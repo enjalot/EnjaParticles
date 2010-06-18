@@ -65,7 +65,7 @@ class EnjGLSurfaceView extends GLSurfaceView {
         }
         else if(event.getAction() == MotionEvent.ACTION_MOVE) {
             //moving = true;
-            Log.i(TAG, "MOVING");
+            //Log.i(TAG, "MOVING");
             //should probably check which pointer we are dealing with
             int pid = event.getPointerId(0);
             float x = event.getX(pid);
@@ -82,7 +82,7 @@ class EnjGLSurfaceView extends GLSurfaceView {
             //Log.i(TAG, "pointerid[0]: " + pid);
             if (et-dt < 200)
             {
-                Log.i(TAG, "less than 200 ms");
+                //Log.i(TAG, "less than 200 ms");
                 float x = event.getX(pid);
                 float y = event.getY(pid);
                 //Log.i(TAG, "x: " + x + "y: " + y);
