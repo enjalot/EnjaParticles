@@ -1,0 +1,14 @@
+Simple OpenGL Particle system written in C
+
+No physics yet... just figured out enough interaction between Java and C to get to work
+
+to build:
+#build the C files (found in jni folder)
+ndk-build
+#build the java stuff
+ant debug
+#move to phone or use -e instead of -d for emulator
+adb -d install bin/EnjaParticles-debug.apk
+
+I use ddms command to capture log output from my app, just add a tag filter for EnjaParticles so you can get useful output
+
