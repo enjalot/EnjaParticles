@@ -2,6 +2,7 @@ Simple OpenGL Particle system written in C
 
 No physics yet... just figured out enough interaction between Java and C to get to work
 
+built against android-7 (must have 2.1 to run)
 to build:
 #build the C files (found in jni folder)
 ndk-build
@@ -12,3 +13,9 @@ adb -d install bin/EnjaParticles-debug.apk
 
 I use ddms command to capture log output from my app, just add a tag filter for EnjaParticles so you can get useful output
 
+
+#TODO
+make an actual particle system
+rewrite in c++? maybe I can avoid weird JNI hack for passing floats
+write a version for OpengGL ES 2.0 with shaders to make pretty effects
+get OpenCL running on a phone ;D
