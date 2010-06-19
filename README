@@ -20,6 +20,15 @@ the position of the particles is stored in static vertices array
     vertices array is used to draw the particles
     colors array determines color of each particle, with seperate alpha array that updates it
 
+#Weird stuff I don't get yet:
+When calling a function defined in enja.c from app-android.c I can't pass floating point values, 
+I had to pass a pointer to static floats instead. integers work just fine, I believe it's something to
+do with the JNI but I know too little about it.
+I'm not really happy with the way the code is laid out, the particle system should probably be its own library
+with all the application stuff in the native function area. I'm not that used to C and playing with statics
+Doing this in C++ might make design a bit easier.
+
+
 #TODO
 //make an actual particle system
     better paramaterization for elements of the system
