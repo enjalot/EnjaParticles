@@ -1,0 +1,55 @@
+
+### EnjaParticles
+OpenCL accelerated particle system. The idea is that this library can take in a generator (emitter)
+and create an opencl/opengl context to compute and update a particle system stored in a VBO (vertex buffer object)
+
+Before long it should be inserted into the Blender Game Engine where it will act upon an object that has the Enja
+modifier (currently a simple custom modifer), use it's Mesh data as the generator and then display the particles.
+
+Collision detection on the GPU is the next goal after that.
+
+### Build
+#setup your environment by editing either setupenv_enjmac (for Mac OS X)
+#or setupenv_vislab (for ubuntu) so that you can point cmake to where
+#you have the NVIDIA SDK installed (for OpenCL headers and libs)
+#set the env variables like so: 
+#(may want to add this to your .bashrc if you plan to build more often)
+source environment/setupenv_yourenv
+
+#Using cmake I prefer to do an out-of-source build:
+cd enjacl
+mkdir build
+cd build
+cmake ..
+make
+./oclenjacl.x
+
+
+
+### File breakdown
+enja.h:
+    defines EnjaParticle class
+
+enja.cpp:
+    defines the routines that are called by host program
+    executes opencl kernel with update routine
+
+opencl.cpp:
+    defines the opencl functions needed for EnjaParticle class
+
+incopencl.h:
+    include all the necessary OpenCL and OpenGL headers
+
+util.h/cpp:
+    function for opening .cl source files
+    2 nvidia helper functions
+
+enja.cl:
+    OpenCL kernel functions which do the heavy lifting
+
+
+CMakeLists.txt:
+    cmake file for building the project, cross-platform tested on Ubuntu and Mac OS X.
+    eventually I'll have to support windows...
+
+

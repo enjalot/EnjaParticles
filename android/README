@@ -1,0 +1,41 @@
+Simple OpenGL Particle system written in C
+
+No physics yet... just figured out enough interaction between Java and C to get to work
+
+built against android-7 (must have 2.1 to run)
+to build:
+#build the C files (found in jni folder)
+ndk-build
+#build the java stuff
+ant debug
+#move to phone or use -e instead of -d for emulator
+adb -d install bin/EnjaParticles-debug.apk
+
+I use ddms command to capture log output from my app, just add a tag filter for EnjaParticles so you can get useful output
+
+#Particle System
+particles are emitted from a generator (initialized as a static array)
+several static arrays govern the behavior of the particles
+the position of the particles is stored in static vertices array
+    vertices array is used to draw the particles
+    colors array determines color of each particle, with seperate alpha array that updates it
+
+#Weird stuff I don't get yet:
+When calling a function defined in enja.c from app-android.c I can't pass floating point values, 
+I had to pass a pointer to static floats instead. integers work just fine, I believe it's something to
+do with the JNI but I know too little about it.
+I'm not really happy with the way the code is laid out, the particle system should probably be its own library
+with all the application stuff in the native function area. I'm not that used to C and playing with statics
+Doing this in C++ might make design a bit easier.
+
+
+#TODO
+//make an actual particle system
+    better paramaterization for elements of the system
+    make consistant way for variables to depend on time
+    add physical interaction
+2d texture effects
+timing to measure costs of effects and compare devices
+rewrite in c++? maybe I can avoid weird JNI hack for passing floats
+write a version for OpengGL ES 2.0 with shaders to make pretty effects
+get OpenCL running on a phone ;D
