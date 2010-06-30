@@ -12,20 +12,19 @@ typedef struct
 } Vec4;
 
 
-
-
 class EnjaParticles
 {
 
 public:
 
     int update(float dt);
-    GLuint getVertexVBO(); //get the vertices vbo id
-    GLuint getColorVBO(); //get the color vbo id
+    int getVertexVBO(); //get the vertices vbo id
+    int getColorVBO(); //get the color vbo id
     int getNum(); //get the number of particles
 
     //constructors: will probably have more as more options are added
     EnjaParticles();
+    EnjaParticles(Vec4* generators, int num);
     EnjaParticles(Vec4* generators, Vec4* colors, int num);
 
     ~EnjaParticles();
@@ -40,6 +39,7 @@ private:
 
     int init(Vec4* generators, Vec4* colors, int num);
 
+    
     //opencl
     cl_platform_id cpPlatform;
     cl_context cxGPUContext;
@@ -56,8 +56,8 @@ private:
     cl_mem cl_generators;  //want to have the start points for reseting particles
     cl_mem cl_velocities;  //particle velocities
     cl_mem cl_life;        //keep track where in their life the particles are
-    GLuint v_vbo;   //vertices vbo
-    GLuint c_vbo;   //colors vbo
+    int v_vbo;   //vertices vbo
+    int c_vbo;   //colors vbo
     unsigned int vbo_size; //size in bytes of the vbo
 
 

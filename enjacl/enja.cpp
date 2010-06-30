@@ -1,7 +1,23 @@
 #include <stdio.h>
 
+
+#include <GL/glew.h>
+#if defined __APPLE__ || defined(MACOSX)
+    //OpenGL stuff
+    #include <OpenGL/gl.h>
+    #include <OpenGL/glext.h>
+    #include <GLUT/glut.h>
+    #include <OpenGL/CGLCurrent.h> //is this really necessary?
+#else
+    //OpenGL stuff
+    #include <GL/glx.h>
+#endif
+
+
 #include "enja.h"
+//#include "incopencl.h"
 #include "util.h"
+
 
 #include<math.h>
 #include<stdlib.h>
@@ -46,7 +62,7 @@ EnjaParticles::EnjaParticles()
     printf("default constructor\n");
     made_default = true; //need to remember to delete our allocated arrays
     //init system
-    int n = 1000000;
+    int n = 100000;
     Vec4* g = new Vec4[n];
 
     float f = 0;
@@ -82,6 +98,26 @@ EnjaParticles::EnjaParticles()
     
 }
 
+EnjaParticles::EnjaParticles(Vec4* g, int n)
+{
+    made_default = false;
+
+    Vec4* c = new Vec4[n];
+    for(int i=0; i < n; i++)
+    {
+        c[i].x = 1.0;   //Red
+        c[i].y = 0.0;   //Green
+        c[i].z = 0.0;   //Blue
+        c[i].w = 1.0;   //Alpha
+    }
+
+    //init particle system
+    init(g, c, n);
+
+    //init opencl
+    int success = init_cl();
+}
+
 EnjaParticles::EnjaParticles(Vec4* g, Vec4* c, int n)
 {
     made_default = false;
@@ -95,6 +131,9 @@ EnjaParticles::EnjaParticles(Vec4* g, Vec4* c, int n)
 EnjaParticles::~EnjaParticles()
 {
 
+    printf("Release!\n");
+    //should probably just make a copy of passed in generator
+    //and always clean things up
     if (made_default)
     {
         delete generators;
@@ -110,13 +149,13 @@ EnjaParticles::~EnjaParticles()
     if(v_vbo)
     {
         glBindBuffer(1, v_vbo);
-        glDeleteBuffers(1, &v_vbo);
+        glDeleteBuffers(1, (GLuint*)&v_vbo);
         v_vbo = 0;
     }
     if(c_vbo)
     {
         glBindBuffer(1, c_vbo);
-        glDeleteBuffers(1, &c_vbo);
+        glDeleteBuffers(1, (GLuint*)&c_vbo);
         c_vbo = 0;
     }
     //if(vbo_cl)clReleaseMemObject(vbo_cl);
@@ -132,12 +171,12 @@ EnjaParticles::~EnjaParticles()
 }
 
 
-GLuint EnjaParticles::getVertexVBO()
+int EnjaParticles::getVertexVBO()
 {
     return v_vbo;
 }
 
-GLuint EnjaParticles::getColorVBO()
+int EnjaParticles::getColorVBO()
 {
     return c_vbo;
 }

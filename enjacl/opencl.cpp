@@ -1,8 +1,23 @@
 #include <string.h>
 #include <string>
 
+#include <GL/glew.h>
+#if defined __APPLE__ || defined(MACOSX)
+    //OpenGL stuff
+    #include <OpenGL/gl.h>
+    #include <OpenGL/glext.h>
+    #include <GLUT/glut.h>
+    #include <OpenGL/CGLCurrent.h> //is this really necessary?
+#else
+    //OpenGL stuff
+    #include <GL/glx.h>
+#endif
+
+
+
 #include "enja.h"
 #include "util.h"
+//#include "incopencl.h"
 
 int EnjaParticles::update(float dt)
 {
@@ -97,6 +112,7 @@ void EnjaParticles::popCorn()
     ciErrNum  = clSetKernelArg(ckKernel, 2, sizeof(cl_mem), (void *) &cl_generators);  //colors is second arguement to kernel
     ciErrNum  = clSetKernelArg(ckKernel, 3, sizeof(cl_mem), (void *) &cl_velocities);  //colors is second arguement to kernel
     ciErrNum  = clSetKernelArg(ckKernel, 4, sizeof(cl_mem), (void *) &cl_life);  //colors is second arguement to kernel
+    printf("done with popCorn()\n");
 
 }
 

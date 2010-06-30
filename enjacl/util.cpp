@@ -4,6 +4,18 @@
 #include <string.h>
 #include <string>
 
+#include <GL/glew.h>
+#if defined __APPLE__ || defined(MACOSX)
+    //OpenGL stuff
+    #include <OpenGL/gl.h>
+    #include <OpenGL/glext.h>
+    #include <GLUT/glut.h>
+    #include <OpenGL/CGLCurrent.h> //is this really necessary?
+#else
+    //OpenGL stuff
+    #include <GL/glx.h>
+#endif
+
 
 #include "incopencl.h"
 #include "util.h"
@@ -49,6 +61,8 @@ GLuint createVBO(const void* data, int dataSize, GLenum target, GLenum usage)
         //cout << "[createVBO()] Data size is mismatch with input array\n";
         printf("[createVBO90] Data size is mismatch with input array\n");
     }
+    //this was important for working inside blender!
+    glBindBuffer(target, 0);
 
     return id;      // return VBO id
 }
