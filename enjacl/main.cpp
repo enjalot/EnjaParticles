@@ -20,7 +20,7 @@
 int window_width = 400;
 int window_height = 300;
 int glutWindowHandle = 0;
-float translate_z = -3.f;
+float translate_z = -30.f;
 
 void init_gl();
 
@@ -46,7 +46,7 @@ void init_gl()
     // projection
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 10.0);
+    gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 100.0);
 
     // set view matrix
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -78,7 +78,7 @@ void appKeyboard(unsigned char key, int x, int y)
 void appRender()
 {
     //update the buffers with new vertices and colors
-    enjas->update(.0001);
+    enjas->update(.001);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //printf("render!\n");

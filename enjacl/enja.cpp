@@ -62,7 +62,7 @@ EnjaParticles::EnjaParticles()
     printf("default constructor\n");
     made_default = true; //need to remember to delete our allocated arrays
     //init system
-    int n = 100000;
+    int n = 10;
     Vec4* g = new Vec4[n];
 
     float f = 0;
@@ -70,9 +70,12 @@ EnjaParticles::EnjaParticles()
     {
         f = (float)i;
         g[i].x = 0.0 + .1*cos(2.*M_PI*(f/n));
+        //g[i].x = 1.0f;
         //g[i].y = 0.0 + .05*sin(2.*M_PI*(f/n));
-        g[i].y = -1.0f;
+        //g[i].y = -1.0f;
+        g[i].y = 0.f;
         g[i].z = 0.0 + .1*sin(2.*M_PI*(f/n));
+        //g[i].z = 0.0f;
         //g[i].z = 0.f;// + f/nums;
         g[i].w = 1.f;
     }
