@@ -2,6 +2,7 @@
 #define ENJA_PARTICLES_H_INCLUDED
 
 #include "incopencl.h"
+#include "timege.h"
 
 typedef struct
 {
@@ -60,6 +61,7 @@ private:
     int c_vbo;   //colors vbo
     unsigned int vbo_size; //size in bytes of the vbo
 
+    GE::Time *ts_cl[3];
 
     int init_cl();
     void popCorn(); //purely convenient function to make init_cl shorter

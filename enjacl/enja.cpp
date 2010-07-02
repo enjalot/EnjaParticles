@@ -62,7 +62,7 @@ EnjaParticles::EnjaParticles()
     printf("default constructor\n");
     made_default = true; //need to remember to delete our allocated arrays
     //init system
-    int n = 100000;
+    int n = 10000;
     Vec4* g = new Vec4[n];
 
     float f = 0;
@@ -135,6 +135,12 @@ EnjaParticles::~EnjaParticles()
 {
 
     printf("Release!\n");
+    ts_cl[0]->print();
+    ts_cl[1]->print();
+    ts_cl[2]->print();
+    delete ts_cl[0];
+    delete ts_cl[1];
+    delete ts_cl[2];
     //should probably just make a copy of passed in generator
     //and always clean things up
     if (made_default)

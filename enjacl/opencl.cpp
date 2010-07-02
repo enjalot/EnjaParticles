@@ -17,6 +17,7 @@
 
 #include "enja.h"
 #include "util.h"
+#include "timege.h"
 //#include "incopencl.h"
 
 int EnjaParticles::update(float dt)
@@ -27,26 +28,33 @@ int EnjaParticles::update(float dt)
  
 #ifdef GL_INTEROP   
     // map OpenGL buffer object for writing from OpenCL
+    ts_cl[0]->start();
     glFinish();
     //ciErrNum = clEnqueueAcquireGLObjects(cqCommandQueue, 1, &vbo_cl, 0,0,0);
     ciErrNum = clEnqueueAcquireGLObjects(cqCommandQueue, 2, cl_vbos, 0,NULL, &evt);
     clReleaseEvent(evt);
     //printf("gl interop, acquire: %s\n", oclErrorString(ciErrNum));
+    ts_cl[0]->end();
 #endif
 
+    ts_cl[1]->start();
     ciErrNum = clSetKernelArg(ckKernel, 4, sizeof(float), &dt);
     //ciErrNum = clSetKernelArg(ckKernel, 2, sizeof(float), &dt);
     ciErrNum |= clEnqueueNDRangeKernel(cqCommandQueue, ckKernel, 1, NULL, szGlobalWorkSize, NULL, 0, NULL, &evt );
     clReleaseEvent(evt);
     //printf("enqueueue nd range kernel: %s\n", oclErrorString(ciErrNum));
+    ts_cl[1]->end();
 
 #ifdef GL_INTEROP
     // unmap buffer object
     //ciErrNum = clEnqueueReleaseGLObjects(cqCommandQueue, 1, &vbo_cl, 0,0,0);
+    
+    ts_cl[2]->start();
     ciErrNum = clEnqueueReleaseGLObjects(cqCommandQueue, 2, cl_vbos, 0, NULL, &evt);
     clReleaseEvent(evt);
     //printf("gl interop, acquire: %s\n", oclErrorString(ciErrNum));
     clFinish(cqCommandQueue);
+    ts_cl[2]->end();
 #else
 
     // Explicit Copy 
@@ -70,6 +78,12 @@ int EnjaParticles::update(float dt)
 
 void EnjaParticles::popCorn()
 {
+
+    ts_cl[0] = new GE::Time("acquire");
+    ts_cl[1] = new GE::Time("ndrange");
+    ts_cl[2] = new GE::Time("release");
+
+
     cl_event evt; //can't do opencl visual profiler without passing an event
     //This is a purely internal helper function, all this code could easily be at the bottom of init_cl
     //init_cl shouldn't change much, and this may
