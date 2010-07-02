@@ -8,8 +8,47 @@ modifier (currently a simple custom modifer), use it's Mesh data as the generato
 
 Collision detection on the GPU is the next goal after that.
 
+###############################################################################
+Build
 
+You need to have OpenCL headers and libraries installed 
+(as well as OpenGL, GLUT and GLEW)
+
+CMake expects certain environment variables to help it find them
+( GPU_SDK and OPENCL_HOME ) see ../environment/setupenv_* for examples
+you can add these env variables to your .bashrc or .bash_profile
+or you can change one of the setupenv scripts and execute:
+source ../environment/setupenv_yourscript
+
+it's recommended that you do an "out of source" build with cmake
+mkdir build
+cd build
+cmake ..
+make
+
+This will create a library file (which can be used in my Blender project)
+libenjaclparticles.a
+and an executable (from the main.cpp)
+oclenjaglcl.x
+which you can run like:
+./oclenjaglcl.x
+(you can exit by hitting esc or 'q', which cleans up the GPU resources)
+
+Right now the base of the path to the .cl files used (either enja.cl or physics/lorentz.cl)
+is set in the CMakeLists.txt:
+ADD_DEFINITIONS(-DCL_SOURCE_DIR="${enjacl_SOURCE_DIR}")
+as I add more kernels I'll improve the interface for loading them, right now their paths are hardcoded
+in init_cl() in opencl.cpp
+
+
+
+###############################################################################
 File breakdown
+
+CMakeLists.txt:
+    cmake file for building the project, cross-platform tested on Ubuntu and Mac OS X.
+    eventually I'll have to support windows...
+
 enja.h:
     defines EnjaParticle class
 
@@ -27,12 +66,16 @@ util.h/cpp:
     function for opening .cl source files
     2 nvidia helper functions
 
+timege.h/cpp:
+    timing library written by my professor Dr. Gordon Erlebacher
+
 enja.cl:
     OpenCL kernel functions which do the heavy lifting
 
+physics/lorentz.cl:
+    simple lorentz attractor solver to move particles
 
-CMakeLists.txt:
-    cmake file for building the project, cross-platform tested on Ubuntu and Mac OS X.
-    eventually I'll have to support windows...
+phsyics/python/:
+    playground for implementing physics algorithms
 
 

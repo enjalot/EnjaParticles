@@ -15,7 +15,7 @@
 #endif
 
 #include "enja.h"
-
+#include "timege.h"
 
 int window_width = 400;
 int window_height = 300;
@@ -34,6 +34,9 @@ int NUM_PARTICLES;
 GLuint v_vbo; //vbo id
 GLuint c_vbo; //vbo id
 
+//timers
+GE::Time *ts[2];
+
 void init_gl()
 {
     // default initialization
@@ -46,13 +49,15 @@ void init_gl()
     // projection
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 100.0);
+    //gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 100.0);
+    gluPerspective(90.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 10000.0); //for lorentz
 
     // set view matrix
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glTranslatef(0.0, 0.0, translate_z);
+    //glTranslatef(0.0, 0.0, translate_z);
+    glTranslatef(0.0, 0.0, -1000.f);    //for lorentz
 /*
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 1.0, 0.0);
@@ -78,8 +83,12 @@ void appKeyboard(unsigned char key, int x, int y)
 void appRender()
 {
     //update the buffers with new vertices and colors
-    enjas->update(.001);
 
+    ts[0]->start();
+    enjas->update(.001);
+    ts[0]->end();
+
+    ts[1]->start();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //printf("render!\n");
     
@@ -106,6 +115,7 @@ void appRender()
     glDisable(GL_BLEND);
 
     glutSwapBuffers();
+    ts[1]->end();
 //    glutPostRedisplay();
 }
 
@@ -114,6 +124,11 @@ void appDestroy()
 
     delete enjas;
     if(glutWindowHandle)glutDestroyWindow(glutWindowHandle);
+
+    ts[0]->print();
+    ts[1]-> print();
+    delete ts[0];
+    delete ts[1];
 
     exit(0);
 }
@@ -158,6 +173,9 @@ int main(int argc, char** argv)
     v_vbo = enjas->getVertexVBO();
     c_vbo = enjas->getColorVBO();
     NUM_PARTICLES = enjas->getNum();
+
+    ts[0] = new GE::Time("update");
+    ts[1] = new GE::Time("render");
 
     glutMainLoop();
     

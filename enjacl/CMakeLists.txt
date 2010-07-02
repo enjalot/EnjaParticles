@@ -32,7 +32,7 @@ ADD_DEFINITIONS(-DGL_INTEROP)
 ADD_DEFINITIONS(-g )
 
 #particles opencl library
-set (CLCXXFILES  enja.cpp opencl.cpp util.cpp)# timege.cpp)
+set (CLCXXFILES  enja.cpp opencl.cpp util.cpp timege.cpp)
 SET(ocllib enjaclparticles)
 ADD_LIBRARY(${ocllib} ${CLCXXFILES})
 

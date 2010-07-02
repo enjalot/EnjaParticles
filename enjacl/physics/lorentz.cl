@@ -29,13 +29,10 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
     vertices[i].z = zn + h*(xn*yn - beta * zn);
 
      
-
-    /*
     colors[i].x = 1.0;
     colors[i].y = life[i];
     colors[i].z = life[i];
     colors[i].w = 1.-life[i];
-    */
 }
 
 

@@ -7,8 +7,8 @@ z = [0]
 
 def FE(x, y, z, h):
     sigma = 10. 
-    rho = 8./3.
-    beta = 99.96
+    beta = 8./3.
+    rho = 99.96
     
     #do for each particle
     i = 0
@@ -19,16 +19,20 @@ def FE(x, y, z, h):
     y[i] = yn + h*(xn*(rho - zn))
     z[i] = zn + h*(xn*yn - beta * zn)
 
+print "solving"
+
 h = .001
-xp = []
-yp = []
-zp = []
-for t in range(0, 1000):
-    xp += [x[0]]
-    yp += [y[0]]
-    zp += [z[0]]
+n = 10000
+xp = numpy.zeros((n,1))
+yp = numpy.zeros((n,1))
+zp = numpy.zeros((n,1))
+for i in range(0, n):
+    xp[i] = x[0]
+    yp[i] = y[0]
+    zp[i] = z[0]
     FE(x, y, z, h)
 
+print "about to plot"
 #print xp
 #print yp
 #print zp
@@ -36,6 +40,5 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 fig = plt.figure()
 ax = Axes3D(fig)
-ax.plot_wireframe(x,y,z, color="blue")
-
-
+ax.plot_wireframe(xp,yp,zp, color="blue")
+plt.show()
