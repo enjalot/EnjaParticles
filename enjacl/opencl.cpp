@@ -41,7 +41,7 @@ int EnjaParticles::update(float dt)
 
     //clFinish(cqCommandQueue);
 	ts_cl[1]->start();
-    ciErrNum = clSetKernelArg(ckKernel, 4, sizeof(float), &dt);
+    ciErrNum = clSetKernelArg(ckKernel, 5, sizeof(float), &dt);
     //ciErrNum = clSetKernelArg(ckKernel, 2, sizeof(float), &dt);
     ciErrNum |= clEnqueueNDRangeKernel(cqCommandQueue, ckKernel, 1, NULL, szGlobalWorkSize, NULL, 0, NULL, &evt );
     clReleaseEvent(evt);
@@ -119,8 +119,8 @@ void EnjaParticles::popCorn()
     
     ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_generators, CL_TRUE, 0, vbo_size, generators, 0, NULL, &evt);
     clReleaseEvent(evt);
-    //ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_velocities, CL_TRUE, 0, vbo_size, velocities, 0, NULL, &evt);
-    //clReleaseEvent(evt);
+    ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_velocities, CL_TRUE, 0, vbo_size, velocities, 0, NULL, &evt);
+    clReleaseEvent(evt);
     ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_life, CL_TRUE, 0, sizeof(float) * num, life, 0, NULL, &evt);
     clReleaseEvent(evt);
     clFinish(cqCommandQueue);
@@ -131,9 +131,8 @@ void EnjaParticles::popCorn()
     ciErrNum  = clSetKernelArg(ckKernel, 0, sizeof(cl_mem), (void *) &cl_vbos[0]);  //vertices is first arguement to kernel
     ciErrNum  = clSetKernelArg(ckKernel, 1, sizeof(cl_mem), (void *) &cl_vbos[1]);  //colors is second arguement to kernel
     ciErrNum  = clSetKernelArg(ckKernel, 2, sizeof(cl_mem), (void *) &cl_generators);  //colors is second arguement to kernel
-    //ciErrNum  = clSetKernelArg(ckKernel, 3, sizeof(cl_mem), (void *) &cl_velocities);  //colors is second arguement to kernel
-    //ciErrNum  = clSetKernelArg(ckKernel, 4, sizeof(cl_mem), (void *) &cl_life);  //colors is second arguement to kernel
-    ciErrNum  = clSetKernelArg(ckKernel, 3, sizeof(cl_mem), (void *) &cl_life);  //colors is second arguement to kernel
+    ciErrNum  = clSetKernelArg(ckKernel, 3, sizeof(cl_mem), (void *) &cl_velocities);  //colors is second arguement to kernel
+    ciErrNum  = clSetKernelArg(ckKernel, 4, sizeof(cl_mem), (void *) &cl_life);  //colors is second arguement to kernel
     printf("done with popCorn()\n");
 
 }
@@ -245,7 +244,7 @@ int EnjaParticles::init_cl()
     
     std::string path(CL_SOURCE_DIR);
     //path += "/enja.cl";
-    path += "/physics/lorentz.cl";
+    path += "/physics/gravity.cl";
     printf("%s\n", path.c_str());
     char* cSourceCL = file_contents(path.c_str(), &pl);
     //char* cSourceCL = file_contents("/panfs/panasas1/users/idj03/research/iansvn/enjacl/build/enja.cl", &pl);

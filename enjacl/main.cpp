@@ -57,7 +57,7 @@ void init_gl()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     //glTranslatef(0.0, 0.0, translate_z);
-    glTranslatef(0.0, 0.0, -1000.f);    //for lorentz
+    glTranslatef(0.0, 0.0, -100.f);    //for lorentz
 /*
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 1.0, 0.0);
