@@ -22,11 +22,21 @@ int window_height = 300;
 int glutWindowHandle = 0;
 float translate_z = -30.f;
 
+// mouse controls
+int mouse_old_x, mouse_old_y;
+int mouse_buttons = 0;
+float rotate_x = 0.0, rotate_y = 0.0;
+
+
 void init_gl();
 
 void appKeyboard(unsigned char key, int x, int y);
 void appRender();
 void appDestroy();
+
+void appMouse(int button, int state, int x, int y);
+void appMotion(int x, int y);
+
 
 EnjaParticles* enjas;
 int NUM_PARTICLES;
@@ -56,8 +66,8 @@ void init_gl()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    //glTranslatef(0.0, 0.0, translate_z);
-    glTranslatef(0.0, 0.0, -100.f);    //for lorentz
+    glTranslatef(0.0, 0.0, translate_z);
+    //glTranslatef(0.0, 0.0, -100.f);    //for lorentz
 /*
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 1.0, 0.0);
@@ -160,10 +170,8 @@ int main(int argc, char** argv)
     glutDisplayFunc(appRender); //main rendering function
     glutTimerFunc(30, timerCB, 30);
     glutKeyboardFunc(appKeyboard);
-/*
     glutMouseFunc(appMouse);
     glutMotionFunc(appMotion);
-*/
 
     // initialize necessary OpenGL extensions
     glewInit();
@@ -192,6 +200,45 @@ int main(int argc, char** argv)
 }
 
 
+void appMouse(int button, int state, int x, int y)
+{
+    if (state == GLUT_DOWN) {
+        mouse_buttons |= 1<<button;
+    } else if (state == GLUT_UP) {
+        mouse_buttons = 0;
+    }
+
+    mouse_old_x = x;
+    mouse_old_y = y;
+
+    glutPostRedisplay();
+}
+
+void appMotion(int x, int y)
+{
+    float dx, dy;
+    dx = x - mouse_old_x;
+    dy = y - mouse_old_y;
+
+    if (mouse_buttons & 1) {
+        rotate_x += dy * 0.2;
+        rotate_y += dx * 0.2;
+    } else if (mouse_buttons & 4) {
+        translate_z += dy * 0.01;
+    }
+
+    mouse_old_x = x;
+    mouse_old_y = y;
+
+    // set view matrix
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glTranslatef(0.0, 0.0, translate_z);
+    glRotatef(rotate_x, 1.0, 0.0, 0.0);
+    glRotatef(rotate_y, 0.0, 1.0, 0.0);
+    glutPostRedisplay();
+}
 
 
 

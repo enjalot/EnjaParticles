@@ -46,7 +46,7 @@ int EnjaParticles::update(float dt)
     ciErrNum |= clEnqueueNDRangeKernel(cqCommandQueue, ckKernel, 1, NULL, szGlobalWorkSize, NULL, 0, NULL, &evt );
     clReleaseEvent(evt);
     //printf("enqueueue nd range kernel: %s\n", oclErrorString(ciErrNum));
-    //clFinish(cqCommandQueue);
+    clFinish(cqCommandQueue); //wont get reliable timings unless we finish the queue for each action
     ts_cl[1]->end();
 
 #ifdef GL_INTEROP

@@ -27,8 +27,8 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
     float vyn = velocities[i].y;
     float vzn = velocities[i].z;
     velocities[i].x = vxn;
-    velocities[i].y = vyn + h*9.8;
-    velocities[i].z = vzn;// - h*9.8;
+    velocities[i].y = vyn;// - h*9.8;
+    velocities[i].z = vzn - h*9.8;
 
     vertices[i].x = xn + h*velocities[i].x; //xn + h*(sigma * (yn - xn));
     vertices[i].y = yn + h*velocities[i].y; //yn + h*(xn*(rho - zn));
@@ -36,9 +36,9 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
 
      
     colors[i].x = 1.f;
-    colors[i].y = 1-life[i];
-    colors[i].z = 1-life[i];
-    colors[i].w = life[i];
+    colors[i].y = life[i];
+    colors[i].z = life[i];
+    colors[i].w = 1-life[i];
 }
 
 
