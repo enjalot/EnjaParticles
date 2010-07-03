@@ -9,7 +9,7 @@ using namespace GE;
 std::vector<GE::Time*> GE::Time::timeList;
 
 //----------------------------------------------------------------------
-Time::Time(const char* name_, int nbCalls)
+Time::Time(const char* name_, int offset, int nbCalls)
 {
 	name = name_;
 
@@ -31,6 +31,8 @@ Time::Time(const char* name_, int nbCalls)
 	t1 = 0;
 	t2 = 0;
 
+    ocount = 0;
+    this->offset = offset;
 	this->nbCalls = nbCalls;
 	timeList.push_back(this);
 	//printf("constructor: this= %d, name= %s\n", this, name.c_str());
@@ -50,6 +52,10 @@ void Time::reset()
 //----------------------------------------------------------------------
 void Time::begin()
 {
+    if(ocount != offset)
+    {
+        return;
+    }
 	gettimeofday(&t_start, NULL);
 	t1 = clock();
 	t2 = 0.0;
@@ -58,6 +64,12 @@ void Time::begin()
 //----------------------------------------------------------------------
 void Time::end()
 {
+    if(ocount != offset)
+    {
+        ocount++;
+        return;
+    }
+    ocount = 0;
 	gettimeofday(&t_end, NULL);
 	double tt = (t_end.tv_sec - t_start.tv_sec) +
 	     (t_end.tv_usec - t_start.tv_usec) * 1.e-6;

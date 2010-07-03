@@ -35,7 +35,7 @@ GLuint v_vbo; //vbo id
 GLuint c_vbo; //vbo id
 
 //timers
-GE::Time *ts[2];
+GE::Time *ts[3];
 
 void init_gl()
 {
@@ -84,6 +84,8 @@ void appRender()
 {
     //update the buffers with new vertices and colors
 
+	ts[2]->start();
+
     ts[0]->start();
     enjas->update(.001);
     ts[0]->end();
@@ -117,6 +119,8 @@ void appRender()
     glutSwapBuffers();
     ts[1]->end();
 //    glutPostRedisplay();
+
+	ts[2]->end();
 }
 
 void appDestroy()
@@ -126,9 +130,11 @@ void appDestroy()
     if(glutWindowHandle)glutDestroyWindow(glutWindowHandle);
 
     ts[0]->print();
-    ts[1]-> print();
+    ts[1]->print();
+    ts[2]->print();
     delete ts[0];
     delete ts[1];
+    delete ts[2];
 
     exit(0);
 }
@@ -174,8 +180,9 @@ int main(int argc, char** argv)
     c_vbo = enjas->getColorVBO();
     NUM_PARTICLES = enjas->getNum();
 
-    ts[0] = new GE::Time("update");
-    ts[1] = new GE::Time("render");
+    ts[0] = new GE::Time("update", 5);
+    ts[1] = new GE::Time("render", 5);
+    ts[2] = new GE::Time("appRender", 5);
 
     glutMainLoop();
     

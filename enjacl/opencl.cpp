@@ -24,31 +24,36 @@ int EnjaParticles::update(float dt)
 {
     cl_int ciErrNum = CL_SUCCESS;
     cl_event evt; //can't do opencl visual profiler without passing an event
-    
+
  
 #ifdef GL_INTEROP   
     // map OpenGL buffer object for writing from OpenCL
-    ts_cl[0]->start();
+    //clFinish(cqCommandQueue);
+	ts_cl[0]->start();
     glFinish();
     //ciErrNum = clEnqueueAcquireGLObjects(cqCommandQueue, 1, &vbo_cl, 0,0,0);
     ciErrNum = clEnqueueAcquireGLObjects(cqCommandQueue, 2, cl_vbos, 0,NULL, &evt);
     clReleaseEvent(evt);
     //printf("gl interop, acquire: %s\n", oclErrorString(ciErrNum));
-    ts_cl[0]->end();
+    clFinish(cqCommandQueue);
+	ts_cl[0]->end();
 #endif
 
-    ts_cl[1]->start();
+    //clFinish(cqCommandQueue);
+	ts_cl[1]->start();
     ciErrNum = clSetKernelArg(ckKernel, 4, sizeof(float), &dt);
     //ciErrNum = clSetKernelArg(ckKernel, 2, sizeof(float), &dt);
     ciErrNum |= clEnqueueNDRangeKernel(cqCommandQueue, ckKernel, 1, NULL, szGlobalWorkSize, NULL, 0, NULL, &evt );
     clReleaseEvent(evt);
     //printf("enqueueue nd range kernel: %s\n", oclErrorString(ciErrNum));
+    //clFinish(cqCommandQueue);
     ts_cl[1]->end();
 
 #ifdef GL_INTEROP
     // unmap buffer object
     //ciErrNum = clEnqueueReleaseGLObjects(cqCommandQueue, 1, &vbo_cl, 0,0,0);
     
+    //clFinish(cqCommandQueue);
     ts_cl[2]->start();
     ciErrNum = clEnqueueReleaseGLObjects(cqCommandQueue, 2, cl_vbos, 0, NULL, &evt);
     clReleaseEvent(evt);
@@ -73,15 +78,16 @@ int EnjaParticles::update(float dt)
     glUnmapBufferARB(GL_ARRAY_BUFFER); 
 #endif
 
+
 }
 
 
 void EnjaParticles::popCorn()
 {
 
-    ts_cl[0] = new GE::Time("acquire");
-    ts_cl[1] = new GE::Time("ndrange");
-    ts_cl[2] = new GE::Time("release");
+    ts_cl[0] = new GE::Time("acquire", 5);
+    ts_cl[1] = new GE::Time("ndrange", 5);
+    ts_cl[2] = new GE::Time("release", 5);
 
 
     cl_event evt; //can't do opencl visual profiler without passing an event
@@ -267,6 +273,7 @@ int EnjaParticles::init_cl()
     printf("kernel made: %s\n", oclErrorString(ciErrNum));
 
     popCorn();
+
 
     return 1;
 }

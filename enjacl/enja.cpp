@@ -62,7 +62,7 @@ EnjaParticles::EnjaParticles()
     printf("default constructor\n");
     made_default = true; //need to remember to delete our allocated arrays
     //init system
-    int n = 10000;
+    int n = 500000;
     Vec4* g = new Vec4[n];
 
     float f = 0;
