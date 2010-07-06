@@ -31,6 +31,7 @@ int EnjaParticles::update(float dt)
     //clFinish(cqCommandQueue);
 	ts_cl[0]->start();
     glFinish();
+    clFinish(cqCommandQueue);
     //ciErrNum = clEnqueueAcquireGLObjects(cqCommandQueue, 1, &vbo_cl, 0,0,0);
     ciErrNum = clEnqueueAcquireGLObjects(cqCommandQueue, 2, cl_vbos, 0,NULL, &evt);
     clReleaseEvent(evt);
@@ -53,7 +54,7 @@ int EnjaParticles::update(float dt)
     // unmap buffer object
     //ciErrNum = clEnqueueReleaseGLObjects(cqCommandQueue, 1, &vbo_cl, 0,0,0);
     
-    //clFinish(cqCommandQueue);
+    clFinish(cqCommandQueue);
     ts_cl[2]->start();
     ciErrNum = clEnqueueReleaseGLObjects(cqCommandQueue, 2, cl_vbos, 0, NULL, &evt);
     clReleaseEvent(evt);
