@@ -24,13 +24,13 @@ int EnjaParticles::update(float dt)
 {
     cl_int ciErrNum = CL_SUCCESS;
     cl_event evt; //can't do opencl visual profiler without passing an event
+	static int count = 0;
 
+// I get the impression that there is an implicit glFinish() when clFinish() is // executed
  
 #ifdef GL_INTEROP   
     // map OpenGL buffer object for writing from OpenCL
-    //clFinish(cqCommandQueue);
 	ts_cl[0]->start();
-    glFinish();
     clFinish(cqCommandQueue);
     //ciErrNum = clEnqueueAcquireGLObjects(cqCommandQueue, 1, &vbo_cl, 0,0,0);
     ciErrNum = clEnqueueAcquireGLObjects(cqCommandQueue, 2, cl_vbos, 0,NULL, &evt);
@@ -40,10 +40,12 @@ int EnjaParticles::update(float dt)
 	ts_cl[0]->end();
 #endif
 
-    //clFinish(cqCommandQueue);
 	ts_cl[1]->start();
-    ciErrNum = clSetKernelArg(ckKernel, 5, sizeof(float), &dt);
-    //ciErrNum = clSetKernelArg(ckKernel, 2, sizeof(float), &dt);
+    clFinish(cqCommandQueue);
+	//if (count == 0) {
+    	ciErrNum = clSetKernelArg(ckKernel, 5, sizeof(float), &dt);
+    	//ciErrNum = clSetKernelArg(ckKernel, 2, sizeof(float), &dt);
+	//}
     ciErrNum |= clEnqueueNDRangeKernel(cqCommandQueue, ckKernel, 1, NULL, szGlobalWorkSize, NULL, 0, NULL, &evt );
     clReleaseEvent(evt);
     //printf("enqueueue nd range kernel: %s\n", oclErrorString(ciErrNum));
@@ -54,8 +56,8 @@ int EnjaParticles::update(float dt)
     // unmap buffer object
     //ciErrNum = clEnqueueReleaseGLObjects(cqCommandQueue, 1, &vbo_cl, 0,0,0);
     
-    clFinish(cqCommandQueue);
     ts_cl[2]->start();
+    clFinish(cqCommandQueue);
     ciErrNum = clEnqueueReleaseGLObjects(cqCommandQueue, 2, cl_vbos, 0, NULL, &evt);
     clReleaseEvent(evt);
     //printf("gl interop, acquire: %s\n", oclErrorString(ciErrNum));
@@ -79,6 +81,7 @@ int EnjaParticles::update(float dt)
     glUnmapBufferARB(GL_ARRAY_BUFFER); 
 #endif
 
+	count++;
 
 }
 
@@ -245,7 +248,9 @@ int EnjaParticles::init_cl()
     
     std::string path(CL_SOURCE_DIR);
     //path += "/enja.cl";
-    path += "/physics/gravity.cl";
+    //path += "/physics/gravity.cl";
+    path += "/physics/lorentz.cl";
+    //path += "/physics/lorenz.cl";
     printf("%s\n", path.c_str());
     char* cSourceCL = file_contents(path.c_str(), &pl);
     //char* cSourceCL = file_contents("/panfs/panasas1/users/idj03/research/iansvn/enjacl/build/enja.cl", &pl);

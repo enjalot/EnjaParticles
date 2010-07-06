@@ -29,7 +29,7 @@ message("${includes}\n")
 ADD_DEFINITIONS(-DCL_SOURCE_DIR="${enjacl_SOURCE_DIR}")
 #make OpenCL use the OpenGL context to avoid memory transfer
 ADD_DEFINITIONS(-DGL_INTEROP)
-ADD_DEFINITIONS(-g )
+#ADD_DEFINITIONS(-g)
 
 #particles opencl library
 set (CLCXXFILES  enja.cpp opencl.cpp util.cpp timege.cpp)

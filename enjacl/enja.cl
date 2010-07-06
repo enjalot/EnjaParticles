@@ -9,9 +9,11 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
 
 {
     unsigned int i = get_global_id(0);
+	return;
 
 
     life[i] -= .05;    //should probably depend on time somehow
+	#if 1
     if(life[i] <= 0.)
     {
         //reset this particle
@@ -22,6 +24,7 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
         velocities[i].z = .001 + notrandom; //not random but oh well
         life[i] = 1.;
     }  
+	#endif
 
     vertices[i].x += velocities[i].x;
     vertices[i].y += velocities[i].y;
@@ -30,10 +33,12 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
     //velocities[i].z -= .0007; //this needs to depend on time or life
 
 
+	#if 0
     colors[i].x = 1.0;
     colors[i].y = life[i];
     colors[i].z = life[i];
     colors[i].w = 1.-life[i];
+	#endif
 
 /*
     vertices[i].x += dt;
