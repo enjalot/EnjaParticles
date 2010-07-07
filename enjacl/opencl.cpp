@@ -29,14 +29,17 @@ int EnjaParticles::update(float dt)
 #ifdef GL_INTEROP   
     // map OpenGL buffer object for writing from OpenCL
     //clFinish(cqCommandQueue);
-	ts_cl[0]->start();
+    ts_cl[3]->start();
     glFinish();
+    ts_cl[3]->stop();
+
+	ts_cl[0]->start();
     //ciErrNum = clEnqueueAcquireGLObjects(cqCommandQueue, 1, &vbo_cl, 0,0,0);
     ciErrNum = clEnqueueAcquireGLObjects(cqCommandQueue, 2, cl_vbos, 0,NULL, &evt);
     clReleaseEvent(evt);
     //printf("gl interop, acquire: %s\n", oclErrorString(ciErrNum));
     clFinish(cqCommandQueue);
-	ts_cl[0]->end();
+	ts_cl[0]->stop();
 #endif
 
     //clFinish(cqCommandQueue);
@@ -47,7 +50,7 @@ int EnjaParticles::update(float dt)
     clReleaseEvent(evt);
     //printf("enqueueue nd range kernel: %s\n", oclErrorString(ciErrNum));
     clFinish(cqCommandQueue); //wont get reliable timings unless we finish the queue for each action
-    ts_cl[1]->end();
+    ts_cl[1]->stop();
 
 #ifdef GL_INTEROP
     // unmap buffer object
@@ -59,10 +62,11 @@ int EnjaParticles::update(float dt)
     clReleaseEvent(evt);
     //printf("gl interop, acquire: %s\n", oclErrorString(ciErrNum));
     clFinish(cqCommandQueue);
-    ts_cl[2]->end();
+    ts_cl[2]->stop();
 #else
 
     // Explicit Copy 
+    // this doesn't get called when we use GL_INTEROP
     glBindBufferARB(GL_ARRAY_BUFFER, v_vbo);    
     // map the buffer object into client's memory
     void* ptr = glMapBufferARB(GL_ARRAY_BUFFER, GL_WRITE_ONLY_ARB);
@@ -88,6 +92,7 @@ void EnjaParticles::popCorn()
     ts_cl[0] = new GE::Time("acquire", 5);
     ts_cl[1] = new GE::Time("ndrange", 5);
     ts_cl[2] = new GE::Time("release", 5);
+    ts_cl[3] = new GE::Time("glFinish", 5);
 
 
     cl_event evt; //can't do opencl visual profiler without passing an event

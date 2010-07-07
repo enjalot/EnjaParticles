@@ -92,45 +92,11 @@ void appKeyboard(unsigned char key, int x, int y)
 
 void appRender()
 {
-    //update the buffers with new vertices and colors
-
-	ts[2]->start();
-
-    ts[0]->start();
-    enjas->update(.001);
-    ts[0]->end();
-
-    ts[1]->start();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    //printf("render!\n");
-    
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_POINT_SMOOTH); 
-    
-    glBindBuffer(GL_ARRAY_BUFFER, c_vbo);
-    glColorPointer(4, GL_FLOAT, 0, 0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, v_vbo);
-    glVertexPointer(4, GL_FLOAT, 0, 0);
-
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
-
-    glColor3f(0,1,0);
-    glPointSize(10.);
-    glDrawArrays(GL_POINTS, 0, NUM_PARTICLES);
-
-    glDisableClientState(GL_COLOR_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glDisable(GL_POINT_SMOOTH);
-    glDisable(GL_BLEND);
-
+    //.001 is the timestep
+    //0 is rendering type (not used yet)
+    enjas->render(.001, 0);
     glutSwapBuffers();
-    ts[1]->end();
-//    glutPostRedisplay();
-
-	ts[2]->end();
 }
 
 void appDestroy()
@@ -138,13 +104,6 @@ void appDestroy()
 
     delete enjas;
     if(glutWindowHandle)glutDestroyWindow(glutWindowHandle);
-
-    ts[0]->print();
-    ts[1]->print();
-    ts[2]->print();
-    delete ts[0];
-    delete ts[1];
-    delete ts[2];
 
     exit(0);
 }
@@ -183,14 +142,7 @@ int main(int argc, char** argv)
 
     printf("before we call enjas functions\n");
 
-    enjas = new EnjaParticles();
-    v_vbo = enjas->getVertexVBO();
-    c_vbo = enjas->getColorVBO();
-    NUM_PARTICLES = enjas->getNum();
-
-    ts[0] = new GE::Time("update", 5);
-    ts[1] = new GE::Time("render", 5);
-    ts[2] = new GE::Time("appRender", 5);
+    enjas = new EnjaParticles(10000);
 
     glutMainLoop();
     

@@ -18,13 +18,15 @@ class EnjaParticles
 
 public:
 
-    int update(float dt);
+    int update(float dt);   //update the particle system
+    int render(float dt, int type); //render calls update then renders the particles
+
     int getVertexVBO(); //get the vertices vbo id
     int getColorVBO(); //get the color vbo id
     int getNum(); //get the number of particles
 
     //constructors: will probably have more as more options are added
-    EnjaParticles();
+    EnjaParticles(int num);
     EnjaParticles(Vec4* generators, int num);
     EnjaParticles(Vec4* generators, Vec4* colors, int num);
 
@@ -61,7 +63,9 @@ private:
     int c_vbo;   //colors vbo
     unsigned int vbo_size; //size in bytes of the vbo
 
-    GE::Time *ts_cl[3];
+    //timers
+    GE::Time *ts[3];    //library timers (update, render, total)
+    GE::Time *ts_cl[4]; //opencl timers (acquire, kernel exec, release)
 
     int init_cl();
     void popCorn(); //purely convenient function to make init_cl shorter

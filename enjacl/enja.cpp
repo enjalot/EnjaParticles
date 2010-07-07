@@ -25,6 +25,9 @@
 
 int EnjaParticles::init(Vec4* g, Vec4* c, int n)
 {
+    // This is the main initialization function for our particle systems
+    // Vec4* g is the array of generator points (this initializes our system)
+    // Vec4* c is the array of color values 
     num = n;
     generators = g;
     colors = c;
@@ -36,33 +39,39 @@ int EnjaParticles::init(Vec4* g, Vec4* c, int n)
 
     srand48(time(NULL));
 
+    //initialize the velocities array, by default we just set to 0
     velocities = new Vec4[num];
     for(int i=0; i < n; i++)
     {
-        velocities[i].x = 1.f; //.01 * (1. - 2.*drand48()); // between -.02 and .02
-        velocities[i].y = 1.f; //.05 * drand48();
-        velocities[i].z = 1.f; //.01 * (1. - 2.*drand48());
+        velocities[i].x = 0.f; //.01 * (1. - 2.*drand48()); // between -.02 and .02
+        velocities[i].y = 0.f; //.05 * drand48();
+        velocities[i].z = 0.f; //.01 * (1. - 2.*drand48());
         velocities[i].w = 0.f;
     }
 
  
+    //initialize the particle life array with random values between 0 and 1
     life = new float[num];
     for(int i=0; i < n; i++)
     {
         life[i] = drand48();
     }
 
+    //we initialize our timers, they only time every 5th call
+    ts[0] = new GE::Time("update", 5);
+    ts[1] = new GE::Time("render", 5);
+    ts[2] = new GE::Time("total render", 5);
+
 
     return 1;
 }
 
 
-EnjaParticles::EnjaParticles()
+EnjaParticles::EnjaParticles(int n)
 {
     printf("default constructor\n");
     made_default = true; //need to remember to delete our allocated arrays
     //init system
-    int n = 10000;
     Vec4* g = new Vec4[n];
 
     float f = 0;
@@ -135,12 +144,21 @@ EnjaParticles::~EnjaParticles()
 {
 
     printf("Release!\n");
+    ts[0]->print();
+    ts[1]->print();
+    ts[2]->print();
+    delete ts[0];
+    delete ts[1];
+    delete ts[2];
+
     ts_cl[0]->print();
     ts_cl[1]->print();
     ts_cl[2]->print();
+    ts_cl[3]->print();
     delete ts_cl[0];
     delete ts_cl[1];
     delete ts_cl[2];
+    delete ts_cl[3];
     //should probably just make a copy of passed in generator
     //and always clean things up
     if (made_default)
