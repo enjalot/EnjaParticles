@@ -8,6 +8,8 @@
 
 export BASE_DIR=/panfs/panasas1/research/erlebach
 
+export ENJA_DIR=${HOME}/research/EnjaParticles/enjacl
+
 export GPU_SDK=${BASE_DIR}/NVIDIA_GPU_Computing_SDK
 export CUDA_HOME=${BASE_DIR}/NVIDIA_CUDA_TOOLKIT_3.0
 export CUDA_LOCAL=${BASE_DIR}/NVIDIA_CUDA_SDK_3.0/C

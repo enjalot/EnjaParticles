@@ -43,7 +43,8 @@ int EnjaParticles::render(float dt, int type=0)
     glEnableClientState(GL_COLOR_ARRAY);
 
     //glColor3f(0,1,0);
-    glPointSize(10.);
+    //glPointSize(10.);
+    glPointSize(1.);
     glDrawArrays(GL_POINTS, 0, num);
 
     glDisableClientState(GL_COLOR_ARRAY);

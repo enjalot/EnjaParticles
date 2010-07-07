@@ -37,6 +37,8 @@ void appDestroy();
 void appMouse(int button, int state, int x, int y);
 void appMotion(int x, int y);
 
+void timerCB(int ms);
+
 
 EnjaParticles* enjas;
 int NUM_PARTICLES;
@@ -46,6 +48,50 @@ GLuint c_vbo; //vbo id
 
 //timers
 GE::Time *ts[3];
+
+
+
+int main(int argc, char** argv)
+{
+
+    //initialize glut
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
+    glutInitWindowSize(window_width, window_height);
+    glutInitWindowPosition (glutGet(GLUT_SCREEN_WIDTH)/2 - window_width/2, 
+                            glutGet(GLUT_SCREEN_HEIGHT)/2 - window_height/2);
+
+    glutWindowHandle = glutCreateWindow("EnjaParticles");
+
+    glutDisplayFunc(appRender); //main rendering function
+    glutTimerFunc(30, timerCB, 30);
+    glutKeyboardFunc(appKeyboard);
+    glutMouseFunc(appMouse);
+    glutMotionFunc(appMotion);
+
+    // initialize necessary OpenGL extensions
+    glewInit();
+    GLboolean bGLEW = glewIsSupported("GL_VERSION_2_0 GL_ARB_pixel_buffer_object"); 
+    printf("GLEW supported?: %d\n", bGLEW);
+
+    //initialize the OpenGL scene for rendering
+    init_gl();
+
+    printf("before we call enjas functions\n");
+
+    //parameters: system and number of particles
+    //system = 0: lorentz
+    //system = 1 gravity
+    enjas = new EnjaParticles(0, 10000);
+
+    glutMainLoop();
+    
+    printf("doesn't happen does it\n");
+    appDestroy();
+    return 0;
+}
+
+
 
 void init_gl()
 {
@@ -67,11 +113,7 @@ void init_gl()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glTranslatef(0.0, 0.0, translate_z);
-    //glTranslatef(0.0, 0.0, -100.f);    //for lorentz
-/*
-    glRotatef(rotate_x, 1.0, 0.0, 0.0);
-    glRotatef(rotate_y, 0.0, 1.0, 0.0);
-*/
+
     return;
 
 }
@@ -112,43 +154,6 @@ void timerCB(int ms)
 {
     glutTimerFunc(ms, timerCB, ms);
     glutPostRedisplay();
-}
-
-int main(int argc, char** argv)
-{
-
-    //initialize glut
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-    glutInitWindowSize(window_width, window_height);
-    glutInitWindowPosition (glutGet(GLUT_SCREEN_WIDTH)/2 - window_width/2, 
-                            glutGet(GLUT_SCREEN_HEIGHT)/2 - window_height/2);
-
-    glutWindowHandle = glutCreateWindow("EnjaParticles");
-
-    glutDisplayFunc(appRender); //main rendering function
-    glutTimerFunc(30, timerCB, 30);
-    glutKeyboardFunc(appKeyboard);
-    glutMouseFunc(appMouse);
-    glutMotionFunc(appMotion);
-
-    // initialize necessary OpenGL extensions
-    glewInit();
-    GLboolean bGLEW = glewIsSupported("GL_VERSION_2_0 GL_ARB_pixel_buffer_object"); 
-    printf("GLEW supported?: %d\n", bGLEW);
-
-    //initialize the OpenGL scene for rendering
-    init_gl();
-
-    printf("before we call enjas functions\n");
-
-    enjas = new EnjaParticles(10000);
-
-    glutMainLoop();
-    
-    printf("doesn't happen does it\n");
-    appDestroy();
-    return 0;
 }
 
 

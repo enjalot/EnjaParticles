@@ -89,11 +89,6 @@ int EnjaParticles::update(float dt)
 void EnjaParticles::popCorn()
 {
 
-    ts_cl[0] = new GE::Time("acquire", 5);
-    ts_cl[1] = new GE::Time("ndrange", 5);
-    ts_cl[2] = new GE::Time("release", 5);
-    ts_cl[3] = new GE::Time("glFinish", 5);
-
 
     cl_event evt; //can't do opencl visual profiler without passing an event
     //This is a purely internal helper function, all this code could easily be at the bottom of init_cl
@@ -142,9 +137,61 @@ void EnjaParticles::popCorn()
 
 }
 
+
 int EnjaParticles::init_cl()
 {
+    setup_cl();
+   
+    cqCommandQueue = clCreateCommandQueue(cxGPUContext, cdDevices[uiDeviceUsed], 0, &ciErrNum);
+    //shrCheckErrorEX(ciErrNum, CL_SUCCESS, pCleanup);
 
+    // Program Setup
+    int pl;
+    size_t program_length;
+    printf("open the program\n");
+    
+    //CL_SOURCE_DIR is set in the CMakeLists.txt
+    std::string path(CL_SOURCE_DIR);
+    path += programs[system];
+    printf("%s\n", path.c_str());
+    char* cSourceCL = file_contents(path.c_str(), &pl);
+    //printf("file: %s\n", cSourceCL);
+    program_length = (size_t)pl;
+
+    // create the program
+    cpProgram = clCreateProgramWithSource(cxGPUContext, 1,
+                      (const char **) &cSourceCL, &program_length, &ciErrNum);
+
+    printf("building the program\n");
+    // build the program
+    ciErrNum = clBuildProgram(cpProgram, 0, NULL, "-cl-fast-relaxed-math", NULL, NULL);
+    //ciErrNum = clBuildProgram(cpProgram, 0, NULL, NULL, NULL, NULL);
+    if (ciErrNum != CL_SUCCESS)
+    {
+        printf("houston we have a problem\n%s\n", oclErrorString(ciErrNum));
+    }
+
+    printf("program built\n");
+    ckKernel = clCreateKernel(cpProgram, "enja", &ciErrNum);
+    printf("kernel made: %s\n", oclErrorString(ciErrNum));
+
+
+    ts_cl[0] = new GE::Time("acquire", 5);
+    ts_cl[1] = new GE::Time("ndrange", 5);
+    ts_cl[2] = new GE::Time("release", 5);
+    ts_cl[3] = new GE::Time("glFinish", 5);
+
+    popCorn();
+
+    return 1;
+}
+
+
+
+
+int EnjaParticles::setup_cl()
+{
+    //setup devices and context
     szGlobalWorkSize[0] = num; //set the workgroup size to number of particles
 
     cl_int ciErrNum;
@@ -162,7 +209,7 @@ int EnjaParticles::init_cl()
     //oclCheckErrorEX(ciErrNum, CL_SUCCESS, pCleanup);
 
     // Get device requested on command line, if any
-    unsigned int uiDeviceUsed = 0;
+    uiDeviceUsed = 0;
     unsigned int uiEndDev = uiDevCount - 1;
 
     bool bSharingSupported = false;
@@ -237,49 +284,5 @@ int EnjaParticles::init_cl()
     // Log device used (reconciled for requested requested and/or CL-GL interop capable devices, as applies)
     //shrLog("Device # %u, ", uiDeviceUsed);
     //oclPrintDevName(LOGBOTH, cdDevices[uiDeviceUsed]);
-    
-    cqCommandQueue = clCreateCommandQueue(cxGPUContext, cdDevices[uiDeviceUsed], 0, &ciErrNum);
-    //shrCheckErrorEX(ciErrNum, CL_SUCCESS, pCleanup);
-
-    // Program Setup
-    int pl;
-    size_t program_length;
-    printf("open the program\n");
-    //char* cSourceCL = file_contents("enja.cl", &pl);
-    
-    std::string path(CL_SOURCE_DIR);
-    //path += "/enja.cl";
-    path += "/physics/gravity.cl";
-    printf("%s\n", path.c_str());
-    char* cSourceCL = file_contents(path.c_str(), &pl);
-    //char* cSourceCL = file_contents("/panfs/panasas1/users/idj03/research/iansvn/enjacl/build/enja.cl", &pl);
-    printf("file: %s\n", cSourceCL);
-    program_length = (size_t)pl;
-    //shrCheckErrorEX(cSourceCL != NULL, shrTRUE, pCleanup);
-
-    // create the program
-    cpProgram = clCreateProgramWithSource(cxGPUContext, 1,
-                      (const char **) &cSourceCL, &program_length, &ciErrNum);
-    //shrCheckErrorEX(ciErrNum, CL_SUCCESS, pCleanup);
-
-    printf("building the program\n");
-    // build the program
-    ciErrNum = clBuildProgram(cpProgram, 0, NULL, "-cl-fast-relaxed-math", NULL, NULL);
-    //ciErrNum = clBuildProgram(cpProgram, 0, NULL, NULL, NULL, NULL);
-    if (ciErrNum != CL_SUCCESS)
-    {
-        printf("houston we have a problem\n%s\n", oclErrorString(ciErrNum));
-    }
-
-    printf("program built\n");
-    ckKernel = clCreateKernel(cpProgram, "enja", &ciErrNum);
-    //shrCheckErrorEX(ciErrNum, CL_SUCCESS, pCleanup);
-    printf("kernel made: %s\n", oclErrorString(ciErrNum));
-
-    popCorn();
-
-
-    return 1;
+ 
 }
-
-

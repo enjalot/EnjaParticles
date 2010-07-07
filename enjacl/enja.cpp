@@ -23,6 +23,16 @@
 #include<stdlib.h>
 #include<time.h>
 
+
+//the paths to these programs are relative to the source dir
+//this is used in init_cl
+const std::string EnjaParticles::programs[] = {
+    "/physics/lorentz.cl",
+    "/physics/gravity.cl"
+};
+
+
+
 int EnjaParticles::init(Vec4* g, Vec4* c, int n)
 {
     // This is the main initialization function for our particle systems
@@ -67,10 +77,10 @@ int EnjaParticles::init(Vec4* g, Vec4* c, int n)
 }
 
 
-EnjaParticles::EnjaParticles(int n)
+EnjaParticles::EnjaParticles(int s, int n)
 {
     printf("default constructor\n");
-    made_default = true; //need to remember to delete our allocated arrays
+    system = s;
     //init system
     Vec4* g = new Vec4[n];
 
@@ -110,9 +120,9 @@ EnjaParticles::EnjaParticles(int n)
     
 }
 
-EnjaParticles::EnjaParticles(Vec4* g, int n)
+EnjaParticles::EnjaParticles(int s, Vec4* g, int n)
 {
-    made_default = false;
+    system = s;
 
     Vec4* c = new Vec4[n];
     for(int i=0; i < n; i++)
@@ -130,9 +140,9 @@ EnjaParticles::EnjaParticles(Vec4* g, int n)
     int success = init_cl();
 }
 
-EnjaParticles::EnjaParticles(Vec4* g, Vec4* c, int n)
+EnjaParticles::EnjaParticles(int s, Vec4* g, Vec4* c, int n)
 {
-    made_default = false;
+    system = s;
     //init particle system
     init(g, c, n);
 
@@ -143,7 +153,7 @@ EnjaParticles::EnjaParticles(Vec4* g, Vec4* c, int n)
 EnjaParticles::~EnjaParticles()
 {
 
-    printf("Release!\n");
+    printf("Release! num=%d\n", num);
     ts[0]->print();
     ts[1]->print();
     ts[2]->print();
@@ -159,13 +169,9 @@ EnjaParticles::~EnjaParticles()
     delete ts_cl[1];
     delete ts_cl[2];
     delete ts_cl[3];
-    //should probably just make a copy of passed in generator
-    //and always clean things up
-    if (made_default)
-    {
-        delete generators;
-        delete colors;
-    }
+    
+    delete generators;
+    delete colors;
 
     delete velocities;
     delete life;

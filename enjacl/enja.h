@@ -1,8 +1,10 @@
 #ifndef ENJA_PARTICLES_H_INCLUDED
 #define ENJA_PARTICLES_H_INCLUDED
 
+#include <string>
 #include "incopencl.h"
 #include "timege.h"
+
 
 typedef struct
 {
@@ -26,15 +28,19 @@ public:
     int getNum(); //get the number of particles
 
     //constructors: will probably have more as more options are added
-    EnjaParticles(int num);
-    EnjaParticles(Vec4* generators, int num);
-    EnjaParticles(Vec4* generators, Vec4* colors, int num);
+    EnjaParticles(int system, int num);
+    EnjaParticles(int system, Vec4* generators, int num);
+    EnjaParticles(int system, Vec4* generators, Vec4* colors, int num);
 
     ~EnjaParticles();
 
+    enum {LORENTZ, GRAVITY};
+    static const std::string programs[];
+
 private:
     //particles
-    int num;
+    int num;            //number of particles
+    int system;         //what kind of system?
     Vec4* generators;
     Vec4* colors;
     Vec4* velocities;
@@ -48,6 +54,7 @@ private:
     cl_context cxGPUContext;
     cl_device_id* cdDevices;
     cl_uint uiDevCount;
+    unsigned int uiDeviceUsed;
     cl_command_queue cqCommandQueue;
     cl_kernel ckKernel;
     cl_program cpProgram;
@@ -67,11 +74,16 @@ private:
     GE::Time *ts[3];    //library timers (update, render, total)
     GE::Time *ts_cl[4]; //opencl timers (acquire, kernel exec, release)
 
+
     int init_cl();
-    void popCorn(); //purely convenient function to make init_cl shorter
+    int setup_cl(); //helper function that initializes the devices and the context
+    void popCorn(); // sets up the kernel and pushes data
     
     bool made_default;
 
 };
+
+
+
 
 #endif
