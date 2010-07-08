@@ -82,7 +82,7 @@ int main(int argc, char** argv)
     //parameters: system and number of particles
     //system = 0: lorentz
     //system = 1 gravity
-    enjas = new EnjaParticles(0, 10000);
+    enjas = new EnjaParticles(0, 100000);
 
     glutMainLoop();
     

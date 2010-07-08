@@ -14,25 +14,44 @@ float lorentzZ(float xn, float yn, float zn)
 {
     return (xn*yn - beta * zn);
 }
+float4 lorentz(float4 yn)
+{
+    float4 vn;
+    vn.x = lorentzX(yn.x, yn.y);
+    vn.y = lorentzY(yn.x, yn.z);
+    vn.z = lorentzZ(yn.x, yn.y, yn.z);
+    vn.w = yn.w;
+    return vn;
+}
 
 //Forward Euler
 void forward_euler(__global float4* yn, __global float4* vn, unsigned int i, float h)
 {
-    float4 ynt;
     //calculate the velocities from the lorentz attractor equations
-    vn[i].x = lorentzX(yn[i].x, yn[i].y);
-    vn[i].y = lorentzY(yn[i].x, yn[i].z);
-    vn[i].z = lorentzZ(yn[i].x, yn[i].y, yn[i].z);
+    vn[i] = lorentz(yn[i]);
 
     //update the positions with the new velocities
     yn[i].x += h*(vn[i].x);
     yn[i].y += h*(vn[i].y);
     yn[i].z += h*(vn[i].z);
+    //yn[i] += h*vn[i]; //this would work with float3
 }
 
 //RK4
+void runge_kutta(__global float4* yn, __global float4* vn, unsigned int i, float h)
+{
+    float4 k1 = lorentz(yn[i]); 
+    float4 k2 = lorentz(yn[i] + .5f*h*k1);
+    float4 k3 = lorentz(yn[i] + .5f*h*k2);
+    float4 k4 = lorentz(yn[i] + h*k3);
 
-
+    vn[i] = (k1 + 2.f*k2 + 2.f*k3 + k4)/6.f;
+    
+    yn[i].x += h*(vn[i].x);
+    yn[i].y += h*(vn[i].y);
+    yn[i].z += h*(vn[i].z);
+    //yn[i] += h*vn[i]; //this would work with float3
+}
 //update the particle position and color
 __kernel void enja(__global float4* vertices, __global float4* colors, __global float4* generators, __global float4* velocities, __global float* life, float h)
 
@@ -53,7 +72,8 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
         life[i] = 1.;
     } 
 
-    forward_euler(vertices, velocities, i, h); 
+    //forward_euler(vertices, velocities, i, h); 
+    runge_kutta(vertices, velocities, i, h*10); //runge_kutta can handle a bigger time-step
 
      
     colors[i].x = 1.f;
