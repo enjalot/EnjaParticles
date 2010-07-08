@@ -104,9 +104,9 @@ void appRender()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //printf("render!\n");
     
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_POINT_SMOOTH); 
+    //glEnable(GL_BLEND);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glEnable(GL_POINT_SMOOTH); 
     
     glBindBuffer(GL_ARRAY_BUFFER, c_vbo);
     glColorPointer(4, GL_FLOAT, 0, 0);
@@ -118,7 +118,7 @@ void appRender()
     glEnableClientState(GL_COLOR_ARRAY);
 
     glColor3f(0,1,0);
-    glPointSize(0.);
+    //glPointSize(0.);
     glDrawArrays(GL_POINTS, 0, NUM_PARTICLES);
 
     glDisableClientState(GL_COLOR_ARRAY);
