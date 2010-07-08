@@ -22,6 +22,8 @@
 #include<math.h>
 #include<stdlib.h>
 #include<time.h>
+#include <sstream>
+#include <iomanip>
 
 
 //the paths to these programs are relative to the source dir
@@ -219,3 +221,24 @@ int EnjaParticles::getNum()
 {
     return num;
 }
+
+float EnjaParticles::getFPS()
+{
+    return 1000.f / ts[2]->getAverage();    //1 second divided by total render time 
+}
+
+std::string* EnjaParticles::getReport()
+{
+    std::stringstream ss1;
+    std::stringstream ss2;
+    std::string* s = new std::string[2];
+    ss1 << std::fixed << std::setprecision(6);
+    ss1 << "Average Render Time (per frame): " << ts[2]->getAverage() << std::ends;
+    s[0] = ss1.str();
+    ss2 << std::fixed << std::setprecision(6);
+    ss2 << "Average OpenCL Time (per frame): " << ts_cl[0]->getAverage() + ts_cl[1]->getAverage() + ts_cl[2]->getAverage() << std::ends;
+    s[1] = ss2.str();
+    return s;
+
+}
+

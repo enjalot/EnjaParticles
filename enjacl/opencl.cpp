@@ -166,11 +166,25 @@ int EnjaParticles::init_cl()
     // build the program
     ciErrNum = clBuildProgram(cpProgram, 0, NULL, "-cl-fast-relaxed-math", NULL, NULL);
     //ciErrNum = clBuildProgram(cpProgram, 0, NULL, NULL, NULL, NULL);
+	if(ciErrNum != CL_SUCCESS){
+		cl_build_status build_status;
+		ciErrNum = clGetProgramBuildInfo(cpProgram, cdDevices[uiDeviceUsed], CL_PROGRAM_BUILD_STATUS, sizeof(cl_build_status), &build_status, NULL);
+
+		char *build_log;
+		size_t ret_val_size;
+		ciErrNum = clGetProgramBuildInfo(cpProgram, cdDevices[uiDeviceUsed], CL_PROGRAM_BUILD_LOG, 0, NULL, &ret_val_size);
+
+		build_log = new char[ret_val_size+1];
+		ciErrNum = clGetProgramBuildInfo(cpProgram, cdDevices[uiDeviceUsed], CL_PROGRAM_BUILD_LOG, ret_val_size, build_log, NULL);
+		build_log[ret_val_size] = '\0';
+		printf("BUILD LOG: \n %s", build_log);
+	}
+/*
     if (ciErrNum != CL_SUCCESS)
     {
         printf("houston we have a problem\n%s\n", oclErrorString(ciErrNum));
     }
-
+*/
     printf("program built\n");
     ckKernel = clCreateKernel(cpProgram, "enja", &ciErrNum);
     printf("kernel made: %s\n", oclErrorString(ciErrNum));

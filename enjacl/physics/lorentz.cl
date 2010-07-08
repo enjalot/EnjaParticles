@@ -1,24 +1,27 @@
 //Lorentz Equations
-float sigma = 10.f;
-float beta = 8.f/3.f;
-float rho = 28.f;
+__constant float sigma = 10.f;
+__constant float beta = 8.f/3.f;
+//__constant float rho = 28.f;
+__constant float rho = 99.96f;
+
 float lorentzX(float xn, float yn)
 {
     return sigma * (yn - xn);
 }
-float lorentzY(float xn, float zn)
+float lorentzY(float xn, float yn, float zn)
 {
-    return xn*(rho - zn);
+    return xn*(rho - zn) - yn;
 }
 float lorentzZ(float xn, float yn, float zn)
 {
     return (xn*yn - beta * zn);
 }
+
 float4 lorentz(float4 yn)
 {
     float4 vn;
     vn.x = lorentzX(yn.x, yn.y);
-    vn.y = lorentzY(yn.x, yn.z);
+    vn.y = lorentzY(yn.x, yn.y, yn.z);
     vn.z = lorentzZ(yn.x, yn.y, yn.z);
     vn.w = yn.w;
     return vn;
@@ -52,12 +55,13 @@ void runge_kutta(__global float4* yn, __global float4* vn, unsigned int i, float
     yn[i].z += h*(vn[i].z);
     //yn[i] += h*vn[i]; //this would work with float3
 }
+
+
 //update the particle position and color
 __kernel void enja(__global float4* vertices, __global float4* colors, __global float4* generators, __global float4* velocities, __global float* life, float h)
 
 {
     unsigned int i = get_global_id(0);
-
     life[i] -= h/10.;    //should probably depend on time somehow
     if(life[i] <= 0.)
     {
@@ -73,7 +77,7 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
     } 
 
     //forward_euler(vertices, velocities, i, h); 
-    runge_kutta(vertices, velocities, i, h*10); //runge_kutta can handle a bigger time-step
+    runge_kutta(vertices, velocities, i, h*1.f); //runge_kutta can handle a bigger time-step
 
      
     colors[i].x = 1.f;
@@ -100,4 +104,5 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
     vertices[i].y = yn + h*velocities[i].y; //yn + h*(xn*(rho - zn));
     vertices[i].z = zn + h*velocities[i].z; // + h*(xn*yn - beta * zn);
 */
+
 

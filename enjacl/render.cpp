@@ -28,10 +28,10 @@ int EnjaParticles::render(float dt, int type=0)
     //printf("render!\n");
     
     glDisable(GL_LIGHTING);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glEnable(GL_BLEND);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    glEnable(GL_POINT_SMOOTH); 
+    //glEnable(GL_POINT_SMOOTH); 
     
     glBindBuffer(GL_ARRAY_BUFFER, c_vbo);
     glColorPointer(4, GL_FLOAT, 0, 0);
@@ -49,8 +49,8 @@ int EnjaParticles::render(float dt, int type=0)
 
     glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
-    glDisable(GL_POINT_SMOOTH);
-    glDisable(GL_BLEND);
+    //glDisable(GL_POINT_SMOOTH);
+    //glDisable(GL_BLEND);
     glEnable(GL_LIGHTING);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 

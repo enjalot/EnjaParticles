@@ -3,8 +3,10 @@
 #include <math.h>
 #include <time.h>
 
-#include <string.h>
-#include <string>
+//#include <string.h>
+//#include <string>
+#include <sstream>
+#include <iomanip>
 
 #include <GL/glew.h>
 #if defined __APPLE__ || defined(MACOSX)
@@ -39,9 +41,12 @@ void appMotion(int x, int y);
 
 void timerCB(int ms);
 
+void drawString(const char *str, int x, int y, float color[4], void *font);
+void showFPS(float fps, std::string *report);
+void *font = GLUT_BITMAP_8_BY_13;
 
 EnjaParticles* enjas;
-int NUM_PARTICLES;
+#define NUM_PARTICLES 100000
 
 GLuint v_vbo; //vbo id
 GLuint c_vbo; //vbo id
@@ -61,10 +66,13 @@ int main(int argc, char** argv)
     glutInitWindowPosition (glutGet(GLUT_SCREEN_WIDTH)/2 - window_width/2, 
                             glutGet(GLUT_SCREEN_HEIGHT)/2 - window_height/2);
 
-    glutWindowHandle = glutCreateWindow("EnjaParticles");
+    
+    std::stringstream ss;
+    ss << "EnjaParticles: " << NUM_PARTICLES << std::ends;
+    glutWindowHandle = glutCreateWindow(ss.str().c_str());
 
     glutDisplayFunc(appRender); //main rendering function
-    glutTimerFunc(30, timerCB, 30);
+    //glutTimerFunc(30, timerCB, 30);
     glutKeyboardFunc(appKeyboard);
     glutMouseFunc(appMouse);
     glutMotionFunc(appMotion);
@@ -82,7 +90,7 @@ int main(int argc, char** argv)
     //parameters: system and number of particles
     //system = 0: lorentz
     //system = 1 gravity
-    enjas = new EnjaParticles(0, 100000);
+    enjas = new EnjaParticles(0, NUM_PARTICLES);
 
     glutMainLoop();
     
@@ -138,7 +146,9 @@ void appRender()
     //.001 is the timestep
     //0 is rendering type (not used yet)
     enjas->render(.001, 0);
+    showFPS(enjas->getFPS(), enjas->getReport());
     glutSwapBuffers();
+    glutPostRedisplay();
 }
 
 void appDestroy()
@@ -198,7 +208,64 @@ void appMotion(int x, int y)
 }
 
 
+///////////////////////////////////////////////////////////////////////////////
+// write 2d text using GLUT
+// The projection matrix must be set to orthogonal before call this function.
+///////////////////////////////////////////////////////////////////////////////
+void drawString(const char *str, int x, int y, float color[4], void *font)
+{
+    glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT); // lighting and color mask
+    glDisable(GL_LIGHTING);     // need to disable lighting for proper text color
 
+    glColor4fv(color);          // set text color
+    glRasterPos2i(x, y);        // place text position
+
+    // loop all characters in the string
+    while(*str)
+    {
+        glutBitmapCharacter(font, *str);
+        ++str;
+    }
+
+    glEnable(GL_LIGHTING);
+    glPopAttrib();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// display frame rates
+///////////////////////////////////////////////////////////////////////////////
+void showFPS(float fps, std::string* report)
+{
+    static std::stringstream ss;
+
+    // backup current model-view matrix
+    glPushMatrix();                     // save current modelview matrix
+    glLoadIdentity();                   // reset modelview matrix
+
+    // set to 2D orthogonal projection
+    glMatrixMode(GL_PROJECTION);        // switch to projection matrix
+    glPushMatrix();                     // save current projection matrix
+    glLoadIdentity();                   // reset projection matrix
+    gluOrtho2D(0, 400, 0, 300);         // set to orthogonal projection
+
+    float color[4] = {1, 1, 0, 1};
+
+    // update fps every second
+    ss.str("");
+    ss << std::fixed << std::setprecision(1);
+    ss << fps << " FPS" << std::ends; // update fps string
+    ss << std::resetiosflags(std::ios_base::fixed | std::ios_base::floatfield);
+    drawString(ss.str().c_str(), 15, 286, color, font);
+    drawString(report[0].c_str(), 15, 273, color, font);
+    drawString(report[1].c_str(), 15, 260, color, font);
+
+    // restore projection matrix
+    glPopMatrix();                      // restore to previous projection matrix
+
+    // restore modelview matrix
+    glMatrixMode(GL_MODELVIEW);         // switch to modelview matrix
+    glPopMatrix();                      // restore to previous modelview matrix
+}
 
 
 

@@ -27,6 +27,9 @@ public:
     int getColorVBO(); //get the color vbo id
     int getNum(); //get the number of particles
 
+    float getFPS(); //get the calculated frames per second for entire rendering process
+    std::string* getReport(); //get string report of timings
+
     //constructors: will probably have more as more options are added
     EnjaParticles(int system, int num);
     EnjaParticles(int system, Vec4* generators, int num);

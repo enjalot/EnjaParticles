@@ -46,6 +46,8 @@ public:
 	static void printAll();
 	void print();
 	void printReset();
+    const char* report(); //returns a string report instead of printing
+    float getAverage(); //returns the avg timing
 };
 
 }

@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include "timege.h"
+#include <sstream>
+#include <iomanip>
 
 using namespace GE;
 
@@ -21,7 +23,7 @@ Time::Time(const char* name_, int offset, int nbCalls)
 		scale = 1. / (float) CLOCKS_PER_SEC;
 		break;
 	default:
-		printf("Time does handle this case\n");
+		printf("Time does not handle this case\n");
 		printf("CLOCKS_PER_SEC= %ld\n", (long) CLOCKS_PER_SEC);
 		exit(0);
 	}
@@ -89,6 +91,20 @@ void Time::print()
 	if (count <= 0) return;
 	printf("%s: tot (ms): %g, avg: %g, (count=%d)\n", 
 		name.c_str(), t, t/count, count);
+}
+//----------------------------------------------------------------------
+const char* Time::report()
+{
+	if (count <= 0) return NULL;
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(6);
+	ss << name << ": tot (ms): " << t << ", (count=" << count << "), avg: " << t/count << std::ends; 
+    return ss.str().c_str();
+
+}
+float Time::getAverage()
+{
+    return t/count;
 }
 //----------------------------------------------------------------------
 void Time::printReset()
