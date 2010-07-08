@@ -20,7 +20,7 @@
 int window_width = 400;
 int window_height = 300;
 int glutWindowHandle = 0;
-float translate_z = -30.f;
+float translate_z = -90.f;
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -181,7 +181,7 @@ void appMotion(int x, int y)
         rotate_x += dy * 0.2;
         rotate_y += dx * 0.2;
     } else if (mouse_buttons & 4) {
-        translate_z += dy * 0.01;
+        translate_z += dy * 0.1;
     }
 
     mouse_old_x = x;
