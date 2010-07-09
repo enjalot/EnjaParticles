@@ -24,7 +24,9 @@ int EnjaParticles::update(float dt)
 {
     cl_int ciErrNum = CL_SUCCESS;
     cl_event evt; //can't do opencl visual profiler without passing an event
+	static int count = 0;
 
+// I get the impression that there is an implicit glFinish() when clFinish() is // executed
  
 #ifdef GL_INTEROP   
     // map OpenGL buffer object for writing from OpenCL
@@ -34,7 +36,7 @@ int EnjaParticles::update(float dt)
     ts_cl[3]->stop();
 
 	ts_cl[0]->start();
-    //ciErrNum = clEnqueueAcquireGLObjects(cqCommandQueue, 1, &vbo_cl, 0,0,0);
+    e/ciErrNum = clEnqueueAcquireGLObjects(cqCommandQueue, 1, &vbo_cl, 0,0,0);
     ciErrNum = clEnqueueAcquireGLObjects(cqCommandQueue, 2, cl_vbos, 0,NULL, &evt);
     clReleaseEvent(evt);
     //printf("gl interop, acquire: %s\n", oclErrorString(ciErrNum));
@@ -42,10 +44,12 @@ int EnjaParticles::update(float dt)
 	ts_cl[0]->stop();
 #endif
 
-    //clFinish(cqCommandQueue);
 	ts_cl[1]->start();
-    ciErrNum = clSetKernelArg(ckKernel, 5, sizeof(float), &dt);
-    //ciErrNum = clSetKernelArg(ckKernel, 2, sizeof(float), &dt);
+    clFinish(cqCommandQueue);
+	//if (count == 0) {
+    	ciErrNum = clSetKernelArg(ckKernel, 5, sizeof(float), &dt);
+    	//ciErrNum = clSetKernelArg(ckKernel, 2, sizeof(float), &dt);
+	//}
     ciErrNum |= clEnqueueNDRangeKernel(cqCommandQueue, ckKernel, 1, NULL, szGlobalWorkSize, NULL, 0, NULL, &evt );
     clReleaseEvent(evt);
     //printf("enqueueue nd range kernel: %s\n", oclErrorString(ciErrNum));
@@ -56,8 +60,8 @@ int EnjaParticles::update(float dt)
     // unmap buffer object
     //ciErrNum = clEnqueueReleaseGLObjects(cqCommandQueue, 1, &vbo_cl, 0,0,0);
     
-    //clFinish(cqCommandQueue);
     ts_cl[2]->start();
+    clFinish(cqCommandQueue);
     ciErrNum = clEnqueueReleaseGLObjects(cqCommandQueue, 2, cl_vbos, 0, NULL, &evt);
     clReleaseEvent(evt);
     //printf("gl interop, acquire: %s\n", oclErrorString(ciErrNum));
@@ -82,6 +86,7 @@ int EnjaParticles::update(float dt)
     glUnmapBufferARB(GL_ARRAY_BUFFER); 
 #endif
 
+	count++;
 
 }
 
@@ -299,4 +304,50 @@ int EnjaParticles::setup_cl()
     //shrLog("Device # %u, ", uiDeviceUsed);
     //oclPrintDevName(LOGBOTH, cdDevices[uiDeviceUsed]);
  
+=======
+    
+    cqCommandQueue = clCreateCommandQueue(cxGPUContext, cdDevices[uiDeviceUsed], 0, &ciErrNum);
+    //shrCheckErrorEX(ciErrNum, CL_SUCCESS, pCleanup);
+
+    // Program Setup
+    int pl;
+    size_t program_length;
+    printf("open the program\n");
+    //char* cSourceCL = file_contents("enja.cl", &pl);
+    
+    std::string path(CL_SOURCE_DIR);
+    //path += "/enja.cl";
+    //path += "/physics/gravity.cl";
+    path += "/physics/lorentz.cl";
+    //path += "/physics/lorenz.cl";
+    printf("%s\n", path.c_str());
+    char* cSourceCL = file_contents(path.c_str(), &pl);
+    //char* cSourceCL = file_contents("/panfs/panasas1/users/idj03/research/iansvn/enjacl/build/enja.cl", &pl);
+    printf("file: %s\n", cSourceCL);
+    program_length = (size_t)pl;
+    //shrCheckErrorEX(cSourceCL != NULL, shrTRUE, pCleanup);
+
+    // create the program
+    cpProgram = clCreateProgramWithSource(cxGPUContext, 1,
+                      (const char **) &cSourceCL, &program_length, &ciErrNum);
+    //shrCheckErrorEX(ciErrNum, CL_SUCCESS, pCleanup);
+
+    printf("building the program\n");
+    // build the program
+    ciErrNum = clBuildProgram(cpProgram, 0, NULL, "-cl-fast-relaxed-math", NULL, NULL);
+    //ciErrNum = clBuildProgram(cpProgram, 0, NULL, NULL, NULL, NULL);
+    if (ciErrNum != CL_SUCCESS)
+    {
+        printf("houston we have a problem\n%s\n", oclErrorString(ciErrNum));
+    }
+
+    printf("program built\n");
+    ckKernel = clCreateKernel(cpProgram, "enja", &ciErrNum);
+    //shrCheckErrorEX(ciErrNum, CL_SUCCESS, pCleanup);
+    printf("kernel made: %s\n", oclErrorString(ciErrNum));
+
+    popCorn();
+
+
+    return 1;
 }

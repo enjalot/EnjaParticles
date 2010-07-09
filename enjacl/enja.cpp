@@ -84,6 +84,7 @@ EnjaParticles::EnjaParticles(int s, int n)
     printf("default constructor\n");
     system = s;
     //init system
+    int n = 5000000;
     Vec4* g = new Vec4[n];
 
     float f = 0;

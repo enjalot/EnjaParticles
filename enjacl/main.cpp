@@ -29,7 +29,7 @@ float translate_z = -90.f;
 // mouse controls
 int mouse_old_x, mouse_old_y;
 int mouse_buttons = 0;
-float rotate_x = 0.0, rotate_y = 0.0;
+float rotate_x = 45.0, rotate_y = 45.0;
 
 
 void init_gl();
@@ -185,6 +185,7 @@ void appMouse(int button, int state, int x, int y)
 
 void appMotion(int x, int y)
 {
+	return;
     float dx, dy;
     dx = x - mouse_old_x;
     dy = y - mouse_old_y;
