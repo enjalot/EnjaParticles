@@ -6,14 +6,21 @@
 #include "timege.h"
 
 
-typedef struct
+typedef struct Vec4
 {
     float x;
     float y;
     float z;
     float w;
-} Vec4;
 
+    Vec4(){};
+    Vec4(float xx, float yy, float zz, float ww):
+        x(xx),
+        y(yy),
+        z(zz),
+        w(ww)
+    {}
+} Vec4;
 
 class EnjaParticles
 {
@@ -31,9 +38,11 @@ public:
     std::string* getReport(); //get string report of timings
 
     //constructors: will probably have more as more options are added
+    //choose system and number of particles
     EnjaParticles(int system, int num);
-    EnjaParticles(int system, Vec4* generators, int num);
-    EnjaParticles(int system, Vec4* generators, Vec4* colors, int num);
+    //specify initial positions and velocities, with arrays on length len, and number of particles
+    EnjaParticles(int system, Vec4* generators, Vec4* velocities, int len, int num);
+    //EnjaParticles(int system, Vec4* generators, Vec4* velocities, Vec4* colors, int num);
 
     ~EnjaParticles();
 
@@ -42,14 +51,14 @@ public:
 
 private:
     //particles
-    int num;            //number of particles
-    int system;         //what kind of system?
-    Vec4* generators;
+    int num;                //number of particles
+    int system;             //what kind of system?
+    Vec4* generators;       //vertex generators
+    Vec4* velocities;       //velocity generators
     Vec4* colors;
-    Vec4* velocities;
     float* life;
 
-    int init(Vec4* generators, Vec4* colors, int num);
+    int init(Vec4* generators, Vec4* velocities, Vec4* colors, int num);
 
     
     //opencl
@@ -66,7 +75,8 @@ private:
 
     //cl_mem vbo_cl;
     cl_mem cl_vbos[2];  //0: vertex vbo, 1: color vbo
-    cl_mem cl_generators;  //want to have the start points for reseting particles
+    cl_mem cl_vert_gen;  //want to have the start points for reseting particles
+    cl_mem cl_velo_gen;  //want to have the start velocities for reseting particles
     cl_mem cl_velocities;  //particle velocities
     cl_mem cl_life;        //keep track where in their life the particles are
     int v_vbo;   //vertices vbo

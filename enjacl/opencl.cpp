@@ -44,7 +44,7 @@ int EnjaParticles::update(float dt)
 
     //clFinish(cqCommandQueue);
 	ts_cl[1]->start();
-    ciErrNum = clSetKernelArg(ckKernel, 5, sizeof(float), &dt);
+    ciErrNum = clSetKernelArg(ckKernel, 6, sizeof(float), &dt);
     //ciErrNum = clSetKernelArg(ckKernel, 2, sizeof(float), &dt);
     ciErrNum |= clEnqueueNDRangeKernel(cqCommandQueue, ckKernel, 1, NULL, szGlobalWorkSize, NULL, 0, NULL, &evt );
     clReleaseEvent(evt);
@@ -113,11 +113,14 @@ void EnjaParticles::popCorn()
     #endif
     
     //support arrays for the particle system
-    cl_generators = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
+    cl_vert_gen = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
+    cl_velo_gen = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
     cl_velocities= clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
     cl_life = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, sizeof(float) * num, NULL, &ciErrNum);
     
-    ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_generators, CL_TRUE, 0, vbo_size, generators, 0, NULL, &evt);
+    ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_vert_gen, CL_TRUE, 0, vbo_size, generators, 0, NULL, &evt);
+    clReleaseEvent(evt);
+    ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_velo_gen, CL_TRUE, 0, vbo_size, velocities, 0, NULL, &evt);
     clReleaseEvent(evt);
     ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_velocities, CL_TRUE, 0, vbo_size, velocities, 0, NULL, &evt);
     clReleaseEvent(evt);
@@ -125,14 +128,14 @@ void EnjaParticles::popCorn()
     clReleaseEvent(evt);
     clFinish(cqCommandQueue);
     
-    printf("lorentz kernel\n");
 
     //printf("about to set kernel args\n");
-    ciErrNum  = clSetKernelArg(ckKernel, 0, sizeof(cl_mem), (void *) &cl_vbos[0]);  //vertices is first arguement to kernel
-    ciErrNum  = clSetKernelArg(ckKernel, 1, sizeof(cl_mem), (void *) &cl_vbos[1]);  //colors is second arguement to kernel
-    ciErrNum  = clSetKernelArg(ckKernel, 2, sizeof(cl_mem), (void *) &cl_generators);  //colors is second arguement to kernel
-    ciErrNum  = clSetKernelArg(ckKernel, 3, sizeof(cl_mem), (void *) &cl_velocities);  //colors is second arguement to kernel
-    ciErrNum  = clSetKernelArg(ckKernel, 4, sizeof(cl_mem), (void *) &cl_life);  //colors is second arguement to kernel
+    ciErrNum  = clSetKernelArg(ckKernel, 0, sizeof(cl_mem), (void *) &cl_vbos[0]);      //vertices is first arguement to kernel
+    ciErrNum  = clSetKernelArg(ckKernel, 1, sizeof(cl_mem), (void *) &cl_vbos[1]);      //colors is second arguement to kernel
+    ciErrNum  = clSetKernelArg(ckKernel, 2, sizeof(cl_mem), (void *) &cl_vert_gen);     //vertex generators
+    ciErrNum  = clSetKernelArg(ckKernel, 3, sizeof(cl_mem), (void *) &cl_velo_gen);     //velocity generators
+    ciErrNum  = clSetKernelArg(ckKernel, 4, sizeof(cl_mem), (void *) &cl_velocities);   //velocities
+    ciErrNum  = clSetKernelArg(ckKernel, 5, sizeof(cl_mem), (void *) &cl_life);         //life
     printf("done with popCorn()\n");
 
 }

@@ -23,6 +23,7 @@ int window_width = 400;
 int window_height = 300;
 int glutWindowHandle = 0;
 float translate_z = -90.f;
+//float translate_z = -4.f;
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -72,7 +73,7 @@ int main(int argc, char** argv)
     glutWindowHandle = glutCreateWindow(ss.str().c_str());
 
     glutDisplayFunc(appRender); //main rendering function
-    //glutTimerFunc(30, timerCB, 30);
+    glutTimerFunc(30, timerCB, 30); //determin a minimum time between frames
     glutKeyboardFunc(appKeyboard);
     glutMouseFunc(appMouse);
     glutMotionFunc(appMotion);
@@ -90,7 +91,27 @@ int main(int argc, char** argv)
     //parameters: system and number of particles
     //system = 0: lorentz
     //system = 1 gravity
+    
+    //default constructor
     enjas = new EnjaParticles(0, NUM_PARTICLES);
+    
+    //Test making a system from vertices and normals;
+    /*
+    Vec4 g[4];
+    Vec4 v[4];
+    g[0] = Vec4(0.0f, -1.0f, 0.0f, 1.0f);
+    g[1] = Vec4(0.0f, 1.0f, 0.0f, 1.0f);
+    g[2] = Vec4(1.0f, 0.0f, 0.0f, 1.0f);
+    g[3] = Vec4(-1.0f, 0.0f, 0.0f, 1.0f);
+
+    v[0] = Vec4(0.0f, 0.0f, 1.0f, 0.0f);
+    v[1] = Vec4(0.0f, 0.0f, 1.0f, 0.0f);
+    v[2] = Vec4(0.0f, 0.0f, 1.0f, 0.0f);
+    v[3] = Vec4(0.0f, 0.0f, 1.0f, 0.0f);
+
+    enjas = new EnjaParticles(1, g, v, 4, NUM_PARTICLES);
+    */
+
 
     glutMainLoop();
     
@@ -148,7 +169,8 @@ void appRender()
     enjas->render(.001, 0);
     showFPS(enjas->getFPS(), enjas->getReport());
     glutSwapBuffers();
-    glutPostRedisplay();
+    //if we want to render as fast as possible we do this
+    //glutPostRedisplay();
 }
 
 void appDestroy()

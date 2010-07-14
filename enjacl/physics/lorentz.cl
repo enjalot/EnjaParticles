@@ -58,7 +58,7 @@ void runge_kutta(__global float4* yn, __global float4* vn, unsigned int i, float
 
 
 //update the particle position and color
-__kernel void enja(__global float4* vertices, __global float4* colors, __global float4* generators, __global float4* velocities, __global float* life, float h)
+__kernel void enja(__global float4* vertices, __global float4* colors, __global float4* vert_gen, __global float4* velo_gen, __global float4* velocities, __global float* life, float h)
 
 {
     unsigned int i = get_global_id(0);
@@ -66,13 +66,13 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
     if(life[i] <= 0.)
     {
         //reset this particle
-        vertices[i].x = generators[i].x;
-        vertices[i].y = generators[i].y;
-        vertices[i].z = generators[i].z;
+        vertices[i].x = vert_gen[i].x;
+        vertices[i].y = vert_gen[i].y;
+        vertices[i].z = vert_gen[i].z;
 
-        velocities[i].x = 0.0f;
-        velocities[i].y = 0.0f;
-        velocities[i].z = 0.0f;
+        velocities[i].x = velo_gen[i].x;
+        velocities[i].y = velo_gen[i].y;
+        velocities[i].z = velo_gen[i].z;
         life[i] = 1.;
     } 
 

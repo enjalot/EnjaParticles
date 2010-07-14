@@ -6,7 +6,7 @@
 #export CUDA_HOME=${HOME}/NVIDIA_CUDA_TOOLKIT_3.0
 #export CUDA_LOCAL=${HOME}/NVIDIA_CUDA_SDK_3.0/C
 
-export BASE_DIR=/panfs/panasas1/research/erlebach
+export BASE_DIR=/panfs/panasas1/research/gerlebacher
 
 export ENJA_DIR=${HOME}/research/EnjaParticles/enjacl
 
