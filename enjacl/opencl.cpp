@@ -105,9 +105,9 @@ void EnjaParticles::popCorn()
         cl_vbos[0] = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
         cl_vbos[1] = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
         //Since we don't get the data from OpenGL we have to manually push the CPU side data to the GPU
-        ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_vbos[0], CL_TRUE, 0, vbo_size, generators, 0, NULL, &evt);
+        ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_vbos[0], CL_TRUE, 0, vbo_size, &generators[0], 0, NULL, &evt);
         clReleaseEvent(evt);
-        ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_vbos[1], CL_TRUE, 0, vbo_size, colors, 0, NULL, &evt);
+        ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_vbos[1], CL_TRUE, 0, vbo_size, &colors[0], 0, NULL, &evt);
         clReleaseEvent(evt);
         //make sure we are finished copying over before going on
     #endif
@@ -118,11 +118,11 @@ void EnjaParticles::popCorn()
     cl_velocities= clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
     cl_life = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, sizeof(float) * num, NULL, &ciErrNum);
     
-    ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_vert_gen, CL_TRUE, 0, vbo_size, generators, 0, NULL, &evt);
+    ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_vert_gen, CL_TRUE, 0, vbo_size, &generators[0], 0, NULL, &evt);
     clReleaseEvent(evt);
-    ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_velo_gen, CL_TRUE, 0, vbo_size, velocities, 0, NULL, &evt);
+    ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_velo_gen, CL_TRUE, 0, vbo_size, &velocities[0], 0, NULL, &evt);
     clReleaseEvent(evt);
-    ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_velocities, CL_TRUE, 0, vbo_size, velocities, 0, NULL, &evt);
+    ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_velocities, CL_TRUE, 0, vbo_size, &velocities[0], 0, NULL, &evt);
     clReleaseEvent(evt);
     ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_life, CL_TRUE, 0, sizeof(float) * num, life, 0, NULL, &evt);
     clReleaseEvent(evt);

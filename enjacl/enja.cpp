@@ -35,11 +35,11 @@ const std::string EnjaParticles::programs[] = {
 
 
 
-int EnjaParticles::init(Vec4* g, Vec4* v, Vec4* c, int n)
+int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
 {
     // This is the main initialization function for our particle systems
-    // Vec4* g is the array of generator points (this initializes our system)
-    // Vec4* c is the array of color values 
+    // AVec4* g is the array of generator points (this initializes our system)
+    // AVec4* c is the array of color values 
     num = n;
     generators = g;
     velocities = v;
@@ -47,10 +47,9 @@ int EnjaParticles::init(Vec4* g, Vec4* v, Vec4* c, int n)
 
     //initialize our vbos
     vbo_size = sizeof(Vec4) * n;
-    v_vbo = createVBO(generators, vbo_size, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
-    c_vbo = createVBO(colors, vbo_size, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+    v_vbo = createVBO(&generators[0], vbo_size, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+    c_vbo = createVBO(&colors[0], vbo_size, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 
-    srand48(time(NULL));
 
  
     //initialize the particle life array with random values between 0 and 1
@@ -75,7 +74,10 @@ EnjaParticles::EnjaParticles(int s, int n)
     printf("default constructor\n");
     system = s;
     //init system
-    Vec4* g = new Vec4[n];
+    //TODO: switch to std::vector
+    //std::vector<AVec4> a(n);
+    //&a[0]
+    AVec4 g(n);
 
     float f = 0;
     for(int i=0; i < n; i++)
@@ -92,7 +94,7 @@ EnjaParticles::EnjaParticles(int s, int n)
         g[i].w = 1.f;
     }
 
-    Vec4* c = new Vec4[n];
+    AVec4 c(n);
     for(int i=0; i < n; i++)
     {
         c[i].x = 1.0;   //Red
@@ -101,7 +103,7 @@ EnjaParticles::EnjaParticles(int s, int n)
         c[i].w = 1.0;   //Alpha
     }
     //initialize the velocities array, by default we just set to 0
-    Vec4* v = new Vec4[n];
+    AVec4 v(n);
     for(int i=0; i < n; i++)
     {
         v[i].x = 1.f; //.01 * (1. - 2.*drand48()); // between -.02 and .02
@@ -111,6 +113,7 @@ EnjaParticles::EnjaParticles(int s, int n)
     }
 
 
+    srand48(time(NULL));
 
     printf("before init call\n");
 
@@ -125,14 +128,14 @@ EnjaParticles::EnjaParticles(int s, int n)
 }
 //Take in vertex generators as well as velocity generators that are len elements long
 //This is to support generating particles from Blender Mesh objects
-EnjaParticles::EnjaParticles(int s, Vec4* g, Vec4* v, int len, int n)
+EnjaParticles::EnjaParticles(int s, AVec4 g, AVec4 v, int len, int n)
 {
     system = s;
 
-    Vec4* vert_gen = new Vec4[n];
-    Vec4* velo_gen = new Vec4[n];
+    AVec4 vert_gen(n);
+    AVec4 velo_gen(n);
  
-    Vec4* c = new Vec4[n];
+    AVec4 c(n);
     
     srand48(time(NULL));
     int j;
@@ -160,7 +163,7 @@ EnjaParticles::EnjaParticles(int s, Vec4* g, Vec4* v, int len, int n)
 }
 
 /* lets implement this when we need it
-EnjaParticles::EnjaParticles(int s, Vec4* g, Vec4* v, Vec4* c, int n)
+EnjaParticles::EnjaParticles(int s, AVec4* g, AVec4* v, AVec4* c, int n)
 {
     system = s;
     //init particle system
@@ -191,10 +194,10 @@ EnjaParticles::~EnjaParticles()
     delete ts_cl[2];
     delete ts_cl[3];
     
-    delete generators;
-    delete colors;
+    //delete generators;
+    //delete colors;
 
-    delete velocities;
+    //delete velocities;
     delete life;
 
     if(ckKernel)clReleaseKernel(ckKernel); 

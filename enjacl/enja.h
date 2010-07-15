@@ -2,6 +2,7 @@
 #define ENJA_PARTICLES_H_INCLUDED
 
 #include <string>
+#include <vector>
 #include "incopencl.h"
 #include "timege.h"
 
@@ -22,6 +23,9 @@ typedef struct Vec4
     {}
 } Vec4;
 
+typedef std::vector<Vec4> AVec4;
+
+
 class EnjaParticles
 {
 
@@ -41,7 +45,7 @@ public:
     //choose system and number of particles
     EnjaParticles(int system, int num);
     //specify initial positions and velocities, with arrays on length len, and number of particles
-    EnjaParticles(int system, Vec4* generators, Vec4* velocities, int len, int num);
+    EnjaParticles(int system, AVec4 generators, AVec4 velocities, int len, int num);
     //EnjaParticles(int system, Vec4* generators, Vec4* velocities, Vec4* colors, int num);
 
     ~EnjaParticles();
@@ -53,12 +57,12 @@ private:
     //particles
     int num;                //number of particles
     int system;             //what kind of system?
-    Vec4* generators;       //vertex generators
-    Vec4* velocities;       //velocity generators
-    Vec4* colors;
+    AVec4 generators;       //vertex generators
+    AVec4 velocities;       //velocity generators
+    AVec4 colors;
     float* life;
 
-    int init(Vec4* generators, Vec4* velocities, Vec4* colors, int num);
+    int init(AVec4 generators, AVec4 velocities, AVec4 colors, int num);
 
     
     //opencl
