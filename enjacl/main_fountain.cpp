@@ -142,7 +142,7 @@ void init_gl()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glTranslatef(0.0, 0.0, translate_z);
-    //glRotatef(-90, 1.0, 0.0, 0.0);
+    glRotatef(-90, 1.0, 0.0, 0.0);
 
     return;
 
@@ -167,7 +167,7 @@ void appRender()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //.001 is the timestep
     //0 is rendering type (not used yet)
-    enjas->render(.001, 0);
+    enjas->render(.0001, 0);
     showFPS(enjas->getFPS(), enjas->getReport());
     glutSwapBuffers();
     //if we want to render as fast as possible we do this
@@ -225,7 +225,7 @@ void appMotion(int x, int y)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glTranslatef(0.0, 0.0, translate_z);
-    glRotatef(rotate_x, 1.0, 0.0, 0.0);
+    glRotatef(rotate_x-90, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 1.0, 0.0);
     glutPostRedisplay();
 }

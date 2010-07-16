@@ -22,6 +22,8 @@ int EnjaParticles::render(float dt, int type=0)
 
     printf("about to update\n");
     ts[0]->start();
+    //TODO: make # of updates a paramater
+    //for(int i = 0: i < numupdates; i++)
     update(dt);     //call the particle update function (executes the opencl)
     ts[0]->stop();
 
@@ -29,6 +31,7 @@ int EnjaParticles::render(float dt, int type=0)
     //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     printf("render!\n");
     
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
     glDisable(GL_LIGHTING);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -51,7 +54,7 @@ int EnjaParticles::render(float dt, int type=0)
     glDisableClientState(GL_INDEX_ARRAY);
     //Need to disable these for blender
     glDisableClientState(GL_NORMAL_ARRAY);
-    glDisableClientState(GL_EDGE_FLAG_ARRAY);
+    //glDisableClientState(GL_EDGE_FLAG_ARRAY);
 
     //glColor3f(0,1,0);
     //glPointSize(10.);
@@ -62,15 +65,19 @@ int EnjaParticles::render(float dt, int type=0)
     printf("disable stuff");
     glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
-    glDisable(GL_POINT_SMOOTH);
-    glDisable(GL_BLEND);
-    glEnable(GL_LIGHTING);
+
+    glPopAttrib();
+    //glDisable(GL_POINT_SMOOTH);
+    //glDisable(GL_BLEND);
+    //glEnable(GL_LIGHTING);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 
     ts[1]->stop();
 //    glutPostRedisplay();
 
+    //make sure rendering timing is accurate
+    glFinish();
 	ts[2]->stop();
     printf("done rendering\n");
 }
