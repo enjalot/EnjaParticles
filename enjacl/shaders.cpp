@@ -12,10 +12,11 @@ varying vec3 posEye;        // position of center in eye space
 
 void main()
 {
+
     posEye = vec3(gl_ModelViewMatrix * vec4(gl_Vertex.xyz, 1.0));
     float dist = length(posEye);
     //gl_PointSize = pointRadius * (pointScale / dist);
-    gl_PointSize = pointRadius * (1.0f / dist);
+    gl_PointSize = pointRadius * (1.0 / dist);
 
     gl_TexCoord[0] = gl_MultiTexCoord0;
     gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz, 1.0);
@@ -54,7 +55,7 @@ void main()
     float specular = pow(max(0.0, dot(n, h)), shininess);
     gl_FragColor = gl_Color * diffuse + specular;
     //want to play with this later
-    gl_FragColor.w = 1.f;
+    gl_FragColor.w = 1.0;
     
     //gl_FragColor = gl_Color * diffuse;
 }

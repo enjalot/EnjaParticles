@@ -123,6 +123,10 @@ int EnjaParticles::render(float dt, int type=0)
 
 int EnjaParticles::compileShaders()
 {
+    printf("vertex shader:\n%s\n", vertex_shader_source);
+    printf("fragment shader:\n%s\n", fragment_shader_source);
+
+
     GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
 
