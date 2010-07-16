@@ -41,6 +41,11 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
     // This is the main initialization function for our particle systems
     // AVec4* g is the array of generator points (this initializes our system)
     // AVec4* c is the array of color values 
+    
+    //this should be configurable. how many updates do we run per frame:
+    updates = 4;
+
+    //setting the velocities here temporarily to make fountain effect. should be moved outside
     float f = 0.f;
     for(int i=0; i < n; i++)
     {
@@ -60,13 +65,22 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
     velocities = v;
     colors = c;
 
+    //index array so we can draw transparent items correctly
+    std::vector<int> ind(n);
+    for(int i = 0; i < n; i++)
+    {
+        ind[i] = i;
+    }
+    indices = ind;
+
     //initialize our vbos
     vbo_size = sizeof(Vec4) * n;
     v_vbo = createVBO(&generators[0], vbo_size, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
     c_vbo = createVBO(&colors[0], vbo_size, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+    i_vbo = createVBO(&ind[0], sizeof(int) * n, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 
 
- 
+    //should move this to generators.w component
     //initialize the particle life array with random values between 0 and 1
     life = new float[num];
     for(int i=0; i < n; i++)
@@ -232,9 +246,17 @@ EnjaParticles::~EnjaParticles()
         glDeleteBuffers(1, (GLuint*)&c_vbo);
         c_vbo = 0;
     }
+    if(i_vbo)
+    {
+        glBindBuffer(1, i_vbo);
+        glDeleteBuffers(1, (GLuint*)&i_vbo);
+        i_vbo = 0;
+    }
+
     //if(vbo_cl)clReleaseMemObject(vbo_cl);
     if(cl_vbos[0])clReleaseMemObject(cl_vbos[0]);
     if(cl_vbos[1])clReleaseMemObject(cl_vbos[1]);
+    if(cl_vbos[2])clReleaseMemObject(cl_vbos[2]);
     if(cl_vert_gen)clReleaseMemObject(cl_vert_gen);
     if(cl_velo_gen)clReleaseMemObject(cl_velo_gen);
     if(cl_velocities)clReleaseMemObject(cl_velocities);

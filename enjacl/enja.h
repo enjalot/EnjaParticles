@@ -47,6 +47,9 @@ public:
     //specify initial positions and velocities, with arrays on length len, and number of particles
     EnjaParticles(int system, AVec4 generators, AVec4 velocities, int len, int num);
     //EnjaParticles(int system, Vec4* generators, Vec4* velocities, Vec4* colors, int num);
+    
+    //we could do getter/setter functions
+    int updates;            //number of times to update per frame
 
     ~EnjaParticles();
 
@@ -60,6 +63,7 @@ private:
     AVec4 generators;       //vertex generators
     AVec4 velocities;       //velocity generators
     AVec4 colors;
+    std::vector<int> indices;
     float* life;
 
     int init(AVec4 generators, AVec4 velocities, AVec4 colors, int num);
@@ -78,13 +82,15 @@ private:
     size_t szGlobalWorkSize[1];
 
     //cl_mem vbo_cl;
-    cl_mem cl_vbos[2];  //0: vertex vbo, 1: color vbo
+    cl_mem cl_vbos[3];  //0: vertex vbo, 1: color vbo, 2: index vbo
     cl_mem cl_vert_gen;  //want to have the start points for reseting particles
     cl_mem cl_velo_gen;  //want to have the start velocities for reseting particles
     cl_mem cl_velocities;  //particle velocities
+    cl_mem cl_indices;     //index array to do proper depth sorting
     cl_mem cl_life;        //keep track where in their life the particles are
     int v_vbo;   //vertices vbo
     int c_vbo;   //colors vbo
+    int i_vbo;   //index vbo
     unsigned int vbo_size; //size in bytes of the vbo
 
     //timers

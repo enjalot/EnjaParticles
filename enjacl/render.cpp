@@ -22,9 +22,12 @@ int EnjaParticles::render(float dt, int type=0)
 
     printf("about to update\n");
     ts[0]->start();
-    //TODO: make # of updates a paramater
-    //for(int i = 0: i < numupdates; i++)
-    update(dt);     //call the particle update function (executes the opencl)
+    
+    for(int i = 0; i < updates; i++)
+    {
+        update(dt);     //call the particle update function (executes the opencl)
+    }
+
     ts[0]->stop();
 
     ts[1]->start();
@@ -50,8 +53,7 @@ int EnjaParticles::render(float dt, int type=0)
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_COLOR_ARRAY);
 
-    //disable this until i implement depth sorting
-    glDisableClientState(GL_INDEX_ARRAY);
+    glEnableClientState(GL_INDEX_ARRAY);
     //Need to disable these for blender
     glDisableClientState(GL_NORMAL_ARRAY);
     //glDisableClientState(GL_EDGE_FLAG_ARRAY);
@@ -63,6 +65,7 @@ int EnjaParticles::render(float dt, int type=0)
     glDrawArrays(GL_POINTS, 0, num);
 
     printf("disable stuff");
+    glDisableClientState(GL_INDEX_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
 

@@ -35,7 +35,7 @@ int EnjaParticles::update(float dt)
 
 	ts_cl[0]->start();
     //ciErrNum = clEnqueueAcquireGLObjects(cqCommandQueue, 1, &vbo_cl, 0,0,0);
-    ciErrNum = clEnqueueAcquireGLObjects(cqCommandQueue, 2, cl_vbos, 0,NULL, &evt);
+    ciErrNum = clEnqueueAcquireGLObjects(cqCommandQueue, 3, cl_vbos, 0,NULL, &evt);
     clReleaseEvent(evt);
     //printf("gl interop, acquire: %s\n", oclErrorString(ciErrNum));
     clFinish(cqCommandQueue);
@@ -44,7 +44,7 @@ int EnjaParticles::update(float dt)
 
     //clFinish(cqCommandQueue);
 	ts_cl[1]->start();
-    ciErrNum = clSetKernelArg(ckKernel, 6, sizeof(float), &dt);
+    ciErrNum = clSetKernelArg(ckKernel, 7, sizeof(float), &dt);
     //ciErrNum = clSetKernelArg(ckKernel, 2, sizeof(float), &dt);
     ciErrNum |= clEnqueueNDRangeKernel(cqCommandQueue, ckKernel, 1, NULL, szGlobalWorkSize, NULL, 0, NULL, &evt );
     clReleaseEvent(evt);
@@ -58,7 +58,7 @@ int EnjaParticles::update(float dt)
     
     //clFinish(cqCommandQueue);
     ts_cl[2]->start();
-    ciErrNum = clEnqueueReleaseGLObjects(cqCommandQueue, 2, cl_vbos, 0, NULL, &evt);
+    ciErrNum = clEnqueueReleaseGLObjects(cqCommandQueue, 3, cl_vbos, 0, NULL, &evt);
     clReleaseEvent(evt);
     //printf("gl interop, acquire: %s\n", oclErrorString(ciErrNum));
     clFinish(cqCommandQueue);
@@ -98,16 +98,20 @@ void EnjaParticles::popCorn()
         // create OpenCL buffer from GL VBO
         cl_vbos[0] = clCreateFromGLBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, v_vbo, &ciErrNum);
         cl_vbos[1] = clCreateFromGLBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, c_vbo, &ciErrNum);
+        cl_vbos[2] = clCreateFromGLBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, i_vbo, &ciErrNum);
         //printf("SUCCES?: %s\n", oclErrorString(ciErrNum));
     #else
         printf("no gl interop!\n");
         // create standard OpenCL mem buffer
         cl_vbos[0] = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
         cl_vbos[1] = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
+        cl_vbos[2] = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, sizeof(int) * num, NULL, &ciErrNum);
         //Since we don't get the data from OpenGL we have to manually push the CPU side data to the GPU
         ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_vbos[0], CL_TRUE, 0, vbo_size, &generators[0], 0, NULL, &evt);
         clReleaseEvent(evt);
         ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_vbos[1], CL_TRUE, 0, vbo_size, &colors[0], 0, NULL, &evt);
+        clReleaseEvent(evt);
+        ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_vbos[2], CL_TRUE, 0, sizeof(int) * num, &colors[0], 0, NULL, &evt);
         clReleaseEvent(evt);
         //make sure we are finished copying over before going on
     #endif
@@ -132,10 +136,11 @@ void EnjaParticles::popCorn()
     //printf("about to set kernel args\n");
     ciErrNum  = clSetKernelArg(ckKernel, 0, sizeof(cl_mem), (void *) &cl_vbos[0]);      //vertices is first arguement to kernel
     ciErrNum  = clSetKernelArg(ckKernel, 1, sizeof(cl_mem), (void *) &cl_vbos[1]);      //colors is second arguement to kernel
-    ciErrNum  = clSetKernelArg(ckKernel, 2, sizeof(cl_mem), (void *) &cl_vert_gen);     //vertex generators
-    ciErrNum  = clSetKernelArg(ckKernel, 3, sizeof(cl_mem), (void *) &cl_velo_gen);     //velocity generators
-    ciErrNum  = clSetKernelArg(ckKernel, 4, sizeof(cl_mem), (void *) &cl_velocities);   //velocities
-    ciErrNum  = clSetKernelArg(ckKernel, 5, sizeof(cl_mem), (void *) &cl_life);         //life
+    ciErrNum  = clSetKernelArg(ckKernel, 2, sizeof(cl_mem), (void *) &cl_vbos[2]);      //indices is third arguement to kernel
+    ciErrNum  = clSetKernelArg(ckKernel, 3, sizeof(cl_mem), (void *) &cl_vert_gen);     //vertex generators
+    ciErrNum  = clSetKernelArg(ckKernel, 4, sizeof(cl_mem), (void *) &cl_velo_gen);     //velocity generators
+    ciErrNum  = clSetKernelArg(ckKernel, 5, sizeof(cl_mem), (void *) &cl_velocities);   //velocities
+    ciErrNum  = clSetKernelArg(ckKernel, 6, sizeof(cl_mem), (void *) &cl_life);         //life
     printf("done with popCorn()\n");
 
 }

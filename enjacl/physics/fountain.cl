@@ -1,5 +1,5 @@
 //update the particle position and color
-__kernel void enja(__global float4* vertices, __global float4* colors, __global float4* vert_gen, __global float4* velo_gen, __global float4* velocities, __global float* life, float h)
+__kernel void enja(__global float4* vertices, __global float4* colors, __global int* indices, __global float4* vert_gen, __global float4* velo_gen, __global float4* velocities, __global float* life, float h)
 
 {
     unsigned int i = get_global_id(0);
