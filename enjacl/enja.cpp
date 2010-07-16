@@ -44,6 +44,8 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
     
     //this should be configurable. how many updates do we run per frame:
     updates = 4;
+    particle_radius = 5.0f;
+    glsl = false;
 
     //setting the velocities here temporarily to make fountain effect. should be moved outside
     float f = 0.f;

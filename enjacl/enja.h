@@ -48,8 +48,11 @@ public:
     EnjaParticles(int system, AVec4 generators, AVec4 velocities, int len, int num);
     //EnjaParticles(int system, Vec4* generators, Vec4* velocities, Vec4* colors, int num);
     
+    //extra properties of the system
     //we could do getter/setter functions
     int updates;            //number of times to update per frame
+    float particle_radius;  
+    void use_glsl();        //not the best way, call this before rendering and it sets up glsl program
 
     ~EnjaParticles();
 
@@ -102,7 +105,11 @@ private:
     int setup_cl(); //helper function that initializes the devices and the context
     void popCorn(); // sets up the kernel and pushes data
     
-    bool made_default;
+    //opengl
+    void drawArrays();      //seperate out the opengl glDrawArrays call
+    int compileShaders();
+    int glsl_program;   //should be GLuint
+    bool glsl;
 
 };
 
