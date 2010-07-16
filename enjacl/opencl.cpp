@@ -153,7 +153,7 @@ int EnjaParticles::init_cl()
     //CL_SOURCE_DIR is set in the CMakeLists.txt
     std::string path(CL_SOURCE_DIR);
     path += programs[system];
-    printf("%s\n", path.c_str());
+    printf("path to opencl file: %s\n", path.c_str());
     char* cSourceCL = file_contents(path.c_str(), &pl);
     //printf("file: %s\n", cSourceCL);
     program_length = (size_t)pl;

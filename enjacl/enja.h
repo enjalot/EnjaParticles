@@ -37,7 +37,7 @@ public:
 
     ~EnjaParticles();
 
-    enum {LORENTZ, GRAVITY};
+    enum {LORENTZ, GRAVITY, COLLISION};
     static const std::string programs[];
 
 private:

@@ -30,7 +30,8 @@
 //this is used in init_cl
 const std::string EnjaParticles::programs[] = {
     "/physics/lorentz.cl",
-    "/physics/gravity.cl"
+    "/physics/gravity.cl",
+    "/physics/collision.cl"
 };
 
 
@@ -55,9 +56,9 @@ int EnjaParticles::init(Vec4* g, Vec4* c, int n)
     velocities = new Vec4[num];
     for(int i=0; i < n; i++)
     {
-        velocities[i].x = 0.f; //.01 * (1. - 2.*drand48()); // between -.02 and .02
+        velocities[i].x = 1.f; //.01 * (1. - 2.*drand48()); // between -.02 and .02
         velocities[i].y = 0.f; //.05 * drand48();
-        velocities[i].z = 0.f; //.01 * (1. - 2.*drand48());
+        velocities[i].z = 1.f; //.01 * (1. - 2.*drand48());
         velocities[i].w = 0.f;
     }
 
@@ -94,8 +95,8 @@ EnjaParticles::EnjaParticles(int s, int n)
         //g[i].x = 1.0f;
         //g[i].y = 0.0 + .05*sin(2.*M_PI*(f/n));
         //g[i].y = -1.0f;
-        g[i].z = 0.f;
-        g[i].y = 0.0 + 10*sin(2.*M_PI*(f/n));
+        g[i].y = 0.f;
+        g[i].z = 0.0 + 10*sin(2.*M_PI*(f/n));
         //g[i].z = 0.0f;
         //g[i].z = 0.f;// + f/nums;
         g[i].w = 1.f;
