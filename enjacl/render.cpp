@@ -20,6 +20,7 @@ void EnjaParticles::drawArrays()
     glBindBuffer(GL_ARRAY_BUFFER, v_vbo);
     glVertexPointer(4, GL_FLOAT, 0, 0);
     
+    //printf("index buffer\n");
     glBindBuffer(GL_ARRAY_BUFFER, i_vbo);
     glIndexPointer(GL_INT, 0, 0);
 
@@ -29,13 +30,13 @@ void EnjaParticles::drawArrays()
     glEnableClientState(GL_INDEX_ARRAY);
     
     //Need to disable these for blender
-    //glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);
     //glDisableClientState(GL_EDGE_FLAG_ARRAY);
 
     //printf("draw arrays\n");
     glDrawArrays(GL_POINTS, 0, num);
 
-    //printf("disable stuff");
+    //printf("disable stuff\n");
     glDisableClientState(GL_INDEX_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
@@ -103,6 +104,7 @@ int EnjaParticles::render(float dt, int type=0)
 
         drawArrays();
     }
+    //printf("done rendering, clean up\n");
    
     glPopClientAttrib();
     glPopAttrib();
