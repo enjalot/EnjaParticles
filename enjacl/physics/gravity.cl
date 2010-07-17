@@ -1,22 +1,24 @@
 //update the particle position and color
-__kernel void enja(__global float4* vertices, __global float4* colors, __global int* indices, __global float4* vert_gen, __global float4* velo_gen, __global float4* velocities, __global float* life, float h)
+__kernel void enja(__global float4* vertices, __global float4* colors, __global int* indices, __global float4* vert_gen, __global float4* velo_gen, __global float4* velocities, float h)
 
 {
     unsigned int i = get_global_id(0);
 
     h = h*10;
-    life[i] -= h;    //should probably depend on time somehow
-    if(life[i] <= 0.)
+    float life = velocities[i].w;
+    life -= h;
+    if(life <= 0.)
     {
         //reset this particle
         vertices[i].x = vert_gen[i].x;
         vertices[i].y = vert_gen[i].y;
         vertices[i].z = vert_gen[i].z;
+        vertices[i].w = 0.4f;
 
-        velocities[i].x = velo_gen[i].x;
-        velocities[i].y = velo_gen[i].y;
-        velocities[i].z = velo_gen[i].z;
-        life[i] = 1.;
+        velocities[i].x = 0.0f;//velo_gen[i].x;
+        velocities[i].y = 0.0f;//velo_gen[i].y;
+        velocities[i].z = 0.0f;//velo_gen[i].z;
+        life = 1.0f;
     } 
     float xn = vertices[i].x;
     float yn = vertices[i].y;
@@ -35,10 +37,13 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
     vertices[i].z = zn + h*velocities[i].z; // + h*(xn*yn - beta * zn);
 
      
-    colors[i].x = 1.0f;
-    colors[i].y = life[i];
-    colors[i].z = life[i];
-    colors[i].w = life[i];
+    colors[i].x = life - .2f;
+    colors[i].y = 0.0f - life * .8f;
+    colors[i].z = 0.0f - life;
+    colors[i].w = life;
+    
+    //save the life!
+    velocities[i].w = life;
 }
 
 

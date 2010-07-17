@@ -58,12 +58,14 @@ void runge_kutta(__global float4* yn, __global float4* vn, unsigned int i, float
 
 
 //update the particle position and color
-__kernel void enja(__global float4* vertices, __global float4* colors, __global int* indices, __global float4* vert_gen, __global float4* velo_gen, __global float4* velocities, __global float* life, float h)
+//__kernel void enja(__global float4* vertices, __global float4* colors, __global int* indices, __global float4* vert_gen, __global float4* velo_gen, __global float4* velocities, __global float* life, float h)
+__kernel void enja(__global float4* vertices, __global float4* colors, __global int* indices, __global float4* vert_gen, __global float4* velo_gen, __global float4* velocities, float h)
 
 {
     unsigned int i = get_global_id(0);
-    life[i] -= h/10.;    //should probably depend on time somehow
-    if(life[i] <= 0.)
+    float life = velocities[i].w;
+    life -= h/10.;    //should probably depend on time somehow
+    if(life <= 0.)
     {
         //reset this particle
         vertices[i].x = vert_gen[i].x;
@@ -73,7 +75,7 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
         velocities[i].x = velo_gen[i].x;
         velocities[i].y = velo_gen[i].y;
         velocities[i].z = velo_gen[i].z;
-        life[i] = 1.;
+        life = 1.0f;
     } 
 
     //forward_euler(vertices, velocities, i, h); 
@@ -81,9 +83,12 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
 
      
     colors[i].x = 1.f;
-    colors[i].y = life[i]*.5;
-    colors[i].z = life[i];
-    colors[i].w = 1.-life[i];
+    colors[i].y = life*.5;
+    colors[i].z = life;
+    colors[i].w = 1.-life;
+    
+    //save the life!
+    velocities[i].w = life;
 }
 
 //This code used to be in the kernel

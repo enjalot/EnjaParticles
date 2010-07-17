@@ -46,6 +46,7 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
     updates = 4;
     particle_radius = 5.0f;
     glsl = false;
+    point_scale = 1.0f;
 
     //setting the velocities here temporarily to make fountain effect. should be moved outside
     float f = 0.f;
@@ -58,9 +59,16 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
         //v[i].x = 1.f; //.01 * (1. - 2.*drand48()); // between -.02 and .02
         //v[i].y = 1.f; //.05 * drand48();
         //v[i].z = 1.f; //.01 * (1. - 2.*drand48());
-        v[i].w = 0.f;
     }
 
+    //we pack radius and life into generator and velocity arrays
+    for(int i=0; i < n; i++)
+    {
+        //initialize the radii array with random values between 1.0 and 10.0
+        g[i].w = 1.0f + 9*drand48();
+        //initialize the particle life array with random values between 0 and 1
+        v[i].w = drand48();
+    }
 
     num = n;
     generators = g;
@@ -80,15 +88,7 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
     v_vbo = createVBO(&generators[0], vbo_size, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
     c_vbo = createVBO(&colors[0], vbo_size, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
     i_vbo = createVBO(&ind[0], sizeof(int) * n, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
-
-
-    //should move this to generators.w component
-    //initialize the particle life array with random values between 0 and 1
-    life = new float[num];
-    for(int i=0; i < n; i++)
-    {
-        life[i] = drand48();
-    }
+    
 
     //we initialize our timers, they only time every 5th call
     ts[0] = new GE::Time("update", 5);
@@ -227,12 +227,6 @@ EnjaParticles::~EnjaParticles()
     delete ts_cl[2];
     delete ts_cl[3];
     
-    //delete generators;
-    //delete colors;
-
-    //delete velocities;
-    delete life;
-
     if(ckKernel)clReleaseKernel(ckKernel); 
     if(cpProgram)clReleaseProgram(cpProgram);
     if(cqCommandQueue)clReleaseCommandQueue(cqCommandQueue);
@@ -262,7 +256,7 @@ EnjaParticles::~EnjaParticles()
     if(cl_vert_gen)clReleaseMemObject(cl_vert_gen);
     if(cl_velo_gen)clReleaseMemObject(cl_velo_gen);
     if(cl_velocities)clReleaseMemObject(cl_velocities);
-    if(cl_life)clReleaseMemObject(cl_life);
+    //if(cl_life)clReleaseMemObject(cl_life);
     if(cxGPUContext)clReleaseContext(cxGPUContext);
     
     if(cdDevices)delete(cdDevices);

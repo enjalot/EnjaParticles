@@ -53,6 +53,7 @@ public:
     int updates;            //number of times to update per frame
     float particle_radius;  
     void use_glsl();        //not the best way, call this before rendering and it sets up glsl program
+    float point_scale;      //scale for rendering glsl particles
 
     ~EnjaParticles();
 
@@ -67,7 +68,7 @@ private:
     AVec4 velocities;       //velocity generators
     AVec4 colors;
     std::vector<int> indices;
-    float* life;
+    //float* life;  //life is packed into velocity.w
 
     int init(AVec4 generators, AVec4 velocities, AVec4 colors, int num);
 
@@ -90,7 +91,7 @@ private:
     cl_mem cl_velo_gen;  //want to have the start velocities for reseting particles
     cl_mem cl_velocities;  //particle velocities
     cl_mem cl_indices;     //index array to do proper depth sorting
-    cl_mem cl_life;        //keep track where in their life the particles are
+    //cl_mem cl_life;        //keep track where in their life the particles are (packed into velocity.w now)
     int v_vbo;   //vertices vbo
     int c_vbo;   //colors vbo
     int i_vbo;   //index vbo

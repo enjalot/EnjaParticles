@@ -81,6 +81,7 @@ int EnjaParticles::render(float dt, int type=0)
 
         glUseProgram(glsl_program);
         //glUniform1f( glGetUniformLocation(m_program, "pointScale"), m_window_h / tanf(m_fov * m_fHalfViewRadianFactor));
+        glUniform1f( glGetUniformLocation(glsl_program, "pointScale"), point_scale);
         glUniform1f( glGetUniformLocation(glsl_program, "pointRadius"), particle_radius );
 
         glColor4f(1, 1, 1, 1);
@@ -100,7 +101,7 @@ int EnjaParticles::render(float dt, int type=0)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         glEnable(GL_POINT_SMOOTH); 
-        glPointSize(5.);
+        glPointSize(particle_radius);
 
         drawArrays();
     }
