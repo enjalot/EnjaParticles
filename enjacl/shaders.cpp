@@ -4,24 +4,34 @@
 
 const char* vertex_shader_source = STRINGIFY(
 
-uniform float pointRadius;  // point size in world space
+//uniform float pointRadius;  // point size in world space
 uniform float pointScale;   // scale to calculate size in pixels
+uniform bool blending;
 //uniform float densityScale;
 //uniform float densityOffset;
+varying float pointRadius;
 varying vec3 posEye;        // position of center in eye space
+
 
 void main()
 {
 
     posEye = vec3(gl_ModelViewMatrix * vec4(gl_Vertex.xyz, 1.0));
     float dist = length(posEye);
+    //we packed radius in the 4th component of vertex
+    pointRadius = gl_Vertex.w;
     gl_PointSize = pointRadius * (pointScale / dist);
     //gl_PointSize = pointRadius * (1.0 / dist);
 
     gl_TexCoord[0] = gl_MultiTexCoord0;
     gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz, 1.0);
 
+    if(!blending)
+    {
+        gl_Color.w = 1.0;
+    }
     gl_FrontColor = gl_Color;
+    
 }
 
 
@@ -29,7 +39,8 @@ void main()
 
 const char* fragment_shader_source = STRINGIFY(
 
-uniform float pointRadius;  // point size in world space
+uniform bool blending;
+varying float pointRadius;  // point size in world space
 varying vec3 posEye;        // position of center in eye space
 
 void main()
@@ -46,6 +57,7 @@ void main()
 
     // point on surface of sphere in eye space
     vec3 spherePosEye = posEye + n*pointRadius;
+    //vec3 spherePosEye = posEye + n*pointRadius;
 
     // calculate lighting
     float diffuse = max(0.0, dot(lightDir, n));
@@ -54,10 +66,6 @@ void main()
     vec3 h = normalize(lightDir + v);
     float specular = pow(max(0.0, dot(n, h)), shininess);
     gl_FragColor = gl_Color * diffuse + specular;
-    //want to play with this later
-    gl_FragColor.w = 1.0;
-    
-    //gl_FragColor = gl_Color * diffuse;
 }
 
 

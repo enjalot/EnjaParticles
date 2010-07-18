@@ -45,7 +45,7 @@ public:
     //choose system and number of particles
     EnjaParticles(int system, int num);
     //specify initial positions and velocities, with arrays on length len, and number of particles
-    EnjaParticles(int system, AVec4 generators, AVec4 velocities, int len, int num);
+    EnjaParticles(int system, AVec4 generators, AVec4 velocities, int len, int num, float radius);
     //EnjaParticles(int system, Vec4* generators, Vec4* velocities, Vec4* colors, int num);
     
     //extra properties of the system
@@ -53,6 +53,7 @@ public:
     int updates;            //number of times to update per frame
     float particle_radius;  
     void use_glsl();        //not the best way, call this before rendering and it sets up glsl program
+    bool blending;          //use alpha blending
     float point_scale;      //scale for rendering glsl particles
 
     ~EnjaParticles();

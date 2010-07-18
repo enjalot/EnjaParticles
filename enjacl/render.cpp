@@ -12,6 +12,13 @@
 
 void EnjaParticles::drawArrays()
 {
+
+    if(blending)
+    {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+
     //printf("color buffer\n");
     glBindBuffer(GL_ARRAY_BUFFER, c_vbo);
     glColorPointer(4, GL_FLOAT, 0, 0);
@@ -82,11 +89,10 @@ int EnjaParticles::render(float dt, int type=0)
         glUseProgram(glsl_program);
         //glUniform1f( glGetUniformLocation(m_program, "pointScale"), m_window_h / tanf(m_fov * m_fHalfViewRadianFactor));
         glUniform1f( glGetUniformLocation(glsl_program, "pointScale"), point_scale);
-        glUniform1f( glGetUniformLocation(glsl_program, "pointRadius"), particle_radius );
+        glUniform1f( glGetUniformLocation(glsl_program, "blending"), blending );
+        //glUniform1f( glGetUniformLocation(glsl_program, "pointRadius"), particle_radius );
 
         glColor4f(1, 1, 1, 1);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         drawArrays();
 
@@ -97,10 +103,8 @@ int EnjaParticles::render(float dt, int type=0)
     {
 
         glDisable(GL_LIGHTING);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-        glEnable(GL_POINT_SMOOTH); 
+        //glEnable(GL_POINT_SMOOTH); 
         glPointSize(particle_radius);
 
         drawArrays();

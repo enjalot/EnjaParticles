@@ -44,8 +44,8 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
     
     //this should be configurable. how many updates do we run per frame:
     updates = 4;
-    particle_radius = 5.0f;
     glsl = false;
+    blending = false;
     point_scale = 1.0f;
 
     //setting the velocities here temporarily to make fountain effect. should be moved outside
@@ -64,8 +64,8 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
     //we pack radius and life into generator and velocity arrays
     for(int i=0; i < n; i++)
     {
-        //initialize the radii array with random values between 1.0 and 10.0
-        g[i].w = 1.0f + 9*drand48();
+        //initialize the radii array with random values between 1.0 and particle_radius
+        g[i].w = 1.0f + particle_radius*drand48();
         //initialize the particle life array with random values between 0 and 1
         v[i].w = drand48();
     }
@@ -103,6 +103,9 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
 EnjaParticles::EnjaParticles(int s, int n)
 {
     printf("default constructor\n");
+    
+    particle_radius = 5.0f;
+    
     system = s;
     //init system
     AVec4 g(n);
@@ -161,9 +164,12 @@ EnjaParticles::EnjaParticles(int s, int n)
 }
 //Take in vertex generators as well as velocity generators that are len elements long
 //This is to support generating particles from Blender Mesh objects
-EnjaParticles::EnjaParticles(int s, AVec4 g, AVec4 v, int len, int n)
+EnjaParticles::EnjaParticles(int s, AVec4 g, AVec4 v, int len, int n, float radius)
 {
     system = s;
+    if(radius <1.0f)
+        radius = 1.0f;
+    particle_radius = radius;
 
     AVec4 vert_gen(n);
     AVec4 velo_gen(n);

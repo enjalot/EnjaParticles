@@ -95,6 +95,7 @@ int main(int argc, char** argv)
     //default constructor
     enjas = new EnjaParticles(2, NUM_PARTICLES);
     enjas->use_glsl();
+//    enjas->blending = true;
     enjas->point_scale = 1.0f;
     
     //Test making a system from vertices and normals;

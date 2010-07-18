@@ -13,7 +13,6 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
         vertices[i].x = vert_gen[i].x;
         vertices[i].y = vert_gen[i].y;
         vertices[i].z = vert_gen[i].z;
-        vertices[i].w = 0.4f;
 
         velocities[i].x = 0.0f;//velo_gen[i].x;
         velocities[i].y = 0.0f;//velo_gen[i].y;
