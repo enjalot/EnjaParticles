@@ -50,7 +50,7 @@ void EnjaParticles::drawArrays()
 
 }
 
-int EnjaParticles::render(float dt, int type=0)
+int EnjaParticles::render()
 {
     // Render the particles with OpenGL
     // dt is the time step
@@ -65,7 +65,7 @@ int EnjaParticles::render(float dt, int type=0)
     
     for(int i = 0; i < updates; i++)
     {
-        update(dt);     //call the particle update function (executes the opencl)
+        update();     //call the particle update function (executes the opencl)
     }
 
     ts[0]->stop();
@@ -125,13 +125,15 @@ int EnjaParticles::render(float dt, int type=0)
     //printf("done rendering\n");
 }
 
-//this may not be the cleanest implementation
-#include "shaders.cpp"
 
 int EnjaParticles::compileShaders()
 {
-    printf("vertex shader:\n%s\n", vertex_shader_source);
-    printf("fragment shader:\n%s\n", fragment_shader_source);
+
+    //this may not be the cleanest implementation
+    #include "shaders.cpp"
+
+    //printf("vertex shader:\n%s\n", vertex_shader_source);
+    //printf("fragment shader:\n%s\n", fragment_shader_source);
 
 
     GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);

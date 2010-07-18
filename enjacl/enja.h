@@ -31,8 +31,8 @@ class EnjaParticles
 
 public:
 
-    int update(float dt);   //update the particle system
-    int render(float dt, int type); //render calls update then renders the particles
+    int update();   //update the particle system
+    int render(); //render calls update then renders the particles
 
     int getVertexVBO(); //get the vertices vbo id
     int getColorVBO(); //get the color vbo id
@@ -51,14 +51,17 @@ public:
     //extra properties of the system
     //we could do getter/setter functions
     int updates;            //number of times to update per frame
+    float dt;
     float particle_radius;  
+
+    //rendering options
     void use_glsl();        //not the best way, call this before rendering and it sets up glsl program
     bool blending;          //use alpha blending
     float point_scale;      //scale for rendering glsl particles
 
     ~EnjaParticles();
 
-    enum {LORENTZ, GRAVITY};
+    enum {LORENZ, GRAVITY, FOUNTAIN, VFIELD};
     static const std::string programs[];
 
 private:

@@ -29,9 +29,10 @@
 //the paths to these programs are relative to the source dir
 //this is used in init_cl
 const std::string EnjaParticles::programs[] = {
-    "/physics/lorentz.cl",
+    "/physics/lorenz.cl",
     "/physics/gravity.cl",
-    "/physics/fountain.cl"
+    "/physics/fountain.cl",
+    "/physics/vfield.cl"
 };
 
 
@@ -44,22 +45,10 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
     
     //this should be configurable. how many updates do we run per frame:
     updates = 4;
+    dt = .0001;
     glsl = false;
     blending = false;
     point_scale = 1.0f;
-
-    //setting the velocities here temporarily to make fountain effect. should be moved outside
-    float f = 0.f;
-    for(int i=0; i < n; i++)
-    {
-        f = (float)i;
-        v[i].x = 0.0 + .5*cos(2.*M_PI*(f/n));  //with lorentz this looks more interesting
-        v[i].z = 3.f;
-        v[i].y = 0.0 + .5*sin(2.*M_PI*(f/n));
-        //v[i].x = 1.f; //.01 * (1. - 2.*drand48()); // between -.02 and .02
-        //v[i].y = 1.f; //.05 * drand48();
-        //v[i].z = 1.f; //.01 * (1. - 2.*drand48());
-    }
 
     //we pack radius and life into generator and velocity arrays
     for(int i=0; i < n; i++)
@@ -102,7 +91,7 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
 
 EnjaParticles::EnjaParticles(int s, int n)
 {
-    printf("default constructor\n");
+    //printf("default constructor\n");
     
     particle_radius = 5.0f;
     
@@ -151,12 +140,12 @@ EnjaParticles::EnjaParticles(int s, int n)
 
     srand48(time(NULL));
 
-    printf("before init call\n");
+    //printf("before init call\n");
 
     //init particle system
     init(g, v, c, n);
 
-    printf("before opencl call\n");
+    //printf("before opencl call\n");
 
     //init opencl
     int success = init_cl();

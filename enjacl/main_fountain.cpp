@@ -170,7 +170,7 @@ void appRender()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //.001 is the timestep
     //0 is rendering type (not used yet)
-    enjas->render(.0001, 0);
+    enjas->render();
     showFPS(enjas->getFPS(), enjas->getReport());
     glutSwapBuffers();
     //if we want to render as fast as possible we do this

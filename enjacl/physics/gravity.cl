@@ -14,9 +14,9 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
         vertices[i].y = vert_gen[i].y;
         vertices[i].z = vert_gen[i].z;
 
-        velocities[i].x = 0.0f;//velo_gen[i].x;
-        velocities[i].y = 0.0f;//velo_gen[i].y;
-        velocities[i].z = 0.0f;//velo_gen[i].z;
+        velocities[i].x = velo_gen[i].x;
+        velocities[i].y = velo_gen[i].y;
+        velocities[i].z = velo_gen[i].z;
         life = 1.0f;
     } 
     float xn = vertices[i].x;
@@ -29,7 +29,7 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
     float vzn = velocities[i].z;
     velocities[i].x = vxn;
     velocities[i].y = vyn;// - h*9.8;
-    velocities[i].z = vzn - h*9.8;
+    velocities[i].z = vzn - 2.0f*h*9.8; //exagerate the effect of gravity for now
 
     vertices[i].x = xn + h*velocities[i].x; //xn + h*(sigma * (yn - xn));
     vertices[i].y = yn + h*velocities[i].y; //yn + h*(xn*(rho - zn));

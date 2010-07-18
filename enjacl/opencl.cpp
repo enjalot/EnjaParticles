@@ -20,7 +20,7 @@
 #include "timege.h"
 //#include "incopencl.h"
 
-int EnjaParticles::update(float dt)
+int EnjaParticles::update()
 {
     cl_int ciErrNum = CL_SUCCESS;
     cl_event evt; //can't do opencl visual profiler without passing an event
@@ -94,14 +94,14 @@ void EnjaParticles::popCorn()
     //This is a purely internal helper function, all this code could easily be at the bottom of init_cl
     //init_cl shouldn't change much, and this may
     #ifdef GL_INTEROP
-        printf("gl interop!\n");
+        //printf("gl interop!\n");
         // create OpenCL buffer from GL VBO
         cl_vbos[0] = clCreateFromGLBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, v_vbo, &ciErrNum);
         cl_vbos[1] = clCreateFromGLBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, c_vbo, &ciErrNum);
         cl_vbos[2] = clCreateFromGLBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, i_vbo, &ciErrNum);
         //printf("SUCCES?: %s\n", oclErrorString(ciErrNum));
     #else
-        printf("no gl interop!\n");
+        //printf("no gl interop!\n");
         // create standard OpenCL mem buffer
         cl_vbos[0] = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
         cl_vbos[1] = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
@@ -157,7 +157,7 @@ int EnjaParticles::init_cl()
     // Program Setup
     int pl;
     size_t program_length;
-    printf("open the program\n");
+    //printf("open the program\n");
     
     //CL_SOURCE_DIR is set in the CMakeLists.txt
     std::string path(CL_SOURCE_DIR);
@@ -171,7 +171,7 @@ int EnjaParticles::init_cl()
     cpProgram = clCreateProgramWithSource(cxGPUContext, 1,
                       (const char **) &cSourceCL, &program_length, &ciErrNum);
 
-    printf("building the program\n");
+    //printf("building the opencl program\n");
     // build the program
     ciErrNum = clBuildProgram(cpProgram, 0, NULL, "-cl-fast-relaxed-math", NULL, NULL);
     //ciErrNum = clBuildProgram(cpProgram, 0, NULL, NULL, NULL, NULL);
@@ -194,7 +194,7 @@ int EnjaParticles::init_cl()
         printf("houston we have a problem\n%s\n", oclErrorString(ciErrNum));
     }
 */
-    printf("program built\n");
+    //printf("program built\n");
     ckKernel = clCreateKernel(cpProgram, "enja", &ciErrNum);
     printf("kernel made: %s\n", oclErrorString(ciErrNum));
 
