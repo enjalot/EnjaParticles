@@ -93,9 +93,9 @@ int main(int argc, char** argv)
     //system = 1 gravity
     
     //default constructor
-    enjas = new EnjaParticles(2, NUM_PARTICLES);
-    enjas->use_glsl();
-//    enjas->blending = true;
+    enjas = new EnjaParticles(0, NUM_PARTICLES);
+//    enjas->use_glsl();
+    enjas->blending = true;
     enjas->point_scale = 1.0f;
     
     //Test making a system from vertices and normals;
