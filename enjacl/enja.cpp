@@ -277,12 +277,24 @@ int EnjaParticles::getNum()
 
 float EnjaParticles::getFPS()
 {
-    // this is wrong =(
     return 1000.f / ts[2]->getAverage();    //1 second divided by total render time 
 }
 
+std::string EnjaParticles::printReport()
+{
+    //print timings with all library options
+    //helper function for printing timings for graphing
+    std::stringstream ss;
+    //ts[0] is total time for all update calls, ts[2] is total rendering time
+    // num, render ms, cl ms, /*updates*/, glsl, alpha blending
+    ss << num << " & " << ts[2]->getAverage() << " & " << ts[0]->getAverage() << " & " /*<< updates << " & "*/ << glsl << " & " << blending << " \\" << std::ends;
+    return ss.str();
+}
+
+
 std::string* EnjaParticles::getReport()
 {
+    //helper function for printing timings to screen
     std::stringstream ss1;
     std::stringstream ss2;
     std::string* s = new std::string[2];
@@ -293,6 +305,5 @@ std::string* EnjaParticles::getReport()
     ss2 << "Average OpenCL Time (per frame): " << ts_cl[0]->getAverage() + ts_cl[1]->getAverage() + ts_cl[2]->getAverage() << std::ends;
     s[1] = ss2.str();
     return s;
-
 }
 

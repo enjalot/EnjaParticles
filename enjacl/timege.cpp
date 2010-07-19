@@ -44,6 +44,10 @@ Time::Time(const char* name_, int offset, int nbCalls)
 Time::~Time()
 {
 }
+int Time::getCount()
+{
+    return count;
+}
 //----------------------------------------------------------------------
 void Time::reset()
 {

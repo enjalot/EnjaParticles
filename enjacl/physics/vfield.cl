@@ -89,8 +89,8 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
 */
     //colors[i].x = life - .2f;
     colors[i].x = 1.0f;
-    colors[i].y = 0.5f - life;
-    colors[i].z = 0.5f - life;
+    colors[i].y = 1.0f - 10.0f*life;// - life;
+    colors[i].z = 1.0f - 10.0f*life;/// - life;
     colors[i].w = life;
  
     

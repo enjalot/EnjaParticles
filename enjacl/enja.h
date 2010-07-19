@@ -40,6 +40,7 @@ public:
 
     float getFPS(); //get the calculated frames per second for entire rendering process
     std::string* getReport(); //get string report of timings
+    std::string printReport(); //get string report of timings with library options
 
     //constructors: will probably have more as more options are added
     //choose system and number of particles
