@@ -75,7 +75,7 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
         //initialize the radii array with random values between 1.0 and particle_radius
         generators[i].w = 1.0f + particle_radius*drand48();
         //initialize the particle life array with random values between 0 and 1
-        velocities[i].w = drand48();
+        velocities[i].w = drand48();// i/(1.0f*num);
     }
 
    
