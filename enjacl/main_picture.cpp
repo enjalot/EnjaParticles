@@ -148,6 +148,7 @@ void init_gl()
     glRotatef(180, 0.0, 0.0, 1.0);
     glTranslatef(0.0, 0.0, translate_z);
 
+
     return;
 
 }
@@ -171,6 +172,11 @@ void appRender()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //.001 is the timestep
     //0 is rendering type (not used yet)
+    //
+    //
+    //m_window_h / tanf(m_fov * m_fHalfViewRadianFactor)
+    
+    
     enjas->render();
     showFPS(enjas->getFPS(), enjas->getReport());
     glutSwapBuffers();
