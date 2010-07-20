@@ -147,6 +147,14 @@ int EnjaParticles::compileShaders()
     glShaderSource(fragment_shader, 1, &fragment_shader_source, 0);
     
     glCompileShader(vertex_shader);
+    GLint len;
+    glGetShaderiv(vertex_shader, GL_INFO_LOG_LENGTH, &len);
+    if(len > 0)
+    {
+        char log[1024];
+        glGetShaderInfoLog(vertex_shader, 1024, 0, log);
+        printf("Vertex Shader log:\n %s\n", log);
+    }
     glCompileShader(fragment_shader);
 
     GLuint program = glCreateProgram();
