@@ -49,6 +49,9 @@ public:
     EnjaParticles(int system, AVec4 generators, AVec4 velocities, int len, int num, float radius);
     //EnjaParticles(int system, Vec4* generators, Vec4* velocities, Vec4* colors, int num);
     
+    //create particle system from an image
+    EnjaParticles(int system, const char* img_filename);
+    
     //extra properties of the system
     //we could do getter/setter functions
     int updates;            //number of times to update per frame
@@ -62,7 +65,7 @@ public:
 
     ~EnjaParticles();
 
-    enum {LORENZ, GRAVITY, FOUNTAIN, VFIELD};
+    enum {LORENZ, GRAVITY, FOUNTAIN, VFIELD, PICTURE};
     static const std::string programs[];
 
 private:

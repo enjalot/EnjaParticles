@@ -3,8 +3,7 @@ project(enjacl)
 
 #need to include FindOPENCL.cmake to
 SET( CMAKE_MODULE_PATH
-     ${enjacl_SOURCE_DIR}/../cmake
-     $ENV{CMAKE_MODULES})
+     ${enjacl_SOURCE_DIR}/../cmake)
 
 message("${CMAKE_MODULE_PATH}\n")
 
@@ -13,12 +12,16 @@ FIND_PACKAGE (GLUT)
 FIND_PACKAGE (OpenGL)
 FIND_PACKAGE (OPENCL)
 FIND_PACKAGE (GLEW)
+FIND_PACKAGE (OpenCV REQUIRED)
+
+#message("OpenCV stuff\n ${OpenCV_LIB_DIR} \n ${OpenCV_LIBS}\n ${OpenCV_INCLUDE_DIRS}\n")
 
 INCLUDE_DIRECTORIES( 
 	${GLUT_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
     ${GLEW_INCLUDE_PATH}
     ${OPENCL_INCLUDE_DIR}
+    ${OpenCV_INCLUDE_DIRS}
 )
 
 message("\nenjacl INCLUDE_DIRECTORIES\n")
@@ -37,8 +40,8 @@ SET(ocllib enjaclparticles)
 ADD_LIBRARY(${ocllib} ${CLCXXFILES})
 
 
-SET(EXEC_CL fountain.x)
-ADD_EXECUTABLE(${EXEC_CL} main_fountain.cpp util.cpp)
+SET(EXEC_CL picture.x)
+ADD_EXECUTABLE(${EXEC_CL} main_picture.cpp util.cpp)
 
 TARGET_LINK_LIBRARIES (${EXEC_CL}
    ${ocllib}
@@ -46,6 +49,7 @@ TARGET_LINK_LIBRARIES (${EXEC_CL}
    ${OPENGL_LIBRARIES}
    ${OPENCL_LIBRARIES}
    ${GLEW_LIBRARY}
+   ${OpenCV_LIBS}
 )
 
 

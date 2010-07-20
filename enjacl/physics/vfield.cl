@@ -20,7 +20,7 @@ float lorentzZ(float xn, float yn, float zn)
 float4 vfield(float4 yn)
 {
     float4 vn;
-    vn.x = 2.0f*sin(yn.y) + 1.0f * cos(yn.z);
+    vn.x = 2.0f*sin(yn.y);// + 1.0f * cos(yn.z);
     vn.y = 2.0f*cos(yn.x);
     vn.z = yn.z - 3.0f;
     vn.w = yn.w;

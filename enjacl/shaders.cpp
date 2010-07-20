@@ -19,7 +19,7 @@ void main()
     posEye = vec3(gl_ModelViewMatrix * vec4(gl_Vertex.xyz, 1.0));
     float dist = length(posEye);
     //we packed radius in the 4th component of vertex
-    pointRadius = gl_Vertex.w;
+    pointRadius = 5.0f;//gl_Vertex.w;
     gl_PointSize = pointRadius * (pointScale / dist);
     //gl_PointSize = pointRadius * (1.0 / dist);
 
