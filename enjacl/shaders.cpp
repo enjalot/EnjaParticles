@@ -26,11 +26,13 @@ void main()
     gl_TexCoord[0] = gl_MultiTexCoord0;
     gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz, 1.0);
 
+    gl_FrontColor = gl_Color;
+
     if(!blending)
     {
-        gl_Color.w = 1.0;
+        gl_FrontColor.w = 1.0;
     }
-    gl_FrontColor = gl_Color;
+
     
 }
 
@@ -39,7 +41,6 @@ void main()
 
 const char* fragment_shader_source = STRINGIFY(
 
-uniform bool blending;
 varying float pointRadius;  // point size in world space
 varying vec3 posEye;        // position of center in eye space
 
