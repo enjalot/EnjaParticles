@@ -37,8 +37,8 @@ SET(ocllib enjaclparticles)
 ADD_LIBRARY(${ocllib} ${CLCXXFILES})
 
 
-SET(EXEC_CL oclenjaglcl.x)
-ADD_EXECUTABLE(${EXEC_CL} main.cpp util.cpp)
+SET(EXEC_CL fountain.x)
+ADD_EXECUTABLE(${EXEC_CL} main_fountain.cpp util.cpp)
 
 TARGET_LINK_LIBRARIES (${EXEC_CL}
    ${ocllib}

@@ -20,7 +20,7 @@
 #include "timege.h"
 //#include "incopencl.h"
 
-int EnjaParticles::update(float dt)
+int EnjaParticles::update()
 {
     cl_int ciErrNum = CL_SUCCESS;
     cl_event evt; //can't do opencl visual profiler without passing an event
@@ -35,7 +35,7 @@ int EnjaParticles::update(float dt)
 
 	ts_cl[0]->start();
     //ciErrNum = clEnqueueAcquireGLObjects(cqCommandQueue, 1, &vbo_cl, 0,0,0);
-    ciErrNum = clEnqueueAcquireGLObjects(cqCommandQueue, 2, cl_vbos, 0,NULL, &evt);
+    ciErrNum = clEnqueueAcquireGLObjects(cqCommandQueue, 3, cl_vbos, 0,NULL, &evt);
     clReleaseEvent(evt);
     //printf("gl interop, acquire: %s\n", oclErrorString(ciErrNum));
     clFinish(cqCommandQueue);
@@ -44,7 +44,7 @@ int EnjaParticles::update(float dt)
 
     //clFinish(cqCommandQueue);
 	ts_cl[1]->start();
-    ciErrNum = clSetKernelArg(ckKernel, 5, sizeof(float), &dt);
+    ciErrNum = clSetKernelArg(ckKernel, 6, sizeof(float), &dt);
     //ciErrNum = clSetKernelArg(ckKernel, 2, sizeof(float), &dt);
     ciErrNum |= clEnqueueNDRangeKernel(cqCommandQueue, ckKernel, 1, NULL, szGlobalWorkSize, NULL, 0, NULL, &evt );
     clReleaseEvent(evt);
@@ -58,7 +58,7 @@ int EnjaParticles::update(float dt)
     
     //clFinish(cqCommandQueue);
     ts_cl[2]->start();
-    ciErrNum = clEnqueueReleaseGLObjects(cqCommandQueue, 2, cl_vbos, 0, NULL, &evt);
+    ciErrNum = clEnqueueReleaseGLObjects(cqCommandQueue, 3, cl_vbos, 0, NULL, &evt);
     clReleaseEvent(evt);
     //printf("gl interop, acquire: %s\n", oclErrorString(ciErrNum));
     clFinish(cqCommandQueue);
@@ -94,45 +94,54 @@ void EnjaParticles::popCorn()
     //This is a purely internal helper function, all this code could easily be at the bottom of init_cl
     //init_cl shouldn't change much, and this may
     #ifdef GL_INTEROP
-        printf("gl interop!\n");
+        //printf("gl interop!\n");
         // create OpenCL buffer from GL VBO
         cl_vbos[0] = clCreateFromGLBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, v_vbo, &ciErrNum);
         cl_vbos[1] = clCreateFromGLBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, c_vbo, &ciErrNum);
+        cl_vbos[2] = clCreateFromGLBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, i_vbo, &ciErrNum);
         //printf("SUCCES?: %s\n", oclErrorString(ciErrNum));
     #else
-        printf("no gl interop!\n");
+        //printf("no gl interop!\n");
         // create standard OpenCL mem buffer
         cl_vbos[0] = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
         cl_vbos[1] = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
+        cl_vbos[2] = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, sizeof(int) * num, NULL, &ciErrNum);
         //Since we don't get the data from OpenGL we have to manually push the CPU side data to the GPU
-        ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_vbos[0], CL_TRUE, 0, vbo_size, generators, 0, NULL, &evt);
+        ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_vbos[0], CL_TRUE, 0, vbo_size, &generators[0], 0, NULL, &evt);
         clReleaseEvent(evt);
-        ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_vbos[1], CL_TRUE, 0, vbo_size, colors, 0, NULL, &evt);
+        ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_vbos[1], CL_TRUE, 0, vbo_size, &colors[0], 0, NULL, &evt);
+        clReleaseEvent(evt);
+        ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_vbos[2], CL_TRUE, 0, sizeof(int) * num, &colors[0], 0, NULL, &evt);
         clReleaseEvent(evt);
         //make sure we are finished copying over before going on
     #endif
     
     //support arrays for the particle system
-    cl_generators = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
+    cl_vert_gen = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
+    cl_velo_gen = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
     cl_velocities= clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
-    cl_life = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, sizeof(float) * num, NULL, &ciErrNum);
+    //cl_life = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, sizeof(float) * num, NULL, &ciErrNum);
     
-    ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_generators, CL_TRUE, 0, vbo_size, generators, 0, NULL, &evt);
+    ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_vert_gen, CL_TRUE, 0, vbo_size, &generators[0], 0, NULL, &evt);
     clReleaseEvent(evt);
-    ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_velocities, CL_TRUE, 0, vbo_size, velocities, 0, NULL, &evt);
+    ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_velo_gen, CL_TRUE, 0, vbo_size, &velocities[0], 0, NULL, &evt);
     clReleaseEvent(evt);
-    ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_life, CL_TRUE, 0, sizeof(float) * num, life, 0, NULL, &evt);
+    ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_velocities, CL_TRUE, 0, vbo_size, &velocities[0], 0, NULL, &evt);
     clReleaseEvent(evt);
+    //ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_life, CL_TRUE, 0, sizeof(float) * num, life, 0, NULL, &evt);
+    //clReleaseEvent(evt);
     clFinish(cqCommandQueue);
     
-    printf("lorentz kernel\n");
 
     //printf("about to set kernel args\n");
-    ciErrNum  = clSetKernelArg(ckKernel, 0, sizeof(cl_mem), (void *) &cl_vbos[0]);  //vertices is first arguement to kernel
-    ciErrNum  = clSetKernelArg(ckKernel, 1, sizeof(cl_mem), (void *) &cl_vbos[1]);  //colors is second arguement to kernel
-    ciErrNum  = clSetKernelArg(ckKernel, 2, sizeof(cl_mem), (void *) &cl_generators);  //colors is second arguement to kernel
-    ciErrNum  = clSetKernelArg(ckKernel, 3, sizeof(cl_mem), (void *) &cl_velocities);  //colors is second arguement to kernel
-    ciErrNum  = clSetKernelArg(ckKernel, 4, sizeof(cl_mem), (void *) &cl_life);  //colors is second arguement to kernel
+    ciErrNum  = clSetKernelArg(ckKernel, 0, sizeof(cl_mem), (void *) &cl_vbos[0]);      //vertices is first arguement to kernel
+    ciErrNum  = clSetKernelArg(ckKernel, 1, sizeof(cl_mem), (void *) &cl_vbos[1]);      //colors is second arguement to kernel
+    ciErrNum  = clSetKernelArg(ckKernel, 2, sizeof(cl_mem), (void *) &cl_vbos[2]);      //indices is third arguement to kernel
+    ciErrNum  = clSetKernelArg(ckKernel, 3, sizeof(cl_mem), (void *) &cl_vert_gen);     //vertex generators
+    ciErrNum  = clSetKernelArg(ckKernel, 4, sizeof(cl_mem), (void *) &cl_velo_gen);     //velocity generators
+    ciErrNum  = clSetKernelArg(ckKernel, 5, sizeof(cl_mem), (void *) &cl_velocities);   //velocities
+    //we now pack life into the w component of velocity
+    //ciErrNum  = clSetKernelArg(ckKernel, 6, sizeof(cl_mem), (void *) &cl_life);         //life
     printf("done with popCorn()\n");
 
 }
@@ -148,7 +157,7 @@ int EnjaParticles::init_cl()
     // Program Setup
     int pl;
     size_t program_length;
-    printf("open the program\n");
+    //printf("open the program\n");
     
     //CL_SOURCE_DIR is set in the CMakeLists.txt
     std::string path(CL_SOURCE_DIR);
@@ -162,7 +171,7 @@ int EnjaParticles::init_cl()
     cpProgram = clCreateProgramWithSource(cxGPUContext, 1,
                       (const char **) &cSourceCL, &program_length, &ciErrNum);
 
-    printf("building the program\n");
+    //printf("building the opencl program\n");
     // build the program
     ciErrNum = clBuildProgram(cpProgram, 0, NULL, "-cl-fast-relaxed-math", NULL, NULL);
     //ciErrNum = clBuildProgram(cpProgram, 0, NULL, NULL, NULL, NULL);
@@ -185,7 +194,7 @@ int EnjaParticles::init_cl()
         printf("houston we have a problem\n%s\n", oclErrorString(ciErrNum));
     }
 */
-    printf("program built\n");
+    //printf("program built\n");
     ckKernel = clCreateKernel(cpProgram, "enja", &ciErrNum);
     printf("kernel made: %s\n", oclErrorString(ciErrNum));
 

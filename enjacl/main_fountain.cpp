@@ -22,7 +22,8 @@
 int window_width = 400;
 int window_height = 300;
 int glutWindowHandle = 0;
-float translate_z = -20.f;
+//float translate_z = -90.f;
+float translate_z = -3.f;
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -46,7 +47,7 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 EnjaParticles* enjas;
-#define NUM_PARTICLES 10000
+#define NUM_PARTICLES 100000
 
 GLuint v_vbo; //vbo id
 GLuint c_vbo; //vbo id
@@ -93,6 +94,9 @@ int main(int argc, char** argv)
     
     //default constructor
     enjas = new EnjaParticles(2, NUM_PARTICLES);
+    enjas->use_glsl();
+//    enjas->blending = true;
+    enjas->point_scale = 1.0f;
     
     //Test making a system from vertices and normals;
     /*
@@ -141,7 +145,7 @@ void init_gl()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glTranslatef(0.0, 0.0, translate_z);
-    //glRotatef(-90, 1.0, 0.0, 0.0);
+    glRotatef(-90, 1.0, 0.0, 0.0);
 
     return;
 
@@ -224,7 +228,7 @@ void appMotion(int x, int y)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glTranslatef(0.0, 0.0, translate_z);
-    glRotatef(rotate_x, 1.0, 0.0, 0.0);
+    glRotatef(rotate_x-90, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 1.0, 0.0);
     glutPostRedisplay();
 }

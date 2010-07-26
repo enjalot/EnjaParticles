@@ -33,7 +33,7 @@ ELSE (WIN32)
 
     FIND_LIBRARY(OPENCL_LIBRARIES OpenCL ENV LD_LIBRARY_PATH)
 
-	message(***** OPENCL ENV: "$ENV{GPU_SDK}" ********)
+    #message(***** OPENCL ENV: "$ENV{GPU_SDK}" ********)
 
 #~/NVIDIA_GPU_Computing_SDK/OpenCL/common/inc/ 
 

@@ -3,10 +3,9 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
 
 {
     unsigned int i = get_global_id(0);
-
-    h = h*10;
     float life = velocities[i].w;
-    life -= h;
+    h = h*5;
+    life -= h;    //should probably depend on time somehow
     if(life <= 0.)
     {
         //reset this particle
@@ -14,8 +13,8 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
         vertices[i].y = vert_gen[i].y;
         vertices[i].z = vert_gen[i].z;
 
-        velocities[i].x = velo_gen[i].x;
-        velocities[i].y = velo_gen[i].y;
+        velocities[i].x = 2*velo_gen[i].x;
+        velocities[i].y = 2*velo_gen[i].y;
         velocities[i].z = velo_gen[i].z;
         life = 1.0f;
     } 
@@ -28,21 +27,21 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
     float vyn = velocities[i].y;
     float vzn = velocities[i].z;
     velocities[i].x = vxn;
-    //velocities[i].y = vyn - h*9.8;
-    //velocities[i].z = vzn;// - h*9.8;
-    velocities[i].y = vyn;// - h*9.8;
-    velocities[i].z = vzn - 2.0f*h*9.8; //exagerate the effect of gravity for now
+    velocities[i].y = vyn;
+    velocities[i].z = vzn - h*9.8f;
 
     vertices[i].x = xn + h*velocities[i].x; //xn + h*(sigma * (yn - xn));
     vertices[i].y = yn + h*velocities[i].y; //yn + h*(xn*(rho - zn));
     vertices[i].z = zn + h*velocities[i].z; // + h*(xn*yn - beta * zn);
 
      
-    colors[i].x = life - .2f;
-    colors[i].y = 0.0f - life * .8f;
-    colors[i].z = 0.0f - life;
+    colors[i].x = 1.0f;
+    //colors[i].x = .5f-life*.5f;
+    colors[i].y = .5f-life*.5f;
+    colors[i].z = .5f-life*.5f;
+    //colors[i].z = 1.0f;
     colors[i].w = life;
-    
+
     //save the life!
     velocities[i].w = life;
 }
