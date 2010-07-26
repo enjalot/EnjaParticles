@@ -104,7 +104,7 @@ int EnjaParticles::render()
 
         glDisable(GL_LIGHTING);
         //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-        //glEnable(GL_POINT_SMOOTH); 
+        glEnable(GL_POINT_SMOOTH); 
         glPointSize(particle_radius);
 
         drawArrays();
