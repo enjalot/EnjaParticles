@@ -28,6 +28,8 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
     float vyn = velocities[i].y;
     float vzn = velocities[i].z;
     velocities[i].x = vxn;
+    //velocities[i].y = vyn - h*9.8;
+    //velocities[i].z = vzn;// - h*9.8;
     velocities[i].y = vyn;// - h*9.8;
     velocities[i].z = vzn - 2.0f*h*9.8; //exagerate the effect of gravity for now
 

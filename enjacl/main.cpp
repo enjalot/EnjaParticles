@@ -22,8 +22,7 @@
 int window_width = 400;
 int window_height = 300;
 int glutWindowHandle = 0;
-//float translate_z = -90.f;
-float translate_z = -5.f;
+float translate_z = -20.f;
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -47,7 +46,7 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 EnjaParticles* enjas;
-#define NUM_PARTICLES 1000000
+#define NUM_PARTICLES 10000
 
 GLuint v_vbo; //vbo id
 GLuint c_vbo; //vbo id
