@@ -29,13 +29,16 @@ ELSE (WIN32)
     FIND_LIBRARY( GLEW_LIBRARY
         NAMES GLEW glew
         PATHS
+		# path on Gordon's notebook mac
+		/opt/local/lib  # 64bit on mac notebook
         /usr/lib64
         /usr/lib
         /usr/local/lib64
         /usr/local/lib
         /sw/lib
         /opt/local/lib
-        DOC "The GLEW library")
+        DOC "The GLEW library"
+		NO_DEFAULT_PATH)
 ENDIF (WIN32)
 
 IF (GLEW_INCLUDE_PATH)
