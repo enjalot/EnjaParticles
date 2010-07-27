@@ -19,10 +19,10 @@
 #include "enja.h"
 #include "timege.h"
 
-int window_width = 400;
-int window_height = 300;
+int window_width = 800;
+int window_height = 600;
 int glutWindowHandle = 0;
-float translate_z = -20.f;
+float translate_z = -4.f;
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -46,7 +46,7 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 EnjaParticles* enjas;
-#define NUM_PARTICLES 10000
+#define NUM_PARTICLES 10
 
 GLuint v_vbo; //vbo id
 GLuint c_vbo; //vbo id
@@ -90,9 +90,13 @@ int main(int argc, char** argv)
     //parameters: system and number of particles
     //system = 0: lorentz
     //system = 1 gravity
+    //system = 2 fountain
+    //system = 3 vfield
+    //system = 4 collision
     
     //default constructor
-    enjas = new EnjaParticles(2, NUM_PARTICLES);
+    enjas = new EnjaParticles(4, NUM_PARTICLES);
+    enjas->particle_radius = 2.0f;
     
     //Test making a system from vertices and normals;
     /*

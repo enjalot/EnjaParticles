@@ -62,7 +62,7 @@ public:
 
     ~EnjaParticles();
 
-    enum {LORENZ, GRAVITY, FOUNTAIN, VFIELD};
+    enum {LORENZ, GRAVITY, FOUNTAIN, VFIELD, COLLISION};
     static const std::string programs[];
 
 private:

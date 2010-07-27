@@ -29,16 +29,11 @@
 //the paths to these programs are relative to the source dir
 //this is used in init_cl
 const std::string EnjaParticles::programs[] = {
-<<<<<<< HEAD
-    "/physics/lorentz.cl",
-    "/physics/gravity.cl",
-    "/physics/collision.cl"
-=======
     "/physics/lorenz.cl",
     "/physics/gravity.cl",
     "/physics/fountain.cl",
-    "/physics/vfield.cl"
->>>>>>> 3a05d889e399d7e4956609a683e2a87061879e69
+    "/physics/vfield.cl",
+    "/physics/collision.cl"
 };
 
 
@@ -60,9 +55,10 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
     for(int i=0; i < n; i++)
     {
         //initialize the radii array with random values between 1.0 and particle_radius
-        g[i].w = 1.0f + particle_radius*drand48();
+        //g[i].w = 1.0f + particle_radius*drand48();
         //initialize the particle life array with random values between 0 and 1
-        v[i].w = drand48();
+        //v[i].w = drand48();
+        v[i].w = 1.0f;
     }
 
     num = n;
@@ -74,14 +70,7 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
     std::vector<int> ind(n);
     for(int i = 0; i < n; i++)
     {
-<<<<<<< HEAD
-        velocities[i].x = 1.f; //.01 * (1. - 2.*drand48()); // between -.02 and .02
-        velocities[i].y = 0.f; //.05 * drand48();
-        velocities[i].z = 1.f; //.01 * (1. - 2.*drand48());
-        velocities[i].w = 0.f;
-=======
         ind[i] = i;
->>>>>>> 3a05d889e399d7e4956609a683e2a87061879e69
     }
     indices = ind;
 
@@ -120,13 +109,8 @@ EnjaParticles::EnjaParticles(int s, int n)
         //g[i].x = 1.0f;
         //g[i].y = 0.0 + .05*sin(2.*M_PI*(f/n));
         //g[i].y = -1.0f;
-<<<<<<< HEAD
         g[i].y = 0.f;
-        g[i].z = 0.0 + 10*sin(2.*M_PI*(f/n));
-=======
-        g[i].z = 0.f;
-        g[i].y = 0.0 + 2*sin(2.*M_PI*(f/n));
->>>>>>> 3a05d889e399d7e4956609a683e2a87061879e69
+        g[i].z = 0.0 + 2*sin(2.*M_PI*(f/n));
         //g[i].z = 0.0f;
         //g[i].z = 0.f;// + f/nums;
         g[i].w = 1.f;
@@ -146,12 +130,12 @@ EnjaParticles::EnjaParticles(int s, int n)
     for(int i=0; i < n; i++)
     {
         f = (float)i;
-        v[i].x = 0.0 + .5*cos(2.*M_PI*(f/n));  //with lorentz this looks more interesting
-        v[i].z = 3.f;
-        v[i].y = 0.0 + .5*sin(2.*M_PI*(f/n));
-        //v[i].x = 1.f; //.01 * (1. - 2.*drand48()); // between -.02 and .02
-        //v[i].y = 1.f; //.05 * drand48();
-        //v[i].z = 1.f; //.01 * (1. - 2.*drand48());
+        //v[i].x = 0.0 + .5*cos(2.*M_PI*(f/n));  //with lorentz this looks more interesting
+        //v[i].z = 3.f;
+        //v[i].y = 0.0 + .5*sin(2.*M_PI*(f/n));
+        v[i].x = 1.f; //.01 * (1. - 2.*drand48()); // between -.02 and .02
+        v[i].y = 1.f; //.05 * drand48();
+        v[i].z = 1.f; //.01 * (1. - 2.*drand48());
         v[i].w = 0.f;
     }
 

@@ -1,21 +1,22 @@
 //update the particle position and color
-__kernel void enja(__global float4* vertices, __global float4* colors, __global float4* generators, __global float4* velocities, __global float* life, float h)
+__kernel void enja(__global float4* vertices, __global float4* colors, __global int* indices, __global float4* vert_gen, __global float4* velo_gen, __global float4* velocities, float h)
 {
     unsigned int i = get_global_id(0);
 
+    float life = velocities[i].w;
+    life -= h;    //should probably depend on time somehow
     h = h*10;
-    life[i] -= h;    //should probably depend on time somehow
-    if(life[i] <= 0.)
+    if(life <= 0.)
     {
         //reset this particle
-        vertices[i].x = generators[i].x;
-        vertices[i].y = generators[i].y;
-        vertices[i].z = generators[i].z;
+        vertices[i].x = vert_gen[i].x;
+        vertices[i].y = vert_gen[i].y;
+        vertices[i].z = vert_gen[i].z;
 
-        velocities[i].x = 1.f;
-        velocities[i].y = 0.f;
-        velocities[i].z = 1.f;
-        life[i] = 1.;
+        velocities[i].x = velo_gen[i].x;
+        velocities[i].y = velo_gen[i].y;
+        velocities[i].z = velo_gen[i].z;
+        life = 1.;
     } 
     float xn = vertices[i].x;
     float yn = vertices[i].y;
@@ -32,21 +33,51 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
     xn += h*velocities[i].x;
     yn += h*velocities[i].y;
     zn += h*velocities[i].z;
-
-    //plane
-    if (yn < -2.0f)
+    
+    //particle and plane collision
+    if (yn < -1.0f)
     {
-        float4 normal = (-0.707106, 0.707106, 0.0, 0.0); //this is actually a unit vector
-        normal = normalize(normal);
-        float4 vel = velocities[i];
-        float mag = sqrt(vel.x*vel.x + vel.y*vel.y + vel.z*vel.z); //store the magnitude of the velocity
-        vel /= mag;
-        vel = 2.f*(dot(normal, vel))*normal - vel;
-        //vel *= mag; //we know the direction lets go the right speed
-        xn = vertices[i].x + h*vel.x;
-        yn = vertices[i].y + h*vel.y;
-        zn = vertices[i].z + h*vel.z;
-        velocities[i] = vel;
+
+        float4 posA = vertices[i];
+        float radiusA = 5.0f;
+        float4 posB = vertices[i] + radiusA/2.0f;
+        float4 relPos = (float4)(posB.x - posA.x, posB.y - posA.y, posB.z - posA.z, 0);
+        float dist = sqrt(relPos.x * relPos.x + relPos.y * relPos.y + relPos.z * relPos.z);
+        float collideDist = radiusA + 0.0;//radiusB;
+
+
+        //float4 norm = (-0.707106, 0.707106, 0.0, 0.0); //this is actually a unit vector
+        float4 norm = (float4)(0.0, 1.0, 0.0, 0.0); 
+        norm = normalize(norm);
+        float4 velA = velocities[i];    //velocity of particle
+        float4 velB = (float4)(0,0,0,0);  //velocity of object
+        float4 relVel = (float4)(velB.x - velA.x, velB.y - velA.y, velB.z - velA.z, 0);
+
+        float relVelDotNorm = relVel.x * norm.x + relVel.y * norm.y + relVel.z * norm.z;
+        float4 tanVel = (float4)(relVel.x - relVelDotNorm * norm.x, relVel.y - relVelDotNorm * norm.y, relVel.z - relVelDotNorm * norm.z, 0);
+        float4 force = (float4)(0,0,0,0);
+        float springFactor = -.5;//-spring * (collideDist - dist);
+        float damping = 1.0f;
+        float shear = 1.0f;
+        float attraction = 1.0f;
+        force = (float4)(
+            springFactor * norm.x + damping * relVel.x + shear * tanVel.x + attraction * relPos.x,
+            springFactor * norm.y + damping * relVel.y + shear * tanVel.y + attraction * relPos.y,
+            springFactor * norm.z + damping * relVel.z + shear * tanVel.z + attraction * relPos.z,
+            0
+        );
+
+        //float mag = sqrt(vel.x*vel.x + vel.y*vel.y + vel.z*vel.z); //store the magnitude of the velocity
+        //vel /= mag;
+        //vel = 2.f*(dot(normal, vel))*normal - vel;
+        ////vel *= mag; //we know the direction lets go the right speed
+        
+        velA += force;
+        
+        xn = vertices[i].x + h*velA.x;
+        yn = vertices[i].y + h*velA.y;
+        zn = vertices[i].z + h*velA.z;
+        velocities[i] = velA;
     }
 
     vertices[i].x = xn;
@@ -55,23 +86,14 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
 
      
     colors[i].x = 1.f;
-    colors[i].y = life[i];
-    colors[i].z = life[i];
-    //colors[i].w = 1-life[i];
+    colors[i].y = life;
+    colors[i].z = life;
+    //colors[i].w = 1-life;
     colors[i].w = 1;
+    
+    //save the life!
+    velocities[i].w = life;
 }
 
-
-/*
-float4 normalize(float4 v)
-{
-    //v is a 4 vector but we only use the x,y,z components
-    float magnitude = sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
-    v = v/magnitude;
-    //for vertices we don't want w component influencing other calculations
-    v.w = 1.0f; 
-    return v;
-}
-*/
 
 
