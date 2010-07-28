@@ -97,6 +97,8 @@ int main(int argc, char** argv)
     //default constructor
     enjas = new EnjaParticles(4, NUM_PARTICLES);
     enjas->particle_radius = 2.0f;
+    enjas->updates = 1;
+    enjas->dt = .01;
     
     //Test making a system from vertices and normals;
     /*

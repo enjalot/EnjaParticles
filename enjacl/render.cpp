@@ -65,7 +65,7 @@ int EnjaParticles::render()
     
     for(int i = 0; i < updates; i++)
     {
-        update();     //call the particle update function (executes the opencl)
+        cpu_update();     //call the particle update function (executes the opencl)
     }
 
     ts[0]->stop();

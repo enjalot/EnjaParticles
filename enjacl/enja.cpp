@@ -46,7 +46,7 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
     
     //this should be configurable. how many updates do we run per frame:
     updates = 4;
-    dt = .0001;
+    dt = .001;
     glsl = false;
     blending = false;
     point_scale = 1.0f;
@@ -62,7 +62,8 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
     }
 
     num = n;
-    generators = g;
+    vert_gen= g;
+    velo_gen = v;
     velocities = v;
     colors = c;
 
@@ -76,7 +77,7 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
 
     //initialize our vbos
     vbo_size = sizeof(Vec4) * n;
-    v_vbo = createVBO(&generators[0], vbo_size, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+    v_vbo = createVBO(&vert_gen[0], vbo_size, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
     c_vbo = createVBO(&colors[0], vbo_size, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
     i_vbo = createVBO(&ind[0], sizeof(int) * n, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
     
@@ -153,7 +154,8 @@ EnjaParticles::EnjaParticles(int s, int n)
     int success = init_cl();
     
 }
-//Take in vertex generators as well as velocity generators that are len elements long
+
+//Take in vertex vert_gen as well as velocity vert_gen that are len elements long
 //This is to support generating particles from Blender Mesh objects
 EnjaParticles::EnjaParticles(int s, AVec4 g, AVec4 v, int len, int n, float radius)
 {
@@ -162,8 +164,8 @@ EnjaParticles::EnjaParticles(int s, AVec4 g, AVec4 v, int len, int n, float radi
         radius = 1.0f;
     particle_radius = radius;
 
-    AVec4 vert_gen(n);
-    AVec4 velo_gen(n);
+    AVec4 _vert_gen(n);
+    AVec4 _velo_gen(n);
  
     AVec4 c(n);
     
@@ -171,10 +173,10 @@ EnjaParticles::EnjaParticles(int s, AVec4 g, AVec4 v, int len, int n, float radi
     int j;
     for(int i=0; i < n; i++)
     {
-        //fill the generators
+        //fill the vert_gen
         j = (int)(drand48()*len); //randomly get a vertex/velocity from a generator
-        vert_gen[i] = g[j];
-        velo_gen[i] = v[j];
+        _vert_gen[i] = g[j];
+        _velo_gen[i] = v[j];
 
         //handle the colors
         c[i].x = 1.0;   //Red
@@ -186,7 +188,7 @@ EnjaParticles::EnjaParticles(int s, AVec4 g, AVec4 v, int len, int n, float radi
    
 
     //init particle system
-    init(vert_gen, velo_gen, c, n);
+    init(_vert_gen, _velo_gen, c, n);
 
     //init opencl
     int success = init_cl();

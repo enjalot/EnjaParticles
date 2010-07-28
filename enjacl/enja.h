@@ -32,6 +32,7 @@ class EnjaParticles
 public:
 
     int update();   //update the particle system
+    int cpu_update();   //update the particle system using cpu code
     int render(); //render calls update then renders the particles
 
     int getVertexVBO(); //get the vertices vbo id
@@ -69,13 +70,14 @@ private:
     //particles
     int num;                //number of particles
     int system;             //what kind of system?
-    AVec4 generators;       //vertex generators
-    AVec4 velocities;       //velocity generators
+    AVec4 vert_gen;       //vertex generators
+    AVec4 velo_gen;       //velocity generators
+    AVec4 velocities;       //for cpu version only
     AVec4 colors;
     std::vector<int> indices;
     //float* life;  //life is packed into velocity.w
 
-    int init(AVec4 generators, AVec4 velocities, AVec4 colors, int num);
+    int init(AVec4 vert_gen, AVec4 velo_gen, AVec4 colors, int num);
 
     
     //opencl
