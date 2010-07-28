@@ -21,13 +21,23 @@
 //eventually I should clean this up so it can serve as a comparison against OpenCL
 //but that means more refactoring of the whole lib I think
 
+//notice we treat Vec4s like Vec3 when doing operation so we don't mess with values that have been packed in
+//like in velocity
 
 float dot(Vec4 a, Vec4 b)
 {
+    return a.x*b.x + a.y*b.y + a.z*b.z;
 }
 
 Vec4 normalize(Vec4 a)
 {
+    float mag = sqrt(a.x*a.x + a.y*a.y + a.z*a.z); //store the magnitude of the velocity
+    return Vec4(a.x/mag, a.y/mag, a.z/mag, a.w);
+}
+
+Vec4 cross_product(Vec4 a, Vec4 b)
+{
+    return Vec4(a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x, 0);
 }
 
 int EnjaParticles::cpu_update()
@@ -43,6 +53,40 @@ int EnjaParticles::cpu_update()
 
     glUnmapBufferARB(GL_ARRAY_BUFFER); 
     
+    //COLLISION STUFF
+        //set up test plane
+        Vec4 plane[4];
+        plane[0] = Vec4(-2,-1,-2,0);
+        plane[1] = Vec4(-2,-1,2,0);
+        plane[2] = Vec4(2,-1,2,0);
+        plane[3] = Vec4(2,-1,-2,0);
+
+        //triangle fan from plane (for handling faces)
+        Vec4 tri1[3];
+        tri1[0] = plane[0];
+        tri1[1] = plane[1];
+        tri1[2] = plane[2];
+
+        // do 1 triangle first
+        //Vec4 tri2[3];
+        //tr2[0] = plane[0];
+        //tr2[1] = plane[2];
+        //tr2[2] = plane[3];
+        //
+         Vec4 A = tri1[0];
+        Vec4 B = tri1[1];
+        Vec4 C = tri1[2];
+        Vec4 bma = Vec4(B.x - A.x, B.y - A.y, B.z - A.z, 0);
+        Vec4 cma = Vec4(C.x - A.x, C.y - A.y, C.z - A.z, 0);
+        Vec4 tri1N = normalize(cross_product(bma, cma));
+        printf("tri1N.x: %f tri1N.y %f tri1N.z %f\n", tri1N.x, tri1N.y, tri1N.z);
+        //Vec4 tri1N = cross_product(B - A, C - A);
+        //Vec4 tri1N = Vec4(0.0, 1.0, 0.0, 0.0); 
+
+
+    //COLLISION STUFF
+
+
 
     printf("about to start cpu loop\n");
     float h = dt;
@@ -79,40 +123,17 @@ int EnjaParticles::cpu_update()
         zn += h*velocities[i].z;
         
 
-        //set up test plane
-        Vec4 plane[4];
-        plane[0] = Vec4(0,-1,0,0);
-        plane[1] = Vec4(0,-1,2,0);
-        plane[2] = Vec4(2,-1,2,0);
-        plane[3] = Vec4(2,-1,0,0);
-
-        //triangle fan from plane (for handling faces)
-        Vec4 tri1[3];
-        tri1[0] = plane[0];
-        tri1[1] = plane[1];
-        tri1[2] = plane[2];
-
-        // do 1 triangle first
-        //Vec4 tri2[3];
-        //tr2[0] = plane[0];
-        //tr2[1] = plane[2];
-        //tr2[2] = plane[3];
-        //
-
         //calculate the normal of the triangle
         //might not need to do this if we just have plane's normal
-        Vec4 A = tri1[0];
-        Vec4 B = tri1[1];
-        Vec4 C = tri1[2];
-        
+        // 
         Vec4 pos = vertices[i];
         Vec4 vel = velocities[i];
-        //Vec4 tri1N = cross_product(B - A, C - A);
-        Vec4 tri1N = Vec4(0.0, 1.0, 0.0, 0.0); 
+
+
         //calculate the distnace of pos from triangle
         Vec4 tmp = Vec4(pos.x - A.x, pos.y - A.y, pos.z - A.z, pos.w);
         float distance = -dot(tmp, tri1N) / dot(velocities[i], tri1N);
-        Vec4 P = pos + distance*velocities[i];
+        Vec4 P = Vec4(pos.x + distance*vel.x, pos.y + distance*vel.y, pos.z + distance*vel.z, 0);
         if (distance <= 0.0f)
         {
             //particle is past the plane so don't do anything
@@ -120,23 +141,26 @@ int EnjaParticles::cpu_update()
         }
         else
         {
-            int x = 0;
-            int y = 2;
             //these should be projections...
             //or at least calculated from the dominant axis of the normal
             //also these are supposed to be float2 but oh well
             Vec4 Ap = Vec4(A.x, A.z, 0, 0);
-            Vec4 Bp = Vec4(A.x, A.z, 0, 0);
-            Vec4 Cp = Vec4(A.x, A.z, 0, 0);
-            Vec4 Pp = Vec4(A.x, A.z, 0, 0);
+            Vec4 Bp = Vec4(B.x, B.z, 0, 0);
+            Vec4 Cp = Vec4(C.x, C.z, 0, 0);
+            Vec4 Pp = Vec4(P.x, P.z, 0, 0);
 
             Vec4 b = Vec4(Bp.x - Ap.x, Bp.y - Ap.y, 0, 0);
             Vec4 c = Vec4(Cp.x - Ap.x, Cp.y - Ap.y, 0, 0);
-            Vec4 p = Vec4(Pp.x - Ap.x, Pp.x - Pp.y, 0, 0);
+            Vec4 p = Vec4(Pp.x - Ap.x, Pp.y - Ap.y, 0, 0);
             
             float u = (p.y*c.x - p.x*c.y)/(b.y*c.x - b.x*c.y);
             float v = (p.y*b.x - p.x*b.y)/(c.y*b.x - c.x*b.y);
-            
+            printf("distance: %f\n", distance);
+            if(pos.y < -.9 and pos.y > -1.1)
+            {
+                printf("i: %d, u: %f, v: %f, u+v: %f\n", i, u, v, u+v);
+                //printf("b.x: %f b.y: %f c.x: %f c.y: %f\n", b.x, b.y, c.x, c.y);
+            }
             if(u >= 0 and v >= 0 and u+v <= 1)
             {
 
@@ -182,7 +206,9 @@ int EnjaParticles::cpu_update()
                 //vel = 2.f*(dot(normal, vel))*normal - vel;
                 ////vel *= mag; //we know the direction lets go the right speed
                 
-                velA += force;
+                velA.x += force.x;
+                velA.y += force.y;
+                velA.z += force.z;
                 
                 xn = vertices[i].x + h*velA.x;
                 yn = vertices[i].y + h*velA.y;
@@ -211,6 +237,13 @@ int EnjaParticles::cpu_update()
     glBindBuffer(GL_ARRAY_BUFFER, v_vbo);    
     glBufferData(GL_ARRAY_BUFFER, sizeof(Vec4)*num, &vertices[0], GL_DYNAMIC_DRAW); // upload data to video card
     glFinish();
+
+    glBegin(GL_TRIANGLES);
+    glVertex3f(tri1[0].x, tri1[0].y, tri1[0].z);
+    glVertex3f(tri1[1].x, tri1[1].y, tri1[1].z);
+    glVertex3f(tri1[2].x, tri1[2].y, tri1[2].z);
+
+    glEnd();
 
 }
 
