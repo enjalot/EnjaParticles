@@ -119,8 +119,8 @@ void EnjaParticles::popCorn()
     //support arrays for the particle system
     cl_vert_gen = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
     cl_velo_gen = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
-    cl_velo_gen= clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
-    //cl_life = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, sizeof(float) * num, NULL, &ciErrNum);
+    cl_velo_gen = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
+    cl_indices = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, sizeof(int) * num, NULL, &ciErrNum);
     
     ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_vert_gen, CL_TRUE, 0, vbo_size, &vert_gen[0], 0, NULL, &evt);
     clReleaseEvent(evt);
@@ -128,8 +128,8 @@ void EnjaParticles::popCorn()
     clReleaseEvent(evt);
     ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_velo_gen, CL_TRUE, 0, vbo_size, &velo_gen[0], 0, NULL, &evt);
     clReleaseEvent(evt);
-    //ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_life, CL_TRUE, 0, sizeof(float) * num, life, 0, NULL, &evt);
-    //clReleaseEvent(evt);
+    ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_indices, CL_TRUE, 0, sizeof(int) * num, &indices[0], 0, NULL, &evt);
+    clReleaseEvent(evt);
     clFinish(cqCommandQueue);
     
 

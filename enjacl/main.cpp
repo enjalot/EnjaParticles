@@ -184,6 +184,7 @@ void appDestroy()
 
     delete enjas;
     if(glutWindowHandle)glutDestroyWindow(glutWindowHandle);
+    printf("about to exit!\n");
 
     exit(0);
 }
