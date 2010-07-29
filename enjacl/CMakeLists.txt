@@ -4,7 +4,7 @@ project(enjacl)
 #need to include FindOPENCL.cmake to
 SET( CMAKE_MODULE_PATH
      ${enjacl_SOURCE_DIR}/../cmake
-     $ENV{CMAKE_MODULES})
+     )
 
 message("${CMAKE_MODULE_PATH}\n")
 
@@ -18,7 +18,8 @@ INCLUDE_DIRECTORIES(
 	${GLUT_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
     ${GLEW_INCLUDE_PATH}
-    ${OPENCL_INCLUDE_DIR}
+    #${OPENCL_INCLUDE_DIR}
+    ${enjacl_SOURCE_DIR}/../opencl10
 )
 
 message("\nenjacl INCLUDE_DIRECTORIES\n")

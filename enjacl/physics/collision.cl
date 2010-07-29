@@ -115,7 +115,7 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
         float4 nvel = normalize(vel);
         float s = 2.0f*(dot(triN, nvel));
         float4 dir = s * triN - nvel; //new direction
-        float damping = .5f;
+        float damping = .6f;
         mag *= damping;
         vel = -mag * dir;
 

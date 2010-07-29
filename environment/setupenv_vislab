@@ -1,33 +1,4 @@
 # setup environment variables for vizlab machines
 
-
-#BASE_DIR=/panfs/panasas1/research/erlebach/idj03/graphics_libs
-#export GPU_SDK=${HOME}/NVIDIA_GPU_Computing_SDK
-#export CUDA_HOME=${HOME}/NVIDIA_CUDA_TOOLKIT_3.0
-#export CUDA_LOCAL=${HOME}/NVIDIA_CUDA_SDK_3.0/C
-
-export BASE_DIR=/panfs/panasas1/research/gerlebacher
-
 export ENJA_DIR=${HOME}/research/EnjaParticles/enjacl
-
-export GPU_SDK=${BASE_DIR}/NVIDIA_GPU_Computing_SDK
-export CUDA_HOME=${BASE_DIR}/NVIDIA_CUDA_TOOLKIT_3.0
-export CUDA_LOCAL=${BASE_DIR}/NVIDIA_CUDA_SDK_3.0/C
-export OPENCL_HOME=${GPU_SDK}/OpenCL
-export GRAPHIC_LIBS_HOME=${BASE_DIR}/idj03/graphics_libs
-export GRAPHICS_LIBS=${GRAPHIC_LIBS_HOME}/builds/laforge
-
-export CXX=/usr/bin/g++-4.3
-export CC=/usr/bin/gcc-4.3
-
-export FC=/usr/bin/gfortran
-
-export CMAKE_MODULES=/usr/share/cmake-2.8/Modules/
-
-#unset CUDA_INSTALL_PATH
-#unset CUDA_LIBS
-
-export CUDA_LIB_PATH=/usr/lib32
-export CUDART_PATH=${CUDA_HOME}/lib
-export CUBLAS_PATH=${CUDA_HOME}/lib
 
