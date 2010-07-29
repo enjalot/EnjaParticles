@@ -1,0 +1,26 @@
+
+
+export BASE_DIR=${HOME}/grav/branch_grav/branch3/graphics_libs
+#this should be updated to where you have this code
+export ENJA_DIR=${HOME}/Documents/src/blender-particles/enjacl
+
+export GPU_SDK=/Developer/GPU\ Computing
+export CUDA_HOME=${GPU_SDK}
+export CUDA_LOCAL=${GPU_SDK}/C
+export OPENCL_HOME=${GPU_SDK}/OpenCL
+#export GRAPHIC_LIBS_HOME=${BASE_DIR}/graphics_libs
+#export GRAPHICS_LIBS=${GRAPHIC_LIBS_HOME}/builds/enjmac
+export GRAPHICS_LIBS=/Users/erlebach/grav/branch_grav/branch3/builds/pure_opencl/graphics_libs
+
+#export CUDA_PROFILE_CONFIG=./profile_config
+
+#export DYLD_LIBRARY_PATH=${SWAN}/lib/:${DYLD_LIBRARY_PATH}:${CUDA_LOCAL}/common/lib/darwin
+
+export FC=gfortran
+export FCFLAGS=-m32
+
+export CMAKE_MODULES=/opt/local/share/cmake-2.8/Modules/
+
+export CUDA_LIB_PATH=/usr/lib32
+export CUDART_PATH=${CUDA_HOME}/lib
+export CUBLAS_PATH=${CUDA_HOME}/lib
