@@ -53,7 +53,7 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
     unsigned int i = get_global_id(0);
 
     float life = velocities[i].w;
-    life -= h/10;    //should probably depend on time somehow
+    life -= h/2;    //should probably depend on time somehow
     //h = h*10;
     if(life <= 0.)
     {
@@ -136,7 +136,9 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
     //colors[i].w = 1-life;
     colors[i].w = 1;
     
-    velocities[i] = vel;
+    velocities[i].x = vel.x;
+    velocities[i].y = vel.y;
+    velocities[i].z = vel.z;
     //save the life!
     velocities[i].w = life;
 }

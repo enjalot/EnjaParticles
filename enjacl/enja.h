@@ -97,7 +97,6 @@ private:
     cl_mem cl_vert_gen;  //want to have the start points for reseting particles
     cl_mem cl_velo_gen;  //want to have the start velocities for reseting particles
     cl_mem cl_velocities;  //particle velocities
-    cl_mem cl_indices;     //index array to do proper depth sorting
     //cl_mem cl_life;        //keep track where in their life the particles are (packed into velocity.w now)
     int v_vbo;   //vertices vbo
     int c_vbo;   //colors vbo

@@ -57,8 +57,8 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
         //initialize the radii array with random values between 1.0 and particle_radius
         //g[i].w = 1.0f + particle_radius*drand48();
         //initialize the particle life array with random values between 0 and 1
-        //v[i].w = drand48();
-        v[i].w = 1.0f;
+        v[i].w = drand48();
+        //v[i].w = 1.0f;
     }
 
     num = n;
@@ -249,25 +249,16 @@ EnjaParticles::~EnjaParticles()
         i_vbo = 0;
     }
 
-    printf("seg fault 1?\n");
     if(cl_vbos[0])clReleaseMemObject(cl_vbos[0]);
     if(cl_vbos[1])clReleaseMemObject(cl_vbos[1]);
     if(cl_vbos[2])clReleaseMemObject(cl_vbos[2]);
-    printf("seg fault 1.5?\n");
-    //why are these arrays segfaulting when released?
     if(cl_vert_gen)clReleaseMemObject(cl_vert_gen);
     if(cl_velo_gen)clReleaseMemObject(cl_velo_gen);
     if(cl_velocities)clReleaseMemObject(cl_velocities);
-    printf("seg fault 1.6?\n");
-    if(cl_indices)clReleaseMemObject(cl_indices);
-    printf("seg fault 1.7?\n");
     //if(cl_life)clReleaseMemObject(cl_life);
     if(cxGPUContext)clReleaseContext(cxGPUContext);
     
-    printf("seg fault 1.8?\n");
     if(cdDevices)delete(cdDevices);
-
-    printf("seg fault 2?\n");
 }
 
 

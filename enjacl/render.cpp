@@ -13,6 +13,11 @@
 void EnjaParticles::drawArrays()
 {
 
+    /*
+    glMatrixMode(GL_MODELVIEW_MATRIX);
+    glPushMatrix();
+    glLoadIdentity();
+    */
     if(blending)
     {
         glEnable(GL_BLEND);
@@ -48,6 +53,7 @@ void EnjaParticles::drawArrays()
     glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
 
+    //glPopMatrix();
 }
 
 int EnjaParticles::render()

@@ -119,16 +119,13 @@ void EnjaParticles::popCorn()
     //support arrays for the particle system
     cl_vert_gen = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
     cl_velo_gen = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
-    cl_velo_gen = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
-    cl_indices = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, sizeof(int) * num, NULL, &ciErrNum);
+    cl_velocities = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
     
     ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_vert_gen, CL_TRUE, 0, vbo_size, &vert_gen[0], 0, NULL, &evt);
     clReleaseEvent(evt);
     ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_velo_gen, CL_TRUE, 0, vbo_size, &velo_gen[0], 0, NULL, &evt);
     clReleaseEvent(evt);
-    ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_velo_gen, CL_TRUE, 0, vbo_size, &velo_gen[0], 0, NULL, &evt);
-    clReleaseEvent(evt);
-    ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_indices, CL_TRUE, 0, sizeof(int) * num, &indices[0], 0, NULL, &evt);
+    ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_velocities, CL_TRUE, 0, vbo_size, &velo_gen[0], 0, NULL, &evt);
     clReleaseEvent(evt);
     clFinish(cqCommandQueue);
     
@@ -138,8 +135,8 @@ void EnjaParticles::popCorn()
     ciErrNum  = clSetKernelArg(ckKernel, 1, sizeof(cl_mem), (void *) &cl_vbos[1]);      //colors is second arguement to kernel
     ciErrNum  = clSetKernelArg(ckKernel, 2, sizeof(cl_mem), (void *) &cl_vbos[2]);      //indices is third arguement to kernel
     ciErrNum  = clSetKernelArg(ckKernel, 3, sizeof(cl_mem), (void *) &cl_vert_gen);     //vertex vert_gen
-    ciErrNum  = clSetKernelArg(ckKernel, 4, sizeof(cl_mem), (void *) &cl_velo_gen);     //velocity vert_gen
-    ciErrNum  = clSetKernelArg(ckKernel, 5, sizeof(cl_mem), (void *) &cl_velo_gen);   //velo_gen
+    ciErrNum  = clSetKernelArg(ckKernel, 4, sizeof(cl_mem), (void *) &cl_velo_gen);     //velocity gen
+    ciErrNum  = clSetKernelArg(ckKernel, 5, sizeof(cl_mem), (void *) &cl_velocities);     //velocities
     //we now pack life into the w component of velocity
     //ciErrNum  = clSetKernelArg(ckKernel, 6, sizeof(cl_mem), (void *) &cl_life);         //life
     printf("done with popCorn()\n");
