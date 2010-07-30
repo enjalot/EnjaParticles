@@ -30,18 +30,18 @@
 //then store them in this list for usage
 #include "physics/lorenz.cl"
 #include "physics/gravity.cl"
-#include "physics/fountain.cl"
 #include "physics/vfield.cl"
 
 #include "physics/collision.cl"
 //#include "physics/transform.cl"
+#include "physics/position.cl"
 
 const std::string EnjaParticles::sources[] = {
-    lorenz_program_source,
-    gravity_program_source,
-    fountain_program_source,
-    vfield_program_source,
-    collision_program_source
+        lorenz_program_source,
+        gravity_program_source,
+        vfield_program_source,
+        collision_program_source,
+        position_program_source
     };
 
 
@@ -115,13 +115,8 @@ EnjaParticles::EnjaParticles(int s, int n)
     {
         f = (float)i;
         g[i].x = 0.0 + 2*cos(2.*M_PI*(f/n));  //with lorentz this looks more interesting
-        //g[i].x = 1.0f;
-        //g[i].y = 0.0 + .05*sin(2.*M_PI*(f/n));
-        //g[i].y = -1.0f;
-        g[i].y = 0.f;
-        g[i].z = 0.0 + 2*sin(2.*M_PI*(f/n));
-        //g[i].z = 0.0f;
-        //g[i].z = 0.f;// + f/nums;
+        g[i].y = 0.0 + 2*sin(2.*M_PI*(f/n));
+        g[i].z = 0.f;
         g[i].w = 1.f;
     }
 
@@ -142,9 +137,9 @@ EnjaParticles::EnjaParticles(int s, int n)
         //v[i].x = 0.0 + .5*cos(2.*M_PI*(f/n));  //with lorentz this looks more interesting
         //v[i].z = 3.f;
         //v[i].y = 0.0 + .5*sin(2.*M_PI*(f/n));
-        v[i].x = 1.f; //.01 * (1. - 2.*drand48()); // between -.02 and .02
-        v[i].y = 1.f; //.05 * drand48();
-        v[i].z = 1.f; //.01 * (1. - 2.*drand48());
+        v[i].x = 0.f; //.01 * (1. - 2.*drand48()); // between -.02 and .02
+        v[i].y = 0.f; //.05 * drand48();
+        v[i].z = 0.f; //.01 * (1. - 2.*drand48());
         v[i].w = 0.f;
     }
 

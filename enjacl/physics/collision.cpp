@@ -28,12 +28,16 @@ float dot(Vec4 a, Vec4 b)
 {
     return a.x*b.x + a.y*b.y + a.z*b.z;
 }
-
+float magnitude(Vec4 a)
+{
+    return sqrt(a.x*a.x + a.y*a.y + a.z*a.z); //store the magnitude of the velocity
+}
 Vec4 normalize(Vec4 a)
 {
-    float mag = sqrt(a.x*a.x + a.y*a.y + a.z*a.z); //store the magnitude of the velocity
+    float mag = magnitude(a);
     return Vec4(a.x/mag, a.y/mag, a.z/mag, a.w);
 }
+
 
 Vec4 cross(Vec4 a, Vec4 b)
 {
@@ -51,7 +55,7 @@ Vec4 scala(float s, Vec4 a)
 }
 
 //Moller and Trumbore
-bool intersect_triangle(Vec4 pos, Vec4 vel, Vec4 tri[3], Vec4 triN, float dist)
+bool intersect_triangle(Vec4 pos, Vec4 vel, Vec4 tri[3], Vec4 triN, float dist, bool culling)
 {
     //take in the particle position and velocity (treated as a Ray)
     //also the triangle vertices for the ray intersection
@@ -59,36 +63,56 @@ bool intersect_triangle(Vec4 pos, Vec4 vel, Vec4 tri[3], Vec4 triN, float dist)
     //dist is the threshold to determine if we are close enough to the triangle
     //to even check for distance
     Vec4 edge1, edge2, tvec, pvec, qvec;
-    float det, inv_det, u, v;
+    float det, inv_det, u, v, t;
     float eps = .000001;
 
     //check distance
-    tvec = sub(pos, tri[0]);
-    float distance = -dot(tvec, triN) / dot(vel, triN);
-    if (distance > dist)
+    //float distance = -dot(tvec, triN) / dot(vel, triN);
+    //float distance = dot(pos, triN) / dot(triN, triN); //signed distance
+
+    if(culling)
+    {
+        
+    }
+    else
+    {
+
+        edge1 = sub(tri[1], tri[0]);
+        edge2 = sub(tri[2], tri[0]);
+
+        pvec = cross(vel, edge2);
+        det = dot(edge1, pvec);
+        //culling branch
+        if(det > -eps && det < eps)
+        //printf("det: %f\n", det);
+        //if(det < eps)
+            return false;
+        
+        tvec = sub(pos, tri[0]);
+
+        inv_det = 1.0/det;
+
+        u = dot(tvec, pvec) * inv_det;
+        //printf("u: %f\n", u);
+        if (u < 0.0 || u > 1.0)
+            return false;
+
+        qvec = cross(tvec, edge1);
+        v = dot(vel, qvec) * inv_det;
+        //printf("v: %f\n", v);
+        //printf("u+v: %f\n", u+v);
+        if (v < 0.0 || u + v > 1.0f)
+            return false;
+
+        t = dot(edge2, qvec) * inv_det;
+        if(t > eps and t < dist)
+        {
+            printf("t: %f", t);
+            printf("colliiiide\n");
+            return true;
+        }
         return false;
-
-
-    edge1 = sub(tri[1], tri[0]);
-    edge2 = sub(tri[2], tri[0]);
-
-    pvec = cross(vel, edge2);
-    det = dot(edge1, pvec);
-    //culling branch
-    //if(det > -eps && det < eps)
-    if(det < eps)
-        return false;
-
-    u = dot(tvec, pvec);
-    if (u < 0.0 || u > det)//1.0)
-        return false;
-
-    qvec = cross(tvec, edge1);
-    v = dot(vel, qvec);
-    if (v < 0.0 || u + v > det)//1.0f)
-        return false;
-
-    return true;
+    }
 }
 
 
@@ -108,10 +132,17 @@ int EnjaParticles::cpu_update()
     //COLLISION STUFF
         //set up test plane
         Vec4 plane[4];
+        /*
         plane[0] = Vec4(-2,-1,-2,0);
         plane[1] = Vec4(-2,-1,2,0);
         plane[2] = Vec4(2,-2,2,0);
         plane[3] = Vec4(2,-1,-2,0);
+        */
+        plane[0] = Vec4(-2,-2,-1,0);
+        plane[1] = Vec4(-2,2,-1,0);
+        plane[2] = Vec4(2,2,-1,0);
+        plane[3] = Vec4(2,-2,-1,0);
+
 
         //triangle fan from plane (for handling faces)
         Vec4 tri[3];
@@ -132,6 +163,7 @@ int EnjaParticles::cpu_update()
         Vec4 cma = Vec4(C.x - A.x, C.y - A.y, C.z - A.z, 0);
         //triangle normal should come from blender
         Vec4 triN = normalize(cross(bma, cma));
+        //triN.z = -triN.z;
         printf("triN.x: %f triN.y %f triN.z %f\n", triN.x, triN.y, triN.z);
         //Vec4 triN = cross_product(B - A, C - A);
         //Vec4 triN = Vec4(0.0, 1.0, 0.0, 0.0); 
@@ -172,14 +204,14 @@ int EnjaParticles::cpu_update()
         float vyn = vel.y;
         float vzn = vel.z;
         vel.x = vxn;
-        vel.y = vyn - h*9.8;
-        vel.z = vzn;// - h*9.8;
+        vel.y = vyn;// - h*9.8;
+        vel.z = vzn - h*9.8;
 
         xn += h*vel.x;
         yn += h*vel.y;
         zn += h*vel.z;
         
-        if(intersect_triangle(pos, vel, tri, triN, h))
+        if(intersect_triangle(pos, vel, tri, triN, h, false))
         {
             //particle and triangle collision
             //if (yn < -1.0f)
@@ -190,11 +222,11 @@ int EnjaParticles::cpu_update()
             float s = 2.0f*(dot(triN, nvel));
             Vec4 dir = scala(s, triN);
             dir = sub(dir, nvel);
-            float damping = .5f;
+            float damping = .8f;
             mag *= damping;
-            printf("orig vel: %f %f %f\n", vel.x, vel.y, vel.z);
+            //printf("orig vel: %f %f %f\n", vel.x, vel.y, vel.z);
             vel = scala(-mag, dir);
-            printf("new vel: %f %f %f\n", vel.x, vel.y, vel.z);
+            //printf("new vel: %f %f %f\n", vel.x, vel.y, vel.z);
 
             xn = pos.x + h*vel.x;
             yn = pos.y + h*vel.y;

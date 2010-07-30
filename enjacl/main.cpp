@@ -46,7 +46,7 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 EnjaParticles* enjas;
-#define NUM_PARTICLES 100
+#define NUM_PARTICLES 1000
 
 GLuint v_vbo; //vbo id
 GLuint c_vbo; //vbo id
@@ -88,17 +88,17 @@ int main(int argc, char** argv)
     printf("before we call enjas functions\n");
 
     //parameters: system and number of particles
-    //system = 0: lorentz
+    //system = 0: lorenz
     //system = 1 gravity
-    //system = 2 fountain
-    //system = 3 vfield
-    //system = 4 collision
+    //system = 2 vfield
+
     
     //default constructor
-    enjas = new EnjaParticles(4, NUM_PARTICLES);
+    enjas = new EnjaParticles(EnjaParticles::VFIELD, NUM_PARTICLES);
     enjas->particle_radius = 2.0f;
     enjas->updates = 1;
-    enjas->dt = .01;
+    enjas->dt = .005;
+    enjas->collision = true;
     
     //Test making a system from vertices and normals;
     /*
@@ -170,9 +170,37 @@ void appKeyboard(unsigned char key, int x, int y)
 void appRender()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    //.001 is the timestep
-    //0 is rendering type (not used yet)
+/*
+    plane[0] = (float4)(-2,-2,-1,0);
+    plane[1] = (float4)(-2,2,-1,0);
+    plane[2] = (float4)(2,2,-1,0);
+    plane[3] = (float4)(2,-2,-1,0);
+*/
+
+
+    Vec4 plane[4];
+    plane[0] = Vec4(-2,-2,-1,0);
+    plane[1] = Vec4(-2,2,-1,0);
+    plane[2] = Vec4(2,2,-1,0);
+    plane[3] = Vec4(2,-2,-1,0);
+
+    //triangle fan from plane (for handling faces)
+    Vec4 tri[3];
+    tri[0] = plane[0];
+    tri[1] = plane[1];
+    tri[2] = plane[2];
+
+
+    glColor3f(0,1,0);
+    glBegin(GL_TRIANGLES);
+    glVertex3f(tri[0].x, tri[0].y, tri[0].z);
+    glVertex3f(tri[1].x, tri[1].y, tri[1].z);
+    glVertex3f(tri[2].x, tri[2].y, tri[2].z);
+
+    glEnd();
+ 
     enjas->render();
+
     showFPS(enjas->getFPS(), enjas->getReport());
     glutSwapBuffers();
     //if we want to render as fast as possible we do this

@@ -53,7 +53,7 @@ public:
     //EnjaParticles(int system, Vec4* generators, Vec4* velocities, Vec4* colors, int num);
     
     //extra properties of the system
-    //we could do getter/setter functions
+    bool collision;         //enable collision detection
     int updates;            //number of times to update per frame
     float dt;
     float particle_radius;  
@@ -65,7 +65,7 @@ public:
 
     ~EnjaParticles();
 
-    enum {LORENZ, GRAVITY, FOUNTAIN, VFIELD, COLLISION};
+    enum {LORENZ, GRAVITY, VFIELD, COLLISION, POSITION, TRANSFORM};
     static const std::string sources[];
 
     //keep track of transformation from blender
@@ -93,12 +93,14 @@ public:
     cl::CommandQueue queue;
 
     cl::Program transform_program;  //keep track of blender transforms
-    cl::Program update_program;     //update the velocities of the particles
-    cl::Program collision_program;  //check for collisions and apply velocities
+    cl::Program vel_update_program;  //integrate the velocities of the particles
+    cl::Program collision_program;  //check for collisions
+    cl::Program pos_update_program;     //update the positions
 
-    cl::Kernel update_kernel;
-    cl::Kernel collision_kernel;
     cl::Kernel transform_kernel; //kernel for updating with blender transformations
+    cl::Kernel vel_update_kernel;
+    cl::Kernel collision_kernel;
+    cl::Kernel pos_update_kernel;
 
     unsigned int deviceUsed;
     

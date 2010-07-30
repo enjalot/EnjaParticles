@@ -40,8 +40,19 @@ int EnjaParticles::update()
 
     //clFinish(cqCommandQueue);
 	ts_cl[1]->start();
-    err = update_kernel.setArg(6, dt);
-    err = queue.enqueueNDRangeKernel(update_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
+    err = vel_update_kernel.setArg(4, dt);
+    err = queue.enqueueNDRangeKernel(vel_update_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
+    queue.finish();
+
+    if(collision)
+    {
+        err = collision_kernel.setArg(2, dt);
+        err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
+        queue.finish();
+    }
+
+    err = pos_update_kernel.setArg(3, dt);
+    err = queue.enqueueNDRangeKernel(pos_update_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
     //printf("enqueue: %s\n", oclErrorString(err));
     queue.finish();
     ts_cl[1]->stop();
@@ -86,8 +97,15 @@ void EnjaParticles::popCorn()
 
     try{
         //#include "physics/collision.cl"
-        update_program = loadProgram(sources[system]);
-        update_kernel = cl::Kernel(update_program, "update", &err);
+        vel_update_program = loadProgram(sources[system]);
+        vel_update_kernel = cl::Kernel(vel_update_program, "vel_update", &err);
+        if(collision)
+        {
+            collision_program = loadProgram(sources[COLLISION]);
+            collision_kernel = cl::Kernel(collision_program, "collision", &err);
+        }
+        pos_update_program = loadProgram(sources[POSITION]);
+        pos_update_kernel = cl::Kernel(pos_update_program, "pos_update", &err);
     }
     catch (cl::Error er) {
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
@@ -100,11 +118,11 @@ void EnjaParticles::popCorn()
         //printf("gl interop!\n");
         // create OpenCL buffer from GL VBO
         cl_vbos.push_back(cl::BufferGL(context, CL_MEM_READ_WRITE, v_vbo, &err));
-        printf("v_vbo: %s\n", oclErrorString(err));
+        //printf("v_vbo: %s\n", oclErrorString(err));
         cl_vbos.push_back(cl::BufferGL(context, CL_MEM_READ_WRITE, c_vbo, &err));
-        printf("c_vbo: %s\n", oclErrorString(err));
+        //printf("c_vbo: %s\n", oclErrorString(err));
         cl_vbos.push_back(cl::BufferGL(context, CL_MEM_READ_WRITE, i_vbo, &err));
-        printf("i_vbo: %s\n", oclErrorString(err));
+        //printf("i_vbo: %s\n", oclErrorString(err));
         //printf("SUCCES?: %s\n", oclErrorString(ciErrNum));
     #else
         //printf("no gl interop!\n");
@@ -136,12 +154,22 @@ void EnjaParticles::popCorn()
     queue.finish();
 
     //printf("about to set kernel args\n");
-    err = update_kernel.setArg(0, cl_vbos[0]);
-    err = update_kernel.setArg(1, cl_vbos[1]);
-    err = update_kernel.setArg(2, cl_vbos[2]);
-    err = update_kernel.setArg(3, cl_vert_gen);
-    err = update_kernel.setArg(4, cl_velo_gen);
-    err = update_kernel.setArg(5, cl_velocities);
+    err = vel_update_kernel.setArg(0, cl_vbos[0]);      //position
+    err = vel_update_kernel.setArg(1, cl_vbos[1]);      //color
+    err = vel_update_kernel.setArg(2, cl_velo_gen);     //velocity generators
+    err = vel_update_kernel.setArg(3, cl_velocities);   //velocities
+ 
+    if(collision)
+    {
+        err = collision_kernel.setArg(0, cl_vbos[0]);      //position
+        //printf("collision arg 0: %s\n", oclErrorString(err));
+        err = collision_kernel.setArg(1, cl_velocities);   //velocities
+        //printf("collision arg 1: %s\n", oclErrorString(err));
+    }
+
+    err = pos_update_kernel.setArg(0, cl_vbos[0]);      //position
+    err = pos_update_kernel.setArg(1, cl_vert_gen);     //position generators
+    err = pos_update_kernel.setArg(2, cl_velocities);   //velocities
     
     printf("done with popCorn()\n");
 

@@ -5,6 +5,11 @@ float4 cross_product(float4 a, float4 b)
 {
     return (float4)(a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x, 0);
 }
+float4 v3normalize(float4 a)
+{
+    float mag = sqrt(a.x*a.x + a.y*a.y + a.z*a.z); //store the magnitude of the velocity
+    return (float4)(a.x/mag, a.y/mag, a.z/mag, 0);
+}
 bool intersect_triangle(float4 pos, float4 vel, float4 tri[3], float4 triN, float dist)
 {
 
@@ -24,78 +29,54 @@ bool intersect_triangle(float4 pos, float4 vel, float4 tri[3], float4 triN, floa
     float4 qvec;
     float det;
     float inv_det;
+    float t;
     float u;
     float v;
     float eps = .000001;
 
-    //check distance
-    tvec = pos - tri[0];
-    float distance = -dot(tvec, triN) / dot(vel, triN);
-    if (distance > dist)
-        return false;
-
-
     edge1 = tri[1] - tri[0];
     edge2 = tri[2] - tri[0];
 
-    pvec = cross(vel, edge2);
+    pvec = cross_product(vel, edge2);
     det = dot(edge1, pvec);
-    //culling branch
-    ///if(det > -eps && det < eps)
-    if(det < eps)
+    
+    //non-culling branch
+    if(det > -eps && det < eps)
+    //if(det < eps)
+        return false;
+    
+    tvec = pos - tri[0];
+    inv_det = 1.0/det;
+
+    u = dot(tvec, pvec) * inv_det;
+    if (u < 0.0 || u > 1.0)
         return false;
 
-    u = dot(tvec, pvec);
-    if (u < 0.0 || u > det)//1.0)
+    qvec = cross_product(tvec, edge1);
+    v = dot(vel, qvec) * inv_det;
+    if (v < 0.0 || u + v > 1.0f)
         return false;
 
-    qvec = cross(tvec, edge1);
-    v = dot(vel, qvec);
-    if (v < 0.0 || u + v > det)//1.0f)
-        return false;
+    t = dot(edge2, qvec) * inv_det;
+    if(t > eps and t < dist)
+        return true;
 
-    return true;
+    return false;
+
 }
-__kernel void update( __global float4* vertices, __global float4* colors, __global int* indices, __global float4* vert_gen, __global float4* velo_gen, __global float4* velocities, float h)
+__kernel void collision( __global float4* vertices, __global float4* velocities, float h)
 {
     unsigned int i = get_global_id(0);
 
-    float life = velocities[i].w;
-    life -= h/2;    //should probably depend on time somehow
-    //h = h*10;
-    if(life <= 0.)
-    {
-        //reset this particle
-        vertices[i].x = vert_gen[i].x;
-        vertices[i].y = vert_gen[i].y;
-        vertices[i].z = vert_gen[i].z;
-
-        velocities[i].x = velo_gen[i].x;
-        velocities[i].y = velo_gen[i].y;
-        velocities[i].z = velo_gen[i].z;
-        life = 1.;
-    } 
     float4 pos = vertices[i];
     float4 vel = velocities[i];
 
-    float vxn = vel.x;
-    float vyn = vel.y;
-    float vzn = vel.z;
-    vel.x = vxn;
-    vel.y = vyn - h*9.8;
-    vel.z = vzn;// - h*9.8;
-
-    float xn = pos.x + h*vel.x;
-    float yn = pos.y + h*vel.y;
-    float zn = pos.z + h*vel.z;
-    
-
     //set up test plane
     float4 plane[4];
-    plane[0] = (float4)(-2,-1,-2,0);
-    plane[1] = (float4)(-2,-1,2,0);
-    plane[2] = (float4)(2,-1,2,0);
-    plane[3] = (float4)(2,-1,-2,0);
+    plane[0] = (float4)(-2,-2,-3,0);
+    plane[1] = (float4)(-2,2,-1,0);
+    plane[2] = (float4)(2,2,-1,0);
+    plane[3] = (float4)(2,-2,-1,0);
 
     //triangle fan from plane (for handling faces)
     float4 tri[3];
@@ -109,40 +90,23 @@ __kernel void update( __global float4* vertices, __global float4* colors, __glob
     float4 B = tri[1];
     float4 C = tri[2];
     
-    float4 triN = normalize(cross_product(B - A, C - A));
-    //float4 tri1N = (float4)(0.0, 1.0, 0.0, 0.0); 
+    float4 triN = v3normalize(cross_product(B - A, C - A));
+    //float4 triN = (float4)(0.0, 0.0, 1.0, 0.0); 
 
     if(intersect_triangle(pos, vel, tri, triN, h))
     {
         //lets do some specular reflection
         float mag = sqrt(vel.x*vel.x + vel.y*vel.y + vel.z*vel.z); //store the magnitude of the velocity
-        float4 nvel = normalize(vel);
+        float4 nvel = v3normalize(vel);
         float s = 2.0f*(dot(triN, nvel));
         float4 dir = s * triN - nvel; //new direction
-        float damping = .6f;
+        float damping = .5f;
         mag *= damping;
         vel = -mag * dir;
-
-        xn = pos.x + h*vel.x;
-        yn = pos.y + h*vel.y;
-        zn = pos.z + h*vel.z;
-
     }
-    vertices[i].x = xn;
-    vertices[i].y = yn;
-    vertices[i].z = zn;
-
-     
-    colors[i].x = 1.f;
-    colors[i].y = life;
-    colors[i].z = life;
-    //colors[i].w = 1-life;
-    colors[i].w = 1;
-    
+   
     velocities[i].x = vel.x;
     velocities[i].y = vel.y;
     velocities[i].z = vel.z;
-    //save the life!
-    velocities[i].w = life;
 }
 );
