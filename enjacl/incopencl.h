@@ -4,6 +4,7 @@
 
 
 
+#include <CL/cl.hpp>
 #if defined __APPLE__ || defined(MACOSX)
     //OpenGL stuff
 //    #include <OpenGL/gl.h>

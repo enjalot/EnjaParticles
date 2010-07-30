@@ -1,6 +1,8 @@
 #ifndef ENJA_PARTICLES_H_INCLUDED
 #define ENJA_PARTICLES_H_INCLUDED
 
+#define __CL_ENABLE_EXCEPTIONS
+
 #include <string>
 #include <vector>
 #include "incopencl.h"
@@ -71,7 +73,7 @@ public:
     Vec4 rotation[3];
     Vec4 invrotation[3];
 
-private:
+//private:
     //particles
     int num;                //number of particles
     int system;             //what kind of system?
@@ -86,24 +88,30 @@ private:
 
     
     //opencl
-    cl_platform_id cpPlatform;
-    cl_context cxGPUContext;
-    cl_device_id* cdDevices;
-    cl_uint uiDevCount;
-    unsigned int uiDeviceUsed;
-    cl_command_queue cqCommandQueue;
-    cl_kernel ckKernel;
-    cl_kernel transform_kernel; //kernel for updating with blender transformations
-    cl_program cpProgram;
-    cl_int ciErrNum;
-    size_t szGlobalWorkSize[1];
+    std::vector<cl::Device> devices;
+    cl::Context context;
+    cl::CommandQueue queue;
 
-    //cl_mem vbo_cl;
-    cl_mem cl_vbos[3];  //0: vertex vbo, 1: color vbo, 2: index vbo
-    cl_mem cl_vert_gen;  //want to have the start points for reseting particles
-    cl_mem cl_velo_gen;  //want to have the start velocities for reseting particles
-    cl_mem cl_velocities;  //particle velocities
-    //cl_mem cl_life;        //keep track where in their life the particles are (packed into velocity.w now)
+    cl::Program update_program;
+    cl::Program collision_program;
+    cl::Program transform_program;
+
+    cl::Kernel update_kernel;
+    cl::Kernel collision_kernel;
+    cl::Kernel transform_kernel; //kernel for updating with blender transformations
+
+    unsigned int deviceUsed;
+    
+    cl_int err;
+    cl::Event event;
+
+
+    //cl::Buffer vbo_cl;
+    std::vector<cl::Memory> cl_vbos;  //0: vertex vbo, 1: color vbo, 2: index vbo
+    cl::Buffer cl_vert_gen;  //want to have the start points for reseting particles
+    cl::Buffer cl_velo_gen;  //want to have the start velocities for reseting particles
+    cl::Buffer cl_velocities;  //particle velocities
+    //cl::Buffer cl_life;        //keep track where in their life the particles are (packed into velocity.w now)
     int v_vbo;   //vertices vbo
     int c_vbo;   //colors vbo
     int i_vbo;   //index vbo
@@ -116,6 +124,7 @@ private:
 
     int init_cl();
     int setup_cl(); //helper function that initializes the devices and the context
+    cl::Program loadProgram(std::string kernel_source);
     void popCorn(); // sets up the kernel and pushes data
     
     //opengl

@@ -1,19 +1,31 @@
+#define STRINGIFY(A) #A
 
+std::string update_program_source = STRINGIFY(
 float4 cross_product(float4 a, float4 b)
 {
     return (float4)(a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x, 0);
 }
-
-//Moller and Trumbore
 bool intersect_triangle(float4 pos, float4 vel, float4 tri[3], float4 triN, float dist)
 {
-    //take in the particle position and velocity (treated as a Ray)
-    //also the triangle vertices for the ray intersection
-    //we take in the precalculated triangle's normal to first test for distance
-    //dist is the threshold to determine if we are close enough to the triangle
-    //to even check for distance
-    float4 edge1, edge2, tvec, pvec, qvec;
-    float det, inv_det, u, v;
+
+    /*
+    * Moller and Trumbore
+    * take in the particle position and velocity (treated as a Ray)
+    * also the triangle vertices for the ray intersection
+    * we take in the precalculated triangle's normal to first test for distance
+    * dist is the threshold to determine if we are close enough to the triangle
+    * to even check for distance
+    */
+    //can't use commas with STRINGIFY trick
+    float4 edge1;
+    float4 edge2;
+    float4 tvec;
+    float4 pvec;
+    float4 qvec;
+    float det;
+    float inv_det;
+    float u;
+    float v;
     float eps = .000001;
 
     //check distance
@@ -29,7 +41,7 @@ bool intersect_triangle(float4 pos, float4 vel, float4 tri[3], float4 triN, floa
     pvec = cross(vel, edge2);
     det = dot(edge1, pvec);
     //culling branch
-    //if(det > -eps && det < eps)
+    ///if(det > -eps && det < eps)
     if(det < eps)
         return false;
 
@@ -44,11 +56,7 @@ bool intersect_triangle(float4 pos, float4 vel, float4 tri[3], float4 triN, floa
 
     return true;
 }
-
-
-
-//update the particle position and color
-__kernel void enja(__global float4* vertices, __global float4* colors, __global int* indices, __global float4* vert_gen, __global float4* velo_gen, __global float4* velocities, float h)
+__kernel void update( __global float4* vertices, __global float4* colors, __global int* indices, __global float4* vert_gen, __global float4* velo_gen, __global float4* velocities, float h)
 {
     unsigned int i = get_global_id(0);
 
@@ -70,10 +78,6 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
     float4 pos = vertices[i];
     float4 vel = velocities[i];
 
-    float xn = pos.x;
-    float yn = pos.y;
-    float zn = pos.z;
-
     float vxn = vel.x;
     float vyn = vel.y;
     float vzn = vel.z;
@@ -81,9 +85,9 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
     vel.y = vyn - h*9.8;
     vel.z = vzn;// - h*9.8;
 
-    xn += h*vel.x;
-    yn += h*vel.y;
-    zn += h*vel.z;
+    float xn = pos.x + h*vel.x;
+    float yn = pos.y + h*vel.y;
+    float zn = pos.z + h*vel.z;
     
 
     //set up test plane
@@ -124,7 +128,6 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
         zn = pos.z + h*vel.z;
 
     }
-    
     vertices[i].x = xn;
     vertices[i].y = yn;
     vertices[i].z = zn;
@@ -142,4 +145,4 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
     //save the life!
     velocities[i].w = life;
 }
-
+);

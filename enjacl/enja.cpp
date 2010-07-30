@@ -226,10 +226,11 @@ EnjaParticles::~EnjaParticles()
     delete ts_cl[2];
     delete ts_cl[3];
     
+/*
     if(ckKernel)clReleaseKernel(ckKernel); 
     if(cpProgram)clReleaseProgram(cpProgram);
     if(cqCommandQueue)clReleaseCommandQueue(cqCommandQueue);
-
+*/
     if(v_vbo)
     {
         glBindBuffer(1, v_vbo);
@@ -248,7 +249,7 @@ EnjaParticles::~EnjaParticles()
         glDeleteBuffers(1, (GLuint*)&i_vbo);
         i_vbo = 0;
     }
-
+/*
     if(cl_vbos[0])clReleaseMemObject(cl_vbos[0]);
     if(cl_vbos[1])clReleaseMemObject(cl_vbos[1]);
     if(cl_vbos[2])clReleaseMemObject(cl_vbos[2]);
@@ -259,6 +260,7 @@ EnjaParticles::~EnjaParticles()
     if(cxGPUContext)clReleaseContext(cxGPUContext);
     
     if(cdDevices)delete(cdDevices);
+*/
 }
 
 

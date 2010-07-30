@@ -1440,6 +1440,27 @@ public:
         }
     }
 
+    Context(cl_context context)
+    {
+        object_ = context;
+    }
+
+    //IJ: Mac Hack
+    Context(cl_context_properties* properties, cl_int* err = NULL)
+    {
+        cl_int error;
+        object_ = ::clCreateContext(
+            properties, 0, 
+            0,
+            NULL, NULL, &error);
+
+        detail::errHandler(error, __CREATE_CONTEXT_FROM_TYPE_ERR);
+        if (err != NULL) {
+            *err = error;
+        }
+
+    }
+
     Context(
         cl_device_type type,
         cl_context_properties* properties = NULL,
