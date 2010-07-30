@@ -85,8 +85,8 @@ void EnjaParticles::popCorn()
 {
 
     try{
-        #include "physics/collision.cl"
-        update_program = loadProgram(update_program_source);
+        //#include "physics/collision.cl"
+        update_program = loadProgram(sources[system]);
         update_kernel = cl::Kernel(update_program, "update", &err);
     }
     catch (cl::Error er) {
@@ -235,7 +235,13 @@ int EnjaParticles::setup_cl()
         //these dont
         //cl_context cxGPUContext = clCreateContext(props, 1,(cl_device_id*)&devices.front(), NULL, NULL, &err);
         //cl_context cxGPUContext = clCreateContextFromType(props, CL_DEVICE_TYPE_GPU, NULL, NULL, &err);
-        printf("IS IT ERR???? %s\n", oclErrorString(err));
+        //printf("IS IT ERR???? %s\n", oclErrorString(err));
+        try{
+            context = cl::Context(props);   //had to edit line 1448 of cl.hpp to add this constructor
+        }
+        catch (cl::Error er) {
+            printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+        }  
     #else
         #if defined WIN32 // Win32
             cl_context_properties props[] = 
@@ -246,6 +252,12 @@ int EnjaParticles::setup_cl()
                 0
             };
             //cl_context cxGPUContext = clCreateContext(props, 1, &cdDevices[uiDeviceUsed], NULL, NULL, &err);
+            try{
+                context = cl::Context(CL_DEVICE_TYPE_GPU, props);
+            }
+            catch (cl::Error er) {
+                printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+            }       
         #else
             cl_context_properties props[] = 
             {
@@ -255,6 +267,12 @@ int EnjaParticles::setup_cl()
                 0
             };
             //cl_context cxGPUContext = clCreateContext(props, 1, &cdDevices[uiDeviceUsed], NULL, NULL, &err);
+            try{
+                context = cl::Context(CL_DEVICE_TYPE_GPU, props);
+            }
+            catch (cl::Error er) {
+                printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+            } 
         #endif
     #endif
  
@@ -262,19 +280,19 @@ int EnjaParticles::setup_cl()
     //cl_context_properties properties[] =
     //    { CL_CONTEXT_PLATFORM, (cl_context_properties)(platforms[0])(), 0};
 
+    /*
     try{
-        //context = cl::Context(CL_DEVICE_TYPE_GPU, props);
+        context = cl::Context(CL_DEVICE_TYPE_GPU, props);
         //context = cl::Context(devices, props);
         //context = cl::Context(devices, props, NULL, NULL, &err);
         //printf("IS IT ERR222 ???? %s\n", oclErrorString(err));
-        context = cl::Context(props);   //had to edit line 1448 of cl.hpp to add this constructor
         //context = cl::Context(CL_DEVICE_TYPE_GPU, props);
         //context = cl::Context(cxGPUContext);
     }
     catch (cl::Error er) {
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
     }
- 
+    */
     //devices = context.getInfo<CL_CONTEXT_DEVICES>();
 
     //create the command queue we will use to execute OpenCL commands

@@ -1,28 +1,31 @@
-//Lorentz Equations
+#define STRINGIFY(A) #A
+
+std::string lorenz_program_source = STRINGIFY(
+//Lorenz Equations
 __constant float sigma = 10.f;
 __constant float beta = 8.f/3.f;
 //__constant float rho = 28.f;
 __constant float rho = 99.96f;
 
-float lorentzX(float xn, float yn)
+float lorenzX(float xn, float yn)
 {
     return sigma * (yn - xn);
 }
-float lorentzY(float xn, float yn, float zn)
+float lorenzY(float xn, float yn, float zn)
 {
     return xn*(rho - zn) - yn;
 }
-float lorentzZ(float xn, float yn, float zn)
+float lorenzZ(float xn, float yn, float zn)
 {
     return (xn*yn - beta * zn);
 }
 
-float4 lorentz(float4 yn)
+float4 lorenz(float4 yn)
 {
     float4 vn;
-    vn.x = lorentzX(yn.x, yn.y);
-    vn.y = lorentzY(yn.x, yn.y, yn.z);
-    vn.z = lorentzZ(yn.x, yn.y, yn.z);
+    vn.x = lorenzX(yn.x, yn.y);
+    vn.y = lorenzY(yn.x, yn.y, yn.z);
+    vn.z = lorenzZ(yn.x, yn.y, yn.z);
     vn.w = yn.w;
     return vn;
 }
@@ -30,8 +33,8 @@ float4 lorentz(float4 yn)
 //Forward Euler
 void forward_euler(__global float4* yn, __global float4* vn, unsigned int i, float h)
 {
-    //calculate the velocities from the lorentz attractor equations
-    vn[i] = lorentz(yn[i]);
+    //calculate the velocities from the lorenz attractor equations
+    vn[i] = lorenz(yn[i]);
 
     //update the positions with the new velocities
     yn[i].x += h*(vn[i].x);
@@ -43,10 +46,10 @@ void forward_euler(__global float4* yn, __global float4* vn, unsigned int i, flo
 //RK4
 void runge_kutta(__global float4* yn, __global float4* vn, unsigned int i, float h)
 {
-    float4 k1 = lorentz(yn[i]); 
-    float4 k2 = lorentz(yn[i] + .5f*h*k1);
-    float4 k3 = lorentz(yn[i] + .5f*h*k2);
-    float4 k4 = lorentz(yn[i] + h*k3);
+    float4 k1 = lorenz(yn[i]); 
+    float4 k2 = lorenz(yn[i] + .5f*h*k1);
+    float4 k3 = lorenz(yn[i] + .5f*h*k2);
+    float4 k4 = lorenz(yn[i] + h*k3);
 
     vn[i] = (k1 + 2.f*k2 + 2.f*k3 + k4)/6.f;
     
@@ -59,7 +62,7 @@ void runge_kutta(__global float4* yn, __global float4* vn, unsigned int i, float
 
 //update the particle position and color
 //__kernel void enja(__global float4* vertices, __global float4* colors, __global int* indices, __global float4* vert_gen, __global float4* velo_gen, __global float4* velocities, __global float* life, float h)
-__kernel void enja(__global float4* vertices, __global float4* colors, __global int* indices, __global float4* vert_gen, __global float4* velo_gen, __global float4* velocities, float h)
+__kernel void update(__global float4* vertices, __global float4* colors, __global int* indices, __global float4* vert_gen, __global float4* velo_gen, __global float4* velocities, float h)
 
 {
     unsigned int i = get_global_id(0);
@@ -90,7 +93,7 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
     //save the life!
     velocities[i].w = life;
 }
-
+);
 //This code used to be in the kernel
 /*
     float xn = vertices[i].x;

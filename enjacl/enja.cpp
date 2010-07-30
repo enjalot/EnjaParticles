@@ -26,15 +26,23 @@
 #include <iomanip>
 
 
-//the paths to these programs are relative to the source dir
-//this is used in init_cl
-const std::string EnjaParticles::programs[] = {
-    "/physics/lorenz.cl",
-    "/physics/gravity.cl",
-    "/physics/fountain.cl",
-    "/physics/vfield.cl",
-    "/physics/collision.cl"
-};
+//we include our cl programs with STRINGIFY macro trick
+//then store them in this list for usage
+#include "physics/lorenz.cl"
+#include "physics/gravity.cl"
+#include "physics/fountain.cl"
+#include "physics/vfield.cl"
+
+#include "physics/collision.cl"
+//#include "physics/transform.cl"
+
+const std::string EnjaParticles::sources[] = {
+    lorenz_program_source,
+    gravity_program_source,
+    fountain_program_source,
+    vfield_program_source,
+    collision_program_source
+    };
 
 
 

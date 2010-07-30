@@ -1,5 +1,8 @@
+#define STRINGIFY(A) #A
+
+std::string fountain_program_source = STRINGIFY(
 //update the particle position and color
-__kernel void enja(__global float4* vertices, __global float4* colors, __global int* indices, __global float4* vert_gen, __global float4* velo_gen, __global float4* velocities, float h)
+__kernel void update(__global float4* vertices, __global float4* colors, __global int* indices, __global float4* vert_gen, __global float4* velo_gen, __global float4* velocities, float h)
 
 {
     unsigned int i = get_global_id(0);
@@ -45,5 +48,4 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
     //save the life!
     velocities[i].w = life;
 }
-
-
+);

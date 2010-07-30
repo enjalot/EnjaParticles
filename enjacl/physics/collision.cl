@@ -1,6 +1,6 @@
 #define STRINGIFY(A) #A
 
-std::string update_program_source = STRINGIFY(
+std::string collision_program_source = STRINGIFY(
 float4 cross_product(float4 a, float4 b)
 {
     return (float4)(a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x, 0);

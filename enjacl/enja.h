@@ -66,7 +66,7 @@ public:
     ~EnjaParticles();
 
     enum {LORENZ, GRAVITY, FOUNTAIN, VFIELD, COLLISION};
-    static const std::string programs[];
+    static const std::string sources[];
 
     //keep track of transformation from blender
     float translation[3];
@@ -92,9 +92,9 @@ public:
     cl::Context context;
     cl::CommandQueue queue;
 
-    cl::Program update_program;
-    cl::Program collision_program;
-    cl::Program transform_program;
+    cl::Program transform_program;  //keep track of blender transforms
+    cl::Program update_program;     //update the velocities of the particles
+    cl::Program collision_program;  //check for collisions and apply velocities
 
     cl::Kernel update_kernel;
     cl::Kernel collision_kernel;
