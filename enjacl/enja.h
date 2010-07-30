@@ -66,6 +66,11 @@ public:
     enum {LORENZ, GRAVITY, FOUNTAIN, VFIELD, COLLISION};
     static const std::string programs[];
 
+    //keep track of transformation from blender
+    float translation[3];
+    Vec4 rotation[3];
+    Vec4 invrotation[3];
+
 private:
     //particles
     int num;                //number of particles
@@ -88,6 +93,7 @@ private:
     unsigned int uiDeviceUsed;
     cl_command_queue cqCommandQueue;
     cl_kernel ckKernel;
+    cl_kernel transform_kernel; //kernel for updating with blender transformations
     cl_program cpProgram;
     cl_int ciErrNum;
     size_t szGlobalWorkSize[1];
