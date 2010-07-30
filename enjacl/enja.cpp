@@ -26,14 +26,23 @@
 #include <iomanip>
 
 
-//the paths to these programs are relative to the source dir
-//this is used in init_cl
-const std::string EnjaParticles::programs[] = {
-    "/physics/lorenz.cl",
-    "/physics/gravity.cl",
-    "/physics/fountain.cl",
-    "/physics/vfield.cl"
-};
+//we include our cl programs with STRINGIFY macro trick
+//then store them in this list for usage
+#include "physics/lorenz.cl"
+#include "physics/gravity.cl"
+#include "physics/fountain.cl"
+#include "physics/vfield.cl"
+
+#include "physics/collision.cl"
+//#include "physics/transform.cl"
+
+const std::string EnjaParticles::sources[] = {
+    lorenz_program_source,
+    gravity_program_source,
+    fountain_program_source,
+    vfield_program_source,
+    collision_program_source
+    };
 
 
 
@@ -45,7 +54,7 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
     
     //this should be configurable. how many updates do we run per frame:
     updates = 4;
-    dt = .0001;
+    dt = .001;
     glsl = false;
     blending = false;
     point_scale = 1.0f;
@@ -54,13 +63,15 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
     for(int i=0; i < n; i++)
     {
         //initialize the radii array with random values between 1.0 and particle_radius
-        g[i].w = 1.0f + particle_radius*drand48();
+        //g[i].w = 1.0f + particle_radius*drand48();
         //initialize the particle life array with random values between 0 and 1
         v[i].w = drand48();
+        //v[i].w = 1.0f;
     }
 
     num = n;
-    generators = g;
+    vert_gen= g;
+    velo_gen = v;
     velocities = v;
     colors = c;
 
@@ -74,7 +85,7 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
 
     //initialize our vbos
     vbo_size = sizeof(Vec4) * n;
-    v_vbo = createVBO(&generators[0], vbo_size, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+    v_vbo = createVBO(&vert_gen[0], vbo_size, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
     c_vbo = createVBO(&colors[0], vbo_size, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
     i_vbo = createVBO(&ind[0], sizeof(int) * n, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
     
@@ -107,8 +118,8 @@ EnjaParticles::EnjaParticles(int s, int n)
         //g[i].x = 1.0f;
         //g[i].y = 0.0 + .05*sin(2.*M_PI*(f/n));
         //g[i].y = -1.0f;
-        g[i].z = 0.f;
-        g[i].y = 0.0 + 2*sin(2.*M_PI*(f/n));
+        g[i].y = 0.f;
+        g[i].z = 0.0 + 2*sin(2.*M_PI*(f/n));
         //g[i].z = 0.0f;
         //g[i].z = 0.f;// + f/nums;
         g[i].w = 1.f;
@@ -128,12 +139,12 @@ EnjaParticles::EnjaParticles(int s, int n)
     for(int i=0; i < n; i++)
     {
         f = (float)i;
-        v[i].x = 0.0 + .5*cos(2.*M_PI*(f/n));  //with lorentz this looks more interesting
-        v[i].z = 3.f;
-        v[i].y = 0.0 + .5*sin(2.*M_PI*(f/n));
-        //v[i].x = 1.f; //.01 * (1. - 2.*drand48()); // between -.02 and .02
-        //v[i].y = 1.f; //.05 * drand48();
-        //v[i].z = 1.f; //.01 * (1. - 2.*drand48());
+        //v[i].x = 0.0 + .5*cos(2.*M_PI*(f/n));  //with lorentz this looks more interesting
+        //v[i].z = 3.f;
+        //v[i].y = 0.0 + .5*sin(2.*M_PI*(f/n));
+        v[i].x = 1.f; //.01 * (1. - 2.*drand48()); // between -.02 and .02
+        v[i].y = 1.f; //.05 * drand48();
+        v[i].z = 1.f; //.01 * (1. - 2.*drand48());
         v[i].w = 0.f;
     }
 
@@ -151,7 +162,8 @@ EnjaParticles::EnjaParticles(int s, int n)
     int success = init_cl();
     
 }
-//Take in vertex generators as well as velocity generators that are len elements long
+
+//Take in vertex vert_gen as well as velocity vert_gen that are len elements long
 //This is to support generating particles from Blender Mesh objects
 EnjaParticles::EnjaParticles(int s, AVec4 g, AVec4 v, int len, int n, float radius)
 {
@@ -160,8 +172,8 @@ EnjaParticles::EnjaParticles(int s, AVec4 g, AVec4 v, int len, int n, float radi
         radius = 1.0f;
     particle_radius = radius;
 
-    AVec4 vert_gen(n);
-    AVec4 velo_gen(n);
+    AVec4 _vert_gen(n);
+    AVec4 _velo_gen(n);
  
     AVec4 c(n);
     
@@ -169,10 +181,10 @@ EnjaParticles::EnjaParticles(int s, AVec4 g, AVec4 v, int len, int n, float radi
     int j;
     for(int i=0; i < n; i++)
     {
-        //fill the generators
+        //fill the vert_gen
         j = (int)(drand48()*len); //randomly get a vertex/velocity from a generator
-        vert_gen[i] = g[j];
-        velo_gen[i] = v[j];
+        _vert_gen[i] = g[j];
+        _velo_gen[i] = v[j];
 
         //handle the colors
         c[i].x = 1.0;   //Red
@@ -184,7 +196,7 @@ EnjaParticles::EnjaParticles(int s, AVec4 g, AVec4 v, int len, int n, float radi
    
 
     //init particle system
-    init(vert_gen, velo_gen, c, n);
+    init(_vert_gen, _velo_gen, c, n);
 
     //init opencl
     int success = init_cl();
@@ -222,9 +234,11 @@ EnjaParticles::~EnjaParticles()
     delete ts_cl[2];
     delete ts_cl[3];
     
+/*
     if(ckKernel)clReleaseKernel(ckKernel); 
     if(cpProgram)clReleaseProgram(cpProgram);
     if(cqCommandQueue)clReleaseCommandQueue(cqCommandQueue);
+*/
     if(v_vbo)
     {
         glBindBuffer(1, v_vbo);
@@ -243,8 +257,7 @@ EnjaParticles::~EnjaParticles()
         glDeleteBuffers(1, (GLuint*)&i_vbo);
         i_vbo = 0;
     }
-
-    //if(vbo_cl)clReleaseMemObject(vbo_cl);
+/*
     if(cl_vbos[0])clReleaseMemObject(cl_vbos[0]);
     if(cl_vbos[1])clReleaseMemObject(cl_vbos[1]);
     if(cl_vbos[2])clReleaseMemObject(cl_vbos[2]);
@@ -255,7 +268,7 @@ EnjaParticles::~EnjaParticles()
     if(cxGPUContext)clReleaseContext(cxGPUContext);
     
     if(cdDevices)delete(cdDevices);
-
+*/
 }
 
 

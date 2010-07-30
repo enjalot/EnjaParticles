@@ -1,6 +1,8 @@
 #ifndef ENJA_PARTICLES_H_INCLUDED
 #define ENJA_PARTICLES_H_INCLUDED
 
+#define __CL_ENABLE_EXCEPTIONS
+
 #include <string>
 #include <vector>
 #include "incopencl.h"
@@ -32,6 +34,7 @@ class EnjaParticles
 public:
 
     int update();   //update the particle system
+    int cpu_update();   //update the particle system using cpu code
     int render(); //render calls update then renders the particles
 
     int getVertexVBO(); //get the vertices vbo id
@@ -62,41 +65,53 @@ public:
 
     ~EnjaParticles();
 
-    enum {LORENZ, GRAVITY, FOUNTAIN, VFIELD};
-    static const std::string programs[];
+    enum {LORENZ, GRAVITY, FOUNTAIN, VFIELD, COLLISION};
+    static const std::string sources[];
 
-private:
+    //keep track of transformation from blender
+    float translation[3];
+    Vec4 rotation[3];
+    Vec4 invrotation[3];
+
+//private:
     //particles
     int num;                //number of particles
     int system;             //what kind of system?
-    AVec4 generators;       //vertex generators
-    AVec4 velocities;       //velocity generators
+    AVec4 vert_gen;       //vertex generators
+    AVec4 velo_gen;       //velocity generators
+    AVec4 velocities;       //for cpu version only
     AVec4 colors;
     std::vector<int> indices;
     //float* life;  //life is packed into velocity.w
 
-    int init(AVec4 generators, AVec4 velocities, AVec4 colors, int num);
+    int init(AVec4 vert_gen, AVec4 velo_gen, AVec4 colors, int num);
 
     
     //opencl
-    cl_platform_id cpPlatform;
-    cl_context cxGPUContext;
-    cl_device_id* cdDevices;
-    cl_uint uiDevCount;
-    unsigned int uiDeviceUsed;
-    cl_command_queue cqCommandQueue;
-    cl_kernel ckKernel;
-    cl_program cpProgram;
-    cl_int ciErrNum;
-    size_t szGlobalWorkSize[1];
+    std::vector<cl::Device> devices;
+    cl::Context context;
+    cl::CommandQueue queue;
 
-    //cl_mem vbo_cl;
-    cl_mem cl_vbos[3];  //0: vertex vbo, 1: color vbo, 2: index vbo
-    cl_mem cl_vert_gen;  //want to have the start points for reseting particles
-    cl_mem cl_velo_gen;  //want to have the start velocities for reseting particles
-    cl_mem cl_velocities;  //particle velocities
-    cl_mem cl_indices;     //index array to do proper depth sorting
-    //cl_mem cl_life;        //keep track where in their life the particles are (packed into velocity.w now)
+    cl::Program transform_program;  //keep track of blender transforms
+    cl::Program update_program;     //update the velocities of the particles
+    cl::Program collision_program;  //check for collisions and apply velocities
+
+    cl::Kernel update_kernel;
+    cl::Kernel collision_kernel;
+    cl::Kernel transform_kernel; //kernel for updating with blender transformations
+
+    unsigned int deviceUsed;
+    
+    cl_int err;
+    cl::Event event;
+
+
+    //cl::Buffer vbo_cl;
+    std::vector<cl::Memory> cl_vbos;  //0: vertex vbo, 1: color vbo, 2: index vbo
+    cl::Buffer cl_vert_gen;  //want to have the start points for reseting particles
+    cl::Buffer cl_velo_gen;  //want to have the start velocities for reseting particles
+    cl::Buffer cl_velocities;  //particle velocities
+    //cl::Buffer cl_life;        //keep track where in their life the particles are (packed into velocity.w now)
     int v_vbo;   //vertices vbo
     int c_vbo;   //colors vbo
     int i_vbo;   //index vbo
@@ -109,6 +124,7 @@ private:
 
     int init_cl();
     int setup_cl(); //helper function that initializes the devices and the context
+    cl::Program loadProgram(std::string kernel_source);
     void popCorn(); // sets up the kernel and pushes data
     
     //opengl

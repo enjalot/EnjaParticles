@@ -4,7 +4,7 @@ project(enjacl)
 #need to include FindOPENCL.cmake to
 SET( CMAKE_MODULE_PATH
      ${enjacl_SOURCE_DIR}/../cmake
-     $ENV{CMAKE_MODULES})
+     )
 
 message("${CMAKE_MODULE_PATH}\n")
 
@@ -18,7 +18,8 @@ INCLUDE_DIRECTORIES(
 	${GLUT_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
     ${GLEW_INCLUDE_PATH}
-    ${OPENCL_INCLUDE_DIR}
+    #${OPENCL_INCLUDE_DIR}
+    ${enjacl_SOURCE_DIR}/../opencl10
 )
 
 message("\nenjacl INCLUDE_DIRECTORIES\n")
@@ -32,13 +33,13 @@ ADD_DEFINITIONS(-DGL_INTEROP)
 ADD_DEFINITIONS(-g )
 
 #particles opencl library
-set (CLCXXFILES  enja.cpp opencl.cpp render.cpp util.cpp timege.cpp)
+set (CLCXXFILES  enja.cpp opencl.cpp physics/collision.cpp render.cpp util.cpp timege.cpp)
 SET(ocllib enjaclparticles)
 ADD_LIBRARY(${ocllib} ${CLCXXFILES})
 
 
-SET(EXEC_CL fountain.x)
-ADD_EXECUTABLE(${EXEC_CL} main_fountain.cpp util.cpp)
+SET(EXEC_CL collision.x)
+ADD_EXECUTABLE(${EXEC_CL} main.cpp util.cpp)
 
 TARGET_LINK_LIBRARIES (${EXEC_CL}
    ${ocllib}

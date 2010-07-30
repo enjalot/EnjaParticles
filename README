@@ -9,7 +9,9 @@ cmake/
     cmake modules to help find necessary libraries
 
 environment/
-    scripts to set the environment variables that cmake needs
+    scripts to set the environment variables for using this project
+    with my BGEnjaParticles project
+    http://github.com/enjalot/BGEnjaParticles
 
 
 

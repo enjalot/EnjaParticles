@@ -1,22 +1,6 @@
-//Lorentz Equations
-__constant float sigma = 10.f;
-__constant float beta = 8.f/3.f;
-//__constant float rho = 28.f;
-__constant float rho = 99.96f;
+#define STRINGIFY(A) #A
 
-float lorentzX(float xn, float yn)
-{
-    return sigma * (yn - xn);
-}
-float lorentzY(float xn, float yn, float zn)
-{
-    return xn*(rho - zn) - yn;
-}
-float lorentzZ(float xn, float yn, float zn)
-{
-    return (xn*yn - beta * zn);
-}
-
+std::string vfield_program_source = STRINGIFY(
 float4 vfield(float4 yn)
 {
     float4 vn;
@@ -59,7 +43,7 @@ void runge_kutta(__global float4* yn, __global float4* vn, unsigned int i, float
 
 //update the particle position and color
 //__kernel void enja(__global float4* vertices, __global float4* colors, __global int* indices, __global float4* vert_gen, __global float4* velo_gen, __global float4* velocities, __global float* life, float h)
-__kernel void enja(__global float4* vertices, __global float4* colors, __global int* indices, __global float4* vert_gen, __global float4* velo_gen, __global float4* velocities, float h)
+__kernel void update(__global float4* vertices, __global float4* colors, __global int* indices, __global float4* vert_gen, __global float4* velo_gen, __global float4* velocities, float h)
 
 {
     unsigned int i = get_global_id(0);
@@ -97,24 +81,4 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
     //save the life!
     velocities[i].w = life;
 }
-
-//This code used to be in the kernel
-/*
-    float xn = vertices[i].x;
-    float yn = vertices[i].y;
-    float zn = vertices[i].z;
-
-    //h = .001;
-    float vxn = velocities[i].x;
-    float vyn = velocities[i].y;
-    float vzn = velocities[i].z;
-    velocities[i].x = sigma * (yn - xn);
-    velocities[i].y = xn*(rho - zn);
-    velocities[i].z = (xn*yn - beta * zn);// + vzn - h*9.8;
-
-    vertices[i].x = xn + h*velocities[i].x; //xn + h*(sigma * (yn - xn));
-    vertices[i].y = yn + h*velocities[i].y; //yn + h*(xn*(rho - zn));
-    vertices[i].z = zn + h*velocities[i].z; // + h*(xn*yn - beta * zn);
-*/
-
-
+);

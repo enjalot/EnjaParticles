@@ -1,5 +1,8 @@
+#define STRINGIFY(A) #A
+
+std::string gravity_program_source = STRINGIFY(
 //update the particle position and color
-__kernel void enja(__global float4* vertices, __global float4* colors, __global int* indices, __global float4* vert_gen, __global float4* velo_gen, __global float4* velocities, float h)
+__kernel void update(__global float4* vertices, __global float4* colors, __global int* indices, __global float4* vert_gen, __global float4* velo_gen, __global float4* velocities, float h)
 
 {
     unsigned int i = get_global_id(0);
@@ -28,6 +31,8 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
     float vyn = velocities[i].y;
     float vzn = velocities[i].z;
     velocities[i].x = vxn;
+    //velocities[i].y = vyn - h*9.8;
+    //velocities[i].z = vzn;// - h*9.8;
     velocities[i].y = vyn;// - h*9.8;
     velocities[i].z = vzn - 2.0f*h*9.8; //exagerate the effect of gravity for now
 
@@ -44,5 +49,5 @@ __kernel void enja(__global float4* vertices, __global float4* colors, __global 
     //save the life!
     velocities[i].w = life;
 }
-
+);
 

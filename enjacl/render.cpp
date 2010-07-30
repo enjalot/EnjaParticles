@@ -13,6 +13,11 @@
 void EnjaParticles::drawArrays()
 {
 
+    /*
+    glMatrixMode(GL_MODELVIEW_MATRIX);
+    glPushMatrix();
+    glLoadIdentity();
+    */
     if(blending)
     {
         glEnable(GL_BLEND);
@@ -48,6 +53,7 @@ void EnjaParticles::drawArrays()
     glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
 
+    //glPopMatrix();
 }
 
 int EnjaParticles::render()
@@ -66,6 +72,7 @@ int EnjaParticles::render()
     for(int i = 0; i < updates; i++)
     {
         update();     //call the particle update function (executes the opencl)
+        //cpu_update();
     }
 
     ts[0]->stop();
@@ -104,7 +111,7 @@ int EnjaParticles::render()
 
         glDisable(GL_LIGHTING);
         //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-        //glEnable(GL_POINT_SMOOTH); 
+        glEnable(GL_POINT_SMOOTH); 
         glPointSize(particle_radius);
 
         drawArrays();

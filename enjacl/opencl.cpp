@@ -1,5 +1,6 @@
 #include <string.h>
 #include <string>
+#include <iostream>
 
 #include <GL/glew.h>
 #if defined __APPLE__ || defined(MACOSX)
@@ -22,9 +23,6 @@
 
 int EnjaParticles::update()
 {
-    cl_int ciErrNum = CL_SUCCESS;
-    cl_event evt; //can't do opencl visual profiler without passing an event
-
  
 #ifdef GL_INTEROP   
     // map OpenGL buffer object for writing from OpenCL
@@ -34,22 +32,18 @@ int EnjaParticles::update()
     ts_cl[3]->stop();
 
 	ts_cl[0]->start();
-    //ciErrNum = clEnqueueAcquireGLObjects(cqCommandQueue, 1, &vbo_cl, 0,0,0);
-    ciErrNum = clEnqueueAcquireGLObjects(cqCommandQueue, 3, cl_vbos, 0,NULL, &evt);
-    clReleaseEvent(evt);
-    //printf("gl interop, acquire: %s\n", oclErrorString(ciErrNum));
-    clFinish(cqCommandQueue);
+    err = queue.enqueueAcquireGLObjects(&cl_vbos, NULL, &event);
+    //printf("acquire: %s\n", oclErrorString(err));
+    queue.finish();
 	ts_cl[0]->stop();
 #endif
 
     //clFinish(cqCommandQueue);
 	ts_cl[1]->start();
-    ciErrNum = clSetKernelArg(ckKernel, 6, sizeof(float), &dt);
-    //ciErrNum = clSetKernelArg(ckKernel, 2, sizeof(float), &dt);
-    ciErrNum |= clEnqueueNDRangeKernel(cqCommandQueue, ckKernel, 1, NULL, szGlobalWorkSize, NULL, 0, NULL, &evt );
-    clReleaseEvent(evt);
-    //printf("enqueueue nd range kernel: %s\n", oclErrorString(ciErrNum));
-    clFinish(cqCommandQueue); //wont get reliable timings unless we finish the queue for each action
+    err = update_kernel.setArg(6, dt);
+    err = queue.enqueueNDRangeKernel(update_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
+    //printf("enqueue: %s\n", oclErrorString(err));
+    queue.finish();
     ts_cl[1]->stop();
 
 #ifdef GL_INTEROP
@@ -58,13 +52,13 @@ int EnjaParticles::update()
     
     //clFinish(cqCommandQueue);
     ts_cl[2]->start();
-    ciErrNum = clEnqueueReleaseGLObjects(cqCommandQueue, 3, cl_vbos, 0, NULL, &evt);
-    clReleaseEvent(evt);
-    //printf("gl interop, acquire: %s\n", oclErrorString(ciErrNum));
-    clFinish(cqCommandQueue);
+    err = queue.enqueueReleaseGLObjects(&cl_vbos, NULL, &event);
+    //printf("release gl: %s\n", oclErrorString(err));
+    queue.finish();
     ts_cl[2]->stop();
 #else
 
+    /* implement this with opencl c++ bindings later
     // Explicit Copy 
     // this doesn't get called when we use GL_INTEROP
     glBindBufferARB(GL_ARRAY_BUFFER, v_vbo);    
@@ -80,6 +74,7 @@ int EnjaParticles::update()
     ciErrNum = clEnqueueReadBuffer(cqCommandQueue, cl_vbos[1], CL_TRUE, 0, vbo_size, ptr, 0, NULL, &evt);
     clReleaseEvent(evt);
     glUnmapBufferARB(GL_ARRAY_BUFFER); 
+    */
 #endif
 
 
@@ -89,59 +84,65 @@ int EnjaParticles::update()
 void EnjaParticles::popCorn()
 {
 
+    try{
+        //#include "physics/collision.cl"
+        update_program = loadProgram(sources[system]);
+        update_kernel = cl::Kernel(update_program, "update", &err);
+    }
+    catch (cl::Error er) {
+        printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+    }
 
-    cl_event evt; //can't do opencl visual profiler without passing an event
+
     //This is a purely internal helper function, all this code could easily be at the bottom of init_cl
     //init_cl shouldn't change much, and this may
     #ifdef GL_INTEROP
         //printf("gl interop!\n");
         // create OpenCL buffer from GL VBO
-        cl_vbos[0] = clCreateFromGLBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, v_vbo, &ciErrNum);
-        cl_vbos[1] = clCreateFromGLBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, c_vbo, &ciErrNum);
-        cl_vbos[2] = clCreateFromGLBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, i_vbo, &ciErrNum);
+        cl_vbos.push_back(cl::BufferGL(context, CL_MEM_READ_WRITE, v_vbo, &err));
+        printf("v_vbo: %s\n", oclErrorString(err));
+        cl_vbos.push_back(cl::BufferGL(context, CL_MEM_READ_WRITE, c_vbo, &err));
+        printf("c_vbo: %s\n", oclErrorString(err));
+        cl_vbos.push_back(cl::BufferGL(context, CL_MEM_READ_WRITE, i_vbo, &err));
+        printf("i_vbo: %s\n", oclErrorString(err));
         //printf("SUCCES?: %s\n", oclErrorString(ciErrNum));
     #else
         //printf("no gl interop!\n");
         // create standard OpenCL mem buffer
+        /* convert this to cpp headers as necessary
         cl_vbos[0] = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
         cl_vbos[1] = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
         cl_vbos[2] = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, sizeof(int) * num, NULL, &ciErrNum);
         //Since we don't get the data from OpenGL we have to manually push the CPU side data to the GPU
-        ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_vbos[0], CL_TRUE, 0, vbo_size, &generators[0], 0, NULL, &evt);
+        ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_vbos[0], CL_TRUE, 0, vbo_size, &vert_gen[0], 0, NULL, &evt);
         clReleaseEvent(evt);
         ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_vbos[1], CL_TRUE, 0, vbo_size, &colors[0], 0, NULL, &evt);
         clReleaseEvent(evt);
         ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_vbos[2], CL_TRUE, 0, sizeof(int) * num, &colors[0], 0, NULL, &evt);
         clReleaseEvent(evt);
+        */
         //make sure we are finished copying over before going on
     #endif
     
     //support arrays for the particle system
-    cl_vert_gen = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
-    cl_velo_gen = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
-    cl_velocities= clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, vbo_size, NULL, &ciErrNum);
-    //cl_life = clCreateBuffer(cxGPUContext, CL_MEM_WRITE_ONLY, sizeof(float) * num, NULL, &ciErrNum);
+    cl_vert_gen = cl::Buffer(context, CL_MEM_WRITE_ONLY, vbo_size, NULL, &err);
+    cl_velo_gen = cl::Buffer(context, CL_MEM_WRITE_ONLY, vbo_size, NULL, &err);
+    cl_velocities = cl::Buffer(context, CL_MEM_WRITE_ONLY, vbo_size, NULL, &err);
     
-    ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_vert_gen, CL_TRUE, 0, vbo_size, &generators[0], 0, NULL, &evt);
-    clReleaseEvent(evt);
-    ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_velo_gen, CL_TRUE, 0, vbo_size, &velocities[0], 0, NULL, &evt);
-    clReleaseEvent(evt);
-    ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_velocities, CL_TRUE, 0, vbo_size, &velocities[0], 0, NULL, &evt);
-    clReleaseEvent(evt);
-    //ciErrNum = clEnqueueWriteBuffer(cqCommandQueue, cl_life, CL_TRUE, 0, sizeof(float) * num, life, 0, NULL, &evt);
-    //clReleaseEvent(evt);
-    clFinish(cqCommandQueue);
+    err = queue.enqueueWriteBuffer(cl_vert_gen, CL_TRUE, 0, vbo_size, &vert_gen[0], NULL, &event);
+    err = queue.enqueueWriteBuffer(cl_velo_gen, CL_TRUE, 0, vbo_size, &velo_gen[0], NULL, &event);
+    err = queue.enqueueWriteBuffer(cl_velocities, CL_TRUE, 0, vbo_size, &velo_gen[0], NULL, &event);
     
+    queue.finish();
 
     //printf("about to set kernel args\n");
-    ciErrNum  = clSetKernelArg(ckKernel, 0, sizeof(cl_mem), (void *) &cl_vbos[0]);      //vertices is first arguement to kernel
-    ciErrNum  = clSetKernelArg(ckKernel, 1, sizeof(cl_mem), (void *) &cl_vbos[1]);      //colors is second arguement to kernel
-    ciErrNum  = clSetKernelArg(ckKernel, 2, sizeof(cl_mem), (void *) &cl_vbos[2]);      //indices is third arguement to kernel
-    ciErrNum  = clSetKernelArg(ckKernel, 3, sizeof(cl_mem), (void *) &cl_vert_gen);     //vertex generators
-    ciErrNum  = clSetKernelArg(ckKernel, 4, sizeof(cl_mem), (void *) &cl_velo_gen);     //velocity generators
-    ciErrNum  = clSetKernelArg(ckKernel, 5, sizeof(cl_mem), (void *) &cl_velocities);   //velocities
-    //we now pack life into the w component of velocity
-    //ciErrNum  = clSetKernelArg(ckKernel, 6, sizeof(cl_mem), (void *) &cl_life);         //life
+    err = update_kernel.setArg(0, cl_vbos[0]);
+    err = update_kernel.setArg(1, cl_vbos[1]);
+    err = update_kernel.setArg(2, cl_vbos[2]);
+    err = update_kernel.setArg(3, cl_vert_gen);
+    err = update_kernel.setArg(4, cl_velo_gen);
+    err = update_kernel.setArg(5, cl_velocities);
+    
     printf("done with popCorn()\n");
 
 }
@@ -150,54 +151,6 @@ void EnjaParticles::popCorn()
 int EnjaParticles::init_cl()
 {
     setup_cl();
-   
-    cqCommandQueue = clCreateCommandQueue(cxGPUContext, cdDevices[uiDeviceUsed], 0, &ciErrNum);
-    //shrCheckErrorEX(ciErrNum, CL_SUCCESS, pCleanup);
-
-    // Program Setup
-    int pl;
-    size_t program_length;
-    //printf("open the program\n");
-    
-    //CL_SOURCE_DIR is set in the CMakeLists.txt
-    std::string path(CL_SOURCE_DIR);
-    path += programs[system];
-    printf("%s\n", path.c_str());
-    char* cSourceCL = file_contents(path.c_str(), &pl);
-    //printf("file: %s\n", cSourceCL);
-    program_length = (size_t)pl;
-
-    // create the program
-    cpProgram = clCreateProgramWithSource(cxGPUContext, 1,
-                      (const char **) &cSourceCL, &program_length, &ciErrNum);
-
-    //printf("building the opencl program\n");
-    // build the program
-    ciErrNum = clBuildProgram(cpProgram, 0, NULL, "-cl-fast-relaxed-math", NULL, NULL);
-    //ciErrNum = clBuildProgram(cpProgram, 0, NULL, NULL, NULL, NULL);
-	if(ciErrNum != CL_SUCCESS){
-		cl_build_status build_status;
-		ciErrNum = clGetProgramBuildInfo(cpProgram, cdDevices[uiDeviceUsed], CL_PROGRAM_BUILD_STATUS, sizeof(cl_build_status), &build_status, NULL);
-
-		char *build_log;
-		size_t ret_val_size;
-		ciErrNum = clGetProgramBuildInfo(cpProgram, cdDevices[uiDeviceUsed], CL_PROGRAM_BUILD_LOG, 0, NULL, &ret_val_size);
-
-		build_log = new char[ret_val_size+1];
-		ciErrNum = clGetProgramBuildInfo(cpProgram, cdDevices[uiDeviceUsed], CL_PROGRAM_BUILD_LOG, ret_val_size, build_log, NULL);
-		build_log[ret_val_size] = '\0';
-		printf("BUILD LOG: \n %s", build_log);
-	}
-/*
-    if (ciErrNum != CL_SUCCESS)
-    {
-        printf("houston we have a problem\n%s\n", oclErrorString(ciErrNum));
-    }
-*/
-    //printf("program built\n");
-    ckKernel = clCreateKernel(cpProgram, "enja", &ciErrNum);
-    printf("kernel made: %s\n", oclErrorString(ciErrNum));
-
 
     ts_cl[0] = new GE::Time("acquire", 5);
     ts_cl[1] = new GE::Time("ndrange", 5);
@@ -214,27 +167,23 @@ int EnjaParticles::init_cl()
 
 int EnjaParticles::setup_cl()
 {
-    //setup devices and context
-    szGlobalWorkSize[0] = num; //set the workgroup size to number of particles
 
-    cl_int ciErrNum;
-    //Get the NVIDIA platform
-    ciErrNum = oclGetPlatformID(&cpPlatform);
-    //oclCheckErrorEX(ciErrNum, CL_SUCCESS, pCleanup);
+    std::vector<cl::Platform> platforms;
+    err = cl::Platform::get(&platforms);
+    printf("cl::Platform::get(): %s\n", oclErrorString(err));
+    printf("platforms.size(): %d\n", platforms.size());
 
-    // Get the number of GPU devices available to the platform
-    ciErrNum = clGetDeviceIDs(cpPlatform, CL_DEVICE_TYPE_GPU, 0, NULL, &uiDevCount);
-    //oclCheckErrorEX(ciErrNum, CL_SUCCESS, pCleanup);
-
-    // Create the device list
-    cdDevices = new cl_device_id [uiDevCount];
-    ciErrNum = clGetDeviceIDs(cpPlatform, CL_DEVICE_TYPE_GPU, uiDevCount, cdDevices, NULL);
-    //oclCheckErrorEX(ciErrNum, CL_SUCCESS, pCleanup);
-
-    // Get device requested on command line, if any
-    uiDeviceUsed = 0;
-    unsigned int uiEndDev = uiDevCount - 1;
-
+    deviceUsed = 0;
+    err = platforms[0].getDevices(CL_DEVICE_TYPE_GPU, &devices);
+    printf("getDevices: %s\n", oclErrorString(err));
+    printf("devices.size(): %d\n", devices.size());
+    //const char* s = devices[0].getInfo<CL_DEVICE_EXTENSIONS>().c_str();
+    //printf("extensions: \n %s \n", s);
+    int t = devices.front().getInfo<CL_DEVICE_TYPE>();
+    printf("type: \n %d %d \n", t, CL_DEVICE_TYPE_GPU);
+    
+    /*
+    //assume sharing for now, need to do this check with the c++ bindings
     bool bSharingSupported = false;
     for(unsigned int i = uiDeviceUsed; (!bSharingSupported && (i <= uiEndDev)); ++i) 
     {
@@ -269,6 +218,7 @@ int EnjaParticles::setup_cl()
             }
         }
     }
+    */
 
     // Define OS-specific context properties and create the OpenCL context
     //#if defined (__APPLE_CC__)
@@ -280,32 +230,130 @@ int EnjaParticles::setup_cl()
             CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE, (cl_context_properties)kCGLShareGroup,
             0
         };
-        cxGPUContext = clCreateContext(props, 0,0, NULL, NULL, &ciErrNum);
+        //this works
+        //cl_context cxGPUContext = clCreateContext(props, 0, 0, NULL, NULL, &err);
+        //these dont
+        //cl_context cxGPUContext = clCreateContext(props, 1,(cl_device_id*)&devices.front(), NULL, NULL, &err);
+        //cl_context cxGPUContext = clCreateContextFromType(props, CL_DEVICE_TYPE_GPU, NULL, NULL, &err);
+        //printf("IS IT ERR???? %s\n", oclErrorString(err));
+        try{
+            context = cl::Context(props);   //had to edit line 1448 of cl.hpp to add this constructor
+        }
+        catch (cl::Error er) {
+            printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+        }  
     #else
         #if defined WIN32 // Win32
             cl_context_properties props[] = 
             {
                 CL_GL_CONTEXT_KHR, (cl_context_properties)wglGetCurrentContext(), 
                 CL_WGL_HDC_KHR, (cl_context_properties)wglGetCurrentDC(), 
-                CL_CONTEXT_PLATFORM, (cl_context_properties)cpPlatform, 
+                CL_CONTEXT_PLATFORM, (cl_context_properties)(platforms[0])(),
                 0
             };
-            cxGPUContext = clCreateContext(props, 1, &cdDevices[uiDeviceUsed], NULL, NULL, &ciErrNum);
+            //cl_context cxGPUContext = clCreateContext(props, 1, &cdDevices[uiDeviceUsed], NULL, NULL, &err);
+            try{
+                context = cl::Context(CL_DEVICE_TYPE_GPU, props);
+            }
+            catch (cl::Error er) {
+                printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+            }       
         #else
             cl_context_properties props[] = 
             {
                 CL_GL_CONTEXT_KHR, (cl_context_properties)glXGetCurrentContext(), 
                 CL_GLX_DISPLAY_KHR, (cl_context_properties)glXGetCurrentDisplay(), 
-                CL_CONTEXT_PLATFORM, (cl_context_properties)cpPlatform, 
+                CL_CONTEXT_PLATFORM, (cl_context_properties)(platforms[0])(),
                 0
             };
-            cxGPUContext = clCreateContext(props, 1, &cdDevices[uiDeviceUsed], NULL, NULL, &ciErrNum);
+            //cl_context cxGPUContext = clCreateContext(props, 1, &cdDevices[uiDeviceUsed], NULL, NULL, &err);
+            try{
+                context = cl::Context(CL_DEVICE_TYPE_GPU, props);
+            }
+            catch (cl::Error er) {
+                printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+            } 
         #endif
     #endif
-    //shrCheckErrorEX(ciErrNum, CL_SUCCESS, pCleanup);
-
-    // Log device used (reconciled for requested requested and/or CL-GL interop capable devices, as applies)
-    //shrLog("Device # %u, ", uiDeviceUsed);
-    //oclPrintDevName(LOGBOTH, cdDevices[uiDeviceUsed]);
  
+    //for some reason this properties works but props doesn't with c++ bindings
+    //cl_context_properties properties[] =
+    //    { CL_CONTEXT_PLATFORM, (cl_context_properties)(platforms[0])(), 0};
+
+    /*
+    try{
+        context = cl::Context(CL_DEVICE_TYPE_GPU, props);
+        //context = cl::Context(devices, props);
+        //context = cl::Context(devices, props, NULL, NULL, &err);
+        //printf("IS IT ERR222 ???? %s\n", oclErrorString(err));
+        //context = cl::Context(CL_DEVICE_TYPE_GPU, props);
+        //context = cl::Context(cxGPUContext);
+    }
+    catch (cl::Error er) {
+        printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+    }
+    */
+    //devices = context.getInfo<CL_CONTEXT_DEVICES>();
+
+    //create the command queue we will use to execute OpenCL commands
+    ///command_queue = clCreateCommandQueue(context, devices[deviceUsed], 0, &err);
+    try{
+        queue = cl::CommandQueue(context, devices[deviceUsed], 0, &err);
+    }
+    catch (cl::Error er) {
+        printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+    }
+
 }
+
+
+cl::Program EnjaParticles::loadProgram(std::string kernel_source)
+{
+     // Program Setup
+    int pl;
+    //size_t program_length;
+    printf("load the program\n");
+    
+    //CL_SOURCE_DIR is set in the CMakeLists.txt
+    /*
+    std::string path(CL_SOURCE_DIR);
+    path += "/" + std::string(relative_path);
+    printf("path: %s\n", path.c_str());
+    */
+    //file_contents is defined in util.cpp
+    //it loads the contents of the file at the given path
+    //char* cSourceCL = file_contents(path.c_str(), &pl);
+    //#include "part1.cl"
+    //printf("Program source:\n %s\n", kernel_source);
+
+    pl = kernel_source.size();
+    //printf("kernel size: %d\n", pl);
+    //printf("kernel: \n %s\n", kernel_source.c_str());
+    cl::Program program;
+    try
+    {
+        cl::Program::Sources source(1,
+            std::make_pair(kernel_source.c_str(), pl));
+    
+        program = cl::Program(context, source);
+    
+    }
+    catch (cl::Error er) {
+        printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+    }
+    printf("What now?\n");
+        
+
+    try
+    {
+        err = program.build(devices);
+    }
+    catch (cl::Error er) {
+        printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+        std::cout << "Build Status: " << program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(devices[0]) << std::endl;
+        std::cout << "Build Options:\t" << program.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(devices[0]) << std::endl;
+        std::cout << "Build Log:\t " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0]) << std::endl;
+    } 
+    return program;
+}
+

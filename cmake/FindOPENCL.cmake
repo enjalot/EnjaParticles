@@ -22,10 +22,10 @@ ELSE (WIN32)
 
     # Unix style platforms
     # We also search for OpenCL in the NVIDIA GPU SDK default location
-	SET(OPENCL_INCLUDE_DIR  "$ENV{OPENCL_HOME}/common/inc"
-	   CACHE PATH "path to Opencl Include files")
+    #SET(OPENCL_INCLUDE_DIR  "$ENV{OPENCL_HOME}/common/inc"
+    #   CACHE PATH "path to Opencl Include files")
 
-	message(***** OPENCL_INCLUDE_DIR: "${OPENCL_INCLUDE_DIR}" ********)
+    #message(***** OPENCL_INCLUDE_DIR: "${OPENCL_INCLUDE_DIR}" ********)
 
 	# does not work. WHY? 
     #SET(inc  $ENV{CUDA_LOCAL}/../OpenCL/common/inc /usr/include)
