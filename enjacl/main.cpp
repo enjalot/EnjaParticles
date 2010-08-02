@@ -61,7 +61,7 @@ int main(int argc, char** argv)
 
     //initialize glut
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
+    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
     glutInitWindowSize(window_width, window_height);
     glutInitWindowPosition (glutGet(GLUT_SCREEN_WIDTH)/2 - window_width/2, 
                             glutGet(GLUT_SCREEN_HEIGHT)/2 - window_height/2);
@@ -94,7 +94,7 @@ int main(int argc, char** argv)
 
     
     //default constructor
-    enjas = new EnjaParticles(EnjaParticles::VFIELD, NUM_PARTICLES);
+    enjas = new EnjaParticles(EnjaParticles::GRAVITY, NUM_PARTICLES);
     enjas->particle_radius = 2.0f;
     enjas->updates = 1;
     enjas->dt = .005;
@@ -181,7 +181,7 @@ void appRender()
     Vec4 plane[4];
     plane[0] = Vec4(-2,-2,-1,0);
     plane[1] = Vec4(-2,2,-1,0);
-    plane[2] = Vec4(2,2,-1,0);
+    plane[2] = Vec4(2,2,-3,0);
     plane[3] = Vec4(2,-2,-1,0);
 
     //triangle fan from plane (for handling faces)

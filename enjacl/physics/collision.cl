@@ -73,9 +73,9 @@ __kernel void collision( __global float4* vertices, __global float4* velocities,
 
     //set up test plane
     float4 plane[4];
-    plane[0] = (float4)(-2,-2,-3,0);
+    plane[0] = (float4)(-2,-2,-1,0);
     plane[1] = (float4)(-2,2,-1,0);
-    plane[2] = (float4)(2,2,-1,0);
+    plane[2] = (float4)(2,2,-3,0);
     plane[3] = (float4)(2,-2,-1,0);
 
     //triangle fan from plane (for handling faces)
