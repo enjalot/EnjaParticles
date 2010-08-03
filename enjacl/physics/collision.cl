@@ -76,6 +76,8 @@ __kernel void collision( __global float4* vertices, __global float4* velocities,
     float4 pos = vertices[i];
     float4 vel = velocities[i];
 
+	int tst = 0;
+
     //iterate through the list of triangles
     for(int j = 0; j < n_triangles; j++)
     {
@@ -89,8 +91,9 @@ __kernel void collision( __global float4* vertices, __global float4* velocities,
             float damping = .5f;
             mag *= damping;
             vel = -mag * dir;
-            //break;
+			tst = 1;
         }
+		if (tst == 1) break;
     }
     velocities[i].x = vel.x;
     velocities[i].y = vel.y;
