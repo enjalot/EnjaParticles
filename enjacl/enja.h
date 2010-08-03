@@ -25,8 +25,13 @@ typedef struct Vec4
     {}
 } Vec4;
 
-typedef std::vector<Vec4> AVec4;
+typedef struct Triangle
+{
+    Vec4 verts[3];
+    Vec4 normal;    //should pack this in verts array
+} Triangle;
 
+typedef std::vector<Vec4> AVec4;
 
 class EnjaParticles
 {
@@ -73,6 +78,11 @@ public:
     Vec4 rotation[3];
     Vec4 invrotation[3];
 
+    int n_triangles;
+    //handle triangles for collision detection
+    void loadTriangles(std::vector<Triangle>);
+    //Triangle faceToTriangle(Vec4 face[4]);
+
 //private:
     //particles
     int num;                //number of particles
@@ -118,6 +128,9 @@ public:
     int c_vbo;   //colors vbo
     int i_vbo;   //index vbo
     unsigned int vbo_size; //size in bytes of the vbo
+    
+    //for collisions
+    cl::Buffer cl_triangles;  //particle velocities
 
     //timers
     GE::Time *ts[3];    //library timers (update, render, total)
@@ -136,8 +149,6 @@ public:
     bool glsl;
 
 };
-
-
 
 
 #endif
