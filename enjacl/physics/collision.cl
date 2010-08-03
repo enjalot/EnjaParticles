@@ -76,40 +76,16 @@ __kernel void collision( __global float4* vertices, __global float4* velocities,
     float4 pos = vertices[i];
     float4 vel = velocities[i];
 
-    /*
-    //set up test plane
-    float4 plane[4];
-    plane[0] = (float4)(-2,-2,-1,0);
-    plane[1] = (float4)(-2,2,-1,0);
-    plane[2] = (float4)(2,2,-3,0);
-    plane[3] = (float4)(2,-2,-1,0);
-
-    //triangle fan from plane (for handling faces)
-    float4 tri[3];
-    tri[0] = plane[0];
-    tri[1] = plane[1];
-    tri[2] = plane[2];
-
-    //calculate the normal of the triangle
-    //might not need to do this if we just have plane's normal
-    float4 A = tri[0];
-    float4 B = tri[1];
-    float4 C = tri[2];
-    
-    float4 triN = v3normalize(cross_product(B - A, C - A));
-    //float4 triN = (float4)(0.0, 0.0, 1.0, 0.0); 
-    */
-
     //iterate through the list of triangles
     for(int j = 0; j < n_triangles; j++)
     {
-        if(intersect_triangle(pos, vel, triangles[0], h))
+        if(intersect_triangle(pos, vel, triangles[j], h))
         {
             //lets do some specular reflection
             float mag = sqrt(vel.x*vel.x + vel.y*vel.y + vel.z*vel.z); //store the magnitude of the velocity
             float4 nvel = v3normalize(vel);
-            float s = 2.0f*(dot(triangles[0].normal, nvel));
-            float4 dir = s * triangles[0].normal - nvel; //new direction
+            float s = 2.0f*(dot(triangles[j].normal, nvel));
+            float4 dir = s * triangles[j].normal - nvel; //new direction
             float damping = .5f;
             mag *= damping;
             vel = -mag * dir;
