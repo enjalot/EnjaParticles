@@ -101,13 +101,13 @@ int main(int argc, char** argv)
     enjas->collision = true;
 
     Triangle tri;
-    tri.verts[0] = Vec4(-2,-2,-1,0);
-    tri.verts[1] = Vec4(-2,2,-1,0);
-    tri.verts[2] = Vec4(2,2,-3,0);
+    tri.verts[0] = Vec4(-5,-5,-1,0);
+    tri.verts[1] = Vec4(-5,5,-1,0);
+    tri.verts[2] = Vec4(10,2,-3,0);
     tri.normal = Vec4(0,0,1,0);
 
     std::vector<Triangle> triangles;
-    for(int i = 0; i < 10; i++)
+    for(int i = 0; i < 100; i++)
     {
         triangles.push_back(tri);
     }
@@ -193,10 +193,10 @@ void appRender()
 
 
     Vec4 plane[4];
-    plane[0] = Vec4(-2,-2,-1,0);
-    plane[1] = Vec4(-2,2,-1,0);
-    plane[2] = Vec4(2,2,-3,0);
-    plane[3] = Vec4(2,-2,-1,0);
+    plane[0] = Vec4(-5,-5,-1,0);
+    plane[1] = Vec4(-5,5,-1,0);
+    plane[2] = Vec4(10,2,-3,0);
+    plane[3] = Vec4(5,-5,-1,0);
 
     //triangle fan from plane (for handling faces)
     Vec4 tri[3];
