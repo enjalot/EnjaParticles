@@ -46,7 +46,7 @@ int EnjaParticles::update()
 
     if(collision)
     {
-        err = collision_kernel.setArg(2, dt);
+        err = collision_kernel.setArg(4, dt);
         err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
         queue.finish();
     }
