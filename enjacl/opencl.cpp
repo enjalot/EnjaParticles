@@ -119,8 +119,11 @@ void EnjaParticles::popCorn()
         if(collision)
         {
             collision_program = loadProgram(sources[COLLISION]);
-            //collision_kernel = cl::Kernel(collision_program, "collision", &err);
+#ifdef OPENCL_SHARED
             collision_kernel = cl::Kernel(collision_program, "collision_ge", &err);
+#else
+            collision_kernel = cl::Kernel(collision_program, "collision", &err);
+#endif
 
             long s = collision_kernel.getWorkGroupInfo<CL_KERNEL_LOCAL_MEM_SIZE>(devices.front());
             printf("kernel local mem: %d\n", s);

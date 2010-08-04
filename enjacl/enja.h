@@ -32,6 +32,7 @@ typedef struct Triangle
 {
     Vec4 verts[3];
     Vec4 normal;    //should pack this in verts array
+	float dummy; // for more efficient global -> shared
 } Triangle;
 
 typedef std::vector<Vec4> AVec4;

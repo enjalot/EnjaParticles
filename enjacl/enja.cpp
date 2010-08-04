@@ -32,7 +32,11 @@
 #include "physics/gravity.cl"
 #include "physics/vfield.cl"
 
+#ifdef OPENCL_SHARED
+#include "physics/collision_ge.cl"
+#else
 #include "physics/collision.cl"
+#endif
 //#include "physics/transform.cl"
 #include "physics/position.cl"
 

@@ -11,15 +11,16 @@ float4 v3normalize(float4 a)
     float mag = sqrt(a.x*a.x + a.y*a.y + a.z*a.z); //store the magnitude of the velocity
     return (float4)(a.x/mag, a.y/mag, a.z/mag, 0);
 }
-typedef struct 
+typedef struct Triangle
 {
     float4 verts[3];
     float4 normal;
     float  dummy;  // for better global to local memory transfer
 } Triangle;
 //----------------------------------------------------------------------
-//bool intersect_triangle(float4 pos, float4 vel, float4 tri[3], float4 triN, float dist)
-bool intersect_triangle(float4 pos, float4 vel, Triangle tri, float dist)
+// Aug. 4, 2010: Erlebacher version with shared memory
+
+bool intersect_triangle_ge(float4 pos, float4 vel, Triangle tri, float dist)
 {
     /*
     * Moller and Trumbore
@@ -73,13 +74,29 @@ bool intersect_triangle(float4 pos, float4 vel, Triangle tri, float dist)
 
 }
 //----------------------------------------------------------------------
-__kernel void collision( __global float4* vertices, __global float4* velocities, __global Triangle* triangles, int n_triangles, float h)
+
+__kernel void collision_ge( __global float4* vertices, __global float4* velocities, __global struct Triangle* triangles, int n_triangles, float h, __local struct Triangle* triangles_sh)
 {
+	return;
+#if 1
     unsigned int i = get_global_id(0);
+
+	#if 1
+	// copy triangles to share memory 
+	for (int j = 0; j < n_triangles; j++) {
+	//for (int j = 0; j < 5; j++) {  // does not work
+		//triangles[i] = triangles_glob[i];
+		triangles[j].normal = triangles_glob[i].normal;
+		triangles[j].verts[0] = triangles_glob[j].verts[0];
+		triangles[j].verts[1] = triangles_glob[j].verts[1];
+		triangles[j].verts[2] = triangles_glob[j].verts[2];
+		//triangles[j].normal = triangles_glob[j].normal;
+		;
+	}
+	#endif
 
     float4 pos = vertices[i];
     float4 vel = velocities[i];
-	//__constant float damping = .5f;
 
 	//int tst = 0;
 
@@ -101,11 +118,10 @@ __kernel void collision( __global float4* vertices, __global float4* velocities,
 		//if (tst == 1) break;
     }
 
-	// uncommenting lines messes up the output. Why?
-	// Ideally, should put this inside the "if". 
+	// velocities change due to collision
     velocities[i].x = vel.x;
     velocities[i].y = vel.y;
     velocities[i].z = vel.z;
+#endif
 }
-//----------------------------------------------------------------------
 );
