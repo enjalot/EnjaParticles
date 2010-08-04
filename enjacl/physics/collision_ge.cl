@@ -20,6 +20,82 @@ typedef struct Triangle
 //----------------------------------------------------------------------
 // Aug. 4, 2010: Erlebacher version with shared memory
 
+//----------------------------------------------------------------------
+#if 1
+bool intersect_triangle_ge(float4 pos, float4 vel, __local Triangle* tri, float dist)
+// Assume triangle is in the x-y plane with normal (0,0,1) for simplicity
+{
+    /*
+    * Moller and Trumbore
+    * take in the particle position and velocity (treated as a Ray)
+    * also the triangle vertices for the ray intersection
+    * we take in the precalculated triangle's normal to first test for distance
+    * dist is the threshold to determine if we are close enough to the triangle
+    * to even check for distance
+    */
+    //can't use commas with STRINGIFY trick
+    float4 edge1;
+    float4 edge2;
+    float4 tvec;
+    float4 pvec;
+    float4 qvec;
+    float det;
+    float inv_det;
+    float t;
+    float u;
+    float v;
+    float eps = .000001;
+
+	float4 pos1 = pos + dist * vel;
+	//if ((pos1.z <= tri->verts[0].z && pos.z >= tri->verts[0].z)) {
+	if (pos1.z <= -1. && pos.z >= -1.) {
+		return true;
+	}
+
+	return false;
+
+#if 0
+    //edge1 = tri.verts[1] - tri.verts[0];
+    //edge2 = tri.verts[2] - tri.verts[0];
+
+    edge1 = tri->verts[1] - tri->verts[0];
+    edge2 = tri->verts[2] - tri->verts[0];
+
+
+    pvec = cross_product(vel, edge2);
+    det = dot(edge1, pvec);
+    
+    //non-culling branch
+    if(det > -eps && det < eps) {
+    //if(det < eps)
+        return false;
+	}
+    
+    //tvec = pos - tri.verts[0];
+    tvec = pos - tri->verts[0];
+    inv_det = 1.0/det;
+
+    u = dot(tvec, pvec) * inv_det;
+    if (u < 0.0 || u > 1.0)
+        return false;
+
+    qvec = cross_product(tvec, edge1);
+    v = dot(vel, qvec) * inv_det;
+    if (v < 0.0 || (u + v) > 1.0f) {
+        return false;
+	}
+
+    t = dot(edge2, qvec) * inv_det;
+    if(t > eps and t < dist)
+        return true;
+
+    return false;
+#endif
+}
+#endif
+//----------------------------------------------------------------------
+
+#if 0
 bool intersect_triangle_ge(float4 pos, float4 vel, __local Triangle* tri, float dist)
 {
     /*
@@ -78,8 +154,8 @@ bool intersect_triangle_ge(float4 pos, float4 vel, __local Triangle* tri, float 
         return true;
 
     return false;
-
 }
+#endif
 //----------------------------------------------------------------------
 
 __kernel void collision_ge( __global float4* vertices, __global float4* velocities, __global struct Triangle* triangles_glob, int n_triangles, float h, __local struct Triangle* triangles)

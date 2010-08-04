@@ -340,23 +340,3 @@ void showFPS(float fps, std::string* report)
     glPopMatrix();                      // restore to previous modelview matrix
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
