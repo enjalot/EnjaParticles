@@ -88,19 +88,16 @@ __kernel void collision_ge( __global float4* vertices, __global float4* velociti
     unsigned int i = get_global_id(0);
 
 
-	#if 1
+#if 1
 
-	// copy triangles to share memory 
-	//for (int j = 0; j < n_triangles; j++) {
-	//for (int j = 0; j < 5; j++) {  // does not work
-		//triangles[i] = triangles_glob[i];
+	// copy triangles to shared memory 
 
 	if (i < n_triangles) {
-	// make more robust (what is total_threads < n_triangles?)
+		// make more robust (what is total_threads < n_triangles?)
 		#if 1
-		triangles[i] = triangles_glob[i];
+		triangles[i] = triangles_glob[i]; // struct copy
 		#else
-		triangles[i].normal = triangles_glob[i].normal;
+		triangles[i].normal   = triangles_glob[i].normal;  // struct element copy
 		triangles[i].verts[0] = triangles_glob[i].verts[0];
 		triangles[i].verts[1] = triangles_glob[i].verts[1];
 		triangles[i].verts[2] = triangles_glob[i].verts[2];
@@ -108,32 +105,30 @@ __kernel void collision_ge( __global float4* vertices, __global float4* velociti
 		;
 	}
 
-
 	barrier(CLK_LOCAL_MEM_FENCE);
-	#endif
+
+#endif
 
     float4 pos = vertices[i];
     float4 vel = velocities[i];
 
 	//int tst = 0;
+    float mag = sqrt(vel.x*vel.x + vel.y*vel.y + vel.z*vel.z); //store the magnitude of the velocity
+    float4 nvel = v3normalize(vel);
 
     //iterate through the list of triangles
     for(int j = 0; j < n_triangles; j++)
     {
-        //if(intersect_triangle(pos, vel, triangles[j], h))
-        //if(intersect_triangle(pos, vel, &triangles[j], h))
         if(intersect_triangle_ge(pos, vel, &triangles[j], h))
-        //if(intersect_triangle_j(pos, vel, triangles, j, h))
         {
-	//return;
             //lets do some specular reflection
-            float mag = sqrt(vel.x*vel.x + vel.y*vel.y + vel.z*vel.z); //store the magnitude of the velocity
-            float4 nvel = v3normalize(vel);
             float s = 2.0f*(dot(triangles[j].normal, nvel));
             float4 dir = s * triangles[j].normal - nvel; //new direction
             float damping = .5f;
             mag *= damping;
             vel = -mag * dir;
+            vel = 0.001;
+			break;
 			//tst = 1;
         }
 		//if (tst == 1) break;
