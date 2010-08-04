@@ -2,15 +2,16 @@
 
 std::string collision_program_source = STRINGIFY(
 
-float4 cross_product(float4 a, float4 b)
+inline float4 cross_product(float4 a, float4 b)
 {
     return (float4)(a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x, 0);
 }
-float4 v3normalize(float4 a)
+inline float4 v3normalize(float4 a)
 {
-    float mag = sqrt(a.x*a.x + a.y*a.y + a.z*a.z); //store the magnitude of the velocity
-    return (float4)(a.x/mag, a.y/mag, a.z/mag, 0);
+    float magi = 1./sqrt(a.x*a.x + a.y*a.y + a.z*a.z); //store the magnitude of the velocity
+    return (float4)(a.x*magi, a.y*magi, a.z*magi, 0);
 }
+
 typedef struct 
 {
     float4 verts[3];
@@ -40,7 +41,7 @@ bool intersect_triangle(float4 pos, float4 vel, Triangle tri, float dist)
     float t;
     float u;
     float v;
-    float eps = .000001;
+    float eps = .00001;
 
     edge1 = tri.verts[1] - tri.verts[0];
     edge2 = tri.verts[2] - tri.verts[0];
@@ -49,9 +50,10 @@ bool intersect_triangle(float4 pos, float4 vel, Triangle tri, float dist)
     det = dot(edge1, pvec);
     
     //non-culling branch
-    if(det > -eps && det < eps)
+    if(det > -eps && det < eps) {
     //if(det < eps)
         return false;
+	}
     
     tvec = pos - tri.verts[0];
     inv_det = 1.0/det;
@@ -62,7 +64,7 @@ bool intersect_triangle(float4 pos, float4 vel, Triangle tri, float dist)
 
     qvec = cross_product(tvec, edge1);
     v = dot(vel, qvec) * inv_det;
-    if (v < 0.0 || u + v > 1.0f)
+    if (v < 0.0 || (u + v) > 1.0f)
         return false;
 
     t = dot(edge2, qvec) * inv_det;
