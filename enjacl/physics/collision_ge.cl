@@ -15,12 +15,12 @@ typedef struct Triangle
 {
     float4 verts[3];
     float4 normal;
-    float  dummy;  // for better global to local memory transfer
+    //float  dummy;  // for better global to local memory transfer
 } Triangle;
 //----------------------------------------------------------------------
 // Aug. 4, 2010: Erlebacher version with shared memory
 
-bool intersect_triangle_ge(float4 pos, float4 vel, Triangle tri, float dist)
+bool intersect_triangle_ge(float4 pos, float4 vel, __local Triangle* tri, float dist)
 {
     /*
     * Moller and Trumbore
@@ -43,18 +43,24 @@ bool intersect_triangle_ge(float4 pos, float4 vel, Triangle tri, float dist)
     float v;
     float eps = .000001;
 
-    edge1 = tri.verts[1] - tri.verts[0];
-    edge2 = tri.verts[2] - tri.verts[0];
+    //edge1 = tri.verts[1] - tri.verts[0];
+    //edge2 = tri.verts[2] - tri.verts[0];
+
+    edge1 = tri->verts[1] - tri->verts[0];
+    edge2 = tri->verts[2] - tri->verts[0];
+
 
     pvec = cross_product(vel, edge2);
     det = dot(edge1, pvec);
     
     //non-culling branch
-    if(det > -eps && det < eps)
+    if(det > -eps && det < eps) {
     //if(det < eps)
         return false;
+	}
     
-    tvec = pos - tri.verts[0];
+    //tvec = pos - tri.verts[0];
+    tvec = pos - tri->verts[0];
     inv_det = 1.0/det;
 
     u = dot(tvec, pvec) * inv_det;
@@ -63,8 +69,9 @@ bool intersect_triangle_ge(float4 pos, float4 vel, Triangle tri, float dist)
 
     qvec = cross_product(tvec, edge1);
     v = dot(vel, qvec) * inv_det;
-    if (v < 0.0 || u + v > 1.0f)
+    if (v < 0.0 || (u + v) > 1.0f) {
         return false;
+	}
 
     t = dot(edge2, qvec) * inv_det;
     if(t > eps and t < dist)
@@ -75,24 +82,34 @@ bool intersect_triangle_ge(float4 pos, float4 vel, Triangle tri, float dist)
 }
 //----------------------------------------------------------------------
 
-__kernel void collision_ge( __global float4* vertices, __global float4* velocities, __global struct Triangle* triangles, int n_triangles, float h, __local struct Triangle* triangles_sh)
+__kernel void collision_ge( __global float4* vertices, __global float4* velocities, __global struct Triangle* triangles_glob, int n_triangles, float h, __local struct Triangle* triangles)
 {
-	return;
 #if 1
     unsigned int i = get_global_id(0);
 
+
 	#if 1
+
 	// copy triangles to share memory 
-	for (int j = 0; j < n_triangles; j++) {
+	//for (int j = 0; j < n_triangles; j++) {
 	//for (int j = 0; j < 5; j++) {  // does not work
 		//triangles[i] = triangles_glob[i];
-		triangles[j].normal = triangles_glob[i].normal;
-		triangles[j].verts[0] = triangles_glob[j].verts[0];
-		triangles[j].verts[1] = triangles_glob[j].verts[1];
-		triangles[j].verts[2] = triangles_glob[j].verts[2];
-		//triangles[j].normal = triangles_glob[j].normal;
+
+	if (i < n_triangles) {
+	// make more robust (what is total_threads < n_triangles?)
+		#if 1
+		triangles[i] = triangles_glob[i];
+		#else
+		triangles[i].normal = triangles_glob[i].normal;
+		triangles[i].verts[0] = triangles_glob[i].verts[0];
+		triangles[i].verts[1] = triangles_glob[i].verts[1];
+		triangles[i].verts[2] = triangles_glob[i].verts[2];
+		#endif
 		;
 	}
+
+
+	barrier(CLK_LOCAL_MEM_FENCE);
 	#endif
 
     float4 pos = vertices[i];
@@ -103,8 +120,12 @@ __kernel void collision_ge( __global float4* vertices, __global float4* velociti
     //iterate through the list of triangles
     for(int j = 0; j < n_triangles; j++)
     {
-        if(intersect_triangle(pos, vel, triangles[j], h))
+        //if(intersect_triangle(pos, vel, triangles[j], h))
+        //if(intersect_triangle(pos, vel, &triangles[j], h))
+        if(intersect_triangle_ge(pos, vel, &triangles[j], h))
+        //if(intersect_triangle_j(pos, vel, triangles, j, h))
         {
+	//return;
             //lets do some specular reflection
             float mag = sqrt(vel.x*vel.x + vel.y*vel.y + vel.z*vel.z); //store the magnitude of the velocity
             float4 nvel = v3normalize(vel);

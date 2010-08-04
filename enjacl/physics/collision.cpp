@@ -13,12 +13,13 @@ void EnjaParticles::loadTriangles(std::vector<Triangle> triangles)
     err = collision_kernel.setArg(2, cl_triangles);   //triangles
     err = collision_kernel.setArg(3, n_triangles);   //number of triangles
 
+	printf("sizeof(Triangle) = %d\n", (int) sizeof(Triangle));
+
 #ifdef OPENCL_SHARED
 
 	size_t max_loc_memory = 1024 << 4;  // 16k bytes local memory on mac
 	int max_tri = max_loc_memory / sizeof(Triangle);
 	max_tri = n_triangles;
-	printf("sizeof(Triangle) = %d\n", (int) sizeof(Triangle));
 	//max_tri -= 10;
 	printf("max_tri= %d\n", max_tri);
 	

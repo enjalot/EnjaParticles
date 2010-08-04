@@ -434,6 +434,7 @@ cl::Program EnjaParticles::loadProgram(std::string kernel_source)
         err = program.build(devices);
     }
     catch (cl::Error er) {
+		printf("GE+++++\n");
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
         std::cout << "Build Status: " << program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(devices[0]) << std::endl;
         std::cout << "Build Options:\t" << program.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(devices[0]) << std::endl;

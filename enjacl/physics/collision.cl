@@ -16,7 +16,7 @@ typedef struct
 {
     float4 verts[3];
     float4 normal;
-    float  dummy;  // for better global to local memory transfer
+    //float  dummy;  // for better global to local memory transfer
 } Triangle;
 //----------------------------------------------------------------------
 //bool intersect_triangle(float4 pos, float4 vel, float4 tri[3], float4 triN, float dist)
