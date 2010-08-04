@@ -14,7 +14,7 @@ float4 v3normalize(float4 a)
 typedef struct Triangle
 {
     float4 verts[3];
-    float4 normal;
+    //float4 normal;
     //float  dummy;  // for better global to local memory transfer
 } Triangle;
 //----------------------------------------------------------------------
@@ -47,8 +47,8 @@ bool intersect_triangle_ge(float4 pos, float4 vel, __local Triangle* tri, float 
     float eps = .000001;
 
 	float4 pos1 = pos + dist * vel;
-	//if ((pos1.z <= tri->verts[0].z && pos.z >= tri->verts[0].z)) {
-	if (pos1.z <= -1. && pos.z >= -1.) {
+	if ((pos1.z <= tri->verts[0].z && pos.z >= tri->verts[0].z)) {
+	//if (pos1.z <= -1. && pos.z >= -1.) {
 		return true;
 	}
 
@@ -173,7 +173,7 @@ __kernel void collision_ge( __global float4* vertices, __global float4* velociti
 		#if 1
 		triangles[i] = triangles_glob[i]; // struct copy
 		#else
-		triangles[i].normal   = triangles_glob[i].normal;  // struct element copy
+		//triangles[i].normal   = triangles_glob[i].normal;  // struct element copy
 		triangles[i].verts[0] = triangles_glob[i].verts[0];
 		triangles[i].verts[1] = triangles_glob[i].verts[1];
 		triangles[i].verts[2] = triangles_glob[i].verts[2];
@@ -192,14 +192,16 @@ __kernel void collision_ge( __global float4* vertices, __global float4* velociti
     float mag = sqrt(vel.x*vel.x + vel.y*vel.y + vel.z*vel.z); //store the magnitude of the velocity
     float4 nvel = v3normalize(vel);
 
+
     //iterate through the list of triangles
     for(int j = 0; j < n_triangles; j++)
     {
+        float4 trinormal = (float4)(triangles[j].verts[0].w, triangles[j].verts[1].w, triangles[j].verts[2].w, 0);
         if(intersect_triangle_ge(pos, vel, &triangles[j], h))
         {
             //lets do some specular reflection
-            float s = 2.0f*(dot(triangles[j].normal, nvel));
-            float4 dir = s * triangles[j].normal - nvel; //new direction
+            float s = 2.0f*(dot(trinormal, nvel));
+            float4 dir = s * trinormal - nvel; //new direction
             float damping = .5f;
             mag *= damping;
             vel = -mag * dir;

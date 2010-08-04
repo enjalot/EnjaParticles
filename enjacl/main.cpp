@@ -104,8 +104,7 @@ int main(int argc, char** argv)
     Triangle tri;
     tri.verts[0] = Vec4(-5,-5,-1,0);
     tri.verts[1] = Vec4(-5,5,-1,0);
-    tri.verts[2] = Vec4(10,2,-1,0);
-    tri.normal = Vec4(0,0,1,0);
+    tri.verts[2] = Vec4(10,2,-1,1);
 
 	//int numTri = 1000;
 	int numTri = 220; // for new collision opencl code
