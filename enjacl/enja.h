@@ -25,6 +25,9 @@ typedef struct Vec4
     {}
 } Vec4;
 
+// size: 4*4 = 16 floats
+// shared memory = 65,536 bytes = 16,384 floats
+//               = 1024 triangles
 typedef struct Triangle
 {
     Vec4 verts[3];

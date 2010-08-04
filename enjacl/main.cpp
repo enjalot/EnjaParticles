@@ -107,7 +107,8 @@ int main(int argc, char** argv)
     tri.normal = Vec4(0,0,1,0);
 
     std::vector<Triangle> triangles;
-	int numTri = 1000;
+	//int numTri = 1000;
+	int numTri = 512; // for new collision opencl code
     for(int i = 0; i < numTri; i++)
     {
         triangles.push_back(tri);
@@ -211,8 +212,8 @@ void appRender()
     glVertex3f(tri[0].x, tri[0].y, tri[0].z);
     glVertex3f(tri[1].x, tri[1].y, tri[1].z);
     glVertex3f(tri[2].x, tri[2].y, tri[2].z);
-
     glEnd();
+
  
     enjas->render();
 

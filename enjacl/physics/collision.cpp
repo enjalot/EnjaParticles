@@ -13,6 +13,11 @@ void EnjaParticles::loadTriangles(std::vector<Triangle> triangles)
     err = collision_kernel.setArg(2, cl_triangles);   //triangles
     err = collision_kernel.setArg(3, n_triangles);   //number of triangles
 
+	
+	size_t sz = n_triangles*sizeof(Triangle);
+	printf("sz= %d bytes\n", sz);
+    err = collision_kernel.setArg(5, sz, 0);   //number of triangles
+
     //need to deal with transforms
 }
 

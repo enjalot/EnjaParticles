@@ -52,6 +52,7 @@ int EnjaParticles::update()
 		size_t loc = 512;
         err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
         //err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
+	printf("end\n");exit(0); // >>>>>>>
         queue.finish();
     }
 
@@ -106,7 +107,8 @@ void EnjaParticles::popCorn()
         if(collision)
         {
             collision_program = loadProgram(sources[COLLISION]);
-            collision_kernel = cl::Kernel(collision_program, "collision", &err);
+            //collision_kernel = cl::Kernel(collision_program, "collision", &err);
+            collision_kernel = cl::Kernel(collision_program, "collision_ge", &err);
 
             long s = collision_kernel.getWorkGroupInfo<CL_KERNEL_LOCAL_MEM_SIZE>(devices.front());
             printf("kernel local mem: %d\n", s);
