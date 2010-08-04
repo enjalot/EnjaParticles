@@ -108,7 +108,7 @@ int main(int argc, char** argv)
 
     std::vector<Triangle> triangles;
 	//int numTri = 1000;
-	int numTri = 512; // for new collision opencl code
+	int numTri = 250; // for new collision opencl code
     for(int i = 0; i < numTri; i++)
     {
         triangles.push_back(tri);

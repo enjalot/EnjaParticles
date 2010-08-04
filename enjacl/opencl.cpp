@@ -50,9 +50,21 @@ int EnjaParticles::update()
         err = collision_kernel.setArg(4, dt);
 		size_t glob = num; // 10000
 		size_t loc = 512;
+		try {
         err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
         //err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
-	printf("end\n");exit(0); // >>>>>>>
+	//printf("end\n");exit(0); // >>>>>>>
+		}
+      catch (cl::Error err) {
+         std::cerr
+            << "ERROR: "
+            << err.what()
+            << "("
+            << err.err()
+            << ")"
+            << std::endl;
+      }
+
         queue.finish();
     }
 
