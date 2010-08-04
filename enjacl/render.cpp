@@ -84,6 +84,7 @@ int EnjaParticles::render()
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
 
+
     if(glsl)
     {
         //printf("GLSL\n");
@@ -134,6 +135,7 @@ int EnjaParticles::render()
     {
         printf("%s\n", printReport().c_str());
     }
+
 }
 
 

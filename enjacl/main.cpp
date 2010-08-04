@@ -46,7 +46,7 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 EnjaParticles* enjas;
-#define NUM_PARTICLES 10000
+#define NUM_PARTICLES 1024*16
 
 GLuint v_vbo; //vbo id
 GLuint c_vbo; //vbo id
@@ -103,11 +103,13 @@ int main(int argc, char** argv)
     Triangle tri;
     tri.verts[0] = Vec4(-5,-5,-1,0);
     tri.verts[1] = Vec4(-5,5,-1,0);
-    tri.verts[2] = Vec4(10,2,-3,0);
+    tri.verts[2] = Vec4(10,2,-1,0);
     tri.normal = Vec4(0,0,1,0);
 
     std::vector<Triangle> triangles;
-    for(int i = 0; i < 100; i++)
+	//int numTri = 1000;
+	int numTri = 220; // for new collision opencl code
+    for(int i = 0; i < numTri; i++)
     {
         triangles.push_back(tri);
     }
@@ -210,8 +212,8 @@ void appRender()
     glVertex3f(tri[0].x, tri[0].y, tri[0].z);
     glVertex3f(tri[1].x, tri[1].y, tri[1].z);
     glVertex3f(tri[2].x, tri[2].y, tri[2].z);
-
     glEnd();
+
  
     enjas->render();
 

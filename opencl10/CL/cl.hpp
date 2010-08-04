@@ -101,7 +101,6 @@
  *       cl::Context context(CL_DEVICE_TYPE_CPU, properties); 
  * 
  *       std::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
- * 
  *       cl::Program::Sources source(1,
  *           std::make_pair(helloStr,strlen(helloStr)));
  *       cl::Program program_ = cl::Program(context, source);
