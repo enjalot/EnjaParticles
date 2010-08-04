@@ -28,6 +28,7 @@ float translate_z = -4.f;
 int mouse_old_x, mouse_old_y;
 int mouse_buttons = 0;
 float rotate_x = 0.0, rotate_y = 0.0;
+std::vector<Triangle> triangles;
 
 
 void init_gl();
@@ -106,7 +107,6 @@ int main(int argc, char** argv)
     tri.verts[2] = Vec4(10,2,-1,0);
     tri.normal = Vec4(0,0,1,0);
 
-    std::vector<Triangle> triangles;
 	//int numTri = 1000;
 	int numTri = 220; // for new collision opencl code
     for(int i = 0; i < numTri; i++)
@@ -202,16 +202,14 @@ void appRender()
 
     //triangle fan from plane (for handling faces)
     Vec4 tri[3];
-    tri[0] = plane[0];
-    tri[1] = plane[1];
-    tri[2] = plane[2];
+	Triangle& tria = triangles[0];
 
 
     glColor3f(0,1,0);
     glBegin(GL_TRIANGLES);
-    glVertex3f(tri[0].x, tri[0].y, tri[0].z);
-    glVertex3f(tri[1].x, tri[1].y, tri[1].z);
-    glVertex3f(tri[2].x, tri[2].y, tri[2].z);
+    glVertex3f(tria.verts[0].x, tria.verts[0].y, tria.verts[0].z);
+    glVertex3f(tria.verts[1].x, tria.verts[1].y, tria.verts[1].z);
+    glVertex3f(tria.verts[2].x, tria.verts[2].y, tria.verts[2].z);
     glEnd();
 
  
