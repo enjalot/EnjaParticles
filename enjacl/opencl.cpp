@@ -103,6 +103,10 @@ void EnjaParticles::popCorn()
         {
             collision_program = loadProgram(sources[COLLISION]);
             collision_kernel = cl::Kernel(collision_program, "collision", &err);
+            long s = collision_kernel.getWorkGroupInfo<CL_KERNEL_LOCAL_MEM_SIZE>(devices.front());
+            printf("kernel local mem: %d\n", s);
+            size_t wgs = collision_kernel.getWorkGroupInfo<CL_KERNEL_WORK_GROUP_SIZE>(devices.front());
+            printf("kernel workgroup size: %d\n", wgs);
         }
         pos_update_program = loadProgram(sources[POSITION]);
         pos_update_kernel = cl::Kernel(pos_update_program, "pos_update", &err);
@@ -378,9 +382,9 @@ cl::Program EnjaParticles::loadProgram(std::string kernel_source)
     }
     catch (cl::Error er) {
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
-        std::cout << "Build Status: " << program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(devices[0]) << std::endl;
-        std::cout << "Build Options:\t" << program.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(devices[0]) << std::endl;
-        std::cout << "Build Log:\t " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0]) << std::endl;
+        std::cout << "Build Status: " << program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(devices.front()) << std::endl;
+        std::cout << "Build Options:\t" << program.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(devices.front()) << std::endl;
+        std::cout << "Build Log:\t " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices.front()) << std::endl;
     } 
     return program;
 }

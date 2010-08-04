@@ -2,6 +2,8 @@
 
 void EnjaParticles::loadTriangles(std::vector<Triangle> triangles)
 {
+    if (!collision)
+        return;
     n_triangles = triangles.size();
     //load triangles into cl buffer
     //Triangle is a struct that ends up being 4 float4s
