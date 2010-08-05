@@ -164,22 +164,22 @@ __kernel void collision_ge( __global float4* vertices, __global float4* velociti
 	//if (n_triangles > tot) return;
 
 	int iw = get_local_id(0);
-
-
-	#if 0
-	if (iw < n_triangles) {
-	// Does not work (no collision)
-		triangles[iw].normal   = make_float4(0.,0.,1.,0.);
-		triangles[iw].verts[0] = make_float4(-5.,-5.,0.,0.);
-		triangles[iw].verts[1] = make_float4(-5.,5.,0.,0.);
-		triangles[iw].verts[2] = make_float4(10.,5.,0.,0.);
-	}
-	#else
+	
+	int n_cache = n_triangles; // often less than n_triangles
 
 	// copy triangles to shared memory 
+	// need to get more threads involved with global -> shared memory transfer
 
-	if (iw < n_triangles) {
+	if (iw < n_cache) {
+	// Does not work (no collision)
+	#if 0
+	// Why does the following not work? 
+		//triangles[iw].normal   = triangles_glob[iw].normal;   //make_float4(0.,0.,1.,0.);
+		//triangles[iw].verts[0] = triangles_glob[iw].verts[0]; //make_float4(-5.,-5.,0.,0.);
+		//triangles[iw].verts[1] = triangles_glob[iw].verts[1]; //make_float4(-5.,5.,0.,0.);
+		//triangles[iw].verts[2] = triangles_glob[iw].verts[2]; //make_float4(10.,5.,0.,0.);
 
+	#else
 		// make more robust (what is total_threads < n_triangles?)
 		// Not efficient. Should instead copy individual floats. I can do this
 		// by doing 
@@ -190,11 +190,15 @@ __kernel void collision_ge( __global float4* vertices, __global float4* velociti
 
 		// Appears to work (there is collision)
 		triangles[iw] = triangles_glob[iw]; // struct copy
+	;
 	}
 	#endif
 
-	barrier(CLK_LOCAL_MEM_FENCE);
+	#if 0
+		__local float* float_vals = (float*) triangles;
+	#endif
 
+	barrier(CLK_LOCAL_MEM_FENCE);
 
 
     float4 pos = vertices[i];
@@ -203,23 +207,22 @@ __kernel void collision_ge( __global float4* vertices, __global float4* velociti
 	//int tst = 0;
 	//store the magnitude of the velocity
     float mag = sqrt(vel.x*vel.x + vel.y*vel.y + vel.z*vel.z); 
-    float4 nvel = v3normalize(vel);
+
+	// variables: 
+	// triangles, nvel, pos, vel
+
+	//process_triangles(n_triangles, triangles, pos, vel, h);
 
     //iterate through the list of triangles
     for(int j = 0; j < n_triangles; j++)
     {
-        //if(intersect_triangle_ge(pos, vel, h, &triangles[j]))
-        //if(intersect_triangle_ge(pos, vel, h, &normal[j], &vert0[j], vert1[j], vert2[j]))
-
         if(intersect_triangle_ge(pos, vel, &triangles[j], h))
         {
             //lets do some specular reflection
+    		float4 nvel = v3normalize(vel);
 
             float s = 2.0f*(dot(triangles[j].normal, nvel));
-            //float s = 2.0f*(dot(normal[j], nvel));
-
             float4 dir = s * triangles[j].normal - nvel; //new direction
-            //float4 dir = s * normal[j] - nvel; //new direction
 
             float damping = .8f;
             mag *= damping;
