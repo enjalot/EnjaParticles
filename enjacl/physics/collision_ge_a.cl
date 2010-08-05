@@ -179,62 +179,15 @@ bool intersect_triangle_ge(float4 pos, float4 vel, __local Triangle* tri, float 
 //----------------------------------------------------------------------
 __kernel void collision_ge( __global float4* vertices, __global float4* velocities, 
      __global Triangle* triangles_glob, int n_triangles, float h, __local Triangle* triangles)
-     //__global Triangle* triangles_glob, __global float* tri_glob_f, int n_triangles, float h, __local Triangle* triangles)
-	 // How to identify triangles and floats
 {
     unsigned int i = get_global_id(0);
-	//int tot = get_global_size(0);
-	//if (n_triangles > tot) return;
 
-	// single precision: float = 4 bytes
-	//int nb_f = n_triangles * 4*4*4; // 4 float4 (float == 4 bytes)
-
-	//int nb_f = n_triangles * sizeof(Triangle) / sizeof(float); 
 	int one_tri = 16; // nb floats per triangle
 	test_local(triangles_glob, triangles, one_tri, n_triangles);
 	barrier(CLK_LOCAL_MEM_FENCE);
 
-	//int iw = get_local_id(0);
-	
-	// will be used at later time
-	//int n_cache = n_triangles; // often less than n_triangles
-
 	// copy triangles to shared memory 
 	// need to get more threads involved with global -> shared memory transfer
-
-#if 0
-	if (iw < n_cache) {
-	// Does not work (no collision)
-	#if 0
-	// Why does the following not work? 
-		triangles[iw].normal[0]  = triangles_glob[iw].normal[0];   //make_float4(0.,0.,1.,0.);
-		//triangles[iw].verts[0] = triangles_glob[iw].verts[0]; //make_float4(-5.,-5.,0.,0.);
-		//triangles[iw].verts[1] = triangles_glob[iw].verts[1]; //make_float4(-5.,5.,0.,0.);
-		//triangles[iw].verts[2] = triangles_glob[iw].verts[2]; //make_float4(10.,5.,0.,0.);
-		;
-
-	#else
-		// make more robust (what is total_threads < n_triangles?)
-		// Not efficient. Should instead copy individual floats. I can do this
-		// by doing 
-		// Next line creates problems. WHY? 
-		//__local float* float_vals = (float*) &triangles[0].verts[0].x;
-		//__local float* float_vals = (float*) triangles;
-		// Have all threads copy successive floats for maximum efficiency. 
-
-		// Appears to work (there is collision)
-		triangles[iw] = triangles_glob[iw]; // struct copy
-	;
-	}
-	#endif
-
-	#if 0
-		__local float* float_vals = (float*) triangles;
-	#endif
-
-	barrier(CLK_LOCAL_MEM_FENCE);
-#endif
-
 
     float4 pos = vertices[i];
     float4 vel = velocities[i];

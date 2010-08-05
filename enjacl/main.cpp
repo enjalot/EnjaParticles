@@ -47,7 +47,7 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 EnjaParticles* enjas;
-#define NUM_PARTICLES 1024*16
+#define NUM_PARTICLES 1024*16*4
 
 GLuint v_vbo; //vbo id
 GLuint c_vbo; //vbo id
@@ -108,7 +108,7 @@ int main(int argc, char** argv)
     tri.normal   = Vec4(0.,0.,1.,0.);
 
 	//int numTri = 1000;
-	int numTri = 220; // for new collision opencl code
+	int numTri = 250; // for new collision opencl code
     for(int i = 0; i < numTri; i++)
     {
         triangles.push_back(tri);
