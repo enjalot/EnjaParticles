@@ -49,13 +49,13 @@ int EnjaParticles::update()
     {
         err = collision_kernel.setArg(4, dt);
 		size_t glob = num; // 10000
-		size_t loc = 512;
+		size_t loc = 128;
 		try {
         err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
-        err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
-        err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
-        err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
-        err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
+        //err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
+        //err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
+        //err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
+        //err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
 	//printf("end\n");exit(0); // >>>>>>>
 		}
       catch (cl::Error err) {
@@ -123,6 +123,12 @@ void EnjaParticles::popCorn()
         {
             collision_program = loadProgram(sources[COLLISION]);
 #ifdef OPENCL_SHARED
+			// version that works (80 fps with 220 tri and 16,000 particles)
+			// file: collision_ge.cl
+            //collision_kernel = cl::Kernel(collision_program, "collision_ge", &err);
+
+			// experimental version, with collision_ge as starting point
+			// file: collision_ge_a.cl
             collision_kernel = cl::Kernel(collision_program, "collision_ge", &err);
 #else
             collision_kernel = cl::Kernel(collision_program, "collision", &err);
@@ -233,8 +239,7 @@ clGetKernelInfo(cl_kernel       /* kernel */,
     printf("done with popCorn()\n");
 
 }
-
-
+//----------------------------------------------------------------------
 int EnjaParticles::init_cl()
 {
     setup_cl();
@@ -248,13 +253,9 @@ int EnjaParticles::init_cl()
 
     return 1;
 }
-
-
-
-
+//----------------------------------------------------------------------
 int EnjaParticles::setup_cl()
 {
-
     std::vector<cl::Platform> platforms;
     err = cl::Platform::get(&platforms);
     printf("cl::Platform::get(): %s\n", oclErrorString(err));
@@ -390,10 +391,8 @@ int EnjaParticles::setup_cl()
     catch (cl::Error er) {
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
     }
-
 }
-
-
+//----------------------------------------------------------------------
 cl::Program EnjaParticles::loadProgram(std::string kernel_source)
 {
      // Program Setup
@@ -447,4 +446,4 @@ cl::Program EnjaParticles::loadProgram(std::string kernel_source)
     } 
     return program;
 }
-
+//----------------------------------------------------------------------

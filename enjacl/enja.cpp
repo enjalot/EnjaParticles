@@ -33,7 +33,8 @@
 #include "physics/vfield.cl"
 
 #ifdef OPENCL_SHARED
-#include "physics/collision_ge.cl"
+//#include "physics/collision_ge.cl"
+#include "physics/collision_ge_a.cl"
 #else
 #include "physics/collision.cl"
 #endif

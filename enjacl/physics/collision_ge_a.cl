@@ -21,6 +21,26 @@ typedef struct Triangle
 // Aug. 4, 2010: Erlebacher version with shared memory
 
 //----------------------------------------------------------------------
+void test_local(__global float* tri_gl, __local float* tri_f, int one_tri, n_triangles)
+// one_tri: nb floats in one Triangle structure
+{
+/*
+	thread id: 0 --> get_global_size(0);
+	local thread id: 0 -> get_local_size(0);
+	thread id: get_global_id(0);  ==> particle number
+	local id: get_local_id(0);   
+*/
+
+	int block_sz = get_local_size(0);
+	int loc_tid = get_local_id(0);
+
+	int nb_floats = one_tri * n_triangles;
+
+	for (int j = loc_tid; j < nb_floats; j += block_sz) {
+		tri_f[j] = tri_gl[j];
+	}
+}
+//----------------------------------------------------------------------
 #if 0
 //bool intersect_triangle_ge(float4 pos, float4 vel, float dt, __local Triangle* tri) 
 bool intersect_triangle_ge(float4 pos, float4 vel, float dt, __local float4* normal, __local float4* vert0, float4 vert1, float4 vert2)
@@ -157,34 +177,48 @@ bool intersect_triangle_ge(float4 pos, float4 vel, __local Triangle* tri, float 
 }
 #endif
 //----------------------------------------------------------------------
-__kernel void collision_ge( __global float4* vertices, __global float4* velocities, __global Triangle* triangles_glob, int n_triangles, float h, __local Triangle* triangles)
+__kernel void collision_ge( __global float4* vertices, __global float4* velocities, 
+     __global Triangle* triangles_glob, int n_triangles, float h, __local Triangle* triangles)
+     //__global Triangle* triangles_glob, __global float* tri_glob_f, int n_triangles, float h, __local Triangle* triangles)
+	 // How to identify triangles and floats
 {
     unsigned int i = get_global_id(0);
 	//int tot = get_global_size(0);
 	//if (n_triangles > tot) return;
 
-	int iw = get_local_id(0);
+	// single precision: float = 4 bytes
+	//int nb_f = n_triangles * 4*4*4; // 4 float4 (float == 4 bytes)
+
+	//int nb_f = n_triangles * sizeof(Triangle) / sizeof(float); 
+	int one_tri = 16; // nb floats per triangle
+	test_local(triangles_glob, triangles, one_tri, n_triangles);
+	barrier(CLK_LOCAL_MEM_FENCE);
+
+	//int iw = get_local_id(0);
 	
-	int n_cache = n_triangles; // often less than n_triangles
+	// will be used at later time
+	//int n_cache = n_triangles; // often less than n_triangles
 
 	// copy triangles to shared memory 
 	// need to get more threads involved with global -> shared memory transfer
 
+#if 0
 	if (iw < n_cache) {
 	// Does not work (no collision)
 	#if 0
 	// Why does the following not work? 
-		//triangles[iw].normal   = triangles_glob[iw].normal;   //make_float4(0.,0.,1.,0.);
+		triangles[iw].normal[0]  = triangles_glob[iw].normal[0];   //make_float4(0.,0.,1.,0.);
 		//triangles[iw].verts[0] = triangles_glob[iw].verts[0]; //make_float4(-5.,-5.,0.,0.);
 		//triangles[iw].verts[1] = triangles_glob[iw].verts[1]; //make_float4(-5.,5.,0.,0.);
 		//triangles[iw].verts[2] = triangles_glob[iw].verts[2]; //make_float4(10.,5.,0.,0.);
+		;
 
 	#else
 		// make more robust (what is total_threads < n_triangles?)
 		// Not efficient. Should instead copy individual floats. I can do this
 		// by doing 
 		// Next line creates problems. WHY? 
-		//__local float* float_vals = (float*) triangles;
+		//__local float* float_vals = (float*) &triangles[0].verts[0].x;
 		//__local float* float_vals = (float*) triangles;
 		// Have all threads copy successive floats for maximum efficiency. 
 
@@ -199,6 +233,7 @@ __kernel void collision_ge( __global float4* vertices, __global float4* velociti
 	#endif
 
 	barrier(CLK_LOCAL_MEM_FENCE);
+#endif
 
 
     float4 pos = vertices[i];
