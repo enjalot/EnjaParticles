@@ -168,7 +168,9 @@ __kernel void collision_ge( __global float4* vertices, __global float4* velociti
 
 	// copy triangles to shared memory 
 
-	if (i < n_triangles) {
+    int ntest = 10;
+	//if (i < n_triangles) {
+	if (i < ntest) {
 		// make more robust (what is total_threads < n_triangles?)
 		#if 1
 		triangles[i] = triangles_glob[i]; // struct copy
@@ -194,7 +196,8 @@ __kernel void collision_ge( __global float4* vertices, __global float4* velociti
 
 
     //iterate through the list of triangles
-    for(int j = 0; j < n_triangles; j++)
+    //for(int j = 0; j < n_triangles; j++)
+    for(int j = 0; j < ntest; j++)
     {
         float4 trinormal = (float4)(triangles[j].verts[0].w, triangles[j].verts[1].w, triangles[j].verts[2].w, 0);
         if(intersect_triangle_ge(pos, vel, &triangles[j], h))
