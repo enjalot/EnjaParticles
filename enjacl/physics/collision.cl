@@ -19,9 +19,9 @@ typedef struct
     //float  dummy;  // for better global to local memory transfer
 } Triangle;
 //----------------------------------------------------------------------
-//bool intersect_triangle(float4 pos, float4 vel, float4 tri[3], float4 triN, float dist)
-bool intersect_triangle(float4 pos, float4 vel, Triangle tri, float dist)
+bool intersect_triangle(float4 pos, float4 vel, Triangle tri, float dt)
 {
+#if 1
     /*
     * Moller and Trumbore
     * take in the particle position and velocity (treated as a Ray)
@@ -43,6 +43,17 @@ bool intersect_triangle(float4 pos, float4 vel, Triangle tri, float dist)
     float v;
     float eps = .00001;
 
+
+	#if 1
+	float4 pos1 = pos + dt * vel;
+	if ((pos1.z <= tri.verts[0].z && pos.z >= tri.verts[0].z)) {
+	//if (pos1.z <= -1. && pos.z >= -1.) {
+		return true;
+	}
+	//return false;
+	#endif
+
+#if 0
     edge1 = tri.verts[1] - tri.verts[0];
     edge2 = tri.verts[2] - tri.verts[0];
 
@@ -68,15 +79,18 @@ bool intersect_triangle(float4 pos, float4 vel, Triangle tri, float dist)
         return false;
 
     t = dot(edge2, qvec) * inv_det;
-    if(t > eps and t < dist)
+    if(t > eps and t < dt)
         return true;
 
     return false;
-
+#endif
+#endif
 }
 //----------------------------------------------------------------------
 __kernel void collision( __global float4* vertices, __global float4* velocities, __global Triangle* triangles, int n_triangles, float h)
 {
+//return;
+#if 1
     unsigned int i = get_global_id(0);
 
     float4 pos = vertices[i];
@@ -108,6 +122,7 @@ __kernel void collision( __global float4* vertices, __global float4* velocities,
     velocities[i].x = vel.x;
     velocities[i].y = vel.y;
     velocities[i].z = vel.z;
+#endif
 }
 //----------------------------------------------------------------------
 );

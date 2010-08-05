@@ -428,10 +428,12 @@ cl::Program EnjaParticles::loadProgram(std::string kernel_source)
     printf("What now?\n");
         
 
+	printf("0***\n");
     try
     {
         //err = program.build(devices, "-cl-nv-verbose");
         err = program.build(devices);
+	printf("1***\n");
     }
     catch (cl::Error er) {
 		printf("GE+++++\n");
