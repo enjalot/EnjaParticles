@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include <GL/glew.h>
 #if defined __APPLE__ || defined(MACOSX)

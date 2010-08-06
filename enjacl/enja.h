@@ -7,6 +7,7 @@
 #include <vector>
 #include "incopencl.h"
 #include "timege.h"
+#include <stdio.h>
 
 
 typedef struct Vec4

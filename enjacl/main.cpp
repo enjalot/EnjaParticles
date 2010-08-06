@@ -246,7 +246,7 @@ int main(int argc, char** argv)
     
     //default constructor
     enjas = new EnjaParticles(EnjaParticles::GRAVITY, NUM_PARTICLES);
-    enjas->particle_radius = 2.0f;
+    enjas->particle_radius = 5.0f;
     enjas->updates = 1;
     enjas->dt = .005;
     enjas->collision = true;
@@ -320,7 +320,7 @@ int main(int argc, char** argv)
 
 // make cubes, formed from triangles
 
-	int nb_cubes = 200;
+	int nb_cubes = 1000;
 	Vec4 cen;
 
 	tri_offsets.push_back(0);
@@ -330,7 +330,7 @@ int main(int argc, char** argv)
 		float ry = rand_float(-1.5,1.5);
 		float rz = rand_float(-5.,0.);
 		cen.set(rx,ry,rz,1.);
-		make_cube(cen, 0.2);
+		make_cube(cen, 0.1);
 		tri_offsets.push_back(triangles.size());
 	}
 
