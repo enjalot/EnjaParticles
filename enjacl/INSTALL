@@ -1,0 +1,20 @@
+Aug. 6, 2010
+- enja.cpp : #include "opencl.cl" files (opencl code)
+    update if adding new code. 
+
+- If a new file is added, in enja.cpp, modify: 
+    EnjaParticles::sources[] = {
+        lorenz_program_source,
+        gravity_program_source,
+        vfield_program_source,
+        collision_program_source,
+        position_program_source
+    };
+
+- If a new kernel is added to one of these files, or a kernel name is changed, 
+  modify lines such as: 
+
+   collision_kernel = cl::Kernel(collision_program, "collision_ge", &err);
+
+- 
+----------------------------------------------------------------------

@@ -190,36 +190,6 @@ void EnjaParticles::popCorn()
     err = vel_update_kernel.setArg(2, cl_velo_gen);     //velocity generators
     err = vel_update_kernel.setArg(3, cl_velocities);   //velocities
 
-#if 0
-Kernel Args. & Object Queries [5.7.2, 5.7.3] cl_int clSetKernelArg (cl_kernel kernel, cl_uint arg_index,
-size_t arg_size, const void *arg_value) cl_int clGetKernelInfo (cl_kernel kernel,
-cl_kernel_info param_name, size_t param_value_size,
-void *param_value, size_t *param_value_size_ret) param_name: CL_KERNEL_FUNCTION_NAME,
-CL_KERNEL_NUM_ARGS, CL_KERNEL_REFERENCE_COUNT, CL_KERNEL_CONTEXT, CL_KERNEL_PROGRAM
-cl_int clGetKernelWorkGroupInfo ( cl_kernel kernel, cl_device_id device, cl_kernel_work_group_info param_name, size_t param_value_size, void *param_value, size_t *param_value_size_ret)
-param_name: CL_KERNEL_WORK_GROUP_SIZE, CL_KERNEL_COMPILE_WORK_GROUP_SIZE, CL_KERNEL_{LOCAL, PRIVATE}_MEM_SIZE, CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE
-
-extern CL_API_ENTRY cl_int CL_API_CALL
-clGetKernelInfo(cl_kernel       /* kernel */,
-                cl_kernel_info  /* param_name */,
-                size_t          /* param_value_size */,
-                void *          /* param_value */,
-                size_t *        /* param_value_size_ret */) CL_API_SUFFIX__VERSION_1_0;
-
-#endif
-
-	#if 0
-	int work_size;
-	cl_kernel col_kern = collision_kernel();
-	int val;
-	clGetKernelWorkGroupInfo(col_kern, &devices[0], CL_KERNEL_WORK_GROUP_SIZE, 
-	 4, val, 0);
-	 printf("val= %d\n", val);
-	//collision_kernel.getInfo(CL_KERNEL_WORK_GROUP_SIZE, &work_size);
-	//printf("work_size= %d\n", work_size);
-	exit(0);
-	#endif
- 
     if(collision)
     {
         err = collision_kernel.setArg(0, cl_vbos[0]);      //position
