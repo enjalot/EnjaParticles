@@ -181,6 +181,7 @@ __kernel void collision_ge( __global float4* vertices, __global float4* velociti
 	// Find a way to Iterate over batches of n_triangles so the number
 	// of triangles can be increased. 
 
+	//int max_tri = 220;
 	int max_tri = 220;
 
 	for (int j=0; j < n_triangles; j += max_tri) {

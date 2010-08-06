@@ -144,7 +144,7 @@ public:
 
     //timers
     GE::Time *ts[3];    //library timers (update, render, total)
-    GE::Time *ts_cl[4]; //opencl timers (acquire, kernel exec, release)
+    GE::Time *ts_cl[2]; //opencl timers (cl update routine, execute kernel)
 
     int init_cl();
     int setup_cl(); //helper function that initializes the devices and the context

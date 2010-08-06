@@ -50,7 +50,8 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 EnjaParticles* enjas;
-#define NUM_PARTICLES 1024*8
+//#define NUM_PARTICLES 1024*8
+#define NUM_PARTICLES 1024*128
 
 
 GLuint v_vbo; //vbo id
@@ -301,7 +302,7 @@ int main(int argc, char** argv)
 
 // make cubes, formed from triangles
 
-	int nb_cubes = 50;
+	int nb_cubes = 500;
 	Vec4 cen;
 
 	for (int i=0; i < nb_cubes; i++) {

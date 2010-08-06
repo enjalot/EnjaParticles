@@ -24,18 +24,15 @@
 
 int EnjaParticles::update()
 {
+	ts_cl[0]->start();
 #ifdef GL_INTEROP   
     // map OpenGL buffer object for writing from OpenCL
     //clFinish(cqCommandQueue);
-    ts_cl[3]->start();
     glFinish();
-    ts_cl[3]->stop();
 
-	ts_cl[0]->start();
     err = queue.enqueueAcquireGLObjects(&cl_vbos, NULL, &event);
     //printf("acquire: %s\n", oclErrorString(err));
     queue.finish();
-	ts_cl[0]->stop();
 #endif
 
     //clFinish(cqCommandQueue);
@@ -50,11 +47,11 @@ int EnjaParticles::update()
 		size_t glob = num; // 10000
 		size_t loc = 512;
 		try {
-        err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
         //err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
         //err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
         //err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
-        //err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
+        //err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
+        err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
 	//printf("end\n");exit(0); // >>>>>>>
 		}
       catch (cl::Error err) {
@@ -80,11 +77,9 @@ int EnjaParticles::update()
     //ciErrNum = clEnqueueReleaseGLObjects(cqCommandQueue, 1, &vbo_cl, 0,0,0);
     
     //clFinish(cqCommandQueue);
-    ts_cl[2]->start();
     err = queue.enqueueReleaseGLObjects(&cl_vbos, NULL, &event);
     //printf("release gl: %s\n", oclErrorString(err));
     queue.finish();
-    ts_cl[2]->stop();
 #else
 
     /* implement this with opencl c++ bindings later
@@ -105,6 +100,8 @@ int EnjaParticles::update()
     glUnmapBufferARB(GL_ARRAY_BUFFER); 
     */
 #endif
+
+	ts_cl[0]->stop();
 }
 
 
@@ -210,10 +207,8 @@ int EnjaParticles::init_cl()
 {
     setup_cl();
 
-    ts_cl[0] = new GE::Time("acquire", 5);
-    ts_cl[1] = new GE::Time("ndrange", 5);
-    ts_cl[2] = new GE::Time("release", 5);
-    ts_cl[3] = new GE::Time("glFinish", 5);
+    ts_cl[0] = new GE::Time("cl update routine", 5);
+    ts_cl[1] = new GE::Time("execute kernels", 5);
 
     popCorn();
 
