@@ -193,7 +193,6 @@ __kernel void collision_ge( __global float4* vertices, __global float4* velociti
 		vel = collisions(pos, vel, first, last, triangles_glob, h, triangles);
 	}
 
-
     velocities[i].x = vel.x;
     velocities[i].y = vel.y;
     velocities[i].z = vel.z;

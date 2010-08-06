@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "../enja.h"
 
 void EnjaParticles::loadTriangles(std::vector<Triangle> triangles)
@@ -34,7 +35,7 @@ void EnjaParticles::loadTriangles(std::vector<Triangle> triangles)
     //need to deal with transforms
 }
 //----------------------------------------------------------------------
-void EnjaParticles::loadBoxes(std::vector<Box> boxes)
+void EnjaParticles::loadBoxes(std::vector<Box> boxes, std::vector<int> tri_offsets)
 {
     n_boxes = boxes.size();
     //load boxes into cl buffer
@@ -49,6 +50,12 @@ void EnjaParticles::loadBoxes(std::vector<Box> boxes)
 
 	printf("sizeof(Box) = %d\n", (int) sizeof(Box));
 
+	size_t offset_size = sizeof(int)*tri_offsets.size();
+	cl_tri_offsets = cl::Buffer(context, CL_MEM_WRITE_ONLY, offset_size, NULL, &err);
+    err = queue.enqueueWriteBuffer(cl_tri_offsets, CL_TRUE, 0, offset_size, &tri_offsets[0], NULL, &event);
+    err = collision_kernel.setArg(5, cl_tri_offsets);   //number of boxes
+	queue.finish();
+
 #ifdef OPENCL_SHARED
 
 	size_t max_loc_memory = 1024 << 4;  // 16k bytes local memory on mac
@@ -61,7 +68,7 @@ void EnjaParticles::loadBoxes(std::vector<Box> boxes)
 	printf("sz= %d bytes\n", sz);
 
    // experimenting with hardcoded local memory in collision_ge.cl
-    err = collision_kernel.setArg(5, sz, 0);   //number of boxes
+    err = collision_kernel.setArg(6, sz, 0);   //number of boxes
 	//exit(0);
 #endif
 

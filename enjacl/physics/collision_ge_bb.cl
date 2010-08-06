@@ -146,7 +146,7 @@ float4 collisions(float4 pos, float4 vel, int first, int last, __global Box* box
 	return vel;
 }
 //----------------------------------------------------------------------
-__kernel void collision_ge( __global float4* vertices, __global float4* velocities, __global Box* boxes_glob, int n_boxes, float h, __local Box* boxes)
+__kernel void collision_ge( __global float4* vertices, __global float4* velocities, __global Box* boxes_glob, int n_boxes, float h, __global int* tri_offsets, __local Box* boxes)
 {
 #if 1
     unsigned int i = get_global_id(0);

@@ -35,6 +35,13 @@ float rotate_x = 0.0, rotate_y = 0.0;
 std::vector<Triangle> triangles;
 std::vector<Box> boxes;
 
+// offsets into the triangle list. tri_offsets[i] corresponds to the 
+// triangle list for box[i]. Number of triangles for triangles[i] is
+//    tri_offsets[i+1]-tri_offsets[i]
+// Add one more offset so that the number of triangles in 
+//   boxes[boxes.size()-1] is tri_offsets[boxes.size()]-tri_offsets[boxes.size()-1]
+std::vector<int> tri_offsets;
+
 
 void init_gl();
 
@@ -52,7 +59,7 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 EnjaParticles* enjas;
-#define NUM_PARTICLES 1024*256
+#define NUM_PARTICLES 1024*16
 
 
 GLuint v_vbo; //vbo id
@@ -313,8 +320,10 @@ int main(int argc, char** argv)
 
 // make cubes, formed from triangles
 
-	int nb_cubes = 2000;
+	int nb_cubes = 200;
 	Vec4 cen;
+
+	tri_offsets.push_back(0);
 
 	for (int i=0; i < nb_cubes; i++) {
 		float rx = rand_float(-1.5,1.5);
@@ -322,14 +331,22 @@ int main(int argc, char** argv)
 		float rz = rand_float(-5.,0.);
 		cen.set(rx,ry,rz,1.);
 		make_cube(cen, 0.2);
+		tri_offsets.push_back(triangles.size());
 	}
+
+	// once all triangles are created: 
+	tri_offsets.push_back(triangles.size());
+
+	//for (int i=0; i < boxes.size(); i++) {
+		//printf("sz = %d\n", tri_offsets[i]);
+	//}
 
 	numTri = triangles.size();
 	printf("triangles: nb: %d\n", triangles.size());
 	printf("boxes: nb: %d\n", boxes.size()); 
 
     //enjas->loadTriangles(triangles);
-    enjas->loadBoxes(boxes);
+    enjas->loadBoxes(boxes, tri_offsets);
     
     //Test making a system from vertices and normals;
     /*
