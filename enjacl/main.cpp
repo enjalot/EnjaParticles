@@ -295,7 +295,7 @@ int main(int argc, char** argv)
 
 // make cubes, formed from triangles
 
-	int nb_cubes = 20;
+	int nb_cubes = 100;
 	Vec4 cen;
 
 	for (int i=0; i < nb_cubes; i++) {

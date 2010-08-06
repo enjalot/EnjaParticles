@@ -19,8 +19,8 @@ void EnjaParticles::loadTriangles(std::vector<Triangle> triangles)
 
 	size_t max_loc_memory = 1024 << 4;  // 16k bytes local memory on mac
 	int max_tri = max_loc_memory / sizeof(Triangle);
-	max_tri = n_triangles;
-	//max_tri -= 10;
+	//max_tri = n_triangles;
+	max_tri = 220; // fits in cache
 	printf("max_tri= %d\n", max_tri);
 	
 	size_t sz = max_tri*sizeof(Triangle);
