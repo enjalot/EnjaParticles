@@ -35,7 +35,8 @@ void EnjaParticles::loadTriangles(std::vector<Triangle> triangles)
     //need to deal with transforms
 }
 //----------------------------------------------------------------------
-void EnjaParticles::loadBoxes(std::vector<Box> boxes, std::vector<int> tri_offsets)
+void EnjaParticles::loadBoxes(std::vector<Box> boxes, std::vector<Triangle> triangles,
+    std::vector<int> tri_offsets)
 {
     n_boxes = boxes.size();
     //load boxes into cl buffer
@@ -56,7 +57,22 @@ void EnjaParticles::loadBoxes(std::vector<Box> boxes, std::vector<int> tri_offse
     err = collision_kernel.setArg(5, cl_tri_offsets);   //number of boxes
 	queue.finish();
 
+	//------------
+    n_triangles = triangles.size();
+    //load triangles into cl buffer
+    //Triangle is a struct that ends up being 4 float4s
+    size_t tri_size = sizeof(Triangle) * n_triangles;
+    cl_triangles = cl::Buffer(context, CL_MEM_WRITE_ONLY, tri_size, NULL, &err);
+    err = queue.enqueueWriteBuffer(cl_triangles, CL_TRUE, 0, tri_size, &triangles[0], NULL, &event);
+    queue.finish();
+   
+    err = collision_kernel.setArg(6, cl_triangles);   //triangles
+
+
 #ifdef OPENCL_SHARED
+
+	//------------
+	// Perhaps I should allocate memory for both boxes and triangles? In two arrays?
 
 	size_t max_loc_memory = 1024 << 4;  // 16k bytes local memory on mac
 	int max_box = max_loc_memory / sizeof(Box);
@@ -68,8 +84,7 @@ void EnjaParticles::loadBoxes(std::vector<Box> boxes, std::vector<int> tri_offse
 	printf("sz= %d bytes\n", sz);
 
    // experimenting with hardcoded local memory in collision_ge.cl
-    err = collision_kernel.setArg(6, sz, 0);   //number of boxes
-	//exit(0);
+    err = collision_kernel.setArg(7, sz, 0);   //number of boxes
 #endif
 
     //need to deal with transforms

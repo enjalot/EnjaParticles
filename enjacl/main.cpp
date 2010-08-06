@@ -59,7 +59,7 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 EnjaParticles* enjas;
-#define NUM_PARTICLES 1024*16
+#define NUM_PARTICLES 1024*16*16
 
 
 GLuint v_vbo; //vbo id
@@ -320,7 +320,7 @@ int main(int argc, char** argv)
 
 // make cubes, formed from triangles
 
-	int nb_cubes = 200;
+	int nb_cubes = 20;
 	Vec4 cen;
 
 	tri_offsets.push_back(0);
@@ -346,7 +346,7 @@ int main(int argc, char** argv)
 	printf("boxes: nb: %d\n", boxes.size()); 
 
     //enjas->loadTriangles(triangles);
-    enjas->loadBoxes(boxes, tri_offsets);
+    enjas->loadBoxes(boxes, triangles, tri_offsets);
     
     //Test making a system from vertices and normals;
     /*

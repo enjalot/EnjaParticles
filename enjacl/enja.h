@@ -98,7 +98,8 @@ public:
     int n_boxes;
     //handle triangles for collision detection
     void loadTriangles(std::vector<Triangle>);
-    void loadBoxes(std::vector<Box>, std::vector<int> tri_offsets);
+    void loadBoxes(std::vector<Box>, std::vector<Triangle>, 
+				   std::vector<int> tri_offsets);
     //Triangle faceToTriangle(Vec4 face[4]);
 
 //private:

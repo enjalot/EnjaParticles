@@ -92,7 +92,7 @@ void global_to_shared_boxes(__global float* box_gl, __local float* box_f, int on
 #endif
 //----------------------------------------------------------------------
 #if 1
-bool intersect_triangle_ge(float4 pos, float4 vel, __local Triangle* tri, float dist, bool collided)
+bool intersect_triangle_ge(float4 pos, float4 vel, __global Triangle* tri, float dist, bool collided)
 {
 	// There is serialization (since not all threads in a warp will have 
 	// "collided" set the same way)
@@ -159,89 +159,28 @@ bool intersect_triangle_ge(float4 pos, float4 vel, __local Triangle* tri, float 
 }
 #endif
 //----------------------------------------------------------------------
-float4 collisions_tri(float4 pos, float4 vel, int first, int last, __global Triangle* triangles_glob, float h, __local Triangle* triangles)
-{
 #if 1
-	int one_tri = 16;
-	// copy triangles to shared memory 
-	// first, last: indices into triangles_glob
-	test_local(triangles_glob, triangles, one_tri, first, last);
-	barrier(CLK_LOCAL_MEM_FENCE);
-
-	//store the magnitude of the velocity
-	#if 1
-    float mag = sqrt(vel.x*vel.x + vel.y*vel.y + vel.z*vel.z); 
-    float damping = 1.0f;
-
-	// variables: 
-	// triangles, pos, vel
-
-	bool collided = false;
-
-    //iterate through the list of triangles
-	// This for() and/or if() slows things down considerably. 
-	// Proof: putting the last three lines inside the for, before the 
-	//    break, slows the code down!
-
-    for (int j=0; j < (last-first); j++)
-    {
-        collided = intersect_triangle_ge(pos, vel, &triangles[j], h, collided);
-        if (collided)
-        {
-            //lets do some specular reflection
-
-            float s = 2.0f*(dot(triangles[j].normal, vel));
-			vel = vel - s*triangles[j].normal;
-
-			/*
- 				vp = v - (v.n) n
- 				vn = (v.n) n
-
- 				New velocity = (vp, -vn) = v - (v.n)n - v.n n
-                   = v - 2n v.n
-           */
-
-
-			vel = vel*damping;
-
-			// faster without the break. Not sure why. 
-			//break;
-        }
-    }
-#endif
-
-#endif
-	return vel;
-}
-//----------------------------------------------------------------------
-#if 1
-bool intersect_box_ge(float4 pos, float4 vel, __local Box* box, float dt, bool collided)
+bool intersect_box_ge(float4 pos, float4 vel, __local Box* box, float dt)
 {
 	// There is serialization (since not all threads in a warp will have 
 	// "collided" set the same way)
 
-	// More efficient if this test is not performed. Not sure why.
-	//if (collided) return;
-
 	float4 pos1 = pos + dt*vel;
 
-#if 1
 	// is pos1 inside the box. If yes, collide is true
 
 	if (pos1.x > box->xmin && pos1.x < box->xmax && 
 	    pos1.y > box->ymin && pos1.y < box->ymax && 
 	    pos1.z > box->zmin && pos1.z < box->zmax) {
 
-		collided = true;
-		return collided;
+		return true;
 	}
-#endif
-	return collided;
+	return false;
 }
 #endif
 //----------------------------------------------------------------------
 
-float4 collisions_box(float4 pos, float4 vel, int first, int last, __global Box* boxes_glob, float dt, __local Box* boxes, int f_tri, int l_tri)
+float4 collisions_box(float4 pos, float4 vel, int first, int last, __global Box* boxes_glob, float dt, __local Box* boxes, __global Triangle* triangles, int f_tri, int l_tri)
 {
 #if 1
 	int one_box = 6; // nb floats in Box
@@ -257,48 +196,31 @@ float4 collisions_box(float4 pos, float4 vel, int first, int last, __global Box*
 	// variables: 
 	// triangles, pos, vel
 
-	bool collided = false;
-
-    //iterate through the list of triangles
+    //iterate through the list of boxes
 	// This for() and/or if() slows things down considerably. 
 	// Proof: putting the last three lines inside the for, before the 
 	//    break, slows the code down!
 
     for (int j=0; j < (last-first); j++)
     {
-        collided = intersect_box_ge(pos, vel, &boxes[j], dt, collided);
+        int collided = intersect_box_ge(pos, vel, &boxes[j], dt);
         if (collided)
         {
+			//vel = 0.0;
 			// go down the triangle list
 			// 3rd arg: nb floats in Triangle
-			//global_to_shared_tri(triangles_glob, triangles, 16, f_tri, l_tri);
 
 			// Do not put triangle list in local memory 
+			bool col = false;
 			for (int k=f_tri; k < l_tri; k++) {
-				;
+				col = intersect_triangle_ge(pos, vel, &triangles[k], dt, col);
+				if (col) {
+            		float s = 2.0f*(dot(triangles[j].normal, vel));
+					vel = vel - s*triangles[j].normal;
+					vel = vel*damping;
+					break;
+				}
 			}
-
-
-
-            //lets do some specular reflection
-#if 0
-            float s = 2.0f*(dot(triangles[j].normal, vel));
-			vel = vel - s*triangles[j].normal;
-
-			/*
- 				vp = v - (v.n) n
- 				vn = (v.n) n
-
- 				New velocity = (vp, -vn) = v - (v.n)n - v.n n
-                   = v - 2n v.n
-           */
-
-
-			vel = vel*damping;
-#endif
-
-			// faster without the break. Not sure why. 
-			//break;
         }
     }
 
@@ -306,7 +228,7 @@ float4 collisions_box(float4 pos, float4 vel, int first, int last, __global Box*
 #endif
 }
 //----------------------------------------------------------------------
-__kernel void collision_ge( __global float4* vertices, __global float4* velocities, __global Box* boxes_glob, int n_boxes, float h, __global int* tri_offsets, __local Box* boxes)
+__kernel void collision_ge( __global float4* vertices, __global float4* velocities, __global Box* boxes_glob, int n_boxes, float h, __global int* tri_offsets, __global int* triangles,  __local Box* boxes)
 {
 #if 1
     unsigned int i = get_global_id(0);
@@ -328,7 +250,7 @@ __kernel void collision_ge( __global float4* vertices, __global float4* velociti
 		}
 		int f_tri = tri_offsets[j];
 		int l_tri = tri_offsets[j+1];
-		vel = collisions_box(pos, vel, first, last, boxes_glob, h, boxes, f_tri, l_tri);
+		vel = collisions_box(pos, vel, first, last, boxes_glob, h, boxes, triangles, f_tri, l_tri);
 	}
 
     velocities[i].x = vel.x;
