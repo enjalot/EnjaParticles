@@ -9,6 +9,7 @@
 
 
 
+
 std::string collision_program_source = STRINGIFY(
 // prototype does not work?
 
@@ -180,7 +181,7 @@ bool intersect_box_ge(float4 pos, float4 vel, __local Box* box, float dt)
 #endif
 //----------------------------------------------------------------------
 
-float4 collisions_box(float4 pos, float4 vel, int first, int last, __global Box* boxes_glob, float dt, __local Box* boxes, __global Triangle* triangles, int f_tri, int l_tri)
+float4 collisions_box(float4 pos, float4 vel, int first, int last, __global Box* boxes_glob, float dt, __local Box* boxes, __global Triangle* triangles, int f_tri, int l_tri, __global int* tri_offsets)
 {
 #if 1
 	int one_box = 6; // nb floats in Box
@@ -203,6 +204,8 @@ float4 collisions_box(float4 pos, float4 vel, int first, int last, __global Box*
 
     for (int j=0; j < (last-first); j++)
     {
+		f_tri = tri_offsets[j+first];
+		l_tri = tri_offsets[j+1+first];
         int collided = intersect_box_ge(pos, vel, &boxes[j], dt);
         if (collided)
         {
@@ -224,16 +227,17 @@ float4 collisions_box(float4 pos, float4 vel, int first, int last, __global Box*
         }
     }
 
-	return vel;
 #endif
+	return vel;
 }
 //----------------------------------------------------------------------
-__kernel void collision_ge( __global float4* vertices, __global float4* velocities, __global Box* boxes_glob, int n_boxes, float h, __global int* tri_offsets, __global int* triangles,  __local Box* boxes)
+__kernel void collision_ge( __global float4* vertices, __global float4* velocities, __global Box* boxes_glob, int n_boxes, float dt, __global int* tri_offsets, __global int* triangles,  __local Box* boxes)
 {
 #if 1
     unsigned int i = get_global_id(0);
     float4 pos = vertices[i];
     float4 vel = velocities[i];
+
 
 	// Find a way to Iterate over batches of n_triangles so the number
 	// of triangles can be increased. 
@@ -250,7 +254,8 @@ __kernel void collision_ge( __global float4* vertices, __global float4* velociti
 		}
 		int f_tri = tri_offsets[j];
 		int l_tri = tri_offsets[j+1];
-		vel = collisions_box(pos, vel, first, last, boxes_glob, h, boxes, triangles, f_tri, l_tri);
+		// offsets are monotonic
+		vel = collisions_box(pos, vel, first, last, boxes_glob, dt, boxes, triangles, f_tri, l_tri, tri_offsets);
 	}
 
     velocities[i].x = vel.x;

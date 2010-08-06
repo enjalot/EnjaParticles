@@ -57,6 +57,11 @@ void EnjaParticles::loadBoxes(std::vector<Box> boxes, std::vector<Triangle> tria
     err = collision_kernel.setArg(5, cl_tri_offsets);   //number of boxes
 	queue.finish();
 
+	//for (int i=0; i < 10; i++) {
+		//printf("offset = %d\n", tri_offsets[i]);
+	//}
+	//exit(0);
+
 	//------------
     n_triangles = triangles.size();
     //load triangles into cl buffer
