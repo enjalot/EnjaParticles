@@ -3,6 +3,8 @@
 #include <math.h>
 #include <time.h>
 
+//#include <utils.h>
+
 //#include <string.h>
 //#include <string>
 #include <sstream>
@@ -56,7 +58,129 @@ GLuint c_vbo; //vbo id
 GE::Time *ts[3];
 
 
+//----------------------------------------------------------------------
+float rand_float(float mn, float mx)
+{
+	float r = random() / (float) RAND_MAX;
+	return mn + (mx-mn)*r;
+}
+//----------------------------------------------------------------------
+void make_cube(Vec4 cen, float half_edge)
+{
+/*
 
+        7-----------6 
+       /           /|
+      /           / |           Z
+     4-----------5  |           |
+	 |           |  2           |  Y
+	 |           | /            | /
+	 |           |/             |/
+     0-----------1              x------- X
+	              
+*/
+	printf("inside make_cube\n");
+	// vertices
+	std::vector<Vec4> v;
+	float h = half_edge;
+	Vec4 vv;
+
+	vv.set(cen.x-h, cen.y-h, cen.z-h);
+	v.push_back(vv);
+	vv.set(cen.x+h, cen.y-h, cen.z-h);
+	v.push_back(vv);
+	vv.set(cen.x+h, cen.y+h, cen.z-h);
+	v.push_back(vv);
+	vv.set(cen.x-h, cen.y+h, cen.z-h);
+	v.push_back(vv);
+	vv.set(cen.x-h, cen.y-h, cen.z+h);
+	v.push_back(vv);
+	vv.set(cen.x+h, cen.y-h, cen.z+h);
+	v.push_back(vv);
+	vv.set(cen.x+h, cen.y+h, cen.z+h);
+	v.push_back(vv);
+	vv.set(cen.x-h, cen.y+h, cen.z+h);
+	v.push_back(vv);
+
+	// Triangles
+	Triangle tri;
+
+	tri.verts[0] = v[2];
+	tri.verts[1] = v[1];
+	tri.verts[2] = v[0];
+	tri.normal.set(0.,0.,-1.,0.);
+	triangles.push_back(tri);
+
+	tri.verts[0] = v[3];
+	tri.verts[1] = v[2];
+	tri.verts[2] = v[0];
+	tri.normal.set(0.,0.,-1.,0.);
+	triangles.push_back(tri);
+	printf("triangles: size: %d\n", triangles.size());
+
+	tri.verts[0] = v[4];
+	tri.verts[1] = v[5];
+	tri.verts[2] = v[6];
+	tri.normal.set(0.,0.,+1.,0.);
+	triangles.push_back(tri);
+
+	tri.verts[0] = v[4];
+	tri.verts[1] = v[6];
+	tri.verts[2] = v[7];
+	tri.normal.set(0.,0.,+1.,0.);
+	triangles.push_back(tri);
+
+	//---
+	tri.verts[0] = v[0];
+	tri.verts[1] = v[1];
+	tri.verts[2] = v[5];
+	tri.normal.set(0.,-1.,0.,0.);
+	triangles.push_back(tri);
+
+	tri.verts[0] = v[0];
+	tri.verts[1] = v[5];
+	tri.verts[2] = v[4];
+	tri.normal.set(0.,-1.,0.,0.);
+	triangles.push_back(tri);
+
+	tri.verts[0] = v[7];
+	tri.verts[1] = v[6];
+	tri.verts[2] = v[2];
+	tri.normal.set(0.,+1.,0.,0.);
+	triangles.push_back(tri);
+
+	tri.verts[0] = v[7];
+	tri.verts[1] = v[2];
+	tri.verts[2] = v[3];
+	tri.normal.set(0.,+1.,0.,0.);
+	triangles.push_back(tri);
+
+	//----
+	tri.verts[0] = v[1];
+	tri.verts[1] = v[2];
+	tri.verts[2] = v[6];
+	tri.normal.set(+1.,0.,0.,0.);
+	triangles.push_back(tri);
+
+	tri.verts[0] = v[1];
+	tri.verts[1] = v[6];
+	tri.verts[2] = v[5];
+	tri.normal.set(+1.,0.,0.,0.);
+	triangles.push_back(tri);
+
+	tri.verts[0] = v[0];
+	tri.verts[1] = v[4];
+	tri.verts[2] = v[7];
+	tri.normal.set(-1.,0.,0.,0.);
+	triangles.push_back(tri);
+
+	tri.verts[0] = v[0];
+	tri.verts[1] = v[7];
+	tri.verts[2] = v[3];
+	tri.normal.set(-1.,0.,0.,0.);
+	triangles.push_back(tri);
+}
+//----------------------------------------------------------------------
 int main(int argc, char** argv)
 {
 
@@ -101,19 +225,120 @@ int main(int argc, char** argv)
     enjas->dt = .005;
     enjas->collision = true;
 
+
     Triangle tri;
     tri.verts[0] = Vec4(-5.,-5.,-1,0.);
     tri.verts[1] = Vec4(-5.,5.,-1.,0.);
     tri.verts[2] = Vec4(10.,2,-1,0.);
-    tri.normal   = Vec4(0.,0.,1.,0.);
+    tri.normal   = Vec4(1.,2.,-1.,0.);
 
 	//int numTri = 1000;
-	int numTri = 250; // for new collision opencl code
+	int numTri = 220; // for new collision opencl code
+
+
+	#if 0
     for(int i = 0; i < numTri; i++)
     {
         triangles.push_back(tri);
     }
+	#endif
 
+
+#if 0
+	//Utils u;
+	//float r = u.rand_float();
+	float r = random() / (float) RAND_MAX;
+	printf("r= %f\n", r);
+	r = random() / (float) RAND_MAX;
+#define R rand_float(-3., 3.)
+#define Rz rand_float(-.2, .2)
+// generate random triangles
+	Vec4& v0 = tri.verts[0];
+	Vec4& v1 = tri.verts[1];
+	Vec4& v2 = tri.verts[2];
+
+	for (int i=0; i < numTri; i++) {
+		float rz = R;
+		float rz1 = Rz;
+		float r = R;
+		v0.set(r, r+.5, rz, 1.);
+		r = R;
+		v1.set(r-1., r+1., rz+rz1, 1.);
+		v2.set(r+1., r+.7, rz-2.*rz1, 1.);
+
+		//v0.set(-4.+R, 4.+R, rz+2*rz1, 1.);
+		//v1.set(4.+R, -4.+R, -3., 1.);
+		//v2.set(-4.+R, -4.+R, rz1, 1.);
+
+		printf("v0: %f, %f, %f\n", v0.x, v0.y, v0.z);
+		printf("v1: %f, %f, %f\n", v1.x, v1.y, v1.z);
+		printf("v2: %f, %f, %f\n", v2.x, v2.y, v2.z);
+
+		// normal
+		float nx = (v1.y-v0.y)*(v2.z-v0.z);
+		float ny = (v1.z-v0.z)*(v2.x-v0.x);
+		float nz = (v1.x-v0.x)*(v2.y-v0.y);
+		tri.normal.set(nx,ny,nz,0.);
+		float nrmi = 1. / sqrt(nx*nx+ny*ny+nz*nz);
+		tri.normal.set(nx*nrmi, ny*nrmi, nz*nrmi, 0.);
+
+		printf("x,y,z= %f, %f, %f\n", nx, ny, nz);
+		printf("x,y,z= %f, %f, %f\n", nx*nrmi, ny*nrmi, nz*nrmi);
+		//exit(0);
+		//tri.normal.set(0.,0.,1.,0.);
+        triangles.push_back(tri);
+	}
+#undef R
+#endif
+
+
+// make cubes, formed from triangles
+
+	int nb_cubes = 20;
+	Vec4 cen;
+
+	for (int i=0; i < nb_cubes; i++) {
+		float rx = rand_float(-1.5,1.5);
+		float ry = rand_float(-1.5,1.5);
+		float rz = rand_float(-3.,1.);
+		cen.set(rx,ry,rz,1.);
+		make_cube(cen, 0.2);
+	}
+
+	numTri = triangles.size();
+	//printf("triangles: nb: %d\n", triangles.size()); exit(0);
+
+    enjas->loadTriangles(triangles);
+    
+    //Test making a system from vertices and normals;
+    /*
+    Vec4 g[4];
+    Vec4 v[4];
+    g[0] = Vec4(0.0f, -1.0f, 0.0f, 1.0f);
+    g[1] = Vec4(0.0f, 1.0f, 0.0f, 1.0f);
+
+		printf("v0: %f, %f, %f\n", v0.x, v0.y, v0.z);
+		printf("v1: %f, %f, %f\n", v1.x, v1.y, v1.z);
+		printf("v2: %f, %f, %f\n", v2.x, v2.y, v2.z);
+
+		// normal
+		float nx = (v1.y-v0.y)*(v2.z-v0.z);
+		float ny = (v1.z-v0.z)*(v2.x-v0.x);
+		float nz = (v1.x-v0.x)*(v2.y-v0.y);
+		tri.normal.set(nx,ny,nz,0.);
+		float nrmi = 1. / sqrt(nx*nx+ny*ny+nz*nz);
+		tri.normal.set(nx*nrmi, ny*nrmi, nz*nrmi, 0.);
+
+		printf("x,y,z= %f, %f, %f\n", nx, ny, nz);
+		printf("x,y,z= %f, %f, %f\n", nx*nrmi, ny*nrmi, nz*nrmi);
+		//exit(0);
+		//tri.normal.set(0.,0.,1.,0.);
+        triangles.push_back(tri);
+	}
+#undef R
+#endif
+
+	printf("triangles: nb: %d\n", triangles.size()); exit(0);
 
     enjas->loadTriangles(triangles);
     
@@ -200,15 +425,22 @@ void appRender()
     plane[3] = Vec4(5,-5,-1,0);
 */
 
-	Triangle& tria = triangles[0];
+	glEnable(GL_DEPTH_TEST);
 
 
-    glColor3f(0,1,0);
     glBegin(GL_TRIANGLES);
-    glVertex3f(tria.verts[0].x, tria.verts[0].y, tria.verts[0].z);
-    glVertex3f(tria.verts[1].x, tria.verts[1].y, tria.verts[1].z);
-    glVertex3f(tria.verts[2].x, tria.verts[2].y, tria.verts[2].z);
+    glColor3f(0,1,0);
+	for (int i=0; i < triangles.size(); i++) {
+	//for (int i=0; i < 20; i++) {
+		Triangle& tria = triangles[i];
+		glNormal3fv(&tria.normal.x);
+    	glVertex3f(tria.verts[0].x, tria.verts[0].y, tria.verts[0].z);
+    	glVertex3f(tria.verts[1].x, tria.verts[1].y, tria.verts[1].z);
+    	glVertex3f(tria.verts[2].x, tria.verts[2].y, tria.verts[2].z);
+	}
     glEnd();
+
+    glColor3f(0,0,0);
 
  
     enjas->render();
@@ -217,6 +449,8 @@ void appRender()
     glutSwapBuffers();
     //if we want to render as fast as possible we do this
     //glutPostRedisplay();
+
+	glDisable(GL_DEPTH_TEST);
 }
 
 void appDestroy()
@@ -335,4 +569,4 @@ void showFPS(float fps, std::string* report)
     glMatrixMode(GL_MODELVIEW);         // switch to modelview matrix
     glPopMatrix();                      // restore to previous modelview matrix
 }
-
+//----------------------------------------------------------------------

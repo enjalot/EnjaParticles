@@ -23,6 +23,12 @@ typedef struct Vec4
         z(zz),
         w(ww)
     {}
+	void set(float xx, float yy, float zz, float ww=1.) {
+		x = xx;
+		y = yy;
+		z = zz;
+		w = ww;
+	}
 } Vec4;
 
 // size: 4*4 = 16 floats
@@ -115,6 +121,8 @@ public:
     cl::Kernel vel_update_kernel;
     cl::Kernel collision_kernel;
     cl::Kernel pos_update_kernel;
+
+	float rand_float(float mn, float mx);
 
     unsigned int deviceUsed;
     

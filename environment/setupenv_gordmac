@@ -11,6 +11,7 @@ export OPENCL_HOME=${GPU_SDK}/OpenCL
 #export GRAPHIC_LIBS_HOME=${BASE_DIR}/graphics_libs
 #export GRAPHICS_LIBS=${GRAPHIC_LIBS_HOME}/builds/enjmac
 export GRAPHICS_LIBS=/Users/erlebach/grav/branch_grav/branch3/builds/pure_opencl/graphics_libs
+export GRAPHICS_LIBS_SRC=/Users/erlebach/grav/branch_grav/branch3/graphics_libs
 
 #export CUDA_PROFILE_CONFIG=./profile_config
 
