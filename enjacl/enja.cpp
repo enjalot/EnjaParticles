@@ -72,6 +72,20 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
     point_scale = 1.0f;
     collision = false;
 
+    transform[0] = Vec4(1,0,0,0);
+    transform[1] = Vec4(0,1,0,0);
+    transform[2] = Vec4(0,0,1,0);
+    transform[3] = Vec4(0,0,0,0);
+
+    for(int i=0; i<16; i++)
+    {
+        gl_transform[i] = 0.0;
+    }
+    gl_transform[0] = 1.0;
+    gl_transform[5] = 1.0;
+    gl_transform[10] = 1.0;
+    gl_transform[15] = 1.0;
+
     //we pack radius and life into generator and velocity arrays
     for(int i=0; i < n; i++)
     {

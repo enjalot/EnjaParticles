@@ -51,7 +51,7 @@ void *font = GLUT_BITMAP_8_BY_13;
 
 EnjaParticles* enjas;
 //#define NUM_PARTICLES 1024*8
-#define NUM_PARTICLES 1024*128
+#define NUM_PARTICLES 1024*8
 
 
 GLuint v_vbo; //vbo id
@@ -85,7 +85,7 @@ void make_cube(Vec4 cen, float half_edge)
      0-----------1              x------- X
 	              
 */
-	printf("inside make_cube\n");
+	//printf("inside make_cube\n");
 	// vertices
 	std::vector<Vec4> v;
 	float h = half_edge;
@@ -122,7 +122,7 @@ void make_cube(Vec4 cen, float half_edge)
 	tri.verts[2] = v[0];
 	tri.normal.set(0.,0.,-1.,0.);
 	triangles.push_back(tri);
-	printf("triangles: size: %d\n", triangles.size());
+	//printf("triangles: size: %d\n", triangles.size());
 
 	tri.verts[0] = v[4];
 	tri.verts[1] = v[5];
@@ -228,7 +228,8 @@ int main(int argc, char** argv)
     
     //default constructor
     enjas = new EnjaParticles(EnjaParticles::GRAVITY, NUM_PARTICLES);
-    enjas->particle_radius = 2.0f;
+    enjas->particle_radius = 25.0f;
+    enjas->use_glsl();
     enjas->updates = 1;
     enjas->dt = .005;
     enjas->collision = true;
@@ -302,7 +303,7 @@ int main(int argc, char** argv)
 
 // make cubes, formed from triangles
 
-	int nb_cubes = 500;
+	int nb_cubes = 100;
 	Vec4 cen;
 
 	for (int i=0; i < nb_cubes; i++) {
@@ -316,6 +317,7 @@ int main(int argc, char** argv)
 	numTri = triangles.size();
 	//printf("triangles: nb: %d\n", triangles.size()); exit(0);
 
+    //enjas->transform[0] = Vec4(1,0,0,0);
     enjas->loadTriangles(triangles);
     
     //Test making a system from vertices and normals;

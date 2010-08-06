@@ -171,11 +171,16 @@ float4 collisions(float4 pos, float4 vel, int first, int last, __global Triangle
 }
 #endif
 //----------------------------------------------------------------------
-__kernel void collision_ge( __global float4* vertices, __global float4* velocities, __global Triangle* triangles_glob, int n_triangles, float h, __local Triangle* triangles)
+__kernel void collision_ge( __global float4* vertices, __global float4* velocities, __global Triangle* triangles_glob, int n_triangles, float h,__global float4* transform, __local Triangle* triangles )
 {
     unsigned int i = get_global_id(0);
     float4 pos = vertices[i];
     float4 vel = velocities[i];
+
+    //transform pos to get global coordinates
+    //3x3 matrix multiply followed by vector add
+    float4 pos_t = (float4)(dot(transform[0], pos), dot(transform[1], pos), dot(transform[2], pos), 0);
+    pos = pos_t + transform[3];
 
 	//int one_tri = 16; // nb floats per triangle
 	// Find a way to Iterate over batches of n_triangles so the number

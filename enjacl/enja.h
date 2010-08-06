@@ -7,6 +7,7 @@
 #include <vector>
 #include "incopencl.h"
 #include "timege.h"
+#include <stdio.h>
 
 
 typedef struct Vec4
@@ -71,6 +72,8 @@ public:
     int updates;            //number of times to update per frame
     float dt;
     float particle_radius;  
+    Vec4 transform[4];          //store the blender transformation matrix
+    double gl_transform[16];    //store the opengl matrix of the object
 
     //rendering options
     void use_glsl();        //not the best way, call this before rendering and it sets up glsl program
@@ -83,10 +86,11 @@ public:
     static const std::string sources[];
 
     //keep track of transformation from blender
+    /*
     float translation[3];
     Vec4 rotation[3];
     Vec4 invrotation[3];
-
+    */
     int n_triangles;
     //handle triangles for collision detection
     void loadTriangles(std::vector<Triangle>);
@@ -133,6 +137,8 @@ public:
     cl::Buffer cl_vert_gen;  //want to have the start points for reseting particles
     cl::Buffer cl_velo_gen;  //want to have the start velocities for reseting particles
     cl::Buffer cl_velocities;  //particle velocities
+    
+    cl::Buffer cl_transform;  //transformation matrix from blender
     //cl::Buffer cl_life;        //keep track where in their life the particles are (packed into velocity.w now)
     int v_vbo;   //vertices vbo
     int c_vbo;   //colors vbo

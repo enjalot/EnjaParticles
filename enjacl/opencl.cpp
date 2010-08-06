@@ -41,9 +41,14 @@ int EnjaParticles::update()
     err = queue.enqueueNDRangeKernel(vel_update_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
     queue.finish();
 
+    err = queue.enqueueWriteBuffer(cl_transform, CL_TRUE, 0, 4*sizeof(Vec4), &transform[0], NULL, &event);
+    queue.finish();
+
     if(collision)
     {
         err = collision_kernel.setArg(4, dt);
+
+        
 		size_t glob = num; // 10000
 		size_t loc = 512;
 		try {
@@ -66,7 +71,9 @@ int EnjaParticles::update()
       queue.finish();
     }
 
-    err = pos_update_kernel.setArg(3, dt);
+
+    err = pos_update_kernel.setArg(3, cl_transform);
+    err = pos_update_kernel.setArg(4, dt);
     err = queue.enqueueNDRangeKernel(pos_update_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
     //printf("enqueue: %s\n", oclErrorString(err));
     queue.finish();
@@ -173,10 +180,14 @@ void EnjaParticles::popCorn()
     cl_vert_gen = cl::Buffer(context, CL_MEM_WRITE_ONLY, vbo_size, NULL, &err);
     cl_velo_gen = cl::Buffer(context, CL_MEM_WRITE_ONLY, vbo_size, NULL, &err);
     cl_velocities = cl::Buffer(context, CL_MEM_WRITE_ONLY, vbo_size, NULL, &err);
+
+    cl_transform = cl::Buffer(context, CL_MEM_WRITE_ONLY, 4*sizeof(Vec4), NULL, &err);
     
     err = queue.enqueueWriteBuffer(cl_vert_gen, CL_TRUE, 0, vbo_size, &vert_gen[0], NULL, &event);
     err = queue.enqueueWriteBuffer(cl_velo_gen, CL_TRUE, 0, vbo_size, &velo_gen[0], NULL, &event);
     err = queue.enqueueWriteBuffer(cl_velocities, CL_TRUE, 0, vbo_size, &velo_gen[0], NULL, &event);
+    
+    err = queue.enqueueWriteBuffer(cl_transform, CL_TRUE, 0, 4*sizeof(Vec4), &transform[0], NULL, &event);
     
     queue.finish();
 
