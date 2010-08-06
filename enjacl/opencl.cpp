@@ -37,18 +37,17 @@ int EnjaParticles::update()
 
     //clFinish(cqCommandQueue);
 	ts_cl[1]->start();
-    err = vel_update_kernel.setArg(4, dt);
-    err = queue.enqueueNDRangeKernel(vel_update_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
-    queue.finish();
-
     err = queue.enqueueWriteBuffer(cl_transform, CL_TRUE, 0, 4*sizeof(Vec4), &transform[0], NULL, &event);
+    queue.finish();
+    
+    err = vel_update_kernel.setArg(4, cl_transform);
+    err = vel_update_kernel.setArg(5, dt);
+    err = queue.enqueueNDRangeKernel(vel_update_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
     queue.finish();
 
     if(collision)
     {
         err = collision_kernel.setArg(4, dt);
-
-        
 		size_t glob = num; // 10000
 		size_t loc = 512;
 		try {
@@ -70,7 +69,6 @@ int EnjaParticles::update()
       }
       queue.finish();
     }
-
 
     err = pos_update_kernel.setArg(3, cl_transform);
     err = pos_update_kernel.setArg(4, dt);

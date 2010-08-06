@@ -2,19 +2,28 @@
 
 std::string gravity_program_source = STRINGIFY(
 //update the particle position and color
-__kernel void vel_update(__global float4* vertices, __global float4* colors, __global float4* velo_gen, __global float4* velocities, float h)
+__kernel void vel_update(__global float4* vertices, __global float4* colors, __global float4* velo_gen, __global float4* velocities, __global float4* transform, float h)
 {
     unsigned int i = get_global_id(0);
 
+   
     //h = h*10;
     float life = velocities[i].w;
-    life -= h/2;
+    life -= h/5;
     if(life <= 0.)
     {
+
+        float4 vel = velo_gen[i];
+        vel = (float4)(dot(transform[0], vel), dot(transform[1], vel), dot(transform[2], vel), 0);
+        //vel = vel_t + transform[3];
+
+        velocities[i] = 5*vel;
         //reset this particle
-        velocities[i].x = velo_gen[i].x;
-        velocities[i].y = velo_gen[i].y;
-        velocities[i].z = velo_gen[i].z;
+        /*
+        velocities[i].x = 5*velo_gen[i].x;
+        velocities[i].y = 5*velo_gen[i].y;
+        velocities[i].z = 5*velo_gen[i].z;
+        */
         life = 1.0f;
     } 
     float vxn = velocities[i].x;
@@ -24,8 +33,8 @@ __kernel void vel_update(__global float4* vertices, __global float4* colors, __g
     velocities[i].y = vyn;// - h*9.8;
     velocities[i].z = vzn - h*9.8;
      
-    colors[i].x = life - .2f;
-    colors[i].y = 1.0f - life * .8f;
+    colors[i].x = life;
+    colors[i].y = 1.0f - life;
     colors[i].z = 1.0f - life;
     colors[i].w = life;
     
