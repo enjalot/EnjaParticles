@@ -41,6 +41,13 @@ typedef struct Triangle
 	//float dummy; // for more efficient global -> shared
 } Triangle;
 
+typedef struct Box
+{
+	float xmin, xmax;
+	float ymin, ymax;
+	float zmin, zmax;
+} Box;
+
 typedef std::vector<Vec4> AVec4;
 
 class EnjaParticles

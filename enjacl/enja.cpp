@@ -35,8 +35,10 @@
 #ifdef OPENCL_SHARED
 //#include "physics/collision_ge.cl"
 //#include "physics/collision_ge_a.cl"
-// Version using blocks, experimental
-#include "physics/collision_ge_b.cl"
+// Version for collision against triangles with shared memory
+//#include "physics/collision_ge_b.cl"
+// Version for collision against bounding boxes
+#include "physics/collision_ge_bb.cl"
 #else
 #include "physics/collision.cl"
 #endif

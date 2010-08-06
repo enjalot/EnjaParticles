@@ -1,3 +1,4 @@
+//
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -32,6 +33,7 @@ int mouse_old_x, mouse_old_y;
 int mouse_buttons = 0;
 float rotate_x = 0.0, rotate_y = 0.0;
 std::vector<Triangle> triangles;
+std::vector<Box> boxes;
 
 
 void init_gl();
@@ -84,7 +86,7 @@ void make_cube(Vec4 cen, float half_edge)
      0-----------1              x------- X
 	              
 */
-	printf("inside make_cube\n");
+	//printf("inside make_cube\n");
 	// vertices
 	std::vector<Vec4> v;
 	float h = half_edge;
@@ -107,6 +109,16 @@ void make_cube(Vec4 cen, float half_edge)
 	vv.set(cen.x-h, cen.y+h, cen.z+h);
 	v.push_back(vv);
 
+	// Boxes
+	Box box;
+	box.xmin = cen.x-h;
+	box.xmax = cen.x+h;
+	box.ymin = cen.y-h;
+	box.ymax = cen.y+h;
+	box.zmin = cen.z-h;
+	box.zmax = cen.z+h;
+	boxes.push_back(box);
+
 	// Triangles
 	Triangle tri;
 
@@ -121,7 +133,7 @@ void make_cube(Vec4 cen, float half_edge)
 	tri.verts[2] = v[0];
 	tri.normal.set(0.,0.,-1.,0.);
 	triangles.push_back(tri);
-	printf("triangles: size: %d\n", triangles.size());
+	//printf("triangles: size: %d\n", triangles.size());
 
 	tri.verts[0] = v[4];
 	tri.verts[1] = v[5];
@@ -313,39 +325,8 @@ int main(int argc, char** argv)
 	}
 
 	numTri = triangles.size();
-	//printf("triangles: nb: %d\n", triangles.size()); exit(0);
-
-    enjas->loadTriangles(triangles);
-    
-    //Test making a system from vertices and normals;
-    /*
-    Vec4 g[4];
-    Vec4 v[4];
-    g[0] = Vec4(0.0f, -1.0f, 0.0f, 1.0f);
-    g[1] = Vec4(0.0f, 1.0f, 0.0f, 1.0f);
-
-		printf("v0: %f, %f, %f\n", v0.x, v0.y, v0.z);
-		printf("v1: %f, %f, %f\n", v1.x, v1.y, v1.z);
-		printf("v2: %f, %f, %f\n", v2.x, v2.y, v2.z);
-
-		// normal
-		float nx = (v1.y-v0.y)*(v2.z-v0.z);
-		float ny = (v1.z-v0.z)*(v2.x-v0.x);
-		float nz = (v1.x-v0.x)*(v2.y-v0.y);
-		tri.normal.set(nx,ny,nz,0.);
-		float nrmi = 1. / sqrt(nx*nx+ny*ny+nz*nz);
-		tri.normal.set(nx*nrmi, ny*nrmi, nz*nrmi, 0.);
-
-		printf("x,y,z= %f, %f, %f\n", nx, ny, nz);
-		printf("x,y,z= %f, %f, %f\n", nx*nrmi, ny*nrmi, nz*nrmi);
-		//exit(0);
-		//tri.normal.set(0.,0.,1.,0.);
-        triangles.push_back(tri);
-	}
-#undef R
-#endif
-
-	printf("triangles: nb: %d\n", triangles.size()); exit(0);
+	printf("triangles: nb: %d\n", triangles.size());
+	printf("boxes: nb: %d\n", boxes.size()); 
 
     enjas->loadTriangles(triangles);
     
