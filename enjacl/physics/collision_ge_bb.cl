@@ -11,7 +11,6 @@
 
 std::string collision_program_source = STRINGIFY(
 // prototype does not work?
-//bool intersect_triangle_ge(float4 pos, float4 vel, __local Triangle* tri, float dist, bool collided);
 
 //----------------------------------------------------------------------
 float4 cross_product(float4 a, float4 b)
@@ -44,9 +43,32 @@ typedef struct Triangle
     //float  dummy;  // for better global to local memory transfer
 } Triangle;
 //----------------------------------------------------------------------
+void global_to_shared_tri(__global float* tri_gl, __local float* tri_f, int one_tri, int first_tri, int last_tri)
+// one_tri: nb floats in one Triangle structure
+{
+/*
+	thread id: 0 --> get_global_size(0);
+	local thread id: 0 -> get_local_size(0);
+	thread id: get_global_id(0);  ==> particle number
+	local id: get_local_id(0);   
+*/
+
+	#if 1
+	int block_sz = get_local_size(0);
+	int loc_tid = get_local_id(0);
+
+	// first = 3, last = 7, tri = 3,4,5,6 = last - first
+	int nb_floats = one_tri * (last_tri-first_tri);
+
+	for (int j = loc_tid; j < nb_floats; j += block_sz) {
+		//if ((j+first_tri) > last_tri) break;
+		tri_f[j] = tri_gl[j+first_tri*one_tri];
+	}
+	#endif
+}
 //----------------------------------------------------------------------
 #if 1
-void test_local(__global float* box_gl, __local float* box_f, int one_box, int first_box, int last_box)
+void global_to_shared_boxes(__global float* box_gl, __local float* box_f, int one_box, int first_box, int last_box)
 // one_tri: nb floats in one Triangle structure
 {
 /*
@@ -69,6 +91,130 @@ void test_local(__global float* box_gl, __local float* box_f, int one_box, int f
 }
 #endif
 //----------------------------------------------------------------------
+#if 1
+bool intersect_triangle_ge(float4 pos, float4 vel, __local Triangle* tri, float dist, bool collided)
+{
+	// There is serialization (since not all threads in a warp will have 
+	// "collided" set the same way)
+
+	// More efficient if this test is not performed. Not sure why.
+	//if (collided) return;
+
+    /*
+    * Moller and Trumbore
+    * take in the particle position and velocity (treated as a Ray)
+    * also the triangle vertices for the ray intersection
+    * we take in the precalculated triangle's normal to first test for distance
+    * dist is the threshold to determine if we are close enough to the triangle
+    * to even check for distance
+    */
+    //can't use commas with STRINGIFY trick
+    float4 edge1;
+    float4 edge2;
+
+    edge1 = tri->verts[1] - tri->verts[0];
+    edge2 = tri->verts[2] - tri->verts[0];
+
+    float4 pvec;
+    pvec = cross_product(vel, edge2);
+
+    float det;
+    det = dot(edge1, pvec);
+    float eps = .000001;
+
+    //non-culling branch
+    if(det > -eps && det < eps) {    // <<<<< if
+    //if(det < eps)
+        return false;
+	}
+
+    float4 tvec;
+    tvec = pos - tri->verts[0];
+
+	// reduce register usage
+    float inv_det = 1.0/det;
+
+    float u;
+    u = dot(tvec, pvec) * inv_det;
+    if (u < 0.0 || u > 1.0) {     // <<<<< if
+        return false;
+	}
+
+    float4 qvec;
+    qvec = cross_product(tvec, edge1);
+
+    float v;
+    v = dot(vel, qvec) * inv_det;
+    if (v < 0.0 || (u + v) > 1.0f) { // <<<< if
+        return false;
+	}
+
+    float t;
+    t = dot(edge2, qvec) * inv_det;
+
+    if(t > eps and t < dist)
+        return true;
+
+    return false;
+}
+#endif
+//----------------------------------------------------------------------
+float4 collisions_tri(float4 pos, float4 vel, int first, int last, __global Triangle* triangles_glob, float h, __local Triangle* triangles)
+{
+#if 1
+	int one_tri = 16;
+	// copy triangles to shared memory 
+	// first, last: indices into triangles_glob
+	test_local(triangles_glob, triangles, one_tri, first, last);
+	barrier(CLK_LOCAL_MEM_FENCE);
+
+	//store the magnitude of the velocity
+	#if 1
+    float mag = sqrt(vel.x*vel.x + vel.y*vel.y + vel.z*vel.z); 
+    float damping = 1.0f;
+
+	// variables: 
+	// triangles, pos, vel
+
+	bool collided = false;
+
+    //iterate through the list of triangles
+	// This for() and/or if() slows things down considerably. 
+	// Proof: putting the last three lines inside the for, before the 
+	//    break, slows the code down!
+
+    for (int j=0; j < (last-first); j++)
+    {
+        collided = intersect_triangle_ge(pos, vel, &triangles[j], h, collided);
+        if (collided)
+        {
+            //lets do some specular reflection
+
+            float s = 2.0f*(dot(triangles[j].normal, vel));
+			vel = vel - s*triangles[j].normal;
+
+			/*
+ 				vp = v - (v.n) n
+ 				vn = (v.n) n
+
+ 				New velocity = (vp, -vn) = v - (v.n)n - v.n n
+                   = v - 2n v.n
+           */
+
+
+			vel = vel*damping;
+
+			// faster without the break. Not sure why. 
+			//break;
+        }
+    }
+#endif
+
+#endif
+	return vel;
+}
+//----------------------------------------------------------------------
+#if 1
 bool intersect_box_ge(float4 pos, float4 vel, __local Box* box, float dt, bool collided)
 {
 	// There is serialization (since not all threads in a warp will have 
@@ -92,14 +238,16 @@ bool intersect_box_ge(float4 pos, float4 vel, __local Box* box, float dt, bool c
 #endif
 	return collided;
 }
+#endif
 //----------------------------------------------------------------------
 
-float4 collisions(float4 pos, float4 vel, int first, int last, __global Box* boxes_glob, float dt, __local Box* boxes)
+float4 collisions_box(float4 pos, float4 vel, int first, int last, __global Box* boxes_glob, float dt, __local Box* boxes, int f_tri, int l_tri)
 {
+#if 1
 	int one_box = 6; // nb floats in Box
 	// copy triangles to shared memory 
 	// first, last: indices into triangles_glob
-	test_local(boxes_glob, boxes, one_box, first, last);
+	global_to_shared_boxes(boxes_glob, boxes, one_box, first, last);
 	barrier(CLK_LOCAL_MEM_FENCE);
 
 	//store the magnitude of the velocity
@@ -121,6 +269,17 @@ float4 collisions(float4 pos, float4 vel, int first, int last, __global Box* box
         collided = intersect_box_ge(pos, vel, &boxes[j], dt, collided);
         if (collided)
         {
+			// go down the triangle list
+			// 3rd arg: nb floats in Triangle
+			//global_to_shared_tri(triangles_glob, triangles, 16, f_tri, l_tri);
+
+			// Do not put triangle list in local memory 
+			for (int k=f_tri; k < l_tri; k++) {
+				;
+			}
+
+
+
             //lets do some specular reflection
 #if 0
             float s = 2.0f*(dot(triangles[j].normal, vel));
@@ -144,6 +303,7 @@ float4 collisions(float4 pos, float4 vel, int first, int last, __global Box* box
     }
 
 	return vel;
+#endif
 }
 //----------------------------------------------------------------------
 __kernel void collision_ge( __global float4* vertices, __global float4* velocities, __global Box* boxes_glob, int n_boxes, float h, __global int* tri_offsets, __local Box* boxes)
@@ -166,7 +326,9 @@ __kernel void collision_ge( __global float4* vertices, __global float4* velociti
 		if (last > n_boxes) {
 			last = n_boxes;
 		}
-		vel = collisions(pos, vel, first, last, boxes_glob, h, boxes);
+		int f_tri = tri_offsets[j];
+		int l_tri = tri_offsets[j+1];
+		vel = collisions_box(pos, vel, first, last, boxes_glob, h, boxes, f_tri, l_tri);
 	}
 
     velocities[i].x = vel.x;
