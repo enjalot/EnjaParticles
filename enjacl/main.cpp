@@ -3,6 +3,7 @@
 #include <math.h>
 #include <time.h>
 
+
 //#include <utils.h>
 
 //#include <string.h>
@@ -49,7 +50,7 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 EnjaParticles* enjas;
-#define NUM_PARTICLES 1024*16
+#define NUM_PARTICLES 1024*8
 
 
 GLuint v_vbo; //vbo id
@@ -58,6 +59,8 @@ GLuint c_vbo; //vbo id
 //timers
 GE::Time *ts[3];
 
+//================
+#include "materials_lights.h"
 
 //----------------------------------------------------------------------
 float rand_float(float mn, float mx)
@@ -68,6 +71,7 @@ float rand_float(float mn, float mx)
 //----------------------------------------------------------------------
 void make_cube(Vec4 cen, float half_edge)
 {
+// Written by G. Erlebacher Aug. 5, 2010
 /*
 
         7-----------6 
@@ -203,6 +207,8 @@ int main(int argc, char** argv)
     glutMouseFunc(appMouse);
     glutMotionFunc(appMotion);
 
+	define_lights_and_materials();
+
     // initialize necessary OpenGL extensions
     glewInit();
     GLboolean bGLEW = glewIsSupported("GL_VERSION_2_0 GL_ARB_pixel_buffer_object"); 
@@ -295,7 +301,7 @@ int main(int argc, char** argv)
 
 // make cubes, formed from triangles
 
-	int nb_cubes = 100;
+	int nb_cubes = 50;
 	Vec4 cen;
 
 	for (int i=0; i < nb_cubes; i++) {
