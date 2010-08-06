@@ -3,6 +3,7 @@
 void EnjaParticles::loadTriangles(std::vector<Triangle> triangles)
 {
     n_triangles = triangles.size();
+    printf("n triangles: %d\n", n_triangles);
     //load triangles into cl buffer
     //Triangle is a struct that ends up being 4 float4s
     size_t tri_size = sizeof(Triangle) * n_triangles;

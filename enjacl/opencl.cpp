@@ -112,8 +112,8 @@ void EnjaParticles::popCorn()
         //#include "physics/collision.cl"
         vel_update_program = loadProgram(sources[system]);
         vel_update_kernel = cl::Kernel(vel_update_program, "vel_update", &err);
-        if(collision)
-        {
+        //if(collision)
+        //{
             collision_program = loadProgram(sources[COLLISION]);
 #ifdef OPENCL_SHARED
 			// version that works (80 fps with 220 tri and 16,000 particles)
@@ -131,7 +131,7 @@ void EnjaParticles::popCorn()
             printf("kernel local mem: %d\n", s);
             size_t wgs = collision_kernel.getWorkGroupInfo<CL_KERNEL_WORK_GROUP_SIZE>(devices.front());
             printf("kernel workgroup size: %d\n", wgs);
-        }
+        //}
         pos_update_program = loadProgram(sources[POSITION]);
         pos_update_kernel = cl::Kernel(pos_update_program, "pos_update", &err);
     }
@@ -187,13 +187,13 @@ void EnjaParticles::popCorn()
     err = vel_update_kernel.setArg(2, cl_velo_gen);     //velocity generators
     err = vel_update_kernel.setArg(3, cl_velocities);   //velocities
 
-    if(collision)
-    {
+    //if(collision)
+    //{
         err = collision_kernel.setArg(0, cl_vbos[0]);      //position
         //printf("collision arg 0: %s\n", oclErrorString(err));
         err = collision_kernel.setArg(1, cl_velocities);   //velocities
         //printf("collision arg 1: %s\n", oclErrorString(err));
-    }
+    //}
 
     err = pos_update_kernel.setArg(0, cl_vbos[0]);      //position
     err = pos_update_kernel.setArg(1, cl_vert_gen);     //position generators
