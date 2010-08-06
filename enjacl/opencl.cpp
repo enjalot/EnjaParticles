@@ -24,7 +24,6 @@
 
 int EnjaParticles::update()
 {
- 
 #ifdef GL_INTEROP   
     // map OpenGL buffer object for writing from OpenCL
     //clFinish(cqCommandQueue);
@@ -67,8 +66,7 @@ int EnjaParticles::update()
             << ")"
             << std::endl;
       }
-
-        queue.finish();
+      queue.finish();
     }
 
     err = pos_update_kernel.setArg(3, dt);
@@ -107,8 +105,6 @@ int EnjaParticles::update()
     glUnmapBufferARB(GL_ARRAY_BUFFER); 
     */
 #endif
-
-
 }
 
 

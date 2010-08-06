@@ -45,7 +45,6 @@ typedef std::vector<Vec4> AVec4;
 
 class EnjaParticles
 {
-
 public:
 
     int update();   //update the particle system
@@ -106,7 +105,6 @@ public:
 
     int init(AVec4 vert_gen, AVec4 velo_gen, AVec4 colors, int num);
 
-    
     //opencl
     std::vector<cl::Device> devices;
     cl::Context context;
@@ -148,7 +146,6 @@ public:
     GE::Time *ts[3];    //library timers (update, render, total)
     GE::Time *ts_cl[4]; //opencl timers (acquire, kernel exec, release)
 
-
     int init_cl();
     int setup_cl(); //helper function that initializes the devices and the context
     cl::Program loadProgram(std::string kernel_source);
@@ -159,8 +156,7 @@ public:
     int compileShaders();
     int glsl_program;   //should be GLuint
     bool glsl;
-
 };
 
-
 #endif
+
