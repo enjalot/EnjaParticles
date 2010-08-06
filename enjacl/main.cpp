@@ -49,7 +49,7 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 EnjaParticles* enjas;
-#define NUM_PARTICLES 1024*16*4
+#define NUM_PARTICLES 1024*16
 
 
 GLuint v_vbo; //vbo id
@@ -301,7 +301,7 @@ int main(int argc, char** argv)
 	for (int i=0; i < nb_cubes; i++) {
 		float rx = rand_float(-1.5,1.5);
 		float ry = rand_float(-1.5,1.5);
-		float rz = rand_float(-3.,1.);
+		float rz = rand_float(-5.,0.);
 		cen.set(rx,ry,rz,1.);
 		make_cube(cen, 0.2);
 	}
