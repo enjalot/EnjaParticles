@@ -95,8 +95,10 @@ public:
     Vec4 invrotation[3];
 
     int n_triangles;
+    int n_boxes;
     //handle triangles for collision detection
     void loadTriangles(std::vector<Triangle>);
+    void loadBoxes(std::vector<Box>);
     //Triangle faceToTriangle(Vec4 face[4]);
 
 //private:
@@ -148,6 +150,7 @@ public:
     
     //for collisions
     cl::Buffer cl_triangles;  //particle velocities
+    cl::Buffer cl_boxes;  //particle velocities
 
     //timers
     GE::Time *ts[3];    //library timers (update, render, total)

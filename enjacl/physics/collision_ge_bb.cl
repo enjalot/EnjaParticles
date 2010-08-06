@@ -45,6 +45,7 @@ typedef struct Triangle
 } Triangle;
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
+#if 1
 void test_local(__global float* box_gl, __local float* box_f, int one_box, int first_box, int last_box)
 // one_tri: nb floats in one Triangle structure
 {
@@ -66,8 +67,8 @@ void test_local(__global float* box_gl, __local float* box_f, int one_box, int f
 		box_f[j] = box_gl[j+first_box*one_box];
 	}
 }
+#endif
 //----------------------------------------------------------------------
-#if 1
 bool intersect_box_ge(float4 pos, float4 vel, __local Box* box, float dt, bool collided)
 {
 	// There is serialization (since not all threads in a warp will have 
@@ -78,19 +79,22 @@ bool intersect_box_ge(float4 pos, float4 vel, __local Box* box, float dt, bool c
 
 	float4 pos1 = pos + dt*vel;
 
+#if 1
 	// is pos1 inside the box. If yes, collide is true
 
-	if (pos1.x > box.xmin && pos1.x < box.xmax && 
-	    pos1.y > box.ymin && pos1.y < box.ymay && 
-	    pos1.z > box.zmin && pos1.z < box.zmaz) {
+	if (pos1.x > box->xmin && pos1.x < box->xmax && 
+	    pos1.y > box->ymin && pos1.y < box->ymax && 
+	    pos1.z > box->zmin && pos1.z < box->zmax) {
 
-		collided == true;
-		return collided
+		collided = true;
+		return collided;
 	}
-}
 #endif
+	return collided;
+}
 //----------------------------------------------------------------------
-float4 collisions(float4 pos, float4 vel, int first, int last, __global Box* boxes_glob, float h, __local Box* boxes)
+
+float4 collisions(float4 pos, float4 vel, int first, int last, __global Box* boxes_glob, float dt, __local Box* boxes)
 {
 	int one_box = 6; // nb floats in Box
 	// copy triangles to shared memory 
@@ -99,7 +103,6 @@ float4 collisions(float4 pos, float4 vel, int first, int last, __global Box* box
 	barrier(CLK_LOCAL_MEM_FENCE);
 
 	//store the magnitude of the velocity
-#if 0
     float mag = sqrt(vel.x*vel.x + vel.y*vel.y + vel.z*vel.z); 
     float damping = 1.0f;
 
@@ -115,11 +118,11 @@ float4 collisions(float4 pos, float4 vel, int first, int last, __global Box* box
 
     for (int j=0; j < (last-first); j++)
     {
-        collided = intersect_box_ge(pos, vel, &triangles[j], h, collided);
+        collided = intersect_box_ge(pos, vel, &boxes[j], dt, collided);
         if (collided)
         {
             //lets do some specular reflection
-
+#if 0
             float s = 2.0f*(dot(triangles[j].normal, vel));
 			vel = vel - s*triangles[j].normal;
 
@@ -133,18 +136,19 @@ float4 collisions(float4 pos, float4 vel, int first, int last, __global Box* box
 
 
 			vel = vel*damping;
+#endif
 
 			// faster without the break. Not sure why. 
 			//break;
         }
     }
-#endif
 
 	return vel;
 }
 //----------------------------------------------------------------------
 __kernel void collision_ge( __global float4* vertices, __global float4* velocities, __global Box* boxes_glob, int n_boxes, float h, __local Box* boxes)
 {
+#if 1
     unsigned int i = get_global_id(0);
     float4 pos = vertices[i];
     float4 vel = velocities[i];
@@ -168,6 +172,7 @@ __kernel void collision_ge( __global float4* vertices, __global float4* velociti
     velocities[i].x = vel.x;
     velocities[i].y = vel.y;
     velocities[i].z = vel.z;
+#endif
 }
 );
 //----------------------------------------------------------------------
