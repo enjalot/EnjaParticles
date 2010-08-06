@@ -12,6 +12,7 @@ __kernel void pos_update(__global float4* vertices, __global float4* vert_gen, _
     if(life == 1.f) //particles have been reset by vel_update kernel
     {
         //reset this particle's position
+        //with current transform
         vertices[i].x = vert_gen[i].x;
         vertices[i].y = vert_gen[i].y;
         vertices[i].z = vert_gen[i].z;

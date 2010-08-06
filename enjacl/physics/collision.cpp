@@ -2,6 +2,7 @@
 
 void EnjaParticles::loadTriangles(std::vector<Triangle> triangles)
 {
+    printf("LOAD TRIANGLES collision: %d\n", collision);
     if (!collision)
         return;
     n_triangles = triangles.size();

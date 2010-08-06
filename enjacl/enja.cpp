@@ -58,6 +58,7 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
     glsl = false;
     blending = false;
     point_scale = 1.0f;
+    collision = false;
 
     //we pack radius and life into generator and velocity arrays
     for(int i=0; i < n; i++)

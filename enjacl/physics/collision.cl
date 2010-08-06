@@ -46,25 +46,30 @@ bool intersect_triangle(float4 pos, float4 vel, Triangle tri, float dist)
     det = dot(edge1, pvec);
     
     //non-culling branch
-    if(det > -eps && det < eps)
+    if(det > -eps && det < eps){
     //if(det < eps)
         return false;
+    }
     
     tvec = pos - tri.verts[0];
     inv_det = 1.0/det;
 
     u = dot(tvec, pvec) * inv_det;
-    if (u < 0.0 || u > 1.0)
+    if (u < 0.0 || u > 1.0){
         return false;
+    }
 
     qvec = cross_product(tvec, edge1);
     v = dot(vel, qvec) * inv_det;
-    if (v < 0.0 || u + v > 1.0f)
+    if (v < 0.0 || u + v > 1.0f){
         return false;
+    }
 
     t = dot(edge2, qvec) * inv_det;
-    if(t > eps and t < dist)
+    if(t > eps and t < dist){
+        tri.normal = cross_product(edge1, edge2);
         return true;
+    }
 
     return false;
 
