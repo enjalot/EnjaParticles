@@ -6,6 +6,7 @@
     //OpenCL stuff
 #endif
 
+#include <stdlib.h>
 #include "enja.h"
 #include "timege.h"
 
@@ -84,6 +85,7 @@ int EnjaParticles::render()
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
 
+
     if(glsl)
     {
         //printf("GLSL\n");
@@ -111,8 +113,10 @@ int EnjaParticles::render()
 
         glDisable(GL_LIGHTING);
         //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+		// draws circles instead of squares
         glEnable(GL_POINT_SMOOTH); 
-        glPointSize(particle_radius);
+        glPointSize(5.*particle_radius);
 
         drawArrays();
     }
@@ -122,7 +126,7 @@ int EnjaParticles::render()
     glPopAttrib();
     //glDisable(GL_POINT_SMOOTH);
     //glDisable(GL_BLEND);
-    //glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHTING);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     //make sure rendering timing is accurate
@@ -134,6 +138,7 @@ int EnjaParticles::render()
     {
         printf("%s\n", printReport().c_str());
     }
+
 }
 
 

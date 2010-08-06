@@ -1,6 +1,7 @@
 #include <string.h>
 #include <string>
 #include <iostream>
+#include <stdlib.h>
 
 #include <GL/glew.h>
 #if defined __APPLE__ || defined(MACOSX)
@@ -23,19 +24,15 @@
 
 int EnjaParticles::update()
 {
- 
+	ts_cl[0]->start();
 #ifdef GL_INTEROP   
     // map OpenGL buffer object for writing from OpenCL
     //clFinish(cqCommandQueue);
-    ts_cl[3]->start();
     glFinish();
-    ts_cl[3]->stop();
 
-	ts_cl[0]->start();
     err = queue.enqueueAcquireGLObjects(&cl_vbos, NULL, &event);
     //printf("acquire: %s\n", oclErrorString(err));
     queue.finish();
-	ts_cl[0]->stop();
 #endif
 
     //clFinish(cqCommandQueue);
@@ -47,8 +44,26 @@ int EnjaParticles::update()
     if(collision)
     {
         err = collision_kernel.setArg(4, dt);
+		size_t glob = num; // 10000
+		size_t loc = 512;
+		try {
+        //err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
+        //err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
+        //err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
+        //err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
         err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
-        queue.finish();
+	//printf("end\n");exit(0); // >>>>>>>
+		}
+      catch (cl::Error err) {
+         std::cerr
+            << "ERROR: "
+            << err.what()
+            << "("
+            << err.err()
+            << ")"
+            << std::endl;
+      }
+      queue.finish();
     }
 
     err = pos_update_kernel.setArg(3, dt);
@@ -62,11 +77,9 @@ int EnjaParticles::update()
     //ciErrNum = clEnqueueReleaseGLObjects(cqCommandQueue, 1, &vbo_cl, 0,0,0);
     
     //clFinish(cqCommandQueue);
-    ts_cl[2]->start();
     err = queue.enqueueReleaseGLObjects(&cl_vbos, NULL, &event);
     //printf("release gl: %s\n", oclErrorString(err));
     queue.finish();
-    ts_cl[2]->stop();
 #else
 
     /* implement this with opencl c++ bindings later
@@ -88,7 +101,7 @@ int EnjaParticles::update()
     */
 #endif
 
-
+	ts_cl[0]->stop();
 }
 
 
@@ -102,7 +115,17 @@ void EnjaParticles::popCorn()
         //if(collision) //we setup collision kernel either way
         //{
             collision_program = loadProgram(sources[COLLISION]);
+#ifdef OPENCL_SHARED
+			// version that works (80 fps with 220 tri and 16,000 particles)
+			// file: collision_ge.cl
+            //collision_kernel = cl::Kernel(collision_program, "collision_ge", &err);
+
+			// experimental version, with collision_ge as starting point
+			// file: collision_ge_a.cl
+            collision_kernel = cl::Kernel(collision_program, "collision_ge", &err);
+#else
             collision_kernel = cl::Kernel(collision_program, "collision", &err);
+#endif
             long s = collision_kernel.getWorkGroupInfo<CL_KERNEL_LOCAL_MEM_SIZE>(devices.front());
             printf("kernel local mem: %d\n", s);
             size_t wgs = collision_kernel.getWorkGroupInfo<CL_KERNEL_WORK_GROUP_SIZE>(devices.front());
@@ -162,7 +185,6 @@ void EnjaParticles::popCorn()
     err = vel_update_kernel.setArg(1, cl_vbos[1]);      //color
     err = vel_update_kernel.setArg(2, cl_velo_gen);     //velocity generators
     err = vel_update_kernel.setArg(3, cl_velocities);   //velocities
- 
     //if(collision) //we setup collision either way
     //{
         err = collision_kernel.setArg(0, cl_vbos[0]);      //position
@@ -178,28 +200,21 @@ void EnjaParticles::popCorn()
     printf("done with popCorn()\n");
 
 }
-
-
+//----------------------------------------------------------------------
 int EnjaParticles::init_cl()
 {
     setup_cl();
 
-    ts_cl[0] = new GE::Time("acquire", 5);
-    ts_cl[1] = new GE::Time("ndrange", 5);
-    ts_cl[2] = new GE::Time("release", 5);
-    ts_cl[3] = new GE::Time("glFinish", 5);
+    ts_cl[0] = new GE::Time("cl update routine", 5);
+    ts_cl[1] = new GE::Time("execute kernels", 5);
 
     popCorn();
 
     return 1;
 }
-
-
-
-
+//----------------------------------------------------------------------
 int EnjaParticles::setup_cl()
 {
-
     std::vector<cl::Platform> platforms;
     err = cl::Platform::get(&platforms);
     printf("cl::Platform::get(): %s\n", oclErrorString(err));
@@ -335,10 +350,8 @@ int EnjaParticles::setup_cl()
     catch (cl::Error er) {
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
     }
-
 }
-
-
+//----------------------------------------------------------------------
 cl::Program EnjaParticles::loadProgram(std::string kernel_source)
 {
      // Program Setup
@@ -376,11 +389,15 @@ cl::Program EnjaParticles::loadProgram(std::string kernel_source)
     printf("What now?\n");
         
 
+	printf("0***\n");
     try
     {
+        //err = program.build(devices, "-cl-nv-verbose");
         err = program.build(devices);
+	printf("1***\n");
     }
     catch (cl::Error er) {
+		printf("GE+++++\n");
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
         std::cout << "Build Status: " << program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(devices.front()) << std::endl;
         std::cout << "Build Options:\t" << program.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(devices.front()) << std::endl;
@@ -388,4 +405,4 @@ cl::Program EnjaParticles::loadProgram(std::string kernel_source)
     } 
     return program;
 }
-
+//----------------------------------------------------------------------

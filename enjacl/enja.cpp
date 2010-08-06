@@ -32,7 +32,14 @@
 #include "physics/gravity.cl"
 #include "physics/vfield.cl"
 
+#ifdef OPENCL_SHARED
+//#include "physics/collision_ge.cl"
+//#include "physics/collision_ge_a.cl"
+// Version using blocks, experimental
+#include "physics/collision_ge_b.cl"
+#else
 #include "physics/collision.cl"
+#endif
 //#include "physics/transform.cl"
 #include "physics/position.cl"
 
@@ -45,6 +52,11 @@ const std::string EnjaParticles::sources[] = {
     };
 
 
+float EnjaParticles::rand_float(float mn, float mx)
+{
+	float r = random() / (float) RAND_MAX;
+	return mn + (mx-mn)*r;
+}
 
 int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
 {
@@ -115,8 +127,9 @@ EnjaParticles::EnjaParticles(int s, int n)
     for(int i=0; i < n; i++)
     {
         f = (float)i;
-        g[i].x = 0.0 + 2*cos(2.*M_PI*(f/n));  //with lorentz this looks more interesting
-        g[i].y = 0.0 + 2*sin(2.*M_PI*(f/n));
+		float rad = rand_float(1.2, 2.);
+        g[i].x = 0.0 + rad*cos(2.*M_PI*(f/n));  //with lorentz this looks more interesting
+        g[i].y = 0.0 + rad*sin(2.*M_PI*(f/n));
         g[i].z = 0.f;
         g[i].w = 1.f;
     }
@@ -138,8 +151,8 @@ EnjaParticles::EnjaParticles(int s, int n)
         //v[i].x = 0.0 + .5*cos(2.*M_PI*(f/n));  //with lorentz this looks more interesting
         //v[i].z = 3.f;
         //v[i].y = 0.0 + .5*sin(2.*M_PI*(f/n));
-        v[i].x = 0.f; //.01 * (1. - 2.*drand48()); // between -.02 and .02
-        v[i].y = 0.f; //.05 * drand48();
+        v[i].x = 0.5f; //.01 * (1. - 2.*drand48()); // between -.02 and .02
+        v[i].y = 0.5f; //.05 * drand48();
         v[i].z = 0.f; //.01 * (1. - 2.*drand48());
         v[i].w = 0.f;
     }
@@ -223,12 +236,8 @@ EnjaParticles::~EnjaParticles()
 
     ts_cl[0]->print();
     ts_cl[1]->print();
-    ts_cl[2]->print();
-    ts_cl[3]->print();
     delete ts_cl[0];
     delete ts_cl[1];
-    delete ts_cl[2];
-    delete ts_cl[3];
     
 /*
     if(ckKernel)clReleaseKernel(ckKernel); 
@@ -311,7 +320,7 @@ std::string* EnjaParticles::getReport()
     ss1 << "Average Render Time (per frame): " << ts[2]->getAverage() << std::ends;
     s[0] = ss1.str();
     ss2 << std::fixed << std::setprecision(6);
-    ss2 << "Average OpenCL Time (per frame): " << ts_cl[0]->getAverage() + ts_cl[1]->getAverage() + ts_cl[2]->getAverage() << std::ends;
+    ss2 << "Average OpenCL Time (per frame): " << ts_cl[0]->getAverage()  << std::ends;
     s[1] = ss2.str();
     return s;
 }

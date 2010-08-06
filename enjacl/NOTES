@@ -1,0 +1,30 @@
+If I have multiple blocks and read triangles in shared memory, I need a way to 
+synchronize the multiple blocks to make sure that triangles are only loaded once. 
+The multiple blocks  would otherwise each load the same triangles, even if on the same 
+multiprocessor. 
+
+Consider storing triangle coordinates in half precision (16 bits). 
+----------------------------------------------------------------------
+TODO: 
+
+Consider a set of blocks [xmin, xmax, ymin, ymax, zmin, zmax]
+Each block has a pointer to a list of triangles. 
+
+struct Block {
+	float xmin, xmax, ymin, ymax, zmin zmax;
+	vector<Triangle> tris;
+}
+
+vector<Block> blocks;
+---------------------------------------------------------------------
+Consider a particle of velocity v, hitting a wall with normal n. 
+v is not normalized, n is normalized. 
+
+Projection of v onto the plane: 
+ 
+ vp = v - (v.n) n
+ vn = (v.n) n
+
+ New velocity = (vp, -vn) = v - (v.n)n - v.n n
+                          = v - 2n v.n
+----------------------------------------------------------------------

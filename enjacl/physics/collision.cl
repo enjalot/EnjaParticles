@@ -1,23 +1,27 @@
 #define STRINGIFY(A) #A
 
 std::string collision_program_source = STRINGIFY(
-float4 cross_product(float4 a, float4 b)
+
+inline float4 cross_product(float4 a, float4 b)
 {
     return (float4)(a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x, 0);
 }
-float4 v3normalize(float4 a)
+inline float4 v3normalize(float4 a)
 {
-    float mag = sqrt(a.x*a.x + a.y*a.y + a.z*a.z); //store the magnitude of the velocity
-    return (float4)(a.x/mag, a.y/mag, a.z/mag, 0);
+    float magi = 1./sqrt(a.x*a.x + a.y*a.y + a.z*a.z); //store the magnitude of the velocity
+    return (float4)(a.x*magi, a.y*magi, a.z*magi, 0);
 }
-typedef struct
+
+typedef struct 
 {
     float4 verts[3];
     float4 normal;
+    //float  dummy;  // for better global to local memory transfer
 } Triangle;
-//bool intersect_triangle(float4 pos, float4 vel, float4 tri[3], float4 triN, float dist)
-bool intersect_triangle(float4 pos, float4 vel, Triangle tri, float dist)
+//----------------------------------------------------------------------
+bool intersect_triangle(float4 pos, float4 vel, Triangle tri, float dt)
 {
+#if 1
     /*
     * Moller and Trumbore
     * take in the particle position and velocity (treated as a Ray)
@@ -37,8 +41,19 @@ bool intersect_triangle(float4 pos, float4 vel, Triangle tri, float dist)
     float t;
     float u;
     float v;
-    float eps = .000001;
+    float eps = .00001;
 
+
+	#if 1
+	float4 pos1 = pos + dt * vel;
+	if ((pos1.z <= tri.verts[0].z && pos.z >= tri.verts[0].z)) {
+	//if (pos1.z <= -1. && pos.z >= -1.) {
+		return true;
+	}
+	//return false;
+	#endif
+
+#if 0
     edge1 = tri.verts[1] - tri.verts[0];
     edge2 = tri.verts[2] - tri.verts[0];
 
@@ -46,10 +61,10 @@ bool intersect_triangle(float4 pos, float4 vel, Triangle tri, float dist)
     det = dot(edge1, pvec);
     
     //non-culling branch
-    if(det > -eps && det < eps){
+    if(det > -eps && det < eps) {
     //if(det < eps)
         return false;
-    }
+	}
     
     tvec = pos - tri.verts[0];
     inv_det = 1.0/det;
@@ -61,7 +76,7 @@ bool intersect_triangle(float4 pos, float4 vel, Triangle tri, float dist)
 
     qvec = cross_product(tvec, edge1);
     v = dot(vel, qvec) * inv_det;
-    if (v < 0.0 || u + v > 1.0f){
+    if (v < 0.0 || (u + v) > 1.0f) {
         return false;
     }
 
@@ -72,14 +87,21 @@ bool intersect_triangle(float4 pos, float4 vel, Triangle tri, float dist)
     }
 
     return false;
-
+#endif
+#endif
 }
+//----------------------------------------------------------------------
 __kernel void collision( __global float4* vertices, __global float4* velocities, __global Triangle* triangles, int n_triangles, float h)
 {
+//return;
+#if 1
     unsigned int i = get_global_id(0);
 
     float4 pos = vertices[i];
     float4 vel = velocities[i];
+	//__constant float damping = .5f;
+
+	//int tst = 0;
 
     //iterate through the list of triangles
     for(int j = 0; j < n_triangles; j++)
@@ -94,11 +116,17 @@ __kernel void collision( __global float4* vertices, __global float4* velocities,
             float damping = .5f;
             mag *= damping;
             vel = -mag * dir;
-            //break;
+			//tst = 1;
         }
+		//if (tst == 1) break;
     }
+
+	// uncommenting lines messes up the output. Why?
+	// Ideally, should put this inside the "if". 
     velocities[i].x = vel.x;
     velocities[i].y = vel.y;
     velocities[i].z = vel.z;
+#endif
 }
+//----------------------------------------------------------------------
 );

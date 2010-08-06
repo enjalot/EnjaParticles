@@ -23,19 +23,28 @@ typedef struct Vec4
         z(zz),
         w(ww)
     {}
+	void set(float xx, float yy, float zz, float ww=1.) {
+		x = xx;
+		y = yy;
+		z = zz;
+		w = ww;
+	}
 } Vec4;
 
+// size: 4*4 = 16 floats
+// shared memory = 65,536 bytes = 16,384 floats
+//               = 1024 triangles
 typedef struct Triangle
 {
     Vec4 verts[3];
     Vec4 normal;    //should pack this in verts array
+	//float dummy; // for more efficient global -> shared
 } Triangle;
 
 typedef std::vector<Vec4> AVec4;
 
 class EnjaParticles
 {
-
 public:
 
     int update();   //update the particle system
@@ -96,7 +105,6 @@ public:
 
     int init(AVec4 vert_gen, AVec4 velo_gen, AVec4 colors, int num);
 
-    
     //opencl
     std::vector<cl::Device> devices;
     cl::Context context;
@@ -111,6 +119,8 @@ public:
     cl::Kernel vel_update_kernel;
     cl::Kernel collision_kernel;
     cl::Kernel pos_update_kernel;
+
+	float rand_float(float mn, float mx);
 
     unsigned int deviceUsed;
     
@@ -134,8 +144,7 @@ public:
 
     //timers
     GE::Time *ts[3];    //library timers (update, render, total)
-    GE::Time *ts_cl[4]; //opencl timers (acquire, kernel exec, release)
-
+    GE::Time *ts_cl[2]; //opencl timers (cl update routine, execute kernel)
 
     int init_cl();
     int setup_cl(); //helper function that initializes the devices and the context
@@ -147,8 +156,7 @@ public:
     int compileShaders();
     int glsl_program;   //should be GLuint
     bool glsl;
-
 };
 
-
 #endif
+
