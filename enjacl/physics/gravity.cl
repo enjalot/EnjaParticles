@@ -14,10 +14,10 @@ __kernel void vel_update(__global float4* vertices, __global float4* colors, __g
     {
 
         float4 vel = velo_gen[i];
-        vel = (float4)(dot(transform[0], vel), dot(transform[1], vel), dot(transform[2], vel), 0);
+        vel = (float4)(dot(transform[0], vel), dot(transform[1], vel), dot(transform[2], vel), 0.0f);
         //vel = vel_t + transform[3];
 
-        velocities[i] = 5*vel;
+        velocities[i] = 5.0f*vel;
         //reset this particle
         /*
         velocities[i].x = 5*velo_gen[i].x;
@@ -31,7 +31,7 @@ __kernel void vel_update(__global float4* vertices, __global float4* colors, __g
     float vzn = velocities[i].z;
     velocities[i].x = vxn;
     velocities[i].y = vyn;// - h*9.8;
-    velocities[i].z = vzn - h*9.8;
+    velocities[i].z = vzn - h*9.8f;
      
     colors[i].x = life;
     colors[i].y = 1.0f - life;

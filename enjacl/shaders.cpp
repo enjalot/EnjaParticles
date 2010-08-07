@@ -41,7 +41,8 @@ void main()
 
 const char* fragment_shader_source = STRINGIFY(
 
-varying float pointRadius;  // point size in world space
+uniform float pointRadius;  // point size in world space
+//varying float pointRadius;  // point size in world space
 varying vec3 posEye;        // position of center in eye space
 
 void main()
