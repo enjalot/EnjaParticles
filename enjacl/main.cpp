@@ -246,8 +246,8 @@ int main(int argc, char** argv)
     
     //default constructor
     enjas = new EnjaParticles(EnjaParticles::GRAVITY, NUM_PARTICLES);
-    enjas->particle_radius = 5.0f;
-    enjas->use_glsl();
+    enjas->particle_radius = 1.0f;
+    //enjas->use_glsl();
     enjas->updates = 1;
     enjas->dt = .005;
     enjas->collision = true;
