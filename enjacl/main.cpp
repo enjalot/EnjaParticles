@@ -60,7 +60,7 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 EnjaParticles* enjas;
-#define NUM_PARTICLES 1024*16*16
+#define NUM_PARTICLES 1024*16
 
 
 GLuint v_vbo; //vbo id
@@ -247,7 +247,8 @@ int main(int argc, char** argv)
     
     //default constructor
     enjas = new EnjaParticles(EnjaParticles::GRAVITY, NUM_PARTICLES);
-    enjas->particle_radius = 5.0f;
+    enjas->particle_radius = 1.0f;
+    //enjas->use_glsl();
     enjas->updates = 1;
     enjas->dt = .005;
     enjas->collision = true;
@@ -321,7 +322,7 @@ int main(int argc, char** argv)
 
 // make cubes, formed from triangles
 
-	int nb_cubes = 1000;
+	int nb_cubes = 100;
 	Vec4 cen;
 
 	tri_offsets.push_back(0);
@@ -338,6 +339,20 @@ int main(int argc, char** argv)
 	// once all triangles are created: 
 	tri_offsets.push_back(triangles.size());
 
+    //enjas->transform[0] = Vec4(1,0,0,0);
+    //enjas->loadTriangles(triangles);
+    enjas->loadBoxes(boxes, triangles, tri_offsets);
+    
+    //Test making a system from vertices and normals;
+    /*
+    Vec4 g[4];
+    Vec4 v[4];
+    g[0] = Vec4(0.0f, -1.0f, 0.0f, 1.0f);
+    g[1] = Vec4(0.0f, 1.0f, 0.0f, 1.0f);
+
+		printf("v0: %f, %f, %f\n", v0.x, v0.y, v0.z);
+		printf("v1: %f, %f, %f\n", v1.x, v1.y, v1.z);
+		printf("v2: %f, %f, %f\n", v2.x, v2.y, v2.z);
 	//for (int i=0; i < boxes.size(); i++) {
 		//printf("sz = %d\n", tri_offsets[i]);
 	//}

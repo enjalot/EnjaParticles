@@ -191,7 +191,7 @@ float4 collisions_box(float4 pos, float4 vel, int first, int last, __global Box*
 	barrier(CLK_LOCAL_MEM_FENCE);
 
 	//store the magnitude of the velocity
-    float mag = sqrt(vel.x*vel.x + vel.y*vel.y + vel.z*vel.z); 
+    //float mag = sqrt(vel.x*vel.x + vel.y*vel.y + vel.z*vel.z); 
     float damping = 1.0f;
 
 	// variables: 
@@ -216,10 +216,11 @@ float4 collisions_box(float4 pos, float4 vel, int first, int last, __global Box*
 			// Do not put triangle list in local memory 
 			bool col = false;
 			for (int k=f_tri; k < l_tri; k++) {
+				// I should exit both loops if col == true
 				col = intersect_triangle_ge(pos, vel, &triangles[k], dt, col);
 				if (col) {
-            		float s = 2.0f*(dot(triangles[j].normal, vel));
-					vel = vel - s*triangles[j].normal;
+            		float s = 2.0f*(dot(triangles[k].normal, vel));
+					vel = vel - s*triangles[k].normal;
 					vel = vel*damping;
 					break;
 				}

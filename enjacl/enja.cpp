@@ -72,6 +72,21 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
     glsl = false;
     blending = false;
     point_scale = 1.0f;
+    collision = false;
+
+    transform[0] = Vec4(1,0,0,0);
+    transform[1] = Vec4(0,1,0,0);
+    transform[2] = Vec4(0,0,1,0);
+    transform[3] = Vec4(0,0,0,0);
+
+    for(int i=0; i<16; i++)
+    {
+        gl_transform[i] = 0.0;
+    }
+    gl_transform[0] = 1.0;
+    gl_transform[5] = 1.0;
+    gl_transform[10] = 1.0;
+    gl_transform[15] = 1.0;
 
     //we pack radius and life into generator and velocity arrays
     for(int i=0; i < n; i++)
@@ -237,12 +252,8 @@ EnjaParticles::~EnjaParticles()
 
     ts_cl[0]->print();
     ts_cl[1]->print();
-    ts_cl[2]->print();
-    ts_cl[3]->print();
     delete ts_cl[0];
     delete ts_cl[1];
-    delete ts_cl[2];
-    delete ts_cl[3];
     
 /*
     if(ckKernel)clReleaseKernel(ckKernel); 
@@ -325,7 +336,7 @@ std::string* EnjaParticles::getReport()
     ss1 << "Average Render Time (per frame): " << ts[2]->getAverage() << std::ends;
     s[0] = ss1.str();
     ss2 << std::fixed << std::setprecision(6);
-    ss2 << "Average OpenCL Time (per frame): " << ts_cl[0]->getAverage() + ts_cl[1]->getAverage() + ts_cl[2]->getAverage() << std::ends;
+    ss2 << "Average OpenCL Time (per frame): " << ts_cl[0]->getAverage()  << std::ends;
     s[1] = ss2.str();
     return s;
 }

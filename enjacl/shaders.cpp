@@ -4,12 +4,12 @@
 
 const char* vertex_shader_source = STRINGIFY(
 
-//uniform float pointRadius;  // point size in world space
+uniform float pointRadius;  // point size in world space
 uniform float pointScale;   // scale to calculate size in pixels
 uniform bool blending;
 //uniform float densityScale;
 //uniform float densityOffset;
-varying float pointRadius;
+//varying float pointRadius;
 varying vec3 posEye;        // position of center in eye space
 
 
@@ -19,7 +19,7 @@ void main()
     posEye = vec3(gl_ModelViewMatrix * vec4(gl_Vertex.xyz, 1.0));
     float dist = length(posEye);
     //we packed radius in the 4th component of vertex
-    pointRadius = gl_Vertex.w;
+    //pointRadius = gl_Vertex.w;
     gl_PointSize = pointRadius * (pointScale / dist);
     //gl_PointSize = pointRadius * (1.0 / dist);
 
@@ -41,7 +41,8 @@ void main()
 
 const char* fragment_shader_source = STRINGIFY(
 
-varying float pointRadius;  // point size in world space
+uniform float pointRadius;  // point size in world space
+//varying float pointRadius;  // point size in world space
 varying vec3 posEye;        // position of center in eye space
 
 void main()

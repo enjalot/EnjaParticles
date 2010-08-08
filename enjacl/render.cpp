@@ -14,11 +14,10 @@
 void EnjaParticles::drawArrays()
 {
 
-    /*
-    glMatrixMode(GL_MODELVIEW_MATRIX);
-    glPushMatrix();
-    glLoadIdentity();
-    */
+    //glMatrixMode(GL_MODELVIEW_MATRIX);
+    //glPushMatrix();
+    //glLoadMatrixd(gl_transform);
+
     if(blending)
     {
         glEnable(GL_BLEND);
@@ -99,7 +98,7 @@ int EnjaParticles::render()
         //glUniform1f( glGetUniformLocation(m_program, "pointScale"), m_window_h / tanf(m_fov * m_fHalfViewRadianFactor));
         glUniform1f( glGetUniformLocation(glsl_program, "pointScale"), point_scale);
         glUniform1f( glGetUniformLocation(glsl_program, "blending"), blending );
-        //glUniform1f( glGetUniformLocation(glsl_program, "pointRadius"), particle_radius );
+        glUniform1f( glGetUniformLocation(glsl_program, "pointRadius"), particle_radius );
 
         glColor4f(1, 1, 1, 1);
 

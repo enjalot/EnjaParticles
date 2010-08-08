@@ -25,23 +25,24 @@
 
 int EnjaParticles::update()
 {
+	ts_cl[0]->start();
 #ifdef GL_INTEROP   
     // map OpenGL buffer object for writing from OpenCL
     //clFinish(cqCommandQueue);
-    ts_cl[3]->start();
     glFinish();
-    ts_cl[3]->stop();
 
-	ts_cl[0]->start();
     err = queue.enqueueAcquireGLObjects(&cl_vbos, NULL, &event);
     //printf("acquire: %s\n", oclErrorString(err));
     queue.finish();
-	ts_cl[0]->stop();
 #endif
 
     //clFinish(cqCommandQueue);
 	ts_cl[1]->start();
-    err = vel_update_kernel.setArg(4, dt);
+    err = queue.enqueueWriteBuffer(cl_transform, CL_TRUE, 0, 4*sizeof(Vec4), &transform[0], NULL, &event);
+    queue.finish();
+    
+    err = vel_update_kernel.setArg(4, cl_transform);
+    err = vel_update_kernel.setArg(5, dt);
     err = queue.enqueueNDRangeKernel(vel_update_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
     queue.finish();
 
@@ -51,12 +52,12 @@ int EnjaParticles::update()
 		size_t glob = num; // 10000
 		size_t loc = 256;
 		try {
-        err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
 		//exit(0);
         //err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
         //err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
         //err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
-        //err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
+        //err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
+        err = queue.enqueueNDRangeKernel(collision_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
 	//printf("end\n");exit(0); // >>>>>>>
 		}
       catch (cl::Error err) {
@@ -71,7 +72,8 @@ int EnjaParticles::update()
       queue.finish();
     }
 
-    err = pos_update_kernel.setArg(3, dt);
+    err = pos_update_kernel.setArg(3, cl_transform);
+    err = pos_update_kernel.setArg(4, dt);
     err = queue.enqueueNDRangeKernel(pos_update_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
     //printf("enqueue: %s\n", oclErrorString(err));
     queue.finish();
@@ -82,11 +84,9 @@ int EnjaParticles::update()
     //ciErrNum = clEnqueueReleaseGLObjects(cqCommandQueue, 1, &vbo_cl, 0,0,0);
     
     //clFinish(cqCommandQueue);
-    ts_cl[2]->start();
     err = queue.enqueueReleaseGLObjects(&cl_vbos, NULL, &event);
     //printf("release gl: %s\n", oclErrorString(err));
     queue.finish();
-    ts_cl[2]->stop();
 #else
 
     /* implement this with opencl c++ bindings later
@@ -107,6 +107,8 @@ int EnjaParticles::update()
     glUnmapBufferARB(GL_ARRAY_BUFFER); 
     */
 #endif
+
+	ts_cl[0]->stop();
 }
 
 
@@ -117,8 +119,8 @@ void EnjaParticles::popCorn()
         //#include "physics/collision.cl"
         vel_update_program = loadProgram(sources[system]);
         vel_update_kernel = cl::Kernel(vel_update_program, "vel_update", &err);
-        if(collision)
-        {
+        //if(collision) //we setup collision kernel either way
+        //{
             collision_program = loadProgram(sources[COLLISION]);
 #ifdef OPENCL_SHARED
 			// version that works (80 fps with 220 tri and 16,000 particles)
@@ -131,12 +133,11 @@ void EnjaParticles::popCorn()
 #else
             collision_kernel = cl::Kernel(collision_program, "collision", &err);
 #endif
-
             long s = collision_kernel.getWorkGroupInfo<CL_KERNEL_LOCAL_MEM_SIZE>(devices.front());
             printf("kernel local mem: %d\n", s);
             size_t wgs = collision_kernel.getWorkGroupInfo<CL_KERNEL_WORK_GROUP_SIZE>(devices.front());
             printf("kernel workgroup size: %d\n", wgs);
-        }
+        //}
         pos_update_program = loadProgram(sources[POSITION]);
         pos_update_kernel = cl::Kernel(pos_update_program, "pos_update", &err);
     }
@@ -179,10 +180,14 @@ void EnjaParticles::popCorn()
     cl_vert_gen = cl::Buffer(context, CL_MEM_WRITE_ONLY, vbo_size, NULL, &err);
     cl_velo_gen = cl::Buffer(context, CL_MEM_WRITE_ONLY, vbo_size, NULL, &err);
     cl_velocities = cl::Buffer(context, CL_MEM_WRITE_ONLY, vbo_size, NULL, &err);
+
+    cl_transform = cl::Buffer(context, CL_MEM_WRITE_ONLY, 4*sizeof(Vec4), NULL, &err);
     
     err = queue.enqueueWriteBuffer(cl_vert_gen, CL_TRUE, 0, vbo_size, &vert_gen[0], NULL, &event);
     err = queue.enqueueWriteBuffer(cl_velo_gen, CL_TRUE, 0, vbo_size, &velo_gen[0], NULL, &event);
     err = queue.enqueueWriteBuffer(cl_velocities, CL_TRUE, 0, vbo_size, &velo_gen[0], NULL, &event);
+    
+    err = queue.enqueueWriteBuffer(cl_transform, CL_TRUE, 0, 4*sizeof(Vec4), &transform[0], NULL, &event);
     
     queue.finish();
 
@@ -191,14 +196,13 @@ void EnjaParticles::popCorn()
     err = vel_update_kernel.setArg(1, cl_vbos[1]);      //color
     err = vel_update_kernel.setArg(2, cl_velo_gen);     //velocity generators
     err = vel_update_kernel.setArg(3, cl_velocities);   //velocities
-
-    if(collision)
-    {
+    //if(collision) //we setup collision either way
+    //{
         err = collision_kernel.setArg(0, cl_vbos[0]);      //position
         //printf("collision arg 0: %s\n", oclErrorString(err));
         err = collision_kernel.setArg(1, cl_velocities);   //velocities
         //printf("collision arg 1: %s\n", oclErrorString(err));
-    }
+    //}
 
     err = pos_update_kernel.setArg(0, cl_vbos[0]);      //position
     err = pos_update_kernel.setArg(1, cl_vert_gen);     //position generators
@@ -212,10 +216,8 @@ int EnjaParticles::init_cl()
 {
     setup_cl();
 
-    ts_cl[0] = new GE::Time("acquire", 5);
-    ts_cl[1] = new GE::Time("ndrange", 5);
-    ts_cl[2] = new GE::Time("release", 5);
-    ts_cl[3] = new GE::Time("glFinish", 5);
+    ts_cl[0] = new GE::Time("cl update routine", 5);
+    ts_cl[1] = new GE::Time("execute kernels", 5);
 
     popCorn();
 
@@ -408,9 +410,9 @@ cl::Program EnjaParticles::loadProgram(std::string kernel_source)
     catch (cl::Error er) {
 		printf("GE+++++\n");
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
-        std::cout << "Build Status: " << program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(devices[0]) << std::endl;
-        std::cout << "Build Options:\t" << program.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(devices[0]) << std::endl;
-        std::cout << "Build Log:\t " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0]) << std::endl;
+        std::cout << "Build Status: " << program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(devices.front()) << std::endl;
+        std::cout << "Build Options:\t" << program.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(devices.front()) << std::endl;
+        std::cout << "Build Log:\t " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices.front()) << std::endl;
     } 
     return program;
 }

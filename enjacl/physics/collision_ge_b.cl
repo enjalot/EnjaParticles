@@ -37,10 +37,15 @@ void test_local(__global float* tri_gl, __local float* tri_f, int one_tri, int f
 */
 
 	int block_sz = get_local_size(0);
+
+	// takes the values [0 to block_sz-1]
 	int loc_tid = get_local_id(0);
 
 	// first = 3, last = 7, tri = 3,4,5,6 = last - first
 	int nb_floats = one_tri * (last_tri-first_tri);
+
+// Store nb_floats (> block_sz) into shared memory
+// All threads participate in the transfer
 
 	for (int j = loc_tid; j < nb_floats; j += block_sz) {
 		//if ((j+first_tri) > last_tri) break;
@@ -59,7 +64,7 @@ bool intersect_triangle_ge(float4 pos, float4 vel, __local Triangle* tri, float 
 
     /*
     * Moller and Trumbore
-    * take in the particle position and velocity (treated as a Ray)
+     take in the particle position and velocity (treated as a Ray)
     * also the triangle vertices for the ray intersection
     * we take in the precalculated triangle's normal to first test for distance
     * dist is the threshold to determine if we are close enough to the triangle
@@ -128,7 +133,7 @@ float4 collisions(float4 pos, float4 vel, int first, int last, __global Triangle
 	//store the magnitude of the velocity
 	#if 1
     float mag = sqrt(vel.x*vel.x + vel.y*vel.y + vel.z*vel.z); 
-    float damping = 1.0f;
+    float damping = .7f;
 
 	// variables: 
 	// triangles, pos, vel
@@ -171,7 +176,7 @@ float4 collisions(float4 pos, float4 vel, int first, int last, __global Triangle
 }
 #endif
 //----------------------------------------------------------------------
-__kernel void collision_ge( __global float4* vertices, __global float4* velocities, __global Triangle* triangles_glob, int n_triangles, float h, __local Triangle* triangles)
+__kernel void collision_ge( __global float4* vertices, __global float4* velocities, __global Triangle* triangles_glob, int n_triangles, float h, __local Triangle* triangles )
 {
     unsigned int i = get_global_id(0);
     float4 pos = vertices[i];
@@ -181,6 +186,7 @@ __kernel void collision_ge( __global float4* vertices, __global float4* velociti
 	// Find a way to Iterate over batches of n_triangles so the number
 	// of triangles can be increased. 
 
+	//int max_tri = 220;
 	int max_tri = 220;
 
 	for (int j=0; j < n_triangles; j += max_tri) {
@@ -192,6 +198,7 @@ __kernel void collision_ge( __global float4* vertices, __global float4* velociti
 		}
 		vel = collisions(pos, vel, first, last, triangles_glob, h, triangles);
 	}
+
 
     velocities[i].x = vel.x;
     velocities[i].y = vel.y;
