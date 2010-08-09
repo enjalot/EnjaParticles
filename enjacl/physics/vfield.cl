@@ -29,7 +29,7 @@ void runge_kutta(float4 yn, __global float4* vn, unsigned int i, float h)
     vn[i] = (k1 + 2.f*k2 + 2.f*k3 + k4)/6.f;
 }
 //update the particle position and color
-__kernel void vel_update(__global float4* vertices, __global float4* colors, __global float4* velo_gen, __global float4* velocities, float h)
+__kernel void vel_update(__global float4* vertices, __global float4* colors, __global float4* velo_gen, __global float4* velocities, __global float4* transform, float h)
 
 {
     unsigned int i = get_global_id(0);
@@ -38,9 +38,17 @@ __kernel void vel_update(__global float4* vertices, __global float4* colors, __g
     if(life <= 0.)
     {
         //reset this particle
-        velocities[i].x = velo_gen[i].x;
-        velocities[i].y = velo_gen[i].y;
-        velocities[i].z = velo_gen[i].z;
+        float4 vel = velo_gen[i];
+        vel = (float4)(dot(transform[0], vel), dot(transform[1], vel), dot(transform[2], vel), 0);
+        //vel = vel_t + transform[3];
+
+        velocities[i] = 5*vel;
+        /*
+        velocities[i].x = 5*velo_gen[i].x;
+        velocities[i].y = 5*velo_gen[i].y;
+        velocities[i].z = 5*velo_gen[i].z;
+        */
+ 
         life = 1.0f;
     } 
 
