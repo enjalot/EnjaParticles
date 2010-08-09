@@ -42,6 +42,13 @@ typedef struct Triangle
 	//float dummy; // for more efficient global -> shared
 } Triangle;
 
+typedef struct Box
+{
+	float xmin, xmax;
+	float ymin, ymax;
+	float zmin, zmax;
+} Box;
+
 typedef std::vector<Vec4> AVec4;
 
 class EnjaParticles
@@ -92,8 +99,11 @@ public:
     Vec4 invrotation[3];
     */
     int n_triangles;
+    int n_boxes;
     //handle triangles for collision detection
     void loadTriangles(std::vector<Triangle>);
+    void loadBoxes(std::vector<Box>, std::vector<Triangle>, 
+				   std::vector<int> tri_offsets);
     //Triangle faceToTriangle(Vec4 face[4]);
 
 //private:
@@ -147,6 +157,8 @@ public:
     
     //for collisions
     cl::Buffer cl_triangles;  //particle velocities
+    cl::Buffer cl_boxes;  //particle velocities
+    cl::Buffer cl_tri_offsets;  //triangle offsets (relates to box list)
 
     //timers
     GE::Time *ts[3];    //library timers (update, render, total)

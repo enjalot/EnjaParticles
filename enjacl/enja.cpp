@@ -35,8 +35,10 @@
 #ifdef OPENCL_SHARED
 //#include "physics/collision_ge.cl"
 //#include "physics/collision_ge_a.cl"
-// Version using blocks, experimental
-#include "physics/collision_ge_b.cl"
+// Version for collision against triangles with shared memory
+//#include "physics/collision_ge_b.cl"
+// Version for collision against bounding boxes
+#include "physics/collision_ge_bb.cl"
 #else
 #include "physics/collision.cl"
 #endif
@@ -141,7 +143,7 @@ EnjaParticles::EnjaParticles(int s, int n)
     for(int i=0; i < n; i++)
     {
         f = (float)i;
-		float rad = rand_float(1.2, 2.);
+		float rad = rand_float(0.5, 2.);
         g[i].x = 0.0 + rad*cos(2.*M_PI*(f/n));  //with lorentz this looks more interesting
         g[i].y = 0.0 + rad*sin(2.*M_PI*(f/n));
         g[i].z = 0.f;
