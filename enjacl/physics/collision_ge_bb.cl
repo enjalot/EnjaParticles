@@ -207,6 +207,7 @@ float4 collisions_box(float4 pos, float4 vel, int first, int last, __global Box*
 		f_tri = tri_offsets[j+first];
 		l_tri = tri_offsets[j+1+first];
         int collided = intersect_box_ge(pos, vel, &boxes[j], dt);
+
         if (collided)
         {
 			//vel = 0.0;
@@ -216,11 +217,13 @@ float4 collisions_box(float4 pos, float4 vel, int first, int last, __global Box*
 			// Do not put triangle list in local memory 
 			bool col = false;
 			for (int k=f_tri; k < l_tri; k++) {
+				// I should exit both loops if col == true
 				col = intersect_triangle_ge(pos, vel, &triangles[k], dt, col);
 				if (col) {
             		float s = 2.0f*(dot(triangles[k].normal, vel));
 					vel = vel - s*triangles[k].normal;
 					vel = vel*damping;
+					return vel; // slow down the code? 
 					break;
 				}
 			}

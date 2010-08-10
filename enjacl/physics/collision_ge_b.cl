@@ -37,10 +37,15 @@ void test_local(__global float* tri_gl, __local float* tri_f, int one_tri, int f
 */
 
 	int block_sz = get_local_size(0);
+
+	// takes the values [0 to block_sz-1]
 	int loc_tid = get_local_id(0);
 
 	// first = 3, last = 7, tri = 3,4,5,6 = last - first
 	int nb_floats = one_tri * (last_tri-first_tri);
+
+// Store nb_floats (> block_sz) into shared memory
+// All threads participate in the transfer
 
 	for (int j = loc_tid; j < nb_floats; j += block_sz) {
 		//if ((j+first_tri) > last_tri) break;
@@ -59,7 +64,7 @@ bool intersect_triangle_ge(float4 pos, float4 vel, __local Triangle* tri, float 
 
     /*
     * Moller and Trumbore
-    * take in the particle position and velocity (treated as a Ray)
+     take in the particle position and velocity (treated as a Ray)
     * also the triangle vertices for the ray intersection
     * we take in the precalculated triangle's normal to first test for distance
     * dist is the threshold to determine if we are close enough to the triangle
