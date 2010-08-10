@@ -51,6 +51,7 @@ void main()
 {
 
     
+/*
     const vec3 lightDir = vec3(0.577, 0.577, 0.577);
     const float shininess = 40.0;
 
@@ -73,10 +74,10 @@ void main()
     vec3 h = normalize(lightDir + v);
     float specular = pow(max(0.0, dot(n, h)), shininess);
     gl_FragColor.xyz = gl_Color.xyz * diffuse + specular;
+ */   
     
-    
-    //gl_FragColor.x = 1.0f;
-    //gl_FragColor.yz = 0.0f;
+    gl_FragColor.x = 1.0f;
+    gl_FragColor.yz = 0.0f;
     //gl_FragColor.w = 1.0f;
     
     gl_FragColor.w = texture2D(texture_color, gl_PointCoord).x;
