@@ -205,6 +205,70 @@ void make_cube(Vec4 cen, float half_edge)
 	triangles.push_back(tri);
 }
 //----------------------------------------------------------------------
+
+//load texture from bmp file
+/*
+//image handling constructor being tested here
+EnjaParticles::EnjaParticles(int s, const char* img_filename)
+{
+    printf("in tha constructor!\n");
+    system = s;
+    particle_radius = 5.0f;
+
+    //load the image with OpenCV
+    Mat img = imread(img_filename, 1);
+    //convert from BGR to RGB colors
+    cvtColor(img, img, CV_BGR2RGB);
+    //this is ugly but it makes an iterator over our 
+    MatIterator_<Vec<uchar, 3> > it = img.begin<Vec<uchar,3> >(), it_end = img.end<Vec<uchar,3> >();
+    int w = img.size().width;
+    int h = img.size().height;
+    int n = w * h;
+
+    AVec4 g(n);
+    AVec4 v(n);
+    AVec4 c(n);
+    int i = 0;
+    float f = 0;
+    //for(; itr != itr_end; ++itr, ++itg, ++itb)
+    for(; it != it_end; ++it)
+    {
+        //printf("i: %d\n");
+        //printf("color %d %d %d\n", it[0][0], it[0][1], it[0][2]);
+        c[i].x = it[0][0]/255.0f;
+        c[i].y = it[0][1]/255.0f;
+        c[i].z = it[0][2]/255.0f;
+        c[i].w = 1.0f;
+        //printf("color %g %g %g\n", c[i].x, c[i].y, c[i].z);
+        
+        f = (float)i;
+        g[i].x = (i%w) * (1.0f/w) - .5f;
+        g[i].y = (i/w) * (1.0f/h) - .5f;
+        g[i].z = 0.0f;
+        g[i].w = 1.0f;
+        //printf("pos %g %g %g\n", g[i].x, g[i].y, g[i].z);
+        
+        v[i].x = 0.0;// + .5*cos(2.*M_PI*(f/n));  
+        v[i].y = 0.0;// + .5*sin(2.*M_PI*(f/n));
+        v[i].z = 0.f;
+        v[i].w = 0.f;
+
+        i++;
+    }
+    printf("i: %d, n: %d\n", i, n);
+    //printf("%g %g %g\n", img(0,0)[0], img(0,0)[1], img(0,0)[2]);
+
+    srand48(time(NULL));
+    printf("about to init\n");
+    init(g, v, c, n);
+
+
+}
+*/
+//should switch to blender's library, or just pass in the texture from blender
+#include "highgui.h"
+#include "cv.h"
+using namespace cv;
 int main(int argc, char** argv)
 {
 
@@ -247,9 +311,42 @@ int main(int argc, char** argv)
     //default constructor
     enjas = new EnjaParticles(EnjaParticles::GRAVITY, NUM_PARTICLES);
     enjas->particle_radius = 10.0f;
+    
     enjas->use_glsl();
+    
+    //load the image with OpenCV
+    std::string path(CL_SOURCE_DIR);
+    path += "/tex/particle.jpg";
+    Mat img = imread(path, 1);
+    //Mat img = imread("tex/enjalot.jpg", 1);
+    //convert from BGR to RGB colors
+    //cvtColor(img, img, CV_BGR2RGB);
+    //this is ugly but it makes an iterator over our image data
+    //MatIterator_<Vec<uchar, 3> > it = img.begin<Vec<uchar,3> >(), it_end = img.end<Vec<uchar,3> >();
+    MatIterator_<Vec<uchar, 3> > it = img.begin<Vec<uchar,3> >(), it_end = img.end<Vec<uchar,3> >();
+    int w = img.size().width;
+    int h = img.size().height;
+    int n = w * h;
+    std::vector<unsigned char> tex;//there are n bgr values 
+
+    printf("read image data %d \n", n);
+    for(; it != it_end; ++it)
+    {
+   //     printf("asdf: %d\n", it[0][0]);
+        tex.push_back(it[0][0]);
+        tex.push_back(it[0][1]);
+        tex.push_back(it[0][2]);
+    }
+    //unsigned char* asdf = &tex[0];
+    //for(int i = 0; i < 3*n; i+=3)
+    //{
+    //    printf("b: %d", asdf[i]);
+    //}
+        
+    enjas->loadTexture( tex, w, h );
+
     enjas->updates = 1;
-    enjas->dt = .005;
+    enjas->dt = .001;
     enjas->collision = true;
 
 

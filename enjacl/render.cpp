@@ -10,7 +10,6 @@
 #include "enja.h"
 #include "timege.h"
 
-
 void EnjaParticles::drawArrays()
 {
 
@@ -90,9 +89,14 @@ int EnjaParticles::render()
         //printf("GLSL\n");
         glEnable(GL_POINT_SPRITE_ARB);
         glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
-        glEnable(GL_VERTEX_PROGRAM_POINT_SIZE_NV);
+        glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
         glDepthMask(GL_TRUE);
         glEnable(GL_DEPTH_TEST);
+
+
+        glEnable(GL_TEXTURE_2D);
+        glActiveTexture(GL_TEXTURE0);
+
 
         glUseProgram(glsl_program);
         //glUniform1f( glGetUniformLocation(m_program, "pointScale"), m_window_h / tanf(m_fov * m_fHalfViewRadianFactor));
@@ -100,11 +104,16 @@ int EnjaParticles::render()
         glUniform1f( glGetUniformLocation(glsl_program, "blending"), blending );
         glUniform1f( glGetUniformLocation(glsl_program, "pointRadius"), particle_radius );
 
-        glColor4f(1, 1, 1, 1);
+        glUniform1i( glGetUniformLocation(glsl_program, "texture_color"), 0);
+
+        //glColor4f(1, 1, 1, 1);
+
+        glBindTexture(GL_TEXTURE_2D, gl_tex);
 
         drawArrays();
 
         glUseProgram(0);
+        glDisable(GL_TEXTURE_2D);
         glDisable(GL_POINT_SPRITE_ARB);
     }
     else
@@ -140,6 +149,22 @@ int EnjaParticles::render()
 
 }
 
+int EnjaParticles::loadTexture(std::vector<unsigned char> image, int w, int h)
+{
+    //load as gl texture
+    glGenTextures(1, &gl_tex);
+    glBindTexture(GL_TEXTURE_2D, gl_tex);
+
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
+     GL_BGR_EXT, GL_UNSIGNED_BYTE, &image[0]);
+
+
+}
 
 int EnjaParticles::compileShaders()
 {

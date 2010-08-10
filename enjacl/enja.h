@@ -177,6 +177,8 @@ public:
     int compileShaders();
     int glsl_program;   //should be GLuint
     bool glsl;
+    int loadTexture(std::vector<unsigned char> image, int width, int height);
+    GLuint gl_tex;     //particle texture handle
 };
 
 #endif

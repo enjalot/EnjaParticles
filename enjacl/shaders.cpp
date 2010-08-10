@@ -24,6 +24,7 @@ void main()
     //gl_PointSize = pointRadius * (1.0 / dist);
 
     gl_TexCoord[0] = gl_MultiTexCoord0;
+    //gl_TexCoord[1] = gl_MultiTexCoord1;
     gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz, 1.0);
 
     gl_FrontColor = gl_Color;
@@ -41,12 +42,15 @@ void main()
 
 const char* fragment_shader_source = STRINGIFY(
 
+uniform sampler2D texture_color;
 uniform float pointRadius;  // point size in world space
 //varying float pointRadius;  // point size in world space
 varying vec3 posEye;        // position of center in eye space
 
 void main()
 {
+
+    /*
     const vec3 lightDir = vec3(0.577, 0.577, 0.577);
     const float shininess = 40.0;
 
@@ -67,7 +71,15 @@ void main()
     vec3 v = normalize(-spherePosEye);
     vec3 h = normalize(lightDir + v);
     float specular = pow(max(0.0, dot(n, h)), shininess);
-    gl_FragColor = gl_Color * diffuse + specular;
+    gl_FragColor.xyz = gl_Color.xyz * diffuse + specular;
+    */
+    
+    gl_FragColor.x = 1.0f;
+    gl_FragColor.yz = 0.0f;
+    //gl_FragColor.w = 1.0f;
+    
+    gl_FragColor.w = texture2D(texture_color, gl_PointCoord).x;
+    //gl_FragColor.y = texture2D(texture_color, gl_TexCoord[0].st).x;
 }
 
 
