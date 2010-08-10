@@ -50,7 +50,7 @@ varying vec3 posEye;        // position of center in eye space
 void main()
 {
 
-    /*
+    
     const vec3 lightDir = vec3(0.577, 0.577, 0.577);
     const float shininess = 40.0;
 
@@ -58,8 +58,9 @@ void main()
     vec3 n;
     n.xy = gl_TexCoord[0].xy*vec2(2.0, -2.0) + vec2(-1.0, 1.0);
     float mag = dot(n.xy, n.xy);
-    if (mag > 1.0) discard;   // kill pixels outside circle
-    n.z = sqrt(1.0-mag);
+    float r = .5f;
+    if (mag > r) discard;   // kill pixels outside circle
+    n.z = sqrt(r-mag);
 
     // point on surface of sphere in eye space
     vec3 spherePosEye = posEye + n*pointRadius;
@@ -72,10 +73,10 @@ void main()
     vec3 h = normalize(lightDir + v);
     float specular = pow(max(0.0, dot(n, h)), shininess);
     gl_FragColor.xyz = gl_Color.xyz * diffuse + specular;
-    */
     
-    gl_FragColor.x = 1.0f;
-    gl_FragColor.yz = 0.0f;
+    
+    //gl_FragColor.x = 1.0f;
+    //gl_FragColor.yz = 0.0f;
     //gl_FragColor.w = 1.0f;
     
     gl_FragColor.w = texture2D(texture_color, gl_PointCoord).x;

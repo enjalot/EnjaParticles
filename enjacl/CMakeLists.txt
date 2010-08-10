@@ -17,15 +17,10 @@ FIND_PACKAGE (OPENCL)
 FIND_PACKAGE (GLEW)
 FIND_PACKAGE (OpenCV REQUIRED)
 
-SET(GUTILS $ENV{GRAPHICS_LIBS}/graphics_utils)
-SET(GRAND $ENV{GRAPHICS_LIBS}/random)
 
-SET(GUTILS_INC $ENV{GRAPHICS_LIBS_SRC}/graphics_utils)
-SET(GRAND_INC $ENV{GRAPHICS_LIBS_SRC}/random)
+message("opencv libs: ${OpenCV_LIBS}\n")
 
 INCLUDE_DIRECTORIES( 
-#	${GRAND_INC}
-#	${GUTILS_INC}
 	${GLUT_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
     ${GLEW_INCLUDE_PATH}
@@ -57,14 +52,13 @@ ADD_EXECUTABLE(${EXEC_CL} main.cpp util.cpp)
 
 
 TARGET_LINK_LIBRARIES (${EXEC_CL}
-#   ${GRAND}/librandom.a
-#   ${GUTILS}/libgraphic_utilities.a
    ${ocllib}
    ${GLUT_LIBRARIES}
    ${OPENGL_LIBRARIES}
    ${OPENCL_LIBRARIES}
    ${GLEW_LIBRARY}
    ${OpenCV_LIBS}
+   ${OpenCV_LIB_DIR}/libcv.a
 )
 
 

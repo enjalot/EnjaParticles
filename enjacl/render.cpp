@@ -150,14 +150,16 @@ int EnjaParticles::render()
 }
 
 //should switch to blender's library, or just pass in the texture from blender
+/*
 #include "highgui.h"
 #include "cv.h"
 using namespace cv;
-
+*/
 //int EnjaParticles::loadTexture(std::vector<unsigned char> image, int w, int h)
 int EnjaParticles::loadTexture()
 {
 
+    /*
     //load the image with OpenCV
     std::string path(CL_SOURCE_DIR);
     path += "/tex/particle.jpg";
@@ -181,13 +183,17 @@ int EnjaParticles::loadTexture()
         image.push_back(it[0][1]);
         image.push_back(it[0][2]);
     }
-    //unsigned char* asdf = &tex[0];
-    //for(int i = 0; i < 3*n; i+=3)
-    //{
-    //    printf("b: %d", asdf[i]);
-    //}
-        
-
+    unsigned char* asdf = &image[0];
+    printf("char string:\n");
+    for(int i = 0; i < 3*n; i++)
+    {
+        printf("%d,", asdf[i]);
+    }
+    printf("\n charstring over\n");
+    */
+    int w = 32;
+    int h = 32;
+    #include "tex/particle.txt"
 
     //load as gl texture
     glGenTextures(1, &gl_tex);

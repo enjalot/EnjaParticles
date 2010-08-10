@@ -309,7 +309,8 @@ int main(int argc, char** argv)
     enjas->particle_radius = 10.0f;
     
     enjas->use_glsl();
-    
+    enjas->blending = true;    
+
     enjas->loadTexture();
 
     enjas->updates = 1;

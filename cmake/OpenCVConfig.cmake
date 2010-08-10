@@ -20,7 +20,7 @@
 #      - OpenCV_VERSION_PATCH : Patch version part of OpenCV_VERSION. Example: "0"
 #
 # ===================================================================================
-
+message("IN OPENCV CONFIG THINGY\n")
 
 # Extract the directory where *this* file has been installed (determined at cmake run-time)
 #  This variable may or may not be used below, depending on the parsing of OpenCVConfig.cmake
@@ -58,6 +58,7 @@ endforeach(__CVLIB)
 
 # For OpenCV built as static libs, we need the user to link against 
 #  many more dependencies:
+message("SHARED?: ${OPENCV_BUILD_SHARED_LIB}\n")
 IF (NOT @OPENCV_BUILD_SHARED_LIB@)
 	# Under static libs, the user of OpenCV needs access to the 3rdparty libs as well:
 	LINK_DIRECTORIES("@CMAKE_BINARY_DIR@/3rdparty/lib")
