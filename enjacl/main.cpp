@@ -246,77 +246,11 @@ int main(int argc, char** argv)
     
     //default constructor
     enjas = new EnjaParticles(EnjaParticles::GRAVITY, NUM_PARTICLES);
-    enjas->particle_radius = 1.0f;
-    //enjas->use_glsl();
+    enjas->particle_radius = 10.0f;
+    enjas->use_glsl();
     enjas->updates = 1;
     enjas->dt = .005;
     enjas->collision = true;
-
-
-    Triangle tri;
-    tri.verts[0] = Vec4(-5.,-5.,-1,0.);
-    tri.verts[1] = Vec4(-5.,5.,-1.,0.);
-    tri.verts[2] = Vec4(10.,2,-1,0.);
-    tri.normal   = Vec4(1.,2.,-1.,0.);
-
-	//int numTri = 1000;
-	int numTri = 220; // for new collision opencl code
-
-
-	#if 0
-    for(int i = 0; i < numTri; i++)
-    {
-        triangles.push_back(tri);
-    }
-	#endif
-
-
-#if 0
-	//Utils u;
-	//float r = u.rand_float();
-	float r = random() / (float) RAND_MAX;
-	printf("r= %f\n", r);
-	r = random() / (float) RAND_MAX;
-#define R rand_float(-3., 3.)
-#define Rz rand_float(-.2, .2)
-// generate random triangles
-	Vec4& v0 = tri.verts[0];
-	Vec4& v1 = tri.verts[1];
-	Vec4& v2 = tri.verts[2];
-
-	for (int i=0; i < numTri; i++) {
-		float rz = R;
-		float rz1 = Rz;
-		float r = R;
-		v0.set(r, r+.5, rz, 1.);
-		r = R;
-		v1.set(r-1., r+1., rz+rz1, 1.);
-		v2.set(r+1., r+.7, rz-2.*rz1, 1.);
-
-		//v0.set(-4.+R, 4.+R, rz+2*rz1, 1.);
-		//v1.set(4.+R, -4.+R, -3., 1.);
-		//v2.set(-4.+R, -4.+R, rz1, 1.);
-
-		printf("v0: %f, %f, %f\n", v0.x, v0.y, v0.z);
-		printf("v1: %f, %f, %f\n", v1.x, v1.y, v1.z);
-		printf("v2: %f, %f, %f\n", v2.x, v2.y, v2.z);
-
-		// normal
-		float nx = (v1.y-v0.y)*(v2.z-v0.z);
-		float ny = (v1.z-v0.z)*(v2.x-v0.x);
-		float nz = (v1.x-v0.x)*(v2.y-v0.y);
-		tri.normal.set(nx,ny,nz,0.);
-		float nrmi = 1. / sqrt(nx*nx+ny*ny+nz*nz);
-		tri.normal.set(nx*nrmi, ny*nrmi, nz*nrmi, 0.);
-
-		printf("x,y,z= %f, %f, %f\n", nx, ny, nz);
-		printf("x,y,z= %f, %f, %f\n", nx*nrmi, ny*nrmi, nz*nrmi);
-		//exit(0);
-		//tri.normal.set(0.,0.,1.,0.);
-        triangles.push_back(tri);
-	}
-#undef R
-#endif
 
 
 // make cubes, formed from triangles
@@ -342,27 +276,7 @@ int main(int argc, char** argv)
     //enjas->loadTriangles(triangles);
     enjas->loadBoxes(boxes, triangles, tri_offsets);
     
-    //Test making a system from vertices and normals;
-    /*
-    Vec4 g[4];
-    Vec4 v[4];
-    g[0] = Vec4(0.0f, -1.0f, 0.0f, 1.0f);
-    g[1] = Vec4(0.0f, 1.0f, 0.0f, 1.0f);
-
-		printf("v0: %f, %f, %f\n", v0.x, v0.y, v0.z);
-		printf("v1: %f, %f, %f\n", v1.x, v1.y, v1.z);
-		printf("v2: %f, %f, %f\n", v2.x, v2.y, v2.z);
-	//for (int i=0; i < boxes.size(); i++) {
-		//printf("sz = %d\n", tri_offsets[i]);
-	//}
-
-	numTri = triangles.size();
-	printf("triangles: nb: %d\n", triangles.size());
-	printf("boxes: nb: %d\n", boxes.size()); 
-
-    //enjas->loadTriangles(triangles);
-    enjas->loadBoxes(boxes, triangles, tri_offsets);
-    
+   
     //Test making a system from vertices and normals;
     /*
     Vec4 g[4];
