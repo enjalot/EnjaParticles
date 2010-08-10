@@ -44,6 +44,8 @@ ADD_DEFINITIONS(-DCL_SOURCE_DIR="${enjacl_SOURCE_DIR}")
 ADD_DEFINITIONS(-DGL_INTEROP)
 ADD_DEFINITIONS(-g )
 
+ADD_DEFINITIONS(-Bstatic)
+
 #particles opencl library
 set (CLCXXFILES  enja.cpp opencl.cpp physics/collision.cpp render.cpp util.cpp timege.cpp)
 SET(ocllib enjaclparticles)

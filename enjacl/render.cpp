@@ -149,8 +149,46 @@ int EnjaParticles::render()
 
 }
 
-int EnjaParticles::loadTexture(std::vector<unsigned char> image, int w, int h)
+//should switch to blender's library, or just pass in the texture from blender
+#include "highgui.h"
+#include "cv.h"
+using namespace cv;
+
+//int EnjaParticles::loadTexture(std::vector<unsigned char> image, int w, int h)
+int EnjaParticles::loadTexture()
 {
+
+    //load the image with OpenCV
+    std::string path(CL_SOURCE_DIR);
+    path += "/tex/particle.jpg";
+    Mat img = imread(path, 1);
+    //Mat img = imread("tex/enjalot.jpg", 1);
+    //convert from BGR to RGB colors
+    //cvtColor(img, img, CV_BGR2RGB);
+    //this is ugly but it makes an iterator over our image data
+    //MatIterator_<Vec<uchar, 3> > it = img.begin<Vec<uchar,3> >(), it_end = img.end<Vec<uchar,3> >();
+    MatIterator_<Vec<uchar, 3> > it = img.begin<Vec<uchar,3> >(), it_end = img.end<Vec<uchar,3> >();
+    int w = img.size().width;
+    int h = img.size().height;
+    int n = w * h;
+    std::vector<unsigned char> image;//there are n bgr values 
+
+    printf("read image data %d \n", n);
+    for(; it != it_end; ++it)
+    {
+   //     printf("asdf: %d\n", it[0][0]);
+        image.push_back(it[0][0]);
+        image.push_back(it[0][1]);
+        image.push_back(it[0][2]);
+    }
+    //unsigned char* asdf = &tex[0];
+    //for(int i = 0; i < 3*n; i+=3)
+    //{
+    //    printf("b: %d", asdf[i]);
+    //}
+        
+
+
     //load as gl texture
     glGenTextures(1, &gl_tex);
     glBindTexture(GL_TEXTURE_2D, gl_tex);
@@ -223,6 +261,7 @@ void EnjaParticles::use_glsl()
     if(glsl_program != 0)
     {
         glsl = true;
+        loadTexture();
     }
     else
     {
