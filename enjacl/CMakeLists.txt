@@ -39,7 +39,7 @@ ADD_DEFINITIONS(-DCL_SOURCE_DIR="${enjacl_SOURCE_DIR}")
 ADD_DEFINITIONS(-DGL_INTEROP)
 ADD_DEFINITIONS(-g )
 
-ADD_DEFINITIONS(-Bstatic)
+#ADD_DEFINITIONS(-Bstatic)
 
 #particles opencl library
 set (CLCXXFILES  enja.cpp opencl.cpp physics/collision.cpp render.cpp util.cpp timege.cpp)
@@ -58,7 +58,6 @@ TARGET_LINK_LIBRARIES (${EXEC_CL}
    ${OPENCL_LIBRARIES}
    ${GLEW_LIBRARY}
    ${OpenCV_LIBS}
-   ${OpenCV_LIB_DIR}/libcv.a
 )
 
 

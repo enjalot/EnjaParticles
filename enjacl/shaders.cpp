@@ -51,7 +51,6 @@ void main()
 {
 
     
-/*
     const vec3 lightDir = vec3(0.577, 0.577, 0.577);
     const float shininess = 40.0;
 
@@ -59,7 +58,7 @@ void main()
     vec3 n;
     n.xy = gl_TexCoord[0].xy*vec2(2.0, -2.0) + vec2(-1.0, 1.0);
     float mag = dot(n.xy, n.xy);
-    float r = .5f;
+    float r = 1.0;
     if (mag > r) discard;   // kill pixels outside circle
     n.z = sqrt(r-mag);
 
@@ -73,15 +72,29 @@ void main()
     vec3 v = normalize(-spherePosEye);
     vec3 h = normalize(lightDir + v);
     float specular = pow(max(0.0, dot(n, h)), shininess);
-    gl_FragColor.xyz = gl_Color.xyz * diffuse + specular;
- */   
+    //gl_FragColor.xyz = gl_Color.xyz * diffuse + specular;
     
-    gl_FragColor.x = 1.0f;
-    gl_FragColor.yz = 0.0f;
-    //gl_FragColor.w = 1.0f;
+    gl_FragColor.x = 1.0;
+    gl_FragColor.y = 1.0;
+    gl_FragColor.z = 0.0;
+    //gl_FragColor = gl_Color;
+    //gl_FragColor.w = .5;
+    //gl_FragColor.w = texture2D(texture_color, gl_PointCoord).x;
+    //gl_FragColor.w = texture2D(texture_color, gl_TexCoord[0].st).x;
+    //
+    vec4 tex = texture2D(texture_color, gl_TexCoord[0].st);
+    gl_FragColor.xyz = tex.xyz * (diffuse*2.0) + specular;
+
+    //gl_FragColor.x = texture2D(texture_color, gl_TexCoord[0].st).x;
+    //gl_FragColor.x = texx * diffuse + specular;
+    //gl_FragColor.y = tex.y * diffuse + specular;
+    //gl_FragColor.z = tex.z * diffuse + specular;
+
+    gl_FragColor.w = 1.0;
+    /*
     
-    gl_FragColor.w = texture2D(texture_color, gl_PointCoord).x;
     //gl_FragColor.y = texture2D(texture_color, gl_TexCoord[0].st).x;
+    */
 }
 
 

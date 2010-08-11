@@ -36,7 +36,7 @@ __kernel void vel_update(__global float4* vertices, __global float4* colors, __g
     colors[i].x = life;
     colors[i].y = 1.0f - life;
     colors[i].z = 1.0f - life;
-    colors[i].w = life;
+    colors[i].w = 1.0f;//life;
     
     //save the life!
     velocities[i].w = life;

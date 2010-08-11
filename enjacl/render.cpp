@@ -152,8 +152,8 @@ int EnjaParticles::render()
 
 }
 
-//should switch to blender's library, or just pass in the texture from blender
 /*
+//should switch to blender's library, or just pass in the texture from blender
 #include "highgui.h"
 #include "cv.h"
 using namespace cv;
@@ -165,7 +165,8 @@ int EnjaParticles::loadTexture()
     /*
     //load the image with OpenCV
     std::string path(CL_SOURCE_DIR);
-    path += "/tex/particle.jpg";
+    //path += "/tex/particle.jpg";
+    path += "/tex/enjalot.jpg";
     Mat img = imread(path, 1);
     //Mat img = imread("tex/enjalot.jpg", 1);
     //convert from BGR to RGB colors
@@ -194,10 +195,12 @@ int EnjaParticles::loadTexture()
     }
     printf("\n charstring over\n");
     */
-    int w = 32;
-    int h = 32;
-    #include "tex/particle.txt"
-
+    //int w = 32;
+    //int h = 32;
+    //#include "tex/particle.txt"
+    int w = 96;
+    int h = 96;
+    #include "tex/enjalot.txt"
     //load as gl texture
     glGenTextures(1, &gl_tex);
     glBindTexture(GL_TEXTURE_2D, gl_tex);
@@ -239,6 +242,13 @@ int EnjaParticles::compileShaders()
         printf("Vertex Shader log:\n %s\n", log);
     }
     glCompileShader(fragment_shader);
+    glGetShaderiv(fragment_shader, GL_INFO_LOG_LENGTH, &len);
+    if(len > 0)
+    {
+        char log[1024];
+        glGetShaderInfoLog(fragment_shader, 1024, 0, log);
+        printf("Vertex Shader log:\n %s\n", log);
+    }
 
     GLuint program = glCreateProgram();
 
