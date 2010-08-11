@@ -9,7 +9,7 @@ __kernel void vel_update(__global float4* vertices, __global float4* colors, __g
    
     //h = h*10;
     float life = velocities[i].w;
-    life -= h/5;
+    life -= h/15;
     if(life <= 0.)
     {
 
@@ -17,7 +17,8 @@ __kernel void vel_update(__global float4* vertices, __global float4* colors, __g
         vel = (float4)(dot(transform[0], vel), dot(transform[1], vel), dot(transform[2], vel), 0.0f);
         //vel = vel_t + transform[3];
 
-        velocities[i] = 5.0f*vel;
+        //velocities[i] = 5.0f*vel;
+        velocities[i] = velo_gen[i];
         //reset this particle
         /*
         velocities[i].x = 5*velo_gen[i].x;
@@ -33,10 +34,12 @@ __kernel void vel_update(__global float4* vertices, __global float4* colors, __g
     velocities[i].y = vyn;// - h*9.8;
     velocities[i].z = vzn - h*9.8f;
      
+    /*
     colors[i].x = life;
     colors[i].y = 1.0f - life;
     colors[i].z = 1.0f - life;
     colors[i].w = 1.0f;//life;
+    */
     
     //save the life!
     velocities[i].w = life;
