@@ -162,11 +162,12 @@ using namespace cv;
 int EnjaParticles::loadTexture()
 {
 
-    /*
+  /*  
     //load the image with OpenCV
     std::string path(CL_SOURCE_DIR);
     //path += "/tex/particle.jpg";
-    path += "/tex/enjalot.jpg";
+    //path += "/tex/enjalot.jpg";
+    path += "/tex/reddit.png";
     Mat img = imread(path, 1);
     //Mat img = imread("tex/enjalot.jpg", 1);
     //convert from BGR to RGB colors
@@ -195,12 +196,15 @@ int EnjaParticles::loadTexture()
     }
     printf("\n charstring over\n");
     */
-    //int w = 32;
-    //int h = 32;
+    int w = 32;
+    int h = 32;
     //#include "tex/particle.txt"
+    #include "tex/reddit.txt"
+    /*
     int w = 96;
     int h = 96;
     #include "tex/enjalot.txt"
+    */
     //load as gl texture
     glGenTextures(1, &gl_tex);
     glBindTexture(GL_TEXTURE_2D, gl_tex);

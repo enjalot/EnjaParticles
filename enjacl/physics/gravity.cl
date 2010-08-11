@@ -26,6 +26,7 @@ __kernel void vel_update(__global float4* vertices, __global float4* colors, __g
         velocities[i].z = 5*velo_gen[i].z;
         */
         life = 1.0f;
+        colors[i].w = 1.0f;
     } 
     float vxn = velocities[i].x;
     float vyn = velocities[i].y;
