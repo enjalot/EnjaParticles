@@ -25,6 +25,11 @@
 #include <sstream>
 #include <iomanip>
 
+//OpenCV include
+#include "highgui.h"
+#include "cv.h"
+using namespace cv;
+
 
 //we include our cl programs with STRINGIFY macro trick
 //then store them in this list for usage
@@ -73,7 +78,7 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
     blending = false;
     point_scale = 1.0f;
     collision = false;
-
+    
     transform[0] = Vec4(1,0,0,0);
     transform[1] = Vec4(0,1,0,0);
     transform[2] = Vec4(0,0,1,0);
@@ -126,6 +131,10 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
     ts[0] = new GE::Time("update", 5);
     ts[1] = new GE::Time("render", 5);
     ts[2] = new GE::Time("total render", 5);
+
+    //loadWebCam();
+    loadedcam = false;
+
 
 
     return 1;
@@ -308,6 +317,8 @@ EnjaParticles::~EnjaParticles()
     
     if(cdDevices)delete(cdDevices);
 */
+
+    cvReleaseCapture(&(CvCapture*)capture);
 }
 
 

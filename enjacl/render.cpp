@@ -10,6 +10,11 @@
 #include "enja.h"
 #include "timege.h"
 
+//OpenCV include
+#include "highgui.h"
+#include "cv.h"
+using namespace cv;
+
 void EnjaParticles::drawArrays()
 {
 
@@ -66,6 +71,13 @@ int EnjaParticles::render()
     //printf("in EnjaParticles::render\n");
 	ts[2]->start();
 
+    printf("loaded cam? %d\n", loadedcam);
+    if(!loadedcam)
+    {
+        loadWebCam();
+        loadedcam = true;
+    }
+    loadTexture();
     //printf("about to update\n");
     ts[0]->start();
     
@@ -152,23 +164,33 @@ int EnjaParticles::render()
 
 }
 
-/*
-//should switch to blender's library, or just pass in the texture from blender
-#include "highgui.h"
-#include "cv.h"
-using namespace cv;
-*/
+int EnjaParticles::loadWebCam()
+{
+    printf("initialize the webcam\n");
+    CvCapture* c = cvCreateCameraCapture(0);
+    printf("set cam properties\n");
+    //cvSetCaptureProperty( c, CV_CAP_PROP_FRAME_WIDTH, 320);
+    //cvSetCaptureProperty( c, CV_CAP_PROP_FRAME_WIDTH, 240);
+    capture = c;
+}
 //int EnjaParticles::loadTexture(std::vector<unsigned char> image, int w, int h)
 int EnjaParticles::loadTexture()
 {
 
-  /*  
+    /*
     //load the image with OpenCV
     std::string path(CL_SOURCE_DIR);
     //path += "/tex/particle.jpg";
     //path += "/tex/enjalot.jpg";
     path += "/tex/reddit.png";
     Mat img = imread(path, 1);
+*/
+
+    //capture = cvCreateCameraCapture(0);
+    printf("about to capture frame!\n");
+    IplImage* frame = cvQueryFrame((CvCapture*)capture);
+    printf("got frame?\n");
+    Mat img(frame);
     //Mat img = imread("tex/enjalot.jpg", 1);
     //convert from BGR to RGB colors
     //cvtColor(img, img, CV_BGR2RGB);
@@ -178,6 +200,8 @@ int EnjaParticles::loadTexture()
     int w = img.size().width;
     int h = img.size().height;
     int n = w * h;
+
+    printf("w: %d h: %d: n: %d\n", w, h, n);
     std::vector<unsigned char> image;//there are n bgr values 
 
     printf("read image data %d \n", n);
@@ -188,6 +212,7 @@ int EnjaParticles::loadTexture()
         image.push_back(it[0][1]);
         image.push_back(it[0][2]);
     }
+    /*
     unsigned char* asdf = &image[0];
     printf("char string:\n");
     for(int i = 0; i < 3*n; i++)
@@ -196,6 +221,7 @@ int EnjaParticles::loadTexture()
     }
     printf("\n charstring over\n");
     */
+    /*
     int w = 32;
     int h = 32;
     //#include "tex/particle.txt"
@@ -284,7 +310,7 @@ void EnjaParticles::use_glsl()
     if(glsl_program != 0)
     {
         glsl = true;
-        loadTexture();
+        //loadTexture();
     }
     else
     {

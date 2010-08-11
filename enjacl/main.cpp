@@ -59,7 +59,8 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 EnjaParticles* enjas;
-#define NUM_PARTICLES 1024*16
+//#define NUM_PARTICLES 1024*16
+#define NUM_PARTICLES 100
 
 
 GLuint v_vbo; //vbo id
@@ -246,7 +247,7 @@ int main(int argc, char** argv)
     
     //default constructor
     enjas = new EnjaParticles(EnjaParticles::GRAVITY, NUM_PARTICLES);
-    enjas->particle_radius = 20.0f;
+    enjas->particle_radius = 100.0f;
     
     enjas->use_glsl();
     enjas->blending = true;    

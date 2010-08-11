@@ -9,6 +9,8 @@
 #include "timege.h"
 #include <stdio.h>
 
+//should switch to blender's library, or just pass in the texture from blender
+
 
 typedef struct Vec4
 {
@@ -180,6 +182,11 @@ public:
     //int loadTexture(std::vector<unsigned char> image, int width, int height);
     int loadTexture();
     GLuint gl_tex;     //particle texture handle
+    
+    int loadWebCam();
+    //CvCapture* capture;
+    void* capture; //hack for blender since it can't include opencv headers for some reason
+    bool loadedcam;
 };
 
 #endif
