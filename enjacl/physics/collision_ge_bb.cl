@@ -224,11 +224,11 @@ float4 collisions_box(float4 pos, float4 vel, int first, int last, __global Box*
 					vel = vel - s*triangles[k].normal;
 					vel = vel*damping;
 
-                    /*
+                    
                     colors[i].x -= .1f;
                     colors[i].y += .1f;
                     colors[i].z += .2f;
-                    */
+                    
                     colors[i].z -= .05f;
 
 					return vel; // slow down the code? 

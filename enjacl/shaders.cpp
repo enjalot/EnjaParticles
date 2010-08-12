@@ -72,20 +72,21 @@ void main()
     vec3 v = normalize(-spherePosEye);
     vec3 h = normalize(lightDir + v);
     float specular = pow(max(0.0, dot(n, h)), shininess);
-    //gl_FragColor.xyz = gl_Color.xyz * diffuse + specular;
+    gl_FragColor.xyz = gl_Color.xyz * diffuse + specular;
     
+    /*
     gl_FragColor.x = 1.0;
     gl_FragColor.y = 1.0;
     gl_FragColor.z = 1.0;
-    
+    */
     //gl_FragColor.xyz = gl_Color.xyz * diffuse + specular;
 
     //gl_FragColor.w = .5;
     //gl_FragColor.w = texture2D(texture_color, gl_PointCoord).x;
     //gl_FragColor.w = texture2D(texture_color, gl_TexCoord[0].st).x;
     //
-    vec4 tex = texture2D(texture_color, gl_TexCoord[0].st);
-    gl_FragColor.xyz = tex.xyz * (diffuse*2.0) + specular;
+    ///vec4 tex = texture2D(texture_color, gl_TexCoord[0].st);
+    ///gl_FragColor.xyz = tex.xyz * (diffuse*2.0) + specular;
     //gl_FragColor.xyz = gl_FragColor.xyz * gl_Color.xyz;
 
     //gl_FragColor.x = texture2D(texture_color, gl_TexCoord[0].st).x;
