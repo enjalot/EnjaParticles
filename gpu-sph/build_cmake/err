@@ -1,0 +1,47 @@
+make: Entering directory `/Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake'
+/opt/local/bin/cmake -H/Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only -B/Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake --check-build-system CMakeFiles/Makefile.cmake 0
+/opt/local/bin/cmake -E cmake_progress_start /Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake/CMakeFiles /Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake/CMakeFiles/progress.marks
+make -f CMakeFiles/Makefile2 all
+make[1]: Entering directory `/Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake'
+make -f SPHSimLib/CMakeFiles/sph_cuda.dir/build.make SPHSimLib/CMakeFiles/sph_cuda.dir/depend
+make[2]: Entering directory `/Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake'
+cd /Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake && /opt/local/bin/cmake -E cmake_depends "Unix Makefiles" /Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only /Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/SPHSimLib /Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake /Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake/SPHSimLib /Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake/SPHSimLib/CMakeFiles/sph_cuda.dir/DependInfo.cmake --color=
+make[2]: Leaving directory `/Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake'
+make -f SPHSimLib/CMakeFiles/sph_cuda.dir/build.make SPHSimLib/CMakeFiles/sph_cuda.dir/build
+make[2]: Entering directory `/Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake'
+make[2]: Nothing to be done for `SPHSimLib/CMakeFiles/sph_cuda.dir/build'.
+make[2]: Leaving directory `/Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake'
+/opt/local/bin/cmake -E cmake_progress_report /Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake/CMakeFiles  3 4 5 6 7 8 9 10 11 12 13 14
+[ 63%] Built target sph_cuda
+make -f SPHSimLib/CMakeFiles/sph_lib.dir/build.make SPHSimLib/CMakeFiles/sph_lib.dir/depend
+make[2]: Entering directory `/Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake'
+cd /Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake && /opt/local/bin/cmake -E cmake_depends "Unix Makefiles" /Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only /Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/SPHSimLib /Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake /Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake/SPHSimLib /Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake/SPHSimLib/CMakeFiles/sph_lib.dir/DependInfo.cmake --color=
+make[2]: Leaving directory `/Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake'
+make -f SPHSimLib/CMakeFiles/sph_lib.dir/build.make SPHSimLib/CMakeFiles/sph_lib.dir/build
+make[2]: Entering directory `/Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake'
+make[2]: Nothing to be done for `SPHSimLib/CMakeFiles/sph_lib.dir/build'.
+make[2]: Leaving directory `/Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake'
+/opt/local/bin/cmake -E cmake_progress_report /Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake/CMakeFiles  15 16 17 18 19
+[ 89%] Built target sph_lib
+make -f ConsoleTest/CMakeFiles/sph.dir/build.make ConsoleTest/CMakeFiles/sph.dir/depend
+make[2]: Entering directory `/Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake'
+cd /Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake && /opt/local/bin/cmake -E cmake_depends "Unix Makefiles" /Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only /Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/ConsoleTest /Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake /Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake/ConsoleTest /Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake/ConsoleTest/CMakeFiles/sph.dir/DependInfo.cmake --color=
+make[2]: Leaving directory `/Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake'
+make -f ConsoleTest/CMakeFiles/sph.dir/build.make ConsoleTest/CMakeFiles/sph.dir/build
+make[2]: Entering directory `/Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake'
+Linking CXX executable sph
+
+
+
+cd /Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake/ConsoleTest && /opt/local/bin/cmake -E cmake_link_script CMakeFiles/sph.dir/link.txt --verbose=1
+/usr/bin/c++    -Wl,-search_paths_first -headerpad_max_install_names -m32 CMakeFiles/sph.dir/ConsoleTest.cpp.o ./sph_generated_ConsoleTest.cu.o  -o sph  -L/Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/lib/lib -L/Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/lib /usr/local/cuda/lib/libcudart.dylib /usr/local/cuda/lib/libcuda.dylib ../SPHSimLib/libsph_lib.a /usr/local/cuda/lib/libcuda.dylib /Developer/GPU_Computing/C/common/lib/darwin/libcudpp_i386.a ../SPHSimLib/libsph_cuda.a /usr/local/cuda/lib/libcudart.dylib /usr/local/cuda/lib/libcuda.dylib /Developer/GPU_Computing/C/lib/libcutil_i386.a -lcuda -lcudart /Developer/GPU_Computing/C/lib/libcutil_i386.a -lcuda -lcudart -framework AGL -framework OpenGL 
+ld: warning: directory '/Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/lib/lib' following -L not found
+ld: warning: directory '/Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/lib' following -L not found
+ld: library not found for -lcuda
+collect2: ld returned 1 exit status
+make[2]: *** [ConsoleTest/sph] Error 1
+make[2]: Leaving directory `/Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake'
+make[1]: *** [ConsoleTest/CMakeFiles/sph.dir/all] Error 2
+make[1]: Leaving directory `/Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake'
+make: *** [all] Error 2
+make: Leaving directory `/Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/build_cmake'

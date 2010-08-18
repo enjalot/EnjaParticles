@@ -60,7 +60,7 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 EnjaParticles* enjas;
-#define NUM_PARTICLES 1024*16
+#define NUM_PARTICLES 1024*16*4
 
 
 GLuint v_vbo; //vbo id
@@ -580,7 +580,7 @@ void showFPS(float fps, std::string* report)
     ss << std::fixed << std::setprecision(1);
     ss << fps << " FPS" << std::ends; // update fps string
     ss << std::resetiosflags(std::ios_base::fixed | std::ios_base::floatfield);
-    drawString(ss.str().c_str(), 15, 286, color, font);
+    drawString(ss.str().c_str(),  15, 286, color, font);
     drawString(report[0].c_str(), 15, 273, color, font);
     drawString(report[1].c_str(), 15, 260, color, font);
 

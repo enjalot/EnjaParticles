@@ -46,6 +46,8 @@ int EnjaParticles::update()
     err = queue.enqueueNDRangeKernel(vel_update_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
     queue.finish();
 
+	reorder_particles(); // GE
+	//collision = false;
     if(collision)
     {
         err = collision_kernel.setArg(4, dt);
@@ -415,5 +417,89 @@ cl::Program EnjaParticles::loadProgram(std::string kernel_source)
         std::cout << "Build Log:\t " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices.front()) << std::endl;
     } 
     return program;
+}
+//----------------------------------------------------------------------
+void EnjaParticles::reorder_particles()
+{
+    GE::Time ts_order("particle reorder", 5);
+
+	std::vector<AVec4> new_order;
+	new_order.resize(num);
+
+	float xmin, xmax;
+	float ymin, ymax;
+	float zmin, zmax;
+	float hx, hy, hz;  // grid size
+	float hxi, hyi, hzi;  // grid size
+	int nx, ny, nz;
+
+	xmin = -2.0;
+	xmax = +2.0;
+	ymin = -2.0;
+	ymax = +2.0;
+	zmin = -1.0;
+	zmax = +1.0;
+	nx = ny = nz = 20;
+	hxi = nx / (xmax - xmin);
+	hyi = ny / (ymax - ymin);
+	hzi = nz / (zmax - zmin);
+
+	printf("num = %d\n", num);
+
+	AVec4& v = vert_gen;
+	std::vector<int>* list = new std::vector<int>[nx*ny*nz];
+
+	int i, j, k;
+
+	std::vector<Vec4> n_vert;
+	std::vector<Vec4> n_vel;
+	std::vector<Vec4> n_col;
+
+	n_vert.resize(num);
+	n_vel.resize(num);
+	n_col.resize(num);
+	printf("n_vert size= %d\n", n_vert.size());
+
+for (int ts=0; ts < 20; ts++) {
+	
+	for (int ii=0; ii < nx*ny*nz; ii++) {
+		list[ii].clear();
+	}
+
+    ts_order.begin();
+
+	for (int ii=0; ii < num; ii++) {
+		i = (v[ii].x-xmin) * hxi;
+		j = (v[ii].y-ymin) * hyi;
+		k = (v[ii].z-zmin) * hzi;
+		list[i+nx*(j+ny*k)].push_back(ii);
+	}
+
+	int count = 0;
+	int accu=0;
+
+	for (int ii=0; ii < nx*ny*nz; ii++) {
+		std::vector<int>& l = list[ii];
+		accu += l.size();
+		for (int j=0; j < l.size(); j++) {
+			int i1 = list[ii][j];
+
+			n_vert[count] = vert_gen[i1];
+			n_col[count ] = colors[i1];
+			n_vel[count ] = velo_gen[i1];
+			count++;
+		}
+	}
+
+    ts_order.end();
+}
+
+printf("number of new vertices: %d\n", n_vert.size());
+
+	ts_order.print();
+
+	//delete [] list;
+
+	exit(0);
 }
 //----------------------------------------------------------------------
