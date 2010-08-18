@@ -1,0 +1,10 @@
+rm CMakeCachetxt
+cmake .
+make
+
+( However, cmake will have a problem because I am not using 
+  nvcc to compiler the cu file that I have. If you could fix this, 
+  it would be great, Bruno, or anybody )
+
+#  compile and link cu and cpp files. This will work. 
+make -f Make_lib

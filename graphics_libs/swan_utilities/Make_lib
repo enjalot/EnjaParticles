@@ -1,0 +1,29 @@
+
+#CPP_OBJ=Array3D.o Vec3i.o timingGE.o array_cuda_1d.o array_cuda_t.o utils.o
+CPP_OBJ=cu.o array_cuda_1d.o array_cuda_t.o array_cuda_1d_cu.o
+#CU_OBJ=array_cuda_1d_cu.o
+
+INC=-Iswan/include -I${CUDA_HOME}/include -I${CUDA_LOCAL}/common/inc -I${GRAPHIC_LIBS_HOME}/utilities
+LIB=swan_utilities
+
+# for mac
+#ARCH= i386
+#for linux
+ARCH=  -m64
+
+CXXFLAGS=${ARCH}
+
+exec: ${CPP_OBJ} ${CU_OBJ}
+	#g++ ${CPP_OBJ} ${CU_OBJ} 
+	ar r lib${LIB}.a ${CPP_OBJ} ${CU_OBJ}
+
+%.o:%.cpp
+	#echo ${INC}
+	g++ ${CXXFLAGS} -c $< ${INC}
+
+#%.o:%.cu 
+#	#echo ${INC}
+#	nvcc -c $< ${INC}
+
+clean:
+	rm *.o lib*a
