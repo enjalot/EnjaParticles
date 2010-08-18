@@ -2,6 +2,7 @@
 #define __SimBuffer_h__
 
 #include <assert.h>
+#include <stdlib.h>
 
 typedef unsigned int uint;
 

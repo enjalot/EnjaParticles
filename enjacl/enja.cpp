@@ -134,6 +134,7 @@ EnjaParticles::EnjaParticles(int s, int n)
     //printf("default constructor\n");
     
     particle_radius = 5.0f;
+	bool are_objects_loaded = false;
     
     system = s;
     //init system

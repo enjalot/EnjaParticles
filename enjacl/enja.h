@@ -136,6 +136,9 @@ public:
     cl::Kernel collision_kernel;
     cl::Kernel pos_update_kernel;
 
+	// true if all objects have been loaded to the GPU
+	bool are_objects_loaded;
+
 	float rand_float(float mn, float mx);
 
     unsigned int deviceUsed;
