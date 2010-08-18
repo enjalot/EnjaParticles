@@ -72,7 +72,7 @@ ENDIF(APPLE)
 
 INCLUDE_DIRECTORIES(
 	.
-	/Developer/GPU_Computing/shared/inc/
+	$ENV{CUDA_LOCAL}/../shared/inc
 	${OPENGL_INCLUDE_DIR}
 )
 
@@ -84,22 +84,27 @@ CUDA_INCLUDE_DIRECTORIES(
 )
 
 CUDA_ADD_LIBRARY(sph_cuda ${CUFILES})
-#TARGET_LINK_LIBRARIES(sph_cuda)
+TARGET_LINK_LIBRARIES(sph_cuda
+   $ENV{CUDA_LOCAL}/common/lib/linux/libcudpp_i386.a
+)
 
-LINK_DIRECTORIES(/usr/local/cuda/lib /Developer/GPU_Computing/C/lib $ENV{CUDA_LOCAL}/common/lib /Developer/GPU_Computing/shared/lib/darwin)
+LINK_DIRECTORIES(
+     $ENV{CUDA_LOCAL}/lib 
+	 $ENV{CUDA_LOCAL}/common/lib 
+	 #$ENV{CUDA_LOCAL}/../shared/lib/darwin 
+	 $ENV{CUDA_LOCAL}/../shared/lib/linux
+	 $ENV{CUDA_HOME}/lib
+)
+
 ADD_LIBRARY(sph_lib ${CXXFILES})
 
 # ON mac
 
 TARGET_LINK_LIBRARIES(sph_lib
-	/Developer/GPU_Computing/C/common/lib/darwin/libcudpp_i386.a
-	sph_cuda
-	#${MY_LIBRARIES}
-	/Developer/GPU_Computing/C/lib/libcutil_i386.a
-	#/Users/erlebach/Documents/src/gpu_sph_sim_source_code/gpusphsim-read-only/SPHSimLib/libcudpp_i386.a   # removed radixSort to avoid conflict
-	#/usr/local/cuda/lib/libcublas.dylib
-	#/usr/local/cuda/lib/libcuda.dylib
-	#/usr/local/cuda/lib/libcudart.dylib
+	#$ENV{CUDA_LOCAL}/common/lib/darwin/libcudpp_i386.a
+	$ENV{CUDA_LOCAL}/common/lib/linux/libcudpp_i386.a
+	#sph_cuda
+	$ENV{CUDA_LOCAL}/lib/libcutil_i386.a
 	${MY_CUDA_LIBRARIES}
 	${OPENGL_LIBRARIES}
 )
