@@ -9,10 +9,12 @@ INCLUDE_DIRECTORIES(
     ${CMAKE_CURRENT_SOURCE_DIR}/../SPHSimLib/ 
 )
 
-LINK_DIRECTORIES(/usr/local/cuda/lib /Developer/GPU_Computing/C/lib $ENV{CUDA_LOCAL}/common/lib /Developer/GPU_Computing/shared/lib/darwin)
+LINK_DIRECTORIES($ENV{CUDA_HOME}/lib $ENV{CUDA_LOCAL}/lib $ENV{CUDA_LOCAL}/common/lib $ENV{CUDA_LOCAL}/../shared/lib/darwin $ENV{CUDA_LOCAL}/../shared/lib/linux)
 CUDA_ADD_EXECUTABLE(sph ${CXXFILES} ${CUFILES})
 
 # cuda libraries already in sph_lib
 TARGET_LINK_LIBRARIES(sph 
-   sph_lib
+	sph_lib
+    sph_cuda
+    sph_lib
 )
