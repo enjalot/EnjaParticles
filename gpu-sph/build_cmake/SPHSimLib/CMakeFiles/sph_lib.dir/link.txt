@@ -1,2 +1,0 @@
-/usr/bin/ar cr libsph_lib.a  CMakeFiles/sph_lib.dir/SimBufferCuda.cpp.o CMakeFiles/sph_lib.dir/SimCudaHelper.cpp.o CMakeFiles/sph_lib.dir/SimSettings.cpp.o CMakeFiles/sph_lib.dir/SimpleSPH.cpp.o CMakeFiles/sph_lib.dir/SimulationSystem.cpp.o
-/usr/bin/ranlib libsph_lib.a
