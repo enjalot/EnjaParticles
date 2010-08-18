@@ -92,6 +92,8 @@ public:
     enum {LORENZ, GRAVITY, VFIELD, COLLISION, POSITION, TRANSFORM};
     static const std::string sources[];
 
+	void reorder_particles(); // experiment with particle sorting
+
     //keep track of transformation from blender
     /*
     float translation[3];

@@ -7,6 +7,23 @@ __kernel void pos_update(__global float4* vertices, __global float4* vert_gen, _
 {
     unsigned int i = get_global_id(0);
 
+#if 0
+	// What is the cost of simple global to local memory access with no 
+	// additional computation
+	float4 vel = velocities[i];
+	float4 vert = h*vel;
+	barrier(CLK_LOCAL_MEM_FENCE);
+
+	for (int j=0; j < 1; j++) {
+		vert += h*vel;
+    	//vertices[i].x += h*velocities[i].x;
+    	//vertices[i].y += h*velocities[i].y;
+    	//vertices[i].z += h*velocities[i].z;
+	}
+	vertices[i] = vert;
+	return;
+#endif
+
     //h = h*10;
     float life = velocities[i].w;
     if(life == 1.f) //particles have been reset by vel_update kernel
