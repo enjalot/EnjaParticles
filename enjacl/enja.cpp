@@ -94,10 +94,10 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
         //initialize the radii array with random values between 1.0 and particle_radius
         //g[i].w = 1.0f + particle_radius*drand48();
         //initialize the particle life array with random values between 0 and 1
-        //v[i].w = drand48();
-        v[i].x = 3.0f;
-        v[i].y = 0.0f;
-        v[i].z = 1.0f;
+        v[i].w = drand48();
+        v[i].x *= 3.0f;
+        v[i].y *= 3.0f;
+        v[i].z *= 3.0f;
         //v[i].w = 1.0f;
     }
 
@@ -232,7 +232,7 @@ EnjaParticles::EnjaParticles(int s, AVec4 g, AVec4 v, int len, int n, float radi
         else
         {
         */
-            _velo_gen[i].w =1.0 - lifeoff*(i / len);
+        //    _velo_gen[i].w =1.0 - lifeoff*(i / len);
         //}
     }
 

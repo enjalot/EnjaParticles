@@ -85,8 +85,8 @@ void main()
     //gl_FragColor.w = texture2D(texture_color, gl_PointCoord).x;
     //gl_FragColor.w = texture2D(texture_color, gl_TexCoord[0].st).x;
     //
-    ///vec4 tex = texture2D(texture_color, gl_TexCoord[0].st);
-    ///gl_FragColor.xyz = tex.xyz * (diffuse*2.0) + specular;
+//    vec4 tex = texture2D(texture_color, gl_TexCoord[0].st);
+//    gl_FragColor.xyz = tex.xyz * (diffuse*2.0) + specular;
     //gl_FragColor.xyz = gl_FragColor.xyz * gl_Color.xyz;
 
     //gl_FragColor.x = texture2D(texture_color, gl_TexCoord[0].st).x;
