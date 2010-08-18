@@ -21,6 +21,7 @@
 
 namespace SimLib
 {
+	//----------------------------------------------------------------------
 	SimulationSystem::SimulationSystem(bool simplesph)
 	: mInitialized(false)
 	, mBuffersMapped(false)
@@ -32,11 +33,13 @@ namespace SimLib
 		mSimCudaAllocator = new SimCudaAllocator();
 	};
 
+	//----------------------------------------------------------------------
 	SimulationSystem::~SimulationSystem()
 	{
 		Free();
 	};
 
+	//----------------------------------------------------------------------
 	void SimulationSystem::PrintMemoryUse()
 	{
 		cout << "Allocated " 
@@ -46,17 +49,20 @@ namespace SimLib
 			<< "\n";
 	}
 
+	//----------------------------------------------------------------------
 	void SimulationSystem::SetExternalBuffer(SimLib::Sim::BaseBufferId id, SimBuffer* buffer)
 	{
 		mExternalSimBuffers[id] = buffer;
 	}
 
+	//----------------------------------------------------------------------
 	void SimulationSystem::RemoveExernalBuffer(SimLib::Sim::BaseBufferId id)
 	{	
 		mExternalSimBuffers.erase(mExternalSimBuffers.find(id));
 	}
 
 	//----------------------------------
+	//----------------------------------------------------------------------
 	void SimulationSystem::Init()
 	{
 		mSimulationSteps = 0;
@@ -122,8 +128,8 @@ namespace SimLib
 
 		mInitialized = true;
 	};
-	//----------------------------------
 
+	//----------------------------------------------------------------------
 	void SimulationSystem::SetNumParticles(uint numParticles)
 	{
 		if(mParticleSim == NULL)
@@ -133,6 +139,7 @@ namespace SimLib
 	}
 
 
+	//----------------------------------
 	void SimulationSystem::Free()
 	{	
 		delete mParticleSim;
@@ -141,6 +148,7 @@ namespace SimLib
 		unmapRenderingBuffers();
 	}
 
+	//----------------------------------
 	void SimulationSystem::mapRenderingBuffers()
 	{
 		// Map the rendering buffers (ready for use by CUDA)
@@ -156,6 +164,7 @@ namespace SimLib
 		}
 	}
 
+	//----------------------------------
 	void SimulationSystem::unmapRenderingBuffers()
 	{
 		// Unmap the rendering buffers (ready for use by rendering system)
@@ -171,6 +180,7 @@ namespace SimLib
 		}
 	}
 
+	//----------------------------------
 	void SimulationSystem::Clear()
 	{
 		mapRenderingBuffers();
@@ -202,12 +212,14 @@ namespace SimLib
 	}
 
 
+	//----------------------------------
 	float SimulationSystem::GetParticleSize()
 	{
 		// meh
 		return mParticleSim->GetParticleSize();
 	}
 
+	//----------------------------------
 	void SimulationSystem::Simulate(bool mProgress, bool gridWallCollisions)
 	{
 		//if(mSimulationSteps >= 400) return;
@@ -224,6 +236,7 @@ namespace SimLib
 
 	}
  
+	//----------------------------------
 	void SimulationSystem::SetScene(int scene) 
 	{
 		mapRenderingBuffers();
@@ -248,7 +261,7 @@ namespace SimLib
 		unmapRenderingBuffers();
 	}
 
-
+	//----------------------------------
 	__device__ int2 getTerrainPos(float3 const &pos, int const &dTerrainSize, float const &dTerrainWorldSize)
 	{            
 		int2 terrainPos;
@@ -257,16 +270,19 @@ namespace SimLib
 		return terrainPos;
 	}
 
+	//----------------------------------
 	__device__ float getTerrainHeight(int const &terrainPosX, int const &terrainPosZ, float const *dTerrainHeights, int const &dTerrainSize)
 	{            
 		return dTerrainHeights[((dTerrainSize) * (dTerrainSize) - 1) - (((dTerrainSize) * terrainPosZ)) + terrainPosX];
 	}
 
+	//----------------------------------
 	__device__ float getTerrainHeight(int2 const &terrainPos, float const *dTerrainHeights, int const &dTerrainSize)
 	{            
 		return getTerrainHeight(terrainPos.x, terrainPos.y, dTerrainHeights, dTerrainSize);
 	}
 
+	//----------------------------------
 	void SimulationSystem::SetFluidPosition(float3 fluidWorldPosition) 
 	{ 
 		mFluidWorldPosition = fluidWorldPosition; 
@@ -274,6 +290,7 @@ namespace SimLib
 		cout << "Fluid World Position: " << fluidWorldPosition.x << " " << fluidWorldPosition.y << " " << fluidWorldPosition.z << "\n";
 	}
 
+	//----------------------------------------------------------------------
 	void SimulationSystem::FillTestData(int scene, float_vec* position, int numParticles, GridParams hGridParams)
 	{
 		int i = 0;

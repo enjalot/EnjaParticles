@@ -11,6 +11,7 @@
 #include "timege.h"
 
 
+//----------------------------------------------------------------------
 void EnjaParticles::drawArrays()
 {
 
@@ -56,6 +57,7 @@ void EnjaParticles::drawArrays()
     //glPopMatrix();
 }
 
+//----------------------------------------------------------------------
 int EnjaParticles::render()
 {
     // Render the particles with OpenGL
@@ -107,7 +109,7 @@ int EnjaParticles::render()
         glUseProgram(0);
         glDisable(GL_POINT_SPRITE_ARB);
     }
-    else
+    else   // do not use glsl
     {
 
         glDisable(GL_LIGHTING);
@@ -141,6 +143,7 @@ int EnjaParticles::render()
 }
 
 
+//----------------------------------------------------------------------
 int EnjaParticles::compileShaders()
 {
 
@@ -192,6 +195,7 @@ int EnjaParticles::compileShaders()
 
 }
 
+//----------------------------------------------------------------------
 void EnjaParticles::use_glsl()
 {
     glsl_program = compileShaders();
@@ -206,3 +210,4 @@ void EnjaParticles::use_glsl()
 
 }
 
+//----------------------------------------------------------------------

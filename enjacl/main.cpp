@@ -431,6 +431,7 @@ void appKeyboard(unsigned char key, int x, int y)
     }
 }
 
+//----------------------------------------------------------------------
 void appRender()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -475,6 +476,7 @@ void appRender()
 	glDisable(GL_DEPTH_TEST);
 }
 
+//----------------------------------------------------------------------
 void appDestroy()
 {
 
