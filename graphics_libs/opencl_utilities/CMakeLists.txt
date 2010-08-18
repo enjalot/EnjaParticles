@@ -6,6 +6,7 @@ set (CXXFILES cl.cpp array_opencl_t.cpp array_opencl_1d.cpp array_opencl_1d_cl.c
 
 Include_directories( BEFORE
 	${OPENCL_INCLUDE_DIR}
+	$ENV{CUDA_LOCAL}/../shared/inc
 )
 
 ADD_LIBRARY(cl_utilities_cpp STATIC ${CXXFILES})

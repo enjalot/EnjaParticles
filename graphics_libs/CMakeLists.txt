@@ -1,6 +1,9 @@
-IF (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
-    MESSAGE(FATAL_ERROR "CMake generation must always be out-of-source!
-    Remove the CMakeCache.txt file and try again from another folder")
+
+message("${CMAKE_SOURCE_DIR}")
+message("${CMAKE_CURRENT_SOURCE_DIR}")
+
+IF (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+    MESSAGE(FATAL_ERROR "CMake generation must always be out-of-source! Remove the CMakeCache.txt file and try again from another folder")
 ENDIF (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 
 
@@ -20,6 +23,11 @@ endif (${CMAKE_SOURCE_DIR} MATCHES ${CMAKE_CURRENT_SOURCE_DIR})
 # reset to zero when a project changes
 INCLUDE_DIRECTORIES(
   ${MY_INCLUDE_DIRS}
+  utilities
+  graphics_utils
+  cuda_utitilities
+  random
+  opencl_utilities
 )
 
 ADD_SUBDIRECTORY(utilities)
