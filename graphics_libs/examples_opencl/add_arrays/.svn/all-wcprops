@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svn/gordon_programs/!svn/ver/1028/gravimetrie_roland/branch_grav/branch3/graphics_libs/examples_opencl/add_arrays
+END
+add_arrays_raw.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 133
+/svn/gordon_programs/!svn/ver/1028/gravimetrie_roland/branch_grav/branch3/graphics_libs/examples_opencl/add_arrays/add_arrays_raw.cpp
+END
+add.cl
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/svn/gordon_programs/!svn/ver/1028/gravimetrie_roland/branch_grav/branch3/graphics_libs/examples_opencl/add_arrays/add.cl
+END
+add_arrays.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 129
+/svn/gordon_programs/!svn/ver/1028/gravimetrie_roland/branch_grav/branch3/graphics_libs/examples_opencl/add_arrays/add_arrays.cpp
+END
+CMakeLists.txt
+K 25
+svn:wc:ra_dav:version-url
+V 129
+/svn/gordon_programs/!svn/ver/1028/gravimetrie_roland/branch_grav/branch3/graphics_libs/examples_opencl/add_arrays/CMakeLists.txt
+END

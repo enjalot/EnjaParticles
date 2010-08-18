@@ -1,0 +1,178 @@
+Create examples for
+- sdot
+- x -> alpha*x
+- pairwise multiplication: a[i] = b[i] * c[i]
+- x = a + alpha*b (saxpy)
+----------------------------------------------------------------------
+	// FIX cl to have multiple programs. Keep Programs in a vector
+	// of programs? Need a program class, each program with a single kernel
+	// For each program, program.getKernel();
+	// to have multiple kernel, implement a map: program['kernel_name']
+----------------------------------------------------------------------
+June 13: timing on NVidia 9400M, 128^3
+(about the same as on 330M, except 20x slower). Not related to sync versus
+async. So what is it? Must be a slowdown in the C++ portion of the code. 
+TEST: saxpy
+saxpy test successful
+sdot: tot (ms): 468.218, avg: 23.4109, (count=20)
+scal: tot (ms): 343.908, avg: 17.1954, (count=20)
+scopy: tot (ms): 564.593, avg: 28.2297, (count=20)
+saxpy: tot (ms): 564.5, avg: 28.225, (count=20)
+(20x slower than cublas routines)
+----------------------------------------------------------------------
+    cll_Program prog = cl.addProgram(path.c_str());
+is responsible for over 95% of the time. Just this method. 
+WHY?  Need more timers. 
+----------------------------------------------------------------------
+After only compiling once, the times are more reasonable
+scal: tot (ms): 5.944, avg: 0.2972, (count=20)
+scal_cpu: tot (ms): 11.377, avg: 0.45508, (count=25)
+----------------------------------------------------------------------
+In scopy: simply removing if (incx == 1) (which is always true since incx
+is an argument that does not change (although I did not make it a constant)
+so the compiler cannot assume that it cannot change), I get 20% speedup!!!
+----------------------------------------------------------------------
+128^3, mac, 9400M GPU
+cublas tests in graphics_libs/examples_opencl/cublas
+sdot: tot (ms): 83.501, avg: 4.17505, (count=20)
+(sum up 128 terms on the GPU)
+sdot_cpu: tot (ms): 0.131, avg: 0.00524, (count=25) 
+transfer 128 floats from GPU to CPU: 4 ms!!! 
+======================================================================
+128^3, mac, 330M GPU + i7 CPU
+cublas tests in graphics_libs/examples_opencl/cublas
+No blocking around the calls to kern.exec()
+sdot: tot (ms): 158.513, avg: 7.92565, (count=20)
+scal: tot (ms): 4.218, avg: 0.2109, (count=20)
+scopy: tot (ms): 108.333, avg: 5.41665, (count=20)
+saxpy: tot (ms): 2.178, avg: 0.1089, (count=20)
+scal_cpu: tot (ms): 435.655, avg: 17.4262, (count=25)
+scopy_cpu: tot (ms): 40.968, avg: 1.63872, (count=25)
+sdot_cpu: tot (ms): 153.556, avg: 6.14224, (count=25)
+
+Blocking around the calls to kern.exec()
+sdot: tot (ms): 235.688, avg: 11.7844, (count=20)
+scal: tot (ms): 114.683, avg: 5.73415, (count=20)
+scopy: tot (ms): 108.78, avg: 5.439, (count=20)
+saxpy: tot (ms): 2.189, avg: 0.10945, (count=20)
+scal_cpu: tot (ms): 26.066, avg: 1.04264, (count=25)
+scopy_cpu: tot (ms): 28.07, avg: 1.1228, (count=25)
+sdot_cpu: tot (ms): 38.056, avg: 1.52224, (count=25)
+scale_gpu_blocked: tot (ms): 179.116, avg: 7.16464, (count=25)
+scopy_gpu_blocked: tot (ms): 171.123, avg: 6.84492, (count=25)
+sdot_gpu_blocked: tot (ms): 200.028, avg: 8.00112, (count=25)
+
+----------------------------------------------------------------------
+128^3, mac, 9400M, GPU + dual core
+No Blocking around the calls to kern.exec()
+sdot: tot (ms): 85.127, avg: 4.25635, (count=20)
+scal: tot (ms): 4.773, avg: 0.23865, (count=20)
+scopy: tot (ms): 221.624, avg: 11.0812, (count=20)
+saxpy: tot (ms): 3.793, avg: 0.18965, (count=20)
+scal_cpu: tot (ms): 283.225, avg: 11.329, (count=25)
+scopy_cpu: tot (ms): 9.204, avg: 0.36816, (count=25)
+sdot_cpu: tot (ms): 90.485, avg: 3.6194, (count=25)
+
+Blocking around the calls to kern.exec()
+sdot: tot (ms): 64.246, avg: 3.2123, (count=20)
+scal: tot (ms): 208.94, avg: 10.447, (count=20)
+scopy: tot (ms): 79.002, avg: 3.9501, (count=20)
+saxpy: tot (ms): 3.672, avg: 0.1836, (count=20)
+scal_cpu: tot (ms): 55.179, avg: 2.20716, (count=25)
+scopy_cpu: tot (ms): 8.728, avg: 0.34912, (count=25)
+sdot_cpu: tot (ms): 7.676, avg: 0.30704, (count=25)
+scale_gpu_blocked: tot (ms): 272.161, avg: 10.8864, (count=25)
+scopy_gpu_blocked: tot (ms): 104.99, avg: 4.1996, (count=25)
+sdot_gpu_blocked: tot (ms): 77.668, avg: 3.10672, (count=25)
+
+
+NOTES: The times measure c++ more than GPU. 
+saxpy is about 50% faster on 9400M
+scopy takes too long (problem as yet unknown)
+sdot: slower on 6400M (reason unknown)
+
+TODO: add clocks around on the exec part, with synchronization (blocking) on. 
+for more accurate measurement. Or turn profiling on. 
+======================================================================
+On the 330M, 128^3
+sdot: tot (ms): 139.815, avg: 3.49537, (count=40)
+scal: tot (ms): 100.874, avg: 2.52185, (count=40)
+scopy: tot (ms): 98.528, avg: 2.4632, (count=40)
+saxpy: tot (ms): 145.603, avg: 3.64007, (count=40)
+
+sdot_cpu: tot (ms): 207.6, avg: 4.61333, (count=45)
+scal_cpu: tot (ms): 156.7, avg: 3.48222, (count=45)
+scopy_cpu: tot (ms): 160.597, avg: 3.56882, (count=45)
+saxpy_cpu: tot (ms): 189.599, avg: 4.62437, (count=41)
+
+sdot_gpu_blocked: tot (ms): 139.486, avg: 3.09969, (count=45)
+scale_gpu_blocked: tot (ms): 127.409, avg: 2.83131, (count=45)
+scopy_gpu_blocked: tot (ms): 132.679, avg: 2.94842, (count=45)
+saxpy_gpu_blocked: tot (ms): 160.564, avg: 3.9162, (count=41)
+
+Synch threads on entry of each cublas routine and right after exec kernel. 
+Time cpu: beginning and end of each cublas routine
+Time gpu: before and after thread barrier, right after kern.exec() .
+----------------------------------------------------------------------
+On the 9400M, 128^3
+
+sdot: tot (ms): 133.037, avg: 3.32592, (count=40)
+scal: tot (ms): 321.029, avg: 8.02573, (count=40)
+scopy: tot (ms): 387.857, avg: 9.69642, (count=40)
+saxpy: tot (ms): 180.627, avg: 4.51568, (count=40)
+
+sdot_cpu: tot (ms): 227.713, avg: 5.06029, (count=45)
+scal_cpu: tot (ms): 439.634, avg: 9.76964, (count=45)
+scopy_cpu: tot (ms): 455.641, avg: 10.1254, (count=45)
+saxpy_cpu: tot (ms): 256.579, avg: 6.25802, (count=41)
+
+sdot_gpu_blocked: tot (ms): 160.501, avg: 3.56669, (count=45)
+scale_gpu_blocked: tot (ms): 384.432, avg: 8.54293, (count=45)
+scopy_gpu_blocked: tot (ms): 442.907, avg: 9.84238, (count=45)
+saxpy_gpu_blocked: tot (ms): 206.993, avg: 5.04861, (count=41)
+----------------------------------------------------------------------
+On kirk, 128^3
+
+sdot: tot (ms): 31.763, avg: 0.794075, (count=40)
+scal: tot (ms): 24.35, avg: 0.60875, (count=40)
+scopy: tot (ms): 24.289, avg: 0.607225, (count=40)
+saxpy: tot (ms): 26.097, avg: 0.652425, (count=40)
+
+sdot_cpu: tot (ms): 278.668, avg: 6.19262, (count=45)
+scal_cpu: tot (ms): 265.732, avg: 5.90516, (count=45)
+scopy_cpu: tot (ms): 261.126, avg: 5.8028, (count=45)
+saxpy_cpu: tot (ms): 264.134, avg: 6.44229, (count=41)
+
+sdot_gpu_blocked: tot (ms): 7.923, avg: 0.176067, (count=45)
+scale_gpu_blocked: tot (ms): 11.875, avg: 0.263889, (count=45)
+scopy_gpu_blocked: tot (ms): 12.008, avg: 0.266844, (count=45)
+saxpy_gpu_blocked: tot (ms): 11.726, avg: 0.286, (count=41)
+
+NOTES: the timings with count=45 include compilation of the kernels. 
+Ideally, I should remove the compilation to another secdtion of the
+code.  the timings: tot (ms) are th emost relevant. 
+----------------------------------------------------------------------
+On troi (fermi 480GTX, 128^3)
+sdot: tot (ms): 10.142, avg: 0.25355, (count=40)
+scal: tot (ms): 11.557, avg: 0.288925, (count=40)
+scopy: tot (ms): 11.714, avg: 0.29285, (count=40)
+saxpy: tot (ms): 13.834, avg: 0.34585, (count=40)
+
+sdot_cpu: tot (ms): 208.442, avg: 4.63205, (count=45)
+scal_cpu: tot (ms): 208.123, avg: 4.62496, (count=45)
+scopy_cpu: tot (ms): 204.934, avg: 4.55409, (count=45)
+saxpy_cpu: tot (ms): 207.131, avg: 5.05197, (count=41)
+
+sdot_gpu_blocked: tot (ms): 7.322, avg: 0.162711, (count=45)
+scale_gpu_blocked: tot (ms): 9.565, avg: 0.212556, (count=45)
+scopy_gpu_blocked: tot (ms): 9.83, avg: 0.218444, (count=45)
+saxpy_gpu_blocked: tot (ms): 10.745, avg: 0.262073, (count=41)
+
+GPU timings on troi are very similar to kirk (measured on the GPU,
+with blocked calls to kernels. CPU timings are 3x faster (makes sense
+since the machines are very new). 
+----------------------------------------------------------------------
+Thur. June 24
+If grid and local_dim jas dimensionality=3, kernel (even simple ones) will not 
+execute. If dimensionality is 2, there is no problem. 
+----------------------------------------------------------------------

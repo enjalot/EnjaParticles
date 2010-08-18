@@ -1,0 +1,17 @@
+Install
+
+rm CMakeCache.txt
+cmake .
+make
+
+Add *.cu to the Makefile somehow. DO not know how to mesh with libraries. 
+_1d.hxx now compiles. Start testing of add kernel. 
+----------------------------------------------------------------------
+Feb 23, 2008
+- I should add namespaces since some files like cu.h might be found 
+in other libraries. Perhaps    namespace CUDA_UTIL_GE  (with my initials)
+----------------------------------------------------------------------
+June 21, 2008
+I don't want to do Make_lib. This is preventing me from fully automating
+make sequence
+----------------------------------------------------------------------

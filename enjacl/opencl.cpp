@@ -46,7 +46,7 @@ int EnjaParticles::update()
     err = queue.enqueueNDRangeKernel(vel_update_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
     queue.finish();
 
-	reorder_particles(); // GE
+	//reorder_particles(); // GE
 	//collision = false;
     if(collision)
     {
@@ -500,6 +500,6 @@ printf("number of new vertices: %d\n", n_vert.size());
 
 	//delete [] list;
 
-	exit(0);
+	//exit(0);
 }
 //----------------------------------------------------------------------

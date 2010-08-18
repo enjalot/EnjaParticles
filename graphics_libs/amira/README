@@ -1,0 +1,15 @@
+July 17, 2008
+Requires installation of Spirit Library from Boost. 
+----------------------------------------------------------------------
+July 23, 2008
+Create a AmiraLineSet reader for my own use since Amira is not reliable
+on either Linux or Macs. 
+----------------------------------------------------------------------
+Aug. 10, 2008
+Added  Boost library path to CMakeLists.txt
+----------------------------------------------------------------------
+Aug. 15, 2008
+----------------------------------------------------------------------
+Added Read for Triangular surface grids.
+svn revision 187
+----------------------------------------------------------------------
