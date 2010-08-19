@@ -29,6 +29,8 @@ LINK_DIRECTORIES(
 	 $ENV{CUDA_HOME}/lib
 )
 
+ADD_DEFINITIONS(-g)
+
 
 ADD_EXECUTABLE(sph_enja 
    main.cpp

@@ -309,6 +309,8 @@ void appRender()
 
  
     enjas->render();
+
+	printf("frameRenderQueued\n");
 	frameRenderingQueued();
 
     showFPS(enjas->getFPS(), enjas->getReport());
@@ -462,10 +464,10 @@ void createScene()
 
 		//if(mSnowConfig->fluidSettings.enabled) {
 			mParticleSystem = new SimLib::SimulationSystem(fluidSettings->simpleSPH);
-			//mParticleSystem = new SimLib::SimulationSystem(mSnowConfig->fluidSettings.simpleSPH);
-
+			int numParticles = (1 << 10) << 2;
+			printf("numParticles= %d\n", numParticles);
+			mParticleSystem->GetSettings()->SetValue("Particles Number", numParticles);
 			mParticleSystem->SetFluidPosition(make_float3(0., 0., 0.));
-			//mParticleSystem->SetFluidPosition(make_float3(mParticlesNode->getPosition().x, mParticlesNode->getPosition().y, mParticlesNode->getPosition().z));
 
 			// WHAT ARE EXTERNAL BUFFERS?
 			//mParticleSystem->SetExternalBuffer(SimLib::Sim::BufferPosition,  mParticlesEntity->GetCudaBufferPosition());
@@ -558,6 +560,7 @@ int main(int argc, char** argv)
 	//SnowSim::SnowApplication app;
 	//app.go();
 
+	printf("INITIALIZE SPH CODE\n");
 	createScene();
 
     
