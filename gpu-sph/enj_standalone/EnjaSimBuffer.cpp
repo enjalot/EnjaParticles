@@ -8,8 +8,6 @@ namespace Enja
 		: //mParticlesMesh(particlesMesh)
 		//, mEnjaVertexBuffer(NULL)
 		  mEnjaCudaHelper(enjaCudaHelper)
-		// **** ERROR ON NEXT LINE, CANNOT FIGURE IT OUT
-		//, SimBuffer(SimLib::BufferLocation::Device, sizeof(Enja::Vector4))
 		, SimBuffer(SimLib::Device, sizeof(Vec4))
 	{
 	}
@@ -23,6 +21,8 @@ namespace Enja
 	void EnjaSimBuffer::SetEnjaVertexBuffer(GLuint bufferid)
 	{
 		bool wasMapped = false;
+        printf("m_bufferid: %d\n", m_bufferid);
+        printf("bufferid: %d\n", bufferid);
 		if(m_bufferid != bufferid)
 		{
 			if(mMapped)
@@ -36,6 +36,7 @@ namespace Enja
 		//mAllocedSize = mEnjaVertexBuffer->getSizeInBytes();
 		//mSize = mAllocedSize;
 
+        printf("wasMapped: %d\n", wasMapped);
 		if(wasMapped)
 			MapBuffer();
 
@@ -45,6 +46,7 @@ namespace Enja
 	void EnjaSimBuffer::MapBuffer()
 	{
 		mEnjaCudaHelper->MapBuffer((void**)&mPtr, m_bufferid);
+        printf("Map buffer: %d\n", mPtr);
 		mMapped = true;
 	}
 

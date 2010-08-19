@@ -157,6 +157,7 @@ namespace SimLib
 			bool mapped = true;
 			for(std::map<SimLib::Sim::BaseBufferId, SimBuffer*>::const_iterator it = mExternalSimBuffers.begin(); it != mExternalSimBuffers.end(); ++it)
 			{
+                printf("mapping buffer!\n");
 				it->second->MapBuffer();
 				mapped &= it->second->IsMapped();
 			}
@@ -247,14 +248,21 @@ namespace SimLib
 		mParticleSim->Clear();
 
 		int numParticles = (int)mParticleSim->GetSettings()->GetValue("Particles Number");
+        printf("in SimulationSystem::SetScene\n");
+        printf("numParticles: %d\n", numParticles);
 		float_vec *positions = new float_vec[numParticles];
 		memset(positions, 0, numParticles*sizeof(float_vec));
 
 		FillTestData(scene, positions, numParticles, gridParams);
+        printf("position[0] %f\n", positions[100].x);
 
+        //mParticleSim->MapBuffer();
 		void* ptr= mParticleSim->GetBuffer(SimLib::Sim::BufferPosition)->GetPtr();
+        printf("ptr: %d\n", ptr);
 
  		CUDA_SAFE_CALL(cudaMemcpy(ptr, positions, numParticles*sizeof(float_vec), cudaMemcpyHostToDevice))
+        
+        //mParticleSim->MapBuffer();
 
 		delete[] positions;
 

@@ -25,13 +25,30 @@ void EnjaParticles::drawArrays()
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
+    glColor3f(1,0,0);
     //printf("color buffer\n");
     glBindBuffer(GL_ARRAY_BUFFER, c_vbo);
     glColorPointer(4, GL_FLOAT, 0, 0);
 
+    void* colptr = glMapBufferARB(GL_ARRAY_BUFFER, GL_READ_ONLY_ARB);
+    printf("col PTR[400]: %f\n", ((float*)colptr)[400]);
+    printf("col PTR[401]: %f\n", ((float*)colptr)[401]);
+    printf("col PTR[402]: %f\n", ((float*)colptr)[402]);
+    glUnmapBufferARB(GL_ARRAY_BUFFER); 
+
+
+
     //printf("vertex buffer\n");
     glBindBuffer(GL_ARRAY_BUFFER, v_vbo);
     glVertexPointer(4, GL_FLOAT, 0, 0);
+
+    // map the buffer object into client's memory
+    void* ptr = glMapBufferARB(GL_ARRAY_BUFFER, GL_READ_ONLY_ARB);
+    printf("Pos PTR[400]: %f\n", ((float*)ptr)[400]);
+    printf("Pos PTR[401]: %f\n", ((float*)ptr)[401]);
+    printf("Pos PTR[402]: %f\n", ((float*)ptr)[402]);
+    glUnmapBufferARB(GL_ARRAY_BUFFER); 
+
     
     //printf("index buffer\n");
     glBindBuffer(GL_ARRAY_BUFFER, i_vbo);
@@ -46,7 +63,9 @@ void EnjaParticles::drawArrays()
     glDisableClientState(GL_NORMAL_ARRAY);
     //glDisableClientState(GL_EDGE_FLAG_ARRAY);
 
-    //printf("draw arrays\n");
+    printf("draw arrays num: %d\n", num);
+    glDisableClientState(GL_COLOR_ARRAY);
+
     glDrawArrays(GL_POINTS, 0, num);
 
     //printf("disable stuff\n");
@@ -119,7 +138,8 @@ int EnjaParticles::render()
 
 		// draws circles instead of squares
         glEnable(GL_POINT_SMOOTH); 
-        glPointSize(5.*particle_radius);
+        //glPointSize(5.*particle_radius);
+        glPointSize(100);
 
         drawArrays();
     }
