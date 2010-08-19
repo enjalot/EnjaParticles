@@ -115,20 +115,52 @@ void appRender()
 	glEnable(GL_DEPTH_TEST);
 
     printf("about to call render\n");
- 
-    glBegin(GL_TRIANGLES);
-    glColor3f(0,1,0);
-    	glVertex3f(0, 0, 70);
-    	glVertex3f(100, -40, 70);
-    	glVertex3f(100, 0, 70);
-    glEnd();
-
 
 
 	printf("frameRenderQueued\n");
 	frameRenderingQueued();
 
     enjas->render();
+
+     
+    glBindBuffer(GL_ARRAY_BUFFER, enjas->v_vbo);
+    void* ptr = glMapBufferARB(GL_ARRAY_BUFFER, GL_READ_ONLY_ARB);
+    float x = ((float*)ptr)[400];
+    float y = ((float*)ptr)[401];
+    float z = ((float*)ptr)[402];
+    printf("Pos PTR[400]: %f\n", x);
+    printf("Pos PTR[401]: %f\n", y);
+    printf("Pos PTR[402]: %f\n", z);
+    glUnmapBufferARB(GL_ARRAY_BUFFER); 
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, enjas->c_vbo);
+    void* colptr = glMapBufferARB(GL_ARRAY_BUFFER, GL_READ_ONLY_ARB);
+    float cx = ((float*)colptr)[400];
+    float cy = ((float*)colptr)[401];
+    float cz = ((float*)colptr)[402];
+    printf("col PTR[400]: %f\n", cx);
+    printf("col PTR[401]: %f\n", cy);
+    printf("col PTR[402]: %f\n", cz);
+    glUnmapBufferARB(GL_ARRAY_BUFFER); 
+
+    
+    /*
+    glBegin(GL_TRIANGLES);
+    glColor3f(cx,cy,cz);
+    	glVertex3f(0, 0, 70);
+    	glVertex3f(x, y, z);
+    	glVertex3f(100, 0, 70);
+    glEnd();
+    glPointSize(10.);
+    glBegin(GL_POINTS);
+    for(int i = 0; i < NUM_POINTS*4; i+=4)
+    {
+        glVertex3f(x, y, z);
+    }
+    glEnd();
+    */
+
 
     showFPS(enjas->getFPS(), enjas->getReport());
     glutSwapBuffers();
@@ -290,7 +322,8 @@ int main(int argc, char** argv)
     printf("INITIALIZE ENJAS\n");
     //default constructor
     enjas = new EnjaParticles(EnjaParticles::GRAVITY, NUM_PARTICLES);
-    enjas->particle_radius = 10.0f;
+    enjas->particle_radius = 5.0f;
+    enjas->blending = false;
     //enjas->use_glsl();
     enjas->updates = 1;
     enjas->dt = .005;
@@ -322,8 +355,8 @@ void init_gl()
     glLoadIdentity();
     //gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 100.0);
     //gluPerspective(90.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 10000.0); //for lorentz
-    glOrtho(-100,300, -100,300, 0,10000);
-    gluLookAt(0,0,200, 0,0,0, 0,1,0);
+    glOrtho(-100,100, -500,100, 0,10000);
+    gluLookAt(0,0,300, 0,0,0, 0,1,0);
     // set view matrix
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
