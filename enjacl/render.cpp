@@ -71,11 +71,13 @@ int EnjaParticles::render()
     //printf("about to update\n");
     ts[0]->start();
     
+    /*
     for(int i = 0; i < updates; i++)
     {
         update();     //call the particle update function (executes the opencl)
         //cpu_update();
     }
+    */
 
     ts[0]->stop();
 

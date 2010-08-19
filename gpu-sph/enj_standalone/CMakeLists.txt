@@ -21,7 +21,9 @@ ADD_LIBRARY(enja ${CXXFILES})
 
 
 LINK_DIRECTORIES(
+     ${CMAKE_CURRENT_BINARY_DIR}/SPHSimLib
 	 ${CMAKE_CURRENT_SOURCE_DIR}/../../enjacl
+	 ${CMAKE_CURRENT_SOURCE_DIR}/../../enjacl/build
      $ENV{CUDA_LOCAL}/lib 
 	 $ENV{CUDA_LOCAL}/common/lib 
 	 $ENV{CUDA_LOCAL}/../shared/lib/darwin 
@@ -43,10 +45,11 @@ message("... ${GLUT_LIBRARIES} ...")
 message("... ${OPENGL_LIBRARIES} ...")
 
 TARGET_LINK_LIBRARIES(sph_enja
-	enja
 	enjaclparticles     # make sure library is in source directory
+	sph_lib
 	sph_cuda
 	sph_lib
+	enja
    ${GLUT_LIBRARIES}
    ${OPENGL_LIBRARIES}
    ${OPENCL_LIBRARIES}

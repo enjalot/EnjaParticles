@@ -380,6 +380,7 @@ void appRender()
     glColor3f(0,0,0);
 
  
+    enjas->update();
     enjas->render();
 
     showFPS(enjas->getFPS(), enjas->getReport());

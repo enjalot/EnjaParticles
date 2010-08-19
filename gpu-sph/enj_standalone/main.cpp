@@ -464,16 +464,18 @@ void createScene()
 
 		//if(mSnowConfig->fluidSettings.enabled) {
 			mParticleSystem = new SimLib::SimulationSystem(fluidSettings->simpleSPH);
+            mParticleSystem->Init();
 			int numParticles = (1 << 10) << 2;
 			printf("numParticles= %d\n", numParticles);
+
 			mParticleSystem->GetSettings()->SetValue("Particles Number", numParticles);
+            printf("asdfasdf\n");
 			mParticleSystem->SetFluidPosition(make_float3(0., 0., 0.));
 
 			// WHAT ARE EXTERNAL BUFFERS?
 			//mParticleSystem->SetExternalBuffer(SimLib::Sim::BufferPosition,  mParticlesEntity->GetCudaBufferPosition());
 			//mParticleSystem->SetExternalBuffer(SimLib::Sim::BufferColor,  mParticlesEntity->GetCudaBufferColor());
 
-			mParticleSystem->Init();
 
 
 			#if 0
