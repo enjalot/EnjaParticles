@@ -86,6 +86,12 @@
 ###############################################
 
 	OPTION(FORCE_32BIT "Force the compile and link process to build a 32bit i386 executable/library" ON)
+    
+    message("64bit: ${CUDA_64_BIT_DEVICE_CODE} ???\n\n")
+    IF(CUDA_64_BIT_DEVICE_CODE)
+        SET(FORCE_32BIT OFF)
+    ENDIF(CUDA_64_BIT_DEVICE_CODE)
+
 
 	SET(TEMP_VAR ${CMAKE_CURRENT_SOURCE_DIR}/lib )
 

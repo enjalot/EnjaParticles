@@ -11,7 +11,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 
 # set to 64 bit
-SET(CUDA_64_BIT_DEVICE_CODE OFF)
+#SET(CUDA_64_BIT_DEVICE_CODE OFF)
+#OPTION(CUDA_64_BIT_DEVICE_CODE "compile in 64bit" ON)
 
 # options controlled via -D option to cmake
 # Only a single option is on at a given time. 
@@ -66,7 +67,8 @@ ENDIF(APPLE)
 
 ################# END OS DEPENDENT CONFIGS ####################
 
-
+SET(CUDA_64_BIT_DEVICE_CODE OFF)
+message("IN CMAKELISTS: ${CUDA_64_BIT_DEVICE_CODE} ?ASDF?\n\n")
 # Get common build instructions used by all operating systems
 INCLUDE (COMMON_CONFIG)
 INCLUDE (CONFIG)
