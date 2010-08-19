@@ -60,8 +60,8 @@ void drawString(const char *str, int x, int y, float color[4], void *font);
 void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
-EnjaParticles* enjas;
-#define NUM_PARTICLES (1 << 10) << 8
+//EnjaParticles* enjas;
+#define NUM_PARTICLES (1 << 10) << 2
 
 
 GLuint v_vbo; //vbo id
@@ -108,6 +108,107 @@ bool frameRenderingQueued()
 	}
 	return true;
 }
+
+void render_slow()
+{
+    int num = NUM_PARTICLES; 
+    std::vector<float> poses(num*4);
+    std::vector<float> coles(num*4);
+
+    glBindBuffer(GL_ARRAY_BUFFER, v_vbo);
+    void* ptr = glMapBufferARB(GL_ARRAY_BUFFER, GL_READ_ONLY_ARB);
+
+    for(int i =0; i < num*4; i++)
+    {
+        poses[i] = ((float*)ptr)[i];
+    }
+
+    glUnmapBufferARB(GL_ARRAY_BUFFER); 
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, c_vbo);
+    void* colptr = glMapBufferARB(GL_ARRAY_BUFFER, GL_READ_ONLY_ARB);
+    for(int i =0; i < num*4; i++)
+    {
+        coles[i] = ((float*)colptr)[i];
+    }
+   
+    glUnmapBufferARB(GL_ARRAY_BUFFER); 
+    
+
+    // Use glBegin/glEnd to draw
+    printf("render POINTS!\n");
+    float x, y, z, cx, cy, cz;
+    glBegin(GL_POINTS);
+    for(int i = 0; i < num*4; i+=4)
+    {
+
+        x = poses[i];
+        y = poses[i+1];
+        z = poses[i+2];
+
+        cx = coles[i];
+        cy = coles[i+1];
+        cz = coles[i+2];
+
+        glColor3f(cx,cy,cz);
+        //glColor3f(1,0,0);
+        //glVertex3f(0,0,0);
+        glVertex3f(x, y, z);
+    }
+    glEnd();
+}
+
+void render_fast()
+{
+    int num = NUM_PARTICLES;
+    glBindBuffer(GL_ARRAY_BUFFER, c_vbo);
+    glColorPointer(3, GL_FLOAT, 0, 0);
+
+    /*
+    void* colptr = glMapBufferARB(GL_ARRAY_BUFFER, GL_READ_ONLY_ARB);
+    printf("col PTR[400]: %f\n", ((float*)colptr)[400]);
+    printf("col PTR[401]: %f\n", ((float*)colptr)[401]);
+    printf("col PTR[402]: %f\n", ((float*)colptr)[402]);
+    glUnmapBufferARB(GL_ARRAY_BUFFER); 
+    */
+
+    //printf("vertex buffer\n");
+    glBindBuffer(GL_ARRAY_BUFFER, v_vbo);
+    glVertexPointer(3, GL_FLOAT, 0, 0);
+
+    // map the buffer object into client's memory
+    /*
+    void* ptr = glMapBufferARB(GL_ARRAY_BUFFER, GL_READ_ONLY_ARB);
+    printf("Pos PTR[400]: %f\n", ((float*)ptr)[400]);
+    printf("Pos PTR[401]: %f\n", ((float*)ptr)[401]);
+    printf("Pos PTR[402]: %f\n", ((float*)ptr)[402]);
+    glUnmapBufferARB(GL_ARRAY_BUFFER); 
+    */
+    
+    //printf("index buffer\n");
+    //glBindBuffer(GL_ARRAY_BUFFER, i_vbo);
+    //glIndexPointer(GL_INT, 0, 0);
+
+    //printf("enable client state\n");
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+    //glEnableClientState(GL_INDEX_ARRAY);
+    
+    //Need to disable these for blender
+    glDisableClientState(GL_NORMAL_ARRAY);
+    //glDisableClientState(GL_EDGE_FLAG_ARRAY);
+
+    //printf("draw arrays num: %d\n", num);
+    glDrawArrays(GL_POINTS, 0, num);
+
+    //printf("disable stuff\n");
+    //glDisableClientState(GL_INDEX_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
+
+}
+
 //----------------------------------------------------------------------
 void appRender()
 {
@@ -120,49 +221,20 @@ void appRender()
 	printf("frameRenderQueued\n");
 	frameRenderingQueued();
 
-    enjas->render();
+    //printf("size of float_vec %d\n", sizeof(float_vec));
+    //enjas->render();
 
-     
-    glBindBuffer(GL_ARRAY_BUFFER, enjas->v_vbo);
-    void* ptr = glMapBufferARB(GL_ARRAY_BUFFER, GL_READ_ONLY_ARB);
-    float x = ((float*)ptr)[400];
-    float y = ((float*)ptr)[401];
-    float z = ((float*)ptr)[402];
-    printf("Pos PTR[400]: %f\n", x);
-    printf("Pos PTR[401]: %f\n", y);
-    printf("Pos PTR[402]: %f\n", z);
-    glUnmapBufferARB(GL_ARRAY_BUFFER); 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, enjas->c_vbo);
-    void* colptr = glMapBufferARB(GL_ARRAY_BUFFER, GL_READ_ONLY_ARB);
-    float cx = ((float*)colptr)[400];
-    float cy = ((float*)colptr)[401];
-    float cz = ((float*)colptr)[402];
-    printf("col PTR[400]: %f\n", cx);
-    printf("col PTR[401]: %f\n", cy);
-    printf("col PTR[402]: %f\n", cz);
-    glUnmapBufferARB(GL_ARRAY_BUFFER); 
-
-    
-    /*
-    glBegin(GL_TRIANGLES);
-    glColor3f(cx,cy,cz);
-    	glVertex3f(0, 0, 70);
-    	glVertex3f(x, y, z);
-    	glVertex3f(100, 0, 70);
-    glEnd();
     glPointSize(10.);
-    glBegin(GL_POINTS);
-    for(int i = 0; i < NUM_POINTS*4; i+=4)
-    {
-        glVertex3f(x, y, z);
-    }
-    glEnd();
-    */
+
+    //render_slow();
+    render_fast();
+    
+
+    //use drawArrays to draw
+    
 
 
-    showFPS(enjas->getFPS(), enjas->getReport());
+    //showFPS(enjas->getFPS(), enjas->getReport());
     glutSwapBuffers();
     //if we want to render as fast as possible we do this
     //glutPostRedisplay();
@@ -203,19 +275,32 @@ void createScene()
             printf("where we at?\n");
             Enja::EnjaCudaHelper* ech = new Enja::EnjaCudaHelper(simCudaHelper);
 
-            ech->RegisterHardwareBuffer(enjas->v_vbo);
-            ech->RegisterHardwareBuffer(enjas->c_vbo);
+            int num = NUM_PARTICLES;
+            std::vector<float_vec> temp(num);
+
+            glGenBuffers(1, &v_vbo);
+            glBindBuffer(GL_ARRAY_BUFFER, v_vbo);
+            glBufferData(GL_ARRAY_BUFFER, num*sizeof(float_vec), &temp[0], GL_DYNAMIC_DRAW);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glGenBuffers(1, &c_vbo);
+            glBindBuffer(GL_ARRAY_BUFFER, c_vbo);
+            glBufferData(GL_ARRAY_BUFFER, num*sizeof(float_vec), &temp[0], GL_DYNAMIC_DRAW);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+
+            ech->RegisterHardwareBuffer(v_vbo);
+            ech->RegisterHardwareBuffer(c_vbo);
             printf("making pos buffer\n");
             
             Enja::EnjaSimBuffer* pos_vbo = new Enja::EnjaSimBuffer(ech);
             printf("setting pos buffer\n");
-            printf("enjas->v_vbo: %d\n", enjas->v_vbo);
-            pos_vbo->SetEnjaVertexBuffer(enjas->v_vbo);
+            printf("enjas->v_vbo: %d\n", v_vbo);
+            pos_vbo->SetEnjaVertexBuffer(v_vbo);
 
             printf("making col buffer\n");
             Enja::EnjaSimBuffer* col_vbo = new Enja::EnjaSimBuffer(ech);
             printf("setting col buffer\n");
-            col_vbo->SetEnjaVertexBuffer(enjas->c_vbo);
+            col_vbo->SetEnjaVertexBuffer(c_vbo);
 
             printf("setting external pos buffer\n");
 			mParticleSystem->SetExternalBuffer(SimLib::Sim::BufferPosition, pos_vbo); 
@@ -304,7 +389,7 @@ int main(int argc, char** argv)
     //initialize the OpenGL scene for rendering
     init_gl();
 
-    printf("before we call enjas functions\n");
+    //printf("before we call enjas functions\n");
 
     //parameters: system and number of particles
     //system = 0: lorenz
@@ -316,9 +401,8 @@ int main(int argc, char** argv)
 	// NOT DEFINED
 	//SnowSim::SnowApplication app;
 	//app.go();
-
-
     
+    /*
     printf("INITIALIZE ENJAS\n");
     //default constructor
     enjas = new EnjaParticles(EnjaParticles::GRAVITY, NUM_PARTICLES);
@@ -328,7 +412,7 @@ int main(int argc, char** argv)
     enjas->updates = 1;
     enjas->dt = .005;
     //enjas->collision = true;
-	
+	*/
 	printf("INITIALIZE SPH CODE\n");
     createScene();
    
@@ -355,7 +439,7 @@ void init_gl()
     glLoadIdentity();
     //gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 100.0);
     //gluPerspective(90.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 10000.0); //for lorentz
-    glOrtho(-100,100, -500,100, 0,10000);
+    glOrtho(-500,500, -500,500, 0,10000);
     gluLookAt(0,0,300, 0,0,0, 0,1,0);
     // set view matrix
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -388,7 +472,7 @@ void appKeyboard(unsigned char key, int x, int y)
 void appDestroy()
 {
 
-    delete enjas;
+    //delete enjas;
     if(glutWindowHandle)glutDestroyWindow(glutWindowHandle);
     printf("about to exit!\n");
 
@@ -415,7 +499,7 @@ void appMouse(int button, int state, int x, int y)
     mouse_old_x = x;
     mouse_old_y = y;
 
-    glutPostRedisplay();
+    //glutPostRedisplay();
 }
 
 //----------------------------------------------------------------------
@@ -442,7 +526,7 @@ void appMotion(int x, int y)
     glTranslatef(0.0, 0.0, translate_z);
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 1.0, 0.0);
-    glutPostRedisplay();
+    //glutPostRedisplay();
 }
 
 
