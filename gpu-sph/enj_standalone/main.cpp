@@ -74,15 +74,15 @@ GE::Time *ts[3];
 //SnowSim::Config* mSnowConfig;
 SimLib::SimulationSystem* mParticleSystem;
 
-	struct FluidSettings
-	{
-		bool simpleSPH;
-		bool enabled;
-		bool enableKernelTiming;
-		bool showFluidGrid;
-		bool gridWallCollisions;
-		bool terrainCollisions;
-	};
+struct FluidSettings
+{
+	bool simpleSPH;
+	bool enabled;
+	bool enableKernelTiming;
+	bool showFluidGrid;
+	bool gridWallCollisions;
+	bool terrainCollisions;
+};
 FluidSettings* fluidSettings;
 
 
@@ -223,6 +223,15 @@ void make_cube(Vec4 cen, float half_edge)
 	triangles.push_back(tri);
 }
 //----------------------------------------------------------------------
+bool frameRenderingQueued()
+{
+	if(mParticleSystem) {
+		bool mProgress = true;
+		mParticleSystem->Simulate(mProgress, fluidSettings->gridWallCollisions);
+	}
+	return true;
+}
+//----------------------------------------------------------------------
 void init_gl()
 {
     // default initialization
@@ -300,6 +309,9 @@ void appRender()
 
  
     enjas->render();
+
+	printf("frameRenderQueued\n");
+	frameRenderingQueued();
 
     showFPS(enjas->getFPS(), enjas->getReport());
     glutSwapBuffers();
@@ -443,13 +455,19 @@ void SetScene(int scene)
 void createScene()
 	{
 		fluidSettings = new FluidSettings();
+		fluidSettings->simpleSPH = true;
+		fluidSettings->enabled = true;
+		fluidSettings->enableKernelTiming = true;
+		fluidSettings->showFluidGrid = false;
+		fluidSettings->gridWallCollisions = false;
+		fluidSettings->terrainCollisions = false;
 
 		//if(mSnowConfig->fluidSettings.enabled) {
 			mParticleSystem = new SimLib::SimulationSystem(fluidSettings->simpleSPH);
-			//mParticleSystem = new SimLib::SimulationSystem(mSnowConfig->fluidSettings.simpleSPH);
-
+			int numParticles = (1 << 10) << 2;
+			printf("numParticles= %d\n", numParticles);
+			mParticleSystem->GetSettings()->SetValue("Particles Number", numParticles);
 			mParticleSystem->SetFluidPosition(make_float3(0., 0., 0.));
-			//mParticleSystem->SetFluidPosition(make_float3(mParticlesNode->getPosition().x, mParticlesNode->getPosition().y, mParticlesNode->getPosition().z));
 
 			// WHAT ARE EXTERNAL BUFFERS?
 			//mParticleSystem->SetExternalBuffer(SimLib::Sim::BufferPosition,  mParticlesEntity->GetCudaBufferPosition());
@@ -498,7 +516,6 @@ void createScene()
 	SetScene(scene);
 }
 //----------------------------------------------------------------------
-//----------------------------------------------------------------------
 int main(int argc, char** argv)
 {
     //initialize glut
@@ -542,6 +559,9 @@ int main(int argc, char** argv)
 	// NOT DEFINED
 	//SnowSim::SnowApplication app;
 	//app.go();
+
+	printf("INITIALIZE SPH CODE\n");
+	createScene();
 
     
     //default constructor

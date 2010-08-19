@@ -28,7 +28,10 @@ namespace Enja
 	{
 		//int cudaDevice = mSnowConfig->generalSettings.cudadevice;
         //need to get cudaDevice some other way (look at console test?)
-		//GE mSimCudaHelper->InitializeGL(cudaDevice);
+
+		// HARDCODED: BAD!!!
+		int cudaDevice = 1;
+		mSimCudaHelper->InitializeGL(cudaDevice);
 	}
 
 	//--------------------------------------------------
