@@ -9,7 +9,8 @@ namespace Enja
 		//, mEnjaVertexBuffer(NULL)
 		  mEnjaCudaHelper(enjaCudaHelper)
 		// **** ERROR ON NEXT LINE, CANNOT FIGURE IT OUT
-		, SimBuffer(SimLib::BufferLocation::Device, sizeof(Enja::Vector4))
+		//, SimBuffer(SimLib::BufferLocation::Device, sizeof(Enja::Vector4))
+		, SimBuffer(SimLib::Device, sizeof(Vec4))
 	{
 	}
 

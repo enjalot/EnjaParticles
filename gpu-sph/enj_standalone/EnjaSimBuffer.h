@@ -3,6 +3,7 @@
 
 #include "SimBuffer.h"
 #include "EnjaCudaHelper.h"
+#include "enja.h"
 //#include "EnjaSimRenderable.h"
 
 namespace Enja
