@@ -18,5 +18,19 @@ INCLUDE_DIRECTORIES(
 
 ADD_LIBRARY(enja ${CXXFILES})
 
-#TARGET_LINK_LIBRARIES(${enja}
+
+LINK_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../../enjacl)
+
+ADD_EXECUTABLE(sph_enja 
+   main.cpp
+)
+
+TARGET_LINK_LIBRARIES(sph_enja
+	enja
+	enjaclparticles     # make sure library is in source directory
+   ${GLUT_LIBRARIES}
+   ${OPENGL_LIBRARIES}
+   ${OPENCL_LIBRARIES}
+   ${GLEW_LIBRARY}
+)
 
