@@ -472,6 +472,8 @@ void createScene()
             printf("asdfasdf\n");
 			mParticleSystem->SetFluidPosition(make_float3(0., 0., 0.));
 
+			mParticleSystem->PrintMemoryUse();
+
 			// WHAT ARE EXTERNAL BUFFERS?
 			//mParticleSystem->SetExternalBuffer(SimLib::Sim::BufferPosition,  mParticlesEntity->GetCudaBufferPosition());
 			//mParticleSystem->SetExternalBuffer(SimLib::Sim::BufferColor,  mParticlesEntity->GetCudaBufferColor());
