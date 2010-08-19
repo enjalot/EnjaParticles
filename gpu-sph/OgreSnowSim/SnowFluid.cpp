@@ -5,6 +5,7 @@ using namespace OgreBites;
 
 namespace SnowSim
 {
+	//--------------------------------------------------
 	SnowFluid::SnowFluid(SnowSim::Config *snowConfig)
 	: mSnowConfig(snowConfig)
 	, mParticleSystem(NULL)
@@ -16,11 +17,13 @@ namespace SnowSim
 	}
 
 
+	//--------------------------------------------------
 	SnowFluid::~SnowFluid()
 	{
 	}
 
 
+	//--------------------------------------------------
 	void SnowFluid::destroyScene(Ogre::RenderWindow* renderWindow, Ogre::SceneManager* mSceneMgr)
 	{
 		if(mParticleSystem)
@@ -31,6 +34,7 @@ namespace SnowSim
 		mRenderWindow = NULL;
 	}
 
+	//--------------------------------------------------
 	void SnowFluid::configureTerrain(SnowTerrain* terrain)
 	{
 		if(terrain == NULL) return;
@@ -50,6 +54,7 @@ namespace SnowSim
 
 	}
 
+	//--------------------------------------------------
 	void SnowFluid::setParticleMaterial(Ogre::String particleMaterial)
 	{
 		// Set a material for particles
@@ -69,6 +74,7 @@ namespace SnowSim
 		}
 
 	}
+	//--------------------------------------------------
 	void SnowFluid::createScene(Ogre::RenderWindow* renderWindow, Ogre::SceneManager* mSceneMgr, SnowTerrain* terrain, Ogre::Light* terrainLight)
 	{
 		mRenderWindow = renderWindow;
@@ -155,16 +161,19 @@ namespace SnowSim
 		SetScene(mSnowConfig->sceneSettings.fluidScene);
 	}
 
+	//--------------------------------------------------
 	bool SnowFluid::frameStarted(const FrameEvent &evt)
 	{
 		return true;
 	}
 
+	//--------------------------------------------------
 	bool SnowFluid::frameEnded(const FrameEvent &evt)
 	{
 		return true;
 	}
 
+	//--------------------------------------------------
 	bool SnowFluid::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	{
 		if(mParticleSystem)
@@ -175,6 +184,7 @@ namespace SnowSim
 	}
 
 
+	//--------------------------------------------------
 	void SnowFluid::SetScene(int scene) 
 	{	
 		if(!mParticleSystem) return;
@@ -185,6 +195,7 @@ namespace SnowSim
 	}
 
 
+	//--------------------------------------------------
 	bool SnowFluid::keyPressed (OIS::Keyboard* keyboard, const OIS::KeyEvent &evt)
 	{
 		switch (evt.key)

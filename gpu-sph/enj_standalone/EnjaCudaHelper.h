@@ -15,16 +15,17 @@
 #include "OgreD3D9RenderSystem.h"
 #include "OgreD3D9HardwareVertexBuffer.h"
 */
+
 #include "SimCudaHelper.h"
 
 namespace Enja
 {
 
-	class OgreCudaHelper
+	class EnjaCudaHelper
 	{
 	public:
 		//OgreCudaHelper::OgreCudaHelper(SnowSim::Config *config, SimLib::SimCudaHelper *simCudaHelper);
-		EnjaCudaHelper::OgreCudaHelper(SimLib::SimCudaHelper *simCudaHelper);
+		EnjaCudaHelper(SimLib::SimCudaHelper *simCudaHelper);
 		~EnjaCudaHelper();
 
 		void Initialize();

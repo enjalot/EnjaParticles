@@ -1,5 +1,6 @@
 #include "OgreSimBuffer.h"
 
+//----------------------------------------------------------------------
 namespace SnowSim
 {
 	OgreSimBuffer::OgreSimBuffer(SnowSim::OgreSimRenderable *particlesMesh, SnowSim::OgreCudaHelper *OgreCudaHelper)

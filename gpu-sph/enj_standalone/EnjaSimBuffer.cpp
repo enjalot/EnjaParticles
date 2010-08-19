@@ -2,18 +2,23 @@
 
 namespace Enja
 {
-	EnjaSimBuffer::EnjaSimBuffer(Enja::EnjaCudaHelper *EnjaCudaHelper)
+	//--------------------------------------------------
+	//EnjaSimBuffer::EnjaSimBuffer(Enja::EnjaCudaHelper *enjaCudaHelper)
+	EnjaSimBuffer::EnjaSimBuffer(EnjaCudaHelper *enjaCudaHelper)
 		: //mParticlesMesh(particlesMesh)
 		//, mEnjaVertexBuffer(NULL)
-		, mEnjaCudaHelper(EnjaCudaHelper)
+		  mEnjaCudaHelper(enjaCudaHelper)
+		// **** ERROR ON NEXT LINE, CANNOT FIGURE IT OUT
 		, SimBuffer(SimLib::BufferLocation::Device, sizeof(Enja::Vector4))
 	{
 	}
 
+	//--------------------------------------------------
 	EnjaSimBuffer::~EnjaSimBuffer()
 	{
 	}
 
+	//--------------------------------------------------
 	void EnjaSimBuffer::SetEnjaVertexBuffer(GLuint bufferid)
 	{
 		bool wasMapped = false;
@@ -35,24 +40,28 @@ namespace Enja
 
 	}
 
+	//--------------------------------------------------
 	void EnjaSimBuffer::MapBuffer()
 	{
 		mEnjaCudaHelper->MapBuffer((void**)&mPtr, m_bufferid);
 		mMapped = true;
 	}
 
+	//--------------------------------------------------
 	void EnjaSimBuffer::UnmapBuffer()
 	{
 		mEnjaCudaHelper->UnmapBuffer((void**)&mPtr, m_bufferid);		
 		mMapped = false;
 	}
 
+	//--------------------------------------------------
 	size_t EnjaSimBuffer::GetSize()
 	{
         //TODO: need to store our size or pass it in
 		//return mEnjaVertexBuffer->getSizeInBytes();
 	}
 
+	//--------------------------------------------------
 	void EnjaSimBuffer::Alloc(size_t size)
 	{
 		if(size == mAllocedSize)
@@ -61,11 +70,13 @@ namespace Enja
 		//mParticlesMesh->Resize(size/sizeof(float4));
 	}
 
+	//--------------------------------------------------
 	void EnjaSimBuffer::Memset(int val)
 	{
 		//TODO
 	}
 
+	//--------------------------------------------------
 	void EnjaSimBuffer::Free()
 	{
 		//TODO

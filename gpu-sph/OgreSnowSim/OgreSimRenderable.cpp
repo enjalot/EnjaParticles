@@ -1,8 +1,10 @@
 #include "OgreSimRenderable.h"
 #include "OgreSimBuffer.h"
 
+//----------------------------------------------------------------------
 namespace SnowSim
 {
+    //---------------------------------------
 	OgreSimRenderable::OgreSimRenderable(OgreCudaHelper *ogreCudaHelper, uint numParticles)
 			: mOgreCudaHelper(ogreCudaHelper)
 			, mNumParticles(0)
@@ -30,11 +32,13 @@ namespace SnowSim
 		setMaterial("CudaVertexBufferMaterial");
 	}
 
+    //---------------------------------------
 	OgreSimRenderable::~OgreSimRenderable()
 	{
 		//TODO: free shit
 	}
 
+    //---------------------------------------
 	void OgreSimRenderable::Resize(uint numParticles)
 	{
 		if(numParticles == mNumParticles)
@@ -61,28 +65,33 @@ namespace SnowSim
 		mCudaBufferColor->SetOgreVertexBuffer(mVertexBufferColor);
 	}
 
+    //---------------------------------------
 	OgreSimBuffer* OgreSimRenderable::GetCudaBufferPosition()
 	{
 		return mCudaBufferPosition;
 	}
 
+    //---------------------------------------
 	OgreSimBuffer* OgreSimRenderable::GetCudaBufferColor()
 	{
 		return mCudaBufferColor;
 	}
 
 
+    //---------------------------------------
 	Ogre::Real OgreSimRenderable::getBoundingRadius(void) const
 	{
 		return 0;
 	}
 
 
+    //---------------------------------------
 	Ogre::Real OgreSimRenderable::getSquaredViewDepth(const Ogre::Camera *) const
 	{
 		return 0;
 	}
 
+    //---------------------------------------
 	void OgreSimRenderable::createVertexBuffers()
 	{
 		//particlesSubMesh->useSharedVertices = false;

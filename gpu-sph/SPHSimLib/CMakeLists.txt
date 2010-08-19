@@ -85,25 +85,23 @@ CUDA_INCLUDE_DIRECTORIES(
 
 CUDA_ADD_LIBRARY(sph_cuda ${CUFILES})
 TARGET_LINK_LIBRARIES(sph_cuda
-   $ENV{CUDA_LOCAL}/common/lib/linux/libcudpp_i386.a
+	${cudpp}
+	${cutil}
 )
 
 LINK_DIRECTORIES(
      $ENV{CUDA_LOCAL}/lib 
 	 $ENV{CUDA_LOCAL}/common/lib 
-	 #$ENV{CUDA_LOCAL}/../shared/lib/darwin 
+	 $ENV{CUDA_LOCAL}/../shared/lib/darwin 
 	 $ENV{CUDA_LOCAL}/../shared/lib/linux
 	 $ENV{CUDA_HOME}/lib
 )
 
 ADD_LIBRARY(sph_lib ${CXXFILES})
 
-# ON mac
 
 TARGET_LINK_LIBRARIES(sph_lib
-	#$ENV{CUDA_LOCAL}/common/lib/darwin/libcudpp_i386.a
-	$ENV{CUDA_LOCAL}/common/lib/linux/libcudpp_i386.a
-	#sph_cuda
+	${cudpp}
 	$ENV{CUDA_LOCAL}/lib/libcutil_i386.a
 	${MY_CUDA_LIBRARIES}
 	${OPENGL_LIBRARIES}

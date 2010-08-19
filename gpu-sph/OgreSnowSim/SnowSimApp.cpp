@@ -10,7 +10,7 @@ using namespace OgreBites;
 namespace SnowSim 
 {
 
-	//-------------------------------------------------------------------------------------
+	//-----------------------------------------------------
 	SnowApplication::SnowApplication(void) 
 		: mSimulationPaused(false)
 		, mScreenCaptureFrame(0)
@@ -19,7 +19,7 @@ namespace SnowSim
 		mSnowGui = new SnowGui(mSnowConfig);
 	}
 
-	//-------------------------------------------------------------------------------------
+	//-----------------------------------------------------
 	SnowApplication::~SnowApplication(void)
 	{
 		delete mSnowGui;
@@ -32,7 +32,7 @@ namespace SnowSim
 		mSnowGui->setupResources();
 	}
 
-	//-------------------------------------------------------------------------------------
+	//-----------------------------------------------------
 	void SnowApplication::destroyScene(void)
 	{
 		if(mDestroyed) return;
@@ -52,7 +52,7 @@ namespace SnowSim
 		delete mSnowFluid;
 	}
 
-	//-------------------------------------------------------------------------------------
+	//-----------------------------------------------------
 	void SnowApplication::createScene(void)
 	{	
 		mDestroyed = false;
@@ -122,6 +122,7 @@ namespace SnowSim
 		return;
 	}
 
+	//-----------------------------------------------------
 	void SnowApplication::createFrameListener()
 	{
 		BaseApplication::createFrameListener();
@@ -129,6 +130,7 @@ namespace SnowSim
 		setupControls();
 	}
 
+	//-----------------------------------------------------
 	bool SnowApplication::frameStarted (const FrameEvent &evt)
 	{
 		if(mDestroyed) return false;
@@ -137,6 +139,7 @@ namespace SnowSim
 		return BaseApplication::frameStarted(evt);
 	}
 
+	//-----------------------------------------------------
 	bool SnowApplication::frameEnded (const FrameEvent &evt)
 	{
 		if(mDestroyed) return false;
@@ -146,6 +149,7 @@ namespace SnowSim
 
 	}
 
+	//-----------------------------------------------------
 	bool SnowApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	{
 		if(mDestroyed) return false;
@@ -166,6 +170,7 @@ namespace SnowSim
 	}
 
 
+	//-----------------------------------------------------
 	bool SnowApplication::keyPressed (const OIS::KeyEvent &evt)
 	{
 		// toggle visibility of help dialog
@@ -274,6 +279,7 @@ namespace SnowSim
 	}
 
 
+	//-----------------------------------------------------
 	void SnowApplication::setupControls()
 	{
 		mCameraMan->setTopSpeed(500);
@@ -311,6 +317,7 @@ namespace SnowSim
 	}
 
 
+	//-----------------------------------------------------
 	void SnowApplication::itemSelected(SelectMenu* menu)
 	{
 	// 	if (menu == mEditMenu)
@@ -325,6 +332,7 @@ namespace SnowSim
 		}
 	}
 
+	//-----------------------------------------------------
 	void SnowApplication::checkBoxToggled(CheckBox* box)
 	{
 	// 	if (box == mFlyBox)
@@ -333,6 +341,7 @@ namespace SnowSim
 	// 	}
 	}
 
+	//-----------------------------------------------------
 	void SnowApplication::windowClosed(Ogre::RenderWindow* rw)
 	{
 
@@ -340,6 +349,7 @@ namespace SnowSim
 	}
 
 
+	//-----------------------------------------------------
 	MaterialPtr SnowApplication::buildDepthShadowMaterial(const String& textureName)
 	{
 		String matName = "DepthShadows/" + textureName;
@@ -367,11 +377,13 @@ namespace SnowSim
 		return ret;
 	}
 
+	//-----------------------------------------------------
 	void SnowApplication::changeShadows()
 	{
 		configureShadows(mShadowMode != SHADOWS_NONE, mShadowMode == SHADOWS_DEPTH);
 	}
 
+	//-----------------------------------------------------
 	void SnowApplication::configureShadows(bool enabled, bool depthShadows)
 	{
 		TerrainMaterialGeneratorA::SM2Profile* matProfile = mSnowTerrain->getMaterialProfile();
@@ -449,9 +461,5 @@ namespace SnowSim
 		{
 			mSceneMgr->setShadowTechnique(SHADOWTYPE_NONE);
 		}
-
-
 	}
-
-
 }

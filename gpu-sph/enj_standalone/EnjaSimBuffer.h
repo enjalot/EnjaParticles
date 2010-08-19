@@ -10,7 +10,8 @@ namespace Enja
 	class EnjaSimBuffer : public SimLib::SimBuffer
 	{
 	public:
-		EnjaSimBuffer::EnjaSimBuffer(SnowSim::EnjaCudaHelper *EnjaCudaHelper);
+		//EnjaSimBuffer::EnjaSimBuffer(Enja::EnjaCudaHelper *EnjaCudaHelper);
+		EnjaSimBuffer(Enja::EnjaCudaHelper *EnjaCudaHelper);
 		~EnjaSimBuffer();
 
 		void SetEnjaVertexBuffer(GLuint  bufferid);
@@ -25,7 +26,7 @@ namespace Enja
 
 	private:
 		//SnowSim::EnjaSimRenderable *mParticlesMesh;
-		SnowSim::EnjaCudaHelper *mEnjaCudaHelper;
+		Enja::EnjaCudaHelper *mEnjaCudaHelper;
         GLuint m_bufferid;
 	};
 	
