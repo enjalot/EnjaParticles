@@ -154,16 +154,23 @@ void render_slow()
         glColor3f(cx,cy,cz);
         //glColor3f(1,0,0);
         //glVertex3f(0,0,0);
-        glVertex3f(x, y, z);
+        //in K_Common.cuh the float4 vecs had .w value being set to 0 by default
+        glVertex4f(x, y, z,1);
     }
     glEnd();
 }
 
 void render_fast()
 {
+    glColor3f(1,0,0);
+    GLenum err;
     int num = NUM_PARTICLES;
+
     glBindBuffer(GL_ARRAY_BUFFER, c_vbo);
-    glColorPointer(3, GL_FLOAT, 0, 0);
+    glColorPointer(4, GL_FLOAT, 0, 0);
+    err = glGetError();
+    printf("col error: %d\n", err);
+
 
     /*
     void* colptr = glMapBufferARB(GL_ARRAY_BUFFER, GL_READ_ONLY_ARB);
@@ -175,7 +182,11 @@ void render_fast()
 
     //printf("vertex buffer\n");
     glBindBuffer(GL_ARRAY_BUFFER, v_vbo);
-    glVertexPointer(3, GL_FLOAT, 0, 0);
+    glVertexPointer(4, GL_FLOAT, 0, 0);
+    err = glGetError();
+    printf("pos error: %d\n", err);
+
+
 
     // map the buffer object into client's memory
     /*
@@ -198,9 +209,13 @@ void render_fast()
     //Need to disable these for blender
     glDisableClientState(GL_NORMAL_ARRAY);
     //glDisableClientState(GL_EDGE_FLAG_ARRAY);
+    glDisableClientState(GL_INDEX_ARRAY);
+
 
     //printf("draw arrays num: %d\n", num);
     glDrawArrays(GL_POINTS, 0, num);
+    err = glGetError();
+    printf("draw arrays error: %d\n", err);
 
     //printf("disable stuff\n");
     //glDisableClientState(GL_INDEX_ARRAY);

@@ -16,15 +16,15 @@ static __inline__ __host__ __device__ float_vec make_vec(float_vec v)
 
 static __inline__ __host__ __device__ float_vec make_vec(float v)
 {
-	float_vec t; t.x = v; t.y = v; t.z = v; t.w = 0; return t;
+	float_vec t; t.x = v; t.y = v; t.z = v; t.w = 1; return t;
 }
 static __inline__ __host__ __device__ float_vec make_vec(float3 v)
 {
-  float_vec t; t.x = v.x; t.y = v.y; t.z = v.z; t.w = 0; return t;
+  float_vec t; t.x = v.x; t.y = v.y; t.z = v.z; t.w = 1; return t;
 }
 static __inline__ __host__ __device__ float_vec make_vec(float x, float y, float z)
 {
-  float_vec t; t.x = x; t.y = y; t.z = z; t.w = 0; return t;
+  float_vec t; t.x = x; t.y = y; t.z = z; t.w = 1; return t;
 }
 static __inline__ __host__ __device__ float_vec make_vec(float x, float y, float z, float w)
 {
