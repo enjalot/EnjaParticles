@@ -1,6 +1,6 @@
 
 # C is not required on the mac, but appears to be on linux
-project(gravimetrie C CXX)
+project(blenderparticles C CXX)
 
 IF (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 	MESSAGE(FATAL_ERROR "CMake generation must always be out-of-source!
@@ -9,6 +9,9 @@ ENDIF (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
+
+# set to 64 bit
+SET(CUDA_64_BIT_DEVICE_CODE OFF)
 
 # options controlled via -D option to cmake
 # Only a single option is on at a given time. 
@@ -27,6 +30,7 @@ ENDIF (PURE_CUDA)
 ################ BEGIN OS DEPENDENT CONFIGS ###################
 
 SET( CMAKE_MODULE_PATH
+    ${CMAKE_MODULE_PATH}
     ${CMAKE_CURRENT_SOURCE_DIR}/common
 	$ENV{CMAKE_MODULES}
     #${CMAKE_CURRENT_SOURCE_DIR}/common/UseDoxygen

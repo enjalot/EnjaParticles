@@ -1,6 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 project(enjacl)
 
+ADD_DEFINITIONS(-m32)
+
 #need to include FindOPENCL.cmake to
 SET( CMAKE_MODULE_PATH
      ${enjacl_SOURCE_DIR}/../cmake
