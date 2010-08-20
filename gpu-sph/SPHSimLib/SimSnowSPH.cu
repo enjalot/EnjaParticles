@@ -91,6 +91,7 @@ SimSnowSPH::~SimSnowSPH()
 	delete mSPHBuffers; mSPHBuffers = NULL;
 }
 
+//----------------------------------------------------------------------
 void SimSnowSPH::SettingChanged(std::string settingName)
 {
 	SimBase::SettingChanged(settingName);
@@ -123,6 +124,7 @@ void SimSnowSPH::SettingChanged(std::string settingName)
 
 }
 
+//----------------------------------------------------------------------
 void SimSnowSPH::UpdateParams()
 {
 	// FLUID SETUP
@@ -177,6 +179,7 @@ void SimSnowSPH::UpdateParams()
 }
 
 
+//----------------------------------------------------------------------
 void SimSnowSPH::Alloc(uint numParticles)
 {
 	if (mAlloced)
@@ -195,6 +198,7 @@ void SimSnowSPH::Alloc(uint numParticles)
 }
 
 
+//----------------------------------------------------------------------
 void SimSnowSPH::Free()
 {
 	SimBase::Free();
@@ -218,6 +222,8 @@ void SimSnowSPH::Free()
 }
 
 
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
 void SimSnowSPH::Clear()
 {
 	SimBase::Clear();
@@ -225,21 +231,25 @@ void SimSnowSPH::Clear()
 	mSPHBuffers->MemsetBuffers(0);
 }
 
+//----------------------------------------------------------------------
 float SimSnowSPH::GetParticleSize()
 {
 	return 0.7*hFluidParams.smoothing_length / hFluidParams.scale_to_simulation;
 }
 
+//----------------------------------------------------------------------
 float SimSnowSPH::GetParticleSpacing()
 {
 	return hFluidParams.particle_rest_distance / hFluidParams.scale_to_simulation;
 }
 
+//----------------------------------------------------------------------
 SnowSPHFluidParams& SimSnowSPH::GetFluidParams()
 {
 	return hFluidParams;
 }
 
+//----------------------------------------------------------------------
 void SimSnowSPH::Simulate(bool doTiming, bool progress, bool gridWallCollisions, bool terrainCollisions, float3 fluidWorldPosition, TerrainData dTerrainData)
 {
 
@@ -277,6 +287,7 @@ void SimSnowSPH::Simulate(bool doTiming, bool progress, bool gridWallCollisions,
 
 }
 
+//----------------------------------------------------------------------
 void SimSnowSPH::BindTextures()
 {
 	SnowSPHData dParticleDataSorted = GetParticleDataSorted();
@@ -302,6 +313,7 @@ void SimSnowSPH::BindTextures()
 #endif
 }
 
+//----------------------------------------------------------------------
 void SimSnowSPH::UnbindTextures()
 {
 #ifdef USE_TEX
@@ -324,6 +336,7 @@ void SimSnowSPH::UnbindTextures()
 #endif
 }
 
+//----------------------------------------------------------------------
 SnowSPHData SimSnowSPH::GetParticleData()
 {
 	SnowSPHData dParticleData;
@@ -334,6 +347,7 @@ SnowSPHData SimSnowSPH::GetParticleData()
 	return dParticleData;
 }
 
+//----------------------------------------------------------------------
 SnowSPHData SimSnowSPH::GetParticleDataSorted()
 {
 	SnowSPHData dParticleDataSorted;
@@ -350,6 +364,7 @@ SnowSPHData SimSnowSPH::GetParticleDataSorted()
 	return dParticleDataSorted;
 }
 
+//----------------------------------------------------------------------
 float SimSnowSPH::BuildDataStruct(bool doTiming)
 {
 	GridData dGridData = mUniformGrid->GetGridData();
@@ -405,6 +420,7 @@ float SimSnowSPH::BuildDataStruct(bool doTiming)
 	return 0;
 }
 
+//----------------------------------------------------------------------
 float SimSnowSPH::ComputeDensityAndBuildNeighborList(bool doTiming)
 {
 	GridData dGridData = mUniformGrid->GetGridData();
@@ -448,6 +464,7 @@ float SimSnowSPH::ComputeDensityAndBuildNeighborList(bool doTiming)
 	return 0;
 }
 
+//----------------------------------------------------------------------
 float SimSnowSPH::ComputeStep1(bool doTiming)
 {
 	GridData dGridData = mUniformGrid->GetGridData();
@@ -503,6 +520,7 @@ float SimSnowSPH::ComputeStep1(bool doTiming)
 }
 
 
+//----------------------------------------------------------------------
 float SimSnowSPH::ComputeStep2(bool doTiming)
 {
 	GridData dGridData = mUniformGrid->GetGridData();

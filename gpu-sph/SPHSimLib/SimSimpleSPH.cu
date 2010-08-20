@@ -89,6 +89,7 @@ SimSimpleSPH::~SimSimpleSPH()
 	delete mSPHBuffers; mSPHBuffers = NULL;
 }
 
+//----------------------------------------------------------------------
 void SimSimpleSPH::SettingChanged(std::string settingName)
 {
 	SimBase::SettingChanged(settingName);
@@ -117,6 +118,7 @@ void SimSimpleSPH::SettingChanged(std::string settingName)
 
 }
 
+//----------------------------------------------------------------------
 void SimSimpleSPH::UpdateParams()
 {
 	// FLUID SETUP
@@ -179,6 +181,7 @@ void SimSimpleSPH::UpdateParams()
 }
 
 
+//----------------------------------------------------------------------
 void SimSimpleSPH::Alloc(uint numParticles)
 {
 	if (mAlloced)
@@ -195,6 +198,7 @@ void SimSimpleSPH::Alloc(uint numParticles)
 }
 
 
+//----------------------------------------------------------------------
 void SimSimpleSPH::Free()
 {
 	SimBase::Free();
@@ -214,6 +218,7 @@ void SimSimpleSPH::Free()
 }
 
 
+//----------------------------------------------------------------------
 void SimSimpleSPH::Clear()
 {
 	SimBase::Clear();
@@ -221,22 +226,26 @@ void SimSimpleSPH::Clear()
 	mSPHBuffers->MemsetBuffers(0);
 }
 
+//----------------------------------------------------------------------
 float SimSimpleSPH::GetParticleSize()
 {
 	return hFluidParams.particle_rest_distance / hFluidParams.scale_to_simulation;
 }
 
+//----------------------------------------------------------------------
 float SimSimpleSPH::GetParticleSpacing()
 {
 	return hFluidParams.particle_rest_distance / hFluidParams.scale_to_simulation;
 }
 
+//----------------------------------------------------------------------
 SimpleSPHFluidParams& SimSimpleSPH::GetFluidParams()
 {
 	return hFluidParams;
 }
 
 
+//----------------------------------------------------------------------
 void SimSimpleSPH::Simulate(bool doTiming, bool progress, bool gridWallCollisions, bool terrainCollisions, float3 fluidWorldPosition, TerrainData dTerrainData)
 {
 	float time_hashSPHData,time_radixsort, time_updatelists, time_computeDensity, time_ComputeStep2s, time_integrateForces;
@@ -266,6 +275,7 @@ void SimSimpleSPH::Simulate(bool doTiming, bool progress, bool gridWallCollision
 
 }
 
+//----------------------------------------------------------------------
 void SimSimpleSPH::BindTextures()
 {
 	SimpleSPHData dParticleDataSorted = GetParticleDataSorted();
@@ -290,6 +300,7 @@ void SimSimpleSPH::BindTextures()
 #endif
 }
 
+//----------------------------------------------------------------------
 void SimSimpleSPH::UnbindTextures()
 {
 #ifdef USE_TEX
@@ -310,6 +321,7 @@ void SimSimpleSPH::UnbindTextures()
 #endif
 }
 
+//----------------------------------------------------------------------
 SimpleSPHData SimSimpleSPH::GetParticleData()
 {
 	SimpleSPHData dParticleData;
@@ -323,6 +335,7 @@ SimpleSPHData SimSimpleSPH::GetParticleData()
 	return dParticleData;
 }
 
+//----------------------------------------------------------------------
 SimpleSPHData SimSimpleSPH::GetParticleDataSorted()
 {
 	SimpleSPHData dParticleDataSorted;
@@ -336,6 +349,7 @@ SimpleSPHData SimSimpleSPH::GetParticleDataSorted()
 	return dParticleDataSorted;
 }
 
+//----------------------------------------------------------------------
 float SimSimpleSPH::BuildDataStruct(bool doTiming)
 {
 	GridData dGridData = mUniformGrid->GetGridData();
@@ -392,6 +406,7 @@ float SimSimpleSPH::BuildDataStruct(bool doTiming)
 	return 0;
 }
 
+//----------------------------------------------------------------------
 float SimSimpleSPH::ComputeDensityAndBuildNeighborList(bool doTiming)
 {
 	GridData dGridData = mUniformGrid->GetGridData();
@@ -445,6 +460,7 @@ float SimSimpleSPH::ComputeDensityAndBuildNeighborList(bool doTiming)
 	return 0;
 }
 
+//----------------------------------------------------------------------
 float SimSimpleSPH::ComputeStep1(bool doTiming)
 {
 	GridData dGridData = mUniformGrid->GetGridData();
@@ -504,6 +520,7 @@ float SimSimpleSPH::ComputeStep1(bool doTiming)
 	return 0;
 }
 
+//----------------------------------------------------------------------
 float SimSimpleSPH::ComputeStep2(bool doTiming)
 {
 	GridData dGridData = mUniformGrid->GetGridData();
@@ -585,6 +602,7 @@ float SimSimpleSPH::ComputeStep2(bool doTiming)
 	return 0;
 }
 
+//----------------------------------------------------------------------
 float SimSimpleSPH::Integrate(bool doTiming, bool progress, float deltaTime, bool gridWallCollisions, bool terrainCollisions, float3 fluidWorldPosition, TerrainData dTerrainData)
 {
 	GridData		dGridData	= mUniformGrid->GetGridData();
@@ -638,3 +656,4 @@ float SimSimpleSPH::Integrate(bool doTiming, bool progress, float deltaTime, boo
 }
 
 }}} // namespace SimLib { namespace Sim { namespace SimpleSPH { 
+//----------------------------------------------------------------------

@@ -307,17 +307,21 @@ namespace SimLib
 		switch(scene){
 			case 1:
 				{
+					float xmin = hGridParams.grid_min.x/2.5f;
+					float xmax = hGridParams.grid_max.x/2.0f;
+					float ymin = hGridParams.grid_min.y;
+					float ymax = hGridParams.grid_max.y;
+					float zmin = hGridParams.grid_min.z/2.0f;
+					float zmax = hGridParams.grid_max.z/1.5f;
+
 					//cube in corner
-					for (float y = hGridParams.grid_min.y; y <= hGridParams.grid_max.y; y += spacing ) 	{	
-						for (float z = hGridParams.grid_min.z/2.0f; z <= hGridParams.grid_max.z/1.5f; z += spacing ) {
-							for (float x = hGridParams.grid_min.x/2.5f; x <= hGridParams.grid_max.x/2.0f; x += spacing ) {
-								if(i>=numParticles) break;				
-								position[i] = make_vec(x,y,z,1);
-								i++;
-							}
-						}
-					}
-				}
+					for (float y = ymin; y <= ymax; y+=spacing) {
+					for (float z = zmin; z <= zmax; z+=spacing) {
+					for (float x = xmin; x <= xmax; x+=spacing) {
+						if (i >= numParticles) break;				
+						position[i] = make_vec(x,y,z,1);
+						i++;
+					}}}
 				break;
 			case 2:
 				{
@@ -507,8 +511,6 @@ namespace SimLib
 				}
 				break;
 		}
-
-		
 
 
 		// safety because we need to use all our particles
