@@ -385,8 +385,9 @@ int main(int argc, char** argv)
                             glutGet(GLUT_SCREEN_HEIGHT)/2 - window_height/2);
 
     
+    int num = NUM_PARTICLES;
     std::stringstream ss;
-    ss << "EnjaParticles: " << NUM_PARTICLES << std::ends;
+    ss << "EnjaParticles: " << num << std::ends;
     glutWindowHandle = glutCreateWindow(ss.str().c_str());
 
     glutDisplayFunc(appRender); //main rendering function
@@ -530,7 +531,7 @@ void appMotion(int x, int y)
         rotate_x += dy * 0.2;
         rotate_y += dx * 0.2;
     } else if (mouse_buttons & 4) {
-        translate_z += dy * 0.1;
+        translate_z += dy * 1;
     }
 
     mouse_old_x = x;
