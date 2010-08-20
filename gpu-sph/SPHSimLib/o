@@ -1,8 +1,0 @@
-K_UniformGrid.cuh:#ifndef __UniformRadixGrid_cuh__
-K_UniformGrid.cuh:#define __UniformRadixGrid_cuh__
-UniformGrid.cu:		mRadixSorter = new RadixSort(mNumParticles * sizeof(uint));
-UniformGrid.cu:		delete mRadixSorter; mRadixSorter = NULL;
-UniformGrid.cu:		mRadixSorter->sort(
-UniformGrid.cuh://using namespace nvRadixSort;
-UniformGrid.cuh:	RadixSort* mRadixSorter;
-Binary file libcudpp_i386.a matches

@@ -61,7 +61,7 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 //EnjaParticles* enjas;
-#define NUM_PARTICLES (1 << 10) << 2
+#define NUM_PARTICLES (1 << 10) << 7
 
 
 GLuint v_vbo; //vbo id
@@ -109,6 +109,7 @@ bool frameRenderingQueued()
 	return true;
 }
 
+//----------------------------------------------------------------------
 void render_slow()
 {
     int num = NUM_PARTICLES; 
@@ -160,6 +161,7 @@ void render_slow()
     glEnd();
 }
 
+//----------------------------------------------------------------------
 void render_fast()
 {
     glColor3f(1,0,0);
@@ -214,8 +216,8 @@ void render_fast()
 
     //printf("draw arrays num: %d\n", num);
     glDrawArrays(GL_POINTS, 0, num);
-    err = glGetError();
-    printf("draw arrays error: %d\n", err);
+    //err = glGetError();
+    //printf("draw arrays error: %d\n", err);
 
     //printf("disable stuff\n");
     //glDisableClientState(GL_INDEX_ARRAY);
@@ -230,16 +232,16 @@ void appRender()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 
-    printf("about to call render\n");
+    //printf("about to call render\n");
 
 
-	printf("frameRenderQueued\n");
+	//printf("frameRenderQueued\n");
 	frameRenderingQueued();
 
     //printf("size of float_vec %d\n", sizeof(float_vec));
     //enjas->render();
 
-    glPointSize(10.);
+    glPointSize(1.);
 
     //render_slow();
     render_fast();
@@ -368,7 +370,7 @@ void createScene()
 			// Draw cube of the fluid grid/simulation volume
 	//}
 
-	int scene = 1; // any value from 0 to 9
+	int scene = 5; // any value from 0 to 9
     printf("setting scene\n");
 	SetScene(scene);
 }
