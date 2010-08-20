@@ -279,7 +279,7 @@ void createScene()
 		fluidSettings->enabled = true;
 		fluidSettings->enableKernelTiming = true;
 		fluidSettings->showFluidGrid = false;
-		fluidSettings->gridWallCollisions = false;
+		fluidSettings->gridWallCollisions = true;
 		fluidSettings->terrainCollisions = false;
 
 		//if(mSnowConfig->fluidSettings.enabled) {

@@ -322,6 +322,7 @@ namespace SimLib
 						position[i] = make_vec(x,y,z,1);
 						i++;
 					}}}
+                }
 				break;
 			case 2:
 				{
