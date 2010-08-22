@@ -61,7 +61,7 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 //EnjaParticles* enjas;
-#define NUM_PARTICLES (1 << 10) << 7
+#define NUM_PARTICLES (1 << 10) << 5
 
 
 GLuint v_vbo; //vbo id
@@ -241,7 +241,7 @@ void appRender()
     //printf("size of float_vec %d\n", sizeof(float_vec));
     //enjas->render();
 
-    glPointSize(1.);
+    glPointSize(2.);
 
     //render_slow();
     render_fast();
@@ -370,7 +370,7 @@ void createScene()
 			// Draw cube of the fluid grid/simulation volume
 	//}
 
-	int scene = 5; // any value from 0 to 9
+	int scene = 9; // any value from 0 to 9
     printf("setting scene\n");
 	SetScene(scene);
 }

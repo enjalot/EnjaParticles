@@ -43,8 +43,10 @@ __device__ float3 calculateWallsNoPenetrationForce(
 	diff = boundary_distance - ((grid_max.z - pos.z ) * scale_to_simulation);
 	if (diff > EPSILON) {
 		float3 normal = make_float3(0,0,-1);
-		float adj =  boundary_stiffness * diff - boundary_dampening * dot(normal, vel);
-		repulsion_force  += adj * normal;
+		//float adj =  boundary_stiffness * diff - boundary_dampening * dot(normal, vel);
+		//repulsion_force  += adj * normal;
+		//GE: added Aug. 21, 2010
+		repulsion_force  += calculateRepulsionForce(vel, normal, diff, boundary_dampening, boundary_stiffness);
 	}
 
 	// simple limit for "wall" in X direction (min of simulated volume)
