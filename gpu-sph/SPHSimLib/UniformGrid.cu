@@ -20,6 +20,7 @@ texture<uint, 1, cudaReadModeElementType> cell_indexes_end_tex;
 
 using namespace SimLib;
 
+//----------------------------------------------------------------------
 UniformGrid::UniformGrid(SimLib::SimCudaAllocator* simCudaAllocator)
 	: mSimCudaAllocator(simCudaAllocator)
 	, mAlloced(false)
@@ -37,6 +38,7 @@ UniformGrid::UniformGrid(SimLib::SimCudaAllocator* simCudaAllocator)
 
 }
 
+//----------------------------------------------------------------------
 UniformGrid::~UniformGrid()
 {
 	Free();
@@ -46,6 +48,7 @@ UniformGrid::~UniformGrid()
 	delete mGridParticleBuffers;
 }
 
+//----------------------------------------------------------------------
 void UniformGrid::Alloc(uint numParticles, float cellWorldSize, float gridWorldSize)
 {
 	if(mAlloced)
@@ -90,6 +93,7 @@ void UniformGrid::Alloc(uint numParticles, float cellWorldSize, float gridWorldS
 	mAlloced = true;
 }
 
+//----------------------------------------------------------------------
 void UniformGrid::Free()	
 {
 	if(!mAlloced)
@@ -110,12 +114,14 @@ void UniformGrid::Free()
 	mAlloced = false;
 }
 
+//----------------------------------------------------------------------
 void UniformGrid::Clear()
 {
 // 	mGridCellBuffers->ClearBuffers();
 // 	mGridParticleBuffers->ClearBuffers();
 }
 
+//----------------------------------------------------------------------
 void UniformGrid::CalculateGridParameters(float cellWorldSize, float gridWorldSize)
 {
 	// GRID SETUP
@@ -146,6 +152,7 @@ void UniformGrid::CalculateGridParameters(float cellWorldSize, float gridWorldSi
 };
 
 
+//----------------------------------------------------------------------
 float UniformGrid::Hash(bool doTiming, float_vec* dParticlePositions, uint numParticles)
 {
 //	assert(mNumParticles == numParticles);
@@ -197,6 +204,7 @@ float UniformGrid::Hash(bool doTiming, float_vec* dParticlePositions, uint numPa
 	return 0;
 }
 
+//----------------------------------------------------------------------
 float UniformGrid::Sort(bool doTiming)
 {
 	if(doTiming)
@@ -237,3 +245,4 @@ float UniformGrid::Sort(bool doTiming)
 
 	return 0;
 }
+//----------------------------------------------------------------------

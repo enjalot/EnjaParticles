@@ -61,7 +61,7 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 //EnjaParticles* enjas;
-#define NUM_PARTICLES (1 << 10) << 5
+#define NUM_PARTICLES (1 << 10) << 7
 
 
 GLuint v_vbo; //vbo id

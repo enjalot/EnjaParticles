@@ -1,0 +1,91 @@
+Aug. 25, 2010
+Gordon Erlebacher notes on the source code. 
+
+//----------------------------------------------------------------------
+void SimSimpleSPH::Simulate(bool doTiming, bool progress, bool gridWallCollisions, bool terrainCollisions, float3 fluidWorldPosition, TerrainData dTerrainData)
+{
+	// UniformGrid.cu calls 
+ 	//  K_Grid_Hash<<< numBlocks, numThreads>>> (
+    //    mNumParticles,
+    //    dParticlePositions,
+    //    dGridData);
+
+	time_hashSPHData = mUniformGrid->Hash(doTiming, mBaseBuffers->Get(BufferPosition)->GetPtr<float_vec>(), mNumParticles);
+
+
+
+
+
+	// UniformGrid.cu calls
+ 	// K_Grid_Hash<<< numBlocks, numThreads>>> (
+    //  mNumParticles,
+    //  dParticlePositions,
+    //  dGridData);
+
+	time_radixsort = mUniformGrid->Sort(doTiming);
+
+
+
+
+
+	// called by SimSimpleSPH.cu
+	//	K_Grid_UpdateSorted<SimpleSPHSystem, SimpleSPHData><<< numBlocks, numThreads, smemSize>>> (
+	//		mNumParticles,
+	//		dParticleData, 
+	//		dParticleDataSorted, 
+	//		dGridData);
+
+	time_updatelists = BuildDataStruct(doTiming);
+
+
+#ifdef SPHSIMLIB_USE_NEIGHBORLIST
+	time_computeDensity = ComputeDensityAndBuildNeighborList(doTiming);
+#else
+	// called by SimSimpleSPH
+	//	K_SumStep1<<<numBlocks, numThreads>>>(
+	//		mNumParticles,
+	//		dNeighborList,
+	//		dParticleDataSorted,
+	//		dGridData);
+#endif
+
+	time_computeDensity = ComputeStep1(doTiming);
+
+
+
+
+
+	// called by SimSimpleSPH
+	// pressure term (SPH_PRESSURE_MUELLER or SPH_PRESSURE_VISCOPLASTIC)
+	//		K_SumStep2<SPH_PRESSURE_MUELLER><<<numBlocks, numThreads>>>(
+	//			mNumParticles,
+	//			dParticleDataSorted,
+	//#ifdef SPHSIMLIB_USE_NEIGHBORLIST
+	//			dNeighborList,
+	//#else
+	//			dGridData
+#endif
+	//		);
+
+	time_ComputeStep2s = ComputeStep2(doTiming);
+
+
+
+
+
+	// called by SimSimpleSPH
+	//	K_Integrate<Velocity, HSVBlueToRed><<<numBlocks, numThreads>>>(
+	//		mNumParticles,
+	//		gridWallCollisions, terrainCollisions,
+	//		deltaTime,
+	//		progress,
+	//		dGridData,
+	//		dParticleData,
+	//		dParticleDataSorted,
+	//		fluidWorldPosition,
+	//		dTerrainData);
+
+	time_integrateForces = Integrate(doTiming, progress, mSettings->GetValue("Timestep"), gridWallCollisions, terrainCollisions, fluidWorldPosition, dTerrainData);
+}
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
