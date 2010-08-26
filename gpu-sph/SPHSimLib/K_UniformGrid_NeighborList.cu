@@ -18,11 +18,13 @@ public:
 	{
 	public:
 
+		//----------------------------------------------------------------------
 		static __device__ void PreCalc(Data &data, uint const &index_i)
 		{
 			data.neighbor_counter = 0;
 		}
 
+		//----------------------------------------------------------------------
 		static __device__ void ForPossibleNeighbor(Data &data, uint const &index_i, uint const &index_j, float3 const &position_i)
 		{
 			// check not colliding with self
@@ -46,6 +48,7 @@ public:
 			}
 		}
 
+		//----------------------------------------------------------------------
 		static __device__ void ForNeighbor(Data &data, uint const &index_i, uint const &index_j, float3 const &r, float const& rlen, float const &rlen_sq)
 		{
 			data.dNeighborList.neighbors[index_i*data.dNeighborList.neighbors_pitch + data.neighbor_counter] = index_j;
@@ -55,6 +58,7 @@ public:
 			// 						cuPrintf("ORG: %d %f\n", index_j, rlen);
 		}
 
+		//----------------------------------------------------------------------
 		static __device__ void PostCalc(Data &data, uint index_i)
 		{
 		}
@@ -62,6 +66,7 @@ public:
 	};
 };
 
+//----------------------------------------------------------------------
 __global__ void buildNeighborList (
 	uint					numParticles,
 	NeighborList			dNeighborList,

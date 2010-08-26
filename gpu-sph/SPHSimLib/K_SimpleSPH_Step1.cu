@@ -20,18 +20,21 @@ public:
 	{
 	public:
 
+		//----------------------------------------
 		static __device__ void PreCalc(Data &data, uint const &index_i)
 		{
 			// read particle data from sorted arrays
 			data.sum_density = 0;
 		}
 
+		//----------------------------------------
 		static __device__ void ForNeighbor(Data &data, uint const &index_i, uint const &index_j, float3 const &r, float const& rlen, float const &rlen_sq)
 		{
 			// the density sum using Wpoly6 kernel
 			data.sum_density += SPH_Kernels::Wpoly6::Kernel_Variable(cPrecalcParams.smoothing_length_pow2, r, rlen_sq);	
 		}
 
+		//----------------------------------------
 		static __device__ void PostCalc(Data &data, uint index_i)
 		{
 			// Compute the density field at the current particle,
@@ -46,6 +49,7 @@ public:
 };
 
 
+//----------------------------------------------------------------------
 __global__ void K_SumStep1(uint				numParticles,
 							   NeighborList		dNeighborList, 
 							   SimpleSPHData	dParticleDataSorted,

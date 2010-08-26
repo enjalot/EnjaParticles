@@ -10,6 +10,10 @@ void SimSimpleSPH::Simulate(bool doTiming, bool progress, bool gridWallCollision
     //    dParticlePositions,
     //    dGridData);
 
+	// CUDA code in K_UniformGrid_Hash.cu (index <== tid = threadIdx.x)
+    // dGridData.sort_hashes[index] = hash;
+    // dGridData.sort_indexes[index] = index;
+
 	time_hashSPHData = mUniformGrid->Hash(doTiming, mBaseBuffers->Get(BufferPosition)->GetPtr<float_vec>(), mNumParticles);
 
 
@@ -17,12 +21,13 @@ void SimSimpleSPH::Simulate(bool doTiming, bool progress, bool gridWallCollision
 
 
 	// UniformGrid.cu calls
- 	// K_Grid_Hash<<< numBlocks, numThreads>>> (
-    //  mNumParticles,
-    //  dParticlePositions,
-    //  dGridData);
+	//	cudppSort(
+	//		m_sortHandle, 
+	//		mGridParticleBuffers->Get(SortHashes)->GetPtr<uint>(), 
+	//		mGridParticleBuffers->Get(SortIndexes)->GetPtr<uint>(),
+	//		mSortBitsPrecision, 
+	//		mNumParticles);
 
-	time_radixsort = mUniformGrid->Sort(doTiming);
 
 
 
@@ -34,20 +39,38 @@ void SimSimpleSPH::Simulate(bool doTiming, bool progress, bool gridWallCollision
 	//		dParticleData, 
 	//		dParticleDataSorted, 
 	//		dGridData);
+	// CUDA code called from K_UniformGrid_Update.cu
+    // HOW did dParticeDataSorted get created?
+	// update physical variables from unsorted to sorted, 
+	//      in T::UpdateSortedValues(dParticlesSorted, dParticles, index, sortedIndex);
+	//           (CUDA in K_SimpleSPH.cu)
+
 
 	time_updatelists = BuildDataStruct(doTiming);
 
 
+
+
+
+// ComputeStep1 is a method of SimSimpleSPH.cu
+// calls CUDA modules ComputeDensityAndBuildNeighborList OR K_SUmStep1
 #ifdef SPHSIMLIB_USE_NEIGHBORLIST
+	// Called from SimSimpleSPH.cu
 	time_computeDensity = ComputeDensityAndBuildNeighborList(doTiming);
 #else
-	// called by SimSimpleSPH
+	time_computeDensity = ComputeStep1(doTiming);
+#endif
+
+	//ComputeDensityAndBuildNeighborList calls no CUDA code 
+	//ComputeStep1  calls K_SumStep1
+	// called by SimSimpleSPH.cu
 	//	K_SumStep1<<<numBlocks, numThreads>>>(
 	//		mNumParticles,
 	//		dNeighborList,
 	//		dParticleDataSorted,
 	//		dGridData);
 #endif
+	// K_SumStep1 is called from K_SimpleSPH_Step1.cu
 
 	time_computeDensity = ComputeStep1(doTiming);
 
@@ -66,6 +89,7 @@ void SimSimpleSPH::Simulate(bool doTiming, bool progress, bool gridWallCollision
 	//			dGridData
 #endif
 	//		);
+	// CUDA code is in K_SimpleSPH_Step2.cu
 
 	time_ComputeStep2s = ComputeStep2(doTiming);
 
@@ -84,8 +108,105 @@ void SimSimpleSPH::Simulate(bool doTiming, bool progress, bool gridWallCollision
 	//		dParticleDataSorted,
 	//		fluidWorldPosition,
 	//		dTerrainData);
+	// CUDA call called from K_SimpleSPH_Integrate.cu
+	// Deals with collisions
 
 	time_integrateForces = Integrate(doTiming, progress, mSettings->GetValue("Timestep"), gridWallCollisions, terrainCollisions, fluidWorldPosition, dTerrainData);
 }
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
+__globals__
+
+
+K_SimpleSPH_Integrate.cu:__global__ void K_Integrate(int				numParticles,
+K_SimpleSPH_Step1.cu:__global__ void K_SumStep1(uint				numParticles,
+K_SimpleSPH_Step2.cu:__global__ void K_SumStep2(uint			numParticles,
+K_UniformGrid_Hash.cu:__global__ void K_Grid_Hash (
+K_UniformGrid_NeighborList.cu:__global__ void buildNeighborList (
+K_UniformGrid_Update.cu:__global__ void K_Grid_UpdateSorted (
+SimBase.cu:__global__ void FermiCacheOverride()
+----------------------------------------------------------------------
+___device__
+K_Boundaries_Common.cu:__device__ float3 calculateRepulsionForce(
+K_Boundaries_Common.cu:__device__ float3 calculateFrictionForce(
+K_Boundaries_Terrain.cu:__device__ int2 getTerrainPos(float3 const &pos, int const &dTerrainSize, float const &dTerrainWorldSize)
+K_Boundaries_Terrain.cu:__device__ float getTerrainHeight(int const &terrainPosX, int const &terrainPosZ, float const *dTerrainHeights, int const &dTerrainSize)
+K_Boundaries_Terrain.cu:__device__ float getTerrainHeight(int2 const &terrainPos, float const *dTerrainHeights, int const &dTerrainSize)
+K_Boundaries_Terrain.cu:__device__ float getTerrainHeightInterpolate(
+K_Boundaries_Terrain.cu:__device__ float3 getTerrainNormal(
+K_Boundaries_Terrain.cu:__device__ float3 calculateTerrainNoPenetrationForce(
+K_Boundaries_Terrain.cu:__device__ float3 calculateTerrainFrictionForce(
+K_Boundaries_Walls.cu:__device__ float3 calculateWallsNoPenetrationForce(
+K_Boundaries_Walls.cu:__device__ float3 calculateWallsNoSlipForce(
+K_Coloring.cu:__device__ float3 HSVtoRGB(float h, float s, float v )
+K_Coloring.cu:__device__ float3 calculateColor(ColoringGradient coloringGradient, float colorScalar)
+K_Coloring.cu:static __device__ float3 CalculateColor(ColoringGradient coloringGradient, SPHColoringSource coloringSource, float3 vnext, float pressure, float3 force)
+
+K_SPH_Common.cu:	static __device__ void PreCalc(D &data, uint index_i)
+K_SPH_Common.cu:	static __device__ void ForNeighbor(D &data, uint const &index_i, uint const &index_j, float3 const &r, float const &rlen)
+K_SPH_Common.cu:	static __device__ void PostCalc(D &data, uint index_i)
+K_SPH_Common.cu:	static __device__ void ForPossibleNeighbor(D &data, uint const &index_i, uint const &index_j, float3 const &position_i)
+
+K_SPH_Kernels_cubic.cu:	static __device__ __host__ float Kernel(float smoothing_length, float3 r, float rlen)
+K_SPH_Kernels_cubic.cu:	static __device__ __host__ float3 Gradient(float smoothing_length, float smoothing_length_pow2, float smoothing_length_pow3, float smoothing_length_pow4, float3 r, float rlen, float rlen_sq)
+K_SPH_Kernels_gaussian.cu:	static __device__ __host__ float Kernel_Constant(float smoothing_length, float smoothing_length_pow2)
+K_SPH_Kernels_gaussian.cu:	static __device__ __host__ float Kernel_Variable(float smoothing_length, float smoothing_length_pow2, float3 r, float rlen, float rlen_sq)
+K_SPH_Kernels_gaussian.cu:	static __device__ __host__ float Kernel(float smoothing_length, float smoothing_length_pow2, float3 r, float rlen, float rlen_sq)
+K_SPH_Kernels_gaussian.cu:	static __device__ __host__ float Gradient_Constant(float smoothing_length, float smoothing_length_pow2)
+K_SPH_Kernels_gaussian.cu:	static __device__ __host__ float3 Gradient_Variable(float smoothing_length, float smoothing_length_pow2, float3 r, float rlen, float rlen_sq)
+K_SPH_Kernels_gaussian.cu:	static __device__ __host__ float3 Gradient(float smoothing_length, float smoothing_length_pow2, float3 r, float rlen, float rlen_sq)
+K_SPH_Kernels_poly6.cu:	static __device__ __host__ float Kernel_Constant(float smoothing_length)
+K_SPH_Kernels_poly6.cu:	static __device__ __host__ float Kernel_Variable(float smoothing_length_pow2, float3 r, float rlen_sq)
+K_SPH_Kernels_poly6.cu:	static __device__ __host__ float Gradient_Constant(float smoothing_length)
+K_SPH_Kernels_poly6.cu:	static __device__ __host__ float Gradient_Variable(float smoothing_length, float smoothing_length_pow2, float3 r, float rlen)
+K_SPH_Kernels_poly6.cu:	static __device__ __host__ float Gradient(float smoothing_length, float smoothing_length_pow2, float3 r, float rlen)
+K_SPH_Kernels_poly6.cu:	static __device__ __host__ float Laplace_Constant(float smoothing_length, float smoothing_length_pow2, float3 r, float rlen)
+K_SPH_Kernels_poly6.cu:	static __device__ __host__ float Laplace_Variable(float smoothing_length, float smoothing_length_pow2, float3 r, float rlen)
+K_SPH_Kernels_quadratic.cu:	static __device__ __host__ float Kernel_Constant(float smoothing_length)
+K_SPH_Kernels_quadratic.cu:	static __device__ __host__ float Kernel_Variable(float smoothing_length, float smoothing_length_pow2, float3 r, float rlen)
+K_SPH_Kernels_quadratic.cu:	static __device__ __host__ float Gradient_Constant(float smoothing_length)
+K_SPH_Kernels_quadratic.cu:	static __device__ __host__ float Gradient_Variable(float smoothing_length, float smoothing_length_pow2, float3 r, float rlen)
+K_SPH_Kernels_quartic.cu:	static __device__ __host__ float Kernel(float smoothing_length, float smoothing_length_pow2, float3 r, float rlen)
+K_SPH_Kernels_quartic.cu:	static __device__ __host__ float Gradient(float smoothing_length)
+K_SPH_Kernels_quintic.cu:	static __device__ __host__ float Kernel(float smoothing_length, float3 r, float rlen, float rlen_sq)
+K_SPH_Kernels_quintic.cu:	static __device__ __host__ float3 Gradient(float smoothing_length, float3 r, float rlen, float rlen_sq)
+K_SPH_Kernels_spiky.cu:	static __device__ __host__ float Kernel_Constant(float smoothing_length)
+K_SPH_Kernels_spiky.cu:	static __device__ __host__ float Kernel_Variable(float smoothing_length, float3 r, float rlen)
+K_SPH_Kernels_spiky.cu:	static __device__ __host__ float3 Gradient(float smoothing_length, float3 r, float rlen)
+K_SPH_Kernels_spiky.cu:	static __device__ __host__ float Gradient_Constant(float smoothing_length)
+K_SPH_Kernels_spiky.cu:	static __device__ __host__ float3 Gradient_Variable(float smoothing_length, float3 r, float rlen)
+K_SPH_Kernels_spiky.cu:	static __device__ __host__ float Laplace_Constant(float smoothing_length)
+K_SPH_Kernels_spiky.cu:	static __device__ __host__ float3 Laplace_Variable(float smoothing_length, float3 r, float rlen)
+K_SPH_Kernels_viscosity.cu:	static __device__ __host__ float Kernel_Constant(float smoothing_length)
+
+K_SPH_Kernels_viscosity.cu:	static __device__ __host__ float Kernel_Variable(float smoothing_length, float3 r, float rlen)
+K_SPH_Kernels_viscosity.cu:	static __device__ __host__ float Gradient_Constant(float smoothing_length)
+K_SPH_Kernels_viscosity.cu:	static __device__ __host__ float Gradient_Variable(float smoothing_length, float3 r, float rlen)
+K_SPH_Kernels_viscosity.cu:	static __device__ __host__ float Laplace_Constant(float smoothing_length)
+K_SPH_Kernels_viscosity.cu:	static __device__ __host__ float Laplace_Variable(float smoothing_length, float3 r, float rlen)
+
+
+K_SimpleSPH.cu:	static __device__ void UpdateSortedValues(SimpleSPHData &dParticlesSorted, SimpleSPHData &dParticles, uint &index, uint &sortedIndex)
+K_SimpleSPH_Step1.cu:		static __device__ void PreCalc(Data &data, uint const &index_i)
+K_SimpleSPH_Step1.cu:		static __device__ void ForNeighbor(Data &data, uint const &index_i, uint const &index_j, float3 const &r, float const& rlen, float const &rlen_sq)
+K_SimpleSPH_Step1.cu:		static __device__ void PostCalc(Data &data, uint index_i)
+K_SimpleSPH_Step2.cu:		static __device__ void PreCalc(Data &data, uint index_i)
+K_SimpleSPH_Step2.cu:		static __device__ void ForNeighbor(Data &data, uint const &index_i, uint const &index_j, float3 const &r, float const& rlen, float const &rlen_sq)
+K_SimpleSPH_Step2.cu:		static __device__ void PostCalc(Data &data, uint index_i)
+
+K_UniformGrid_NeighborList.cu:		static __device__ void PreCalc(Data &data, uint const &index_i)
+K_UniformGrid_NeighborList.cu:		static __device__ void ForPossibleNeighbor(Data &data, uint const &index_i, uint const &index_j, float3 const &position_i)
+K_UniformGrid_NeighborList.cu:		static __device__ void ForNeighbor(Data &data, uint const &index_i, uint const &index_j, float3 const &r, float const& rlen, float const &rlen_sq)
+K_UniformGrid_NeighborList.cu:		static __device__ void PostCalc(Data &data, uint index_i)
+K_UniformGrid_Utils.cu:	static __device__ int3 calcGridCell(float3 const &p, float3 grid_min, float3 grid_delta)
+K_UniformGrid_Utils.cu:	static __device__ uint calcGridHash(int3 const &gridPos, float3 grid_res)
+K_UniformGrid_Utils.cu:	static __device__ void IterateParticlesInCell(
+K_UniformGrid_Utils.cu:	static __device__ void IterateParticlesInNearbyCells(
+K_UniformGrid_Utils.cu:	static __device__ void IterateParticlesInNearbyCells(
+
+SimSimpleSPH.cu:__device__ __constant__	GridParams		cGridParams;
+SimSimpleSPH.cu:__device__ __constant__	SimpleSPHFluidParams	cFluidParams;
+SimSimpleSPH.cu:__device__ __constant__	SimpleSPHPrecalcParams	cPrecalcParams;
+
+UniformGrid.cu:__device__ __constant__	GridParams		cGridParams;
+

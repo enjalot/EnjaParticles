@@ -8,23 +8,27 @@ template<class O, class D>
 class SPHNeighborCalc
 {
 public:
+	//----------------------------------------------------------------------
 	// this is called before the loop over each neighbor particle
 	static __device__ void PreCalc(D &data, uint index_i)
 	{
 		O::PreCalc(data, index_i);
 	}
 
+	//----------------------------------------------------------------------
 	static __device__ void ForNeighbor(D &data, uint const &index_i, uint const &index_j, float3 const &r, float const &rlen)
 	{
 		O::ForNeighbor(data, index_i, index_j, r, rlen);
 	}		
 
+	//----------------------------------------------------------------------
 	// this is called after the loop over each particle in a cell
 	static __device__ void PostCalc(D &data, uint index_i)
 	{
 		O::PostCalc(data, index_i);
 	}
 
+	//----------------------------------------------------------------------
 	// this is called inside the loop over each particle in a cell
 	static __device__ void ForPossibleNeighbor(D &data, uint const &index_i, uint const &index_j, float3 const &position_i)
 	{

@@ -3,6 +3,7 @@
 
 namespace UniformGridUtils
 {
+	//----------------------------------------------------------------------
 	// find the grid cell from a position in world space
 	static __device__ int3 calcGridCell(float3 const &p, float3 grid_min, float3 grid_delta)
 	{
@@ -11,6 +12,7 @@ namespace UniformGridUtils
 	}
 
 
+	//----------------------------------------------------------------------
 	// calculate hash from grid cell
 	template <bool wrapEdges> 
 	static __device__ uint calcGridHash(int3 const &gridPos, float3 grid_res)
@@ -53,6 +55,7 @@ namespace UniformGridUtils
 	}
 
 
+	//----------------------------------------------------------------------
 	// Iterate over particles found in the nearby cells (including cell of position_i)
 	template<class O, class D>
 	static __device__ void IterateParticlesInCell(
@@ -84,6 +87,7 @@ namespace UniformGridUtils
 		}
 	}
 
+	//----------------------------------------------------------------------
 	// Iterate over particles found in the nearby cells (including cell of position_i)
 	template<class O, class D>
 	static __device__ void IterateParticlesInNearbyCells(
@@ -112,6 +116,7 @@ namespace UniformGridUtils
 
 		O::PostCalc(data, index_i);
 	}
+	//----------------------------------------------------------------------
 	// Iterate over particles found in the neighbor list
 	template<class O, class D>
 	static __device__ void IterateParticlesInNearbyCells(
