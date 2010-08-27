@@ -1,0 +1,6 @@
+This code comes from
+http://code.google.com/p/gpusphsim/
+
+TODO
+Working on making a standalone viewer
+this is CUDA code, so we will first evaluate it's possibilities before trying to port to OpenCL

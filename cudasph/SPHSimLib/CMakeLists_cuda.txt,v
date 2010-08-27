@@ -1,0 +1,53 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2010.08.17.18.53.07;	author erlebach;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@# pure CUDA Version 
+
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+
+set (CUFILES conjugate_gradient.cu map.cu
+  mat_mat_mul_el_kernel.cu sscal_no_param.cu sscal_param.cu)
+
+
+CUDA_INCLUDE_DIRECTORIES(
+	.
+	${GLIB}/cuda_utilities 
+	${GLIB}/graphics_utils
+	${GLIB}/utilities 
+    ${CUDA_SDK_ROOT_DIR}/common/inc
+    ${CUDA_TOOLKIT_ROOT_DIR}/include
+)
+
+CUDA_ADD_LIBRARY(gpu ${CUFILES})
+
+#----------------------------------
+
+SET(EXEC test_pure_cuda.x)
+CUDA_ADD_EXECUTABLE(${EXEC} main.cpp)
+
+# Target link libraries are NOT carried over from parent directory
+TARGET_LINK_LIBRARIES(${EXEC} 
+    gpu
+	${MY_LIBRARIES}
+)
+#----------------------------------------------------------------------
+@

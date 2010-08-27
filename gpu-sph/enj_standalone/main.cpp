@@ -24,7 +24,6 @@
 #include "enja.h"
 #include "timege.h"
 
-
 int window_width = 800;
 int window_height = 600;
 int glutWindowHandle = 0;
@@ -60,8 +59,9 @@ void drawString(const char *str, int x, int y, float color[4], void *font);
 void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
-//EnjaParticles* enjas;
-#define NUM_PARTICLES (1 << 10) << 7
+EnjaParticles* enjas;
+//#define NUM_PARTICLES (1 << 10) << 7
+#define NUM_PARTICLES 16384
 
 
 GLuint v_vbo; //vbo id
@@ -69,24 +69,6 @@ GLuint c_vbo; //vbo id
 
 //timers
 GE::Time *ts[3];
-
-#include "EnjaSimBuffer.h"
-#include <SimulationSystem.h>
-// SPH global variables
-//SnowSim::Config* mSnowConfig;
-SimLib::SimulationSystem* mParticleSystem;
-
-struct FluidSettings
-{
-	bool simpleSPH;
-	bool enabled;
-	bool enableKernelTiming;
-	bool showFluidGrid;
-	bool gridWallCollisions;
-	bool terrainCollisions;
-};
-FluidSettings* fluidSettings;
-
 
 //================
 #include "materials_lights.h"
@@ -97,286 +79,137 @@ float rand_float(float mn, float mx)
 	float r = random() / (float) RAND_MAX;
 	return mn + (mx-mn)*r;
 }
-
 //----------------------------------------------------------------------
-bool frameRenderingQueued()
+void make_cube(Vec4 cen, float half_edge)
 {
-	if(mParticleSystem) {
-		bool mProgress = true;
-        printf("simulating!\n");
-		mParticleSystem->Simulate(mProgress, fluidSettings->gridWallCollisions);
-	}
-	return true;
-}
+// Written by G. Erlebacher Aug. 5, 2010
+/*
 
-//----------------------------------------------------------------------
-void render_slow()
-{
-    int num = NUM_PARTICLES; 
-    std::vector<float> poses(num*4);
-    std::vector<float> coles(num*4);
+        7-----------6 
+       /           /|
+      /           / |           Z
+     4-----------5  |           |
+	 |           |  2           |  Y
+	 |           | /            | /
+	 |           |/             |/
+     0-----------1              x------- X
+	              
+*/
+	//printf("inside make_cube\n");
+	// vertices
+	std::vector<Vec4> v;
+	float h = half_edge;
+	Vec4 vv;
 
-    glBindBuffer(GL_ARRAY_BUFFER, v_vbo);
-    void* ptr = glMapBufferARB(GL_ARRAY_BUFFER, GL_READ_ONLY_ARB);
+	vv.set(cen.x-h, cen.y-h, cen.z-h);
+	v.push_back(vv);
+	vv.set(cen.x+h, cen.y-h, cen.z-h);
+	v.push_back(vv);
+	vv.set(cen.x+h, cen.y+h, cen.z-h);
+	v.push_back(vv);
+	vv.set(cen.x-h, cen.y+h, cen.z-h);
+	v.push_back(vv);
+	vv.set(cen.x-h, cen.y-h, cen.z+h);
+	v.push_back(vv);
+	vv.set(cen.x+h, cen.y-h, cen.z+h);
+	v.push_back(vv);
+	vv.set(cen.x+h, cen.y+h, cen.z+h);
+	v.push_back(vv);
+	vv.set(cen.x-h, cen.y+h, cen.z+h);
+	v.push_back(vv);
 
-    for(int i =0; i < num*4; i++)
-    {
-        poses[i] = ((float*)ptr)[i];
-    }
+	// Boxes
+	Box box;
+	box.xmin = cen.x-h;
+	box.xmax = cen.x+h;
+	box.ymin = cen.y-h;
+	box.ymax = cen.y+h;
+	box.zmin = cen.z-h;
+	box.zmax = cen.z+h;
+	boxes.push_back(box);
 
-    glUnmapBufferARB(GL_ARRAY_BUFFER); 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+	// Triangles
+	Triangle tri;
 
-    glBindBuffer(GL_ARRAY_BUFFER, c_vbo);
-    void* colptr = glMapBufferARB(GL_ARRAY_BUFFER, GL_READ_ONLY_ARB);
-    for(int i =0; i < num*4; i++)
-    {
-        coles[i] = ((float*)colptr)[i];
-    }
-   
-    glUnmapBufferARB(GL_ARRAY_BUFFER); 
-    
+	tri.verts[0] = v[2];
+	tri.verts[1] = v[1];
+	tri.verts[2] = v[0];
+	tri.normal.set(0.,0.,-1.,0.);
+	triangles.push_back(tri);
 
-    // Use glBegin/glEnd to draw
-    printf("render POINTS!\n");
-    float x, y, z, cx, cy, cz;
-    glBegin(GL_POINTS);
-    for(int i = 0; i < num*4; i+=4)
-    {
+	tri.verts[0] = v[3];
+	tri.verts[1] = v[2];
+	tri.verts[2] = v[0];
+	tri.normal.set(0.,0.,-1.,0.);
+	triangles.push_back(tri);
+	//printf("triangles: size: %d\n", triangles.size());
 
-        x = poses[i];
-        y = poses[i+1];
-        z = poses[i+2];
+	tri.verts[0] = v[4];
+	tri.verts[1] = v[5];
+	tri.verts[2] = v[6];
+	tri.normal.set(0.,0.,+1.,0.);
+	triangles.push_back(tri);
 
-        cx = coles[i];
-        cy = coles[i+1];
-        cz = coles[i+2];
+	tri.verts[0] = v[4];
+	tri.verts[1] = v[6];
+	tri.verts[2] = v[7];
+	tri.normal.set(0.,0.,+1.,0.);
+	triangles.push_back(tri);
 
-        glColor3f(cx,cy,cz);
-        //glColor3f(1,0,0);
-        //glVertex3f(0,0,0);
-        //in K_Common.cuh the float4 vecs had .w value being set to 0 by default
-        glVertex4f(x, y, z,1);
-    }
-    glEnd();
-}
+	//---
+	tri.verts[0] = v[0];
+	tri.verts[1] = v[1];
+	tri.verts[2] = v[5];
+	tri.normal.set(0.,-1.,0.,0.);
+	triangles.push_back(tri);
 
-//----------------------------------------------------------------------
-void render_fast()
-{
-    glColor3f(1,0,0);
-    GLenum err;
-    int num = NUM_PARTICLES;
+	tri.verts[0] = v[0];
+	tri.verts[1] = v[5];
+	tri.verts[2] = v[4];
+	tri.normal.set(0.,-1.,0.,0.);
+	triangles.push_back(tri);
 
-    glBindBuffer(GL_ARRAY_BUFFER, c_vbo);
-    glColorPointer(4, GL_FLOAT, 0, 0);
-    err = glGetError();
-    printf("col error: %d\n", err);
+	tri.verts[0] = v[7];
+	tri.verts[1] = v[6];
+	tri.verts[2] = v[2];
+	tri.normal.set(0.,+1.,0.,0.);
+	triangles.push_back(tri);
 
+	tri.verts[0] = v[7];
+	tri.verts[1] = v[2];
+	tri.verts[2] = v[3];
+	tri.normal.set(0.,+1.,0.,0.);
+	triangles.push_back(tri);
 
-    /*
-    void* colptr = glMapBufferARB(GL_ARRAY_BUFFER, GL_READ_ONLY_ARB);
-    printf("col PTR[400]: %f\n", ((float*)colptr)[400]);
-    printf("col PTR[401]: %f\n", ((float*)colptr)[401]);
-    printf("col PTR[402]: %f\n", ((float*)colptr)[402]);
-    glUnmapBufferARB(GL_ARRAY_BUFFER); 
-    */
+	//----
+	tri.verts[0] = v[1];
+	tri.verts[1] = v[2];
+	tri.verts[2] = v[6];
+	tri.normal.set(+1.,0.,0.,0.);
+	triangles.push_back(tri);
 
-    //printf("vertex buffer\n");
-    glBindBuffer(GL_ARRAY_BUFFER, v_vbo);
-    glVertexPointer(4, GL_FLOAT, 0, 0);
-    err = glGetError();
-    printf("pos error: %d\n", err);
+	tri.verts[0] = v[1];
+	tri.verts[1] = v[6];
+	tri.verts[2] = v[5];
+	tri.normal.set(+1.,0.,0.,0.);
+	triangles.push_back(tri);
 
+	tri.verts[0] = v[0];
+	tri.verts[1] = v[4];
+	tri.verts[2] = v[7];
+	tri.normal.set(-1.,0.,0.,0.);
+	triangles.push_back(tri);
 
-
-    // map the buffer object into client's memory
-    /*
-    void* ptr = glMapBufferARB(GL_ARRAY_BUFFER, GL_READ_ONLY_ARB);
-    printf("Pos PTR[400]: %f\n", ((float*)ptr)[400]);
-    printf("Pos PTR[401]: %f\n", ((float*)ptr)[401]);
-    printf("Pos PTR[402]: %f\n", ((float*)ptr)[402]);
-    glUnmapBufferARB(GL_ARRAY_BUFFER); 
-    */
-    
-    //printf("index buffer\n");
-    //glBindBuffer(GL_ARRAY_BUFFER, i_vbo);
-    //glIndexPointer(GL_INT, 0, 0);
-
-    //printf("enable client state\n");
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
-    //glEnableClientState(GL_INDEX_ARRAY);
-    
-    //Need to disable these for blender
-    glDisableClientState(GL_NORMAL_ARRAY);
-    //glDisableClientState(GL_EDGE_FLAG_ARRAY);
-    glDisableClientState(GL_INDEX_ARRAY);
-
-
-    //printf("draw arrays num: %d\n", num);
-    glDrawArrays(GL_POINTS, 0, num);
-    //err = glGetError();
-    //printf("draw arrays error: %d\n", err);
-
-    //printf("disable stuff\n");
-    //glDisableClientState(GL_INDEX_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
-
-}
-
-//----------------------------------------------------------------------
-void appRender()
-{
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_DEPTH_TEST);
-
-    //printf("about to call render\n");
-
-
-	//printf("frameRenderQueued\n");
-	frameRenderingQueued();
-
-    //printf("size of float_vec %d\n", sizeof(float_vec));
-    //enjas->render();
-
-    glPointSize(2.);
-
-    //render_slow();
-    render_fast();
-    
-
-    //use drawArrays to draw
-    
-
-
-    //showFPS(enjas->getFPS(), enjas->getReport());
-    glutSwapBuffers();
-    //if we want to render as fast as possible we do this
-    //glutPostRedisplay();
-
-	glDisable(GL_DEPTH_TEST);
-}
-
-void SetScene(int scene) 
-{	
-	if(!mParticleSystem) return;
-
-	//lastScene = scene;
-    printf("setting scene: %d\n", scene);
-	mParticleSystem->SetScene(scene);
-    printf("scene set\n");
-}
-//----------------------------------------------------------------------
-void createScene()
-	{
-        SimLib::SimCudaHelper* simCudaHelper = new SimLib::SimCudaHelper();
-        simCudaHelper->Initialize(0);
-
-		fluidSettings = new FluidSettings();
-		fluidSettings->simpleSPH = true;
-		fluidSettings->enabled = true;
-		fluidSettings->enableKernelTiming = true;
-		fluidSettings->showFluidGrid = false;
-		fluidSettings->gridWallCollisions = true;
-		fluidSettings->terrainCollisions = false;
-
-		//if(mSnowConfig->fluidSettings.enabled) {
-			mParticleSystem = new SimLib::SimulationSystem(fluidSettings->simpleSPH);
-			//int numParticles = (1 << 10) << 2;
-			printf("NUM_PARTICLES= %d\n", NUM_PARTICLES);
-
-			mParticleSystem->SetFluidPosition(make_float3(0., 0., 0.));
-
-            printf("where we at?\n");
-            Enja::EnjaCudaHelper* ech = new Enja::EnjaCudaHelper(simCudaHelper);
-
-            int num = NUM_PARTICLES;
-            std::vector<float_vec> temp(num);
-
-            glGenBuffers(1, &v_vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, v_vbo);
-            glBufferData(GL_ARRAY_BUFFER, num*sizeof(float_vec), &temp[0], GL_DYNAMIC_DRAW);
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-            glGenBuffers(1, &c_vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, c_vbo);
-            glBufferData(GL_ARRAY_BUFFER, num*sizeof(float_vec), &temp[0], GL_DYNAMIC_DRAW);
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-
-            ech->RegisterHardwareBuffer(v_vbo);
-            ech->RegisterHardwareBuffer(c_vbo);
-            printf("making pos buffer\n");
-            
-            Enja::EnjaSimBuffer* pos_vbo = new Enja::EnjaSimBuffer(ech);
-            printf("setting pos buffer\n");
-            printf("enjas->v_vbo: %d\n", v_vbo);
-            pos_vbo->SetEnjaVertexBuffer(v_vbo);
-
-            printf("making col buffer\n");
-            Enja::EnjaSimBuffer* col_vbo = new Enja::EnjaSimBuffer(ech);
-            printf("setting col buffer\n");
-            col_vbo->SetEnjaVertexBuffer(c_vbo);
-
-            printf("setting external pos buffer\n");
-			mParticleSystem->SetExternalBuffer(SimLib::Sim::BufferPosition, pos_vbo); 
-            printf("setting external col buffer\n");
-			mParticleSystem->SetExternalBuffer(SimLib::Sim::BufferColor, col_vbo);
-            printf("init:\n");
-            mParticleSystem->Init();
-
-
-
-            printf("settings: \n");
-        	mParticleSystem->GetSettings()->SetValue("Particles Number", NUM_PARTICLES);
-            printf("asdfasdf\n");
-			mParticleSystem->PrintMemoryUse();
-
-
-			#if 0
-			Ogre::ConfigFile::SettingsIterator iter = mSnowConfig->getCfg()->getSettingsIterator("FluidParams");
-
-			while(iter.hasMoreElements())
-			{
-				String name = iter.peekNextKey();
-				String value = iter.getNext();
-				float val =  StringConverter::parseReal(value);
-
-				
-				if(!StringUtil::startsWith(name, "//")) 
-					mParticleSystem->GetSettings()->SetValue(name, val);
-			}
-			#endif
-
-			//mVolumeSize = mParticleSystem->GetSettings()->GetValue("Grid World Size");
-			//mNumParticles = mParticleSystem->GetSettings()->GetValue("Particles Number");
-
-			//setParticleMaterial(mSnowConfig->generalSettings.fluidShader);
-		
-
-			// create material for fluid cube/grid
-			#if 0
-			Ogre::MaterialPtr gridMaterial = MaterialManager::getSingleton().create("FluidGridMaterial", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-			gridMaterial->setReceiveShadows(false);
-			//gridMaterial->createTechnique()->createPass();
-			gridMaterial->getTechnique(0)->setLightingEnabled(false);
-			gridMaterial->getTechnique(0)->getPass(0)->setDiffuse(0, 0, 1, 0);
-			gridMaterial->getTechnique(0)->getPass(0)->setAmbient(0, 0, 1); 
-			gridMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(0, 0, 1);
-			gridMaterial->load();
-			#endif
-
-			// Draw cube of the fluid grid/simulation volume
-	//}
-
-	int scene = 9; // any value from 0 to 9
-    printf("setting scene\n");
-	SetScene(scene);
+	tri.verts[0] = v[0];
+	tri.verts[1] = v[7];
+	tri.verts[2] = v[3];
+	tri.normal.set(-1.,0.,0.,0.);
+	triangles.push_back(tri);
 }
 //----------------------------------------------------------------------
 int main(int argc, char** argv)
 {
+
     //initialize glut
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
@@ -385,9 +218,8 @@ int main(int argc, char** argv)
                             glutGet(GLUT_SCREEN_HEIGHT)/2 - window_height/2);
 
     
-    int num = NUM_PARTICLES;
     std::stringstream ss;
-    ss << "EnjaParticles: " << num << std::ends;
+    ss << "EnjaParticles: " << NUM_PARTICLES << std::ends;
     glutWindowHandle = glutCreateWindow(ss.str().c_str());
 
     glutDisplayFunc(appRender); //main rendering function
@@ -395,7 +227,6 @@ int main(int argc, char** argv)
     glutKeyboardFunc(appKeyboard);
     glutMouseFunc(appMouse);
     glutMotionFunc(appMotion);
-	//----------------------
 
 	define_lights_and_materials();
 
@@ -407,42 +238,75 @@ int main(int argc, char** argv)
     //initialize the OpenGL scene for rendering
     init_gl();
 
-    //printf("before we call enjas functions\n");
+    printf("before we call enjas functions\n");
 
     //parameters: system and number of particles
     //system = 0: lorenz
     //system = 1 gravity
     //system = 2 vfield
 
-	//------------------
-	// Create sph particle system
-	// NOT DEFINED
-	//SnowSim::SnowApplication app;
-	//app.go();
     
-    /*
-    printf("INITIALIZE ENJAS\n");
     //default constructor
-    enjas = new EnjaParticles(EnjaParticles::GRAVITY, NUM_PARTICLES);
-    enjas->particle_radius = 5.0f;
-    enjas->blending = false;
+    //enjas = new EnjaParticles(EnjaParticles::GRAVITY, NUM_PARTICLES);
+    enjas = new EnjaParticles(3, NUM_PARTICLES);
+    enjas->particle_radius = 2.0f;
     //enjas->use_glsl();
     enjas->updates = 1;
     enjas->dt = .005;
     //enjas->collision = true;
-	*/
-	printf("INITIALIZE SPH CODE\n");
-    createScene();
+
+
+// make cubes, formed from triangles
+
+	int nb_cubes = 100;
+	Vec4 cen;
+
+	tri_offsets.push_back(0);
+
+	for (int i=0; i < nb_cubes; i++) {
+		float rx = rand_float(-1.5,1.5);
+		float ry = rand_float(-1.5,1.5);
+		float rz = rand_float(-5.,0.);
+		cen.set(rx,ry,rz,1.);
+		make_cube(cen, 0.1);
+		tri_offsets.push_back(triangles.size());
+	}
+
+	// once all triangles are created: 
+	tri_offsets.push_back(triangles.size());
+
+    //enjas->transform[0] = Vec4(1,0,0,0);
+    //enjas->loadTriangles(triangles);
+    //enjas->loadBoxes(boxes, triangles, tri_offsets);
+    
    
-   
+    //Test making a system from vertices and normals;
+    /*
+    Vec4 g[4];
+    Vec4 v[4];
+    g[0] = Vec4(0.0f, -1.0f, 0.0f, 1.0f);
+    g[1] = Vec4(0.0f, 1.0f, 0.0f, 1.0f);
+    g[2] = Vec4(1.0f, 0.0f, 0.0f, 1.0f);
+    g[3] = Vec4(-1.0f, 0.0f, 0.0f, 1.0f);
+
+    v[0] = Vec4(0.0f, 0.0f, 1.0f, 0.0f);
+    v[1] = Vec4(0.0f, 0.0f, 1.0f, 0.0f);
+    v[2] = Vec4(0.0f, 0.0f, 1.0f, 0.0f);
+    v[3] = Vec4(0.0f, 0.0f, 1.0f, 0.0f);
+
+    enjas = new EnjaParticles(1, g, v, 4, NUM_PARTICLES);
+    */
+
+
     glutMainLoop();
     
     printf("doesn't happen does it\n");
     appDestroy();
     return 0;
 }
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
+
+
+
 void init_gl()
 {
     // default initialization
@@ -456,9 +320,10 @@ void init_gl()
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     //gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 100.0);
-    //gluPerspective(90.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 10000.0); //for lorentz
-    glOrtho(-500,500, -500,500, 0,10000);
-    gluLookAt(0,0,300, 0,0,0, 0,1,0);
+    gluPerspective(90.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 10000.0); //for lorentz
+    //glOrtho(-500,500, -500,500, 0,10000);
+    //gluLookAt(0,0,300, 0,0,0, 0,1,0);
+
     // set view matrix
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
@@ -470,7 +335,6 @@ void init_gl()
 
 }
 
-//----------------------------------------------------------------------
 void appKeyboard(unsigned char key, int x, int y)
 {
     switch(key) 
@@ -485,19 +349,66 @@ void appKeyboard(unsigned char key, int x, int y)
     }
 }
 
+//----------------------------------------------------------------------
+void appRender()
+{
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+/*
+    plane[0] = (float4)(-2,-2,-1,0);
+    plane[1] = (float4)(-2,2,-1,0);
+    plane[2] = (float4)(2,2,-1,0);
+    plane[3] = (float4)(2,-2,-1,0);
+
+    Vec4 plane[4];
+    plane[0] = Vec4(-5,-5,-1,0);
+    plane[1] = Vec4(-5,5,-1,0);
+    plane[2] = Vec4(10,2,-3,0);
+    plane[3] = Vec4(5,-5,-1,0);
+*/
+
+	glEnable(GL_DEPTH_TEST);
+
+
+    /*
+    glBegin(GL_TRIANGLES);
+    glColor3f(0,1,0);
+	for (int i=0; i < triangles.size(); i++) {
+	//for (int i=0; i < 20; i++) {
+		Triangle& tria = triangles[i];
+		glNormal3fv(&tria.normal.x);
+    	glVertex3f(tria.verts[0].x, tria.verts[0].y, tria.verts[0].z);
+    	glVertex3f(tria.verts[1].x, tria.verts[1].y, tria.verts[1].z);
+    	glVertex3f(tria.verts[2].x, tria.verts[2].y, tria.verts[2].z);
+	}
+    glEnd();
+
+    glColor3f(0,0,0);
+*/
+ 
+    enjas->update();
+    enjas->render();
+
+    printf("after render\n");
+    //showFPS(enjas->getFPS(), enjas->getReport());
+    printf("after showfps\n");
+    glutSwapBuffers();
+    //if we want to render as fast as possible we do this
+    //glutPostRedisplay();
+
+	glDisable(GL_DEPTH_TEST);
+}
 
 //----------------------------------------------------------------------
 void appDestroy()
 {
 
-    //delete enjas;
+    delete enjas;
     if(glutWindowHandle)glutDestroyWindow(glutWindowHandle);
     printf("about to exit!\n");
 
     exit(0);
 }
 
-//----------------------------------------------------------------------
 void timerCB(int ms)
 {
     glutTimerFunc(ms, timerCB, ms);
@@ -505,7 +416,6 @@ void timerCB(int ms)
 }
 
 
-//----------------------------------------------------------------------
 void appMouse(int button, int state, int x, int y)
 {
     if (state == GLUT_DOWN) {
@@ -520,7 +430,6 @@ void appMouse(int button, int state, int x, int y)
     //glutPostRedisplay();
 }
 
-//----------------------------------------------------------------------
 void appMotion(int x, int y)
 {
     float dx, dy;
@@ -531,7 +440,7 @@ void appMotion(int x, int y)
         rotate_x += dy * 0.2;
         rotate_y += dx * 0.2;
     } else if (mouse_buttons & 4) {
-        translate_z += dy * 1;
+        translate_z += dy * 0.1;
     }
 
     mouse_old_x = x;
@@ -548,7 +457,6 @@ void appMotion(int x, int y)
 }
 
 
-//----------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////
 // write 2d text using GLUT
 // The projection matrix must be set to orthogonal before call this function.
@@ -608,4 +516,3 @@ void showFPS(float fps, std::string* report)
     glPopMatrix();                      // restore to previous modelview matrix
 }
 //----------------------------------------------------------------------
-
