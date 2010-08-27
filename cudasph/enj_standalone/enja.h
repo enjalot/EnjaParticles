@@ -9,7 +9,8 @@
 #include "timege.h"
 #include <stdio.h>
 
-#include <SimulationSystem.h>
+//blender hates that i include this...
+//#include <SimulationSystem.h>
 
 //sph stuff
 struct FluidSettings
@@ -179,7 +180,9 @@ public:
     cl::Buffer cl_tri_offsets;  //triangle offsets (relates to box list)
     
     //for SPH
-    SimLib::SimulationSystem* mParticleSystem;
+    //SimLib::SimulationSystem* mParticleSystem;
+    //i swear to god, i will not do this once its opencl, but cuda + blender do not want to mix
+    void* mParticleSystem;
     FluidSettings* fluidSettings;
     int vel_vbo;
     int createScene();

@@ -22,6 +22,7 @@
 #include "util.h"
 #include "timege.h"
 //#include "incopencl.h"
+#include <SimulationSystem.h>
 
 int EnjaParticles::update()
 {
@@ -30,7 +31,8 @@ int EnjaParticles::update()
     {
         printf("in update about to simulate\n");
         //1st arguement is mProgress
-		mParticleSystem->Simulate(true, fluidSettings->gridWallCollisions);
+        SimLib::SimulationSystem* tmParticleSystem = (SimLib::SimulationSystem*)mParticleSystem;
+		tmParticleSystem->Simulate(true, fluidSettings->gridWallCollisions);
         printf("simulated\n");
         return 1;
     }

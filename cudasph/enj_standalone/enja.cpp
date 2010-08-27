@@ -27,6 +27,7 @@
 
 
 #include "EnjaSimBuffer.h"
+#include <SimulationSystem.h>
 
 
 
@@ -84,7 +85,8 @@ int EnjaParticles::createScene()
     //int numParticles = (1 << 10) << 2;
     printf("NUM_PARTICLES= %d\n", num);
 
-    mParticleSystem->SetFluidPosition(make_float3(0., 0., 0.));
+    SimLib::SimulationSystem* tmParticleSystem = (SimLib::SimulationSystem*)mParticleSystem;
+    tmParticleSystem->SetFluidPosition(make_float3(0., 0., 0.));
 
     printf("where we at?\n");
     Enja::EnjaCudaHelper* ech = new Enja::EnjaCudaHelper(simCudaHelper);
@@ -130,18 +132,18 @@ int EnjaParticles::createScene()
 
 
     printf("setting external pos buffer\n");
-    mParticleSystem->SetExternalBuffer(SimLib::Sim::BufferPosition, pos_buff); 
+    tmParticleSystem->SetExternalBuffer(SimLib::Sim::BufferPosition, pos_buff); 
     printf("setting external col buffer\n");
-    mParticleSystem->SetExternalBuffer(SimLib::Sim::BufferColor, col_buff);
+    tmParticleSystem->SetExternalBuffer(SimLib::Sim::BufferColor, col_buff);
     //printf("setting external vel buffer\n");
-    mParticleSystem->SetExternalBuffer(SimLib::Sim::BufferVelocity, vel_buff);
+    tmParticleSystem->SetExternalBuffer(SimLib::Sim::BufferVelocity, vel_buff);
 
     printf("init:\n");
-    mParticleSystem->Init();
+    tmParticleSystem->Init();
 
     int scene = 5; // any value from 0 to 9
     printf("setting scene\n");
-	mParticleSystem->SetScene(scene);
+	tmParticleSystem->SetScene(scene);
 
 }
 

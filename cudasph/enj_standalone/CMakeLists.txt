@@ -12,6 +12,8 @@ message("${CMAKE_MODULE_PATH}\n")
 
 ADD_DEFINITIONS(-DOPENCL_SHARED)
 
+#to make sure we use same flags as blender
+ADD_DEFINITIONS(-D__SSE__ -D__MMX__ -DGLEW_STATIC -fopenmp  -msse -msse2 -pipe -fPIC -funsigned-char -fno-strict-aliasing -Wno-char-subscripts -Wall -Wno-invalid-offsetof -Wno-sign-compare)
 
 #FIND_PACKAGE (GLUT)
 #FIND_PACKAGE (OpenGL)
@@ -46,12 +48,12 @@ INCLUDE_DIRECTORIES(
 
 LINK_DIRECTORIES(
      ${CMAKE_CURRENT_BINARY_DIR}/SPHSimLib
-     $ENV{CUDA_LOCAL}/lib
-	 $ENV{CUDA_LOCAL}/common/lib 
-	 $ENV{CUDA_LOCAL}/../shared/lib/darwin 
-	 $ENV{CUDA_LOCAL}/../shared/lib/linux
-     $ENV{CUDA_HOME}/lib
-	 $ENV{CUDA_HOME}/lib64
+     #$ENV{CUDA_LOCAL}/lib
+     #$ENV{CUDA_LOCAL}/common/lib 
+     #$ENV{CUDA_LOCAL}/../shared/lib/darwin 
+     #$ENV{CUDA_LOCAL}/../shared/lib/linux
+     #$ENV{CUDA_HOME}/lib
+     #$ENV{CUDA_HOME}/lib64
 )
 
 
