@@ -223,6 +223,7 @@ float4 collisions_box(float4 pos, float4 vel, int first, int last, __global Box*
             		float s = 2.0f*(dot(triangles[k].normal, vel));
 					vel = vel - s*triangles[k].normal;
 					vel = vel*damping;
+                    //vel = (float4)(0,0,0,0); //this doesn't seem to affect anything
 					return vel; // slow down the code? 
 					break;
 				}
@@ -264,6 +265,12 @@ __kernel void collision_ge( __global float4* vertices, __global float4* velociti
     velocities[i].x = vel.x;
     velocities[i].y = vel.y;
     velocities[i].z = vel.z;
+    /*
+       //this destroys the simulation (everything stops moving)
+    velocities[i].x = 0;
+    velocities[i].y = 0;
+    velocities[i].z = 0;
+    */
 #endif
 }
 );
