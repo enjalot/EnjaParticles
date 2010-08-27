@@ -278,7 +278,7 @@ EnjaParticles::EnjaParticles(int s, int n)
     //printf("before opencl call\n");
 
     //init opencl
-    //int success = init_cl();
+    int success = init_cl();
 }
 
 //Take in vertex vert_gen as well as velocity vert_gen that are len elements long
@@ -365,12 +365,18 @@ EnjaParticles::~EnjaParticles()
         glDeleteBuffers(1, (GLuint*)&c_vbo);
         c_vbo = 0;
     }
-    if(i_vbo)
+    if(vel_vbo)
     {
-        glBindBuffer(1, i_vbo);
-        glDeleteBuffers(1, (GLuint*)&i_vbo);
+        glBindBuffer(1, vel_vbo);
+        glDeleteBuffers(1, (GLuint*)&vel_vbo);
         i_vbo = 0;
     }
+
+
+    //not properly deleting (segfault on exit... wonder why)
+    SimLib::SimulationSystem* tmParticleSystem = (SimLib::SimulationSystem*)mParticleSystem;
+    delete tmParticleSystem;
+
 /*
     if(cl_vbos[0])clReleaseMemObject(cl_vbos[0]);
     if(cl_vbos[1])clReleaseMemObject(cl_vbos[1]);

@@ -1,6 +1,8 @@
 #include <stdlib.h>
+#include <iostream>
 #include <GL/glew.h> //had to do this to avoid stupid glew error
 #include "../enja.h"
+#include "../util.h"
 
 void EnjaParticles::loadTriangles(std::vector<Triangle> triangles)
 {
@@ -46,6 +48,7 @@ void EnjaParticles::loadTriangles(std::vector<Triangle> triangles)
 void EnjaParticles::loadBoxes(std::vector<Box> boxes, std::vector<Triangle> triangles,
     std::vector<int> tri_offsets)
 {
+    printf("load boxes\n");
     n_boxes = boxes.size();
     //load boxes into cl buffer
     //Box is a struct that ends up being 6 floats

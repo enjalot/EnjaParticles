@@ -253,7 +253,7 @@ int main(int argc, char** argv)
     //enjas->use_glsl();
     enjas->updates = 1;
     enjas->dt = .005;
-    //enjas->collision = true;
+    enjas->collision = true;
 
 
 // make cubes, formed from triangles
@@ -264,11 +264,11 @@ int main(int argc, char** argv)
 	tri_offsets.push_back(0);
 
 	for (int i=0; i < nb_cubes; i++) {
-		float rx = rand_float(-1.5,1.5);
-		float ry = rand_float(-1.5,1.5);
-		float rz = rand_float(-5.,0.);
+		float rx = rand_float(10,50);
+		float ry = rand_float(0,200);
+		float rz = rand_float(0.,200.);
 		cen.set(rx,ry,rz,1.);
-		make_cube(cen, 0.1);
+		make_cube(cen, 10);
 		tri_offsets.push_back(triangles.size());
 	}
 
@@ -277,7 +277,7 @@ int main(int argc, char** argv)
 
     //enjas->transform[0] = Vec4(1,0,0,0);
     //enjas->loadTriangles(triangles);
-    //enjas->loadBoxes(boxes, triangles, tri_offsets);
+    enjas->loadBoxes(boxes, triangles, tri_offsets);
     
    
     //Test making a system from vertices and normals;
@@ -369,7 +369,6 @@ void appRender()
 	glEnable(GL_DEPTH_TEST);
 
 
-    /*
     glBegin(GL_TRIANGLES);
     glColor3f(0,1,0);
 	for (int i=0; i < triangles.size(); i++) {
@@ -383,7 +382,6 @@ void appRender()
     glEnd();
 
     glColor3f(0,0,0);
-*/
  
     enjas->update();
     enjas->render();

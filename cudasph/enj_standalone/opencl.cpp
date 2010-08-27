@@ -34,7 +34,6 @@ int EnjaParticles::update()
         SimLib::SimulationSystem* tmParticleSystem = (SimLib::SimulationSystem*)mParticleSystem;
 		tmParticleSystem->Simulate(true, fluidSettings->gridWallCollisions);
         printf("simulated\n");
-        return 1;
     }
 	ts_cl[0]->start();
 #ifdef GL_INTEROP   
@@ -51,11 +50,13 @@ int EnjaParticles::update()
     err = queue.enqueueWriteBuffer(cl_transform, CL_TRUE, 0, 4*sizeof(Vec4), &transform[0], NULL, &event);
     queue.finish();
     
-    err = vel_update_kernel.setArg(4, cl_transform);
-    err = vel_update_kernel.setArg(5, dt);
-    err = queue.enqueueNDRangeKernel(vel_update_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
-    queue.finish();
-
+    if(system != SPH)
+    {
+        err = vel_update_kernel.setArg(4, cl_transform);
+        err = vel_update_kernel.setArg(5, dt);
+        err = queue.enqueueNDRangeKernel(vel_update_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
+        queue.finish();
+    }
 	//reorder_particles(); // GE
 	//collision = false;
     if(collision)
@@ -84,11 +85,14 @@ int EnjaParticles::update()
       queue.finish();
     }
 
-    err = pos_update_kernel.setArg(3, cl_transform);
-    err = pos_update_kernel.setArg(4, dt);
-    err = queue.enqueueNDRangeKernel(pos_update_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
-    //printf("enqueue: %s\n", oclErrorString(err));
-    queue.finish();
+    if(system != SPH)
+    {
+        err = pos_update_kernel.setArg(3, cl_transform);
+        err = pos_update_kernel.setArg(4, dt);
+        err = queue.enqueueNDRangeKernel(pos_update_kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
+        //printf("enqueue: %s\n", oclErrorString(err));
+        queue.finish();
+    }
     ts_cl[1]->stop();
 
 #ifdef GL_INTEROP
