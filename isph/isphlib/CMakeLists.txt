@@ -13,15 +13,15 @@ SET (CPPFILES
 	gpubitonicsort.cpp
 	log.cpp
 	particle.cpp
-	#pcintegrator.cpp
-	pcisphsimulation.cpp
+    #pcintegrator.cpp
+    pcisphsimulation.cpp
 	probemanager.cpp
 	#simulation.cpp
 	stdwriter.cpp
 	utils.cpp
 	vec.cpp
 	vtkwriter.cpp
-	wcsphsimulation.cpp
+    wcsphsimulation.cpp
 	writer.cpp
 )
 
@@ -42,4 +42,5 @@ message("*** SPH: ${SPH}")
 #tar -cvf isph.cta --exclude .svn wcsph pcisph general kernels scene integrators
 #ln ../lib/isph.cta ../bin/isph.cta
 
+#EXEC_PROGRAM
 

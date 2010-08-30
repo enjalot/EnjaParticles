@@ -14,7 +14,11 @@ WcsphSimulation<dim, typ>::WcsphSimulation()
 	, densityReinitMethod(None)
 	, densityReinitFrequency(-1)
 {
+    //Simulation<dim,typ>::integratorType = PredictorCorrector;
     integratorType = PredictorCorrector;
+    //want to instantiate the integrator
+    //integrator = new PCIntegrator<dim, typ>(this);
+
 }
 
 
@@ -122,7 +126,7 @@ bool WcsphSimulation<dim, typ>::InitSph()
 	case PredictorCorrector: 
 		 this->LoadSubprogram("predictor", "integrators/wcsph_predictor.cl");
     	 this->LoadSubprogram("corrector", "integrators/wcsph_corrector.cl");
-		 break;
+         break;
 	default: Log::Send(Log::Error, "Integrator type choice is not correct.");
 	}
 
@@ -133,7 +137,11 @@ bool WcsphSimulation<dim, typ>::InitSph()
 template<int dim, typename typ>
 bool WcsphSimulation<dim, typ>::RunSph()
 {
+    printf("Run SPH\n");
+	//Simulation<dim,typ>::integrator->Integrate();
+    printf("integrator NULL? %d", &integrator);
 	integrator->Integrate();
+    printf("Done with integrator->Integrat()\n");
 
 	// Shepard filter every densityReinitFrequency steps
 	if (((this->timeStepCount + 1) % densityReinitFrequency ) == 0) 

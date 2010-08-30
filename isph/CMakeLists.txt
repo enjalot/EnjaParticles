@@ -29,5 +29,29 @@ ADD_DEFINITIONS(-DGL_INTEROP)
 ADD_DEFINITIONS(-g )
 
 
+#Doxygen
+find_package(Doxygen REQUIRED)
+
+set(DOXYGEN_INPUT   ${isph_SOURCE_DIR}/doc/doxyfile)
+set(DOXYGEN_OUTPUT  ${isph_BINARY_DIR}/html/index.html)
+file(MAKE_DIRECTORY ${isph_BINARY_DIR}/html)
+
+configure_file(
+  ${isph_SOURCE_DIR}/doc/doxyfile
+  ${DOXYGEN_INPUT} @ONLY
+)
+
+add_custom_command(
+  OUTPUT  ${DOXYGEN_OUTPUT}
+  COMMAND ${DOXYGEN} ${DOXYGEN_INPUT}
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+  DEPENDS ${DOXYGEN_INPUT}
+)
+
+add_custom_target(doc DEPENDS ${DOXYGEN_OUTPUT})
+
+
+
+
 ADD_SUBDIRECTORY(isphlib)
 ADD_SUBDIRECTORY(tools/test)

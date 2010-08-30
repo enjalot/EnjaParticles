@@ -6,7 +6,7 @@
 namespace isph {
 
      /*!
-	 *	\enum DensityReinitMethod
+	 *	\enum DensityReinitMethods
 	 *	\brief	Different density reinitialization methods.
 	 */
 	enum DensityReinitMethods
@@ -27,6 +27,9 @@ namespace isph {
 	{
 	public:
 		using Simulation<dim, typ>::program;
+        //added by enjalot
+        using Simulation<dim, typ>::integrator;
+        using Simulation<dim, typ>::integratorType;
 		
 		WcsphSimulation();
 		~WcsphSimulation();
@@ -92,6 +95,7 @@ namespace isph {
 		 *	\return	Time in seconds.
 		 */
 		virtual typ SuggestTimeStep();
+        
 
 	protected:
 
@@ -110,10 +114,11 @@ namespace isph {
 
         // added by enjalot to make this work. inheritance is not working properly
         // integrator - from simulation.h
-        AbstractIntegrator<dim,typ> *integrator;
-        IntegratorType integratorType;
+        //AbstractIntegrator<dim,typ> *integrator;
+        //IntegratorType integratorType;
 	};
 
 }
+
 
 #endif

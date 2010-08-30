@@ -641,6 +641,8 @@ bool Simulation<dim, typ>::RunGrid()
 template<int dim, typename typ>
 bool Simulation<dim, typ>::Advance( float advanceTimeStep )
 {
+    //enjalot
+    printf("in Simulation<dim, typ>::Advance\n");
 	LogDebug("Advancing simulation");
 
 	if(!program->IsBuilt())

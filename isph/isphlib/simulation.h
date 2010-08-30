@@ -164,7 +164,7 @@ namespace isph {
 
 		/*!
 		 *	\brief	Set the fluid alpha parameter for artificial viscosity.
-		 *	\param	viscosity	Value of the alpha parameter for artificial viscosity, in  ???.
+		 *	\param	alpha	Value of the alpha parameter for artificial viscosity, in  ???.
 		 */
 		void SetAlphaViscosity(typ alpha);
 
@@ -293,8 +293,8 @@ namespace isph {
 		virtual bool RunGrid();
 
 
-//GE	protected: 
-	public:
+	protected: 
+	//public:
 
 		/*!
 		 *	\brief	Set the number of particles.
@@ -354,7 +354,6 @@ namespace isph {
 		template<int dim_, typename typ_>	friend class Particle;
 		template<int dim__, typename typ__>	friend class Geometry;
         template<int dim___, typename typ___>	friend class ProbeManager;
-
 
 		// solver
 		CLProgram *program;

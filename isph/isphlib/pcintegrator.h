@@ -13,6 +13,9 @@ namespace isph {
 	class PCIntegrator: public AbstractIntegrator<dim,typ>
 	{
 	public:
+        //enjalot
+        using AbstractIntegrator<dim,typ>::sim;
+        using AbstractIntegrator<dim,typ>::doRegrid;
 
 		PCIntegrator(Simulation<dim,typ>* simulation);
 
@@ -26,6 +29,6 @@ namespace isph {
 
 } // namespace isph
 
-#include "pcintegrator.h"
+#include "pcintegrator.cpp"
 
 #endif

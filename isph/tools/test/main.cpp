@@ -34,6 +34,7 @@ void BuildWaterDrop(WcsphSimulation<2,float>* sim, int resFactor)
 
 void SetWaterDrop(WcsphSimulation<2,float>* sim)
 {
+    printf("setting water drop\n");
 	Geometry<2,float>* dropSphere = sim->GetGeometry("WaterDrop");
 	float spacing = sim->ParticleSpacing();
 	for (unsigned int i=0; i<dropSphere->ParticleCount(); i++)
@@ -49,6 +50,7 @@ void SetWaterDrop(WcsphSimulation<2,float>* sim)
 		p.SetPressure(pressure);
 		p.SetMass(density * spacing * spacing);
 	}
+    printf("dropSphere->ParticleCount(): %d\n", dropSphere->ParticleCount());
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -433,11 +435,15 @@ int main(int argc, char *argv[])
 	default: break;
 	}
 
+    printf("Made it past testCaseNumber\n");
+
 	const double simMaxTime = 4.000;   // sec
 	const double exportingStep = (argc>3) ? atof(argv[3]) : 0.01; // sec
 	double nextTimeStep = 1e-6;        // sec
 	double lastExportTime = -1;
 	double minTimeStep = nextTimeStep;
+
+    printf("about to do exporter.Prepare()\n");
 
 	exporter.Prepare();
     exporter.WriteData(); // write scene setup
@@ -447,14 +453,19 @@ int main(int argc, char *argv[])
 	
 	unsigned int stepCounts = 0;
 
+    printf("about to start simulation loop\n");
+
 	while(sim.Time() < simMaxTime && running)
 	{
+        printf("sim.time() < simMaxTime && running\n");
 		// advance with CFL
 		if(sim.Advance((float)nextTimeStep))
 		{
 			stepCounts++;
+            printf("stepCounts: %d\n", stepCounts);
 			// write results every something time step
 			nextTimeStep = sim.SuggestTimeStep();
+            printf("next time step %f\n" , (float)nextTimeStep);
 			minTimeStep = std::min(nextTimeStep,minTimeStep);
 			if(sim.Time() >= (exporter.FileIndex() * exportingStep))
 			{
