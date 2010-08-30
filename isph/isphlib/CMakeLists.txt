@@ -21,7 +21,7 @@ SET (CPPFILES
 	utils.cpp
 	vec.cpp
 	vtkwriter.cpp
-	#wcsphsimulation.cpp
+	wcsphsimulation.cpp
 	writer.cpp
 )
 
@@ -37,4 +37,9 @@ message("*** bin dir: ${CMAKE_CURRENT_BINARY_DIR}")
 #FIND_LIBRARY(SPH sph PATH ${CMAKE_CURRENT_BINARY_DIR})
 SET(SPH ${CMAKE_CURRENT_BINARY_DIR}/libsph.a)
 message("*** SPH: ${SPH}")
+
+#need to execute these commands, make sure this file gets placed in the proper place
+#tar -cvf isph.cta --exclude .svn wcsph pcisph general kernels scene integrators
+#ln ../lib/isph.cta ../bin/isph.cta
+
 

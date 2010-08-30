@@ -22,7 +22,12 @@ ADD_EXECUTABLE(main.x ${CPPFILES})
 
 #ADD_DEFINITIONS(-m32)
 message("++++ sph: ${SPH}")
+message("++++ sph: ${sph}")
 
+#CMake is not keeping the variables from the isphlib CMakeLists.txt
+SET(SPH ${isph_BINARY_DIR}/isphlib/libsph.a)
+
+message("++++ sph: ${SPH}")
 
 TARGET_LINK_LIBRARIES(main.x
    ${SPH}

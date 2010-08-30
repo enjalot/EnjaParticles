@@ -107,11 +107,13 @@ namespace isph {
         // Density reinitialization
 		DensityReinitMethods densityReinitMethod;
 		int densityReinitFrequency;
+
+        // added by enjalot to make this work. inheritance is not working properly
+        // integrator - from simulation.h
+        AbstractIntegrator<dim,typ> *integrator;
+        IntegratorType integratorType;
 	};
 
-
 }
-
-#include "wcsphsimulation.cpp"
 
 #endif
