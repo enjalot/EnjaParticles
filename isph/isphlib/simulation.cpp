@@ -277,6 +277,8 @@ bool Simulation<dim,typ>::Initialize()
 	// precompute tensile correction kernel dP constant
 	typ dp;
 	EnqueueSubprogram("deltaP", 1, 1);
+    //enjalot
+    printf("ij: about to call program finish from Initialize()\n");
 	program->Finish();
 	program->Variable("DELTA_P")->ReadTo(&dp); // TODO copy directly with clvariable
 	dp = 1 / dp;
@@ -633,6 +635,9 @@ bool Simulation<dim, typ>::RunGrid()
 
 	// set cell start
 	EnqueueSubprogram("set cell start");
+    //enjalot
+    printf("ij: done with rungrid\n");
+    program->Finish();
 
 	return true;
 }
@@ -642,7 +647,7 @@ template<int dim, typename typ>
 bool Simulation<dim, typ>::Advance( float advanceTimeStep )
 {
     //enjalot
-    printf("in Simulation<dim, typ>::Advance\n");
+    printf("ij: in Simulation<dim, typ>::Advance\n");
 	LogDebug("Advancing simulation");
 
 	if(!program->IsBuilt())
@@ -666,9 +671,11 @@ bool Simulation<dim, typ>::Advance( float advanceTimeStep )
 
 	// run the SPH simulation on devices
 	RunSph();
+    printf("ij: Advance:: RunSph();\n");
 
 	// TODO dont wait to finish
 	program->Finish();
+    printf("ij: Advance:: finished\n");
 
 	// advance sim time
 	timeOverall += advanceTimeStep; 

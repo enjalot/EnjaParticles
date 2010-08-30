@@ -76,8 +76,10 @@ bool CLLink::Initialize(CLDevice** devices, unsigned int size)
 
 	for (i=0; i<size; i++)
 	{
-		LogDebug("Linking to device: " + devices[i]->Name());
+        //enjalot
+        Log::Send(Log::Info, "Linking to device: " + devices[i]->Name());
 		queues[i] = clCreateCommandQueue(context, devices[i]->ID(), 0, &status);
+        Log::Send(Log::Info, "command queue: " +  CLSystem::Instance()->ErrorDesc(status));
 		deviceFactors[i] = (double)devices[i]->PerformanceIndex() / totalPerformance;
 	}
 
@@ -88,6 +90,8 @@ bool CLLink::Initialize(CLDevice** devices, unsigned int size)
 CLLink::~CLLink()
 {
 	cl_int status;
+    //enjalot
+    printf("deconstructing cllink\n");
 
 	if(deviceCount)
 	{
@@ -149,6 +153,8 @@ bool CLLink::Finish()
 
 	for(unsigned int i=0; i<deviceCount; i++)
 	{
+        //enjalot
+        printf("i: %d\n", i);
 		status = clFinish(queues[i]);
 		if(status)
 		{

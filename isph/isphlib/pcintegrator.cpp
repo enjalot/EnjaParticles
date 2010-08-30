@@ -31,17 +31,22 @@ template<int dim, typename typ>
 bool PCIntegrator<dim, typ>::Integrate()
 {
 	
+    printf("starting integrate\n");
   	// calculate particle accelerations
 	sim->EnqueueSubprogram("acceleration");
+    printf("enqueued acceleration\n");
 
 	// calculate particle viscous acceleration
-	sim->EnqueueSubprogram("viscosity");
+	//sim->EnqueueSubprogram("viscosity");
+    //printf("enqueued viscosity\n");
 
 	// correct velocities 
 	sim->EnqueueSubprogram("xsph");
+    printf("enqueued xsph\n");
 
 	// calculate density rate of change with continuity eq.
 	sim->EnqueueSubprogram("continuity");
+    printf("enqueued continuity\n");
 
 	// copy buffers since we used XSPH_VELOCITIES as a temp buffer
 	sim->WriteVariableFrom("VELOCITIES_TMP","VELOCITIES");
@@ -50,6 +55,7 @@ bool PCIntegrator<dim, typ>::Integrate()
 
 	// Update particle position, velocities and densities at predictor step
     sim->EnqueueSubprogram("predictor");
+    printf("enqueued predictor\n");
 
 	// reinit grid with new particle positions
 	if (doRegrid)
@@ -57,24 +63,31 @@ bool PCIntegrator<dim, typ>::Integrate()
 
 	// Update particle pressure by Equation of State
     sim->EnqueueSubprogram("eos");
+    printf("enqueued eos\n");
 
 	// calculate particle accelerations
 	sim->EnqueueSubprogram("acceleration");
+    printf("enqueued acceleration\n");
 
 	// calculate particle viscous acceleration
-	sim->EnqueueSubprogram("viscosity");
+	//sim->EnqueueSubprogram("viscosity");
+    //printf("enqueued viscosity\n");
 
 	// correct velocities 
 	sim->EnqueueSubprogram("xsph");
+    printf("enqueued xsph\n");
 
 	// calculate density rate of change with continuity eq.
 	sim->EnqueueSubprogram("continuity");
+    printf("enqueued continuity\n");
 
 	// Update particle position, velocities and densities at corrector step
     sim->EnqueueSubprogram("corrector");
+    printf("enqueued corrector\n");
 
 	// Update particle pressure by Equation of State
     sim->EnqueueSubprogram("eos");
+    printf("enqueued eos\n");
 
 	// reinit grid with new particle positions
 	sim->RunGrid(); 

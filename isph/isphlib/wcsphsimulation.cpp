@@ -87,9 +87,11 @@ bool WcsphSimulation<dim, typ>::InitSph()
 	{
 	case ArtificialViscosity: 
          this->LoadSubprogram("acceleration", "wcsph/acceleration_artificial.cl");
+         printf("### artificial\n");
 		 break;
 	case LaminarViscosity: 
          this->LoadSubprogram("acceleration", "wcsph/acceleration_laminar.cl");
+         printf("### laminar\n");
 		 break;
 	default: Log::Send(Log::Error, "Viscosity formulation choice is not correct.");
 	}
@@ -129,6 +131,9 @@ bool WcsphSimulation<dim, typ>::InitSph()
          break;
 	default: Log::Send(Log::Error, "Integrator type choice is not correct.");
 	}
+    printf("in InitSPH calling finish\n");
+    program->Finish();
+    printf("called finish\n");
 
 	return true;
 }
