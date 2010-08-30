@@ -1,0 +1,65 @@
+Project ISPH
+============
+
+    Cross-platform CFD library for mesh-free simulation and 
+    visualization of incompressible flows using Smoothed Particle 
+    Hydrodynamics (SPH) methods.
+
+    Check out http://isph.sourceforge.net/ for more, and up to date infos.
+
+
+Folder Structure
+----------------
+
+    /isph
+        /bin        compiled tools
+        /build      build and IDE project files
+        /data       test and other data
+        /doc        library (doxygen) and tools documentation
+        /isphlib    library sources
+        /lib        compiled library files
+        /tools      tools sources
+
+
+Requirements
+------------
+
+    For successful compilation you'll need the following installed on
+    your system:
+
+    - OpenCL SDK and drivers
+
+
+    Since there is no integrated visualization engine at the moment,
+    we suggest you post-process simulated data with:
+
+    - ParaView Meshless
+
+
+Supported Operating Systems
+---------------------------
+
+    - Linux 2.6
+    - Windows XP, Vista, 7
+    - Mac OS X 10.6
+
+    Other operating systems may work but are not tested.
+
+
+Supported Compilers
+-------------------
+
+    - MSVC 9 and newer
+    - GCC 4.0 and newer
+
+    Other standard C++ compilers should work but are not tested.
+
+
+Legal Stuff
+-----------
+
+    (c) Copyright 2009-2010. The ISPH authors
+    All rights reserved.
+
+    The project is distributed under the GNU/GPL License,
+    complete license text can be found in file named 'COPYING'.
