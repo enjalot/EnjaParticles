@@ -1,9 +1,9 @@
 
-#include "pcintegrator.h"
+//#include "pcintegrator.h"
 #include "simulation.h"
 
 
-using namespace isph;
+//using namespace isph;
 
 template<int dim, typename typ>
 PCIntegrator<dim, typ>::PCIntegrator(Simulation<dim,typ>* simulation) :
@@ -90,4 +90,5 @@ bool PCIntegrator<dim, typ>::Integrate()
 
 template class PCIntegrator<2,float>;
 
-#endif
+//#endif
+} // namespace isph

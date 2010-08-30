@@ -19,6 +19,9 @@
 #include "wcsphsimulation.h"
 #include "pcisphsimulation.h"
 
+//integrator
+#include "pcintegrator.h"
+
 // exporters
 #include "vtkwriter.h"
 

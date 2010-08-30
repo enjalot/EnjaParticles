@@ -27,7 +27,6 @@ namespace isph {
     
 	};
 
-} // namespace isph
 
 #include "pcintegrator.cpp"
 
