@@ -34,7 +34,7 @@ __kernel void Xsph
 			corr += mass[j] * (vel[j] - velI) * SphKernel(posI - pos[j], h.x, h.y) / (densityI + density[j]);
 	ForEachEnd
 	
-	xsphVel[i] = velI + 2.0 * xsphFactor * corr;
+	xsphVel[i] = velI + 2.0f * xsphFactor * corr;
 
 	}
 	else xsphVel[i] = vel[i];

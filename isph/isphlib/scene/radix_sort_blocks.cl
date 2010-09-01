@@ -62,7 +62,8 @@ uint4 rank4(uint4 preds, __local uint* sMem)
 
 	uint4 address = scan4(preds, sMem);
 	
-	__local uint numtrue[1];
+//	__local uint numtrue[1];
+    uint numtrue[1];
 	if (localId == localSize - 1) 
 	{
 		numtrue[0] = address.w + preds.w;

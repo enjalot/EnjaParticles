@@ -37,7 +37,7 @@ vector SphKernelGrad(vector distVec, scalar smoothInv, scalar smoothInvSq)
 	if(Q < 1)
 	{
 		scalar c = 90 * M_1_PI / 28 * smoothInvSq * smoothInvSq;
-		return distVec * (c * (Q - 4.0/3.0));
+		return distVec * (c * (Q - 4.0f/3.0f));
 	}
 	else if(Q < 2)
 	{

@@ -28,7 +28,7 @@ vector SphKernelGrad(vector distVec, scalar smoothInv, scalar smoothInvSq)
 	scalar dist = length(distVec);
 	scalar Q = dist * smoothInv;
 	if(Q < GAUSS_KERNEL_SUPPORT)
-		return distVec * (c * exp(-(Q*Q)) / (1 - 10.0*d));
+		return distVec * (c * exp(-(Q*Q)) / (1 - 10.0f*d));
 	return (vector)0;
 }
 
