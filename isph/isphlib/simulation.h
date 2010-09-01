@@ -417,6 +417,4 @@ namespace isph {
 	};
 }
 
-#include "simulation.cpp"
-
 #endif

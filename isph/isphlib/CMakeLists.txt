@@ -9,14 +9,14 @@ SET (CPPFILES
 	clvariable.cpp
 	cpubitonicsort.cpp
 	diffusionsimulation.cpp
-	geometry.cpp
+    geometry.cpp
 	gpubitonicsort.cpp
 	log.cpp
 	particle.cpp
-    #pcintegrator.cpp
+    pcintegrator.cpp
     pcisphsimulation.cpp
 	probemanager.cpp
-	#simulation.cpp
+	simulation.cpp
 	stdwriter.cpp
 	utils.cpp
 	vec.cpp
