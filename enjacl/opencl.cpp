@@ -397,18 +397,13 @@ cl::Program EnjaParticles::loadProgram(std::string kernel_source)
     catch (cl::Error er) {
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
     }
-    printf("What now?\n");
-        
 
-	printf("0***\n");
     try
     {
         //err = program.build(devices, "-cl-nv-verbose");
         err = program.build(devices);
-	printf("1***\n");
     }
     catch (cl::Error er) {
-		printf("GE+++++\n");
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
         std::cout << "Build Status: " << program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(devices.front()) << std::endl;
         std::cout << "Build Options:\t" << program.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(devices.front()) << std::endl;

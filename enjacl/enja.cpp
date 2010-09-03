@@ -31,6 +31,7 @@
 #include "physics/lorenz.cl"
 #include "physics/gravity.cl"
 #include "physics/vfield.cl"
+#include "physics/sph.cl"
 
 #ifdef OPENCL_SHARED
 //#include "physics/collision_ge.cl"
@@ -49,6 +50,7 @@ const std::string EnjaParticles::sources[] = {
         lorenz_program_source,
         gravity_program_source,
         vfield_program_source,
+        sph_program_source,
         collision_program_source,
         position_program_source
     };
@@ -94,8 +96,8 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
         //initialize the radii array with random values between 1.0 and particle_radius
         //g[i].w = 1.0f + particle_radius*drand48();
         //initialize the particle life array with random values between 0 and 1
-        v[i].w = drand48();
-        //v[i].w = 1.0f;
+        //v[i].w = drand48();
+        v[i].w = 1.0f;
     }
 
     num = n;
@@ -128,6 +130,39 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
     return 1;
 }
 
+void EnjaParticles::make_grid(Vec4 min, Vec4 max)
+{
+    //will add more grid functionality
+    //we will probably have a seperate grid class
+    grid_min = min;
+    grid_max = max;
+}
+
+void EnjaParticles::make_cube(Vec4* position)
+{
+    printf("hihii\n");
+
+    float spacing = sph_settings.spacing;
+
+    float xmin = grid_min.x/2.5f;
+    float xmax = grid_max.x/2.0f;
+    float ymin = grid_min.y;
+    float ymax = grid_max.y;
+    float zmin = grid_min.z/2.0f;
+    float zmax = grid_max.z/1.5f;
+
+    int i=0;
+    //cube in corner
+    for (float y = ymin; y <= ymax; y+=spacing) {
+    for (float z = zmin; z <= zmax; z+=spacing) {
+    for (float x = xmin; x <= xmax; x+=spacing) {
+        if (i >= num) break;				
+        position[i] = Vec4(x,y,z,1);
+        i++;
+    }}}
+    printf("byee\n");
+
+}
 
 EnjaParticles::EnjaParticles(int s, int n)
 {
@@ -135,21 +170,29 @@ EnjaParticles::EnjaParticles(int s, int n)
     
     particle_radius = 5.0f;
 	bool are_objects_loaded = false;
+
+    num = n;
     
     system = s;
     //init system
     AVec4 g(n);
 
-    float f = 0;
-    for(int i=0; i < n; i++)
-    {
-        f = (float)i;
-		float rad = rand_float(0.5, 2.);
-        g[i].x = 0.0 + rad*cos(2.*M_PI*(f/n));  //with lorentz this looks more interesting
-        g[i].y = 0.0 + rad*sin(2.*M_PI*(f/n));
-        g[i].z = 0.f;
-        g[i].w = 1.f;
-    }
+   
+    //init sph stuff
+    sph_settings.rest_density = 1000;
+    sph_settings.simulation_scale = .001;
+
+    sph_settings.particle_mass = (128*1024)/num * .0002;
+    printf("particle mass: %f\n", sph_settings.particle_mass);
+    sph_settings.particle_rest_distance = .87 * pow(sph_settings.particle_mass / sph_settings.rest_density, 1./3.);
+    printf("particle rest distance: %f\n", sph_settings.particle_rest_distance);
+   
+    sph_settings.spacing = sph_settings.particle_rest_distance / sph_settings.simulation_scale;
+    particle_radius = sph_settings.spacing;
+    printf("particle radius: %f\n", particle_radius);
+
+    make_grid(Vec4(-100,-100,-100,0), Vec4(100,100,100,0));
+    make_cube(&g[0]);
 
     AVec4 c(n);
     for(int i=0; i < n; i++)
@@ -161,15 +204,15 @@ EnjaParticles::EnjaParticles(int s, int n)
     }
     //initialize the velocities array, by default we just set to 0
     AVec4 v(n);
-    f = 0.f;
+    float f = 0.f;
     for(int i=0; i < n; i++)
     {
         f = (float)i;
         //v[i].x = 0.0 + .5*cos(2.*M_PI*(f/n));  //with lorentz this looks more interesting
         //v[i].z = 3.f;
         //v[i].y = 0.0 + .5*sin(2.*M_PI*(f/n));
-        v[i].x = 0.5f; //.01 * (1. - 2.*drand48()); // between -.02 and .02
-        v[i].y = 0.5f; //.05 * drand48();
+        v[i].x = 0.f; //.01 * (1. - 2.*drand48()); // between -.02 and .02
+        v[i].y = 0.f; //.05 * drand48();
         v[i].z = 0.f; //.01 * (1. - 2.*drand48());
         v[i].w = 0.f;
     }

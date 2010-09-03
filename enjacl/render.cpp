@@ -64,6 +64,7 @@ int EnjaParticles::render()
     // and this should get more sophisticated)
  
     //printf("in EnjaParticles::render\n");
+    /*
 	ts[2]->start();
 
     //printf("about to update\n");
@@ -78,6 +79,7 @@ int EnjaParticles::render()
     ts[0]->stop();
 
     ts[1]->start();
+    */
     //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //printf("render!\n");
  

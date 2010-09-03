@@ -51,6 +51,19 @@ typedef struct Box
 
 typedef std::vector<Vec4> AVec4;
 
+
+typedef struct SPHSettings
+{
+    float rest_density;
+    float simulation_scale;
+    float particle_mass;
+    float particle_rest_distance;
+    float spacing;
+    float grid_cell_size;
+
+} SPHSettings;
+
+
 class EnjaParticles
 {
 public:
@@ -89,7 +102,7 @@ public:
 
     ~EnjaParticles();
 
-    enum {LORENZ, GRAVITY, VFIELD, COLLISION, POSITION, TRANSFORM};
+    enum {LORENZ, GRAVITY, VFIELD, SPH, COLLISION, POSITION, TRANSFORM};
     static const std::string sources[];
 
     //keep track of transformation from blender
@@ -116,6 +129,16 @@ public:
     AVec4 colors;
     std::vector<int> indices;
     //float* life;  //life is packed into velocity.w
+    
+
+    //SPH
+    void make_cube(Vec4* position);
+    void make_grid(Vec4 min, Vec4 max);
+    //will want a seperate grid class
+    Vec4 grid_min;
+    Vec4 grid_max;
+    SPHSettings sph_settings; 
+
 
     int init(AVec4 vert_gen, AVec4 velo_gen, AVec4 colors, int num);
 
