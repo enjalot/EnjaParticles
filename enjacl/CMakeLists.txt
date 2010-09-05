@@ -33,6 +33,9 @@ set (CLCXXFILES
     opencl.cpp 
     physics/collision.cpp 
     render.cpp 
+
+    SPH.cpp
+
     util.cpp 
     timege.cpp)
 
