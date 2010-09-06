@@ -27,7 +27,8 @@ __kernel void collision_wall(__global float4* pos, __global float4* vel,  __glob
     //we should have a grid data structure passed in with min/max to calculate these things
     float boundary_stiffness = 20000.0f;
     float boundary_dampening = 256.0f;
-    float boundary_distance = 0.010176f*.5f;
+    float rest_distance = 0.025641;
+    float boundary_distance = rest_distance * .5f;
     float EPSILON = .00001f;
     
     //bottom wall

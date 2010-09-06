@@ -89,6 +89,8 @@ void SPH::update()
     //printf("acquire: %s\n", oclErrorString(err));
     queue.finish();
     
+    //density
+    err = queue.enqueueNDRangeKernel(k_density, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
     //pressure
     err = queue.enqueueNDRangeKernel(k_pressure, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
     //collision
