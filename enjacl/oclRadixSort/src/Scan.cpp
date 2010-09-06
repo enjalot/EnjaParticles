@@ -13,6 +13,7 @@
 * 
 */
 
+#include <stdio.h>
 #include <oclUtils.h>
 #include "Scan.h"
 
@@ -37,7 +38,24 @@ Scan::Scan(cl_context GPUContext,
 
 	char *SourceFile = "Scan_b.cl";
 
-    char *cScan = oclLoadProgSource(shrFindFilePath(SourceFile, path), "// My comment\n", &szKernelLength);
+	printf("cScan, path= %s\n", path);
+	printf("path: %s\n", shrFindFilePath(SourceFile, path));
+
+    //char *cScan = oclLoadProgSource(shrFindFilePath(SourceFile, path), "// My comment\n", &szKernelLength);
+
+    //char *cScan = oclLoadProgSource(".", "// My comment\n", &szKernelLength);
+
+	// IAN: FIX CODE AND REMOVE HARDCODING (path to cl files)
+	// cScan should contain the source code
+
+	char* pathr= "/Users/erlebach/Documents/src/blender-particles/enjacl/build/Scan_b.cl";
+	FILE* fd =fopen(pathr, "r");
+	char* cScan = new char [10000];
+	int nb = fread(cScan, 1, 10000, fd);
+
+	printf("nb= %d\n", nb);
+	//printf("cScan= %s\n", cScan);
+
     oclCheckErrorEX(cScan == NULL, false, NULL);
     cpProgram = clCreateProgramWithSource(cxGPUContext, 1, (const char **)&cScan, &szKernelLength, &ciErrNum);
     ciErrNum = clBuildProgram(cpProgram, 0, NULL, "-cl-fast-relaxed-math", NULL, NULL);

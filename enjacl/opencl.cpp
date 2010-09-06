@@ -125,7 +125,6 @@ int EnjaParticles::update()
 	int nb_el = 2 << 12;
 	cl::Buffer cl_sort(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(int), NULL, &err);
 	cl::Buffer cl_unsort(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(int), NULL, &err);
-	cl_command_queue qu = queue();
 
 
 	for (int i=0; i < nb_el; i++) {
@@ -138,7 +137,8 @@ int EnjaParticles::update()
 
 		int ctaSize = 128; // work group size
 		printf("true= %d\n", true);
-	    RadixSort* radixSort = new RadixSort(context(), qu, nb_el, "oclRadixSort/RadixSort.cl", ctaSize, true);		    
+	    //RadixSort* radixSort = new RadixSort(context(), queue(), nb_el, "oclRadixSort/RadixSort.cl", ctaSize, true);		    
+	    RadixSort* radixSort = new RadixSort(context(), queue(), nb_el, "../oclRadixSort/", ctaSize, true);		    
 		unsigned int keybits = 32;
 	    radixSort->sort(cl_unsort(), 0, nb_el, keybits);
 

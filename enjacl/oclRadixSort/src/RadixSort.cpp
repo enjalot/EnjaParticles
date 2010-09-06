@@ -13,6 +13,7 @@
 * 
 */
 
+#include <stdio.h>
 #include <oclUtils.h>
 #include "RadixSort.h"
 
@@ -47,7 +48,21 @@ RadixSort::RadixSort(cl_context GPUContext,
 	mBlockOffsets = clCreateBuffer(cxGPUContext, CL_MEM_READ_WRITE, WARP_SIZE * numBlocks * sizeof(unsigned int), NULL, &ciErrNum); 
 
 	size_t szKernelLength; // Byte size of kernel code
-    char *cRadixSort = oclLoadProgSource(shrFindFilePath("RadixSort.cl", path), "// My comment\n", &szKernelLength);
+
+
+
+    //char *cRadixSort = oclLoadProgSource(shrFindFilePath("RadixSort.cl", path), "// My comment\n", &szKernelLength);
+
+
+
+	char* pathr= "/Users/erlebach/Documents/src/blender-particles/enjacl/build/RadixSort.cl";
+	FILE* fd =fopen(pathr, "r");
+	char* cRadixSort = new char [10000];
+	int nb = fread(cRadixSort, 1, 10000, fd);
+
+	//printf("cScan= %s\n", cScan);
+
+
     oclCheckErrorEX(cRadixSort == NULL, false, NULL);
     cpProgram = clCreateProgramWithSource(cxGPUContext, 1, (const char **)&cRadixSort, &szKernelLength, &ciErrNum);
     oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
