@@ -158,10 +158,13 @@ void EnjaParticles::popCorn()
 
     try{
         //#include "physics/collision.cl"
+		printf("before load program system\n");
         vel_update_program = loadProgram(sources[system]);
+		printf("before load program vel_update\n");
         vel_update_kernel = cl::Kernel(vel_update_program, "vel_update", &err);
         //if(collision) //we setup collision kernel either way
         //{
+			printf("before load program sources[collision]\n");
             collision_program = loadProgram(sources[COLLISION]);
 #ifdef OPENCL_SHARED
 			// version that works (80 fps with 220 tri and 16,000 particles)
@@ -179,14 +182,17 @@ void EnjaParticles::popCorn()
             size_t wgs = collision_kernel.getWorkGroupInfo<CL_KERNEL_WORK_GROUP_SIZE>(devices.front());
             printf("kernel workgroup size: %d\n", wgs);
         //}
+		printf("before load program sources[position]\n");
         pos_update_program = loadProgram(sources[POSITION]);
         pos_update_kernel = cl::Kernel(pos_update_program, "pos_update", &err);
 
+		printf("before load program sources[sort]\n");
 		sort_program = loadProgram(sources[SORT]);
 		sort_kernel = cl::Kernel(sort_program, "sort", &err);
     }
     catch (cl::Error er) {
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+		exit(0);
     }
 
 
@@ -437,6 +443,7 @@ cl::Program EnjaParticles::loadProgram(std::string kernel_source)
     
     }
     catch (cl::Error er) {
+		printf("loadProgram\n");
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
     }
 
@@ -446,6 +453,8 @@ cl::Program EnjaParticles::loadProgram(std::string kernel_source)
         err = program.build(devices);
     }
     catch (cl::Error er) {
+		printf("loadProgram::program.build\n");
+		printf("source= %s\n", kernel_source.c_str());
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
         std::cout << "Build Status: " << program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(devices.front()) << std::endl;
         std::cout << "Build Options:\t" << program.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(devices.front()) << std::endl;
