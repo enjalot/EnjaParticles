@@ -121,14 +121,23 @@ int EnjaParticles::update()
 #if 1
 // Sorting
 	std::vector<int> sort_int;
-	cl::Buffer cl_sort;
-
 	int nb_el = 2 << 12;
+	cl::Buffer cl_sort(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(int), NULL, &err);
+
 	for (int i=0; i < nb_el; i++)
 	{
 		sort_int.push_back(10000-i);
 	}
-    err = queue.enqueueWriteBuffer(cl_sort, CL_TRUE, 0, nb_el*sizeof(int), &sort_int[0], NULL, &event);
+
+    try
+    {
+        err = queue.enqueueWriteBuffer(cl_sort, CL_TRUE, 0, nb_el*sizeof(int), &sort_int[0], NULL, &event);
+    }
+    catch (cl::Error er) {
+        printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+    }
+
+
     queue.finish();
     
 #endif
