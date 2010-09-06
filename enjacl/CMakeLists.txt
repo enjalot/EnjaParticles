@@ -15,9 +15,12 @@ FIND_PACKAGE (OPENCL)
 FIND_PACKAGE (GLEW)
 
 INCLUDE_DIRECTORIES( 
+	oclRadixSort/inc
 	${GLUT_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
     ${GLEW_INCLUDE_PATH}
+	$ENV{OPENCL_HOME}/common/inc
+	$ENV{OPENCL_HOME}/../shared/inc
     #${OPENCL_INCLUDE_DIR}
     ${enjacl_SOURCE_DIR}/../opencl10
 )
@@ -29,6 +32,8 @@ ADD_DEFINITIONS(-g )
 
 #particles opencl library
 set (CLCXXFILES  
+	oclRadixSort/src/RadixSort.cpp
+	oclRadixSort/src/Scan.cpp
     enja.cpp 
     opencl.cpp 
     physics/collision.cpp 
@@ -48,6 +53,8 @@ ADD_EXECUTABLE(${EXEC_CL} main.cpp util.cpp)
 
 
 TARGET_LINK_LIBRARIES (${EXEC_CL}
+   $ENV{OPENCL_HOME}/../shared/lib/libshrutil_x86_64.a
+   $ENV{OPENCL_HOME}/common/lib/liboclUtil_x86_64.a
    ${ocllib}
    ${GLUT_LIBRARIES}
    ${OPENGL_LIBRARIES}

@@ -18,7 +18,7 @@
 #endif
 
 
-
+#include "RadixSort.h"
 #include "enja.h"
 #include "util.h"
 #include "timege.h"
@@ -125,6 +125,7 @@ int EnjaParticles::update()
 	int nb_el = 2 << 12;
 	cl::Buffer cl_sort(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(int), NULL, &err);
 	cl::Buffer cl_unsort(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(int), NULL, &err);
+	cl_command_queue qu = queue();
 
 
 	for (int i=0; i < nb_el; i++) {
@@ -133,14 +134,22 @@ int EnjaParticles::update()
 	}
 
     try {
-        err = queue.enqueueWriteBuffer(cl_sort, CL_TRUE, 0, nb_el*sizeof(int), &unsort_int[0], NULL, &event);
+        err = queue.enqueueWriteBuffer(cl_unsort, CL_TRUE, 0, nb_el*sizeof(int), &unsort_int[0], NULL, &event);
 
+		int ctaSize = 128; // work group size
+		printf("true= %d\n", true);
+	    RadixSort* radixSort = new RadixSort(context(), qu, nb_el, "oclRadixSort/RadixSort.cl", ctaSize, true);		    
+		unsigned int keybits = 32;
+	    radixSort->sort(cl_unsort(), 0, nb_el, keybits);
+
+		#if 0
 		size_t glob = num; // 10000
 		size_t loc = 256;
 		err = sort_kernel.setArg(0, cl_unsort);
 		err = sort_kernel.setArg(1, cl_sort);
     	err = queue.enqueueNDRangeKernel(sort_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
-
+    	queue.finish();
+		#endif
     } catch (cl::Error er) {
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
     }
@@ -148,9 +157,7 @@ int EnjaParticles::update()
     queue.finish();
     
 #endif
-
 }
-
 
 //----------------------------------------------------------------------
 void EnjaParticles::popCorn()
