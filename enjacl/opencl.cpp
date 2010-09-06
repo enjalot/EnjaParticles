@@ -23,6 +23,7 @@
 #include "timege.h"
 //#include "incopencl.h"
 
+//----------------------------------------------------------------------
 int EnjaParticles::update()
 {
     m_system->update();
@@ -117,6 +118,7 @@ int EnjaParticles::update()
 }
 
 
+//----------------------------------------------------------------------
 void EnjaParticles::popCorn()
 {
 
@@ -428,3 +430,4 @@ cl::Kernel EnjaParticles::loadKernel(std::string kernel_source, std::string kern
     }
     return kernel;
 }
+//----------------------------------------------------------------------

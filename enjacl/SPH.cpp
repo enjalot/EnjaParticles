@@ -60,9 +60,6 @@ SPH::SPH(EnjaParticles *enj)
     k_euler.setArg(1, cl_velocity);
     k_euler.setArg(2, cl_force);
     k_euler.setArg(3, .01f); //time step (should be set from settings)
-
-
-
 }
 
 SPH::~SPH()
