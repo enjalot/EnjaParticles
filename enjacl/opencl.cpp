@@ -1,3 +1,4 @@
+#include <vector>
 #include <string.h>
 #include <string>
 #include <iostream>
@@ -26,6 +27,7 @@
 //----------------------------------------------------------------------
 int EnjaParticles::update()
 {
+	printf("inside update\n");
     m_system->update();
 #if 0
 
@@ -115,6 +117,22 @@ int EnjaParticles::update()
 	ts_cl[0]->stop();
 
 #endif
+
+#if 1
+// Sorting
+	std::vector<int> sort_int;
+	cl::Buffer cl_sort;
+
+	int nb_el = 2 << 12;
+	for (int i=0; i < nb_el; i++)
+	{
+		sort_int.push_back(10000-i);
+	}
+    err = queue.enqueueWriteBuffer(cl_sort, CL_TRUE, 0, nb_el*sizeof(int), &sort_int[0], NULL, &event);
+    queue.finish();
+    
+#endif
+
 }
 
 
