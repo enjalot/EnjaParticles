@@ -5,10 +5,12 @@
 
 #include <string>
 #include <vector>
-#include "incopencl.h"
-#include "timege.h"
 #include <stdio.h>
 
+#include <CL/cl.hpp>
+
+#include "system.h"
+#include "timege.h"
 
 typedef struct Vec4
 {
@@ -87,6 +89,7 @@ public:
     EnjaParticles(int system, AVec4 generators, AVec4 velocities, int len, int num, float radius);
     //EnjaParticles(int system, Vec4* generators, Vec4* velocities, Vec4* colors, int num);
     
+
     //extra properties of the system
     bool collision;         //enable collision detection
     int updates;            //number of times to update per frame
@@ -123,6 +126,7 @@ public:
     //particles
     int num;                //number of particles
     int system;             //what kind of system?
+    System *m_system;
     AVec4 vert_gen;       //vertex generators
     AVec4 velo_gen;       //velocity generators
     AVec4 velocities;       //for cpu version only
@@ -178,7 +182,6 @@ public:
     //cl::Buffer cl_life;        //keep track where in their life the particles are (packed into velocity.w now)
     int v_vbo;   //vertices vbo
     int c_vbo;   //colors vbo
-    int i_vbo;   //index vbo
     unsigned int vbo_size; //size in bytes of the vbo
     
     //for collisions
@@ -193,6 +196,7 @@ public:
     int init_cl();
     int setup_cl(); //helper function that initializes the devices and the context
     cl::Program loadProgram(std::string kernel_source);
+    cl::Kernel loadKernel(std::string kernel_source, std::string kernel_name);
     void popCorn(); // sets up the kernel and pushes data
     
     //opengl

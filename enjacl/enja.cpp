@@ -1,20 +1,7 @@
 #include <stdio.h>
 
-
-#include <GL/glew.h>
-#if defined __APPLE__ || defined(MACOSX)
-    //OpenGL stuff
-    #include <OpenGL/gl.h>
-    #include <OpenGL/glext.h>
-    #include <GLUT/glut.h>
-    #include <OpenGL/CGLCurrent.h> //is this really necessary?
-#else
-    //OpenGL stuff
-    #include <GL/glx.h>
-#endif
-
-
 #include "enja.h"
+#include "SPH.h"
 //#include "incopencl.h"
 #include "util.h"
 
@@ -67,6 +54,7 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
     // This is the main initialization function for our particle systems
     // AVec4* g is the array of generator points (this initializes our system)
     // AVec4* c is the array of color values 
+
     
     //this should be configurable. how many updates do we run per frame:
     updates = 4;
@@ -105,20 +93,11 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
     velo_gen = v;
     velocities = v;
     colors = c;
-
-    //index array so we can draw transparent items correctly
-    std::vector<int> ind(n);
-    for(int i = 0; i < n; i++)
-    {
-        ind[i] = i;
-    }
-    indices = ind;
-
+   
     //initialize our vbos
     vbo_size = sizeof(Vec4) * n;
     v_vbo = createVBO(&vert_gen[0], vbo_size, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
     c_vbo = createVBO(&colors[0], vbo_size, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
-    i_vbo = createVBO(&ind[0], sizeof(int) * n, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
     
 
     //we initialize our timers, they only time every 5th call
@@ -230,6 +209,7 @@ EnjaParticles::EnjaParticles(int s, int n)
     //init opencl
     int success = init_cl();
     
+    m_system = new SPH::SPH(this);
 }
 
 //Take in vertex vert_gen as well as velocity vert_gen that are len elements long
@@ -306,21 +286,13 @@ EnjaParticles::~EnjaParticles()
 */
     if(v_vbo)
     {
-        glBindBuffer(1, v_vbo);
-        glDeleteBuffers(1, (GLuint*)&v_vbo);
-        v_vbo = 0;
+	deleteVBO(v_vbo);
+	v_vbo = 0;
     }
     if(c_vbo)
     {
-        glBindBuffer(1, c_vbo);
-        glDeleteBuffers(1, (GLuint*)&c_vbo);
+	deleteVBO(v_vbo);
         c_vbo = 0;
-    }
-    if(i_vbo)
-    {
-        glBindBuffer(1, i_vbo);
-        glDeleteBuffers(1, (GLuint*)&i_vbo);
-        i_vbo = 0;
     }
 /*
     if(cl_vbos[0])clReleaseMemObject(cl_vbos[0]);

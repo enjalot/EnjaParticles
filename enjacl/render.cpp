@@ -31,15 +31,10 @@ void EnjaParticles::drawArrays()
     //printf("vertex buffer\n");
     glBindBuffer(GL_ARRAY_BUFFER, v_vbo);
     glVertexPointer(4, GL_FLOAT, 0, 0);
-    
-    //printf("index buffer\n");
-    glBindBuffer(GL_ARRAY_BUFFER, i_vbo);
-    glIndexPointer(GL_INT, 0, 0);
 
     //printf("enable client state\n");
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_COLOR_ARRAY);
-    glEnableClientState(GL_INDEX_ARRAY);
     
     //Need to disable these for blender
     glDisableClientState(GL_NORMAL_ARRAY);
@@ -49,7 +44,7 @@ void EnjaParticles::drawArrays()
     glDrawArrays(GL_POINTS, 0, num);
 
     //printf("disable stuff\n");
-    glDisableClientState(GL_INDEX_ARRAY);
+    //glDisableClientState(GL_INDEX_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
 

@@ -25,6 +25,9 @@
 
 int EnjaParticles::update()
 {
+    m_system->update();
+#if 0
+
 	ts_cl[0]->start();
 #ifdef GL_INTEROP   
     // map OpenGL buffer object for writing from OpenCL
@@ -109,6 +112,8 @@ int EnjaParticles::update()
 #endif
 
 	ts_cl[0]->stop();
+
+#endif
 }
 
 
@@ -155,8 +160,6 @@ void EnjaParticles::popCorn()
         //printf("v_vbo: %s\n", oclErrorString(err));
         cl_vbos.push_back(cl::BufferGL(context, CL_MEM_READ_WRITE, c_vbo, &err));
         //printf("c_vbo: %s\n", oclErrorString(err));
-        cl_vbos.push_back(cl::BufferGL(context, CL_MEM_READ_WRITE, i_vbo, &err));
-        //printf("i_vbo: %s\n", oclErrorString(err));
         //printf("SUCCES?: %s\n", oclErrorString(ciErrNum));
     #else
         //printf("no gl interop!\n");
@@ -412,3 +415,16 @@ cl::Program EnjaParticles::loadProgram(std::string kernel_source)
     return program;
 }
 //----------------------------------------------------------------------
+cl::Kernel EnjaParticles::loadKernel(std::string kernel_source, std::string kernel_name)
+{
+    cl::Program program;
+    cl::Kernel kernel;
+    try{
+        program = loadProgram(kernel_source);
+        kernel = cl::Kernel(program, kernel_name.c_str(), &err);
+    }
+    catch (cl::Error er) {
+        printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+    }
+    return kernel;
+}

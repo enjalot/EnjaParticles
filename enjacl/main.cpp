@@ -26,7 +26,7 @@
 int window_width = 800;
 int window_height = 600;
 int glutWindowHandle = 0;
-float translate_z = -200.f;
+float translate_z = 250.f;
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -324,7 +324,8 @@ void init_gl()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glTranslatef(0.0, 0.0, translate_z);
+    glRotatef(-90, 1.0, 0.0, 0.0);
+    glTranslatef(0.0, translate_z, 0);
     //glRotatef(-90, 1.0, 0.0, 0.0);
 
     return;
@@ -477,7 +478,7 @@ void appMotion(int x, int y)
         rotate_x += dy * 0.2;
         rotate_y += dx * 0.2;
     } else if (mouse_buttons & 4) {
-        translate_z += dy * 0.1;
+        translate_z -= dy * 0.1;
     }
 
     mouse_old_x = x;
@@ -487,9 +488,10 @@ void appMotion(int x, int y)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glTranslatef(0.0, 0.0, translate_z);
+    glRotatef(-90, 1.0, 0.0, 0.0);
+    glTranslatef(0.0, translate_z, 0.0);
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
-    glRotatef(rotate_y, 0.0, 1.0, 0.0);
+    glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
     glutPostRedisplay();
 }
 
