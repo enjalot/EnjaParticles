@@ -138,8 +138,8 @@ int EnjaParticles::update()
 		size_t glob = num; // 10000
 		size_t loc = 256;
 		err = sort_kernel.setArg(0, cl_unsort);
-		//err = sort_kernel.setArg(1, cl_sort);
-    	//err = queue.enqueueNDRangeKernel(sort_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
+		err = sort_kernel.setArg(1, cl_sort);
+    	err = queue.enqueueNDRangeKernel(sort_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
 
     } catch (cl::Error er) {
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
