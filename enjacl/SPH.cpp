@@ -26,7 +26,17 @@ SPH::SPH(EnjaParticles *enj)
 
     //create buffers
     cl_density = cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(float)*num, NULL, &err); //float array
-    cl_force = cl::Buffer(context, CL_MEM_READ_WRITE, 4*sizeof(float)*num, NULL, &err); //float4 array
+    cl_force = cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(Vec4)*num, NULL, &err); //float4 array
+
+    //initialize force
+    // don't need to because it gets set to 0 first in pressure calculation
+    //std::vector<float> dens(num);
+    //std::vector<Vec4> forc(num);
+    //std::fill(dens.begin(), dens.end(), 0.0f);
+    //Vec4 f(0.0f, 0.0f, -9.8f, 0.0f);
+    //std::fill(forc.begin(), forc.end(), f);
+    //err = queue.enqueueWriteBuffer(cl_force, CL_TRUE, 0, sizeof(Vec4)*num, &forc[0], NULL, &event);
+
     //cl_velocity = cl::Buffer(context, CL_MEM_READ_WRITE, 4*sizeof(float)*num, NULL, &err); //float4 array
     cl_velocity = enjas->cl_velocities;
 
@@ -50,7 +60,8 @@ SPH::SPH(EnjaParticles *enj)
     printf("create collision_wall kernel\n");
     k_collision_wall = enjas->loadKernel(sources[COLLISION_WALL], "collision_wall");
     k_collision_wall.setArg(0, enjas->cl_vbos[0]);
-    k_collision_wall.setArg(1, cl_force);
+    k_collision_wall.setArg(1, cl_velocity);
+    k_collision_wall.setArg(2, cl_force);
     //k_collision_wall.setArg(2, cl_walls); //need to make a data structure for grid walls
 
     printf("create euler kernel\n");
@@ -74,8 +85,12 @@ void SPH::update()
     err = queue.enqueueAcquireGLObjects(&enjas->cl_vbos, NULL, &event);
     //printf("acquire: %s\n", oclErrorString(err));
     queue.finish();
-
-
+    
+    //pressure
+    err = queue.enqueueNDRangeKernel(k_pressure, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
+    //collision
+    err = queue.enqueueNDRangeKernel(k_collision_wall, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
+    //euler integration
     err = queue.enqueueNDRangeKernel(k_euler, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
     queue.finish();
 

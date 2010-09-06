@@ -4,7 +4,8 @@ std::string pressure_program_source = STRINGIFY(
 //do the SPH pressure calculations and update the force
 __kernel void pressure(__global float4* pos, __global float* density, __global float4* force)
 {
-    unsigned int i = get_global_id(0);
+   unsigned int i = get_global_id(0);
+   force[i] = (float4)(0.0f, 0.0f, 0.0f, 0.0f);
 
 }
 );

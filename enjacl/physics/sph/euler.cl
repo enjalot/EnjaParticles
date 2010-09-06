@@ -9,7 +9,8 @@ __kernel void euler(__global float4* pos, __global float4* vel, __global float4*
     float4 v = vel[i];
     float4 f = force[i];
 
-    f.z = -9.8f;
+    //external force is gravity
+    f.z += -9.8f;
 
     v += h*f;
     p += h*v;
