@@ -105,7 +105,7 @@ public:
 
     ~EnjaParticles();
 
-    enum {LORENZ, GRAVITY, VFIELD, SPH, COLLISION, POSITION, TRANSFORM};
+    enum {LORENZ, GRAVITY, VFIELD, SPH, COLLISION, POSITION, SORT};
     static const std::string sources[];
 
     //keep track of transformation from blender
@@ -155,11 +155,13 @@ public:
     cl::Program vel_update_program;  //integrate the velocities of the particles
     cl::Program collision_program;  //check for collisions
     cl::Program pos_update_program;     //update the positions
+    cl::Program sort_program;     //sorting of integer array
 
     cl::Kernel transform_kernel; //kernel for updating with blender transformations
     cl::Kernel vel_update_kernel;
     cl::Kernel collision_kernel;
     cl::Kernel pos_update_kernel;
+    cl::Kernel sort_kernel;     //sorting of integer array
 
 	// true if all objects have been loaded to the GPU
 	bool are_objects_loaded;

@@ -40,6 +40,7 @@ const std::string EnjaParticles::sources[] = {
         sph_program_source,
         collision_program_source,
         position_program_source
+        sort_program_source
     };
 
 
