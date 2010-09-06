@@ -121,22 +121,29 @@ int EnjaParticles::update()
 #if 1
 // Sorting
 	std::vector<int> sort_int;
+	std::vector<int> unsort_int;
 	int nb_el = 2 << 12;
 	cl::Buffer cl_sort(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(int), NULL, &err);
+	cl::Buffer cl_unsort(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(int), NULL, &err);
 
-	for (int i=0; i < nb_el; i++)
-	{
-		sort_int.push_back(10000-i);
+
+	for (int i=0; i < nb_el; i++) {
+		sort_int.push_back(0);
+		unsort_int.push_back(10000-i);
 	}
 
-    try
-    {
-        err = queue.enqueueWriteBuffer(cl_sort, CL_TRUE, 0, nb_el*sizeof(int), &sort_int[0], NULL, &event);
-    }
-    catch (cl::Error er) {
+    try {
+        err = queue.enqueueWriteBuffer(cl_sort, CL_TRUE, 0, nb_el*sizeof(int), &unsort_int[0], NULL, &event);
+
+		size_t glob = num; // 10000
+		size_t loc = 256;
+		err = sort_kernel.setArg(0, cl_unsort);
+		//err = sort_kernel.setArg(1, cl_sort);
+    	//err = queue.enqueueNDRangeKernel(sort_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
+
+    } catch (cl::Error er) {
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
     }
-
 
     queue.finish();
     
@@ -174,6 +181,9 @@ void EnjaParticles::popCorn()
         //}
         pos_update_program = loadProgram(sources[POSITION]);
         pos_update_kernel = cl::Kernel(pos_update_program, "pos_update", &err);
+
+		sort_program = loadProgram(sources[SORT]);
+		sort_kernel = cl::Kernel(sort_program, "sort", &err);
     }
     catch (cl::Error er) {
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
