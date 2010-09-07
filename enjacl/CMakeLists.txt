@@ -25,6 +25,8 @@ INCLUDE_DIRECTORIES(
     ${enjacl_SOURCE_DIR}/../opencl10
 )
 
+message("Opencl Home: $ENV{OPENCL_HOME}")
+
 #make OpenCL use the OpenGL context to avoid memory transfer
 ADD_DEFINITIONS(-DGL_INTEROP)
 ADD_DEFINITIONS(-DOPENCL_SHARED)
@@ -51,6 +53,10 @@ ADD_LIBRARY(${ocllib} ${CLCXXFILES})
 SET(EXEC_CL sph.x)
 ADD_EXECUTABLE(${EXEC_CL} main.cpp util.cpp)
 
+TARGET_LINK_LIBRARIES (${ocllib}
+   $ENV{OPENCL_HOME}/../shared/lib/libshrutil_x86_64.a
+   $ENV{OPENCL_HOME}/common/lib/liboclUtil_x86_64.a
+)
 
 TARGET_LINK_LIBRARIES (${EXEC_CL}
    $ENV{OPENCL_HOME}/../shared/lib/libshrutil_x86_64.a

@@ -38,8 +38,8 @@ Scan::Scan(cl_context GPUContext,
 
 	char *SourceFile = "Scan_b.cl";
 
-	printf("cScan, path= %s\n", path);
-	printf("path: %s\n", shrFindFilePath(SourceFile, path));
+    //printf("cScan, path= %s\n", path);
+	//printf("path: %s\n", shrFindFilePath(SourceFile, path));
 
     //char *cScan = oclLoadProgSource(shrFindFilePath(SourceFile, path), "// My comment\n", &szKernelLength);
 
@@ -48,23 +48,31 @@ Scan::Scan(cl_context GPUContext,
 	// IAN: FIX CODE AND REMOVE HARDCODING (path to cl files)
 	// cScan should contain the source code
 
-	char* pathr= "/Users/erlebach/Documents/src/blender-particles/enjacl/build/Scan_b.cl";
+	//char* pathr= "/Users/erlebach/Documents/src/blender-particles/enjacl/build/Scan_b.cl";
+	char* pathr= "/panfs/panasas1/users/idj03/research/enjasph/enjacl/oclRadixSort/Scan_b.cl";
 	FILE* fd =fopen(pathr, "r");
 	char* cScan = new char [10000];
 	int nb = fread(cScan, 1, 10000, fd);
+    szKernelLength = nb;
 
+    printf("cScan: %s\n", cScan);
 	printf("nb= %d\n", nb);
 	//printf("cScan= %s\n", cScan);
 
     oclCheckErrorEX(cScan == NULL, false, NULL);
+    printf("about to create sort program\n");
     cpProgram = clCreateProgramWithSource(cxGPUContext, 1, (const char **)&cScan, &szKernelLength, &ciErrNum);
+    oclCheckError(ciErrNum, CL_SUCCESS); 
+    printf("about to build sort program\n");
     ciErrNum = clBuildProgram(cpProgram, 0, NULL, "-cl-fast-relaxed-math", NULL, NULL);
     if (ciErrNum != CL_SUCCESS)
     {
+        printf("checking errors for sort\n");
         // write out standard error, Build Log and PTX, then cleanup and exit
         shrLogEx(LOGBOTH | ERRORMSG, ciErrNum, STDERROR);
         oclLogBuildInfo(cpProgram, oclGetFirstDev(cxGPUContext));
         oclLogPtx(cpProgram, oclGetFirstDev(cxGPUContext), "Scan.ptx");
+        printf("error: %s", oclErrorString(ciErrNum));
         oclCheckError(ciErrNum, CL_SUCCESS); 
     }
 
