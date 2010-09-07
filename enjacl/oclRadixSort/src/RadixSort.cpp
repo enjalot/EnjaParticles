@@ -57,8 +57,10 @@ RadixSort::RadixSort(cl_context GPUContext,
 
 	char* pathr= "/Users/erlebach/Documents/src/blender-particles/enjacl/build/RadixSort.cl";
 	FILE* fd =fopen(pathr, "r");
-	char* cRadixSort = new char [10000];
-	int nb = fread(cRadixSort, 1, 10000, fd);
+	char* cRadixSort = new char [20000];
+	int nb = fread(cRadixSort, 1, 20000, fd);
+	printf("nb= %d\n", nb);
+    szKernelLength = nb;
 
 	//printf("cScan= %s\n", cScan);
 

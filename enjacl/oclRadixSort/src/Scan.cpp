@@ -48,8 +48,8 @@ Scan::Scan(cl_context GPUContext,
 	// IAN: FIX CODE AND REMOVE HARDCODING (path to cl files)
 	// cScan should contain the source code
 
-	//char* pathr= "/Users/erlebach/Documents/src/blender-particles/enjacl/build/Scan_b.cl";
-	char* pathr= "/panfs/panasas1/users/idj03/research/enjasph/enjacl/oclRadixSort/Scan_b.cl";
+	char* pathr= "/Users/erlebach/Documents/src/blender-particles/enjacl/build/Scan_b.cl";
+	//char* pathr= "/panfs/panasas1/users/idj03/research/enjasph/enjacl/oclRadixSort/Scan_b.cl";
 	FILE* fd =fopen(pathr, "r");
 	char* cScan = new char [10000];
 	int nb = fread(cScan, 1, 10000, fd);
@@ -115,6 +115,8 @@ void Scan::scanExclusiveLarge(
     oclCheckError( factorizationRemainder == 1, shrTRUE);
 
     //Check supported size range
+	printf("arrayLength= %d\n", arrayLength);
+	printf("MIN/MAX: %d, %d\n", MIN_LARGE_ARRAY_SIZE, MAX_LARGE_ARRAY_SIZE);
     oclCheckError( (arrayLength >= MIN_LARGE_ARRAY_SIZE) && (arrayLength <= MAX_LARGE_ARRAY_SIZE), shrTRUE );
 
     //Check total batch size limit

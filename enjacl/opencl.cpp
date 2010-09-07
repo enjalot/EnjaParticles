@@ -122,7 +122,7 @@ int EnjaParticles::update()
 // Sorting
 	std::vector<int> sort_int;
 	std::vector<int> unsort_int;
-	int nb_el = 2 << 12;
+	int nb_el = 2 << 16;
 	cl::Buffer cl_sort(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(int), NULL, &err);
 	cl::Buffer cl_unsort(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(int), NULL, &err);
 
@@ -140,7 +140,7 @@ int EnjaParticles::update()
 	    //RadixSort* radixSort = new RadixSort(context(), queue(), nb_el, "oclRadixSort/RadixSort.cl", ctaSize, true);		    
 	    RadixSort* radixSort = new RadixSort(context(), queue(), nb_el, "../oclRadixSort/", ctaSize, true);		    
 		unsigned int keybits = 32;
-	    radixSort->sort(cl_unsort(), 0, nb_el, keybits);
+	    //radixSort->sort(cl_unsort(), 0, nb_el, keybits);
 
 		#if 0
 		size_t glob = num; // 10000

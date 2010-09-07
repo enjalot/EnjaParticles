@@ -8,6 +8,9 @@ SET( CMAKE_MODULE_PATH
 
 message("${CMAKE_MODULE_PATH}\n")
 
+# appears in RadixSort.cl
+ADD_DEFINITIONS(-DMAC)
+
 
 FIND_PACKAGE (GLUT)
 FIND_PACKAGE (OpenGL)
