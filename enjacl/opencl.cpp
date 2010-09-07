@@ -126,10 +126,9 @@ int EnjaParticles::update()
 	cl::Buffer cl_sort(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(int), NULL, &err);
 	cl::Buffer cl_unsort(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(int), NULL, &err);
 
-
 	for (int i=0; i < nb_el; i++) {
 		sort_int.push_back(0);
-		unsort_int.push_back(10000-i);
+		unsort_int.push_back(nb_el-i);
 	}
 
     try {
@@ -140,7 +139,17 @@ int EnjaParticles::update()
 	    //RadixSort* radixSort = new RadixSort(context(), queue(), nb_el, "oclRadixSort/RadixSort.cl", ctaSize, true);		    
 	    RadixSort* radixSort = new RadixSort(context(), queue(), nb_el, "../oclRadixSort/", ctaSize, true);		    
 		unsigned int keybits = 32;
-	    //radixSort->sort(cl_unsort(), 0, nb_el, keybits);
+	    radixSort->sort(cl_unsort(), 0, nb_el, keybits);
+
+		// are results sorted? 
+        err = queue.enqueueReadBuffer(cl_unsort, CL_TRUE, 0, nb_el*sizeof(int), &sort_int[0], NULL, &event);
+		queue.finish();
+
+		for (int i=0; i < nb_el; i++) {
+			printf("%d: sort: %d, unsort: %d\n", i, sort_int[i], unsort_int[i]);
+		}
+		exit(0);
+
 
 		#if 0
 		size_t glob = num; // 10000
