@@ -48,9 +48,15 @@ Scan::Scan(cl_context GPUContext,
 	// IAN: FIX CODE AND REMOVE HARDCODING (path to cl files)
 	// cScan should contain the source code
 
-	char* pathr= "/Users/erlebach/Documents/src/blender-particles/enjacl/build/Scan_b.cl";
+	string paths(CL_SOURCE_DIR);
+	paths = paths + "/Scan_b.cl";
+	const char* pathr = paths.c_str();
+
+	//char* pathr= "/Users/erlebach/Documents/src/blender-particles/enjacl/build/RadixSort.cl";
+	//const char* pathr= "/Users/erlebach/Documents/src/blender-particles/enjacl/build/Scan_b.cl";
 	//char* pathr= "/panfs/panasas1/users/idj03/research/enjasph/enjacl/oclRadixSort/Scan_b.cl";
-	FILE* fd =fopen(pathr, "r");
+
+	FILE* fd = fopen(pathr, "r");
 	char* cScan = new char [10000];
 	int nb = fread(cScan, 1, 10000, fd);
     szKernelLength = nb;

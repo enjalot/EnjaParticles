@@ -49,16 +49,17 @@ RadixSort::RadixSort(cl_context GPUContext,
 
 	size_t szKernelLength; // Byte size of kernel code
 
-
-
     //char *cRadixSort = oclLoadProgSource(shrFindFilePath("RadixSort.cl", path), "// My comment\n", &szKernelLength);
 
-
-
-	char* pathr= "/Users/erlebach/Documents/src/blender-particles/enjacl/build/RadixSort.cl";
+	string paths(CL_SOURCE_DIR);
+	paths = paths + "/RadixSort.cl";
+	const char* pathr = paths.c_str();
+	//char* pathr= "/Users/erlebach/Documents/src/blender-particles/enjacl/build/RadixSort.cl";
 	FILE* fd =fopen(pathr, "r");
+	printf("fd= %d\n", fd);
 	char* cRadixSort = new char [20000];
 	int nb = fread(cRadixSort, 1, 20000, fd);
+	printf("pathr= %s\n", pathr);
 	printf("nb= %d\n", nb);
     szKernelLength = nb;
 
