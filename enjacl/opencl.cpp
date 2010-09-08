@@ -133,18 +133,19 @@ int EnjaParticles::update()
 		unsort_int.push_back(nb_el-i);
 	}
 
-	sort(unsort_int, sort_int);
+	//sort(unsort_int, sort_int);
 
 
 
 	GridParams gp;
-	gp.grid_size = float3(10.,10.,10.);
-	gp.grid_min = float3(0.,0.,0.);
-	gp.grid_max = float3(10.,10.,10.);
-	gp.grid_res = float3(10,10,10);
+	gp.grid_size = float4(10.,10.,10.,1.);
+	gp.grid_min = float4(0.,0.,0.,1.);
+	gp.grid_max = float4(10.,10.,10.,1.);
+	gp.grid_res = float4(10.,10.,10.,1.);
 	gp.grid_delta.x = gp.grid_size.x / gp.grid_res.x;
 	gp.grid_delta.y = gp.grid_size.y / gp.grid_res.y;
 	gp.grid_delta.z = gp.grid_size.z / gp.grid_res.z;
+	gp.grid_delta.w = 1.;
 	printf("delta z= %f\n", gp.grid_delta.z);
 
 	std::vector<cl_float4> cells;
@@ -167,7 +168,7 @@ void EnjaParticles::hash(std::vector<cl_float4> list, GridParams& gp)
 {
 //  Have to make sure that the data associated with the pointers is on the GPU
 
-	int nb_el = (2 << 16);
+	int nb_el = (2 << 12);
 	cl::Buffer cl_cells(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(cl_float4), NULL, &err);
 	cl::Buffer cl_sort_hashes(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(cl_uint), NULL, &err);
 	cl::Buffer cl_sort_indices(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(cl_uint), NULL, &err);
@@ -175,6 +176,7 @@ void EnjaParticles::hash(std::vector<cl_float4> list, GridParams& gp)
 
 	cl::Buffer cl_GridParams(context, CL_MEM_WRITE_ONLY, sizeof(GridParams), NULL, &err);
     err = queue.enqueueWriteBuffer(cl_GridParams, CL_TRUE, 0, sizeof(GridParams), &gp, NULL, &event);
+	queue.finish();
 
 	std::vector<cl_uint> sort_hashes;
 	std::vector<cl_uint> sort_indices;
@@ -213,10 +215,10 @@ void EnjaParticles::hash(std::vector<cl_float4> list, GridParams& gp)
 #define DEBUG
 #ifdef DEBUG
 	for (int i=0; i < 100; i++) {
-		printf("sort_index: %d, sort_hash: %d, %d\n", i, sort_hashes[i], sort_indices[i]);
+		printf("sort_index: %d, sort_hash: %u, %u\n", i, (unsigned int) sort_hashes[i], (unsigned int) sort_indices[i]);
 		printf("%d, %f, %f, %f, %f\n", i, list[i].x, list[i].y, list[i].z, list[i].w);
 
-		#if 0
+		#if 1
 		int gx = list[i].x;
 		int gy = list[i].y;
 		int gz = list[i].z;

@@ -10,21 +10,25 @@ std::string hash_program_source = STRINGIFY(
 //----------------------------------------------------------------------
 // find the grid cell from a position in world space
 // WHY static?
-//static int3 calcGridCell(float3 const &p, float3 grid_min, float3 grid_delta)
-#if 1
-int3 calcGridCell(__constant float3 p, float3 grid_min, float3 grid_delta)
-//int4 calcGridCell(float4 const &p, float4 grid_min, float4 grid_delta)
+//static int4 calcGridCell(float4 const &p, float4 grid_min, float4 grid_delta)
+int4 calcGridCell(float4 p, float4 grid_min, float4 grid_delta)
 {
 	// subtract grid_min (cell position) and multiply by delta
-	//return make_int3((p-grid_min) * grid_delta);
-	return (int3) ((p-grid_min) * grid_delta);
+	//return make_int4((p-grid_min) * grid_delta);
+	float4 pp = (p-grid_min)*grid_delta;
+
+	int4 ii;
+	ii.x = pp.x;
+	ii.y = pp.y;
+	ii.z = pp.z;
+	ii.w = pp.w;
+	return ii;
 }
-#endif
 
 //----------------------------------------------------------------------
 //template <bool wrapEdges>
 //static uint calcGridHash(int3 const &gridPos, float3 grid_res, __constant bool wrapEdges)
-uint calcGridHash(__constant int3 gridPos, float3 grid_res, __constant bool wrapEdges)
+uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 {
 	// each variable on single line or else STRINGIFY DOES NOT WORK
 	int gx;
@@ -64,7 +68,6 @@ uint calcGridHash(__constant int3 gridPos, float3 grid_res, __constant bool wrap
 	//return __mul24(__umul24(gz, grid_res.y), grid_res.x) + __mul24(gy, grid_res.x) + gx;
 
 	return (gz*grid_res.y + gy) * grid_res.x + gx; 
-	//return 3;
 }
 
 //----------------------------------------------------------------------
@@ -82,13 +85,13 @@ uint calcGridHash(__constant int3 gridPos, float3 grid_res, __constant bool wrap
 
 struct GridParams
 {
-    float3          grid_size;
-    float3          grid_min;
-    float3          grid_max;
+    float4          grid_size;
+    float4          grid_min;
+    float4          grid_max;
 
     // number of cells in each dimension/side of grid
-    float3          grid_res;
-    float3          grid_delta;
+    float4          grid_res;
+    float4          grid_delta;
 };
 
 
@@ -111,17 +114,15 @@ __kernel void hash(
 	float4 p = dParticlePositions[index];
 
 	// get address in grid
-	//int3 gridPos = calcGridCell(make_float3(p), cGridParams.grid_min, cGridParams.grid_delta);
-	int3 gridPos = calcGridCell(p.xyz, cGridParams->grid_min, cGridParams->grid_delta);
+	int4 gridPos = calcGridCell(p, cGridParams->grid_min, cGridParams->grid_delta);
 	bool wrap_edges = false;
 	uint hash = calcGridHash(gridPos, cGridParams->grid_res, wrap_edges);
+	//hash = cGridParams->grid_res.x;
 
 	// store grid hash and particle index
-	//dGridData.sort_hashes[index] = hash;
-	//dGridData.sort_indexes[index] = index;
-	sort_hashes[index] = gridPos.z; //hash;
+
+	sort_hashes[index] = hash;
 	sort_indexes[index] = index;
-#endif
 }
 //----------------------------------------------------------------------
 

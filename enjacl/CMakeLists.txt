@@ -30,7 +30,7 @@ INCLUDE_DIRECTORIES(
 	$ENV{OPENCL_HOME}/common/inc
 	$ENV{OPENCL_HOME}/../shared/inc
     #${OPENCL_INCLUDE_DIR}
-    ${enjacl_SOURCE_DIR}/../opencl10
+    ${enjacl_SOURCE_DIR}/../opencl11
 )
 
 message("Opencl Home: $ENV{OPENCL_HOME}")

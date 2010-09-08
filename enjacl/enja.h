@@ -17,15 +17,16 @@
 
 
 // GE: Sept. 8, 2010
-typedef struct float3 {
-	float x, y, z;
-	float3() {}
-	float3(float x, float y, float z) {
+typedef struct float4 {
+	float x, y, z, w;
+	float4() {}
+	float4(float x, float y, float z, float w=1.) {
 		this->x = x;
 		this->y = y;
 		this->z = z;
+		this->w = w;
 	}
-} float3;
+} float4;
 
 // GE: Sept. 8, 2010
 typedef struct int3 {
@@ -42,14 +43,14 @@ typedef struct int3 {
 // From Krog's SPH code
 struct GridParams
 {
-    float3          grid_size;
-    float3          grid_min;
-    float3          grid_max;
+    float4          grid_size;
+    float4          grid_min;
+    float4          grid_max;
 
     // number of cells in each dimension/side of grid
-    float3          grid_res;
+    float4          grid_res;
 
-    float3          grid_delta;
+    float4          grid_delta;
 };
 
 
