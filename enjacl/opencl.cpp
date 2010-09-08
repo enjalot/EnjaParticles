@@ -143,14 +143,17 @@ int EnjaParticles::update()
 	gp.grid_delta.x = gp.grid_size.x / gp.grid_res.x;
 	gp.grid_delta.y = gp.grid_size.y / gp.grid_res.y;
 	gp.grid_delta.z = gp.grid_size.z / gp.grid_res.z;
+	printf("delta z= %f\n", gp.grid_delta.z);
 
-	std::vector<float3> cells;
+	std::vector<cl_float4> cells;
 	cells.resize(nb_el);
 	// notice the index rotation? 
+
 	for (int i=0; i < nb_el; i++) {
 		cells[i].x = rand_float(0.,1.);
 		cells[i].y = rand_float(0.,1.);
 		cells[i].z = rand_float(0.,1.);
+		cells[i].w = 1.;
 	}
 
 	hash(cells, gp);
@@ -158,14 +161,64 @@ int EnjaParticles::update()
 }
 
 //----------------------------------------------------------------------
-void EnjaParticles::hash(std::vector<float3> list, GridParams& gp)
+void EnjaParticles::hash(std::vector<cl_float4> list, GridParams& gp)
 {
 //  Have to make sure that the data associated with the pointers is on the GPU
 
 	int nb_el = (2 << 16);
-	cl::Buffer cl_cells(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(float3), NULL, &err);
-    err = queue.enqueueWriteBuffer(cl_cells, CL_TRUE, 0, nb_el*sizeof(float3), &list[0], NULL, &event);
+	cl::Buffer cl_cells(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(cl_float4), NULL, &err);
+	cl::Buffer cl_sort_hashes(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(cl_uint), NULL, &err);
+	cl::Buffer cl_sort_indices(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(cl_uint), NULL, &err);
+    err = queue.enqueueWriteBuffer(cl_cells, CL_TRUE, 0, nb_el*sizeof(cl_float4), &list[0], NULL, &event);
 
+	cl::Buffer cl_GridParams(context, CL_MEM_WRITE_ONLY, sizeof(GridParams), NULL, &err);
+    err = queue.enqueueWriteBuffer(cl_GridParams, CL_TRUE, 0, sizeof(GridParams), &gp, NULL, &event);
+
+	std::vector<cl_uint> sort_hashes;
+	std::vector<cl_uint> sort_indices;
+	sort_hashes.resize(nb_el);
+	sort_indices.resize(nb_el);
+
+	int ctaSize = 128; // work group size
+	int err;
+
+//
+//__kernel void hash (unsigned int	numParticles,
+//			  __global float4*	  dParticlePositions,	
+//			  uint* sort_hashes,
+//			  uint* sort_indexes,
+//			  __constant struct GridParams* cGridParams)
+
+	try {
+    	err = hash_kernel.setArg(0, nb_el);
+    	err = hash_kernel.setArg(1, cl_cells);
+    	err = hash_kernel.setArg(2, cl_sort_hashes);
+    	err = hash_kernel.setArg(3, cl_sort_indices);
+    	err = hash_kernel.setArg(4, cl_GridParams);
+	} catch (cl::Error er) {
+        printf("ERROR(hash): %s(%s)\n", er.what(), oclErrorString(er.err()));
+		exit(0);
+	}
+
+    err = queue.enqueueNDRangeKernel(hash_kernel, cl::NullRange, cl::NDRange(ctaSize), cl::NullRange, NULL, &event);
+
+	// the kernel computes these arrays
+    err = queue.enqueueWriteBuffer(cl_sort_hashes, CL_TRUE, 0, nb_el*sizeof(cl_uint), &sort_hashes[0], NULL, &event);
+    err = queue.enqueueWriteBuffer(cl_sort_indices, CL_TRUE, 0, nb_el*sizeof(cl_uint), &sort_indices[0], NULL, &event);
+
+#define DEBUG
+#ifdef DEBUG
+	for (int i=0; i < 100; i++) {
+		printf("sort_index, sort_hash: %d, %d\n", sort_hashes[i], sort_indices[i]);
+		printf("%d, %f, %f, %f, %f\n", i, list[i].x, list[i].y, list[i].y, list[i].w);
+	}
+
+	exit(0);
+#endif
+#undef DEBUG
+
+
+	// Check hashes
 }
 //----------------------------------------------------------------------
 void EnjaParticles::sort(std::vector<int> sort_int, std::vector<int> unsort_int)

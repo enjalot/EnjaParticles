@@ -99,8 +99,8 @@ __kernel void hash (
 							   //__global float_vec*	dParticlePositions,	
 							   __global float4*	  dParticlePositions,	
 							   //GridData				dGridData
-							   uint* sort_hashes,
-							   uint* sort_indexes,
+							   __global uint* sort_hashes,
+							   __global uint* sort_indexes,
 							   __constant struct GridParams* cGridParams
 							   )
 {			

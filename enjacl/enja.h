@@ -115,7 +115,7 @@ public:
 	void sort(std::vector<int> sort_int, std::vector<int> unsort_int);
 
 	// cl_float3 does not appear to exist. I'd have to extend cl_platform.h
-	void hash(std::vector<float3> list, GridParams& gp);
+	void hash(std::vector<cl_float4> list, GridParams& gp);
 
     int update();   //update the particle system
     int cpu_update();   //update the particle system using cpu code
