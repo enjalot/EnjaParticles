@@ -119,55 +119,56 @@ int EnjaParticles::update()
 #endif
 
 #if 1
-// Sorting
 	std::vector<int> sort_int;
 	std::vector<int> unsort_int;
 	int nb_el = 2 << 16;
-	cl::Buffer cl_sort(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(int), NULL, &err);
-	cl::Buffer cl_unsort(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(int), NULL, &err);
 
 	for (int i=0; i < nb_el; i++) {
 		sort_int.push_back(0);
 		unsort_int.push_back(nb_el-i);
 	}
 
+	sort(unsort_int, sort_int);
+#endif
+}
+
+//----------------------------------------------------------------------
+void EnjaParticles::sort(std::vector<int> sort_int, std::vector<int> unsort_int)
+{
+	int nb_el = sort_int.size();
+
+#if 1
+// Sorting
+	// SHOULD ONLY DO ONCE
+	cl::Buffer cl_sort(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(int), NULL, &err);
+	cl::Buffer cl_unsort(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(int), NULL, &err);
+
+
     try {
         err = queue.enqueueWriteBuffer(cl_unsort, CL_TRUE, 0, nb_el*sizeof(int), &unsort_int[0], NULL, &event);
 
 		int ctaSize = 128; // work group size
-		printf("true= %d\n", true);
-	    //RadixSort* radixSort = new RadixSort(context(), queue(), nb_el, "oclRadixSort/RadixSort.cl", ctaSize, true);		    
 	    RadixSort* radixSort = new RadixSort(context(), queue(), nb_el, "../oclRadixSort/", ctaSize, true);		    
 		unsigned int keybits = 32;
 	    radixSort->sort(cl_unsort(), 0, nb_el, keybits);
 
+#ifdef DEBUG
 		// are results sorted? 
+		// NOT REQUIRED EXCEPT FOR DEBUGGING
         err = queue.enqueueReadBuffer(cl_unsort, CL_TRUE, 0, nb_el*sizeof(int), &sort_int[0], NULL, &event);
 		queue.finish();
 
 		for (int i=0; i < nb_el; i++) {
 			printf("%d: sort: %d, unsort: %d\n", i, sort_int[i], unsort_int[i]);
 		}
-		exit(0);
-
-
-		#if 0
-		size_t glob = num; // 10000
-		size_t loc = 256;
-		err = sort_kernel.setArg(0, cl_unsort);
-		err = sort_kernel.setArg(1, cl_sort);
-    	err = queue.enqueueNDRangeKernel(sort_kernel, cl::NullRange, cl::NDRange(glob), cl::NDRange(loc), NULL, &event);
-    	queue.finish();
-		#endif
+#endif
     } catch (cl::Error er) {
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
     }
 
     queue.finish();
-    
 #endif
 }
-
 //----------------------------------------------------------------------
 void EnjaParticles::popCorn()
 {

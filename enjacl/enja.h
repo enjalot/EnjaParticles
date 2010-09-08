@@ -70,6 +70,9 @@ class EnjaParticles
 {
 public:
 
+	/// Radix sort of integer array
+	void sort(std::vector<int> sort_int, std::vector<int> unsort_int);
+
     int update();   //update the particle system
     int cpu_update();   //update the particle system using cpu code
     int render(); //render calls update then renders the particles
@@ -105,7 +108,7 @@ public:
 
     ~EnjaParticles();
 
-    enum {LORENZ, GRAVITY, VFIELD, SPH, COLLISION, POSITION, SORT};
+    enum {LORENZ, GRAVITY, VFIELD, SPH, COLLISION, POSITION, SORT, HASH};
     static const std::string sources[];
 
     //keep track of transformation from blender
