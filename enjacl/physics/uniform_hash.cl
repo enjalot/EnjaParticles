@@ -72,13 +72,13 @@ uint calcGridHash(__constant int3 gridPos, float3 grid_res, __constant bool wrap
 
 
 //  Have to make sure that the data associated with the pointers is on the GPU
-struct GridData
-{
-    uint* sort_hashes;          // particle hashes
-    uint* sort_indexes;         // particle indices
-    uint* cell_indexes_start;   // mapping between bucket hash and start index in sorted list
-    uint* cell_indexes_end;     // mapping between bucket hash and end index in sorted list
-};
+//struct GridData
+//{
+//    uint* sort_hashes;          // particle hashes
+//    uint* sort_indexes;         // particle indices
+//    uint* cell_indexes_start;   // mapping between bucket hash and start index in sorted list
+//    uint* cell_indexes_end;     // mapping between bucket hash and end index in sorted list
+//};
 
 struct GridParams
 {
@@ -88,7 +88,6 @@ struct GridParams
 
     // number of cells in each dimension/side of grid
     float3          grid_res;
-
     float3          grid_delta;
 };
 

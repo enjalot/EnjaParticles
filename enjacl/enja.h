@@ -15,6 +15,44 @@
 // for access to cl_int4, etc.
 #include <CL/cl_platform.h>
 
+
+// GE: Sept. 8, 2010
+typedef struct float3 {
+	float x, y, z;
+	float3() {}
+	float3(float x, float y, float z) {
+		this->x = x;
+		this->y = y;
+		this->z = z;
+	}
+} float3;
+
+// GE: Sept. 8, 2010
+typedef struct int3 {
+	int x, y, z;
+	int3() {}
+	int3(float x, float y, float z) {
+		this->x = x;
+		this->y = y;
+		this->z = z;
+	}
+} int3;
+
+// GE: Sept8, 2010
+// From Krog's SPH code
+struct GridParams
+{
+    float3          grid_size;
+    float3          grid_min;
+    float3          grid_max;
+
+    // number of cells in each dimension/side of grid
+    float3          grid_res;
+
+    float3          grid_delta;
+};
+
+
 typedef struct Vec4
 {
     float x;
@@ -77,7 +115,7 @@ public:
 	void sort(std::vector<int> sort_int, std::vector<int> unsort_int);
 
 	// cl_float3 does not appear to exist. I'd have to extend cl_platform.h
-	void hash(std::vector<cl_float4> list);
+	void hash(std::vector<float3> list, GridParams& gp);
 
     int update();   //update the particle system
     int cpu_update();   //update the particle system using cpu code

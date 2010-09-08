@@ -132,12 +132,40 @@ int EnjaParticles::update()
 	}
 
 	sort(unsort_int, sort_int);
+
+
+
+	GridParams gp;
+	gp.grid_size = float3(1.,1.,1.);
+	gp.grid_min = float3(0.,0.,0.);
+	gp.grid_max = float3(1.,1.,1.);
+	gp.grid_res = float3(10,10,10);
+	gp.grid_delta.x = gp.grid_size.x / gp.grid_res.x;
+	gp.grid_delta.y = gp.grid_size.y / gp.grid_res.y;
+	gp.grid_delta.z = gp.grid_size.z / gp.grid_res.z;
+
+	std::vector<float3> cells;
+	cells.resize(nb_el);
+	// notice the index rotation? 
+	for (int i=0; i < nb_el; i++) {
+		cells[i].x = rand_float(0.,1.);
+		cells[i].y = rand_float(0.,1.);
+		cells[i].z = rand_float(0.,1.);
+	}
+
+	hash(cells, gp);
 #endif
 }
 
 //----------------------------------------------------------------------
-void EnjaParticles::hash(std::vector<cl_float4> list)
+void EnjaParticles::hash(std::vector<float3> list, GridParams& gp)
 {
+//  Have to make sure that the data associated with the pointers is on the GPU
+
+	int nb_el = (2 << 16);
+	cl::Buffer cl_cells(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(float3), NULL, &err);
+    err = queue.enqueueWriteBuffer(cl_cells, CL_TRUE, 0, nb_el*sizeof(float3), &list[0], NULL, &event);
+
 }
 //----------------------------------------------------------------------
 void EnjaParticles::sort(std::vector<int> sort_int, std::vector<int> unsort_int)
