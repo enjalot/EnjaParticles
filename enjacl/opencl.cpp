@@ -206,6 +206,9 @@ void EnjaParticles::popCorn()
 		printf("before load program sources[sort]\n");
 		sort_program = loadProgram(sources[SORT]);
 		sort_kernel = cl::Kernel(sort_program, "sort", &err);
+
+		hash_program = loadProgram(sources[HASH]);
+		hash_kernel = cl::Kernel(hash_program, "hash", &err);
     }
     catch (cl::Error er) {
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));

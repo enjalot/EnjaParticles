@@ -159,12 +159,14 @@ public:
     cl::Program collision_program;  //check for collisions
     cl::Program pos_update_program;     //update the positions
     cl::Program sort_program;     //sorting of integer array
+    cl::Program hash_program;     //hashing of grid cells
 
     cl::Kernel transform_kernel; //kernel for updating with blender transformations
     cl::Kernel vel_update_kernel;
     cl::Kernel collision_kernel;
     cl::Kernel pos_update_kernel;
     cl::Kernel sort_kernel;     //sorting of integer array
+	cl::Kernel hash_kernel;
 
 	// true if all objects have been loaded to the GPU
 	bool are_objects_loaded;
