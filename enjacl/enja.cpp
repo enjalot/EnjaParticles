@@ -20,6 +20,7 @@
 #include "physics/vfield.cl"
 #include "physics/sph.cl"
 #include "physics/sort.cl"
+#include "physics/uniform_hash.cl"
 
 #ifdef OPENCL_SHARED
 //#include "physics/collision_ge.cl"
@@ -41,7 +42,8 @@ const std::string EnjaParticles::sources[] = {
         sph_program_source,
         collision_program_source,
         position_program_source,
-        sort_program_source
+        sort_program_source,
+		hash_program_source
     };
 
 

@@ -12,6 +12,47 @@
 #include "system.h"
 #include "timege.h"
 
+// for access to cl_int4, etc.
+#include <CL/cl_platform.h>
+
+
+// GE: Sept. 8, 2010
+typedef struct float3 {
+	float x, y, z;
+	float3() {}
+	float3(float x, float y, float z) {
+		this->x = x;
+		this->y = y;
+		this->z = z;
+	}
+} float3;
+
+// GE: Sept. 8, 2010
+typedef struct int3 {
+	int x, y, z;
+	int3() {}
+	int3(float x, float y, float z) {
+		this->x = x;
+		this->y = y;
+		this->z = z;
+	}
+} int3;
+
+// GE: Sept8, 2010
+// From Krog's SPH code
+struct GridParams
+{
+    float3          grid_size;
+    float3          grid_min;
+    float3          grid_max;
+
+    // number of cells in each dimension/side of grid
+    float3          grid_res;
+
+    float3          grid_delta;
+};
+
+
 typedef struct Vec4
 {
     float x;
@@ -70,6 +111,12 @@ class EnjaParticles
 {
 public:
 
+	/// Radix sort of integer array
+	void sort(std::vector<int> sort_int, std::vector<int> unsort_int);
+
+	// cl_float3 does not appear to exist. I'd have to extend cl_platform.h
+	void hash(std::vector<cl_float4> list, GridParams& gp);
+
     int update();   //update the particle system
     int cpu_update();   //update the particle system using cpu code
     int render(); //render calls update then renders the particles
@@ -105,7 +152,7 @@ public:
 
     ~EnjaParticles();
 
-    enum {LORENZ, GRAVITY, VFIELD, SPH, COLLISION, POSITION, SORT};
+    enum {LORENZ, GRAVITY, VFIELD, SPH, COLLISION, POSITION, SORT, HASH};
     static const std::string sources[];
 
     //keep track of transformation from blender
@@ -156,12 +203,14 @@ public:
     cl::Program collision_program;  //check for collisions
     cl::Program pos_update_program;     //update the positions
     cl::Program sort_program;     //sorting of integer array
+    cl::Program hash_program;     //hashing of grid cells
 
     cl::Kernel transform_kernel; //kernel for updating with blender transformations
     cl::Kernel vel_update_kernel;
     cl::Kernel collision_kernel;
     cl::Kernel pos_update_kernel;
     cl::Kernel sort_kernel;     //sorting of integer array
+	cl::Kernel hash_kernel;
 
 	// true if all objects have been loaded to the GPU
 	bool are_objects_loaded;
