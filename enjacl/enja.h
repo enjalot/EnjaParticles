@@ -12,6 +12,9 @@
 #include "system.h"
 #include "timege.h"
 
+// for access to cl_int4, etc.
+#include <CL/cl_platform.h>
+
 typedef struct Vec4
 {
     float x;
@@ -72,6 +75,9 @@ public:
 
 	/// Radix sort of integer array
 	void sort(std::vector<int> sort_int, std::vector<int> unsort_int);
+
+	// cl_float3 does not appear to exist. I'd have to extend cl_platform.h
+	void hash(std::vector<cl_float4> list);
 
     int update();   //update the particle system
     int cpu_update();   //update the particle system using cpu code

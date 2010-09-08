@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+// for access to cl_int4, etc.
+#include <CL/cl_platform.h>
+
 #include <GL/glew.h>
 #if defined __APPLE__ || defined(MACOSX)
     //OpenGL stuff
@@ -132,6 +135,10 @@ int EnjaParticles::update()
 #endif
 }
 
+//----------------------------------------------------------------------
+void EnjaParticles::hash(std::vector<cl_float4> list)
+{
+}
 //----------------------------------------------------------------------
 void EnjaParticles::sort(std::vector<int> sort_int, std::vector<int> unsort_int)
 {
