@@ -5,19 +5,8 @@
 #include <string>
 
 #include <GL/glew.h>
-#if defined __APPLE__ || defined(MACOSX)
-    //OpenGL stuff
-    #include <OpenGL/gl.h>
-    #include <OpenGL/glext.h>
-    #include <GLUT/glut.h>
-    #include <OpenGL/CGLCurrent.h> //is this really necessary?
-#else
-    //OpenGL stuff
-    #include <GL/glx.h>
-#endif
+#include <CL/cl.hpp>
 
-
-#include "incopencl.h"
 #include "util.h"
 
 char *file_contents(const char *filename, int *length)
@@ -42,6 +31,12 @@ char *file_contents(const char *filename, int *length)
     return (char*)buffer;
 }
 
+int deleteVBO(GLuint id)
+{
+    glBindBuffer(1, id);
+    glDeleteBuffers(1, (GLuint*)&id);
+    return 1; //success
+}
 
 GLuint createVBO(const void* data, int dataSize, GLenum target, GLenum usage)
 {

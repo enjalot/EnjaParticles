@@ -27,7 +27,7 @@
 int window_width = 800;
 int window_height = 600;
 int glutWindowHandle = 0;
-float translate_z = -4.f;
+float translate_z = 250.f;
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -60,7 +60,8 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 EnjaParticles* enjas;
-#define NUM_PARTICLES 1024*16*4
+//#define NUM_PARTICLES 16384
+#define NUM_PARTICLES 1024
 
 
 GLuint v_vbo; //vbo id
@@ -246,16 +247,17 @@ int main(int argc, char** argv)
 
     
     //default constructor
-    enjas = new EnjaParticles(EnjaParticles::GRAVITY, NUM_PARTICLES);
-    enjas->particle_radius = 10.0f;
-    enjas->use_glsl();
+    enjas = new EnjaParticles(EnjaParticles::SPH, NUM_PARTICLES);
+    enjas->particle_radius = 2.0f;
+    //enjas->use_glsl();
     enjas->updates = 1;
-    enjas->dt = .005;
-    enjas->collision = true;
+    enjas->dt = .002;
+    //enjas->collision = true;
 
 
+
+    /*
 // make cubes, formed from triangles
-
 	int nb_cubes = 100;
 	Vec4 cen;
 
@@ -276,7 +278,7 @@ int main(int argc, char** argv)
     //enjas->transform[0] = Vec4(1,0,0,0);
     //enjas->loadTriangles(triangles);
     enjas->loadBoxes(boxes, triangles, tri_offsets);
-    
+    */
    
     //Test making a system from vertices and normals;
     /*
@@ -324,7 +326,8 @@ void init_gl()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glTranslatef(0.0, 0.0, translate_z);
+    glRotatef(-90, 1.0, 0.0, 0.0);
+    glTranslatef(0.0, translate_z, 0);
     //glRotatef(-90, 1.0, 0.0, 0.0);
 
     return;
@@ -362,6 +365,8 @@ void appRender()
     plane[3] = Vec4(5,-5,-1,0);
 */
 
+    enjas->update();
+
 	glEnable(GL_DEPTH_TEST);
 
 
@@ -376,6 +381,51 @@ void appRender()
     	glVertex3f(tria.verts[2].x, tria.verts[2].y, tria.verts[2].z);
 	}
     glEnd();
+
+    Vec4 min = enjas->grid_min;
+    Vec4 max = enjas->grid_max;
+
+    //draw grid
+    glBegin(GL_LINES);
+    //1st face
+    glVertex3f(min.x, min.y, min.z);
+    glVertex3f(min.x, min.y, max.z);
+    
+    glVertex3f(min.x, max.y, min.z);
+    glVertex3f(min.x, max.y, max.z);
+
+    glVertex3f(min.x, min.y, min.z);
+    glVertex3f(min.x, max.y, min.z);
+ 
+    glVertex3f(min.x, min.y, max.z);
+    glVertex3f(min.x, max.y, max.z);
+    //2nd face
+    glVertex3f(max.x, min.y, min.z);
+    glVertex3f(max.x, min.y, max.z);
+    
+    glVertex3f(max.x, max.y, min.z);
+    glVertex3f(max.x, max.y, max.z);
+
+    glVertex3f(max.x, min.y, min.z);
+    glVertex3f(max.x, max.y, min.z);
+ 
+    glVertex3f(max.x, min.y, max.z);
+    glVertex3f(max.x, max.y, max.z);
+    //connections
+    glVertex3f(min.x, min.y, min.z);
+    glVertex3f(max.x, min.y, min.z);
+ 
+    glVertex3f(min.x, max.y, min.z);
+    glVertex3f(max.x, max.y, min.z);
+ 
+    glVertex3f(min.x, min.y, max.z);
+    glVertex3f(max.x, min.y, max.z);
+ 
+    glVertex3f(min.x, max.y, max.z);
+    glVertex3f(max.x, max.y, max.z);
+    
+    glEnd();
+
 
     glColor3f(0,0,0);
 
@@ -432,7 +482,7 @@ void appMotion(int x, int y)
         rotate_x += dy * 0.2;
         rotate_y += dx * 0.2;
     } else if (mouse_buttons & 4) {
-        translate_z += dy * 0.1;
+        translate_z -= dy * 0.1;
     }
 
     mouse_old_x = x;
@@ -442,9 +492,10 @@ void appMotion(int x, int y)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glTranslatef(0.0, 0.0, translate_z);
+    glRotatef(-90, 1.0, 0.0, 0.0);
+    glTranslatef(0.0, translate_z, 0.0);
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
-    glRotatef(rotate_y, 0.0, 1.0, 0.0);
+    glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
     glutPostRedisplay();
 }
 

@@ -4,8 +4,8 @@ export BASE_DIR=${HOME}/vislab/home/erlebach/src/blender-particles/EnjaParticles
 #this should be updated to where you have this code
 export ENJA_DIR=${BASE_DIR}/enjacl
 
-export GPU_SDK=/Developer/GPU\ Computing
-export CUDA_HOME=${GPU_SDK}
+export GPU_SDK=${HOME}/vislab/NVIDIA_CUDA_SDK_3.0
+export CUDA_HOME=${HOME}/vislab/NVIDIA_CUDA_TOOLKIT_3.0
 export CUDA_LOCAL=${GPU_SDK}/C
 export OPENCL_HOME=${GPU_SDK}/OpenCL
 #export GRAPHIC_LIBS_HOME=${BASE_DIR}/graphics_libs

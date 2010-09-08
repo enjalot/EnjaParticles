@@ -5,9 +5,52 @@
 
 #include <string>
 #include <vector>
-#include "incopencl.h"
-#include "timege.h"
 #include <stdio.h>
+
+#include <CL/cl.hpp>
+
+#include "system.h"
+#include "timege.h"
+
+// for access to cl_int4, etc.
+#include <CL/cl_platform.h>
+
+
+// GE: Sept. 8, 2010
+typedef struct float3 {
+	float x, y, z;
+	float3() {}
+	float3(float x, float y, float z) {
+		this->x = x;
+		this->y = y;
+		this->z = z;
+	}
+} float3;
+
+// GE: Sept. 8, 2010
+typedef struct int3 {
+	int x, y, z;
+	int3() {}
+	int3(float x, float y, float z) {
+		this->x = x;
+		this->y = y;
+		this->z = z;
+	}
+} int3;
+
+// GE: Sept8, 2010
+// From Krog's SPH code
+struct GridParams
+{
+    float3          grid_size;
+    float3          grid_min;
+    float3          grid_max;
+
+    // number of cells in each dimension/side of grid
+    float3          grid_res;
+
+    float3          grid_delta;
+};
 
 
 typedef struct Vec4
@@ -51,9 +94,28 @@ typedef struct Box
 
 typedef std::vector<Vec4> AVec4;
 
+
+typedef struct SPHSettings
+{
+    float rest_density;
+    float simulation_scale;
+    float particle_mass;
+    float particle_rest_distance;
+    float spacing;
+    float grid_cell_size;
+
+} SPHSettings;
+
+
 class EnjaParticles
 {
 public:
+
+	/// Radix sort of integer array
+	void sort(std::vector<int> sort_int, std::vector<int> unsort_int);
+
+	// cl_float3 does not appear to exist. I'd have to extend cl_platform.h
+	void hash(std::vector<cl_float4> list, GridParams& gp);
 
     int update();   //update the particle system
     int cpu_update();   //update the particle system using cpu code
@@ -74,6 +136,7 @@ public:
     EnjaParticles(int system, AVec4 generators, AVec4 velocities, int len, int num, float radius);
     //EnjaParticles(int system, Vec4* generators, Vec4* velocities, Vec4* colors, int num);
     
+
     //extra properties of the system
     bool collision;         //enable collision detection
     int updates;            //number of times to update per frame
@@ -89,7 +152,7 @@ public:
 
     ~EnjaParticles();
 
-    enum {LORENZ, GRAVITY, VFIELD, COLLISION, POSITION, TRANSFORM};
+    enum {LORENZ, GRAVITY, VFIELD, SPH, COLLISION, POSITION, SORT, HASH};
     static const std::string sources[];
 
 	void reorder_particles(); // experiment with particle sorting
@@ -112,12 +175,23 @@ public:
     //particles
     int num;                //number of particles
     int system;             //what kind of system?
+    System *m_system;
     AVec4 vert_gen;       //vertex generators
     AVec4 velo_gen;       //velocity generators
     AVec4 velocities;       //for cpu version only
     AVec4 colors;
     std::vector<int> indices;
     //float* life;  //life is packed into velocity.w
+    
+
+    //SPH
+    void make_cube(Vec4* position);
+    void make_grid(Vec4 min, Vec4 max);
+    //will want a seperate grid class
+    Vec4 grid_min;
+    Vec4 grid_max;
+    SPHSettings sph_settings; 
+
 
     int init(AVec4 vert_gen, AVec4 velo_gen, AVec4 colors, int num);
 
@@ -130,11 +204,15 @@ public:
     cl::Program vel_update_program;  //integrate the velocities of the particles
     cl::Program collision_program;  //check for collisions
     cl::Program pos_update_program;     //update the positions
+    cl::Program sort_program;     //sorting of integer array
+    cl::Program hash_program;     //hashing of grid cells
 
     cl::Kernel transform_kernel; //kernel for updating with blender transformations
     cl::Kernel vel_update_kernel;
     cl::Kernel collision_kernel;
     cl::Kernel pos_update_kernel;
+    cl::Kernel sort_kernel;     //sorting of integer array
+	cl::Kernel hash_kernel;
 
 	// true if all objects have been loaded to the GPU
 	bool are_objects_loaded;
@@ -157,7 +235,6 @@ public:
     //cl::Buffer cl_life;        //keep track where in their life the particles are (packed into velocity.w now)
     int v_vbo;   //vertices vbo
     int c_vbo;   //colors vbo
-    int i_vbo;   //index vbo
     unsigned int vbo_size; //size in bytes of the vbo
     
     //for collisions
@@ -172,6 +249,7 @@ public:
     int init_cl();
     int setup_cl(); //helper function that initializes the devices and the context
     cl::Program loadProgram(std::string kernel_source);
+    cl::Kernel loadKernel(std::string kernel_source, std::string kernel_name);
     void popCorn(); // sets up the kernel and pushes data
     
     //opengl

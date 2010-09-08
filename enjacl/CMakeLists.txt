@@ -8,7 +8,13 @@ SET( CMAKE_MODULE_PATH
 
 message("${CMAKE_MODULE_PATH}\n")
 
-ADD_DEFINITIONS(-DOPENCL_SHARED)
+#Only define this on the apple platform
+# appears in RadixSort.cl
+IF(APPLE)
+	ADD_DEFINITIONS(-DMAC)
+ENDIF()
+ADD_DEFINITIONS(-DCL_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/physics")
+#ADD_DEFINITIONS(-DCL_SOURCE_DIR="${CMAKE_CURRENT_BINARY_DIR}")
 
 
 FIND_PACKAGE (GLUT)
@@ -16,45 +22,53 @@ FIND_PACKAGE (OpenGL)
 FIND_PACKAGE (OPENCL)
 FIND_PACKAGE (GLEW)
 
-SET(GUTILS $ENV{GRAPHICS_LIBS}/graphics_utils)
-SET(GRAND $ENV{GRAPHICS_LIBS}/random)
-
-SET(GUTILS_INC $ENV{GRAPHICS_LIBS_SRC}/graphics_utils)
-SET(GRAND_INC $ENV{GRAPHICS_LIBS_SRC}/random)
-
 INCLUDE_DIRECTORIES( 
-#	${GRAND_INC}
-#	${GUTILS_INC}
+	oclRadixSort/inc
 	${GLUT_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
     ${GLEW_INCLUDE_PATH}
+	$ENV{OPENCL_HOME}/common/inc
+	$ENV{OPENCL_HOME}/../shared/inc
     #${OPENCL_INCLUDE_DIR}
     ${enjacl_SOURCE_DIR}/../opencl10
 )
 
-message("\nenjacl INCLUDE_DIRECTORIES\n")
-get_directory_property(includes INCLUDE_DIRECTORIES)
-message("${includes}\n")
+message("Opencl Home: $ENV{OPENCL_HOME}")
 
-#provide the source path so we can open our .cl file at runtime
-ADD_DEFINITIONS(-DCL_SOURCE_DIR="${enjacl_SOURCE_DIR}")
 #make OpenCL use the OpenGL context to avoid memory transfer
 ADD_DEFINITIONS(-DGL_INTEROP)
+ADD_DEFINITIONS(-DOPENCL_SHARED)
 ADD_DEFINITIONS(-g )
 
 #particles opencl library
-set (CLCXXFILES  enja.cpp opencl.cpp physics/collision.cpp render.cpp util.cpp timege.cpp)
+set (CLCXXFILES  
+	oclRadixSort/src/RadixSort.cpp
+	oclRadixSort/src/Scan.cpp
+    enja.cpp 
+    opencl.cpp 
+    physics/collision.cpp 
+    render.cpp 
+
+    SPH.cpp
+
+    util.cpp 
+    timege.cpp)
+
 SET(ocllib enjaclparticles)
 ADD_LIBRARY(${ocllib} ${CLCXXFILES})
 
 
-SET(EXEC_CL collision.x)
+SET(EXEC_CL sph.x)
 ADD_EXECUTABLE(${EXEC_CL} main.cpp util.cpp)
 
+TARGET_LINK_LIBRARIES (${ocllib}
+   $ENV{OPENCL_HOME}/../shared/lib/libshrutil_x86_64.a
+   $ENV{OPENCL_HOME}/common/lib/liboclUtil_x86_64.a
+)
 
 TARGET_LINK_LIBRARIES (${EXEC_CL}
-#   ${GRAND}/librandom.a
-#   ${GUTILS}/libgraphic_utilities.a
+   $ENV{OPENCL_HOME}/../shared/lib/libshrutil_x86_64.a
+   $ENV{OPENCL_HOME}/common/lib/liboclUtil_x86_64.a
    ${ocllib}
    ${GLUT_LIBRARIES}
    ${OPENGL_LIBRARIES}
@@ -62,9 +76,4 @@ TARGET_LINK_LIBRARIES (${EXEC_CL}
    ${GLEW_LIBRARY}
 )
 
-
-#CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/enja.v.glsl ${CMAKE_CURRENT_BINARY_DIR}/enja.v.glsl)
-#CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/enja.f.glsl ${CMAKE_CURRENT_BINARY_DIR}/enja.f.glsl)
-#don't need to copy it if we provide path to source dir
-#CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/enja.cl ${CMAKE_CURRENT_BINARY_DIR}/enja.cl)
 

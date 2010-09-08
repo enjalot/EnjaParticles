@@ -7,7 +7,8 @@
 //   across a corner, but this is unlikely to be a problem unless the 
 //   boxes are small. 
 
-
+// Sep. 5, 2010: enjalot version dealing with SPH forces instead of direct velocity changes
+// 
 
 
 std::string collision_program_source = STRINGIFY(
@@ -153,7 +154,7 @@ bool intersect_triangle_ge(float4 pos, float4 vel, __global Triangle* tri, float
     float t;
     t = dot(edge2, qvec) * inv_det;
 
-    if(t > eps && t < dist)
+    if(t > eps and t < dist)
         return true;
 
     return false;
@@ -231,15 +232,18 @@ float4 collisions_box(float4 pos, float4 vel, int first, int last, __global Box*
     }
 
 #endif
+	//TODO
+	//need to change this to return a force
 	return vel;
 }
 //----------------------------------------------------------------------
-__kernel void collision_ge( __global float4* vertices, __global float4* velocities, __global Box* boxes_glob, int n_boxes, float dt, __global int* tri_offsets, __global int* triangles,  __local Box* boxes)
+__kernel void collision_ge( __global float4* pos, __global float4* vel, __global float4* force, __global Box* boxes_glob, int n_boxes, float dt, __global int* tri_offsets, __global int* triangles,  __local Box* boxes)
 {
 #if 1
     unsigned int i = get_global_id(0);
-    float4 pos = vertices[i];
-    float4 vel = velocities[i];
+    float4 p = pos[i];
+    float4 v = vel[i];
+    float4 f;
 
 
 	// Find a way to Iterate over batches of n_triangles so the number
@@ -258,12 +262,15 @@ __kernel void collision_ge( __global float4* vertices, __global float4* velociti
 		int f_tri = tri_offsets[j];
 		int l_tri = tri_offsets[j+1];
 		// offsets are monotonic
-		vel = collisions_box(pos, vel, first, last, boxes_glob, dt, boxes, triangles, f_tri, l_tri, tri_offsets);
+		f = collisions_box(p, v, first, last, boxes_glob, dt, boxes, triangles, f_tri, l_tri, tri_offsets);
 	}
 
-    velocities[i].x = vel.x;
-    velocities[i].y = vel.y;
-    velocities[i].z = vel.z;
+    force[i] = f;
+/*
+    vel[i].x = v.x;
+    vel[i].y = v.y;
+    vel[i].z = v.z;
+*/
 #endif
 }
 );
