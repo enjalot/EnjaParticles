@@ -104,7 +104,6 @@ __kernel void hash(
 		   __global uint* sort_indexes,
 		   __constant struct GridParams* cGridParams)
 {
-#if 1
 	// particle index
 	//uint index = __umul24(blockIdx.x, blockDim.x) + threadIdx.x;
 	uint index = get_global_id(0);
