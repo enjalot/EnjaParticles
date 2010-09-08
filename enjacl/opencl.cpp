@@ -136,9 +136,9 @@ int EnjaParticles::update()
 
 
 	GridParams gp;
-	gp.grid_size = float3(1.,1.,1.);
+	gp.grid_size = float3(10.,10.,10.);
 	gp.grid_min = float3(0.,0.,0.);
-	gp.grid_max = float3(1.,1.,1.);
+	gp.grid_max = float3(10.,10.,10.);
 	gp.grid_res = float3(10,10,10);
 	gp.grid_delta.x = gp.grid_size.x / gp.grid_res.x;
 	gp.grid_delta.y = gp.grid_size.y / gp.grid_res.y;
@@ -150,9 +150,9 @@ int EnjaParticles::update()
 	// notice the index rotation? 
 
 	for (int i=0; i < nb_el; i++) {
-		cells[i].x = rand_float(0.,1.);
-		cells[i].y = rand_float(0.,1.);
-		cells[i].z = rand_float(0.,1.);
+		cells[i].x = rand_float(0.,10.);
+		cells[i].y = rand_float(0.,10.);
+		cells[i].z = rand_float(0.,10.);
 		cells[i].w = 1.;
 	}
 
@@ -201,16 +201,27 @@ void EnjaParticles::hash(std::vector<cl_float4> list, GridParams& gp)
 	}
 
     err = queue.enqueueNDRangeKernel(hash_kernel, cl::NullRange, cl::NDRange(ctaSize), cl::NullRange, NULL, &event);
+    queue.finish();
 
 	// the kernel computes these arrays
-    err = queue.enqueueWriteBuffer(cl_sort_hashes, CL_TRUE, 0, nb_el*sizeof(cl_uint), &sort_hashes[0], NULL, &event);
-    err = queue.enqueueWriteBuffer(cl_sort_indices, CL_TRUE, 0, nb_el*sizeof(cl_uint), &sort_indices[0], NULL, &event);
+    err = queue.enqueueReadBuffer(cl_sort_hashes,  CL_TRUE, 0, nb_el*sizeof(cl_uint), &sort_hashes[0],  NULL, &event);
+    err = queue.enqueueReadBuffer(cl_sort_indices, CL_TRUE, 0, nb_el*sizeof(cl_uint), &sort_indices[0], NULL, &event);
+    queue.finish();
 
 #define DEBUG
 #ifdef DEBUG
 	for (int i=0; i < 100; i++) {
-		printf("sort_index, sort_hash: %d, %d\n", sort_hashes[i], sort_indices[i]);
-		printf("%d, %f, %f, %f, %f\n", i, list[i].x, list[i].y, list[i].y, list[i].w);
+		printf("sort_index: %d, sort_hash: %d, %d\n", i, sort_hashes[i], sort_indices[i]);
+		printf("%d, %f, %f, %f, %f\n", i, list[i].x, list[i].y, list[i].z, list[i].w);
+
+		#if 0
+		int gx = list[i].x;
+		int gy = list[i].y;
+		int gz = list[i].z;
+		unsigned int idx = (gz*gp.grid_res.y + gy) * gp.grid_res.x + gx; 
+		printf("exact hash: %d\n", idx);
+		#endif
+		printf("---------------------------\n");
 	}
 
 	exit(0);

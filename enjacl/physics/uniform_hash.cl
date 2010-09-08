@@ -32,7 +32,6 @@ uint calcGridHash(__constant int3 gridPos, float3 grid_res, __constant bool wrap
 	int gz;
 
 	if(wrapEdges) {
-#if 1
 		int gsx = (int)floor(grid_res.x);
 		int gsy = (int)floor(grid_res.y);
 		int gsz = (int)floor(grid_res.z);
@@ -53,7 +52,6 @@ uint calcGridHash(__constant int3 gridPos, float3 grid_res, __constant bool wrap
 		gx = gridPos.x;
 		gy = gridPos.y;
 		gz = gridPos.z;
-#endif
 	}
 
 	//return  __mul24(__mul24(gz, (int) cGridParams.grid_res.y)+gy, (int) cGridParams.grid_res.x) + gx;
@@ -64,7 +62,9 @@ uint calcGridHash(__constant int3 gridPos, float3 grid_res, __constant bool wrap
 	//This means that we process the grid structure in "depth slice" order, and
 	//each such slice is processed in row-column order.
 	//return __mul24(__umul24(gz, grid_res.y), grid_res.x) + __mul24(gy, grid_res.x) + gx;
+
 	return (gz*grid_res.y + gy) * grid_res.x + gx; 
+	//return 3;
 }
 
 //----------------------------------------------------------------------
@@ -94,16 +94,13 @@ struct GridParams
 
 // comes from K_Grid_Hash
 // CANNOT USE references to structures/classes as aruguments!
-__kernel void hash (
-							   unsigned int			numParticles,
-							   //__global float_vec*	dParticlePositions,	
-							   __global float4*	  dParticlePositions,	
-							   //GridData				dGridData
-							   __global uint* sort_hashes,
-							   __global uint* sort_indexes,
-							   __constant struct GridParams* cGridParams
-							   )
-{			
+__kernel void hash(
+		   unsigned int				numParticles,
+		   __global float4*	  		dParticlePositions,	
+		   __global uint* sort_hashes,
+		   __global uint* sort_indexes,
+		   __constant struct GridParams* cGridParams)
+{
 #if 1
 	// particle index
 	//uint index = __umul24(blockIdx.x, blockDim.x) + threadIdx.x;
@@ -116,13 +113,13 @@ __kernel void hash (
 	// get address in grid
 	//int3 gridPos = calcGridCell(make_float3(p), cGridParams.grid_min, cGridParams.grid_delta);
 	int3 gridPos = calcGridCell(p.xyz, cGridParams->grid_min, cGridParams->grid_delta);
-	bool t = true;
-	uint hash = calcGridHash(gridPos, cGridParams->grid_res, t);
+	bool wrap_edges = false;
+	uint hash = calcGridHash(gridPos, cGridParams->grid_res, wrap_edges);
 
 	// store grid hash and particle index
 	//dGridData.sort_hashes[index] = hash;
 	//dGridData.sort_indexes[index] = index;
-	sort_hashes[index] = hash;
+	sort_hashes[index] = gridPos.z; //hash;
 	sort_indexes[index] = index;
 #endif
 }
