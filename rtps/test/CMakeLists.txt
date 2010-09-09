@@ -1,76 +1,54 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-project(enjacl)
+IF (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+	MESSAGE(FATAL_ERROR "CMake generation must always be out-of-source!
+    Remove the CMakeCache.txt file and try again from another folder")
+ENDIF (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+
+project(test C CXX)
+
+#change this later
+SET( BASE_DIR ${test_SOURCE_DIR}/../..)
+SET( RTPS_DIR ${test_SOURCE_DIR}/../rtpslib)
 
 #need to include FindOPENCL.cmake to
 SET( CMAKE_MODULE_PATH
-     ${enjacl_SOURCE_DIR}/../cmake
+     ${BASE_DIR}/cmake
      )
 
 message("${CMAKE_MODULE_PATH}\n")
-
-# appears in RadixSort.cl
-ADD_DEFINITIONS(-DMAC)
-#ADD_DEFINITIONS(-DCL_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
-ADD_DEFINITIONS(-DCL_SOURCE_DIR="${CMAKE_CURRENT_BINARY_DIR}")
-
 
 FIND_PACKAGE (GLUT)
 FIND_PACKAGE (OpenGL)
 FIND_PACKAGE (OPENCL)
 FIND_PACKAGE (GLEW)
 
-INCLUDE_DIRECTORIES( 
-	oclRadixSort/inc
-	${GLUT_INCLUDE_DIR}
+set (test_INCLUDES
+    ${RTPS_DIR}
+    ${GLUT_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
     ${GLEW_INCLUDE_PATH}
-	$ENV{OPENCL_HOME}/common/inc
-	$ENV{OPENCL_HOME}/../shared/inc
-    #${OPENCL_INCLUDE_DIR}
-    ${enjacl_SOURCE_DIR}/../opencl10
+    ${BASE_DIR}/opencl10
 )
 
-message("Opencl Home: $ENV{OPENCL_HOME}")
 
-#make OpenCL use the OpenGL context to avoid memory transfer
-ADD_DEFINITIONS(-DGL_INTEROP)
-ADD_DEFINITIONS(-DOPENCL_SHARED)
+#library
+set (test_SOURCES
+    main.cpp
+    )
+
+
+
 ADD_DEFINITIONS(-g )
 
-#particles opencl library
-set (CLCXXFILES  
-	oclRadixSort/src/RadixSort.cpp
-	oclRadixSort/src/Scan.cpp
-    enja.cpp 
-    opencl.cpp 
-    physics/collision.cpp 
-    render.cpp 
+INCLUDE_DIRECTORIES(${test_INCLUDES})
+ADD_EXECUTABLE(test.x ${test_SOURCES})
 
-    SPH.cpp
-
-    util.cpp 
-    timege.cpp)
-
-SET(ocllib enjaclparticles)
-ADD_LIBRARY(${ocllib} ${CLCXXFILES})
-
-
-SET(EXEC_CL sph.x)
-ADD_EXECUTABLE(${EXEC_CL} main.cpp util.cpp)
-
-TARGET_LINK_LIBRARIES (${ocllib}
-   $ENV{OPENCL_HOME}/../shared/lib/libshrutil_x86_64.a
-   $ENV{OPENCL_HOME}/common/lib/liboclUtil_x86_64.a
-)
-
-TARGET_LINK_LIBRARIES (${EXEC_CL}
-   $ENV{OPENCL_HOME}/../shared/lib/libshrutil_x86_64.a
-   $ENV{OPENCL_HOME}/common/lib/liboclUtil_x86_64.a
-   ${ocllib}
-   ${GLUT_LIBRARIES}
-   ${OPENGL_LIBRARIES}
-   ${OPENCL_LIBRARIES}
-   ${GLEW_LIBRARY}
+TARGET_LINK_LIBRARIES (test.x
+    rtps
+    ${GLUT_LIBRARIES}
+    ${OPENGL_LIBRARIES}
+    ${OPENCL_LIBRARIES}
+    ${GLEW_LIBRARY}
 )
 
 

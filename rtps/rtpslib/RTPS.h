@@ -16,7 +16,7 @@
 #include "particle/IV.h"
 
 //settings class to configure the framework
-#include "RPTSettings.h"
+#include "RTPSettings.h"
 
 
 namespace rtps {
@@ -24,9 +24,10 @@ namespace rtps {
 class RTPS
 {
 public:
+    //default constructor
     RTPS();
-
-    Init();
+    //Setup CL, Render, initial values and System based on settings
+    RTPS(RTPSettings s);
 
     //Keep track of settings
     RTPSettings settings;
