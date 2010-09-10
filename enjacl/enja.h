@@ -115,6 +115,9 @@ public:
 	/// Radix sort of integer array
 	void sort(std::vector<int> sort_int, std::vector<int> unsort_int);
 
+	/// a specific kernel
+	void buildDataStructures();
+
 	// cl_float3 does not appear to exist. I'd have to extend cl_platform.h
 	void hash(std::vector<cl_float4> list, GridParams& gp);
 
@@ -153,7 +156,7 @@ public:
 
     ~EnjaParticles();
 
-    enum {LORENZ, GRAVITY, VFIELD, SPH, COLLISION, POSITION, SORT, HASH};
+    enum {LORENZ, GRAVITY, VFIELD, SPH, COLLISION, POSITION, SORT, HASH, DATASTRUCTURES};
     static const std::string sources[];
 
 	void reorder_particles(); // experiment with particle sorting
@@ -207,13 +210,15 @@ public:
     cl::Program pos_update_program;     //update the positions
     cl::Program sort_program;     //sorting of integer array
     cl::Program hash_program;     //hashing of grid cells
+    cl::Program datastructures_program;     //
 
     cl::Kernel transform_kernel; //kernel for updating with blender transformations
     cl::Kernel vel_update_kernel;
     cl::Kernel collision_kernel;
     cl::Kernel pos_update_kernel;
     cl::Kernel sort_kernel;     //sorting of integer array
-	cl::Kernel hash_kernel;
+    cl::Kernel hash_kernel;
+    cl::Kernel datastructures_kernel;
 
 	// true if all objects have been loaded to the GPU
 	bool are_objects_loaded;

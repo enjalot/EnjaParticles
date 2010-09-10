@@ -164,6 +164,22 @@ int EnjaParticles::update()
 }
 
 //----------------------------------------------------------------------
+void EnjaParticles::buildDataStructures()
+{
+	#if 0
+	K_Grid_UpdateSorted<SimpleSPHSystem, SimpleSPHData><<< numBlocks, numThreads, smemSize>>> (
+		mNumParticles,
+		dParticleData, 
+		dParticleDataSorted, 
+		dGridData
+		);
+	#endif
+
+	int nb_el = (2 << 12); // should be same value in all methods
+	//float4 array[nb_el * x	:f
+
+}
+//----------------------------------------------------------------------
 void EnjaParticles::hash(std::vector<cl_float4> list, GridParams& gp)
 {
 //  Have to make sure that the data associated with the pointers is on the GPU
@@ -312,6 +328,10 @@ void EnjaParticles::popCorn()
 
 		hash_program = loadProgram(sources[HASH]);
 		hash_kernel = cl::Kernel(hash_program, "hash", &err);
+
+		datastructures_program = loadProgram(sources[DATASTRUCTURES]);
+		exit(0);
+		datastructures_kernel = cl::Kernel(datastructures_program, "datastructures", &err);
     }
     catch (cl::Error er) {
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
