@@ -164,8 +164,36 @@ int EnjaParticles::update()
 }
 
 //----------------------------------------------------------------------
-void EnjaParticles::buildDataStructures()
+void EnjaParticles::buildDataStructures(GridParams& gp)
 {
+	static bool first_time = false;
+	int nb_el, nb_var, nb_bytes;
+	cl::Buffer cl_vars_sorted;
+	cl::Buffer cl_vars_unsorted;
+	std::vector<cl_float4> vars_sorted; 
+	std::vector<cl_float4> vars_unsorted; 
+
+	if (!first_time) {
+		nb_el = (2 << 12);  // number of particles
+		nb_var = 3;  // number of cl_float4 variables to reorder
+		nb_bytes = nb_el*nb_var*sizeof(cl_float4);
+		vars_unsorted.reserve(nb_el*nb_var);
+		vars_sorted.reserve(nb_el*nb_var);
+		// This array should stay on the GPU
+		cl_vars_unsorted = cl::Buffer(context, CL_MEM_WRITE_ONLY, nb_bytes, NULL, &err);
+    	err = queue.enqueueWriteBuffer(cl_vars_unsorted, CL_TRUE, 0, nb_bytes, &vars_unsorted[0], NULL, &event);
+
+		cl_vars_sorted = cl::Buffer(context, CL_MEM_WRITE_ONLY, nb_bytes, NULL, &err);
+    	err = queue.enqueueWriteBuffer(cl_vars_sorted, CL_TRUE, 0, nb_bytes, &vars_sorted[0], NULL, &event);
+		queue.finish();
+		first_time = true;
+	}
+
+	cl::Buffer cl_GridParams(context, CL_MEM_WRITE_ONLY, sizeof(GridParams), NULL, &err);
+    err = queue.enqueueWriteBuffer(cl_GridParams, CL_TRUE, 0, sizeof(GridParams), &gp, NULL, &event);
+	queue.finish();
+
+	// Test arrays
 	#if 0
 	K_Grid_UpdateSorted<SimpleSPHSystem, SimpleSPHData><<< numBlocks, numThreads, smemSize>>> (
 		mNumParticles,
@@ -175,9 +203,31 @@ void EnjaParticles::buildDataStructures()
 		);
 	#endif
 
-	int nb_el = (2 << 12); // should be same value in all methods
-	//float4 array[nb_el * x	:f
+	#if 0
+		__constant int	numParticles,
+		__constant int numVars;
+		// D == float4
+		__global float4*	dParticles,
+		__global float4*	dParticlesSorted, 
+		GridData dGridData,
+		__global uint* sort_hashes,
+		__global uint* sort_indexes,
+		__local sharedHash
+	#endif
 
+	// particle index	
+	#if 0
+	cl_uint index = __umul24(blockIdx.x, blockDim.x) + threadIdx.x;		
+	if (index >= numParticles) return;
+
+	// blockSize + 1 elements	
+	extern __shared__ uint sharedHash[];	
+
+	uint hash = dGridData.sort_hashes[index];
+
+	nb_el = (2 << 12); // should be same value in all methods
+	//float4 array[nb_el * x	:f
+	#endif
 }
 //----------------------------------------------------------------------
 void EnjaParticles::hash(std::vector<cl_float4> list, GridParams& gp)
@@ -330,7 +380,6 @@ void EnjaParticles::popCorn()
 		hash_kernel = cl::Kernel(hash_program, "hash", &err);
 
 		datastructures_program = loadProgram(sources[DATASTRUCTURES]);
-		exit(0);
 		datastructures_kernel = cl::Kernel(datastructures_program, "datastructures", &err);
     }
     catch (cl::Error er) {

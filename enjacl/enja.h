@@ -116,7 +116,7 @@ public:
 	void sort(std::vector<int> sort_int, std::vector<int> unsort_int);
 
 	/// a specific kernel
-	void buildDataStructures();
+	void buildDataStructures(GridParams& gp);
 
 	// cl_float3 does not appear to exist. I'd have to extend cl_platform.h
 	void hash(std::vector<cl_float4> list, GridParams& gp);

@@ -21,7 +21,7 @@
 #include "physics/sph.cl"
 #include "physics/sort.cl"
 #include "physics/uniform_hash.cl"
-#include "physics/datastructures.cl"
+#include "physics/datastructures_test.cl"
 
 #ifdef OPENCL_SHARED
 //#include "physics/collision_ge.cl"
