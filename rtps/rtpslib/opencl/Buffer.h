@@ -30,6 +30,8 @@ public:
     std::vector<T> data;
     int num_elements;
 
+    CL *cli;
+
     //if this is a VBO we store its id
     GLuint vbo_id;
     //need to acquire and release arrays from OpenGL context if we have a VBO

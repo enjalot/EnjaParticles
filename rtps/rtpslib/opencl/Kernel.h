@@ -25,6 +25,7 @@ public:
     std::string name;
     std::string source;
 
+    CL *cli;
     //we need to build a program to have a kernel
     cl::Program program;
 
