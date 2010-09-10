@@ -13,7 +13,7 @@ std::string datastructures_program_source = STRINGIFY(
 
 __kernel void datastructures(
 					__constant int	numParticles,
-					__constant int numVars,
+					__constant int nb_vars,
 					// D == float4
 					__global float4*   dParticles,
 					__global float4*   dParticlesSorted, 
@@ -83,6 +83,12 @@ __kernel void datastructures(
 #if 0
 	T::UpdateSortedValues(dParticlesSorted, dParticles, index, sortedIndex);
 #endif
+
+	for (int j=0; j < nb_vars; j++) {
+		dParticlesSorted[index+j*numParticles]	= dParticles[sortedIndex+j*numParticles];
+	}
+
+	
 }
 
 );
