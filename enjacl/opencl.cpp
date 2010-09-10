@@ -167,7 +167,7 @@ int EnjaParticles::update()
 void EnjaParticles::buildDataStructures(GridParams& gp)
 {
 	static bool first_time = false;
-	int nb_el, nb_var, nb_bytes;
+	int nb_el, nb_vars, nb_bytes;
 	cl::Buffer cl_vars_sorted;
 	cl::Buffer cl_vars_unsorted;
 	std::vector<cl_float4> vars_sorted; 
@@ -175,10 +175,10 @@ void EnjaParticles::buildDataStructures(GridParams& gp)
 
 	if (!first_time) {
 		nb_el = (2 << 12);  // number of particles
-		nb_var = 3;  // number of cl_float4 variables to reorder
-		nb_bytes = nb_el*nb_var*sizeof(cl_float4);
-		vars_unsorted.reserve(nb_el*nb_var);
-		vars_sorted.reserve(nb_el*nb_var);
+		nb_vars = 3;  // number of cl_float4 variables to reorder
+		nb_bytes = nb_el*nb_vars*sizeof(cl_float4);
+		vars_unsorted.reserve(nb_el*nb_vars);
+		vars_sorted.reserve(nb_el*nb_vars);
 		// This array should stay on the GPU
 		cl_vars_unsorted = cl::Buffer(context, CL_MEM_WRITE_ONLY, nb_bytes, NULL, &err);
     	err = queue.enqueueWriteBuffer(cl_vars_unsorted, CL_TRUE, 0, nb_bytes, &vars_unsorted[0], NULL, &event);
@@ -207,13 +207,24 @@ void EnjaParticles::buildDataStructures(GridParams& gp)
 		__constant int	numParticles,
 		__constant int numVars;
 		// D == float4
-		__global float4*	dParticles,
-		__global float4*	dParticlesSorted, 
-		GridData dGridData,
+		__global float4*	cl_vars_unsorted,
+		__global float4*	cl_vars_sorted,
 		__global uint* sort_hashes,
 		__global uint* sort_indexes,
+		__global uint* cell_indexes_start,
+		__global uint* cell_indexes_end,
 		__local sharedHash
 	#endif
+
+    err = datastructures_kernel.setArg(0, nb_el);
+    err = datastructures_kernel.setArg(1, nb_vars);
+    err = datastructures_kernel.setArg(2, cl_vars_unsorted);
+    err = datastructures_kernel.setArg(3, cl_vars_sorted);
+    err = datastructures_kernel.setArg(4, sort_hashes);
+    err = datastructures_kernel.setArg(5, sort_indices);
+    err = datastructures_kernel.setArg(6, cell_indexes_start);
+    err = datastructures_kernel.setArg(7, cell_indexes_end);
+    //err = datastructures_kernel.setArg(8, nb_el); // HOW TO DEAL WITH LOCAL MEMORY? 
 
 	// particle index	
 	#if 0
