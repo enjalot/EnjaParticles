@@ -1,9 +1,9 @@
 #ifndef RTPS_CL_H_INCLUDED
 #define RTPS_CL_H_INCLUDED
 
-#include <CL/cl.hpp>
+#define __CL_ENABLE_EXCEPTIONS
 
-#include "Buffer.h"
+#include <CL/cl.hpp>
 
 namespace rtps{
 class CL
@@ -19,6 +19,21 @@ public:
     int addProgram(Program prog);
     int addKernel(Kernel kern);
 */
+
+    cl::Context context;
+    cl::CommandQueue queue;
+
+    std::vector<cl::Device> devices;
+    int deviceUsed;
+
+    int err;
+    cl::Event event;
+
+    //setup an OpenCL context that shares with OpenGL
+    void setup_gl_cl();
+
+    cl::Program loadProgram(std::string source);
+    cl::Kernel loadKernel(std::string name, std::string source);
 };
 
 }

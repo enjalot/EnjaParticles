@@ -32,10 +32,17 @@ set (rtpslib_INCLUDES
 #library
 set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/RTPS.cpp
-    ${rtpslib_SOURCE_DIR}/opencl
-    ${rtpslib_SOURCE_DIR}/render
-    ${rtpslib_SOURCE_DIR}/system
-    ${rtpslib_SOURCE_DIR}/particle
+    ${rtpslib_SOURCE_DIR}/util.cpp
+
+    ${rtpslib_SOURCE_DIR}/opencl/CL.cpp
+    ${rtpslib_SOURCE_DIR}/opencl/Kernel.cpp
+
+    ${rtpslib_SOURCE_DIR}/render/Render.cpp
+    
+    ${rtpslib_SOURCE_DIR}/system/Simple.cpp
+
+
+    #${rtpslib_SOURCE_DIR}/particle
     )
 
 

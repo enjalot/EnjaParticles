@@ -18,6 +18,8 @@
 //settings class to configure the framework
 #include "RTPSettings.h"
 
+//defines useful structs like float3 and float4
+#include "util.h"
 
 namespace rtps {
 
@@ -29,19 +31,27 @@ public:
     //Setup CL, Render, initial values and System based on settings
     RTPS(RTPSettings s);
 
+    ~RTPS();
+
+    void Init();
+
     //Keep track of settings
     RTPSettings settings;
     
     //OpenCL abstraction instance
-    CL cli;
-    Render render;
+    CL *cli;
+    Render *renderer;
 
     //will be instanciated as a specific subclass like SPH or Boids
-    System system;
+    System *system;
     //std::vector<System> systems;
 
     //initial value helper
-    IV iv;
+    //IV iv;
+
+
+    void update();
+    void render();
 };
 
 }

@@ -1,10 +1,25 @@
+#include <stdio.h>
+
+
+#include <GL/glew.h>
+#if defined __APPLE__ || defined(MACOSX)
+    #include <GLUT/glut.h>
+#else
+    #include <GL/glut.h>
+    //OpenCL stuff
+#endif
+
+
 #include "Render.h"
 
 namespace rtps{
 
-Render::Render()
+Render::Render(GLuint pos, GLuint col, int n)
 {
     rtype = POINTS;
+    pos_vbo = pos;
+    col_vbo = col;
+    num = n;
 }
 
 void Render::drawArrays()
@@ -14,14 +29,16 @@ void Render::drawArrays()
     //glPushMatrix();
     //glLoadMatrixd(gl_transform);
 
+    /*
     if(blending)
     {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
+    */
 
     //printf("color buffer\n");
-    glBindBuffer(GL_ARRAY_BUFFER, c_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, col_vbo);
     glColorPointer(4, GL_FLOAT, 0, 0);
 
     /*
@@ -34,7 +51,7 @@ void Render::drawArrays()
 
 
     //printf("vertex buffer\n");
-    glBindBuffer(GL_ARRAY_BUFFER, v_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
     glVertexPointer(4, GL_FLOAT, 0, 0);
 
     // map the buffer object into client's memory
@@ -68,7 +85,7 @@ void Render::drawArrays()
 }
 
 //----------------------------------------------------------------------
-int Render::render()
+void Render::render()
 {
     // Render the particles with OpenGL
 
@@ -112,7 +129,7 @@ int Render::render()
         glPointSize(1.0f);
 
         drawArrays();
-    }
+    //}
     //printf("done rendering, clean up\n");
    
     glPopClientAttrib();
