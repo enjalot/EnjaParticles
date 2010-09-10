@@ -18,12 +18,6 @@ public:
 
 };
 
-RTPSettings::RTPSettings()
-{
-    system = Simple;
-    max_particles = 1024;
-}
-
 }
 
 #endif

@@ -4,11 +4,13 @@ IF (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 ENDIF (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
-project(test C CXX)
+project(test CXX)
 
 #change this later
 SET( BASE_DIR ${test_SOURCE_DIR}/../..)
 SET( RTPS_DIR ${test_SOURCE_DIR}/../rtpslib)
+
+message("base dir: ${BASE_DIR}")
 
 #need to include FindOPENCL.cmake to
 SET( CMAKE_MODULE_PATH

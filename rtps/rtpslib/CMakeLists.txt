@@ -34,8 +34,9 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/RTPS.cpp
     ${rtpslib_SOURCE_DIR}/util.cpp
 
-    ${rtpslib_SOURCE_DIR}/opencl/CL.cpp
+    ${rtpslib_SOURCE_DIR}/opencl/CLL.cpp
     ${rtpslib_SOURCE_DIR}/opencl/Kernel.cpp
+    ${rtpslib_SOURCE_DIR}/opencl/Buffer.cpp
 
     ${rtpslib_SOURCE_DIR}/render/Render.cpp
     

@@ -4,7 +4,7 @@
 #include <vector>
 
 //OpenCL API
-#include "opencl/CL.h"
+#include "opencl/CLL.h"
 
 //Render API
 #include "render/Render.h"
