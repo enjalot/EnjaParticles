@@ -170,8 +170,16 @@ void EnjaParticles::buildDataStructures(GridParams& gp)
 	int nb_el, nb_vars, nb_bytes;
 	cl::Buffer cl_vars_sorted;
 	cl::Buffer cl_vars_unsorted;
+	cl::Buffer cl_cell_indices_start;
+	cl::Buffer cl_cell_indices_end;
+	cl::Buffer cl_sort_hashes;
+	cl::Buffer cl_sort_indices;
+	std::vector<cl_uint> sort_indices;
+	std::vector<cl_uint> sort_hashes;
 	std::vector<cl_float4> vars_sorted; 
 	std::vector<cl_float4> vars_unsorted; 
+	std::vector<cl_uint> cell_indices_start;
+	std::vector<cl_uint> cell_indices_end;
 
 	if (!first_time) {
 		nb_el = (2 << 12);  // number of particles
@@ -220,10 +228,11 @@ void EnjaParticles::buildDataStructures(GridParams& gp)
     err = datastructures_kernel.setArg(1, nb_vars);
     err = datastructures_kernel.setArg(2, cl_vars_unsorted);
     err = datastructures_kernel.setArg(3, cl_vars_sorted);
-    err = datastructures_kernel.setArg(4, sort_hashes);
-    err = datastructures_kernel.setArg(5, sort_indices);
-    err = datastructures_kernel.setArg(6, cell_indexes_start);
-    err = datastructures_kernel.setArg(7, cell_indexes_end);
+    err = datastructures_kernel.setArg(4, cl_sort_hashes);
+    err = datastructures_kernel.setArg(5, cl_sort_indices);
+    err = datastructures_kernel.setArg(6, cl_cell_indices_start);
+    err = datastructures_kernel.setArg(7, cl_cell_indices_end);
+    err = datastructures_kernel.setArg(8, sizeof(int), 0);
     //err = datastructures_kernel.setArg(8, nb_el); // HOW TO DEAL WITH LOCAL MEMORY? 
 
 	// particle index	
