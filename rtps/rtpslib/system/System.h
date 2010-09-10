@@ -15,16 +15,16 @@ namespace rtps {
 class System
 {
 public:
-    System(){};
-    //virtual ~System();
     virtual void update() = 0;
 
     //number of particles
     int num; 
 
+    GLuint pos_vbo;
+    GLuint col_vbo;
+    //flag is true if the system's constructor creates the VBOs for the system
+    bool managed;
 
-    virtual GLuint getPosVBO();
-    virtual GLuint getColVBO();
 };
 
 }

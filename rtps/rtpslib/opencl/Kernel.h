@@ -12,13 +12,17 @@
  */
 
 #include <string>
+#include <stdio.h>
 
 #include "CLL.h"
 
 namespace rtps{
+
+    
 class Kernel
 {
 public:
+    Kernel(){cli = NULL;};
     Kernel(CL *cli, std::string name, std::string source);
 
     //we will want to access buffers by name when going accross systems
@@ -27,16 +31,32 @@ public:
 
     CL *cli;
     //we need to build a program to have a kernel
-    cl::Program program;
+    //cl::Program program;
 
     //the actual OpenCL kernel object
     cl::Kernel kernel;
 
     template <class T> void setArg(int arg, T val);
 
-    void execute();
+    //assumes null range for worksize offset and local worksize
+    void execute(int ndrange);
+    //later we will make more execute routines to give more options
     
 };
+
+template <class T> void Kernel::setArg(int arg, T val)
+{
+    try
+    {
+        kernel.setArg(arg, val);
+    }
+    catch (cl::Error er) {
+        printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+    }
+
+}
+
+
 
 }
 

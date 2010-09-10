@@ -4,17 +4,16 @@ namespace rtps {
 
 Kernel::Kernel(CL *cli, std::string name, std::string source)
 {
-
+    this->cli = cli;
+    this->name = name;
+    this->source = source;
+    kernel = cli->loadKernel(name, source);
 }
 
-template <class T> void Kernel::setArg(int arg, T val)
+void Kernel::execute(int ndrange)
 {
-
-}
-
-void Kernel::execute()
-{
-
+    //TODO add error checking
+    cli->err = cli->queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(ndrange), cl::NullRange, NULL, &cli->event);
 }
  
 }

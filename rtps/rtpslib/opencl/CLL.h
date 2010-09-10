@@ -6,6 +6,10 @@
 #include <CL/cl.hpp>
 
 namespace rtps{
+
+    
+const char* oclErrorString(cl_int error);
+    
 class CL
 {
 public:
@@ -26,6 +30,7 @@ public:
     std::vector<cl::Device> devices;
     int deviceUsed;
 
+    //error checking stuff
     int err;
     cl::Event event;
 
@@ -34,7 +39,16 @@ public:
 
     cl::Program loadProgram(std::string source);
     cl::Kernel loadKernel(std::string name, std::string source);
+
+    //TODO add oclErrorString to the class
+    //move from util.h/cpp
 };
+
+
+
+
+
+
 
 }
 

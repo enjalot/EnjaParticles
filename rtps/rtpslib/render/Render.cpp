@@ -22,6 +22,10 @@ Render::Render(GLuint pos, GLuint col, int n)
     num = n;
 }
 
+Render::~Render()
+{
+}
+
 void Render::drawArrays()
 {
 
@@ -72,7 +76,7 @@ void Render::drawArrays()
     glDisableClientState(GL_NORMAL_ARRAY);
     //glDisableClientState(GL_EDGE_FLAG_ARRAY);
 
-    printf("draw arrays num: %d\n", num);
+    //printf("draw arrays num: %d\n", num);
 
     glDrawArrays(GL_POINTS, 0, num);
 

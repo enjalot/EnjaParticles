@@ -45,8 +45,12 @@ ADD_DEFINITIONS(-g )
 INCLUDE_DIRECTORIES(${test_INCLUDES})
 ADD_EXECUTABLE(test.x ${test_SOURCES})
 
+message("current build dir:\n")
+message("${BASE_DIR}/rtps/build")
+
 TARGET_LINK_LIBRARIES (test.x
-    rtps
+    #rtps
+    ${BASE_DIR}/rtps/build/rtpslib/librtps.a
     ${GLUT_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${OPENCL_LIBRARIES}

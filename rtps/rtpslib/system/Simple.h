@@ -22,12 +22,12 @@ public:
     //the particle system framework
     RTPS *ps;
 
-    Kernel *k_euler;
+    Kernel k_euler;
 
-    Buffer<float4> *cl_position;
-    Buffer<float4> *cl_color;
-    Buffer<float4> *cl_force;
-    Buffer<float4> *cl_velocity;
+    Buffer<float4> cl_position;
+    Buffer<float4> cl_color;
+    Buffer<float4> cl_force;
+    Buffer<float4> cl_velocity;
 
 };
 

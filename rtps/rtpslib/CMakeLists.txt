@@ -32,11 +32,12 @@ set (rtpslib_INCLUDES
 #library
 set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/RTPS.cpp
+    ${rtpslib_SOURCE_DIR}/RTPSettings.cpp
     ${rtpslib_SOURCE_DIR}/util.cpp
 
     ${rtpslib_SOURCE_DIR}/opencl/CLL.cpp
     ${rtpslib_SOURCE_DIR}/opencl/Kernel.cpp
-    ${rtpslib_SOURCE_DIR}/opencl/Buffer.cpp
+    #${rtpslib_SOURCE_DIR}/opencl/Buffer.cpp
 
     ${rtpslib_SOURCE_DIR}/render/Render.cpp
     
@@ -51,7 +52,7 @@ set (rtpslib_SOURCES
 ADD_DEFINITIONS(-g )
 
 INCLUDE_DIRECTORIES(${rtpslib_INCLUDES})
-ADD_LIBRARY(rtps ${rtpslib_SOURCES})
+ADD_LIBRARY(rtps STATIC ${rtpslib_SOURCES})
 
 TARGET_LINK_LIBRARIES (rtps
     #${GLUT_LIBRARIES}
