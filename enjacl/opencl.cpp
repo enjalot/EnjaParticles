@@ -136,18 +136,6 @@ int EnjaParticles::update()
 	//sort(unsort_int, sort_int);
 
 
-
-	GridParams gp;
-	gp.grid_size = float4(10.,10.,10.,1.);
-	gp.grid_min = float4(0.,0.,0.,1.);
-	gp.grid_max = float4(10.,10.,10.,1.);
-	gp.grid_res = float4(10.,10.,10.,1.);
-	gp.grid_delta.x = gp.grid_size.x / gp.grid_res.x;
-	gp.grid_delta.y = gp.grid_size.y / gp.grid_res.y;
-	gp.grid_delta.z = gp.grid_size.z / gp.grid_res.z;
-	gp.grid_delta.w = 1.;
-	printf("delta z= %f\n", gp.grid_delta.z);
-
 	std::vector<cl_float4> cells;
 	cells.resize(nb_el);
 	// notice the index rotation? 
@@ -162,7 +150,65 @@ int EnjaParticles::update()
 	hash(cells, gp);
 #endif
 }
+//----------------------------------------------------------------------
+void EnjaParticles::setupArrays()
+{
+	// only for my test routines: sort, hash, datastructures
 
+	int nb_el, nb_vars, nb_bytes;
+	cl::Buffer cl_vars_sorted;
+	cl::Buffer cl_vars_unsorted;
+	cl::Buffer cl_cell_indices_start;
+	cl::Buffer cl_cell_indices_end;
+	cl::Buffer cl_sort_hashes;
+	cl::Buffer cl_sort_indices;
+	std::vector<cl_uint> sort_indices;
+	std::vector<cl_uint> sort_hashes;
+	std::vector<cl_float4> vars_sorted; 
+	std::vector<cl_float4> vars_unsorted; 
+	std::vector<cl_uint> cell_indices_start;
+	std::vector<cl_uint> cell_indices_end;
+
+	gp.grid_size = float4(10.,10.,10.,1.);
+	gp.grid_min = float4(0.,0.,0.,1.);
+	gp.grid_max = float4(10.,10.,10.,1.);
+	gp.grid_res = float4(10.,10.,10.,1.);
+	gp.grid_delta.x = gp.grid_size.x / gp.grid_res.x;
+	gp.grid_delta.y = gp.grid_size.y / gp.grid_res.y;
+	gp.grid_delta.z = gp.grid_size.z / gp.grid_res.z;
+	gp.grid_delta.w = 1.;
+	printf("delta z= %f\n", gp.grid_delta.z);
+
+	nb_el = (2 << 12);  // number of particles
+	nb_vars = 3;  // number of cl_float4 variables to reorder
+	nb_bytes = nb_el*nb_vars*sizeof(cl_float4);
+
+	vars_unsorted.reserve(nb_el*nb_vars);
+	vars_sorted.reserve(nb_el*nb_vars);
+	// This array should stay on the GPU
+
+#define BUFFER(bytes) 		cl::Buffer(context, CL_MEM_WRITE_ONLY, bytes, NULL, &err);
+#define WRITE_BUFFER(cl_var, bytes, cpu_var_ptr) queue.enqueueWriteBuffer(cl_var, CL_TRUE, 0, bytes, cpu_var_ptr, NULL, &event)
+
+	try {
+		cl_vars_unsorted = BUFFER(nb_bytes);
+		WRITE_BUFFER(cl_vars_unsorted, nb_bytes, &vars_unsorted[0]);
+
+		cl_vars_sorted = BUFFER(nb_bytes); 
+		WRITE_BUFFER(cl_vars_sorted, nb_bytes, &vars_sorted[0]);
+		queue.finish();
+	} catch(cl::Error er) {
+        printf("ERROR(hash): %s(%s)\n", er.what(), oclErrorString(er.err()));
+		exit(0);
+	}
+
+	cl_GridParams = BUFFER(sizeof(GridParams));
+    err = queue.enqueueWriteBuffer(cl_GridParams, CL_TRUE, 0, sizeof(GridParams), &gp, NULL, &event);
+	queue.finish();
+
+#undef BUFFER
+#undef WRITE_BUFFER
+}
 //----------------------------------------------------------------------
 void EnjaParticles::buildDataStructures(GridParams& gp)
 {
@@ -224,30 +270,26 @@ void EnjaParticles::buildDataStructures(GridParams& gp)
 		__local sharedHash
 	#endif
 
-    err = datastructures_kernel.setArg(0, nb_el);
-    err = datastructures_kernel.setArg(1, nb_vars);
-    err = datastructures_kernel.setArg(2, cl_vars_unsorted);
-    err = datastructures_kernel.setArg(3, cl_vars_sorted);
-    err = datastructures_kernel.setArg(4, cl_sort_hashes);
-    err = datastructures_kernel.setArg(5, cl_sort_indices);
-    err = datastructures_kernel.setArg(6, cl_cell_indices_start);
-    err = datastructures_kernel.setArg(7, cl_cell_indices_end);
-    err = datastructures_kernel.setArg(8, sizeof(int), 0);
-    //err = datastructures_kernel.setArg(8, nb_el); // HOW TO DEAL WITH LOCAL MEMORY? 
+	try {
+    	err = datastructures_kernel.setArg(0, nb_el);
+    	err = datastructures_kernel.setArg(1, nb_vars);
+    	err = datastructures_kernel.setArg(2, cl_vars_unsorted);
+    	err = datastructures_kernel.setArg(3, cl_vars_sorted);
+    	err = datastructures_kernel.setArg(4, cl_sort_hashes);
+    	err = datastructures_kernel.setArg(5, cl_sort_indices);
+    	err = datastructures_kernel.setArg(6, cl_cell_indices_start);
+    	err = datastructures_kernel.setArg(7, cl_cell_indices_end);
+		// local memory
+    	err = datastructures_kernel.setArg(8, sizeof(int), 0);
+	} catch(cl::Error er) {
+        printf("ERROR(hash): %s(%s)\n", er.what(), oclErrorString(er.err()));
+		exit(0);
+	}
 
-	// particle index	
-	#if 0
-	cl_uint index = __umul24(blockIdx.x, blockDim.x) + threadIdx.x;		
-	if (index >= numParticles) return;
+	int ctaSize = 128;
+	int err;
 
-	// blockSize + 1 elements	
-	extern __shared__ uint sharedHash[];	
-
-	uint hash = dGridData.sort_hashes[index];
-
-	nb_el = (2 << 12); // should be same value in all methods
-	//float4 array[nb_el * x	:f
-	#endif
+    err = queue.enqueueNDRangeKernel(datastructures_kernel, cl::NullRange, cl::NDRange(ctaSize), cl::NullRange, NULL, &event);
 }
 //----------------------------------------------------------------------
 void EnjaParticles::hash(std::vector<cl_float4> list, GridParams& gp)

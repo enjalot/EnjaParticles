@@ -111,6 +111,28 @@ typedef struct SPHSettings
 class EnjaParticles
 {
 public:
+// BEGIN
+// ADDED BY GORDON FOR TESTING of hash, sort, datastructures
+	int nb_el, nb_vars, nb_bytes;
+	cl::Buffer cl_vars_sorted;
+	cl::Buffer cl_vars_unsorted;
+	cl::Buffer cl_cell_indices_start;
+	cl::Buffer cl_cell_indices_end;
+	cl::Buffer cl_sort_hashes;
+	cl::Buffer cl_sort_indices;
+	cl::Buffer cl_GridParams;
+	std::vector<cl_uint> sort_indices;
+	std::vector<cl_uint> sort_hashes;
+	std::vector<cl_float4> vars_sorted; 
+	std::vector<cl_float4> vars_unsorted; 
+	std::vector<cl_uint> cell_indices_start;
+	std::vector<cl_uint> cell_indices_end;
+	void setupArrays();
+
+	GridParams gp;
+// END
+
+public:
 
 	/// Radix sort of integer array
 	void sort(std::vector<int> sort_int, std::vector<int> unsort_int);
