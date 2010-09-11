@@ -347,7 +347,6 @@ void EnjaParticles::hash()
 //void EnjaParticles::sort()
 void EnjaParticles::sort(cl::Buffer cl_list)
 {
-#if 1
 // Sorting
 
     try {
@@ -369,6 +368,8 @@ void EnjaParticles::sort(cl::Buffer cl_list)
 		printf("size: %d\n", sizeof(cl_int));
 		#endif
 
+        err = queue.enqueueReadBuffer(cl_list, CL_TRUE, 0, nb_el*sizeof(cl_int), &unsort_int[0], NULL, &event);
+		queue.finish();
 
 		// if ctaSize is too large, sorting is not possible. Number of elements has to ie between some MIN 
 		// and MAX array size, computed in oclRadixSort/src/RadixSort.cpp
@@ -378,8 +379,8 @@ void EnjaParticles::sort(cl::Buffer cl_list)
 		unsigned int keybits = 32;
 
 		// debugging only
-        err = queue.enqueueWriteBuffer(cl_list, CL_TRUE, 0, nb_el*sizeof(int), &unsort_int[0], NULL, &event);
-		queue.finish();
+        //err = queue.enqueueWriteBuffer(cl_list, CL_TRUE, 0, nb_el*sizeof(int), &unsort_int[0], NULL, &event);
+		//queue.finish();
 
 		printf("=== nb_el= %d\n", nb_el);
 		printf("nb_el= %d\n", nb_el);
@@ -392,16 +393,15 @@ void EnjaParticles::sort(cl::Buffer cl_list)
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
     }
 
-	#if 0
+	#if 1
     err = queue.enqueueReadBuffer(cl_list, CL_TRUE, 0, nb_el*sizeof(int), &sort_int[0], NULL, &event);
+    err = queue.enqueueReadBuffer(cl_sort_indices, CL_TRUE, 0, nb_el*sizeof(int), &sort_indices[0], NULL, &event);
 	queue.finish();
 	for (int i=0; i < nb_el; i++) {
-		printf("%d: sort: %d, unsort: %d\n", i, sort_int[i], unsort_int[i]);
+		printf("%d: sort: %d, unsort: %d, index; %d\n", i, sort_int[i], unsort_int[i], sort_indices[i]);
 	}
-	#endif
-
 	//exit(0);
-#endif
+	#endif
 }
 //----------------------------------------------------------------------
 void EnjaParticles::popCorn()
