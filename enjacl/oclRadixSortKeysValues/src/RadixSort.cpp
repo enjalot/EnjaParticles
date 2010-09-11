@@ -24,7 +24,7 @@ RadixSort::RadixSort(cl_context GPUContext,
 					 unsigned int maxElements, 
 					 const char* path, 
 					 const int ctaSize,
-					 bool keysOnly = true) :
+					 bool keysOnly) :
 					 mNumElements(0),
 					 mTempValues(0),
 					 mCounters(0),
@@ -43,6 +43,8 @@ RadixSort::RadixSort(cl_context GPUContext,
 
 	cl_int ciErrNum;
 	d_tempKeys = clCreateBuffer(cxGPUContext, CL_MEM_READ_WRITE, sizeof(unsigned int) * maxElements, NULL, &ciErrNum);
+	// Not sure this is required (G. Erlebacher, 9/11/2010)
+	d_tempValues = clCreateBuffer(cxGPUContext, CL_MEM_READ_WRITE, sizeof(unsigned int) * maxElements, NULL, &ciErrNum);
 	mCounters = clCreateBuffer(cxGPUContext, CL_MEM_READ_WRITE, WARP_SIZE * numBlocks * sizeof(unsigned int), NULL, &ciErrNum);
 	mCountersSum = clCreateBuffer(cxGPUContext, CL_MEM_READ_WRITE, WARP_SIZE * numBlocks * sizeof(unsigned int), NULL, &ciErrNum);
 	mBlockOffsets = clCreateBuffer(cxGPUContext, CL_MEM_READ_WRITE, WARP_SIZE * numBlocks * sizeof(unsigned int), NULL, &ciErrNum); 
@@ -84,23 +86,28 @@ RadixSort::RadixSort(cl_context GPUContext,
         oclCheckError(ciErrNum, CL_SUCCESS); 
     }
 
-	ckRadixSortBlocksKeysOnly = clCreateKernel(cpProgram, "radixSortBlocksKeysOnly", &ciErrNum);
+	//ckRadixSortBlocksKeysOnly = clCreateKernel(cpProgram, "radixSortBlocksKeysOnly", &ciErrNum);
+	ckRadixSortBlocksKeysValues = clCreateKernel(cpProgram, "radixSortBlocksKeysValues", &ciErrNum);
 	oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
 	ckFindRadixOffsets        = clCreateKernel(cpProgram, "findRadixOffsets",        &ciErrNum);
 	oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
 	ckScanNaive               = clCreateKernel(cpProgram, "scanNaive",               &ciErrNum);
 	oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
-	ckReorderDataKeysOnly     = clCreateKernel(cpProgram, "reorderDataKeysOnly",     &ciErrNum);
+	ckReorderDataKeysValues     = clCreateKernel(cpProgram, "reorderDataKeysValues",     &ciErrNum);
 	oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
 	free(cRadixSort);
 }
 
 RadixSort::~RadixSort()
 {
-	clReleaseKernel(ckRadixSortBlocksKeysOnly);
+	//clReleaseKernel(ckRadixSortBlocksKeysOnly);
+	//clReleaseKernel(ckRadixSortBlocksKeysOnly);
+	clReleaseKernel(ckRadixSortBlocksKeysValues);
+	clReleaseKernel(ckRadixSortBlocksKeysValues);
 	clReleaseKernel(ckFindRadixOffsets);
 	clReleaseKernel(ckScanNaive);
-	clReleaseKernel(ckReorderDataKeysOnly);
+	//clReleaseKernel(ckReorderDataKeysOnly);
+	clReleaseKernel(ckReorderDataKeysValues);
 	clReleaseProgram(cpProgram);
 	clReleaseMemObject(d_tempKeys);
 	clReleaseMemObject(mCounters);
@@ -118,14 +125,12 @@ RadixSort::~RadixSort()
 // @param keyBits     The number of bits in each key to use for ordering
 //------------------------------------------------------------------------
 void RadixSort::sort(cl_mem d_keys, 
-		  unsigned int *values, 
+		  cl_mem d_values,
 		  unsigned int  numElements,
 		  unsigned int  keyBits)
 {
-	if (values == 0) 
-    {
-		radixSortKeysOnly(d_keys, numElements, keyBits);
-    }
+	//radixSortKeysOnly(d_keys, numElements, keyBits);
+	radixSortKeysValues(d_keys, d_values, numElements, keyBits);
 }
 
 //----------------------------------------------------------------------------
@@ -134,6 +139,7 @@ void RadixSort::sort(cl_mem d_keys,
 // parameters are device pointers.  Uses cudppScan() for the prefix sum of
 // radix counters.
 //----------------------------------------------------------------------------
+#if 0
 void RadixSort::radixSortKeysOnly(cl_mem d_keys, unsigned int numElements, unsigned int keyBits)
 {
 	int i = 0;
@@ -143,11 +149,25 @@ void RadixSort::radixSortKeysOnly(cl_mem d_keys, unsigned int numElements, unsig
 		i++;
 	}
 }
+#endif
+
+// Added by G. Erlebacher 9/11/2010
+void RadixSort::radixSortKeysValues(cl_mem d_keys, cl_mem d_values, unsigned int numElements, unsigned int keyBits)
+{
+	int i = 0;
+    while (keyBits > i*bitStep) 
+	{
+		//radixSortStepKeysOnly(d_keys, bitStep, i*bitStep, numElements);
+		radixSortStepKeysValues(d_keys, d_values, bitStep, i*bitStep, numElements);
+		i++;
+	}
+}
 
 //----------------------------------------------------------------------------
 // Perform one step of the radix sort.  Sorts by nbits key bits per step, 
 // starting at startbit.
 //----------------------------------------------------------------------------
+#if 0
 void RadixSort::radixSortStepKeysOnly(cl_mem d_keys, unsigned int nbits, unsigned int startbit, unsigned int numElements)
 {
 	// Four step algorithms from Satish, Harris & Garland
@@ -159,10 +179,26 @@ void RadixSort::radixSortStepKeysOnly(cl_mem d_keys, unsigned int nbits, unsigne
 
 	reorderDataKeysOnlyOCL(d_keys, startbit, numElements);
 }
+#endif
 
+// Added by G. Erlebacher, 9/11/2010
+void RadixSort::radixSortStepKeysValues(cl_mem d_keys, cl_mem d_values, unsigned int nbits, unsigned int startbit, unsigned int numElements)
+{
+	// Four step algorithms from Satish, Harris & Garland
+	//radixSortBlocksKeysOnlyOCL(d_keys, nbits, startbit, numElements);
+	radixSortBlocksKeysValuesOCL(d_keys, d_values, nbits, startbit, numElements);
+
+	findRadixOffsetsOCL(startbit, numElements);
+
+	scan.scanExclusiveLarge(mCountersSum, mCounters, 1, numElements/2/CTA_SIZE*16);
+
+	//reorderDataKeysOnlyOCL(d_keys, startbit, numElements);
+	reorderDataKeysValuesOCL(d_keys, d_values, startbit, numElements);
+}
 //----------------------------------------------------------------------------
 // Wrapper for the kernels of the four steps
 //----------------------------------------------------------------------------
+#if 0
 void RadixSort::radixSortBlocksKeysOnlyOCL(cl_mem d_keys, unsigned int nbits, unsigned int startbit, unsigned int numElements)
 {
 	unsigned int totalBlocks = numElements/4/CTA_SIZE;
@@ -179,7 +215,29 @@ void RadixSort::radixSortBlocksKeysOnlyOCL(cl_mem d_keys, unsigned int nbits, un
     ciErrNum |= clEnqueueNDRangeKernel(cqCommandQueue, ckRadixSortBlocksKeysOnly, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL);
 	oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
 }
+#endif
 
+void RadixSort::radixSortBlocksKeysValuesOCL(cl_mem d_keys, cl_mem d_values, unsigned int nbits, unsigned int startbit, unsigned int numElements)
+{
+	unsigned int totalBlocks = numElements/4/CTA_SIZE;
+	size_t globalWorkSize[1] = {CTA_SIZE*totalBlocks};
+	size_t localWorkSize[1] = {CTA_SIZE};
+	cl_int ciErrNum;
+	ciErrNum  = clSetKernelArg(ckRadixSortBlocksKeysValues, 0, sizeof(cl_mem), (void*)&d_keys);
+	ciErrNum  = clSetKernelArg(ckRadixSortBlocksKeysValues, 1, sizeof(cl_mem), (void*)&d_values);
+    ciErrNum |= clSetKernelArg(ckRadixSortBlocksKeysValues, 2, sizeof(cl_mem), (void*)&d_tempKeys);
+    ciErrNum |= clSetKernelArg(ckRadixSortBlocksKeysValues, 2, sizeof(cl_mem), (void*)&d_tempValues);
+	ciErrNum |= clSetKernelArg(ckRadixSortBlocksKeysValues, 3, sizeof(unsigned int), (void*)&nbits);
+	ciErrNum |= clSetKernelArg(ckRadixSortBlocksKeysValues, 4, sizeof(unsigned int), (void*)&startbit);
+    ciErrNum |= clSetKernelArg(ckRadixSortBlocksKeysValues, 5, sizeof(unsigned int), (void*)&numElements);
+    ciErrNum |= clSetKernelArg(ckRadixSortBlocksKeysValues, 6, sizeof(unsigned int), (void*)&totalBlocks);
+	ciErrNum |= clSetKernelArg(ckRadixSortBlocksKeysValues, 7, 4*CTA_SIZE*sizeof(unsigned int), NULL);
+    ciErrNum |= clEnqueueNDRangeKernel(cqCommandQueue, ckRadixSortBlocksKeysValues, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL);
+	oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
+}
+
+
+//----------------------------------------------------------------------
 void RadixSort::findRadixOffsetsOCL(unsigned int startbit, unsigned int numElements)
 {
 	unsigned int totalBlocks = numElements/2/CTA_SIZE;
@@ -187,12 +245,13 @@ void RadixSort::findRadixOffsetsOCL(unsigned int startbit, unsigned int numEleme
 	size_t localWorkSize[1] = {CTA_SIZE};
 	cl_int ciErrNum;
 	ciErrNum  = clSetKernelArg(ckFindRadixOffsets, 0, sizeof(cl_mem), (void*)&d_tempKeys);
-	ciErrNum |= clSetKernelArg(ckFindRadixOffsets, 1, sizeof(cl_mem), (void*)&mCounters);
-    ciErrNum |= clSetKernelArg(ckFindRadixOffsets, 2, sizeof(cl_mem), (void*)&mBlockOffsets);
-	ciErrNum |= clSetKernelArg(ckFindRadixOffsets, 3, sizeof(unsigned int), (void*)&startbit);
-	ciErrNum |= clSetKernelArg(ckFindRadixOffsets, 4, sizeof(unsigned int), (void*)&numElements);
-	ciErrNum |= clSetKernelArg(ckFindRadixOffsets, 5, sizeof(unsigned int), (void*)&totalBlocks);
-	ciErrNum |= clSetKernelArg(ckFindRadixOffsets, 6, 2 * CTA_SIZE *sizeof(unsigned int), NULL);
+	ciErrNum  = clSetKernelArg(ckFindRadixOffsets, 1, sizeof(cl_mem), (void*)&d_tempValues);
+	ciErrNum |= clSetKernelArg(ckFindRadixOffsets, 2, sizeof(cl_mem), (void*)&mCounters);
+    ciErrNum |= clSetKernelArg(ckFindRadixOffsets, 3, sizeof(cl_mem), (void*)&mBlockOffsets);
+	ciErrNum |= clSetKernelArg(ckFindRadixOffsets, 4, sizeof(unsigned int), (void*)&startbit);
+	ciErrNum |= clSetKernelArg(ckFindRadixOffsets, 5, sizeof(unsigned int), (void*)&numElements);
+	ciErrNum |= clSetKernelArg(ckFindRadixOffsets, 6, sizeof(unsigned int), (void*)&totalBlocks);
+	ciErrNum |= clSetKernelArg(ckFindRadixOffsets, 7, 2 * CTA_SIZE *sizeof(unsigned int), NULL);
 	ciErrNum |= clEnqueueNDRangeKernel(cqCommandQueue, ckFindRadixOffsets, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL);
 	oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
 }
@@ -230,5 +289,26 @@ void RadixSort::reorderDataKeysOnlyOCL(cl_mem d_keys, unsigned int startbit, uns
 	ciErrNum |= clSetKernelArg(ckReorderDataKeysOnly, 7, sizeof(unsigned int), (void*)&totalBlocks);
 	ciErrNum |= clSetKernelArg(ckReorderDataKeysOnly, 8, 2 * CTA_SIZE * sizeof(unsigned int), NULL);
 	ciErrNum |= clEnqueueNDRangeKernel(cqCommandQueue, ckReorderDataKeysOnly, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL);
+	oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
+}
+
+void RadixSort::reorderDataKeysValuesOCL(cl_mem d_keys, cl_mem d_values, unsigned int startbit, unsigned int numElements)
+{
+	unsigned int totalBlocks = numElements/2/CTA_SIZE;
+	size_t globalWorkSize[1] = {CTA_SIZE*totalBlocks};
+	size_t localWorkSize[1] = {CTA_SIZE};
+	cl_int ciErrNum;
+	ciErrNum  = clSetKernelArg(ckReorderDataKeysOnly, 0, sizeof(cl_mem), 		(void*)&d_keys);
+	ciErrNum  = clSetKernelArg(ckReorderDataKeysOnly, 1, sizeof(cl_mem), 		(void*)&d_values);
+	ciErrNum |= clSetKernelArg(ckReorderDataKeysOnly, 2, sizeof(cl_mem), 		(void*)&d_tempKeys);
+	ciErrNum |= clSetKernelArg(ckReorderDataKeysOnly, 3, sizeof(cl_mem), 		(void*)&d_tempValues);
+	ciErrNum |= clSetKernelArg(ckReorderDataKeysOnly, 4, sizeof(cl_mem), 		(void*)&mBlockOffsets);
+	ciErrNum |= clSetKernelArg(ckReorderDataKeysOnly, 5, sizeof(cl_mem), 		(void*)&mCountersSum);
+	ciErrNum |= clSetKernelArg(ckReorderDataKeysOnly, 6, sizeof(cl_mem), 		(void*)&mCounters);
+	ciErrNum |= clSetKernelArg(ckReorderDataKeysOnly, 7, sizeof(unsigned int), 	(void*)&startbit);
+	ciErrNum |= clSetKernelArg(ckReorderDataKeysOnly, 8, sizeof(unsigned int), 	(void*)&numElements);
+	ciErrNum |= clSetKernelArg(ckReorderDataKeysOnly, 9, sizeof(unsigned int), 	(void*)&totalBlocks);
+	ciErrNum |= clSetKernelArg(ckReorderDataKeysOnly, 10, 2 * CTA_SIZE * sizeof(unsigned int), NULL);
+	ciErrNum |= clEnqueueNDRangeKernel(cqCommandQueue, ckReorderDataKeysValues, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL);
 	oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
 }
