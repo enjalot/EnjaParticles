@@ -110,10 +110,10 @@ typedef struct SPHSettings
 
 class EnjaParticles
 {
-public:
+private:
 // BEGIN
 // ADDED BY GORDON FOR TESTING of hash, sort, datastructures
-	int nb_el, nb_vars, nb_bytes;
+	int nb_el, nb_vars;
 	cl::Buffer cl_vars_sorted;
 	cl::Buffer cl_vars_unsorted;
 	cl::Buffer cl_cell_indices_start;
@@ -121,15 +121,21 @@ public:
 	cl::Buffer cl_sort_hashes;
 	cl::Buffer cl_sort_indices;
 	cl::Buffer cl_GridParams;
+	cl::Buffer cl_cells;
 	std::vector<cl_uint> sort_indices;
 	std::vector<cl_uint> sort_hashes;
 	std::vector<cl_float4> vars_sorted; 
 	std::vector<cl_float4> vars_unsorted; 
 	std::vector<cl_uint> cell_indices_start;
 	std::vector<cl_uint> cell_indices_end;
+	std::vector<cl_float4> cells;
 	void setupArrays();
 
 	GridParams gp;
+
+public:
+	int getNbVars() { return nb_vars; }
+	int getNbEl() { return nb_el; }
 // END
 
 public:
@@ -141,7 +147,8 @@ public:
 	void buildDataStructures(GridParams& gp);
 
 	// cl_float3 does not appear to exist. I'd have to extend cl_platform.h
-	void hash(std::vector<cl_float4> list, GridParams& gp);
+	//void hash(std::vector<cl_float4> list, GridParams& gp);
+	void hash();
 
     int update();   //update the particle system
     int cpu_update();   //update the particle system using cpu code

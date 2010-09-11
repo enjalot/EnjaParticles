@@ -126,17 +126,23 @@ int EnjaParticles::update()
 #if 1
 	std::vector<int> sort_int;
 	std::vector<int> unsort_int;
-	int nb_el = 2 << 16;
 
-	for (int i=0; i < nb_el; i++) {
-		sort_int.push_back(0);
-		unsort_int.push_back(nb_el-i);
-	}
+	setupArrays();
 
 	//sort(unsort_int, sort_int);
+	hash();
+#endif
+}
+//----------------------------------------------------------------------
+void EnjaParticles::setupArrays()
+{
+	// only for my test routines: sort, hash, datastructures
+	int nb_bytes;
 
+	nb_el = (2 << 13);  // number of particles
+	nb_vars = 3;        // number of cl_float4 variables to reorder
+	printf("nb_el= %d\n", nb_el); 
 
-	std::vector<cl_float4> cells;
 	cells.resize(nb_el);
 	// notice the index rotation? 
 
@@ -145,29 +151,8 @@ int EnjaParticles::update()
 		cells[i].y = rand_float(0.,10.);
 		cells[i].z = rand_float(0.,10.);
 		cells[i].w = 1.;
+		//printf("%d, %f, %f, %f, %f\n", i, cells[i].x, cells[i].y, cells[i].z, cells[i].w);
 	}
-
-	hash(cells, gp);
-#endif
-}
-//----------------------------------------------------------------------
-void EnjaParticles::setupArrays()
-{
-	// only for my test routines: sort, hash, datastructures
-
-	int nb_el, nb_vars, nb_bytes;
-	cl::Buffer cl_vars_sorted;
-	cl::Buffer cl_vars_unsorted;
-	cl::Buffer cl_cell_indices_start;
-	cl::Buffer cl_cell_indices_end;
-	cl::Buffer cl_sort_hashes;
-	cl::Buffer cl_sort_indices;
-	std::vector<cl_uint> sort_indices;
-	std::vector<cl_uint> sort_hashes;
-	std::vector<cl_float4> vars_sorted; 
-	std::vector<cl_float4> vars_unsorted; 
-	std::vector<cl_uint> cell_indices_start;
-	std::vector<cl_uint> cell_indices_end;
 
 	gp.grid_size = float4(10.,10.,10.,1.);
 	gp.grid_min = float4(0.,0.,0.,1.);
@@ -179,30 +164,58 @@ void EnjaParticles::setupArrays()
 	gp.grid_delta.w = 1.;
 	printf("delta z= %f\n", gp.grid_delta.z);
 
-	nb_el = (2 << 12);  // number of particles
-	nb_vars = 3;  // number of cl_float4 variables to reorder
-	nb_bytes = nb_el*nb_vars*sizeof(cl_float4);
+	//exit(0);
+
+	//for (int i=0; i < nb_el; i++) {
+		//sort_int.push_back(0);
+		//unsort_int.push_back(nb_el-i);
+	//}
+
 
 	vars_unsorted.reserve(nb_el*nb_vars);
 	vars_sorted.reserve(nb_el*nb_vars);
-	// This array should stay on the GPU
+	cell_indices_start.reserve(nb_el);
+	cell_indices_end.reserve(nb_el);
+	sort_indices.reserve(nb_el);
+	sort_hashes.reserve(nb_el);
 
 #define BUFFER(bytes) 		cl::Buffer(context, CL_MEM_WRITE_ONLY, bytes, NULL, &err);
 #define WRITE_BUFFER(cl_var, bytes, cpu_var_ptr) queue.enqueueWriteBuffer(cl_var, CL_TRUE, 0, bytes, cpu_var_ptr, NULL, &event)
 
 	try {
+		nb_bytes = nb_el*nb_vars*sizeof(cl_float4);
 		cl_vars_unsorted = BUFFER(nb_bytes);
 		WRITE_BUFFER(cl_vars_unsorted, nb_bytes, &vars_unsorted[0]);
 
 		cl_vars_sorted = BUFFER(nb_bytes); 
 		WRITE_BUFFER(cl_vars_sorted, nb_bytes, &vars_sorted[0]);
+
+		nb_bytes = nb_el*sizeof(cl_int);
+		cl_sort_hashes  = BUFFER(nb_bytes);
+		WRITE_BUFFER(cl_sort_hashes, nb_bytes, &sort_hashes[0]);
+
+		cl_sort_indices = BUFFER(nb_bytes);
+		WRITE_BUFFER(cl_sort_indices, nb_bytes, &sort_indices[0]);
+
+		cl_cell_indices_start = BUFFER(nb_bytes);
+		WRITE_BUFFER(cl_cell_indices_start, nb_bytes, &cell_indices_start[0]);
+
+		cl_cell_indices_end = BUFFER(nb_bytes);
+		WRITE_BUFFER(cl_cell_indices_end, nb_bytes, &cell_indices_end[0]);
+
+		cl_cells = BUFFER(nb_bytes);
+		WRITE_BUFFER(cl_cells, nb_bytes, &cells[0]);
+
+		nb_bytes = sizeof(GridParams);
+		cl_GridParams = BUFFER(nb_bytes);
+		WRITE_BUFFER(cl_GridParams, nb_bytes, &gp);
+
 		queue.finish();
 	} catch(cl::Error er) {
         printf("ERROR(hash): %s(%s)\n", er.what(), oclErrorString(er.err()));
 		exit(0);
 	}
 
-	cl_GridParams = BUFFER(sizeof(GridParams));
     err = queue.enqueueWriteBuffer(cl_GridParams, CL_TRUE, 0, sizeof(GridParams), &gp, NULL, &event);
 	queue.finish();
 
@@ -213,39 +226,16 @@ void EnjaParticles::setupArrays()
 void EnjaParticles::buildDataStructures(GridParams& gp)
 {
 	static bool first_time = false;
-	int nb_el, nb_vars, nb_bytes;
-	cl::Buffer cl_vars_sorted;
-	cl::Buffer cl_vars_unsorted;
-	cl::Buffer cl_cell_indices_start;
-	cl::Buffer cl_cell_indices_end;
-	cl::Buffer cl_sort_hashes;
-	cl::Buffer cl_sort_indices;
-	std::vector<cl_uint> sort_indices;
-	std::vector<cl_uint> sort_hashes;
-	std::vector<cl_float4> vars_sorted; 
-	std::vector<cl_float4> vars_unsorted; 
-	std::vector<cl_uint> cell_indices_start;
-	std::vector<cl_uint> cell_indices_end;
 
 	if (!first_time) {
-		nb_el = (2 << 12);  // number of particles
-		nb_vars = 3;  // number of cl_float4 variables to reorder
-		nb_bytes = nb_el*nb_vars*sizeof(cl_float4);
-		vars_unsorted.reserve(nb_el*nb_vars);
-		vars_sorted.reserve(nb_el*nb_vars);
-		// This array should stay on the GPU
-		cl_vars_unsorted = cl::Buffer(context, CL_MEM_WRITE_ONLY, nb_bytes, NULL, &err);
-    	err = queue.enqueueWriteBuffer(cl_vars_unsorted, CL_TRUE, 0, nb_bytes, &vars_unsorted[0], NULL, &event);
-
-		cl_vars_sorted = cl::Buffer(context, CL_MEM_WRITE_ONLY, nb_bytes, NULL, &err);
-    	err = queue.enqueueWriteBuffer(cl_vars_sorted, CL_TRUE, 0, nb_bytes, &vars_sorted[0], NULL, &event);
-		queue.finish();
+		//nb_el = (2 << 12);  // number of particles
+		//nb_vars = 3;  // number of cl_float4 variables to reorder
 		first_time = true;
 	}
 
-	cl::Buffer cl_GridParams(context, CL_MEM_WRITE_ONLY, sizeof(GridParams), NULL, &err);
-    err = queue.enqueueWriteBuffer(cl_GridParams, CL_TRUE, 0, sizeof(GridParams), &gp, NULL, &event);
-	queue.finish();
+	//cl::Buffer cl_GridParams(context, CL_MEM_WRITE_ONLY, sizeof(GridParams), NULL, &err);
+    //err = queue.enqueueWriteBuffer(cl_GridParams, CL_TRUE, 0, sizeof(GridParams), &gp, NULL, &event);
+	//queue.finish();
 
 	// Test arrays
 	#if 0
@@ -257,18 +247,6 @@ void EnjaParticles::buildDataStructures(GridParams& gp)
 		);
 	#endif
 
-	#if 0
-		__constant int	numParticles,
-		__constant int numVars;
-		// D == float4
-		__global float4*	cl_vars_unsorted,
-		__global float4*	cl_vars_sorted,
-		__global uint* sort_hashes,
-		__global uint* sort_indexes,
-		__global uint* cell_indexes_start,
-		__global uint* cell_indexes_end,
-		__local sharedHash
-	#endif
 
 	try {
     	err = datastructures_kernel.setArg(0, nb_el);
@@ -292,34 +270,19 @@ void EnjaParticles::buildDataStructures(GridParams& gp)
     err = queue.enqueueNDRangeKernel(datastructures_kernel, cl::NullRange, cl::NDRange(ctaSize), cl::NullRange, NULL, &event);
 }
 //----------------------------------------------------------------------
-void EnjaParticles::hash(std::vector<cl_float4> list, GridParams& gp)
+void EnjaParticles::hash()
 {
 //  Have to make sure that the data associated with the pointers is on the GPU
+	for (int i=0; i < 100; i++) {
+		printf("%d, %f, %f, %f, %f\n", i, cells[i].x, cells[i].y, cells[i].z, cells[i].w);
+	}
 
-	int nb_el = (2 << 12);
-	cl::Buffer cl_cells(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(cl_float4), NULL, &err);
-	cl::Buffer cl_sort_hashes(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(cl_uint), NULL, &err);
-	cl::Buffer cl_sort_indices(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(cl_uint), NULL, &err);
-    err = queue.enqueueWriteBuffer(cl_cells, CL_TRUE, 0, nb_el*sizeof(cl_float4), &list[0], NULL, &event);
+	std::vector<cl_float4>& list = cells;
 
-	cl::Buffer cl_GridParams(context, CL_MEM_WRITE_ONLY, sizeof(GridParams), NULL, &err);
-    err = queue.enqueueWriteBuffer(cl_GridParams, CL_TRUE, 0, sizeof(GridParams), &gp, NULL, &event);
-	queue.finish();
-
-	std::vector<cl_uint> sort_hashes;
-	std::vector<cl_uint> sort_indices;
-	sort_hashes.resize(nb_el);
-	sort_indices.resize(nb_el);
+	int nb_el = getNbEl();
 
 	int ctaSize = 128; // work group size
 	int err;
-
-//
-//__kernel void hash (unsigned int	numParticles,
-//			  __global float4*	  dParticlePositions,	
-//			  uint* sort_hashes,
-//			  uint* sort_indexes,
-//			  __constant struct GridParams* cGridParams)
 
 	try {
     	err = hash_kernel.setArg(0, nb_el);
@@ -344,7 +307,7 @@ void EnjaParticles::hash(std::vector<cl_float4> list, GridParams& gp)
 #ifdef DEBUG
 	for (int i=0; i < 100; i++) {
 		printf("sort_index: %d, sort_hash: %u, %u\n", i, (unsigned int) sort_hashes[i], (unsigned int) sort_indices[i]);
-		printf("%d, %f, %f, %f, %f\n", i, list[i].x, list[i].y, list[i].z, list[i].w);
+		printf("%d, %f, %f, %f, %f\n", i, cells[i].x, cells[i].y, cells[i].z, cells[i].w);
 
 		#if 1
 		int gx = list[i].x;
