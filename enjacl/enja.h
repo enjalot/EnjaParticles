@@ -122,6 +122,7 @@ private:
 	cl::Buffer cl_sort_indices;
 	cl::Buffer cl_GridParams;
 	cl::Buffer cl_cells;
+	cl::Buffer cl_unsort;
 	std::vector<cl_uint> sort_indices;
 	std::vector<cl_uint> sort_hashes;
 	std::vector<cl_float4> vars_sorted; 
@@ -129,6 +130,8 @@ private:
 	std::vector<cl_uint> cell_indices_start;
 	std::vector<cl_uint> cell_indices_end;
 	std::vector<cl_float4> cells;
+	std::vector<int> sort_int;
+	std::vector<int> unsort_int;
 	void setupArrays();
 
 	GridParams gp;
@@ -141,7 +144,12 @@ public:
 public:
 
 	/// Radix sort of integer array
-	void sort(std::vector<int> sort_int, std::vector<int> unsort_int);
+	//void sort(std::vector<int> sort_int, std::vector<int> unsort_int);
+	//void sort();
+	//void sort(cl::Buffer cl_unsort, cl::Buffer cl_sort);
+	// Sort the list cl_list (stored on the GPU)
+	// The sort is done in place
+	void sort(cl::Buffer cl_list);
 
 	/// a specific kernel
 	void buildDataStructures(GridParams& gp);

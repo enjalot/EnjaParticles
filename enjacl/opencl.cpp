@@ -124,13 +124,12 @@ int EnjaParticles::update()
 #endif
 
 #if 1
-	std::vector<int> sort_int;
-	std::vector<int> unsort_int;
 
 	setupArrays();
 
-	//sort(unsort_int, sort_int);
 	hash();
+	//sort(unsort_int, sort_int);
+	sort(cl_sort_hashes); // sort hash values in place. Should also reorder cl_sort_indices
 #endif
 }
 //----------------------------------------------------------------------
@@ -164,25 +163,26 @@ void EnjaParticles::setupArrays()
 	gp.grid_delta.w = 1.;
 	printf("delta z= %f\n", gp.grid_delta.z);
 
-	//exit(0);
+	sort_int.resize(nb_el);
+	unsort_int.resize(nb_el);
 
-	//for (int i=0; i < nb_el; i++) {
-		//sort_int.push_back(0);
-		//unsort_int.push_back(nb_el-i);
-	//}
+	for (int i=0; i < nb_el; i++) {
+		sort_int.push_back(0);
+		unsort_int.push_back(nb_el-i);
+	}
 
+	vars_unsorted.resize(nb_el*nb_vars);
+	vars_sorted.resize(nb_el*nb_vars);
+	cell_indices_start.resize(nb_el);
+	cell_indices_end.resize(nb_el);
+	sort_indices.resize(nb_el);
+	sort_hashes.resize(nb_el);
 
-	vars_unsorted.reserve(nb_el*nb_vars);
-	vars_sorted.reserve(nb_el*nb_vars);
-	cell_indices_start.reserve(nb_el);
-	cell_indices_end.reserve(nb_el);
-	sort_indices.reserve(nb_el);
-	sort_hashes.reserve(nb_el);
-
-#define BUFFER(bytes) 		cl::Buffer(context, CL_MEM_WRITE_ONLY, bytes, NULL, &err);
+#define BUFFER(bytes) cl::Buffer(context, CL_MEM_WRITE_ONLY, bytes, NULL, &err);
 #define WRITE_BUFFER(cl_var, bytes, cpu_var_ptr) queue.enqueueWriteBuffer(cl_var, CL_TRUE, 0, bytes, cpu_var_ptr, NULL, &event)
 
 	try {
+		// float4 ELEMENTS
 		nb_bytes = nb_el*nb_vars*sizeof(cl_float4);
 		cl_vars_unsorted = BUFFER(nb_bytes);
 		WRITE_BUFFER(cl_vars_unsorted, nb_bytes, &vars_unsorted[0]);
@@ -190,6 +190,10 @@ void EnjaParticles::setupArrays()
 		cl_vars_sorted = BUFFER(nb_bytes); 
 		WRITE_BUFFER(cl_vars_sorted, nb_bytes, &vars_sorted[0]);
 
+		cl_cells = BUFFER(nb_bytes);
+		WRITE_BUFFER(cl_cells, nb_bytes, &cells[0]);
+
+		// int ELEMENTS
 		nb_bytes = nb_el*sizeof(cl_int);
 		cl_sort_hashes  = BUFFER(nb_bytes);
 		WRITE_BUFFER(cl_sort_hashes, nb_bytes, &sort_hashes[0]);
@@ -203,12 +207,11 @@ void EnjaParticles::setupArrays()
 		cl_cell_indices_end = BUFFER(nb_bytes);
 		WRITE_BUFFER(cl_cell_indices_end, nb_bytes, &cell_indices_end[0]);
 
-		cl_cells = BUFFER(nb_bytes);
-		WRITE_BUFFER(cl_cells, nb_bytes, &cells[0]);
-
 		nb_bytes = sizeof(GridParams);
 		cl_GridParams = BUFFER(nb_bytes);
 		WRITE_BUFFER(cl_GridParams, nb_bytes, &gp);
+
+		cl_unsort = BUFFER(nb_bytes);
 
 		queue.finish();
 	} catch(cl::Error er) {
@@ -267,19 +270,19 @@ void EnjaParticles::buildDataStructures(GridParams& gp)
 	int ctaSize = 128;
 	int err;
 
-    err = queue.enqueueNDRangeKernel(datastructures_kernel, cl::NullRange, cl::NDRange(ctaSize), cl::NullRange, NULL, &event);
+    err = queue.enqueueNDRangeKernel(datastructures_kernel, cl::NullRange, cl::NDRange(nb_el), cl::NDRange(ctaSize), NULL, &event);
 }
 //----------------------------------------------------------------------
 void EnjaParticles::hash()
+// Generate hash list: stored in cl_sort_hashes
 {
 //  Have to make sure that the data associated with the pointers is on the GPU
-	for (int i=0; i < 100; i++) {
-		printf("%d, %f, %f, %f, %f\n", i, cells[i].x, cells[i].y, cells[i].z, cells[i].w);
-	}
+	//for (int i=0; i < 100; i++) {
+		//printf("%d, %f, %f, %f, %f\n", i, cells[i].x, cells[i].y, cells[i].z, cells[i].w);
+	//}
 
 	std::vector<cl_float4>& list = cells;
 
-	int nb_el = getNbEl();
 
 	int ctaSize = 128; // work group size
 	int err;
@@ -295,17 +298,19 @@ void EnjaParticles::hash()
 		exit(0);
 	}
 
-    err = queue.enqueueNDRangeKernel(hash_kernel, cl::NullRange, cl::NDRange(ctaSize), cl::NullRange, NULL, &event);
+    err = queue.enqueueNDRangeKernel(hash_kernel, cl::NullRange, cl::NDRange(nb_el), cl::NDRange(ctaSize), NULL, &event);
     queue.finish();
 
+
+//#define DEBUG
+#ifdef DEBUG
 	// the kernel computes these arrays
     err = queue.enqueueReadBuffer(cl_sort_hashes,  CL_TRUE, 0, nb_el*sizeof(cl_uint), &sort_hashes[0],  NULL, &event);
     err = queue.enqueueReadBuffer(cl_sort_indices, CL_TRUE, 0, nb_el*sizeof(cl_uint), &sort_indices[0], NULL, &event);
     queue.finish();
 
-#define DEBUG
-#ifdef DEBUG
-	for (int i=0; i < 100; i++) {
+	for (int i=0; i < 4150; i++) {  // only first 4096 are ok. WHY? 
+	//for (int i=nb_el-10; i < nb_el; i++) {
 		printf("sort_index: %d, sort_hash: %u, %u\n", i, (unsigned int) sort_hashes[i], (unsigned int) sort_indices[i]);
 		printf("%d, %f, %f, %f, %f\n", i, cells[i].x, cells[i].y, cells[i].z, cells[i].w);
 
@@ -317,50 +322,85 @@ void EnjaParticles::hash()
 		printf("exact hash: %d\n", idx);
 		#endif
 		printf("---------------------------\n");
-	}
 
-	exit(0);
+	}
+	//exit(0);
+
 #endif
 #undef DEBUG
-
-
-	// Check hashes
+		#if 0
+		// SORT IN PLACE
+        err = queue.enqueueReadBuffer(cl_sort_hashes, CL_TRUE, 0, nb_el*sizeof(cl_uint), &unsort_int[0], NULL, &event);
+		queue.finish();
+		for (int i=nb_el-10; i < nb_el; i++) {
+		//for (int i=0; i < 10; i++) {
+			printf("xx %d, hash: %d, %d\n", i, (unsigned int) unsort_int[i], sort_hashes[i]);
+		}
+		#endif
+		//exit(0);
 }
 //----------------------------------------------------------------------
-void EnjaParticles::sort(std::vector<int> sort_int, std::vector<int> unsort_int)
+//void EnjaParticles::sort(std::vector<int> sort_int, std::vector<int> unsort_int)
+// Input: a list of integers in random order
+// Output: a list of sorted integers
+// Leave data on the gpu
+//void EnjaParticles::sort()
+void EnjaParticles::sort(cl::Buffer cl_list)
 {
-	int nb_el = sort_int.size();
-
 #if 1
 // Sorting
-	// SHOULD ONLY DO ONCE
-	cl::Buffer cl_sort(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(int), NULL, &err);
-	cl::Buffer cl_unsort(context, CL_MEM_WRITE_ONLY, nb_el*sizeof(int), NULL, &err);
-
 
     try {
-        err = queue.enqueueWriteBuffer(cl_unsort, CL_TRUE, 0, nb_el*sizeof(int), &unsort_int[0], NULL, &event);
 
-		int ctaSize = 128; // work group size
+		//for (int i=0; i < nb_el; i++) {
+			//unsort_int[i] = -1;
+		//}
+
+		// SORT IN PLACE
+		#if 0
+        err = queue.enqueueReadBuffer(cl_list, CL_TRUE, 0, nb_el*sizeof(cl_int), &unsort_int[0], NULL, &event);
+		queue.finish();
+		for (int i=0; i < nb_el; i++) {
+		//for (int i=0; i < 200; i++) {
+			printf("%d, %d\n", i, unsort_int[i]);
+			//unsort_int[i] = 20000 - i;
+		}
+		printf("nb_el= %d\n", nb_el);
+		printf("size: %d\n", sizeof(cl_int));
+		#endif
+
+
+		// if ctaSize is too large, sorting is not possible. Number of elements has to ie between some MIN 
+		// and MAX array size, computed in oclRadixSort/src/RadixSort.cpp
+		int ctaSize = 64; // work group size
 	    RadixSort* radixSort = new RadixSort(context(), queue(), nb_el, "../oclRadixSort/", ctaSize, true);		    
+		queue.finish();
 		unsigned int keybits = 32;
-	    radixSort->sort(cl_unsort(), 0, nb_el, keybits);
 
-#ifdef DEBUG
-		// are results sorted? 
-		// NOT REQUIRED EXCEPT FOR DEBUGGING
-        err = queue.enqueueReadBuffer(cl_unsort, CL_TRUE, 0, nb_el*sizeof(int), &sort_int[0], NULL, &event);
+		// debugging only
+        err = queue.enqueueWriteBuffer(cl_list, CL_TRUE, 0, nb_el*sizeof(int), &unsort_int[0], NULL, &event);
 		queue.finish();
 
-		for (int i=0; i < nb_el; i++) {
-			printf("%d: sort: %d, unsort: %d\n", i, sort_int[i], unsort_int[i]);
-		}
-#endif
+		printf("=== nb_el= %d\n", nb_el);
+		printf("nb_el= %d\n", nb_el);
+	    radixSort->sort(cl_sort_hashes(), 0, nb_el, keybits);
+		queue.finish();
+
+		// Sort in place
+		// NOT REQUIRED EXCEPT FOR DEBUGGING
     } catch (cl::Error er) {
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
     }
 
-    queue.finish();
+	#if 0
+    err = queue.enqueueReadBuffer(cl_list, CL_TRUE, 0, nb_el*sizeof(int), &sort_int[0], NULL, &event);
+	queue.finish();
+	for (int i=0; i < nb_el; i++) {
+		printf("%d: sort: %d, unsort: %d\n", i, sort_int[i], unsort_int[i]);
+	}
+	#endif
+
+	//exit(0);
 #endif
 }
 //----------------------------------------------------------------------
@@ -408,6 +448,7 @@ void EnjaParticles::popCorn()
 		datastructures_kernel = cl::Kernel(datastructures_program, "datastructures", &err);
     }
     catch (cl::Error er) {
+		printf("hash(): error\n");
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
 		exit(0);
     }

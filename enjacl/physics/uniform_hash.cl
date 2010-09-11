@@ -98,7 +98,7 @@ struct GridParams
 // comes from K_Grid_Hash
 // CANNOT USE references to structures/classes as aruguments!
 __kernel void hash(
-		   unsigned int				numParticles,
+		   __constant unsigned int	numParticles,
 		   __global float4*	  		dParticlePositions,	
 		   __global uint* sort_hashes,
 		   __global uint* sort_indexes,
@@ -116,11 +116,13 @@ __kernel void hash(
 	int4 gridPos = calcGridCell(p, cGridParams->grid_min, cGridParams->grid_delta);
 	bool wrap_edges = false;
 	uint hash = calcGridHash(gridPos, cGridParams->grid_res, wrap_edges);
-	//hash = cGridParams->grid_res.x;
 
 	// store grid hash and particle index
 
 	sort_hashes[index] = hash;
+	//int grid_size = get_global_size(0);
+	//sort_hashes[index] = numParticles;
+	//sort_hashes[index] = grid_size;
 	sort_indexes[index] = index;
 }
 //----------------------------------------------------------------------
