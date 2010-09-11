@@ -129,7 +129,7 @@ int EnjaParticles::update()
 
 	hash();
 	//sort(unsort_int, sort_int);
-	sort(cl_sort_hashes); // sort hash values in place. Should also reorder cl_sort_indices
+	sort(cl_sort_hashes, cl_sort_indices); // sort hash values in place. Should also reorder cl_sort_indices
 #endif
 }
 //----------------------------------------------------------------------
@@ -345,15 +345,11 @@ void EnjaParticles::hash()
 // Output: a list of sorted integers
 // Leave data on the gpu
 //void EnjaParticles::sort()
-void EnjaParticles::sort(cl::Buffer cl_list)
+void EnjaParticles::sort(cl::Buffer cl_list, cl::Buffer cl_indices)
 {
 // Sorting
 
     try {
-
-		//for (int i=0; i < nb_el; i++) {
-			//unsort_int[i] = -1;
-		//}
 
 		// SORT IN PLACE
 		#if 0
@@ -366,6 +362,7 @@ void EnjaParticles::sort(cl::Buffer cl_list)
 		}
 		printf("nb_el= %d\n", nb_el);
 		printf("size: %d\n", sizeof(cl_int));
+		exit(0);
 		#endif
 
         err = queue.enqueueReadBuffer(cl_list, CL_TRUE, 0, nb_el*sizeof(cl_int), &unsort_int[0], NULL, &event);
@@ -384,7 +381,7 @@ void EnjaParticles::sort(cl::Buffer cl_list)
 
 		printf("=== nb_el= %d\n", nb_el);
 		printf("nb_el= %d\n", nb_el);
-	    radixSort->sort(cl_sort_hashes(), 0, nb_el, keybits);
+	    radixSort->sort(cl_sort_hashes(), cl_sort_indices(), nb_el, keybits);
 		queue.finish();
 
 		// Sort in place

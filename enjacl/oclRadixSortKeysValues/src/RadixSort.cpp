@@ -53,7 +53,7 @@ RadixSort::RadixSort(cl_context GPUContext,
 
     //char *cRadixSort = oclLoadProgSource(shrFindFilePath("RadixSort.cl", path), "// My comment\n", &szKernelLength);
 
-	string paths(CL_SOURCE_DIR);
+	string paths(CL_SORT_SOURCE_DIR);
 	paths = paths + "/RadixSort.cl";
 	const char* pathr = paths.c_str();
 	//char* pathr= "/Users/erlebach/Documents/src/blender-particles/enjacl/build/RadixSort.cl";
@@ -102,7 +102,6 @@ RadixSort::~RadixSort()
 {
 	//clReleaseKernel(ckRadixSortBlocksKeysOnly);
 	//clReleaseKernel(ckRadixSortBlocksKeysOnly);
-	clReleaseKernel(ckRadixSortBlocksKeysValues);
 	clReleaseKernel(ckRadixSortBlocksKeysValues);
 	clReleaseKernel(ckFindRadixOffsets);
 	clReleaseKernel(ckScanNaive);
@@ -184,6 +183,7 @@ void RadixSort::radixSortStepKeysOnly(cl_mem d_keys, unsigned int nbits, unsigne
 // Added by G. Erlebacher, 9/11/2010
 void RadixSort::radixSortStepKeysValues(cl_mem d_keys, cl_mem d_values, unsigned int nbits, unsigned int startbit, unsigned int numElements)
 {
+	printf("enter radixSortStepKeysValues\n");
 	// Four step algorithms from Satish, Harris & Garland
 	//radixSortBlocksKeysOnlyOCL(d_keys, nbits, startbit, numElements);
 	radixSortBlocksKeysValuesOCL(d_keys, d_values, nbits, startbit, numElements);
@@ -219,6 +219,7 @@ void RadixSort::radixSortBlocksKeysOnlyOCL(cl_mem d_keys, unsigned int nbits, un
 
 void RadixSort::radixSortBlocksKeysValuesOCL(cl_mem d_keys, cl_mem d_values, unsigned int nbits, unsigned int startbit, unsigned int numElements)
 {
+	printf("enter radixSortBlocks\n");
 	unsigned int totalBlocks = numElements/4/CTA_SIZE;
 	size_t globalWorkSize[1] = {CTA_SIZE*totalBlocks};
 	size_t localWorkSize[1] = {CTA_SIZE};
@@ -226,13 +227,15 @@ void RadixSort::radixSortBlocksKeysValuesOCL(cl_mem d_keys, cl_mem d_values, uns
 	ciErrNum  = clSetKernelArg(ckRadixSortBlocksKeysValues, 0, sizeof(cl_mem), (void*)&d_keys);
 	ciErrNum  = clSetKernelArg(ckRadixSortBlocksKeysValues, 1, sizeof(cl_mem), (void*)&d_values);
     ciErrNum |= clSetKernelArg(ckRadixSortBlocksKeysValues, 2, sizeof(cl_mem), (void*)&d_tempKeys);
-    ciErrNum |= clSetKernelArg(ckRadixSortBlocksKeysValues, 2, sizeof(cl_mem), (void*)&d_tempValues);
-	ciErrNum |= clSetKernelArg(ckRadixSortBlocksKeysValues, 3, sizeof(unsigned int), (void*)&nbits);
-	ciErrNum |= clSetKernelArg(ckRadixSortBlocksKeysValues, 4, sizeof(unsigned int), (void*)&startbit);
-    ciErrNum |= clSetKernelArg(ckRadixSortBlocksKeysValues, 5, sizeof(unsigned int), (void*)&numElements);
-    ciErrNum |= clSetKernelArg(ckRadixSortBlocksKeysValues, 6, sizeof(unsigned int), (void*)&totalBlocks);
-	ciErrNum |= clSetKernelArg(ckRadixSortBlocksKeysValues, 7, 4*CTA_SIZE*sizeof(unsigned int), NULL);
+    ciErrNum |= clSetKernelArg(ckRadixSortBlocksKeysValues, 3, sizeof(cl_mem), (void*)&d_tempValues);
+	ciErrNum |= clSetKernelArg(ckRadixSortBlocksKeysValues, 4, sizeof(unsigned int), (void*)&nbits);
+	ciErrNum |= clSetKernelArg(ckRadixSortBlocksKeysValues, 5, sizeof(unsigned int), (void*)&startbit);
+    ciErrNum |= clSetKernelArg(ckRadixSortBlocksKeysValues, 6, sizeof(unsigned int), (void*)&numElements);
+    ciErrNum |= clSetKernelArg(ckRadixSortBlocksKeysValues, 7, sizeof(unsigned int), (void*)&totalBlocks);
+	ciErrNum |= clSetKernelArg(ckRadixSortBlocksKeysValues, 8, 4*CTA_SIZE*sizeof(unsigned int), NULL);
     ciErrNum |= clEnqueueNDRangeKernel(cqCommandQueue, ckRadixSortBlocksKeysValues, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL);
+
+	// ERROR MESSGE: ERror #-33 (CL_INVALID_DEVICE)   WHY??????
 	oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
 }
 
@@ -245,13 +248,13 @@ void RadixSort::findRadixOffsetsOCL(unsigned int startbit, unsigned int numEleme
 	size_t localWorkSize[1] = {CTA_SIZE};
 	cl_int ciErrNum;
 	ciErrNum  = clSetKernelArg(ckFindRadixOffsets, 0, sizeof(cl_mem), (void*)&d_tempKeys);
-	ciErrNum  = clSetKernelArg(ckFindRadixOffsets, 1, sizeof(cl_mem), (void*)&d_tempValues);
+	ciErrNum |= clSetKernelArg(ckFindRadixOffsets, 1, sizeof(cl_mem), (void*)&d_tempValues);
 	ciErrNum |= clSetKernelArg(ckFindRadixOffsets, 2, sizeof(cl_mem), (void*)&mCounters);
     ciErrNum |= clSetKernelArg(ckFindRadixOffsets, 3, sizeof(cl_mem), (void*)&mBlockOffsets);
 	ciErrNum |= clSetKernelArg(ckFindRadixOffsets, 4, sizeof(unsigned int), (void*)&startbit);
 	ciErrNum |= clSetKernelArg(ckFindRadixOffsets, 5, sizeof(unsigned int), (void*)&numElements);
 	ciErrNum |= clSetKernelArg(ckFindRadixOffsets, 6, sizeof(unsigned int), (void*)&totalBlocks);
-	ciErrNum |= clSetKernelArg(ckFindRadixOffsets, 7, 2 * CTA_SIZE *sizeof(unsigned int), NULL);
+	ciErrNum |= clSetKernelArg(ckFindRadixOffsets, 7, 2 * CTA_SIZE * sizeof(unsigned int), NULL);
 	ciErrNum |= clEnqueueNDRangeKernel(cqCommandQueue, ckFindRadixOffsets, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL);
 	oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
 }
@@ -273,6 +276,7 @@ void RadixSort::scanNaiveOCL(unsigned int numElements)
 	oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
 }
 
+#if 0
 void RadixSort::reorderDataKeysOnlyOCL(cl_mem d_keys, unsigned int startbit, unsigned int numElements)
 {
 	unsigned int totalBlocks = numElements/2/CTA_SIZE;
@@ -291,24 +295,29 @@ void RadixSort::reorderDataKeysOnlyOCL(cl_mem d_keys, unsigned int startbit, uns
 	ciErrNum |= clEnqueueNDRangeKernel(cqCommandQueue, ckReorderDataKeysOnly, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL);
 	oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
 }
+#endif
 
 void RadixSort::reorderDataKeysValuesOCL(cl_mem d_keys, cl_mem d_values, unsigned int startbit, unsigned int numElements)
 {
+	printf("enter reorder\n");
 	unsigned int totalBlocks = numElements/2/CTA_SIZE;
 	size_t globalWorkSize[1] = {CTA_SIZE*totalBlocks};
 	size_t localWorkSize[1] = {CTA_SIZE};
 	cl_int ciErrNum;
-	ciErrNum  = clSetKernelArg(ckReorderDataKeysOnly, 0, sizeof(cl_mem), 		(void*)&d_keys);
-	ciErrNum  = clSetKernelArg(ckReorderDataKeysOnly, 1, sizeof(cl_mem), 		(void*)&d_values);
-	ciErrNum |= clSetKernelArg(ckReorderDataKeysOnly, 2, sizeof(cl_mem), 		(void*)&d_tempKeys);
-	ciErrNum |= clSetKernelArg(ckReorderDataKeysOnly, 3, sizeof(cl_mem), 		(void*)&d_tempValues);
-	ciErrNum |= clSetKernelArg(ckReorderDataKeysOnly, 4, sizeof(cl_mem), 		(void*)&mBlockOffsets);
-	ciErrNum |= clSetKernelArg(ckReorderDataKeysOnly, 5, sizeof(cl_mem), 		(void*)&mCountersSum);
-	ciErrNum |= clSetKernelArg(ckReorderDataKeysOnly, 6, sizeof(cl_mem), 		(void*)&mCounters);
-	ciErrNum |= clSetKernelArg(ckReorderDataKeysOnly, 7, sizeof(unsigned int), 	(void*)&startbit);
-	ciErrNum |= clSetKernelArg(ckReorderDataKeysOnly, 8, sizeof(unsigned int), 	(void*)&numElements);
-	ciErrNum |= clSetKernelArg(ckReorderDataKeysOnly, 9, sizeof(unsigned int), 	(void*)&totalBlocks);
-	ciErrNum |= clSetKernelArg(ckReorderDataKeysOnly, 10, 2 * CTA_SIZE * sizeof(unsigned int), NULL);
+	ciErrNum  = clSetKernelArg(ckReorderDataKeysValues, 0, sizeof(cl_mem), 		(void*)&d_keys);
+	#if 1
+	ciErrNum |= clSetKernelArg(ckReorderDataKeysValues, 1, sizeof(cl_mem), 		(void*)&d_values);
+	ciErrNum |= clSetKernelArg(ckReorderDataKeysValues, 2, sizeof(cl_mem), 		(void*)&d_tempKeys);
+	ciErrNum |= clSetKernelArg(ckReorderDataKeysValues, 3, sizeof(cl_mem), 		(void*)&d_tempValues);
+	ciErrNum |= clSetKernelArg(ckReorderDataKeysValues, 4, sizeof(cl_mem), 		(void*)&mBlockOffsets);
+	ciErrNum |= clSetKernelArg(ckReorderDataKeysValues, 5, sizeof(cl_mem), 		(void*)&mCountersSum);
+	ciErrNum |= clSetKernelArg(ckReorderDataKeysValues, 6, sizeof(cl_mem), 		(void*)&mCounters);
+	ciErrNum |= clSetKernelArg(ckReorderDataKeysValues, 7, sizeof(unsigned int), 	(void*)&startbit);
+	ciErrNum |= clSetKernelArg(ckReorderDataKeysValues, 8, sizeof(unsigned int), 	(void*)&numElements);
+	ciErrNum |= clSetKernelArg(ckReorderDataKeysValues, 9, sizeof(unsigned int), 	(void*)&totalBlocks);
+	ciErrNum |= clSetKernelArg(ckReorderDataKeysValues, 10, 2 * CTA_SIZE * sizeof(unsigned int), NULL);
+	ciErrNum |= clSetKernelArg(ckReorderDataKeysValues, 11, 2 * CTA_SIZE * sizeof(unsigned int), NULL);
+	#endif
 	ciErrNum |= clEnqueueNDRangeKernel(cqCommandQueue, ckReorderDataKeysValues, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL);
 	oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
 }

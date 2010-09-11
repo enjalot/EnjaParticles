@@ -149,7 +149,7 @@ public:
 	//void sort(cl::Buffer cl_unsort, cl::Buffer cl_sort);
 	// Sort the list cl_list (stored on the GPU)
 	// The sort is done in place
-	void sort(cl::Buffer cl_list);
+	void sort(cl::Buffer cl_list, cl::Buffer cl_values);
 
 	/// a specific kernel
 	void buildDataStructures(GridParams& gp);

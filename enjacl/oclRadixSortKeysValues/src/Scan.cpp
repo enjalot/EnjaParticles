@@ -48,7 +48,7 @@ Scan::Scan(cl_context GPUContext,
 	// IAN: FIX CODE AND REMOVE HARDCODING (path to cl files)
 	// cScan should contain the source code
 
-	string paths(CL_SOURCE_DIR);
+	string paths(CL_SORT_SOURCE_DIR);
 	paths = paths + "/Scan_b.cl";
 	const char* pathr = paths.c_str();
 
