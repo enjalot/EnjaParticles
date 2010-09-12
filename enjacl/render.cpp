@@ -11,6 +11,7 @@
 #include "timege.h"
 
 
+//----------------------------------------------------------------------
 void EnjaParticles::drawArrays()
 {
 
@@ -31,15 +32,10 @@ void EnjaParticles::drawArrays()
     //printf("vertex buffer\n");
     glBindBuffer(GL_ARRAY_BUFFER, v_vbo);
     glVertexPointer(4, GL_FLOAT, 0, 0);
-    
-    //printf("index buffer\n");
-    glBindBuffer(GL_ARRAY_BUFFER, i_vbo);
-    glIndexPointer(GL_INT, 0, 0);
 
     //printf("enable client state\n");
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_COLOR_ARRAY);
-    glEnableClientState(GL_INDEX_ARRAY);
     
     //Need to disable these for blender
     glDisableClientState(GL_NORMAL_ARRAY);
@@ -49,13 +45,14 @@ void EnjaParticles::drawArrays()
     glDrawArrays(GL_POINTS, 0, num);
 
     //printf("disable stuff\n");
-    glDisableClientState(GL_INDEX_ARRAY);
+    //glDisableClientState(GL_INDEX_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
 
     //glPopMatrix();
 }
 
+//----------------------------------------------------------------------
 int EnjaParticles::render()
 {
     // Render the particles with OpenGL
@@ -64,6 +61,7 @@ int EnjaParticles::render()
     // and this should get more sophisticated)
  
     //printf("in EnjaParticles::render\n");
+    /*
 	ts[2]->start();
 
     //printf("about to update\n");
@@ -78,6 +76,7 @@ int EnjaParticles::render()
     ts[0]->stop();
 
     ts[1]->start();
+    */
     //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //printf("render!\n");
  
@@ -107,7 +106,7 @@ int EnjaParticles::render()
         glUseProgram(0);
         glDisable(GL_POINT_SPRITE_ARB);
     }
-    else
+    else   // do not use glsl
     {
 
         glDisable(GL_LIGHTING);
@@ -141,6 +140,7 @@ int EnjaParticles::render()
 }
 
 
+//----------------------------------------------------------------------
 int EnjaParticles::compileShaders()
 {
 
@@ -192,6 +192,7 @@ int EnjaParticles::compileShaders()
 
 }
 
+//----------------------------------------------------------------------
 void EnjaParticles::use_glsl()
 {
     glsl_program = compileShaders();
@@ -206,3 +207,4 @@ void EnjaParticles::use_glsl()
 
 }
 
+//----------------------------------------------------------------------

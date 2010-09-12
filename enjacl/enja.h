@@ -5,9 +5,53 @@
 
 #include <string>
 #include <vector>
-#include "incopencl.h"
-#include "timege.h"
 #include <stdio.h>
+
+#include <CL/cl.hpp>
+
+#include "system.h"
+#include "timege.h"
+
+// for access to cl_int4, etc.
+#include <CL/cl_platform.h>
+
+
+// GE: Sept. 8, 2010
+typedef struct float4 {
+	float x, y, z, w;
+	float4() {}
+	float4(float x, float y, float z, float w=1.) {
+		this->x = x;
+		this->y = y;
+		this->z = z;
+		this->w = w;
+	}
+} float4;
+
+// GE: Sept. 8, 2010
+typedef struct int3 {
+	int x, y, z;
+	int3() {}
+	int3(float x, float y, float z) {
+		this->x = x;
+		this->y = y;
+		this->z = z;
+	}
+} int3;
+
+// GE: Sept8, 2010
+// From Krog's SPH code
+struct GridParams
+{
+    float4          grid_size;
+    float4          grid_min;
+    float4          grid_max;
+
+    // number of cells in each dimension/side of grid
+    float4          grid_res;
+
+    float4          grid_delta;
+};
 
 
 typedef struct Vec4
@@ -51,9 +95,68 @@ typedef struct Box
 
 typedef std::vector<Vec4> AVec4;
 
+
+typedef struct SPHSettings
+{
+    float rest_density;
+    float simulation_scale;
+    float particle_mass;
+    float particle_rest_distance;
+    float spacing;
+    float grid_cell_size;
+
+} SPHSettings;
+
+
 class EnjaParticles
 {
+private:
+// BEGIN
+// ADDED BY GORDON FOR TESTING of hash, sort, datastructures
+	int nb_el, nb_vars;
+	cl::Buffer cl_vars_sorted;
+	cl::Buffer cl_vars_unsorted;
+	cl::Buffer cl_cell_indices_start;
+	cl::Buffer cl_cell_indices_end;
+	cl::Buffer cl_sort_hashes;
+	cl::Buffer cl_sort_indices;
+	cl::Buffer cl_GridParams;
+	cl::Buffer cl_cells;
+	cl::Buffer cl_unsort;
+	std::vector<cl_uint> sort_indices;
+	std::vector<cl_uint> sort_hashes;
+	std::vector<cl_float4> vars_sorted; 
+	std::vector<cl_float4> vars_unsorted; 
+	std::vector<cl_uint> cell_indices_start;
+	std::vector<cl_uint> cell_indices_end;
+	std::vector<cl_float4> cells;
+	std::vector<int> sort_int;
+	std::vector<int> unsort_int;
+	void setupArrays();
+
+	GridParams gp;
+
 public:
+	int getNbVars() { return nb_vars; }
+	int getNbEl() { return nb_el; }
+// END
+
+public:
+
+	/// Radix sort of integer array
+	//void sort(std::vector<int> sort_int, std::vector<int> unsort_int);
+	//void sort();
+	//void sort(cl::Buffer cl_unsort, cl::Buffer cl_sort);
+	// Sort the list cl_list (stored on the GPU)
+	// The sort is done in place
+	void sort(cl::Buffer cl_list, cl::Buffer cl_values);
+
+	/// a specific kernel
+	void buildDataStructures(GridParams& gp);
+
+	// cl_float3 does not appear to exist. I'd have to extend cl_platform.h
+	//void hash(std::vector<cl_float4> list, GridParams& gp);
+	void hash();
 
     int update();   //update the particle system
     int cpu_update();   //update the particle system using cpu code
@@ -74,6 +177,7 @@ public:
     EnjaParticles(int system, AVec4 generators, AVec4 velocities, int len, int num, float radius);
     //EnjaParticles(int system, Vec4* generators, Vec4* velocities, Vec4* colors, int num);
     
+
     //extra properties of the system
     bool collision;         //enable collision detection
     int updates;            //number of times to update per frame
@@ -89,8 +193,10 @@ public:
 
     ~EnjaParticles();
 
-    enum {LORENZ, GRAVITY, VFIELD, COLLISION, POSITION, TRANSFORM};
+    enum {LORENZ, GRAVITY, VFIELD, SPH, COLLISION, POSITION, SORT, HASH, DATASTRUCTURES};
     static const std::string sources[];
+
+	void reorder_particles(); // experiment with particle sorting
 
     //keep track of transformation from blender
     /*
@@ -110,12 +216,23 @@ public:
     //particles
     int num;                //number of particles
     int system;             //what kind of system?
+    System *m_system;
     AVec4 vert_gen;       //vertex generators
     AVec4 velo_gen;       //velocity generators
     AVec4 velocities;       //for cpu version only
     AVec4 colors;
     std::vector<int> indices;
     //float* life;  //life is packed into velocity.w
+    
+
+    //SPH
+    void make_cube(Vec4* position);
+    void make_grid(Vec4 min, Vec4 max);
+    //will want a seperate grid class
+    Vec4 grid_min;
+    Vec4 grid_max;
+    SPHSettings sph_settings; 
+
 
     int init(AVec4 vert_gen, AVec4 velo_gen, AVec4 colors, int num);
 
@@ -128,11 +245,17 @@ public:
     cl::Program vel_update_program;  //integrate the velocities of the particles
     cl::Program collision_program;  //check for collisions
     cl::Program pos_update_program;     //update the positions
+    cl::Program sort_program;     //sorting of integer array
+    cl::Program hash_program;     //hashing of grid cells
+    cl::Program datastructures_program;     //
 
     cl::Kernel transform_kernel; //kernel for updating with blender transformations
     cl::Kernel vel_update_kernel;
     cl::Kernel collision_kernel;
     cl::Kernel pos_update_kernel;
+    cl::Kernel sort_kernel;     //sorting of integer array
+    cl::Kernel hash_kernel;
+    cl::Kernel datastructures_kernel;
 
 	// true if all objects have been loaded to the GPU
 	bool are_objects_loaded;
@@ -155,7 +278,6 @@ public:
     //cl::Buffer cl_life;        //keep track where in their life the particles are (packed into velocity.w now)
     int v_vbo;   //vertices vbo
     int c_vbo;   //colors vbo
-    int i_vbo;   //index vbo
     unsigned int vbo_size; //size in bytes of the vbo
     
     //for collisions
@@ -170,6 +292,7 @@ public:
     int init_cl();
     int setup_cl(); //helper function that initializes the devices and the context
     cl::Program loadProgram(std::string kernel_source);
+    cl::Kernel loadKernel(std::string kernel_source, std::string kernel_name);
     void popCorn(); // sets up the kernel and pushes data
     
     //opengl

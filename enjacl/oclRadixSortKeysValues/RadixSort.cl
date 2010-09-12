@@ -391,10 +391,20 @@ void radixSortBlockKeysValues(uint4 *key, uint4 *value, uint nbits, uint startbi
 
         barrier(CLK_LOCAL_MEM_FENCE);
 
+<<<<<<< HEAD
         //sVMem[(r.x & 3) * localSize + (r.x >> 2)] = (*value).x;
         //sVMem[(r.y & 3) * localSize + (r.y >> 2)] = (*value).y;
         //sVMem[(r.z & 3) * localSize + (r.z >> 2)] = (*value).z;
         //sVMem[(r.w & 3) * localSize + (r.w >> 2)] = (*value).w;
+=======
+        sVMem[(r.x & 3) * localSize + (r.x >> 2)] = (*value).x;
+        sVMem[(r.y & 3) * localSize + (r.y >> 2)] = (*value).y;
+        sVMem[(r.z & 3) * localSize + (r.z >> 2)] = (*value).z;
+        sVMem[(r.w & 3) * localSize + (r.w >> 2)] = (*value).w;
+
+
+
+>>>>>>> e344910309d7555e0a40153bf06a3a73bdb20bba
 
         barrier(CLK_LOCAL_MEM_FENCE);
 
@@ -405,6 +415,7 @@ void radixSortBlockKeysValues(uint4 *key, uint4 *value, uint nbits, uint startbi
         (*key).w = sMem[localId + 3 * localSize];
 
 		// I AM NOT CLEAR ON HOW TO HANDLE value ARRAY
+<<<<<<< HEAD
 	}
 
 	for(uint shift = startbit; shift < (startbit + nbits); ++shift)
@@ -435,6 +446,14 @@ void radixSortBlockKeysValues(uint4 *key, uint4 *value, uint nbits, uint startbi
         (*value).z = sVMem[localId + 2 * localSize];
         (*value).w = sVMem[localId + 3 * localSize];
         barrier(CLK_LOCAL_MEM_FENCE);
+=======
+		barrier(CLK_LOCAL_MEM_FENCE);
+        (*value).x = sMem[localId];
+        (*value).y = sMem[localId +     localSize];
+        (*value).z = sMem[localId + 2 * localSize];
+        (*value).w = sMem[localId + 3 * localSize];
+
+>>>>>>> e344910309d7555e0a40153bf06a3a73bdb20bba
 	}
 }
 
