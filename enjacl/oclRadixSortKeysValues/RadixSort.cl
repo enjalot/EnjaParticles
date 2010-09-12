@@ -391,8 +391,6 @@ void radixSortBlockKeysValues(uint4 *key, uint4 *value, uint nbits, uint startbi
 
         barrier(CLK_LOCAL_MEM_FENCE);
 
-        barrier(CLK_LOCAL_MEM_FENCE);
-
         // The above allows us to read without 4-way bank conflicts:
         (*key).x = sMem[localId];
         (*key).y = sMem[localId +     localSize];
@@ -414,17 +412,14 @@ void radixSortBlockKeysValues(uint4 *key, uint4 *value, uint nbits, uint startbi
 		
 		r = rank4(lsb, sMem);
 
-		barrier(CLK_LOCAL_MEM_FENCE);
-
         // This arithmetic strides the ranks across 4 CTA_SIZE regions
         sVMem[(r.x & 3) * localSize + (r.x >> 2)] = (*value).x;
         sVMem[(r.y & 3) * localSize + (r.y >> 2)] = (*value).y;
         sVMem[(r.z & 3) * localSize + (r.z >> 2)] = (*value).z;
         sVMem[(r.w & 3) * localSize + (r.w >> 2)] = (*value).w;
-        //barrier(CLK_LOCAL_MEM_FENCE);
+        barrier(CLK_LOCAL_MEM_FENCE);
 
         // The above allows us to read without 4-way bank conflicts:
-		barrier(CLK_LOCAL_MEM_FENCE);
         (*value).x = sVMem[localId];
         (*value).y = sVMem[localId +     localSize];
         (*value).z = sVMem[localId + 2 * localSize];

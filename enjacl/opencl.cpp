@@ -368,7 +368,7 @@ void EnjaParticles::sort(cl::Buffer cl_hashes, cl::Buffer cl_indices)
 		// if ctaSize is too large, sorting is not possible. Number of elements has to lie between some MIN 
 		// and MAX array size, computed in oclRadixSort/src/RadixSort.cpp
 		int ctaSize = 64; // work group size
-	    RadixSort* radixSort = new RadixSort(context(), queue(), nb_el, "../oclRadixSort/", ctaSize, true);		    
+	    RadixSort* radixSort = new RadixSort(context(), queue(), nb_el, "../oclRadixSort/", ctaSize, false);		    
 		unsigned int keybits = 32;
 
 // **** BEFORE SORT
@@ -398,6 +398,7 @@ void EnjaParticles::sort(cl::Buffer cl_hashes, cl::Buffer cl_indices)
 		// NOT REQUIRED EXCEPT FOR DEBUGGING
     } catch (cl::Error er) {
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+		exit(0);
     }
 
 	#if 1
@@ -407,7 +408,7 @@ void EnjaParticles::sort(cl::Buffer cl_hashes, cl::Buffer cl_indices)
     err = queue.enqueueReadBuffer(cl_indices, CL_TRUE, 0, nb_el*sizeof(int), &unsort_int[0], NULL, &event);
 	queue.finish();
 	for (int i=0; i < 10; i++) {
-		// fist and 3rd columns are computed by sorting method
+		// first and 3rd columns are computed by sorting method
 		printf("%d: sorted hash: %d, unsorted index; %d\n", i, sort_int[i], unsort_int[i]);
 	}
 	exit(0);
