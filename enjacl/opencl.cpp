@@ -168,7 +168,7 @@ void EnjaParticles::setupArrays()
 	unsort_int.resize(nb_el);
 
 	for (int i=0; i < nb_el; i++) {
-		sort_int.push_back(0);
+		sort_int.push_back(i);
 		unsort_int.push_back(nb_el-i);
 	}
 
@@ -184,26 +184,31 @@ void EnjaParticles::setupArrays()
 #define WRITE_BUFFER(cl_var, bytes, cpu_var_ptr) queue.enqueueWriteBuffer(cl_var, CL_TRUE, 0, bytes, cpu_var_ptr, NULL, &event)
 
 	try {
-
-#if 0
+		//----------------
 		// float4 ELEMENTS
 		nb_bytes = nb_el*nb_vars*sizeof(cl_float4);
+
+		#if 1
 		cl_vars_unsorted = BUFFER(nb_bytes);
 		WRITE_BUFFER(cl_vars_unsorted, nb_bytes, &vars_unsorted[0]);
 
 		cl_vars_sorted = BUFFER(nb_bytes); 
 		WRITE_BUFFER(cl_vars_sorted, nb_bytes, &vars_sorted[0]);
-#endif
+		#endif
 
+		#if 1
+		nb_bytes = nb_el*sizeof(cl_float4);
 		cl_cells = BUFFER(nb_bytes);
 		WRITE_BUFFER(cl_cells, nb_bytes, &cells[0]);
+		#endif
 
+		//----------------
 		// int ELEMENTS
 		nb_bytes = nb_el*sizeof(int);
+		#if 1
 		cl_sort_hashes  = BUFFER(nb_bytes);
 		WRITE_BUFFER(cl_sort_hashes, nb_bytes, &sort_hashes[0]);
 
-		#if 1
 		cl_sort_indices = BUFFER(nb_bytes);
 		WRITE_BUFFER(cl_sort_indices, nb_bytes, &sort_indices[0]);
 
@@ -213,19 +218,26 @@ void EnjaParticles::setupArrays()
 		cl_cell_indices_end = BUFFER(nb_bytes);
 		WRITE_BUFFER(cl_cell_indices_end, nb_bytes, &cell_indices_end[0]);
 
+		cl_unsort = BUFFER(nb_bytes);
+		WRITE_BUFFER(cl_unsort, nb_bytes, &unsort_int);
+
+		cl_sort = BUFFER(nb_bytes);
+		WRITE_BUFFER(cl_sort, nb_bytes, &sort_int);
+
 		nb_bytes = sizeof(GridParams);
 		cl_GridParams = BUFFER(nb_bytes);
 		WRITE_BUFFER(cl_GridParams, nb_bytes, &gp);
-
-		cl_unsort = BUFFER(nb_bytes);
 		#endif
-        //err = queue.enqueueWriteBuffer(cl_GridParams, CL_TRUE, 0, sizeof(GridParams), &gp, NULL, &event);
+
 
 		queue.finish();
 	} catch(cl::Error er) {
         printf("ERROR(setupArray): %s(%s)\n", er.what(), oclErrorString(er.err()));
 		exit(0);
 	}
+
+	//exit(0);
+
 
 
     printf("done with setup arrays\n");
@@ -283,16 +295,24 @@ void EnjaParticles::buildDataStructures(GridParams& gp)
 void EnjaParticles::hash()
 // Generate hash list: stored in cl_sort_hashes
 {
+	try {
+    	err = queue.enqueueReadBuffer(cl_cells,  CL_TRUE, 0, nb_el*sizeof(cl_float4), &cells[0],  NULL, &event);
+		queue.finish();
+	} catch(cl::Error er) {
+        printf("0 ERROR(hash): %s(%s)\n", er.what(), oclErrorString(er.err()));
+		exit(0);
+	}
+
 //  Have to make sure that the data associated with the pointers is on the GPU
-	//for (int i=0; i < 100; i++) {
-		//printf("%d, %f, %f, %f, %f\n", i, cells[i].x, cells[i].y, cells[i].z, cells[i].w);
-	//}
+	for (int i=0; i < 100; i++) {
+		printf("%d, %f, %f, %f, %f\n", i, cells[i].x, cells[i].y, cells[i].z, cells[i].w);
+	}
 
 	std::vector<cl_float4>& list = cells;
 
-
 	int ctaSize = 128; // work group size
 	int err;
+
 
     printf("setting up hash kernel\n");
 	try {
@@ -307,15 +327,16 @@ void EnjaParticles::hash()
 	}
 
     queue.finish();
+
     printf("executing hash kernel\n");
     err = queue.enqueueNDRangeKernel(hash_kernel, cl::NullRange, cl::NDRange(nb_el), cl::NDRange(ctaSize), NULL, &event);
-    //err = queue.enqueueNDRangeKernel(hash_kernel, cl::NullRange, cl::NDRange(nb_el), cl::NullRange, NULL, &event);
-    printf("finishing queue\n");
     queue.finish();
-    printf("queue finished\n");
+
+	//printf("int: %d, cl_int: %d\n", sizeof(int), sizeof(cl_int));
+	//exit(0);
 
 
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
 	// the kernel computes these arrays
     err = queue.enqueueReadBuffer(cl_sort_hashes,  CL_TRUE, 0, nb_el*sizeof(cl_uint), &sort_hashes[0],  NULL, &event);
@@ -324,7 +345,7 @@ void EnjaParticles::hash()
 
 	for (int i=0; i < 4150; i++) {  // only first 4096 are ok. WHY? 
 	//for (int i=nb_el-10; i < nb_el; i++) {
-		printf("sort_index: %d, sort_hash: %u, %u\n", i, (unsigned int) sort_hashes[i], (unsigned int) sort_indices[i]);
+		printf("sort_index: %d, sort_hash: %u, %u\n", i, sort_hashes[i], sort_indices[i]);
 		printf("%d, %f, %f, %f, %f\n", i, cells[i].x, cells[i].y, cells[i].z, cells[i].w);
 
 		#if 1
@@ -338,6 +359,7 @@ void EnjaParticles::hash()
 	}
 #endif
 #undef DEBUG
+exit(0);
 
         printf("about to read from buffers to see what they have\n");
 		#if 1
@@ -347,7 +369,7 @@ void EnjaParticles::hash()
 		queue.finish();
 		for (int i=nb_el-10; i < nb_el; i++) {
 		//for (int i=0; i < 10; i++) {
-			printf("xx index: %d, cl_sort_indices: %d, cl_sort_hashes: %d\n", i, (unsigned int) sort_indices[i], sort_hashes[i]);
+			printf("xx index: %d, sort_indices: %d, sort_hashes: %d\n", i, sort_indices[i], sort_hashes[i]);
 		}
 		#endif
 }
@@ -438,7 +460,7 @@ void EnjaParticles::sort(cl::Buffer cl_hashes, cl::Buffer cl_indices)
 void EnjaParticles::popCorn()
 {
 
-    try{
+    try {
 #if 0
         //#include "physics/collision.cl"
 		printf("before load program system\n");

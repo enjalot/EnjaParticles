@@ -15,13 +15,19 @@ int4 calcGridCell(float4 p, float4 grid_min, float4 grid_delta)
 {
 	// subtract grid_min (cell position) and multiply by delta
 	//return make_int4((p-grid_min) * grid_delta);
-	float4 pp = (p-grid_min)*grid_delta;
+
+	//float4 pp = (p-grid_min)*grid_delta;
+	float4 pp;
+	pp.x = (p.x-grid_min.x)*grid_delta.x;
+	pp.y = (p.y-grid_min.y)*grid_delta.y;
+	pp.z = (p.z-grid_min.z)*grid_delta.z;
+	pp.w = (p.w-grid_min.w)*grid_delta.w;
 
 	int4 ii;
-	ii.x = pp.x;
-	ii.y = pp.y;
-	ii.z = pp.z;
-	ii.w = pp.w;
+	ii.x = (int) pp.x;
+	ii.y = (int) pp.y;
+	ii.z = (int) pp.z;
+	ii.w = (int) pp.w;
 	return ii;
 }
 
@@ -67,7 +73,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 	//each such slice is processed in row-column order.
 	//return __mul24(__umul24(gz, grid_res.y), grid_res.x) + __mul24(gy, grid_res.x) + gx;
 
-	return (gz*(int)grid_res.y + gy) * (int)grid_res.x + gx; 
+	return (gz*grid_res.y + gy) * grid_res.x + gx; 
 }
 
 //----------------------------------------------------------------------
@@ -119,8 +125,14 @@ __kernel void hash(
 
 	// store grid hash and particle index
 
-	sort_hashes[index] = index;
-	//sort_hashes[index] = 5;
+	sort_hashes[index] = hash;
+	//int pp = (int) ((p.z-cGridParams->grid_min.z)*cGridParams->grid_delta.z);
+	//int pp = (int) cGridParams->grid_delta.z;
+	int pp = (int) p.x;
+
+	//sort_hashes[index] = (int) cGridParams->grid_res.x;
+	//sort_hashes[index] = hash;
+	//sort_hashes[index] = pp;
 	//int grid_size = get_global_size(0);
 	//sort_hashes[index] = numParticles;
 	//sort_hashes[index] = grid_size;

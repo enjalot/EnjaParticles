@@ -123,6 +123,7 @@ private:
 	cl::Buffer cl_GridParams;
 	cl::Buffer cl_cells;
 	cl::Buffer cl_unsort;
+	cl::Buffer cl_sort;
 	std::vector<cl_uint> sort_indices;
 	std::vector<cl_uint> sort_hashes;
 	std::vector<cl_float4> vars_sorted; 
@@ -132,9 +133,9 @@ private:
 	std::vector<cl_float4> cells;
 	std::vector<int> sort_int;
 	std::vector<int> unsort_int;
-	void setupArrays();
-
 	GridParams gp;
+
+	void setupArrays();
 
 public:
 	int getNbVars() { return nb_vars; }
