@@ -129,6 +129,7 @@ int EnjaParticles::update()
 	hash();
     printf("done with hash\n");
 	sort(cl_sort_hashes, cl_sort_indices); // sort hash values in place. Should also reorder cl_sort_indices
+	buildDataStructures();
 	exit(0);
 
 #endif
@@ -180,6 +181,22 @@ void EnjaParticles::setupArrays()
 	sort_hashes.resize(nb_el);
     printf("about to start writing buffers");
 
+	int nb_floats = nb_vars*nb_el;
+	cl_float4 f;
+	cl_float4 zero;
+	zero.x = zero.y = zero.z = 0.0;
+	zero.w = 1.;
+
+	for (int i=0; i < nb_floats; i++) {
+		f.x = rand_float(0., 1.);
+		f.y = rand_float(0., 1.);
+		f.z = rand_float(0., 1.);
+		f.w = 1.0;
+		vars_unsorted[i] = f;
+		vars_sorted[i]   = zero;
+		//printf("f= %f, %f, %f, %f\n", f.x, f.y, f.z, f.w);
+	}
+
 #define BUFFER(bytes) cl::Buffer(context, CL_MEM_READ_WRITE, bytes, NULL, &err);
 #define WRITE_BUFFER(cl_var, bytes, cpu_var_ptr) queue.enqueueWriteBuffer(cl_var, CL_TRUE, 0, bytes, cpu_var_ptr, NULL, &event)
 
@@ -188,24 +205,19 @@ void EnjaParticles::setupArrays()
 		// float4 ELEMENTS
 		nb_bytes = nb_el*nb_vars*sizeof(cl_float4);
 
-		#if 1
 		cl_vars_unsorted = BUFFER(nb_bytes);
 		WRITE_BUFFER(cl_vars_unsorted, nb_bytes, &vars_unsorted[0]);
 
 		cl_vars_sorted = BUFFER(nb_bytes); 
 		WRITE_BUFFER(cl_vars_sorted, nb_bytes, &vars_sorted[0]);
-		#endif
 
-		#if 1
 		nb_bytes = nb_el*sizeof(cl_float4);
 		cl_cells = BUFFER(nb_bytes);
 		WRITE_BUFFER(cl_cells, nb_bytes, &cells[0]);
-		#endif
 
 		//----------------
 		// int ELEMENTS
 		nb_bytes = nb_el*sizeof(int);
-		#if 1
 		cl_sort_hashes  = BUFFER(nb_bytes);
 		WRITE_BUFFER(cl_sort_hashes, nb_bytes, &sort_hashes[0]);
 
@@ -227,8 +239,6 @@ void EnjaParticles::setupArrays()
 		nb_bytes = sizeof(GridParams);
 		cl_GridParams = BUFFER(nb_bytes);
 		WRITE_BUFFER(cl_GridParams, nb_bytes, &gp);
-		#endif
-
 
 		queue.finish();
 	} catch(cl::Error er) {
@@ -245,30 +255,13 @@ void EnjaParticles::setupArrays()
 #undef WRITE_BUFFER
 }
 //----------------------------------------------------------------------
-void EnjaParticles::buildDataStructures(GridParams& gp)
+void EnjaParticles::buildDataStructures()
 {
 	static bool first_time = false;
 
 	if (!first_time) {
-		//nb_el = (2 << 12);  // number of particles
-		//nb_vars = 3;  // number of cl_float4 variables to reorder
 		first_time = true;
 	}
-
-	//cl::Buffer cl_GridParams(context, CL_MEM_WRITE_ONLY, sizeof(GridParams), NULL, &err);
-    //err = queue.enqueueWriteBuffer(cl_GridParams, CL_TRUE, 0, sizeof(GridParams), &gp, NULL, &event);
-	//queue.finish();
-
-	// Test arrays
-	#if 0
-	K_Grid_UpdateSorted<SimpleSPHSystem, SimpleSPHData><<< numBlocks, numThreads, smemSize>>> (
-		mNumParticles,
-		dParticleData, 
-		dParticleDataSorted, 
-		dGridData
-		);
-	#endif
-
 
 	try {
     	err = datastructures_kernel.setArg(0, nb_el);
@@ -282,7 +275,7 @@ void EnjaParticles::buildDataStructures(GridParams& gp)
 		// local memory
     	err = datastructures_kernel.setArg(8, sizeof(int), 0);
 	} catch(cl::Error er) {
-        printf("ERROR(buildDataStructures): %s(%s)\n", er.what(), oclErrorString(er.err()));
+        printf("0 ERROR(buildDataStructures): %s(%s)\n", er.what(), oclErrorString(er.err()));
 		exit(0);
 	}
 
@@ -290,6 +283,37 @@ void EnjaParticles::buildDataStructures(GridParams& gp)
 	int err;
 
     err = queue.enqueueNDRangeKernel(datastructures_kernel, cl::NullRange, cl::NDRange(nb_el), cl::NDRange(ctaSize), NULL, &event);
+	queue.finish();
+
+	int nb_bytes;
+
+	try {
+		nb_bytes = nb_el*nb_vars*sizeof(cl_float4);
+    	err = queue.enqueueReadBuffer(cl_vars_unsorted,  CL_TRUE, 0, nb_bytes, &vars_unsorted[0],  NULL, &event);
+
+    	err = queue.enqueueReadBuffer(cl_vars_sorted,  CL_TRUE, 0, nb_bytes, &vars_sorted[0],  NULL, &event);
+
+		nb_bytes = nb_el*sizeof(cl_int);
+    	err = queue.enqueueReadBuffer(cl_sort_indices,  CL_TRUE, 0, nb_bytes, &sort_indices[0],  NULL, &event);
+	} catch(cl::Error er) {
+        printf("1 ERROR(buildDatastructures): %s(%s)\n", er.what(), oclErrorString(er.err()));
+		exit(0);
+	}
+
+	for (int k=0; k < nb_vars; k++) {
+		printf("================================================\n");
+		printf("=== VARIABLE: %d ===============================\n", k);
+	for (int i=0; i < nb_el; i++) {
+		cl_float4 us = vars_unsorted[i+k*nb_el];
+		cl_float4 so = vars_sorted[i+k*nb_el];
+		printf("[%d]: %d, (%f, %f), (%f, %f)\n", i, sort_indices[i], us.x, us.y, so.x, so.y);
+	}
+	}
+	printf("===============================================\n");
+	printf("===============================================\n");
+
+	printf("exit BuildDataStructures\n");
+	exit(0);
 }
 //----------------------------------------------------------------------
 void EnjaParticles::hash()
@@ -336,7 +360,7 @@ void EnjaParticles::hash()
 	//exit(0);
 
 
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
 	// the kernel computes these arrays
     err = queue.enqueueReadBuffer(cl_sort_hashes,  CL_TRUE, 0, nb_el*sizeof(cl_uint), &sort_hashes[0],  NULL, &event);
@@ -406,7 +430,7 @@ void EnjaParticles::sort(cl::Buffer cl_hashes, cl::Buffer cl_indices)
 
 // **** BEFORE SORT
 #if 1
-	printf("**** BEFORE SORT ******\n");
+	//printf("**** BEFORE SORT ******\n");
     err = queue.enqueueReadBuffer(cl_indices, CL_TRUE, 0, nb_el*sizeof(int), &sort_indices[0], NULL, &event);
     err = queue.enqueueReadBuffer(cl_hashes, CL_TRUE, 0, nb_el*sizeof(int), &unsort_int[0], NULL, &event);
 	
@@ -431,9 +455,9 @@ void EnjaParticles::sort(cl::Buffer cl_hashes, cl::Buffer cl_indices)
 // **************
 
 		// both arguments should already be on the GPU
-		printf("BEFORE SORT KERNEL\n");
+	//	printf("BEFORE SORT KERNEL\n");
 	    radixSort->sort(cl_hashes(), cl_indices(), nb_el, keybits);
-		printf("AFTER SORT KERNEL\n");
+	//	printf("AFTER SORT KERNEL\n");
 
 		// Sort in place
 		// NOT REQUIRED EXCEPT FOR DEBUGGING
@@ -454,7 +478,6 @@ void EnjaParticles::sort(cl::Buffer cl_hashes, cl::Buffer cl_indices)
 		// first and 3rd columns are computed by sorting method
 		printf("%d: sorted hash: %d, sorted index; %d\n", i, shash[i], sindex[i]);
 	}
-	exit(0);
 	#endif
 }
 //----------------------------------------------------------------------

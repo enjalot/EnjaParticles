@@ -183,7 +183,7 @@ void RadixSort::radixSortKeysOnly(cl_mem d_keys, unsigned int numElements, unsig
 // Added by G. Erlebacher 9/11/2010
 void RadixSort::radixSortKeysValues(cl_mem d_keys, cl_mem d_values, unsigned int numElements, unsigned int keyBits)
 {
-	printf("enter radixSortKeysValues\n");
+	//printf("enter radixSortKeysValues\n");
 	int i = 0;
     while (keyBits > i*bitStep) 
 	{
@@ -214,7 +214,7 @@ void RadixSort::radixSortStepKeysOnly(cl_mem d_keys, unsigned int nbits, unsigne
 // Added by G. Erlebacher, 9/11/2010
 void RadixSort::radixSortStepKeysValues(cl_mem d_keys, cl_mem d_values, unsigned int nbits, unsigned int startbit, unsigned int numElements)
 {
-	printf("enter radixSortStepKeysValues\n");
+	//printf("enter radixSortStepKeysValues\n");
 	// Four step algorithms from Satish, Harris & Garland
 	//radixSortBlocksKeysOnlyOCL(d_keys, nbits, startbit, numElements);
 	radixSortBlocksKeysValuesOCL(d_keys, d_values, nbits, startbit, numElements);
@@ -251,7 +251,7 @@ void RadixSort::radixSortBlocksKeysOnlyOCL(cl_mem d_keys, unsigned int nbits, un
 
 void RadixSort::radixSortBlocksKeysValuesOCL(cl_mem d_keys, cl_mem d_values, unsigned int nbits, unsigned int startbit, unsigned int numElements)
 {
-	printf("enter radixSortBlocks\n");
+	//printf("enter radixSortBlocks\n");
 	unsigned int totalBlocks = numElements/4/CTA_SIZE;
 	size_t globalWorkSize[1] = {CTA_SIZE*totalBlocks};
 	size_t localWorkSize[1] = {CTA_SIZE};
@@ -340,7 +340,7 @@ void RadixSort::reorderDataKeysOnlyOCL(cl_mem d_keys, unsigned int startbit, uns
 
 void RadixSort::reorderDataKeysValuesOCL(cl_mem d_keys, cl_mem d_values, unsigned int startbit, unsigned int numElements)
 {
-	printf("enter reorder\n");
+	//printf("enter reorder\n");
 	unsigned int totalBlocks = numElements/2/CTA_SIZE;
 	size_t globalWorkSize[1] = {CTA_SIZE*totalBlocks};
 	size_t localWorkSize[1] = {CTA_SIZE};

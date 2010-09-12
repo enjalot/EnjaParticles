@@ -153,7 +153,7 @@ public:
 	void sort(cl::Buffer cl_list, cl::Buffer cl_values);
 
 	/// a specific kernel
-	void buildDataStructures(GridParams& gp);
+	void buildDataStructures();
 
 	// cl_float3 does not appear to exist. I'd have to extend cl_platform.h
 	//void hash(std::vector<cl_float4> list, GridParams& gp);

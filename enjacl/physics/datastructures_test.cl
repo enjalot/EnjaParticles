@@ -65,11 +65,12 @@ __kernel void datastructures(
 	if ((index == 0 || hash != sharedHash[tid]) )
 	{
 		cell_indexes_start[hash] = index;
-		if (index > 0)
+		if (index > 0) {
 			cell_indexes_end[sharedHash[tid]] = index;
+		}
 	}
 
-	return;
+	//return;
 
 	if (index == numParticles - 1)
 	{
@@ -86,6 +87,10 @@ __kernel void datastructures(
 
 	for (int j=0; j < nb_vars; j++) {
 		dParticlesSorted[index+j*numParticles]	= dParticles[sortedIndex+j*numParticles];
+		//dParticlesSorted[index+j*numParticles].x = 3.; // = (float4) (3.,3.,3.,3.);
+		//dParticlesSorted[index+j*numParticles].y = 4.; // = (float4) (3.,3.,3.,3.);
+		//dParticlesSorted[index+j*numParticles].z = 5.; // = (float4) (3.,3.,3.,3.);
+		//dParticlesSorted[index+j*numParticles].w = 6.; // = (float4) (3.,3.,3.,3.);
 	}
 
 	
