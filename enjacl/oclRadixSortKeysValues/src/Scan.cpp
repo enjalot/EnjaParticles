@@ -61,7 +61,7 @@ Scan::Scan(cl_context GPUContext,
 	int nb = fread(cScan, 1, 10000, fd);
     szKernelLength = nb;
 
-    printf("cScan: %s\n", cScan);
+    //printf("cScan: %s\n", cScan);
 	printf("nb= %d\n", nb);
 	//printf("cScan= %s\n", cScan);
 

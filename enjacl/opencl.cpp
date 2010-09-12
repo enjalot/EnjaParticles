@@ -107,7 +107,7 @@ int EnjaParticles::update()
     // map the buffer object into client's memory
     void* ptr = glMapBufferARB(GL_ARRAY_BUFFER, GL_WRITE_ONLY_ARB);
     ciErrNum = clEnqueueReadBuffer(cqCommandQueue, cl_vbos[0], CL_TRUE, 0, vbo_size, ptr, 0, NULL, &evt);
-    clReleaseEvent(evt);
+listeleaseEvent(evt);
     glUnmapBufferARB(GL_ARRAY_BUFFER); 
     
     glBindBufferARB(GL_ARRAY_BUFFER, c_vbo);    
@@ -127,7 +127,7 @@ int EnjaParticles::update()
 
 	setupArrays();
 
-	hash();
+	//hash();
 	//sort(unsort_int, sort_int);
 	sort(cl_sort_hashes, cl_sort_indices); // sort hash values in place. Should also reorder cl_sort_indices
 #endif
@@ -168,7 +168,9 @@ void EnjaParticles::setupArrays()
 
 	for (int i=0; i < nb_el; i++) {
 		sort_int.push_back(0);
-		unsort_int.push_back(nb_el-i);
+		//unsort_int.push_back(nb_el-i);
+		unsort_int[i] = nb_el-i;
+        //printf("unsort_int[%d] = %d\n", i, unsort_int[i]);
 	}
 
 	vars_unsorted.resize(nb_el*nb_vars);
@@ -196,10 +198,12 @@ void EnjaParticles::setupArrays()
 		// int ELEMENTS
 		nb_bytes = nb_el*sizeof(cl_int);
 		cl_sort_hashes  = BUFFER(nb_bytes);
-		WRITE_BUFFER(cl_sort_hashes, nb_bytes, &sort_hashes[0]);
+		//WRITE_BUFFER(cl_sort_hashes, nb_bytes, &sort_hashes[0]);
+		WRITE_BUFFER(cl_sort_hashes, nb_bytes, &unsort_int[0]);
 
 		cl_sort_indices = BUFFER(nb_bytes);
-		WRITE_BUFFER(cl_sort_indices, nb_bytes, &sort_indices[0]);
+		//WRITE_BUFFER(cl_sort_indices, nb_bytes, &sort_indices[0]);
+		WRITE_BUFFER(cl_sort_indices, nb_bytes, &unsort_int[0]);
 
 		cl_cell_indices_start = BUFFER(nb_bytes);
 		WRITE_BUFFER(cl_cell_indices_start, nb_bytes, &cell_indices_start[0]);
@@ -365,8 +369,8 @@ void EnjaParticles::sort(cl::Buffer cl_list, cl::Buffer cl_indices)
 		exit(0);
 		#endif
 
-        err = queue.enqueueReadBuffer(cl_list, CL_TRUE, 0, nb_el*sizeof(cl_int), &unsort_int[0], NULL, &event);
-		queue.finish();
+        //err = queue.enqueueReadBuffer(cl_list, CL_TRUE, 0, nb_el*sizeof(cl_int), &unsort_int[0], NULL, &event);
+		//queue.finish();
 
 		// if ctaSize is too large, sorting is not possible. Number of elements has to ie between some MIN 
 		// and MAX array size, computed in oclRadixSort/src/RadixSort.cpp
@@ -381,7 +385,8 @@ void EnjaParticles::sort(cl::Buffer cl_list, cl::Buffer cl_indices)
 
 		printf("=== nb_el= %d\n", nb_el);
 		printf("nb_el= %d\n", nb_el);
-	    radixSort->sort(cl_sort_hashes(), cl_sort_indices(), nb_el, keybits);
+	    //radixSort->sort(cl_sort_hashes(), cl_sort_indices(), nb_el, keybits);
+	    radixSort->sort(cl_list(), cl_indices(), nb_el, keybits);
 		queue.finish();
 
 		// Sort in place
@@ -392,7 +397,7 @@ void EnjaParticles::sort(cl::Buffer cl_list, cl::Buffer cl_indices)
 
 	#if 1
     err = queue.enqueueReadBuffer(cl_list, CL_TRUE, 0, nb_el*sizeof(int), &sort_int[0], NULL, &event);
-    err = queue.enqueueReadBuffer(cl_sort_indices, CL_TRUE, 0, nb_el*sizeof(int), &sort_indices[0], NULL, &event);
+    err = queue.enqueueReadBuffer(cl_indices, CL_TRUE, 0, nb_el*sizeof(int), &sort_indices[0], NULL, &event);
 	queue.finish();
 	for (int i=0; i < nb_el; i++) {
 		printf("%d: sort: %d, unsort: %d, index; %d\n", i, sort_int[i], unsort_int[i], sort_indices[i]);
@@ -437,12 +442,13 @@ void EnjaParticles::popCorn()
 		printf("before load program sources[sort]\n");
 		sort_program = loadProgram(sources[SORT]);
 		sort_kernel = cl::Kernel(sort_program, "sort", &err);
-
+/*
 		hash_program = loadProgram(sources[HASH]);
 		hash_kernel = cl::Kernel(hash_program, "hash", &err);
 
 		datastructures_program = loadProgram(sources[DATASTRUCTURES]);
 		datastructures_kernel = cl::Kernel(datastructures_program, "datastructures", &err);
+    */
     }
     catch (cl::Error er) {
 		printf("hash(): error\n");

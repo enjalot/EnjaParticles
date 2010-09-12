@@ -59,8 +59,8 @@ RadixSort::RadixSort(cl_context GPUContext,
 	//char* pathr= "/Users/erlebach/Documents/src/blender-particles/enjacl/build/RadixSort.cl";
 	FILE* fd =fopen(pathr, "r");
 	printf("fd= %d\n", fd);
-	char* cRadixSort = new char [20000];
-	int nb = fread(cRadixSort, 1, 20000, fd);
+	char* cRadixSort = new char [30000];
+	int nb = fread(cRadixSort, 1, 30000, fd);
 	printf("pathr= %s\n", pathr);
 	printf("nb= %d\n", nb);
     szKernelLength = nb;
@@ -233,6 +233,7 @@ void RadixSort::radixSortBlocksKeysValuesOCL(cl_mem d_keys, cl_mem d_values, uns
     ciErrNum |= clSetKernelArg(ckRadixSortBlocksKeysValues, 6, sizeof(unsigned int), (void*)&numElements);
     ciErrNum |= clSetKernelArg(ckRadixSortBlocksKeysValues, 7, sizeof(unsigned int), (void*)&totalBlocks);
 	ciErrNum |= clSetKernelArg(ckRadixSortBlocksKeysValues, 8, 4*CTA_SIZE*sizeof(unsigned int), NULL);
+    ciErrNum |= clSetKernelArg(ckRadixSortBlocksKeysValues, 9, 4*CTA_SIZE*sizeof(unsigned int), NULL);
     ciErrNum |= clEnqueueNDRangeKernel(cqCommandQueue, ckRadixSortBlocksKeysValues, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL);
 
 	// ERROR MESSGE: ERror #-33 (CL_INVALID_DEVICE)   WHY??????

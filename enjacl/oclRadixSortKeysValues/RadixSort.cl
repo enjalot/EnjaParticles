@@ -363,10 +363,11 @@ __kernel void reorderDataKeysOnly(__global uint  *outKeys,
 //#include "Radix_Keys_Values.cl"
 //----------------------------------------------------------------------
 
-void radixSortBlockKeysValues(uint4 *key, uint4 *value, uint nbits, uint startbit, __local uint* sMem)
+void radixSortBlockKeysValues(uint4 *key, uint4 *value, uint nbits, uint startbit, __local uint* sMem, __local uint* sVMem)
 {
 	int localId = get_local_id(0);
     int localSize = get_local_size(0);
+
 	
 	for(uint shift = startbit; shift < (startbit + nbits); ++shift)
 	{
@@ -377,14 +378,27 @@ void radixSortBlockKeysValues(uint4 *key, uint4 *value, uint nbits, uint startbi
         lsb.w = !(((*key).w >> shift) & 0x1);
         
 		uint4 r;
+        uint4 rv;
 		
 		r = rank4(lsb, sMem);
+		//rv = rank4(lsb, sVMem);
 
         // This arithmetic strides the ranks across 4 CTA_SIZE regions
         sMem[(r.x & 3) * localSize + (r.x >> 2)] = (*key).x;
         sMem[(r.y & 3) * localSize + (r.y >> 2)] = (*key).y;
         sMem[(r.z & 3) * localSize + (r.z >> 2)] = (*key).z;
         sMem[(r.w & 3) * localSize + (r.w >> 2)] = (*key).w;
+
+        barrier(CLK_LOCAL_MEM_FENCE);
+
+        sVMem[(r.x & 3) * localSize + (r.x >> 2)] = (*value).x;
+        sVMem[(r.y & 3) * localSize + (r.y >> 2)] = (*value).y;
+        sVMem[(r.z & 3) * localSize + (r.z >> 2)] = (*value).z;
+        sVMem[(r.w & 3) * localSize + (r.w >> 2)] = (*value).w;
+
+
+
+
         barrier(CLK_LOCAL_MEM_FENCE);
 
         // The above allows us to read without 4-way bank conflicts:
@@ -394,8 +408,12 @@ void radixSortBlockKeysValues(uint4 *key, uint4 *value, uint nbits, uint startbi
         (*key).w = sMem[localId + 3 * localSize];
 
 		// I AM NOT CLEAR ON HOW TO HANDLE value ARRAY
-
 		barrier(CLK_LOCAL_MEM_FENCE);
+        (*value).x = sMem[localId];
+        (*value).y = sMem[localId +     localSize];
+        (*value).z = sMem[localId + 2 * localSize];
+        (*value).w = sMem[localId + 3 * localSize];
+
 	}
 }
 
@@ -408,7 +426,8 @@ __kernel void radixSortBlocksKeysValues(__global uint4* keysIn,
 									  uint startbit,
 									  uint numElements, 
 									  uint totalBlocks,
-									  __local uint* sMem)
+									  __local uint* sMem,
+									  __local uint* sVMem)
 {
 	int globalId = get_global_id(0);
 	
@@ -420,7 +439,7 @@ __kernel void radixSortBlocksKeysValues(__global uint4* keysIn,
 	
 	barrier(CLK_LOCAL_MEM_FENCE);
 	
-	radixSortBlockKeysValues(&key, &value, nbits, startbit, sMem);
+	radixSortBlockKeysValues(&key, &value, nbits, startbit, sMem, sVMem);
 	
 	keysOut[globalId] = key;
 	valuesOut[globalId] = value;
