@@ -33,6 +33,18 @@ void RadixSort::printInts(cl_mem d_var, int nb_el, const char* msg)
 	}
 }
 //----------------------------------------------------------------------
+#if 0
+void RadixSort::printInts4(cl_mem d_var, int nb_el, const char* msg)
+{
+    vector<int> h_mem(nb_el);
+	printf("h_mem size: %d\n", h_mem.size());
+	clEnqueueReadBuffer(cqCommandQueue, d_var, CL_TRUE, 0, 4*sizeof(unsigned int) * nb_el, &h_mem[0], 0, NULL, NULL);
+	for (int i=0; i < 10; i++) {
+		printf("%s: %d, %d, %d, %d, %e\n", msg, i, h_mem[i]);
+	}
+}
+#endif
+//----------------------------------------------------------------------
 RadixSort::RadixSort(cl_context GPUContext,
 					 cl_command_queue CommandQue,
 					 unsigned int maxElements, 
@@ -171,6 +183,7 @@ void RadixSort::radixSortKeysOnly(cl_mem d_keys, unsigned int numElements, unsig
 // Added by G. Erlebacher 9/11/2010
 void RadixSort::radixSortKeysValues(cl_mem d_keys, cl_mem d_values, unsigned int numElements, unsigned int keyBits)
 {
+	printf("enter radixSortKeysValues\n);
 	int i = 0;
     while (keyBits > i*bitStep) 
 	{
@@ -205,6 +218,7 @@ void RadixSort::radixSortStepKeysValues(cl_mem d_keys, cl_mem d_values, unsigned
 	// Four step algorithms from Satish, Harris & Garland
 	//radixSortBlocksKeysOnlyOCL(d_keys, nbits, startbit, numElements);
 	radixSortBlocksKeysValuesOCL(d_keys, d_values, nbits, startbit, numElements);
+exit(3);
 
 	findRadixOffsetsOCL(startbit, numElements);
 
@@ -256,6 +270,11 @@ void RadixSort::radixSortBlocksKeysValuesOCL(cl_mem d_keys, cl_mem d_values, uns
 
 	// ERROR MESSGE: ERror #-33 (CL_INVALID_DEVICE)   WHY??????
 	////oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
+
+
+	printInts(d_tempKeys, 12, "keys(radixSortBlocksKeysOnlyOCL)");
+	printInts(d_tempValues, 12, "keys(radixSortBlocksKeysOnlyOCL)");
+	exit(3);
 }
 
 

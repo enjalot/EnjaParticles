@@ -453,7 +453,8 @@ __kernel void radixSortBlocksKeysValues(__global uint4* keysIn,
 	radixSortBlockKeysValues(&key, &value, nbits, startbit, sMem, sVMem);
 	
 	keysOut[globalId] = key;
-	valuesOut[globalId] = value;
+	valuesOut[globalId] = value; 
+	//valuesOut[globalId] = 3; // works
 }
 
 
