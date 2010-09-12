@@ -448,6 +448,7 @@ void radixSortBlockKeysValues(uint4 *key, uint4 *value, uint nbits, uint startbi
 }
 
 //----------------------------------------------------------------------
+// ERROR: 
 __kernel void radixSortBlocksKeysValues(__global uint4* keysIn, 
                                       __global uint4* valuesIn,
 									  __global uint4* keysOut,

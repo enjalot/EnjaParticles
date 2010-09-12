@@ -136,7 +136,9 @@ __kernel void hash(
 	//int grid_size = get_global_size(0);
 	//sort_hashes[index] = numParticles;
 	//sort_hashes[index] = grid_size;
+
 	sort_indexes[index] = index;
+
 	//sort_indexes[index] = 6;
 }
 //----------------------------------------------------------------------

@@ -366,8 +366,8 @@ void EnjaParticles::hash()
         err = queue.enqueueReadBuffer(cl_sort_hashes, CL_TRUE, 0, nb_el*sizeof(cl_int), &sort_hashes[0], NULL, &event);
         err = queue.enqueueReadBuffer(cl_sort_indices, CL_TRUE, 0, nb_el*sizeof(cl_int), &sort_indices[0], NULL, &event);
 		queue.finish();
-		for (int i=nb_el-10; i < nb_el; i++) {
-		//for (int i=0; i < 10; i++) {
+		//for (int i=nb_el-10; i < nb_el; i++) {
+		for (int i=0; i < 10; i++) {
 			printf("xx index: %d, sort_indices: %d, sort_hashes: %d\n", i, sort_indices[i], sort_hashes[i]);
 		}
 		#endif
@@ -410,10 +410,10 @@ void EnjaParticles::sort(cl::Buffer cl_hashes, cl::Buffer cl_indices)
     err = queue.enqueueReadBuffer(cl_indices, CL_TRUE, 0, nb_el*sizeof(int), &sort_indices[0], NULL, &event);
     err = queue.enqueueReadBuffer(cl_hashes, CL_TRUE, 0, nb_el*sizeof(int), &unsort_int[0], NULL, &event);
 	
-    unsort_int[0] = 2;
-    unsort_int[2] = 0;
-    sort_indices[0] = 27;
-	sort_indices[2] = 10;
+    //unsort_int[0] = 2;
+    //unsort_int[2] = 0;
+    //sort_indices[0] = 27;
+	//sort_indices[2] = 10;
     err = queue.enqueueWriteBuffer(cl_hashes, CL_TRUE, 0, nb_el*sizeof(int), &unsort_int[0], NULL, &event);
     err = queue.enqueueWriteBuffer(cl_indices, CL_TRUE, 0, nb_el*sizeof(int), &sort_indices[0], NULL, &event);
     queue.finish();
@@ -450,7 +450,7 @@ void EnjaParticles::sort(cl::Buffer cl_hashes, cl::Buffer cl_indices)
     err = queue.enqueueReadBuffer(cl_hashes, CL_TRUE, 0, nb_el*sizeof(int), &shash[0], NULL, &event);
     err = queue.enqueueReadBuffer(cl_indices, CL_TRUE, 0, nb_el*sizeof(int), &sindex[0], NULL, &event);
 	queue.finish();
-	for (int i=0; i < 10; i++) {
+	for (int i=0; i < nb_el; i++) {
 		// first and 3rd columns are computed by sorting method
 		printf("%d: sorted hash: %d, sorted index; %d\n", i, shash[i], sindex[i]);
 	}

@@ -29,7 +29,7 @@ void RadixSort::printInts(cl_mem d_var, int nb_el, const char* msg)
 	printf("h_mem size: %d\n", h_mem.size());
 	clEnqueueReadBuffer(cqCommandQueue, d_var, CL_TRUE, 0, sizeof(unsigned int) * nb_el, &h_mem[0], 0, NULL, NULL);
 	for (int i=0; i < 10; i++) {
-		printf("%s: %d, %d\n", msg, i, h_mem[i]);
+		printf("%s[%d]: %d\n", msg, i, h_mem[i]);
 	}
 }
 //----------------------------------------------------------------------
@@ -158,8 +158,8 @@ void RadixSort::sort(cl_mem d_keys,
 {
 	//radixSortKeysOnly(d_keys, numElements, keyBits);
 	radixSortKeysValues(d_keys, d_values, numElements, keyBits);
-	printInts(d_keys, 10, "keys");
-	printInts(d_values, 10, "values");
+	//printInts(d_keys, 10, "keys");
+	//printInts(d_values, 10, "values");
 }
 
 //----------------------------------------------------------------------------
@@ -272,9 +272,12 @@ void RadixSort::radixSortBlocksKeysValuesOCL(cl_mem d_keys, cl_mem d_values, uns
 	////oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
 
 
-	printInts(d_tempKeys, 12, "keys(radixSortBlocksKeysOnlyOCL)");
-	printInts(d_tempValues, 12, "values(radixSortBlocksKeysOnlyOCL)");
-	//exit(3);
+	//printf("-----------------------------------------------\n");
+	//printInts(d_keys, 12, "d_keys(radixSortBlocksKeysOnlyOCL)");
+	//printInts(d_values, 12, "d_values(radixSortBlocksKeysOnlyOCL)");
+	//printInts(d_tempKeys, 12, "d_tempKeys(radixSortBlocksKeysOnlyOCL)");
+	//printInts(d_tempValues, 12, "d_tempValues(radixSortBlocksKeysOnlyOCL)");
+	//printf("-----------------------------------------------\n");
 }
 
 
