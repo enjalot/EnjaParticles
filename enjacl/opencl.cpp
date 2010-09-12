@@ -344,12 +344,10 @@ void EnjaParticles::hash()
 		//exit(0);
 }
 //----------------------------------------------------------------------
-//void EnjaParticles::sort(std::vector<int> sort_int, std::vector<int> unsort_int)
 // Input: a list of integers in random order
 // Output: a list of sorted integers
 // Leave data on the gpu
-//void EnjaParticles::sort()
-void EnjaParticles::sort(cl::Buffer cl_list, cl::Buffer cl_indices)
+void EnjaParticles::sort(cl::Buffer cl_hashes, cl::Buffer cl_indices)
 {
 // Sorting
 
@@ -357,26 +355,23 @@ void EnjaParticles::sort(cl::Buffer cl_list, cl::Buffer cl_indices)
 
 		// SORT IN PLACE
 		#if 0
-        err = queue.enqueueReadBuffer(cl_list, CL_TRUE, 0, nb_el*sizeof(cl_int), &unsort_int[0], NULL, &event);
+		// cl_hashes and cl_indices are correct
+        err = queue.enqueueReadBuffer(cl_hashes, CL_TRUE, 0, nb_el*sizeof(cl_int), &unsort_int[0], NULL, &event);
+        err = queue.enqueueReadBuffer(cl_indices, CL_TRUE, 0, nb_el*sizeof(cl_int), &sort_int[0], NULL, &event);
 		queue.finish();
-		for (int i=0; i < nb_el; i++) {
-		//for (int i=0; i < 200; i++) {
-			printf("%d, %d\n", i, unsort_int[i]);
+		//for (int i=0; i < nb_el; i++) {
+		for (int i=0; i < 10; i++) {
+			printf("*** i: %d, unsorted hash: %d, index: %d\n", i, unsort_int[i], sort_int[i]);
 			//unsort_int[i] = 20000 - i;
 		}
 		printf("nb_el= %d\n", nb_el);
 		printf("size: %d\n", sizeof(cl_int));
 		exit(0);
 		#endif
-
-        //err = queue.enqueueReadBuffer(cl_list, CL_TRUE, 0, nb_el*sizeof(cl_int), &unsort_int[0], NULL, &event);
-		//queue.finish();
-
-		// if ctaSize is too large, sorting is not possible. Number of elements has to ie between some MIN 
+		// if ctaSize is too large, sorting is not possible. Number of elements has to lie between some MIN 
 		// and MAX array size, computed in oclRadixSort/src/RadixSort.cpp
 		int ctaSize = 64; // work group size
 	    RadixSort* radixSort = new RadixSort(context(), queue(), nb_el, "../oclRadixSort/", ctaSize, true);		    
-		queue.finish();
 		unsigned int keybits = 32;
 
 		// debugging only
@@ -386,8 +381,10 @@ void EnjaParticles::sort(cl::Buffer cl_list, cl::Buffer cl_indices)
 		printf("=== nb_el= %d\n", nb_el);
 		printf("nb_el= %d\n", nb_el);
 	    //radixSort->sort(cl_sort_hashes(), cl_sort_indices(), nb_el, keybits);
-	    radixSort->sort(cl_list(), cl_indices(), nb_el, keybits);
+	    radixSort->sort(cl_hashes(), cl_indices(), nb_el, keybits);
 		queue.finish();
+		// both arguments should already be on the GPU
+	    radixSort->sort(cl_hashes(), cl_indices(), nb_el, keybits);
 
 		// Sort in place
 		// NOT REQUIRED EXCEPT FOR DEBUGGING
@@ -396,13 +393,14 @@ void EnjaParticles::sort(cl::Buffer cl_list, cl::Buffer cl_indices)
     }
 
 	#if 1
-    err = queue.enqueueReadBuffer(cl_list, CL_TRUE, 0, nb_el*sizeof(int), &sort_int[0], NULL, &event);
+    err = queue.enqueueReadBuffer(cl_hashes, CL_TRUE, 0, nb_el*sizeof(int), &sort_int[0], NULL, &event);
     err = queue.enqueueReadBuffer(cl_indices, CL_TRUE, 0, nb_el*sizeof(int), &sort_indices[0], NULL, &event);
 	queue.finish();
-	for (int i=0; i < nb_el; i++) {
+	for (int i=0; i < 10; i++) {
+		// fist and 3rd columns are computed by sorting method
 		printf("%d: sort: %d, unsort: %d, index; %d\n", i, sort_int[i], unsort_int[i], sort_indices[i]);
 	}
-	//exit(0);
+	exit(0);
 	#endif
 }
 //----------------------------------------------------------------------
