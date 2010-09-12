@@ -381,13 +381,19 @@ void radixSortBlockKeysValues(uint4 *key, uint4 *value, uint nbits, uint startbi
         uint4 rv;
 		
 		r = rank4(lsb, sMem);
-		//rv = rank4(lsb, sVMem);
+		rv = rank4(lsb, sVMem);
 
         // This arithmetic strides the ranks across 4 CTA_SIZE regions
         sMem[(r.x & 3) * localSize + (r.x >> 2)] = (*key).x;
         sMem[(r.y & 3) * localSize + (r.y >> 2)] = (*key).y;
         sMem[(r.z & 3) * localSize + (r.z >> 2)] = (*key).z;
         sMem[(r.w & 3) * localSize + (r.w >> 2)] = (*key).w;
+
+        sVMem[(rv.x & 3) * localSize + (rv.x >> 2)] = (*value).x;
+        sVMem[(rv.y & 3) * localSize + (rv.y >> 2)] = (*value).y;
+        sVMem[(rv.z & 3) * localSize + (rv.z >> 2)] = (*value).z;
+        sVMem[(rv.w & 3) * localSize + (rv.w >> 2)] = (*value).w;
+
 
         barrier(CLK_LOCAL_MEM_FENCE);
 
@@ -397,9 +403,21 @@ void radixSortBlockKeysValues(uint4 *key, uint4 *value, uint nbits, uint startbi
         (*key).z = sMem[localId + 2 * localSize];
         (*key).w = sMem[localId + 3 * localSize];
 
+        // This arithmetic strides the ranks across 4 CTA_SIZE regions
+        // The above allows us to read without 4-way bank conflicts:
+        (*value).x = sVMem[localId];
+        (*value).y = sVMem[localId +     localSize];
+        (*value).z = sVMem[localId + 2 * localSize];
+        (*value).w = sVMem[localId + 3 * localSize];
+        barrier(CLK_LOCAL_MEM_FENCE);
+
 		// I AM NOT CLEAR ON HOW TO HANDLE value ARRAY
 	}
-
+    //better not put things in seperate for-loops
+    //i don't quite understand what the radix sort is doing but the rank4 update
+    // seems to be using memory addresses to do calculations and we want to couple
+    // our values to our keys as closely as possible
+/*
 	for(uint shift = startbit; shift < (startbit + nbits); ++shift)
 	{
 		uint4 lsb;
@@ -410,7 +428,7 @@ void radixSortBlockKeysValues(uint4 *key, uint4 *value, uint nbits, uint startbi
         
 		uint4 r;
 		
-		r = rank4(lsb, sMem);
+		r = rank4(lsb, sVMem);
 
         // This arithmetic strides the ranks across 4 CTA_SIZE regions
         sVMem[(r.x & 3) * localSize + (r.x >> 2)] = (*value).x;
@@ -426,6 +444,7 @@ void radixSortBlockKeysValues(uint4 *key, uint4 *value, uint nbits, uint startbi
         (*value).w = sVMem[localId + 3 * localSize];
         barrier(CLK_LOCAL_MEM_FENCE);
 	}
+        */
 }
 
 //----------------------------------------------------------------------
