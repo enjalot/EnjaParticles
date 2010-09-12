@@ -65,6 +65,8 @@ private:
          
 	Scan scan;
 
+	void printInts(cl_mem var, int nb_el, const char* msg); // GErlebacher
+
 	void radixSortKeysOnly(cl_mem d_keys, unsigned int numElements, unsigned int keyBits);
 	void radixSortKeysValues(cl_mem d_keys, cl_mem d_values, unsigned int numElements, unsigned int keyBits);
 	void radixSortStepKeysOnly(cl_mem d_keys, unsigned int nbits, unsigned int startbit, unsigned int numElements);

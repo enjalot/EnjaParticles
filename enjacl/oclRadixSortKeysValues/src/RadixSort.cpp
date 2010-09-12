@@ -19,6 +19,17 @@
 
 extern double time1, time2, time3, time4;
 
+//----------------------------------------------------------------------
+void RadixSort::printInts(cl_mem d_var, int nb_el, const char* msg)
+{
+	vector<int> h_mem(nb_el);
+	printf("h_mem size: %d\n", h_mem.size());
+	clEnqueueReadBuffer(cqCommandQueue, d_var, CL_TRUE, 0, sizeof(unsigned int) * nb_el, &h_mem[0], 0, NULL, NULL);
+	for (int i=0; i < 10; i++) {
+		printf("%s: %d, %d\n", msg, i, h_mem[i]);
+	}
+}
+//----------------------------------------------------------------------
 RadixSort::RadixSort(cl_context GPUContext,
 					 cl_command_queue CommandQue,
 					 unsigned int maxElements, 
@@ -130,6 +141,8 @@ void RadixSort::sort(cl_mem d_keys,
 {
 	//radixSortKeysOnly(d_keys, numElements, keyBits);
 	radixSortKeysValues(d_keys, d_values, numElements, keyBits);
+	printInts(d_keys, 20, "keys");
+	printInts(d_values, 20, "values");
 }
 
 //----------------------------------------------------------------------------
