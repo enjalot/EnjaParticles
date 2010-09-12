@@ -124,9 +124,10 @@ int EnjaParticles::update()
 #endif
 
 #if 1
-
 	setupArrays();
+    printf("about to hash\n");
 	hash();
+    printf("done with hash\n");
 	sort(cl_sort_hashes, cl_sort_indices); // sort hash values in place. Should also reorder cl_sort_indices
 	exit(0);
 
@@ -182,6 +183,7 @@ void EnjaParticles::setupArrays()
 #define WRITE_BUFFER(cl_var, bytes, cpu_var_ptr) queue.enqueueWriteBuffer(cl_var, CL_TRUE, 0, bytes, cpu_var_ptr, NULL, &event)
 
 	try {
+
 		// float4 ELEMENTS
 		nb_bytes = nb_el*nb_vars*sizeof(cl_float4);
 		cl_vars_unsorted = BUFFER(nb_bytes);
@@ -214,6 +216,7 @@ void EnjaParticles::setupArrays()
 
 		cl_unsort = BUFFER(nb_bytes);
 		#endif
+        //err = queue.enqueueWriteBuffer(cl_GridParams, CL_TRUE, 0, sizeof(GridParams), &gp, NULL, &event);
 
 		queue.finish();
 	} catch(cl::Error er) {
@@ -221,9 +224,8 @@ void EnjaParticles::setupArrays()
 		exit(0);
 	}
 
-    err = queue.enqueueWriteBuffer(cl_GridParams, CL_TRUE, 0, sizeof(GridParams), &gp, NULL, &event);
-	queue.finish();
 
+    printf("done with setup arrays\n");
 #undef BUFFER
 #undef WRITE_BUFFER
 }
