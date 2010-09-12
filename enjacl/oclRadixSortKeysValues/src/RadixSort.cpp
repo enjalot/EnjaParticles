@@ -158,8 +158,8 @@ void RadixSort::sort(cl_mem d_keys,
 {
 	//radixSortKeysOnly(d_keys, numElements, keyBits);
 	radixSortKeysValues(d_keys, d_values, numElements, keyBits);
-	printInts(d_keys, 20, "keys");
-	printInts(d_values, 20, "values");
+	printInts(d_keys, 10, "keys");
+	printInts(d_values, 10, "values");
 }
 
 //----------------------------------------------------------------------------

@@ -359,7 +359,6 @@ void EnjaParticles::hash()
 	}
 #endif
 #undef DEBUG
-exit(0);
 
         printf("about to read from buffers to see what they have\n");
 		#if 1
@@ -432,7 +431,9 @@ void EnjaParticles::sort(cl::Buffer cl_hashes, cl::Buffer cl_indices)
 // **************
 
 		// both arguments should already be on the GPU
+		printf("BEFORE SORT KERNEL\n");
 	    radixSort->sort(cl_hashes(), cl_indices(), nb_el, keybits);
+		printf("AFTER SORT KERNEL\n");
 
 		// Sort in place
 		// NOT REQUIRED EXCEPT FOR DEBUGGING
