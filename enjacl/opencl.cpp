@@ -127,10 +127,8 @@ int EnjaParticles::update()
 
 	setupArrays();
 	hash();
-	exit(0);
-
-	//sort(unsort_int, sort_int);
 	sort(cl_sort_hashes, cl_sort_indices); // sort hash values in place. Should also reorder cl_sort_indices
+	exit(0);
 
 #endif
 }
@@ -340,7 +338,6 @@ void EnjaParticles::hash()
 			printf("xx index: %d, hash: %d, %d\n", i, (unsigned int) sort_indices[i], sort_hashes[i]);
 		}
 		#endif
-		exit(0);
 }
 //----------------------------------------------------------------------
 // Input: a list of integers in random order
@@ -377,13 +374,20 @@ void EnjaParticles::sort(cl::Buffer cl_hashes, cl::Buffer cl_indices)
 // **** BEFORE SORT
 #if 1
 	printf("**** BEFORE SORT ******\n");
-    err = queue.enqueueReadBuffer(cl_hashes, CL_TRUE, 0, nb_el*sizeof(int), &sort_int[0], NULL, &event);
+    err = queue.enqueueReadBuffer(cl_indices, CL_TRUE, 0, nb_el*sizeof(int), &sort_indices[0], NULL, &event);
+	sort_indices[2] = 10;
+	sort_indices[0] = 27;
+    err = queue.enqueueWriteBuffer(cl_indices, CL_TRUE, 0, nb_el*sizeof(int), &sort_indices[0], NULL, &event);
+
+    err = queue.enqueueReadBuffer(cl_hashes, CL_TRUE, 0, nb_el*sizeof(int), &unsort_int[0], NULL, &event);
     err = queue.enqueueReadBuffer(cl_indices, CL_TRUE, 0, nb_el*sizeof(int), &sort_indices[0], NULL, &event);
 	queue.finish();
+
 	for (int i=0; i < 10; i++) {
 		// fist and 3rd columns are computed by sorting method
-		printf("%d: sort: %d, unsort: %d, index; %d\n", i, sort_int[i], unsort_int[i], sort_indices[i]);
+		printf("%d: unsorted hashes: %d, sorted indices %d\n", i, unsort_int[i], sort_indices[i]);
 	}
+    err = queue.enqueueWriteBuffer(cl_indices, CL_TRUE, 0, nb_el*sizeof(int), &sort_indices[0], NULL, &event);
 #endif
 // **************
 
@@ -398,12 +402,13 @@ void EnjaParticles::sort(cl::Buffer cl_hashes, cl::Buffer cl_indices)
 
 	#if 1
 	printf("\n**** AFTER SORT ******\n");
+	queue.finish();
     err = queue.enqueueReadBuffer(cl_hashes, CL_TRUE, 0, nb_el*sizeof(int), &sort_int[0], NULL, &event);
-    err = queue.enqueueReadBuffer(cl_indices, CL_TRUE, 0, nb_el*sizeof(int), &sort_indices[0], NULL, &event);
+    err = queue.enqueueReadBuffer(cl_indices, CL_TRUE, 0, nb_el*sizeof(int), &unsort_int[0], NULL, &event);
 	queue.finish();
 	for (int i=0; i < 10; i++) {
 		// fist and 3rd columns are computed by sorting method
-		printf("%d: sort: %d, unsort: %d, index; %d\n", i, sort_int[i], unsort_int[i], sort_indices[i]);
+		printf("%d: sorted hash: %d, unsorted index; %d\n", i, sort_int[i], unsort_int[i]);
 	}
 	exit(0);
 	#endif

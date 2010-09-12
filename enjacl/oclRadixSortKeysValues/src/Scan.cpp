@@ -121,8 +121,8 @@ void Scan::scanExclusiveLarge(
     oclCheckError( factorizationRemainder == 1, shrTRUE);
 
     //Check supported size range
-	printf("arrayLength= %d\n", arrayLength);
-	printf("MIN/MAX: %d, %d\n", MIN_LARGE_ARRAY_SIZE, MAX_LARGE_ARRAY_SIZE);
+	//printf("arrayLength= %d\n", arrayLength);
+	//printf("MIN/MAX: %d, %d\n", MIN_LARGE_ARRAY_SIZE, MAX_LARGE_ARRAY_SIZE);
     oclCheckError( (arrayLength >= MIN_LARGE_ARRAY_SIZE) && (arrayLength <= MAX_LARGE_ARRAY_SIZE), shrTRUE );
 
     //Check total batch size limit
