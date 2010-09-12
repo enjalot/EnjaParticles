@@ -215,7 +215,7 @@ EnjaParticles::EnjaParticles(int s, int n)
     //init opencl
     int success = init_cl();
     
-    m_system = new SPH::SPH(this);
+    //m_system = new SPH::SPH(this);
 }
 
 //Take in vertex vert_gen as well as velocity vert_gen that are len elements long
