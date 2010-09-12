@@ -14,15 +14,18 @@
 */
 
 #include <stdio.h>
-#include <oclUtils.h>
+//#include <oclUtils.h>
 #include "RadixSort.h"
+#include <vector>
+#include <string>
+using namespace std;
 
 extern double time1, time2, time3, time4;
 
 //----------------------------------------------------------------------
 void RadixSort::printInts(cl_mem d_var, int nb_el, const char* msg)
 {
-	vector<int> h_mem(nb_el);
+    vector<int> h_mem(nb_el);
 	printf("h_mem size: %d\n", h_mem.size());
 	clEnqueueReadBuffer(cqCommandQueue, d_var, CL_TRUE, 0, sizeof(unsigned int) * nb_el, &h_mem[0], 0, NULL, NULL);
 	for (int i=0; i < 10; i++) {
@@ -79,9 +82,9 @@ RadixSort::RadixSort(cl_context GPUContext,
 	//printf("cScan= %s\n", cScan);
 
 
-    oclCheckErrorEX(cRadixSort == NULL, false, NULL);
+    //oclCheckErrorEX(cRadixSort == NULL, false, NULL);
     cpProgram = clCreateProgramWithSource(cxGPUContext, 1, (const char **)&cRadixSort, &szKernelLength, &ciErrNum);
-    oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
+    //oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
 #ifdef MAC
     char *flags = "-DMAC -cl-fast-relaxed-math";
 #else
@@ -91,21 +94,23 @@ RadixSort::RadixSort(cl_context GPUContext,
     if (ciErrNum != CL_SUCCESS)
     {
         // write out standard ciErrNumor, Build Log and PTX, then cleanup and exit
+         /*
         shrLogEx(LOGBOTH | ERRORMSG, ciErrNum, STDERROR);
         oclLogBuildInfo(cpProgram, oclGetFirstDev(cxGPUContext));
         oclLogPtx(cpProgram, oclGetFirstDev(cxGPUContext), "RadixSort.ptx");
         oclCheckError(ciErrNum, CL_SUCCESS); 
+        */
     }
 
 	//ckRadixSortBlocksKeysOnly = clCreateKernel(cpProgram, "radixSortBlocksKeysOnly", &ciErrNum);
 	ckRadixSortBlocksKeysValues = clCreateKernel(cpProgram, "radixSortBlocksKeysValues", &ciErrNum);
-	oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
+	//oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
 	ckFindRadixOffsets        = clCreateKernel(cpProgram, "findRadixOffsets",        &ciErrNum);
-	oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
+	////oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
 	ckScanNaive               = clCreateKernel(cpProgram, "scanNaive",               &ciErrNum);
-	oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
+	////oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
 	ckReorderDataKeysValues     = clCreateKernel(cpProgram, "reorderDataKeysValues",     &ciErrNum);
-	oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
+	////oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
 	free(cRadixSort);
 }
 
@@ -250,7 +255,7 @@ void RadixSort::radixSortBlocksKeysValuesOCL(cl_mem d_keys, cl_mem d_values, uns
     ciErrNum |= clEnqueueNDRangeKernel(cqCommandQueue, ckRadixSortBlocksKeysValues, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL);
 
 	// ERROR MESSGE: ERror #-33 (CL_INVALID_DEVICE)   WHY??????
-	oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
+	////oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
 }
 
 
@@ -270,7 +275,7 @@ void RadixSort::findRadixOffsetsOCL(unsigned int startbit, unsigned int numEleme
 	ciErrNum |= clSetKernelArg(ckFindRadixOffsets, 6, sizeof(unsigned int), (void*)&totalBlocks);
 	ciErrNum |= clSetKernelArg(ckFindRadixOffsets, 7, 2 * CTA_SIZE * sizeof(unsigned int), NULL);
 	ciErrNum |= clEnqueueNDRangeKernel(cqCommandQueue, ckFindRadixOffsets, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL);
-	oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
+	////oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
 }
 
 #define NUM_BANKS 16
@@ -287,7 +292,7 @@ void RadixSort::scanNaiveOCL(unsigned int numElements)
 	ciErrNum |= clSetKernelArg(ckScanNaive, 2, sizeof(unsigned int), (void*)&nHist);
 	ciErrNum |= clSetKernelArg(ckScanNaive, 3, 2 * shared_mem_size, NULL);
 	ciErrNum |= clEnqueueNDRangeKernel(cqCommandQueue, ckScanNaive, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL);
-	oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
+	////oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
 }
 
 #if 0
@@ -333,5 +338,5 @@ void RadixSort::reorderDataKeysValuesOCL(cl_mem d_keys, cl_mem d_values, unsigne
 	ciErrNum |= clSetKernelArg(ckReorderDataKeysValues, 11, 2 * CTA_SIZE * sizeof(unsigned int), NULL);
 	#endif
 	ciErrNum |= clEnqueueNDRangeKernel(cqCommandQueue, ckReorderDataKeysValues, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL);
-	oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
+	////oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
 }

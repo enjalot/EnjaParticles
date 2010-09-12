@@ -14,8 +14,11 @@
 */
 
 #include <stdio.h>
-#include <oclUtils.h>
+//#include <oclUtils.h>
 #include "Scan.h"
+
+#include <string>
+using namespace std;
 
 Scan::Scan(cl_context GPUContext,
 		   cl_command_queue CommandQue,
@@ -30,7 +33,7 @@ Scan::Scan(cl_context GPUContext,
 	if (numElements > MAX_WORKGROUP_INCLUSIVE_SCAN_SIZE) 
 	{
 		d_Buffer = clCreateBuffer(cxGPUContext, CL_MEM_READ_WRITE, numElements / MAX_WORKGROUP_INCLUSIVE_SCAN_SIZE * sizeof(cl_uint), NULL, &ciErrNum);
-		oclCheckError(ciErrNum, CL_SUCCESS);
+		////oclCheckError(ciErrNum, CL_SUCCESS);
 	}
 	
 	//shrLog("Create and build Scan program\n");
@@ -65,30 +68,30 @@ Scan::Scan(cl_context GPUContext,
 	printf("nb= %d\n", nb);
 	//printf("cScan= %s\n", cScan);
 
-    oclCheckErrorEX(cScan == NULL, false, NULL);
+    ////oclCheckErrorEX(cScan == NULL, false, NULL);
     printf("about to create sort program\n");
     cpProgram = clCreateProgramWithSource(cxGPUContext, 1, (const char **)&cScan, &szKernelLength, &ciErrNum);
-    oclCheckError(ciErrNum, CL_SUCCESS); 
+    ////oclCheckError(ciErrNum, CL_SUCCESS); 
     printf("about to build sort program\n");
     ciErrNum = clBuildProgram(cpProgram, 0, NULL, "-cl-fast-relaxed-math", NULL, NULL);
     if (ciErrNum != CL_SUCCESS)
     {
         printf("checking errors for sort\n");
         // write out standard error, Build Log and PTX, then cleanup and exit
-        shrLogEx(LOGBOTH | ERRORMSG, ciErrNum, STDERROR);
-        oclLogBuildInfo(cpProgram, oclGetFirstDev(cxGPUContext));
-        oclLogPtx(cpProgram, oclGetFirstDev(cxGPUContext), "Scan.ptx");
-        printf("error: %s", oclErrorString(ciErrNum));
-        oclCheckError(ciErrNum, CL_SUCCESS); 
+        ////shrLogEx(LOGBOTH | ERRORMSG, ciErrNum, STDERROR);
+        ////oclLogBuildInfo(cpProgram, oclGetFirstDev(cxGPUContext));
+        //oclLogPtx(cpProgram, oclGetFirstDev(cxGPUContext), "Scan.ptx");
+        //printf("error: %s", oclErrorString(ciErrNum));
+        //oclCheckError(ciErrNum, CL_SUCCESS); 
     }
 
 
 	ckScanExclusiveLocal1 = clCreateKernel(cpProgram, "scanExclusiveLocal1", &ciErrNum);
-    oclCheckError(ciErrNum, CL_SUCCESS);
+    //oclCheckError(ciErrNum, CL_SUCCESS);
     ckScanExclusiveLocal2 = clCreateKernel(cpProgram, "scanExclusiveLocal2", &ciErrNum);
-    oclCheckError(ciErrNum, CL_SUCCESS);
+    //oclCheckError(ciErrNum, CL_SUCCESS);
     ckUniformUpdate = clCreateKernel(cpProgram, "uniformUpdate", &ciErrNum);
-    oclCheckError(ciErrNum, CL_SUCCESS);
+    //oclCheckError(ciErrNum, CL_SUCCESS);
 
 	free(cScan);
 }
@@ -105,7 +108,7 @@ Scan::~Scan()
 		ciErrNum |= clReleaseMemObject(d_Buffer);
     }
     ciErrNum |= clReleaseProgram(cpProgram);
-	oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
+	//oclCheckErrorEX(ciErrNum, CL_SUCCESS, NULL);
 }
 
 // main exclusive scan routine
@@ -118,15 +121,15 @@ void Scan::scanExclusiveLarge(
     //Check power-of-two factorization
     unsigned int log2L;
     unsigned int factorizationRemainder = factorRadix2(log2L, arrayLength);
-    oclCheckError( factorizationRemainder == 1, shrTRUE);
+    //oclCheckError( factorizationRemainder == 1, shrTRUE);
 
     //Check supported size range
 	//printf("arrayLength= %d\n", arrayLength);
 	//printf("MIN/MAX: %d, %d\n", MIN_LARGE_ARRAY_SIZE, MAX_LARGE_ARRAY_SIZE);
-    oclCheckError( (arrayLength >= MIN_LARGE_ARRAY_SIZE) && (arrayLength <= MAX_LARGE_ARRAY_SIZE), shrTRUE );
+    //oclCheckError( (arrayLength >= MIN_LARGE_ARRAY_SIZE) && (arrayLength <= MAX_LARGE_ARRAY_SIZE), shrTRUE );
 
     //Check total batch size limit
-    oclCheckError( (batchSize * arrayLength) <= MAX_BATCH_ELEMENTS, shrTRUE );
+    //oclCheckError( (batchSize * arrayLength) <= MAX_BATCH_ELEMENTS, shrTRUE );
 
     scanExclusiveLocal1(
         d_Dst,
@@ -164,13 +167,13 @@ void Scan::scanExclusiveLocal1(
     ciErrNum |= clSetKernelArg(ckScanExclusiveLocal1, 1, sizeof(cl_mem), (void *)&d_Src);
     ciErrNum |= clSetKernelArg(ckScanExclusiveLocal1, 2, 2 * WORKGROUP_SIZE * sizeof(unsigned int), NULL);
     ciErrNum |= clSetKernelArg(ckScanExclusiveLocal1, 3, sizeof(unsigned int), (void *)&size);
-    oclCheckError(ciErrNum, CL_SUCCESS);
+    //oclCheckError(ciErrNum, CL_SUCCESS);
 
     localWorkSize = WORKGROUP_SIZE;
     globalWorkSize = (n * size) / 4;
 
     ciErrNum = clEnqueueNDRangeKernel(cqCommandQueue, ckScanExclusiveLocal1, 1, NULL, &globalWorkSize, &localWorkSize, 0, NULL, NULL);
-    oclCheckError(ciErrNum, CL_SUCCESS);
+    //oclCheckError(ciErrNum, CL_SUCCESS);
 }
 
 void Scan::scanExclusiveLocal2(
@@ -190,13 +193,13 @@ void Scan::scanExclusiveLocal2(
     ciErrNum |= clSetKernelArg(ckScanExclusiveLocal2, 3, 2 * WORKGROUP_SIZE * sizeof(unsigned int), NULL);
     ciErrNum |= clSetKernelArg(ckScanExclusiveLocal2, 4, sizeof(unsigned int), (void *)&elements);
     ciErrNum |= clSetKernelArg(ckScanExclusiveLocal2, 5, sizeof(unsigned int), (void *)&size);
-    oclCheckError(ciErrNum, CL_SUCCESS);
+    //oclCheckError(ciErrNum, CL_SUCCESS);
 
      localWorkSize = WORKGROUP_SIZE;
     globalWorkSize = iSnapUp(elements, WORKGROUP_SIZE);
 
     ciErrNum = clEnqueueNDRangeKernel(cqCommandQueue, ckScanExclusiveLocal2, 1, NULL, &globalWorkSize, &localWorkSize, 0, NULL, NULL);
-    oclCheckError(ciErrNum, CL_SUCCESS);
+    ////oclCheckError(ciErrNum, CL_SUCCESS);
 }
 
 void Scan::uniformUpdate(
@@ -209,11 +212,11 @@ void Scan::uniformUpdate(
 
     ciErrNum  = clSetKernelArg(ckUniformUpdate, 0, sizeof(cl_mem), (void *)&d_Dst);
     ciErrNum |= clSetKernelArg(ckUniformUpdate, 1, sizeof(cl_mem), (void *)&d_Buffer);
-    oclCheckError(ciErrNum, CL_SUCCESS);
+    //oclCheckError(ciErrNum, CL_SUCCESS);
 
      localWorkSize = WORKGROUP_SIZE;
     globalWorkSize = n * WORKGROUP_SIZE;
 
     ciErrNum = clEnqueueNDRangeKernel(cqCommandQueue, ckUniformUpdate, 1, NULL, &globalWorkSize, &localWorkSize, 0, NULL, NULL);
-    oclCheckError(ciErrNum, CL_SUCCESS);
+    //oclCheckError(ciErrNum, CL_SUCCESS);
 }
