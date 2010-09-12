@@ -141,7 +141,7 @@ void RadixSort::sort(cl_mem d_keys,
 {
 	//radixSortKeysOnly(d_keys, numElements, keyBits);
 	radixSortKeysValues(d_keys, d_values, numElements, keyBits);
-	printInts(d_keys, 20, "keys");
+	printInts(d_keys, 20, "keys(after radixSortKeysValues)");
 	printInts(d_values, 20, "values");
 }
 
@@ -171,6 +171,8 @@ void RadixSort::radixSortKeysValues(cl_mem d_keys, cl_mem d_values, unsigned int
 	{
 		//radixSortStepKeysOnly(d_keys, bitStep, i*bitStep, numElements);
 		radixSortStepKeysValues(d_keys, d_values, bitStep, i*bitStep, numElements);
+	printInts(d_keys, 20, "keys(after radixSortStepKeysValues)");
+	printInts(d_values, 20, "values");
 		i++;
 	}
 }
@@ -200,6 +202,8 @@ void RadixSort::radixSortStepKeysValues(cl_mem d_keys, cl_mem d_values, unsigned
 	// Four step algorithms from Satish, Harris & Garland
 	//radixSortBlocksKeysOnlyOCL(d_keys, nbits, startbit, numElements);
 	radixSortBlocksKeysValuesOCL(d_keys, d_values, nbits, startbit, numElements);
+	printInts(d_keys, 20, "keys(after radixSortStepKeysValuesOCL)");
+	printInts(d_values, 20, "values");
 
 	findRadixOffsetsOCL(startbit, numElements);
 
@@ -207,6 +211,8 @@ void RadixSort::radixSortStepKeysValues(cl_mem d_keys, cl_mem d_values, unsigned
 
 	//reorderDataKeysOnlyOCL(d_keys, startbit, numElements);
 	reorderDataKeysValuesOCL(d_keys, d_values, startbit, numElements);
+	printInts(d_keys, 20, "keys(after reorderDataKeysValuesOCL)");
+	printInts(d_values, 20, "values");
 }
 //----------------------------------------------------------------------------
 // Wrapper for the kernels of the four steps
