@@ -183,7 +183,7 @@ void RadixSort::radixSortKeysOnly(cl_mem d_keys, unsigned int numElements, unsig
 // Added by G. Erlebacher 9/11/2010
 void RadixSort::radixSortKeysValues(cl_mem d_keys, cl_mem d_values, unsigned int numElements, unsigned int keyBits)
 {
-	printf("enter radixSortKeysValues\n);
+	printf("enter radixSortKeysValues\n");
 	int i = 0;
     while (keyBits > i*bitStep) 
 	{
@@ -218,7 +218,7 @@ void RadixSort::radixSortStepKeysValues(cl_mem d_keys, cl_mem d_values, unsigned
 	// Four step algorithms from Satish, Harris & Garland
 	//radixSortBlocksKeysOnlyOCL(d_keys, nbits, startbit, numElements);
 	radixSortBlocksKeysValuesOCL(d_keys, d_values, nbits, startbit, numElements);
-exit(3);
+//exit(3);
 
 	findRadixOffsetsOCL(startbit, numElements);
 
@@ -273,8 +273,8 @@ void RadixSort::radixSortBlocksKeysValuesOCL(cl_mem d_keys, cl_mem d_values, uns
 
 
 	printInts(d_tempKeys, 12, "keys(radixSortBlocksKeysOnlyOCL)");
-	printInts(d_tempValues, 12, "keys(radixSortBlocksKeysOnlyOCL)");
-	exit(3);
+	printInts(d_tempValues, 12, "values(radixSortBlocksKeysOnlyOCL)");
+	//exit(3);
 }
 
 
