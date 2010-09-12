@@ -259,6 +259,12 @@ void EnjaParticles::buildDataStructures()
 {
 	static bool first_time = false;
 
+	// nb_vars: number of float4 variables to reorder. 
+	// nb_el:   number of particles
+	// Alternative: could construct float columns
+	// Stored in vars_sorted[nb_vars*nb_el]. Ordering is consistent 
+	// with vars_sorted[nb_vars][nb_el]
+
 	if (!first_time) {
 		first_time = true;
 	}
@@ -300,6 +306,9 @@ void EnjaParticles::buildDataStructures()
 		exit(0);
 	}
 
+
+	#if 0
+	// PRINT OUT UNSORTED AND SORTED VARIABLES
 	for (int k=0; k < nb_vars; k++) {
 		printf("================================================\n");
 		printf("=== VARIABLE: %d ===============================\n", k);
@@ -311,6 +320,20 @@ void EnjaParticles::buildDataStructures()
 	}
 	printf("===============================================\n");
 	printf("===============================================\n");
+	#endif
+
+
+	#if 1
+		// PRINT OUT START and END CELL INDICES
+        err = queue.enqueueReadBuffer(cl_cell_indices_start, CL_TRUE, 0, nb_el*sizeof(cl_int), &cell_indices_start[0], NULL, &event);
+        err = queue.enqueueReadBuffer(cl_cell_indices_end, CL_TRUE, 0, nb_el*sizeof(cl_int), &cell_indices_end[0], NULL, &event);
+
+		printf("cell_indices_start, end\n");
+		for (int i=0; i < nb_el; i++) {
+			printf("%d, %d\n", cell_indices_start[i], cell_indices_end[i]);
+		}
+
+	#endif
 
 	printf("exit BuildDataStructures\n");
 	exit(0);
@@ -372,29 +395,26 @@ void EnjaParticles::hash()
 		printf("sort_index: %d, sort_hash: %u, %u\n", i, sort_hashes[i], sort_indices[i]);
 		printf("%d, %f, %f, %f, %f\n", i, cells[i].x, cells[i].y, cells[i].z, cells[i].w);
 
-		#if 1
 		int gx = list[i].x;
 		int gy = list[i].y;
 		int gz = list[i].z;
 		unsigned int idx = (gz*gp.grid_res.y + gy) * gp.grid_res.x + gx; 
 		printf("exact hash: %d\n", idx);
-		#endif
 		printf("---------------------------\n");
 	}
 #endif
 #undef DEBUG
 
         printf("about to read from buffers to see what they have\n");
-		#if 1
+	#if 0
 		// SORT IN PLACE
         err = queue.enqueueReadBuffer(cl_sort_hashes, CL_TRUE, 0, nb_el*sizeof(cl_int), &sort_hashes[0], NULL, &event);
         err = queue.enqueueReadBuffer(cl_sort_indices, CL_TRUE, 0, nb_el*sizeof(cl_int), &sort_indices[0], NULL, &event);
 		queue.finish();
-		//for (int i=nb_el-10; i < nb_el; i++) {
-		for (int i=0; i < 10; i++) {
+		for (int i=0; i < 300; i++) {
 			printf("xx index: %d, sort_indices: %d, sort_hashes: %d\n", i, sort_indices[i], sort_hashes[i]);
 		}
-		#endif
+	#endif
 }
 //----------------------------------------------------------------------
 // Input: a list of integers in random order
