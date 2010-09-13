@@ -130,7 +130,7 @@ int EnjaParticles::update()
     printf("done with hash\n");
 	sort(cl_sort_hashes, cl_sort_indices); // sort hash values in place. Should also reorder cl_sort_indices
 	buildDataStructures();
-	computeStep1();
+	//computeStep1();
 	exit(0);
 
 	// setup neighbors
@@ -169,6 +169,8 @@ void EnjaParticles::setupArrays()
 	gp.grid_delta.z = gp.grid_size.z / gp.grid_res.z;
 	gp.grid_delta.w = 1.;
 	printf("delta z= %f\n", gp.grid_delta.z);
+
+	grid_size = (int) (gp.grid_size.x * gp.grid_size.y * gp.grid_size.z);
 
 	sort_int.resize(nb_el);
 	unsort_int.resize(nb_el);
@@ -229,12 +231,6 @@ void EnjaParticles::setupArrays()
 		cl_sort_indices = BUFFER(nb_bytes);
 		WRITE_BUFFER(cl_sort_indices, nb_bytes, &sort_indices[0]);
 
-		cl_cell_indices_start = BUFFER(nb_bytes);
-		WRITE_BUFFER(cl_cell_indices_start, nb_bytes, &cell_indices_start[0]);
-
-		cl_cell_indices_end = BUFFER(nb_bytes);
-		WRITE_BUFFER(cl_cell_indices_end, nb_bytes, &cell_indices_end[0]);
-
 		cl_unsort = BUFFER(nb_bytes);
 		WRITE_BUFFER(cl_unsort, nb_bytes, &unsort_int);
 
@@ -244,6 +240,15 @@ void EnjaParticles::setupArrays()
 		nb_bytes = sizeof(GridParams);
 		cl_GridParams = BUFFER(nb_bytes);
 		WRITE_BUFFER(cl_GridParams, nb_bytes, &gp);
+
+
+		nb_bytes = grid_size * sizeof(int);
+		cl_cell_indices_start = BUFFER(nb_bytes);
+		WRITE_BUFFER(cl_cell_indices_start, nb_bytes, &cell_indices_start[0]);
+
+		cl_cell_indices_end = BUFFER(nb_bytes);
+		WRITE_BUFFER(cl_cell_indices_end, nb_bytes, &cell_indices_end[0]);
+
 
 		queue.finish();
 	} catch(cl::Error er) {
@@ -335,7 +340,7 @@ void EnjaParticles::buildDataStructures()
         err = queue.enqueueReadBuffer(cl_cell_indices_end, CL_TRUE, 0, nb_el*sizeof(cl_int), &cell_indices_end[0], NULL, &event);
 
 		printf("cell_indices_start, end\n");
-		for (int i=0; i < nb_el; i++) {
+		for (int i=0; i < grid_size; i++) {
 			printf("[%d]: %d, %d\n", i, cell_indices_start[i], cell_indices_end[i]);
 		}
 

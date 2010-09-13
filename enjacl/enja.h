@@ -113,7 +113,7 @@ class EnjaParticles
 private:
 // BEGIN
 // ADDED BY GORDON FOR TESTING of hash, sort, datastructures
-	int nb_el, nb_vars;
+	int nb_el, nb_vars, grid_size;
 	cl::Buffer cl_vars_sorted;
 	cl::Buffer cl_vars_unsorted;
 	cl::Buffer cl_cell_indices_start;
@@ -155,7 +155,7 @@ public:
 	/// a specific kernel
 	void buildDataStructures();
 
-	computeStep1();
+	//void computeStep1();
 
 	// cl_float3 does not appear to exist. I'd have to extend cl_platform.h
 	//void hash(std::vector<cl_float4> list, GridParams& gp);
