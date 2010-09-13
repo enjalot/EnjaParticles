@@ -1,11 +1,13 @@
 #include "RTPS.h"
 #include "system/Simple.h"
+#include "system/SPH.h"
 
 
 namespace rtps{
     
 RTPS::RTPS()
 {
+    //settings will be the default constructor
     Init();
 }
 
@@ -26,8 +28,10 @@ void RTPS::Init()
 {
 
     cli = new CL();
-    //choose based on settings
-    system = new Simple(this, settings.max_particles);
+
+    //TODO choose based on settings
+    //system = new Simple(this, settings.max_particles);
+    system = new SPH(this, settings.max_particles);
 
     //pass in the position and color vbo ids to the renderer
     //get the number from the system

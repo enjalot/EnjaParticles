@@ -4,8 +4,9 @@ namespace rtps {
 
 RTPSettings::RTPSettings()
 {
-    system = Simple;
+    system = SPH;
     max_particles = 1024;
+    dt = .001f;
 }
 
 }

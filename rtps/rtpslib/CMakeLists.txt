@@ -42,6 +42,9 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/render/Render.cpp
     
     ${rtpslib_SOURCE_DIR}/system/Simple.cpp
+    
+    ${rtpslib_SOURCE_DIR}/system/SPH.cpp
+    ${rtpslib_SOURCE_DIR}/system/sph/Euler.cpp
 
 
     #${rtpslib_SOURCE_DIR}/particle

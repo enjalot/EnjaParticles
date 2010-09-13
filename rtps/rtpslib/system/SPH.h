@@ -3,49 +3,44 @@
 
 #include <string>
 
-#include "RTPS.h"
-#include "system.h"
+#include "../RTPS.h"
+#include "System.h"
 #include "../opencl/Kernel.h"
 #include "../opencl/Buffer.h"
+//#include "../util.h"
+
 
 namespace rtps {
 
 class SPH : public System
 {
 public:
-    SPH(RTPS *ps, num);
+    SPH(RTPS *ps, int num);
     ~SPH();
 
     void update();
 
     //the particle system framework
     RTPS *ps;
-    //number of particles
-    int num; 
+    int num;
 
-    /*
-    cl::Context context;
-    cl::CommandQueue queue;
-    int err;
-    cl::Event event;
-    */
-    //cl source codes
-    /*
-    static const std::string sources[];
-    enum {DENSITY, PRESSURE, VISCOSITY, COLLISION_WALL, EULER};
-    */
 
     Kernel k_density, k_pressure, k_viscosity;
     Kernel k_collision_wall;
     Kernel k_euler;
 
-    //the vbos will come from enjas
-    //std::vector<cl::Memory> cl_vbos;  //0: position vbo, 1: color vbo
-    Buffer cl_position;
-    Buffer cl_color;
-    Buffer cl_density;
-    Buffer cl_force;
-    Buffer cl_velocity;
+    Buffer<float4> cl_position;
+    Buffer<float4> cl_color;
+    Buffer<float> cl_density;
+    Buffer<float4> cl_force;
+    Buffer<float4> cl_velocity;
+
+    //these are defined in sph/ folder next to the kernels
+    Kernel loadDensity();
+    Kernel loadPressure();
+    Kernel loadViscosity();
+    Kernel loadCollision_wall();
+    Kernel loadEuler();
 
 };
 

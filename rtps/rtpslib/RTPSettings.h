@@ -14,7 +14,11 @@ public:
     enum SysType {Simple, SPH, BOIDS};
     SysType system;
 
+    //maximum number of particles a system can hold
     int max_particles;
+
+    //time step per iteration
+    float dt;
 
 };
 

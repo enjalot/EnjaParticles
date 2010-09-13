@@ -7,7 +7,7 @@
 #include "System.h"
 #include "../opencl/Kernel.h"
 #include "../opencl/Buffer.h"
-#include "../util.h"
+//#include "../util.h"
 
 namespace rtps {
 
@@ -21,6 +21,7 @@ public:
 
     //the particle system framework
     RTPS *ps;
+    int num;
 
     Kernel k_euler;
 

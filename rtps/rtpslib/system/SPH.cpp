@@ -1,104 +1,100 @@
+
+#include <GL/glew.h>
 #include "SPH.h"
-//#include "util.h"
 
 namespace rtps {
 
-#include "physics/sph/density.cl"
-#include "physics/sph/pressure.cl"
-#include "physics/sph/viscosity.cl"
-#include "physics/sph/collision_wall.cl"
-#include "physics/sph/euler.cl"
-const std::string SPH::sources[] = {
-    density_program_source,
-    pressure_program_source,
-    viscosity_program_source,
-    collision_wall_program_source,
-    euler_program_source
-};
 
-
-SPH::SPH(RTPS *psfr, int num)
+SPH::SPH(RTPS *psfr, int n)
 {
     //store the particle system framework
     ps = psfr;
 
-    //we take some variables that EnjaParticles have already prepared
-    //
-    //create buffers
-    cl_density = cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(float)*num, NULL, &err); //float array
-    cl_force = cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(Vec4)*num, NULL, &err); //float4 array
+    num = n;
 
-    //initialize force
-    // don't need to because it gets set to 0 first in pressure calculation
-    //std::vector<float> dens(num);
-    //std::vector<Vec4> forc(num);
-    //std::fill(dens.begin(), dens.end(), 0.0f);
-    //Vec4 f(0.0f, 0.0f, -9.8f, 0.0f);
-    //std::fill(forc.begin(), forc.end(), f);
-    //err = queue.enqueueWriteBuffer(cl_force, CL_TRUE, 0, sizeof(Vec4)*num, &forc[0], NULL, &event);
+    //*** Initialization, TODO: move out of here to the particle directory
+    std::vector<float4> positions(num);
+    std::vector<float4> colors(num);
+    std::vector<float4> forces(num);
+    std::vector<float4> velocities(num);
+    std::vector<float> densities(num);
+    
+    
+    //std::fill(positions.begin(), positions.end(),(float4) {0.0f, 0.0f, 0.0f, 1.0f});
+    for(int i = 0; i < num; i++)
+    {
+        positions[i] = float4((i*1.0f)/num, 0.0f, 0.0f, 1.0f);
+    }
+    std::fill(colors.begin(), colors.end(),(float4) {1.0f, 0.0f, 0.0f, 0.0f});
+    std::fill(forces.begin(), forces.end(),(float4) {0.0f, 0.0f, 1.0f, 0.0f});
+    std::fill(velocities.begin(), velocities.end(),(float4) {0.0f, 0.0f, -9.8f, 0.0f});
 
-    //cl_velocity = cl::Buffer(context, CL_MEM_READ_WRITE, 4*sizeof(float)*num, NULL, &err); //float4 array
-    cl_velocity = enjas->cl_velocities;
+    std::fill(densities.begin(), densities.end(), 0.0f);
+    //*** end Initialization
+   
 
-    //create kernels
-    printf("create density kernel\n");
-    k_density = enjas->loadKernel(sources[DENSITY], "density");
-    k_density.setArg(0, enjas->cl_vbos[0]);
-    k_density.setArg(1, cl_density);
 
-    printf("create pressure kernel\n");
-    k_pressure = enjas->loadKernel(sources[PRESSURE], "pressure");
-    k_pressure.setArg(0, enjas->cl_vbos[0]);
-    k_pressure.setArg(1, cl_density);
-    k_pressure.setArg(2, cl_force);
+    // VBO creation, TODO: should be abstracted to another class
+    managed = true;
+    pos_vbo = createVBO(&positions[0], positions.size()*sizeof(float4), GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+    printf("pos vbo: %d\n", pos_vbo);
+    col_vbo = createVBO(&colors[0], colors.size()*sizeof(float4), GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+    printf("col vbo: %d\n", col_vbo);
+    // end VBO creation
 
-    printf("create viscosity kernel\n");
-    k_viscosity = enjas->loadKernel(sources[VISCOSITY], "viscosity");
-    k_viscosity.setArg(0, enjas->cl_vbos[0]);
-    k_viscosity.setArg(1, cl_velocity);
+    //vbo buffers
+    cl_position = Buffer<float4>(ps->cli, pos_vbo);
+    cl_color = Buffer<float4>(ps->cli, col_vbo);
 
-    printf("create collision_wall kernel\n");
-    k_collision_wall = enjas->loadKernel(sources[COLLISION_WALL], "collision_wall");
-    k_collision_wall.setArg(0, enjas->cl_vbos[0]);
-    k_collision_wall.setArg(1, cl_velocity);
-    k_collision_wall.setArg(2, cl_force);
-    //k_collision_wall.setArg(2, cl_walls); //need to make a data structure for grid walls
+    //pure opencl buffers
+    cl_force = Buffer<float4>(ps->cli, forces);
+    cl_velocity = Buffer<float4>(ps->cli, velocities);
 
-    printf("create euler kernel\n");
+    cl_density = Buffer<float>(ps->cli, densities);
+
+
     //could generalize this to other integration methods later (leap frog, RK4)
-    k_euler = enjas->loadKernel(sources[EULER], "euler");
-    k_euler.setArg(0, enjas->cl_vbos[0]);
-    k_euler.setArg(1, cl_velocity);
-    k_euler.setArg(2, cl_force);
-    k_euler.setArg(3, .01f); //time step (should be set from settings)
+    printf("create euler kernel\n");
+    k_euler = loadEuler();
+    printf("euler kernel created\n");
+
+
+
+  
+
+
 }
 
 SPH::~SPH()
 {
+    if(pos_vbo && managed)
+    {
+        glBindBuffer(1, pos_vbo);
+        glDeleteBuffers(1, (GLuint*)&pos_vbo);
+        pos_vbo = 0;
+    }
+    if(col_vbo && managed)
+    {
+        glBindBuffer(1, col_vbo);
+        glDeleteBuffers(1, (GLuint*)&col_vbo);
+        col_vbo = 0;
+    }
 }
 
 void SPH::update()
 {
     //call kernels
-    //add timings
+    //TODO: add timings
     glFinish();
-    err = queue.enqueueAcquireGLObjects(&enjas->cl_vbos, NULL, &event);
-    //printf("acquire: %s\n", oclErrorString(err));
-    queue.finish();
+    cl_position.acquire();
+    cl_color.acquire();
     
-    //density
-    err = queue.enqueueNDRangeKernel(k_density, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
-    //pressure
-    err = queue.enqueueNDRangeKernel(k_pressure, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
-    //collision
-    err = queue.enqueueNDRangeKernel(k_collision_wall, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
+    printf("execute!\n");
     //euler integration
-    err = queue.enqueueNDRangeKernel(k_euler, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
-    queue.finish();
+    //k_euler.execute(num);
 
-    err = queue.enqueueReleaseGLObjects(&enjas->cl_vbos, NULL, &event);
-    //printf("release gl: %s\n", oclErrorString(err));
-    queue.finish();
+    cl_position.release();
+    cl_color.release();
 
 }
 
