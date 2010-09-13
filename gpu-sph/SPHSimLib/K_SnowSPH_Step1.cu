@@ -47,10 +47,8 @@ public:
 			// ideal gas equation of state (by Desbrun and Cani in "Smoothed particles: A new paradigm for animating highly deformable bodies")
 			data.dParticleDataSorted.pressure[index_i] = cFluidParams.rest_pressure + cFluidParams.gas_stiffness * (data.sum_density - cFluidParams.rest_density);
 		}
-
 	};
 };
-
 
 __global__ void K_SumStep1(uint			numParticles,
 					   NeighborList		dNeighborList, 

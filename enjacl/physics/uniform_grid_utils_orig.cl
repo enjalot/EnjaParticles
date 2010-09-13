@@ -1,8 +1,10 @@
-#ifndef __K_UniformGrid_Utils_cu__
-#define __K_UniformGrid_Utils_cu__
+# TO BE INCLUDED FROM OTHER FILES. In OpenCL, I believe that all device code
+# must be in the same file as the kernel using it. 
 
+//----------------------------------------------------------------------
 namespace UniformGridUtils
 {
+	//------------------------------------------------
 	// find the grid cell from a position in world space
 	static __device__ int3 calcGridCell(float3 const &p, float3 grid_min, float3 grid_delta)
 	{
@@ -10,7 +12,7 @@ namespace UniformGridUtils
 		return make_int3((p-grid_min) * grid_delta);
 	}
 
-
+	//------------------------------------------------
 	// calculate hash from grid cell
 	template <bool wrapEdges> 
 	static __device__ uint calcGridHash(int3 const &gridPos, float3 grid_res)
@@ -53,6 +55,7 @@ namespace UniformGridUtils
 	}
 
 
+	//--------------------------------------------------------------
 	// Iterate over particles found in the nearby cells (including cell of position_i)
 	template<class O, class D>
 	static __device__ void IterateParticlesInCell(
@@ -84,6 +87,7 @@ namespace UniformGridUtils
 		}
 	}
 
+	//--------------------------------------------------------------
 	// Iterate over particles found in the nearby cells (including cell of position_i)
 	template<class O, class D>
 	static __device__ void IterateParticlesInNearbyCells(
@@ -112,7 +116,6 @@ namespace UniformGridUtils
 
 		O::PostCalc(data, index_i);
 	}
-	//--------------------------------------------------
 	// Iterate over particles found in the neighbor list
 	template<class O, class D>
 	static __device__ void IterateParticlesInNearbyCells(
@@ -127,8 +130,8 @@ namespace UniformGridUtils
 		// iterate over particles in neighbor list
 		for(uint counter=0; counter < dNeighborList.MAX_NEIGHBORS; counter++) 
 		{
-			//const uint index_j = FETCH(dNeighborList, neighbors, index_i*dNeighborList.neighbors_pitch+counter);
-			const uint index_j = FETCH_NOTEX(dNeighborList, neighbors, index_i*dNeighborList.MAX_NEIGHBORS+counter);			
+			//const uint index_j = FETCH(dNeighborList,neighbors, index_i*dNeighborList.neighbors_pitch+counter);
+			const uint index_j = FETCH_NOTEX(dNeighborList,neighbors, index_i*dNeighborList.MAX_NEIGHBORS+counter);			
 
 			// no more neighbors for this particle
 			if(index_j == 0xffffffff)
@@ -137,8 +140,11 @@ namespace UniformGridUtils
 			O::ForPossibleNeighbor(data, index_i, index_j, position_i);
 
 		}
+
 		O::PostCalc(data, index_i);
 	}
+
 };
+//--------------------------------------------------------------
 
 #endif

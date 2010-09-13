@@ -74,3 +74,13 @@ __global__ void K_SumStep1(uint				numParticles,
 }
 
 #endif
+
+#if 0
+
+A = SPHNeighborCalc<Step1::Calc, Step1::Data>
+
+B = Step1::Data
+
+IteratateParticlesInNearbyCells<A, B> (data, index, position_i, dGridData)
+
+#endif
