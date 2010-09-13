@@ -130,6 +130,11 @@ int EnjaParticles::update()
     printf("done with hash\n");
 	sort(cl_sort_hashes, cl_sort_indices); // sort hash values in place. Should also reorder cl_sort_indices
 	buildDataStructures();
+	computeStep1();
+	exit(0);
+
+	// setup neighbors
+
 	exit(0);
 
 #endif
@@ -324,7 +329,7 @@ void EnjaParticles::buildDataStructures()
 	#endif
 
 
-	#if 1
+	#if 0
 		// PRINT OUT START and END CELL INDICES
         err = queue.enqueueReadBuffer(cl_cell_indices_start, CL_TRUE, 0, nb_el*sizeof(cl_int), &cell_indices_start[0], NULL, &event);
         err = queue.enqueueReadBuffer(cl_cell_indices_end, CL_TRUE, 0, nb_el*sizeof(cl_int), &cell_indices_end[0], NULL, &event);
@@ -337,7 +342,6 @@ void EnjaParticles::buildDataStructures()
 	#endif
 
 	printf("exit BuildDataStructures\n");
-	exit(0);
 }
 //----------------------------------------------------------------------
 void EnjaParticles::hash()

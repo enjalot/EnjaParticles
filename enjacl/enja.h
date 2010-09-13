@@ -155,6 +155,8 @@ public:
 	/// a specific kernel
 	void buildDataStructures();
 
+	computeStep1();
+
 	// cl_float3 does not appear to exist. I'd have to extend cl_platform.h
 	//void hash(std::vector<cl_float4> list, GridParams& gp);
 	void hash();

@@ -392,6 +392,7 @@ float SimSimpleSPH::BuildDataStruct(bool doTiming)
 	return 0;
 }
 
+//----------------------------------------------------------------------
 float SimSimpleSPH::ComputeDensityAndBuildNeighborList(bool doTiming)
 {
 	GridData dGridData = mUniformGrid->GetGridData();
@@ -445,6 +446,7 @@ float SimSimpleSPH::ComputeDensityAndBuildNeighborList(bool doTiming)
 	return 0;
 }
 
+//----------------------------------------------------------------------
 float SimSimpleSPH::ComputeStep1(bool doTiming)
 {
 	GridData dGridData = mUniformGrid->GetGridData();
