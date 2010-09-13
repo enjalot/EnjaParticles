@@ -7,6 +7,7 @@
 #include <vector>
 #include <stdio.h>
 
+#include "cl.h"
 #include <CL/cl.hpp>
 
 #include "system.h"
@@ -113,6 +114,7 @@ class EnjaParticles
 private:
 // BEGIN
 // ADDED BY GORDON FOR TESTING of hash, sort, datastructures
+	//CL cl;  // GE CL library
 	int nb_el, nb_vars, grid_size;
 	cl::Buffer cl_vars_sorted;
 	cl::Buffer cl_vars_unsorted;
@@ -160,6 +162,8 @@ public:
 	// cl_float3 does not appear to exist. I'd have to extend cl_platform.h
 	//void hash(std::vector<cl_float4> list, GridParams& gp);
 	void hash();
+
+	void neighbor_search(); // in neighbor_search.cpp via include
 
     int update();   //update the particle system
     int cpu_update();   //update the particle system using cpu code

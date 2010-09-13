@@ -12,7 +12,6 @@ public:
 	struct Data
 	{
 		float sum_density;
-
 		SimpleSPHData dParticleDataSorted;
 	};
 
@@ -53,7 +52,7 @@ __global__ void K_SumStep1(uint				numParticles,
 							   NeighborList		dNeighborList, 
 							   SimpleSPHData	dParticleDataSorted,
 							   GridData const	dGridData
-							   )								
+						   )								
 {
 	// particle index	
 	uint index = __umul24(blockIdx.x, blockDim.x) + threadIdx.x;		
@@ -70,8 +69,6 @@ __global__ void K_SumStep1(uint				numParticles,
 #else
 	UniformGridUtils::IterateParticlesInNearbyCells<SPHNeighborCalc<Step1::Calc, Step1::Data>, Step1::Data>(data, index, position_i, dGridData);
 #endif
-
-}
 
 #endif
 

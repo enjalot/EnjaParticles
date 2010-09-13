@@ -31,6 +31,8 @@
 #include "timege.h"
 //#include "incopencl.h"
 
+#include "neighbor_search.cpp"
+
 //----------------------------------------------------------------------
 int EnjaParticles::update()
 {
@@ -134,10 +136,9 @@ int EnjaParticles::update()
     printf("done with hash\n");
 	sort(cl_sort_hashes, cl_sort_indices); // sort hash values in place. Should also reorder cl_sort_indices
 	buildDataStructures();
-	//computeStep1();
 
-	CL cl;
-	exit(0);
+	neighbor_search();
+	//computeStep1();
 
 	// setup neighbors
 

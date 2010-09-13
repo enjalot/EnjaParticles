@@ -47,7 +47,6 @@ public:
 	};
 };
 
-
 //----------------------------------------------------------------------
 __global__ void K_SumStep1(uint				numParticles,
 							   NeighborList		dNeighborList, 
