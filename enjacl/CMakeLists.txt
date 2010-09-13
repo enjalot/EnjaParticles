@@ -32,6 +32,8 @@ INCLUDE_DIRECTORIES(
     #$ENV{OPENCL_HOME}/../shared/inc
     ${OPENCL_INCLUDE_DIR}
     ${enjacl_SOURCE_DIR}/../opencl11
+	$ENV{GRAPHICS_LIBS}/utilities
+	$ENV{GRAPHICS_LIBS}/opencl_utilities
     #${enjacl_SOURCE_DIR}/oclRadixSortKeysValues
 )
 
@@ -74,7 +76,7 @@ TARGET_LINK_LIBRARIES (${EXEC_CL}
     #$ENV{OPENCL_HOME}/../shared/lib/libshrutil_x86_64.a
     #$ENV{OPENCL_HOME}/common/lib/liboclUtil_x86_64.a
    ${ocllib}
-   $ENV{GRAPHICS_LIBS}/opencl_utilities/libcl_utilities_cpp.a
+   ${CMAKE_CURRENT_BINARY_DIR}/graphics_libs/opencl_utilities/libcl_utilities_cpp.a
    ${GLUT_LIBRARIES}
    ${OPENGL_LIBRARIES}
    ${OPENCL_LIBRARIES}

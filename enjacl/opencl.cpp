@@ -20,6 +20,10 @@
     #include <GL/glx.h>
 #endif
 
+// GE opencl library
+#include <cl.h>
+
+
 
 #include "RadixSort.h"
 #include "enja.h"
@@ -131,6 +135,8 @@ int EnjaParticles::update()
 	sort(cl_sort_hashes, cl_sort_indices); // sort hash values in place. Should also reorder cl_sort_indices
 	buildDataStructures();
 	//computeStep1();
+
+	CL cl;
 	exit(0);
 
 	// setup neighbors

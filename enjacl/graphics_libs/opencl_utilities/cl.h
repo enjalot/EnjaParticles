@@ -24,7 +24,7 @@ public:
     static cl_context context;                 // compute context
     static cl_command_queue commands;          // compute command queue
 	static bool is_initialized;
-	static bool program_added;
+	static bool program_added; // not used
     static cl_device_id device_id;  // compute device id
 	static bool profiling;
 	std::vector<cll_Program> programs;  // multiple programs per kernel
@@ -61,6 +61,10 @@ public:
 	void waitForKernelsToFinish();
 	cl_platform_id getPlatformId();
 	cl_int oclGetPlatformID(cl_platform_id* clSelectedPlatformID);
+	void setContext(cl_context context) { this->context = context; }
+	void setCommandQueue(cl_command_queue cq) { commands = cq; }
+	cl_context& getContext() { return context; }
+	cl_command_queue& getCommandQueue() { return commands; }
 
     // Retrieve data from the device
     cl_event connectReadBuffer(cl_mem buffer,
