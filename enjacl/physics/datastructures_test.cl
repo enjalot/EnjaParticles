@@ -55,7 +55,6 @@ __kernel void datastructures(
 	//__syncthreads ();
 #endif
 
-
 	// If this particle has a different cell index to the previous
 	// particle then it must be the first particle in the cell,
 	// so store the index of this particle in the cell.
@@ -70,13 +69,10 @@ __kernel void datastructures(
 		}
 	}
 
-	//return;
-
 	if (index == numParticles - 1)
 	{
 		cell_indexes_end[hash] = index + 1;
 	}
-
 
 	uint sortedIndex = sort_indexes[index];
 
@@ -92,8 +88,6 @@ __kernel void datastructures(
 		//dParticlesSorted[index+j*numParticles].z = 5.; // = (float4) (3.,3.,3.,3.);
 		//dParticlesSorted[index+j*numParticles].w = 6.; // = (float4) (3.,3.,3.,3.);
 	}
-
-	
 }
 
 );

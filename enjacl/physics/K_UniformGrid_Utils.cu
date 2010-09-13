@@ -136,10 +136,8 @@ namespace UniformGridUtils
 			O::ForPossibleNeighbor(data, index_i, index_j, position_i);
 
 		}
-
 		O::PostCalc(data, index_i);
 	}
-
 };
 
 #endif

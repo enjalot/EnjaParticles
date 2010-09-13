@@ -269,6 +269,8 @@ void EnjaParticles::buildDataStructures()
 		first_time = true;
 	}
 
+	int ctaSize = 128;
+
 	try {
     	err = datastructures_kernel.setArg(0, nb_el);
     	err = datastructures_kernel.setArg(1, nb_vars);
@@ -279,13 +281,12 @@ void EnjaParticles::buildDataStructures()
     	err = datastructures_kernel.setArg(6, cl_cell_indices_start);
     	err = datastructures_kernel.setArg(7, cl_cell_indices_end);
 		// local memory
-    	err = datastructures_kernel.setArg(8, sizeof(int), 0);
+    	err = datastructures_kernel.setArg(8, ctaSize*sizeof(int), 0);
 	} catch(cl::Error er) {
         printf("0 ERROR(buildDataStructures): %s(%s)\n", er.what(), oclErrorString(er.err()));
 		exit(0);
 	}
 
-	int ctaSize = 128;
 	int err;
 
     err = queue.enqueueNDRangeKernel(datastructures_kernel, cl::NullRange, cl::NDRange(nb_el), cl::NDRange(ctaSize), NULL, &event);
@@ -330,7 +331,7 @@ void EnjaParticles::buildDataStructures()
 
 		printf("cell_indices_start, end\n");
 		for (int i=0; i < nb_el; i++) {
-			printf("%d, %d\n", cell_indices_start[i], cell_indices_end[i]);
+			printf("[%d]: %d, %d\n", i, cell_indices_start[i], cell_indices_end[i]);
 		}
 
 	#endif

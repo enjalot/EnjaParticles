@@ -1,8 +1,16 @@
-K_UniformGrid.cuh:#ifndef __UniformRadixGrid_cuh__
-K_UniformGrid.cuh:#define __UniformRadixGrid_cuh__
-UniformGrid.cu:		mRadixSorter = new RadixSort(mNumParticles * sizeof(uint));
-UniformGrid.cu:		delete mRadixSorter; mRadixSorter = NULL;
-UniformGrid.cu:		mRadixSorter->sort(
-UniformGrid.cuh://using namespace nvRadixSort;
-UniformGrid.cuh:	RadixSort* mRadixSorter;
-Binary file libcudpp_i386.a matches
+K_UniformGrid_Update.cu:		dGridData.cell_indexes_start[hash] = index;
+K_UniformGrid_Utils.cu:		//uint startIndex	= FETCH_NOTEX(dGridData,cell_indexes_start,cellHash);
+K_UniformGrid_Utils.cu:		volatile uint startIndex = FETCH(dGridData,cell_indexes_start,cellHash);
+SimDEM.cu:// texture<uint, 1, cudaReadModeElementType> cell_indexes_start_tex;
+SimDEM.cu:// 	CUDA_SAFE_CALL(cudaBindTexture(0, cell_indexes_start_tex, dGridData.cell_indexes_start, mUniformGrid->GetNumCells()  * sizeof(uint)));
+SimDEM.cu:// 	CUDA_SAFE_CALL(cudaUnbindTexture(cell_indexes_start_tex));
+SimDEM.cu:// 	CUDA_SAFE_CALL(cudaMemset(dGridData.cell_indexes_start, 0xff, mUniformGrid->GetNumCells()  * sizeof(uint)));
+SimSimpleSPH.cu:texture<uint, 1, cudaReadModeElementType> cell_indexes_start_tex;
+SimSimpleSPH.cu:	CUDA_SAFE_CALL(cudaBindTexture(0, cell_indexes_start_tex, dGridData.cell_indexes_start, mUniformGrid->GetNumCells() * sizeof(uint)));
+SimSimpleSPH.cu:	CUDA_SAFE_CALL(cudaUnbindTexture(cell_indexes_start_tex));
+SimSimpleSPH.cu:	CUDA_SAFE_CALL(cudaMemset(dGridData.cell_indexes_start, 0xff, mUniformGrid->GetNumCells()  * sizeof(uint)));
+SimSnowSPH.cu:texture<uint, 1, cudaReadModeElementType> cell_indexes_start_tex;
+SimSnowSPH.cu:	CUDA_SAFE_CALL(cudaBindTexture(0, cell_indexes_start_tex, dGridData.cell_indexes_start, mUniformGrid->GetNumCells() * sizeof(uint)));
+SimSnowSPH.cu:	CUDA_SAFE_CALL(cudaUnbindTexture(cell_indexes_start_tex));
+SimSnowSPH.cu:	CUDA_SAFE_CALL(cudaMemset(dGridData.cell_indexes_start, 0xff, mUniformGrid->GetNumCells()  * sizeof(uint)));
+UniformGrid.cu:texture<uint, 1, cudaReadModeElementType> cell_indexes_start_tex;
