@@ -74,8 +74,11 @@ TARGET_LINK_LIBRARIES (${EXEC_CL}
     #$ENV{OPENCL_HOME}/../shared/lib/libshrutil_x86_64.a
     #$ENV{OPENCL_HOME}/common/lib/liboclUtil_x86_64.a
    ${ocllib}
+   $ENV{GRAPHICS_LIBS}/opencl_utilities/libcl_utilities_cpp.a
    ${GLUT_LIBRARIES}
    ${OPENGL_LIBRARIES}
    ${OPENCL_LIBRARIES}
    ${GLEW_LIBRARY}
 )
+
+ADD_SUBDIRECTORY(graphics_libs)

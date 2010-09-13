@@ -1,3 +1,6 @@
+#ifndef _UNIFORM_GRID_UTILS_CL_
+#define _UNIFORM_GRID_UTILS_CL_
+
 // TO BE INCLUDED FROM OTHER FILES. In OpenCL, I believe that all device code
 // must be in the same file as the kernel using it. 
 
@@ -146,5 +149,6 @@ struct GridParams
 	}
 
 //--------------------------------------------------------------
+
 
 #endif

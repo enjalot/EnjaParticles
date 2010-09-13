@@ -87,7 +87,7 @@ public:
 	//void profile();
 	void profile(cl_event event= (cl_event)0);
 	void printDeviceID() {
-		printf("deviceID: %d\n", (int) device_id);
+		printf("deviceID: %d\n", (long) device_id);
 	}
 	//void printKernel(const char* msg="") {
 		//printf("%s, kernel: %d\n", msg, (int) kernel);
