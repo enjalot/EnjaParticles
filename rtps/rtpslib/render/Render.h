@@ -9,6 +9,8 @@
     #include <GL/gl.h>
 #endif
 
+#include "../structs.h"
+
 namespace rtps{
 
 class Render
@@ -29,6 +31,8 @@ public:
 
     void render();
     void drawArrays();
+
+    void render_box(float3 min, float3 max);
 
     //void compileShaders();
 

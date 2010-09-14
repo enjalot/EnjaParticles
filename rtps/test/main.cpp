@@ -23,7 +23,9 @@
 int window_width = 800;
 int window_height = 600;
 int glutWindowHandle = 0;
-float translate_z = 250.f;
+float translate_x = -400.f;
+float translate_y = -300.f;
+float translate_z = 350.f;
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -137,7 +139,7 @@ void init_gl()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glRotatef(-90, 1.0, 0.0, 0.0);
-    glTranslatef(0.0, translate_z, 0);
+    glTranslatef(translate_x, translate_z, translate_y);
     //glRotatef(-90, 1.0, 0.0, 0.0);
 
     return;
@@ -165,7 +167,7 @@ void appRender()
     ps->update();
 
 	//glEnable(GL_DEPTH_TEST);
- 
+
     ps->render();
 
     //showFPS(enjas->getFPS(), enjas->getReport());
@@ -228,7 +230,7 @@ void appMotion(int x, int y)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glRotatef(-90, 1.0, 0.0, 0.0);
-    glTranslatef(0.0, translate_z, 0.0);
+    glTranslatef(translate_x, translate_z, translate_y);
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
     glutPostRedisplay();

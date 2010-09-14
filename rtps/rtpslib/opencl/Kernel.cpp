@@ -14,6 +14,7 @@ void Kernel::execute(int ndrange)
 {
     //TODO add error checking
     cli->err = cli->queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(ndrange), cl::NullRange, NULL, &cli->event);
+    cli->queue.finish();
 }
  
 }

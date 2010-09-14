@@ -18,6 +18,7 @@ __kernel void euler(__global float4* pos, __global float4* vel, __global float4*
 
     vel[i] = v;
     pos[i] = p;
+
 }
 );
 

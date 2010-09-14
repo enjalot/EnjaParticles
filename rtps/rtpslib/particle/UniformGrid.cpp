@@ -1,3 +1,55 @@
+#include <math.h>
+
 #include "UniformGrid.h"
 
+namespace rtps {
 
+UniformGrid::UniformGrid(float3 min, float3 max, float cell_size)
+{
+    this->min = min;
+    this->max = max;
+    size = float3(max.x - min.x,
+                  max.y - min.y,
+                  max.z - min.z);
+
+    res = float3(ceil(size.x / cell_size),
+                 ceil(size.y / cell_size),
+                 ceil(size.z / cell_size));
+
+    size = float3(res.x * cell_size,
+                  res.y * cell_size,
+                  res.z * cell_size);
+
+    delta = float3(res.x / size.x,
+                   res.y / size.y,
+                   res.z / size.z);
+
+}
+
+UniformGrid::~UniformGrid()
+{
+}
+
+void UniformGrid::make_cube(float4* position, float spacing, int num)
+{
+    float xmin = min.x/2.5f;
+    float xmax = max.x/2.0f;
+    float ymin = min.y;
+    float ymax = max.y;
+    float zmin = min.z/2.0f;
+    float zmax = max.z/1.5f;
+
+    int i=0;
+    //cube in corner
+    for (float y = ymin; y <= ymax; y+=spacing) {
+    for (float z = zmin; z <= zmax; z+=spacing) {
+    for (float x = xmin; x <= xmax; x+=spacing) {
+        if (i >= num) break;				
+        position[i] = float4(x,y,z,1.0f);
+        i++;
+    }}}
+
+}
+
+
+}

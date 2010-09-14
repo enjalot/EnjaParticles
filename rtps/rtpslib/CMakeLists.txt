@@ -40,11 +40,16 @@ set (rtpslib_SOURCES
     #${rtpslib_SOURCE_DIR}/opencl/Buffer.cpp
 
     ${rtpslib_SOURCE_DIR}/render/Render.cpp
+
+    ${rtpslib_SOURCE_DIR}/particle/UniformGrid.cpp
     
     ${rtpslib_SOURCE_DIR}/system/Simple.cpp
     
     ${rtpslib_SOURCE_DIR}/system/SPH.cpp
     ${rtpslib_SOURCE_DIR}/system/sph/Euler.cpp
+    ${rtpslib_SOURCE_DIR}/system/sph/Density.cpp
+    ${rtpslib_SOURCE_DIR}/system/sph/Pressure.cpp
+    ${rtpslib_SOURCE_DIR}/system/sph/Collision_wall.cpp
 
 
     #${rtpslib_SOURCE_DIR}/particle

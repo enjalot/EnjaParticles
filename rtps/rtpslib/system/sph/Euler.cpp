@@ -2,7 +2,7 @@
 
 namespace rtps {
 
-Kernel SPH::loadEuler()
+void SPH::loadEuler()
 {
     #include "euler.cl"
     //printf("%s\n", euler_program_source.c_str());
@@ -14,7 +14,6 @@ Kernel SPH::loadEuler()
     k_euler.setArg(2, cl_force.cl_buffer[0]);
     k_euler.setArg(3, ps->settings.dt); //time step
 
-    return k_euler;
 } 
 
 }

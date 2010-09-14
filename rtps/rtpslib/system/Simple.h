@@ -21,7 +21,6 @@ public:
 
     //the particle system framework
     RTPS *ps;
-    int num;
 
     Kernel k_euler;
 

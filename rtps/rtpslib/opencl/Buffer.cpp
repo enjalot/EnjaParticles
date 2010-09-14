@@ -31,6 +31,7 @@ template <class T>
 void Buffer<T>::acquire()
 {
     cli->err = cli->queue.enqueueAcquireGLObjects(&cl_buffer, NULL, &cli->event);
+    cli->queue.finish();
 }
 
 
@@ -38,6 +39,7 @@ template <class T>
 void Buffer<T>::release()
 {
     cli->err = cli->queue.enqueueReleaseGLObjects(&cl_buffer, NULL, &cli->event);
+    cli->queue.finish();
 }
 
 
@@ -46,6 +48,7 @@ void Buffer<T>::copyToDevice(const std::vector<T> &data)
 {
     //TODO clean up this memory/buffer issue (nasty pointer casting)
     cli->err = cli->queue.enqueueWriteBuffer(*((cl::Buffer*)&cl_buffer[0]), CL_TRUE, 0, data.size()*sizeof(T), &data[0], NULL, &cli->event);
+    cli->queue.finish();
 
 }
 
@@ -56,6 +59,7 @@ std::vector<T>* Buffer<T>::copyToHost(int num)
     //TODO clean up this memory/buffer issue
     std::vector<T> data = new std::vector<T>(num);
     cli->err = cli->queue.enqueueReadBuffer(*((cl::Buffer*)&cl_buffer[0]), CL_TRUE, 0, data.size()*sizeof(T), &data[0], 0, NULL, &cli->event);
+    cli->queue.finish();
     return data;
 
 }

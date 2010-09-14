@@ -8,9 +8,23 @@
 #include "../opencl/Kernel.h"
 #include "../opencl/Buffer.h"
 //#include "../util.h"
+#include "../particle/UniformGrid.h"
 
 
 namespace rtps {
+
+typedef struct SPHSettings
+{
+    float rest_density;
+    float simulation_scale;
+    float particle_mass;
+    float particle_rest_distance;
+    float smoothing_distance;
+    float boundary_distance;
+    float spacing;
+    float grid_cell_size;
+
+} SPHSettings;
 
 class SPH : public System
 {
@@ -19,11 +33,14 @@ public:
     ~SPH();
 
     void update();
+    int getNum();
+    UniformGrid getGrid();
 
+private:
     //the particle system framework
     RTPS *ps;
-    int num;
 
+    SPHSettings sph_settings;
 
     Kernel k_density, k_pressure, k_viscosity;
     Kernel k_collision_wall;
@@ -36,11 +53,11 @@ public:
     Buffer<float4> cl_velocity;
 
     //these are defined in sph/ folder next to the kernels
-    Kernel loadDensity();
-    Kernel loadPressure();
-    Kernel loadViscosity();
-    Kernel loadCollision_wall();
-    Kernel loadEuler();
+    void loadDensity();
+    void loadPressure();
+    void loadViscosity();
+    void loadCollision_wall();
+    void loadEuler();
 
 };
 

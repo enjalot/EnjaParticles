@@ -2,19 +2,16 @@
 
 namespace rtps {
 
-Kernel SPH::loadEuler()
+void SPH::loadDensity()
 {
-    #include "simple/euler.cl"
+    #include "density.cl"
     //printf("%s\n", euler_program_source.c_str());
-    k_euler = Kernel(ps->cli, euler_program_source, "euler");
+    k_density = Kernel(ps->cli, density_program_source, "density");
   
     //TODO: fix the way we are wrapping buffers
-    k_euler.setArg(0, cl_position.cl_buffer[0]);
-    k_euler.setArg(1, cl_velocity.cl_buffer[0]);
-    k_euler.setArg(2, cl_force.cl_buffer[0]);
-    k_euler.setArg(3, .01f); //time step (should be set from settings)
+    k_density.setArg(0, cl_position.cl_buffer[0]);
+    k_density.setArg(1, cl_density.cl_buffer[0]);
 
-    return k_euler;
 } 
 
 }

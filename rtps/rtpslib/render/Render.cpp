@@ -9,8 +9,8 @@
     //OpenCL stuff
 #endif
 
-
 #include "Render.h"
+
 
 namespace rtps{
 
@@ -78,6 +78,7 @@ void Render::drawArrays()
 
     //printf("draw arrays num: %d\n", num);
 
+    //printf("NUM %d\n", num);
     glDrawArrays(GL_POINTS, 0, num);
 
     //printf("disable stuff\n");
@@ -140,7 +141,7 @@ void Render::render()
     glPopAttrib();
     //glDisable(GL_POINT_SMOOTH);
     //glDisable(GL_BLEND);
-    glEnable(GL_LIGHTING);
+    //glEnable(GL_LIGHTING);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     //make sure rendering timing is accurate
@@ -149,6 +150,54 @@ void Render::render()
 
 }
 
+void Render::render_box(float3 min, float3 max)
+{
+	
+    glEnable(GL_DEPTH_TEST);
+    glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
+    //draw grid
+    glBegin(GL_LINES);
+    //1st face
+    glVertex3f(min.x, min.y, min.z);
+    glVertex3f(min.x, min.y, max.z);
+    
+    glVertex3f(min.x, max.y, min.z);
+    glVertex3f(min.x, max.y, max.z);
+
+    glVertex3f(min.x, min.y, min.z);
+    glVertex3f(min.x, max.y, min.z);
+ 
+    glVertex3f(min.x, min.y, max.z);
+    glVertex3f(min.x, max.y, max.z);
+    //2nd face
+    glVertex3f(max.x, min.y, min.z);
+    glVertex3f(max.x, min.y, max.z);
+    
+    glVertex3f(max.x, max.y, min.z);
+    glVertex3f(max.x, max.y, max.z);
+
+    glVertex3f(max.x, min.y, min.z);
+    glVertex3f(max.x, max.y, min.z);
+ 
+    glVertex3f(max.x, min.y, max.z);
+    glVertex3f(max.x, max.y, max.z);
+    //connections
+    glVertex3f(min.x, min.y, min.z);
+    glVertex3f(max.x, min.y, min.z);
+ 
+    glVertex3f(min.x, max.y, min.z);
+    glVertex3f(max.x, max.y, min.z);
+ 
+    glVertex3f(min.x, min.y, max.z);
+    glVertex3f(max.x, min.y, max.z);
+ 
+    glVertex3f(min.x, max.y, max.z);
+    glVertex3f(max.x, max.y, max.z);
+    
+    glEnd();
+
+
+}
 
 //----------------------------------------------------------------------
 /*

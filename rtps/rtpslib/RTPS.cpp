@@ -35,7 +35,7 @@ void RTPS::Init()
 
     //pass in the position and color vbo ids to the renderer
     //get the number from the system
-    renderer = new Render(system->pos_vbo, system->col_vbo, system->num);
+    renderer = new Render(system->getPosVBO(), system->getColVBO(), system->getNum());
 }
 
 void RTPS::update()
@@ -48,6 +48,11 @@ void RTPS::update()
 
 void RTPS::render()
 {
+
+    UniformGrid grid = system->getGrid();
+    //should check if grid exists
+    renderer->render_box(grid.getMin(), grid.getMax());
+
     renderer->render();
 }
 

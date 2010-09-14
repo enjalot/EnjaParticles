@@ -32,7 +32,7 @@ __kernel void collision_wall(__global float4* pos, __global float4* vel,  __glob
     float EPSILON = .00001f;
     
     //bottom wall
-    float diff = boundary_distance - (-100.0f - p.z);
+    float diff = boundary_distance - (0.0f - p.z);
     if (diff < EPSILON)
     {
         float4 normal = (float4)(0.0f, 0.0f, 1.0f, 0.0f);

@@ -18,10 +18,10 @@ Simple::Simple(RTPS *psfr, int n)
     std::vector<float4> velocities(num);
     
     
-    std::fill(positions.begin(), positions.end(),(float4) {0.0f, 0.0f, 0.0f, 1.0f});
-    std::fill(colors.begin(), colors.end(),(float4) {1.0f, 0.0f, 0.0f, 0.0f});
-    std::fill(forces.begin(), forces.end(),(float4) {0.0f, 0.0f, 1.0f, 0.0f});
-    std::fill(velocities.begin(), velocities.end(),(float4) {0.0f, 0.0f, -9.8f, 0.0f});
+    std::fill(positions.begin(), positions.end(), float4(0.0f, 0.0f, 0.0f, 1.0f));
+    std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));
+    std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 1.0f, 0.0f));
+    std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, -9.8f, 0.0f));
 
     
     managed = true;
