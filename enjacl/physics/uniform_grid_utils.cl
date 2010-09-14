@@ -206,13 +206,11 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 __kernel void K_SumStep1(
 				uint    numParticles,
 				uint	nb_vars,
-				__global float4* vars//,   // *** ERROR
-				#if 0
+				__global float4* vars,   // *** ERROR
 				__global float4* sorted_vars,
         		__global int*    cell_indexes_start,
         		__global int*    cell_indexes_end,
 				__constant struct GridParams* cGridParams
-				#endif
 				)
 {
     // particle index

@@ -5,73 +5,72 @@ using namespace std;
 #include <CL/cl_platform.h>
 #include <CL/cl.h>
 
+//----------------------------------------------------------------------
+char* EnjaParticles::getSourceString(const char* path_to_source_file)
+{
+	// Must find a way to only compile a single time. 
+	// Define all programs before starting the code? 
+
+	//printf("enter addProgramR\n");
+
+    FILE* fd =  fopen(path_to_source_file, "r");
+	if (fd == 0) {
+		printf("cannot open file: %s\n", path_to_source_file);
+	}
+// should not limit string size
+	int max_len = 300000;
+    char* source = new char [max_len];
+    int nb = fread(source, 1, max_len, fd);    
+
+	if (nb > (max_len-2)) { 
+        printf("cannot read program from %s\n", path_to_source_file);
+        printf("   buffer size too small\n");
+    }    
+	source[nb] = '\0';
+
+	return source;
+}
+//----------------------------------------------------------------------
 void EnjaParticles::neighbor_search()
 {
 	static cll_Program* prog = 0;
-	CL cl(true);
-	//cl.waitForKernels ToFinish();
-	printf("junk\n");
 
 	if (prog == 0) {
-		string path(CL_SOURCE_DIR);
-		//path = path + "/neighbor_search.cl";
-		path = path + "/uniform_grid_utils.cl";
-		printf("prog == 0\n");
-		cll_Program& progr = cl.addProgramR(path.c_str());
-		prog = &progr;
+		try {
+			string path(CL_SOURCE_DIR);
+			path = path + "/uniform_grid_utils.cl";
+			char* src = getSourceString(path.c_str());
+        	step1_program = loadProgram(src);
+        	step1_kernel = cl::Kernel(step1_program, "K_SumStep1", &err);
+		} catch(cl::Error er) {
+        	printf("ERROR(neighborSearch): %s(%s)\n", er.what(), oclErrorString(er.err()));
+		}
 	}
 
-	// SERIOUS PROBLEM with CL++ library. Cannot use with my library when setting
-	// cl_mem types. Hard to believe. 
+	cl::Kernel kern = step1_kernel;
+	printf("sizeof(kern) = %d\n", sizeof(kern));
 
-	cll_Kernel kern = prog->addKernel("K_SumStep1");
-
-    //cl::Kernel* ksumstep1;; 
-	//cl::Program* psumstep1
-	//ksumstep1 = cl::Kernel(psumstep1, "K_SumStep1", &err);
-
-	cl::Kernel kernel();
-	kernel.setKernel(kern.getKernel());
-	//kernel.setKernel();
-
-	ArrayOpenCL1D<cl_float4> ar(10,10,10);
-	//ArrayOpenCL1D<float>* ar = new ArrayOpenCL1D<float>(10,10,10);
 
 	int iarg = 0;
-	//kern.setArg(nb_el, iarg++);
-	//kern.setArg(nb_vars, iarg++);
 
-	printf("sizeof(int) = %d\n", sizeof(int));
-	printf("sizeof(int*) = %d\n", sizeof(int*));
-	printf("sizeof(cl_mem) = %d\n", sizeof(cl_mem));
-	//kern.setArg(&cl_vars_unsorted, iarg++); // CANNOT SET ARGUMENT
-	//kern.setArg(cl_vars_sorted(), iarg++);
-	//kern.setArg(cl_cell_indices_start(), iarg++);
-	//kern.setArg(cl_cell_indices_end(),   iarg++);
-	//kern.setArg(cl_GridParams(), iarg++);
+	kern.setArg(iarg++, nb_el);
+	kern.setArg(iarg++, nb_vars);
 
-	clSetKernelArg(kern.getKernel(), iarg++, sizeof(int), &nb_el);
-	clSetKernelArg(kern.getKernel(), iarg++, sizeof(int), &nb_vars);
-	// CREATES AN ERROR ON KERNEL EXECUTION
-	// 8 byte addresses, 4-byte ints (in 64 bits addressing mode)
-	cl_mem arm = ar.getDevicePtr();
-	//clSetKernelArg(kern.getKernel(), iarg++, sizeof(cl_mem), arm);
-	clSetKernelArg(kern.getKernel(), iarg++, sizeof(cl_mem), cl_vars_unsorted());
-	#if 0
-	clSetKernelArg(kern.getKernel(), iarg++, sizeof(cl_mem), cl_vars_sorted());
-	clSetKernelArg(kern.getKernel(), iarg++, sizeof(cl_mem), cl_cell_indices_start());
-	clSetKernelArg(kern.getKernel(), iarg++, sizeof(cl_mem), cl_cell_indices_end());
-	clSetKernelArg(kern.getKernel(), iarg++, sizeof(cl_mem), cl_GridParams());
-	#endif
-	
-	// How to wrap my kernel in cl++?
-    //err = pos_update_kernel.setArg(2, cl_velocities);   //velocities
+	kern.setArg(iarg++, cl_vars_unsorted);
+	kern.setArg(iarg++, cl_vars_sorted);
+	kern.setArg(iarg++, cl_cell_indices_start);
+	kern.setArg(iarg++, cl_cell_indices_end);
+	kern.setArg(iarg++, cl_GridParams);
+
 
 	size_t global = (size_t) nb_el;
-	size_t local = cl.getMaxWorkSize(kern.getKernel());
+	//size_t local = cl.getMaxWorkSize(kern.getKernel());
+	size_t local = cl.getMaxWorkSize(kern());
 	printf("local= %d, global= %d\n", local, global);
 
-	cl_event exec = kern.exec(1, &global, &local);
+    err = queue.enqueueNDRangeKernel(kern, cl::NullRange, cl::NDRange(nb_el), cl::NDRange(local), NULL, &event);
+
+	//cl_event exec = kern.exec(1, &global, &local);
 	cl.waitForKernelsToFinish();
 }
 

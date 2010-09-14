@@ -137,6 +137,9 @@ private:
 	std::vector<int> unsort_int;
 	GridParams gp;
 
+    cl::Program step1_program;
+    cl::Kernel step1_kernel;
+
 	void setupArrays();
 
 public:
@@ -163,6 +166,7 @@ public:
 	//void hash(std::vector<cl_float4> list, GridParams& gp);
 	void hash();
 
+	char* getSourceString(const char* path_to_source_file);
 	void neighbor_search(); // in neighbor_search.cpp via include
 
     int update();   //update the particle system

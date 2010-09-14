@@ -31,6 +31,7 @@ INCLUDE_DIRECTORIES(
   cuda_utitilities
   random
   opencl_utilities
+  //opencl++_utilities
 )
 
 ADD_SUBDIRECTORY(utilities)
@@ -38,6 +39,7 @@ ADD_SUBDIRECTORY(graphics_utils)
 #ADD_SUBDIRECTORY(cuda_utilities)
 ADD_SUBDIRECTORY(random)
 ADD_SUBDIRECTORY(opencl_utilities)
+#ADD_SUBDIRECTORY(opencl++_utilities)
 
 # examples require glew library, not installed on our systems.
 #ADD_SUBDIRECTORY(examples)
