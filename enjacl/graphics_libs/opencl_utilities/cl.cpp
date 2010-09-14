@@ -174,8 +174,8 @@ cll_Program& CL::addProgramR(const char* path_to_source_file)
 	if (fd == 0) {
 		printf("cannot open file: %s\n", path_to_source_file);
 	}
-// do not limit string size
-	int max_len = 100000;
+// should not limit string size
+	int max_len = 200000;
     char* source = new char [max_len];
     int nb = fread(source, 1, max_len, fd);    
 

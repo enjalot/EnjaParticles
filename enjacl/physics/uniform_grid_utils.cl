@@ -34,7 +34,7 @@
 //#define FETCH(a, t, i) (a + __mul24(i,sizeof(a)) + (void*)offsetof(a, t))
 #endif
 
-
+#if 0
 struct GridParams
 {
     float4          grid_size;
@@ -109,8 +109,12 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 
 	return (gz*grid_res.y + gy) * grid_res.x + gx; 
 }
-
+#endif
 	//--------------------------------------------------------------
+
+
+
+#if 0
 	// Iterate over particles found in the nearby cells (including cell of position_i)
 	//template<class O, class D>
 	//static __device__ void IterateParticlesInCell(
@@ -196,30 +200,20 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		//PostCalc(data, index_i);
 	}
 
+#endif
 	//----------------------------------------------------------------------
 //--------------------------------------------------------------
 __kernel void K_SumStep1(
 				uint    numParticles,
 				uint	nb_vars,
-				//SimpleSPHData    dParticleDataSorted,
-				__global float4* vars,
+				__global float4* vars//,   // *** ERROR
+				#if 0
 				__global float4* sorted_vars,
-
-				//__global float4* force,
-				//__global float4* pressure,
-				//__global float4* density,
-				//__global float4* position,
-
-				//Step1::Data
-				//__global float4* force_sorted,
-				//__global float4* pressure_sorted,
-				//__global float4* density_sorted,
-				//__global float4* position_sorted,
-
-				//GridData const   dGridData,
         		__global int*    cell_indexes_start,
         		__global int*    cell_indexes_end,
-				__constant struct GridParams* cGridParams)
+				__constant struct GridParams* cGridParams
+				#endif
+				)
 {
     // particle index
     //uint index = __umul24(blockIdx.x, blockDim.x) + threadIdx.x;
@@ -227,6 +221,7 @@ __kernel void K_SumStep1(
 	uint index = get_global_id(0);
     if (index >= numParticles) return;
 
+	#if 0
     //Step1::Data data;
     //data.dParticleDataSorted = dParticleDataSorted;
 
@@ -238,12 +233,15 @@ __kernel void K_SumStep1(
 
 	// assume position is 0th variable
     float4 position_i = FETCH_VAR(vars, index, 0);
+	#endif
 
     // Do calculations on particles in neighboring cells
 
     //IterateParticlesInNearbyCells(force_sorted, pressure_sorted, density_sorted, position_sorted, index, position_i, cell_indexes_start, cell_indexes_end, cGridParams);
 
+	#if 0
     IterateParticlesInNearbyCells(sorted_vars, index, position_i, cell_indexes_start, cell_indexes_end, cGridParams);
+	#endif
 
 }
 

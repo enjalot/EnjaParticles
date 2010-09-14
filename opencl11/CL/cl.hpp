@@ -2312,6 +2312,9 @@ public:
     inline Kernel(const Program& program, const char* name, cl_int* err = NULL);
 
     Kernel() { }
+	//Kernel(cl_kernel kern) { object_ = kern; } // GE
+	void setKernel(cl_kernel& kern) { object_ = kern; } // GE WHY ERROR?
+	//void setKernel() { } // GE
 
     Kernel(const Kernel& kernel) : detail::Wrapper<cl_type>(kernel) { }
 
