@@ -24,6 +24,7 @@
 #else
 //#define FETCH(a, t, i) a.t[i]
 #define FETCH(t, i) t[i]
+#define FETCH_VAR(t, i, ivar) t[i+ivar*numParticles]
 //#define FETCH_NOTEX(a, t, i) a.t[i]
 #define FETCH_NOTEX(t, i) t[i]
 //#define FETCH_FLOAT3(a,t,i) make_float3(FETCH(a,t,i))
@@ -98,7 +99,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		gz = gridPos.z;
 	}
 
-	//return  __mul24(__mul24(gz, (int) cGridParams.grid_res.y)+gy, (int) cGridParams.grid_res.x) + gx;
 
 	//We choose to simply traverse the grid cells along the x, y, and z axes, in that order. The inverse of
 	//this space filling curve is then simply:
@@ -115,11 +115,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 	//template<class O, class D>
 	//static __device__ void IterateParticlesInCell(
 	void IterateParticlesInCell(
-		//D 					&data, 
-		//int3 const		&cellPos,
-		//float3 const		&position_i, 
-		//GridData const	&dGridData,
-		//D 					data, 
 		__constant int4 	cellPos,
 		__constant uint 	index_i, 
 		__constant float4 	position_i, 
@@ -141,16 +136,11 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		// check cell is not empty
 		if (startIndex != 0xffffffff) 
 		{	   
-			//uint endIndex = FETCH_NOTEX(dGridData,cell_indexes_end,cellHash);
-			//volatile uint endIndex = FETCH(dGridData, cell_indexes_end, cellHash);
 			uint endIndex = FETCH(cell_indexes_end, cellHash);
 
 			// iterate over particles in this cell
 			for(uint index_j=startIndex; index_j < endIndex; index_j++) 
 			{			
-				// TO BE DELETED
-				//O::ForPossibleNeighbor(data, index_i, index_j, position_i);
-
 				// For now, nothing to loop over. ADD WHEN CODE WORKS. 
 				//ForPossibleNeighbor(data, index_i, index_j, position_i);
 				;
@@ -163,12 +153,12 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 	//template<class O, class D>
 	//static __device__ void IterateParticlesInNearbyCells(
 	void IterateParticlesInNearbyCells(
-		__global float4*     force_sorted,
-		__global float4*     pressure_sorted,
-		__global float4*     density_sorted,
-		__global float4*     position_sorted,
+		__global float4* vars_sorted,
+		//__global float4*     force_sorted,
+		//__global float4*     pressure_sorted,
+		//__global float4*     density_sorted,
+		//__global float4*     position_sorted,
 		//D 					data, 
-		//uint const		&index_i, 
 		__constant uint 	index_i, 
 		//float3 const		&position_i, 
 		__constant float4   position_i, 
@@ -178,14 +168,10 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		__constant struct GridParams* cGridParams)
 	{
 		// How to chose which PreCalc to use? 
-		// TO REMOVE
-		//O::PreCalc(data, index_i);
-
 		// TODO LATER
 		//PreCalc(data, index_i); // TODO
 
 		// get cell in grid for the given position
-		//volatile int3 cell = UniformGridUtils::calcGridCell(position_i, cGridParams.grid_min, cGridParams.grid_delta);
 		int4 cell = calcGridCell(position_i, cGridParams->grid_min, cGridParams->grid_delta);
 
 		// iterate through the 3^3 cells in and around the given position
@@ -193,7 +179,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		for(int z=cell.z-1; z<=cell.z+1; ++z) {
 			for(int y=cell.y-1; y<=cell.y+1; ++y) {
 				for(int x=cell.x-1; x<=cell.x+1; ++x) {
-					//IterateParticlesInCell<O,D>(data, make_int3(x,y,z), index_i, position_i, dGridData);
 					int4 ipos;
 					ipos.x = x;
 					ipos.y = y;
@@ -214,19 +199,22 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 	//----------------------------------------------------------------------
 //--------------------------------------------------------------
 __kernel void K_SumStep1(
-				uint             numParticles,
+				uint    numParticles,
+				uint	nb_vars,
 				//SimpleSPHData    dParticleDataSorted,
-				__global float4* force,
-				__global float4* pressure,
-				__global float4* density,
-				__global float4* position,
+				__global float4* vars,
+				__global float4* sorted_vars,
+
+				//__global float4* force,
+				//__global float4* pressure,
+				//__global float4* density,
+				//__global float4* position,
 
 				//Step1::Data
-				float* sum_density,
-				__global float4* force_sorted,
-				__global float4* pressure_sorted,
-				__global float4* density_sorted,
-				__global float4* position_sorted,
+				//__global float4* force_sorted,
+				//__global float4* pressure_sorted,
+				//__global float4* density_sorted,
+				//__global float4* position_sorted,
 
 				//GridData const   dGridData,
         		__global int*    cell_indexes_start,
@@ -240,26 +228,23 @@ __kernel void K_SumStep1(
     if (index >= numParticles) return;
 
     //Step1::Data data;
-
     //data.dParticleDataSorted = dParticleDataSorted;
-	force = force_sorted;
-	pressure = pressure_sorted;
-	density  = density_sorted;
-	position = position_sorted;
 
-    //float3 position_i = make_float3(FETCH(dParticleDataSorted, position, index));
-    //float4 position_i = FETCH(dParticleDataSorted, position, index);
-    float4 position_i = FETCH(position, index);
+	vars = sorted_vars;
+	//force = force_sorted;
+	//pressure = pressure_sorted;
+	//density  = density_sorted;
+	//position = position_sorted;
+
+	// assume position is 0th variable
+    float4 position_i = FETCH_VAR(vars, index, 0);
 
     // Do calculations on particles in neighboring cells
-//#ifdef SPHSIMLIB_USE_NEIGHBORLIST
-    //UniformGridUtils::IterateParticlesInNearbyCells<SPHNeighborCalc<Step1::Calc, Step1::Data>, Step1::Data>(data, index, position_i, dNeighborList);
-//#else
-    //UniformGridUtils::IterateParticlesInNearbyCells<SPHNeighborCalc<Step1::Calc, Step1::Data>, Step1::Data>(data, index, position_i, dGridData);
 
-    IterateParticlesInNearbyCells(force_sorted, pressure_sorted, density_sorted, position_sorted, index, position_i, cell_indexes_start, cell_indexes_end, cGridParams);
+    //IterateParticlesInNearbyCells(force_sorted, pressure_sorted, density_sorted, position_sorted, index, position_i, cell_indexes_start, cell_indexes_end, cGridParams);
 
-//#endif
+    IterateParticlesInNearbyCells(sorted_vars, index, position_i, cell_indexes_start, cell_indexes_end, cGridParams);
+
 }
 
 //--------------------------------------------------------------

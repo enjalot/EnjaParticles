@@ -193,7 +193,7 @@ void EnjaParticles::setupArrays()
 	cell_indices_end.resize(nb_el);
 	sort_indices.resize(nb_el);
 	sort_hashes.resize(nb_el);
-    printf("about to start writing buffers");
+    printf("about to start writing buffers\n");
 
 	int nb_floats = nb_vars*nb_el;
 	cl_float4 f;

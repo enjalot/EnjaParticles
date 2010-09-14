@@ -35,7 +35,7 @@ int cll_Kernel::setArg(T arg, int which_arg)
 	int err = clSetKernelArg(kernel, which_arg, sizeof(T), &arg); 
 
     if (err != CL_SUCCESS) {
-        printf("Error: CL::setKernelArg,  Failed to set kernel arguments! %d\n", err);
+        printf("Error: CL::cll_Kernel::setKernelArg,  Failed to set kernel arguments! %d\n", err);
 		printf("sizeof(argument)= %d\n", sizeof(T));
         exit(1);
     }   

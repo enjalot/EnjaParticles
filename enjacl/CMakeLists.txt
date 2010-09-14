@@ -76,11 +76,15 @@ TARGET_LINK_LIBRARIES (${EXEC_CL}
     #$ENV{OPENCL_HOME}/../shared/lib/libshrutil_x86_64.a
     #$ENV{OPENCL_HOME}/common/lib/liboclUtil_x86_64.a
    ${ocllib}
-   ${CMAKE_CURRENT_BINARY_DIR}/graphics_libs/opencl_utilities/libcl_utilities_cpp.a
+   utilities
+   cl_utilities_cpp
+   #${CMAKE_CURRENT_BINARY_DIR}/graphics_libs/opencl_utilities/libcl_utilities_cpp.a
+   #${CMAKE_CURRENT_BINARY_DIR}/graphics_libs/utilities/libutilities.a
+   #${CMAKE_CURRENT_BINARY_DIR}/graphics_libs/opencl_utilities/libcl_utilities_cpp.a
    ${GLUT_LIBRARIES}
    ${OPENGL_LIBRARIES}
    ${OPENCL_LIBRARIES}
    ${GLEW_LIBRARY}
 )
 
-ADD_SUBDIRECTORY(graphics_libs)
+ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/graphics_libs)
