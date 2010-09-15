@@ -23,6 +23,7 @@ FIND_PACKAGE (OPENCL)
 FIND_PACKAGE (GLEW)
 
 INCLUDE_DIRECTORIES( 
+	physics/
 	#oclRadixSort/inc
 	oclRadixSortKeysValues/inc
 	${GLUT_INCLUDE_DIR}

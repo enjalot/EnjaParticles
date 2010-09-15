@@ -28,3 +28,16 @@ Projection of v onto the plane:
  New velocity = (vp, -vn) = v - (v.n)n - v.n n
                           = v - 2n v.n
 ----------------------------------------------------------------------
+9/14/2010
+- Given sort and datastructures (start_cell_indices, end_cell_indices), and hash, what experiments to perform? 
+1) Given collection of particles, compute collision forces of particles within a radius R
+   - assume forces given by Leonnard Jones force: -(24*eps/a)*[2*(a/r)^{13}-(a/r)^{7}]
+     = -(24*eps/a)*(a/r)^7 * [ 2*(a/r)^6 - 1. ]
+	 r << a ==> F = -(24*eps)/a  2 * (a/r)^{13}
+	 r >> a ==> F = +(24*eps)/a (a/r)^7
+
+2) for each particle, search neighbors (I would rather not store them since there can be infinite number of neighbors). 
+Compute the forces on each particle (sum of all neighboring particles)o
+
+3) figure out how to restrict number of particles per cell to 8. 
+----------------------------------------------------------------------

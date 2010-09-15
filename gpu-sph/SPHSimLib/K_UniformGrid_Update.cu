@@ -4,6 +4,7 @@
 #ifndef __K_UniformGrid_Update_cu__
 #define __K_UniformGrid_Update_cu__
 
+//------------------------------------------
 // read/write from the unsorted data structure to the sorted one
 template <class T, class D> 
 __global__ void K_Grid_UpdateSorted (

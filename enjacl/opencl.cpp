@@ -187,6 +187,9 @@ void EnjaParticles::setupArrays()
 		unsort_int.push_back(nb_el-i);
 	}
 
+	// position POS=0
+	// velocity VEL=1
+	// Force    FOR=2
 	vars_unsorted.resize(nb_el*nb_vars);
 	vars_sorted.resize(nb_el*nb_vars);
 	cell_indices_start.resize(nb_el);
@@ -825,7 +828,9 @@ cl::Program EnjaParticles::loadProgram(std::string kernel_source)
     try
     {
         //err = program.build(devices, "-cl-nv-verbose");
-        err = program.build(devices);
+		string path(CL_SOURCE_DIR);
+		string options ="-I/" + path;
+        err = program.build(devices, options.c_str()); //GE: include path
     }
     catch (cl::Error er) {
 		printf("loadProgram::program.build\n");

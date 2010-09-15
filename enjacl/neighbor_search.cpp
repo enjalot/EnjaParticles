@@ -65,12 +65,16 @@ void EnjaParticles::neighbor_search()
 
 	size_t global = (size_t) nb_el;
 	//size_t local = cl.getMaxWorkSize(kern.getKernel());
-	size_t local = cl.getMaxWorkSize(kern());
-	printf("local= %d, global= %d\n", local, global);
+	//size_t local = cl.getMaxWorkSize(kern());
+	//printf("local= %d, global= %d\n", local, global);
+	int local = 128;
 
     err = queue.enqueueNDRangeKernel(kern, cl::NullRange, cl::NDRange(nb_el), cl::NDRange(local), NULL, &event);
 
+	queue.finish();
+	printf("after end of neighbor_search\n");
+
 	//cl_event exec = kern.exec(1, &global, &local);
-	cl.waitForKernelsToFinish();
+	//cl.waitForKernelsToFinish();
 }
 
