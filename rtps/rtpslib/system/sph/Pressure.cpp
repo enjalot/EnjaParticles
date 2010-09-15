@@ -12,6 +12,7 @@ void SPH::loadPressure()
     k_pressure.setArg(0, cl_position.cl_buffer[0]);
     k_pressure.setArg(1, cl_density.cl_buffer[0]);
     k_pressure.setArg(2, cl_force.cl_buffer[0]);
+    k_pressure.setArg(3, cl_params.cl_buffer[0]);
 
 } 
 

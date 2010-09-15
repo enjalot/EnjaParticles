@@ -7,6 +7,7 @@ Kernel::Kernel(CL *cli, std::string name, std::string source)
     this->cli = cli;
     this->name = name;
     this->source = source;
+    //TODO need to save the program
     kernel = cli->loadKernel(name, source);
 }
 

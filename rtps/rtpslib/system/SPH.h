@@ -13,6 +13,7 @@
 
 namespace rtps {
 
+//keep track of the fluid settings
 typedef struct SPHSettings
 {
     float rest_density;
@@ -26,6 +27,26 @@ typedef struct SPHSettings
 
 } SPHSettings;
 
+//pass parameters to OpenCL routines
+typedef struct SPHParams
+{
+    float3 grid_min;
+    float grid_min_padding;     //float3s take up a float4 of space in OpenCL 1.0 and 1.1
+    float3 grid_max;
+    float grid_max_padding;
+    float mass;
+    float rest_distance;
+    float smoothing_distance;
+    float simulation_scale;
+    float boundary_stiffness;
+    float boundary_dampening;
+    float boundary_distance;
+    float EPSILON;
+    float PI;       //delicious
+    float K;        //speed of sound
+ 
+} SPHParams __attribute__((aligned(16)));
+
 class SPH : public System
 {
 public:
@@ -33,18 +54,19 @@ public:
     ~SPH();
 
     void update();
-    int getNum();
-    UniformGrid getGrid();
 
 private:
     //the particle system framework
     RTPS *ps;
 
     SPHSettings sph_settings;
+    SPHParams params;
 
     Kernel k_density, k_pressure, k_viscosity;
     Kernel k_collision_wall;
     Kernel k_euler;
+
+    Buffer<SPHParams> cl_params;
 
     Buffer<float4> cl_position;
     Buffer<float4> cl_color;

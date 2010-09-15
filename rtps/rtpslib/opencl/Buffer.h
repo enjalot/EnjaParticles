@@ -42,7 +42,7 @@ public:
     void release();
 
     void copyToDevice(const std::vector<T> &data);
-    std::vector<T>* copyToHost(int num);
+    std::vector<T> copyToHost(int num);
 
     void set(T val);
     void set(const std::vector<T> &data);

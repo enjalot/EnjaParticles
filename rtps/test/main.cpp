@@ -139,7 +139,8 @@ void init_gl()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glRotatef(-90, 1.0, 0.0, 0.0);
-    glTranslatef(translate_x, translate_z, translate_y);
+    //glTranslatef(translate_x, translate_z, translate_y);
+    glTranslatef(0, translate_z, 0);
     //glRotatef(-90, 1.0, 0.0, 0.0);
 
     return;
@@ -230,7 +231,8 @@ void appMotion(int x, int y)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glRotatef(-90, 1.0, 0.0, 0.0);
-    glTranslatef(translate_x, translate_z, translate_y);
+    //glTranslatef(translate_x, translate_z, translate_y);
+    glTranslatef(0, translate_z, 0);
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
     glutPostRedisplay();

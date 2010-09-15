@@ -31,7 +31,7 @@ public:
 
     CL *cli;
     //we need to build a program to have a kernel
-    //cl::Program program;
+    cl::Program program;
 
     //the actual OpenCL kernel object
     cl::Kernel kernel;

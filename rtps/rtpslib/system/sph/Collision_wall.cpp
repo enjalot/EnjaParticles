@@ -12,6 +12,7 @@ void SPH::loadCollision_wall()
     k_collision_wall.setArg(0, cl_position.cl_buffer[0]);
     k_collision_wall.setArg(1, cl_velocity.cl_buffer[0]);
     k_collision_wall.setArg(2, cl_force.cl_buffer[0]);
+    k_collision_wall.setArg(3, cl_params.cl_buffer[0]);
 
 } 
 

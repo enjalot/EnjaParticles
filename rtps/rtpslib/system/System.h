@@ -19,10 +19,10 @@ public:
     virtual void update() = 0;
     
     
-    UniformGrid getGrid(){ return grid; };
-    int getNum(){ return num; };
-    GLuint getPosVBO() { return pos_vbo; };
-    GLuint getColVBO() { return col_vbo; };
+    virtual UniformGrid getGrid(){ return grid; };
+    virtual int getNum(){ return num; };
+    virtual GLuint getPosVBO() { return pos_vbo; };
+    virtual GLuint getColVBO() { return col_vbo; };
     
 
 protected:
