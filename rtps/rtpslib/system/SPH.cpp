@@ -40,7 +40,8 @@ SPH::SPH(RTPS *psfr, int n)
     float particle_radius = sph_settings.spacing;
     printf("particle radius: %f\n", particle_radius);
 
-    grid = UniformGrid(float3(0,0,0), float3(1024, 1024, 1024), sph_settings.smoothing_distance / sph_settings.simulation_scale);
+    //grid = UniformGrid(float3(0,0,0), float3(1024, 1024, 1024), sph_settings.smoothing_distance / sph_settings.simulation_scale);
+    grid = UniformGrid(float3(-512,0,-512), float3(512, 1024, 512), sph_settings.smoothing_distance / sph_settings.simulation_scale);
     grid.make_cube(&positions[0], sph_settings.spacing, num);
 
 
