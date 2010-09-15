@@ -26,6 +26,11 @@ float magnitude(float4 vec)
 {
     return sqrt(vec.x*vec.x + vec.y*vec.y + vec.z*vec.z);
 }
+float dist_squared(float4 vec)
+{
+    return vec.x*vec.x + vec.y*vec.y + vec.z*vec.z;
+}
+
 
 __kernel void density(__global float4* pos, __global float* density, __constant struct SPHParams* params)
 {
@@ -34,7 +39,9 @@ __kernel void density(__global float4* pos, __global float* density, __constant 
 
     float h = params->smoothing_distance;
     //stuff from Tim's code (need to match #s to papers)
-    float alpha = 315.f/208.f/params->PI/h/h/h;
+    //float alpha = 315.f/208.f/params->PI/h/h/h;
+    float h9 = h*h*h * h*h*h * h*h*h;
+    float alpha = 315.f/64.f/params->PI/h9;
 
     float4 p = pos[i] * params->simulation_scale;
 
@@ -48,15 +55,16 @@ __kernel void density(__global float4* pos, __global float* density, __constant 
         float rlen = magnitude(r);
         if(rlen < h)
         {
-            //float q = 1.0f - rlen / smoothing_length;
-            float r2 = rlen*rlen;
+            float r2 = dist_squared(r);
             float re2 = h*h;
-            if(r2/re2 <= 4.f)
-            {
-                float R = sqrt(r2/re2);
-                float Wij = alpha*(2.f/3.f - 9.f*R*R/8.f + 19.f*R*R*R/24.f - 5.f*R*R*R*R/32.f);
+            //if(r2/re2 <= 4.f)
+            //{
+                //float R = sqrt(r2/re2);
+                //float Wij = alpha*(2.f/3.f - 9.f*R*R/8.f + 19.f*R*R*R/24.f - 5.f*R*R*R*R/32.f);
+                float hr2 = (h*h - r2);
+                float Wij = alpha * hr2*hr2*hr2;
                 density[i] += params->mass * Wij;
-            }
+            //}
         }
     }
 

@@ -25,7 +25,12 @@ float magnitude(float4 vec)
 {
     return sqrt(vec.x*vec.x + vec.y*vec.y + vec.z*vec.z);
 }
-        
+float dist_squared(float4 vec)
+{
+    return vec.x*vec.x + vec.y*vec.y + vec.z*vec.z;
+}
+
+       
 __kernel void pressure(__global float4* pos, __global float* density, __global float4* force, __constant struct SPHParams* params)
 {
     unsigned int i = get_global_id(0);
@@ -38,7 +43,9 @@ __kernel void pressure(__global float4* pos, __global float* density, __global f
     float h = params->smoothing_distance;
 
     //stuff from Tim's code (need to match #s to papers)
-    float alpha = 315.f/208.f/params->PI/h/h/h;
+    //float alpha = 315.f/208.f/params->PI/h/h/h;
+    float h6 = h*h*h * h*h*h;
+    float alpha = -45.f/params->PI/h6;
 
 
     //super slow way, we need to use grid + sort method to get nearest neighbors
@@ -53,10 +60,12 @@ __kernel void pressure(__global float4* pos, __global float* density, __global f
         {
             float r2 = rlen*rlen;
             float re2 = h*h;
-            if(r2/re2 <= 4.f)
-            {
-                float R = sqrt(r2/re2);
-                float Wij = alpha*(-2.25f + 2.375f*R - .625f*R*R);
+            //if(r2/re2 <= 4.f)
+            //{
+                //float R = sqrt(r2/re2);
+                //float Wij = alpha*(-2.25f + 2.375f*R - .625f*R*R);
+                float hr2 = (h - rlen);
+                float Wij = alpha * hr2*hr2;
                 //from tim's code
                 /*
                 float Pi = 1.013E5*(pow(density[i]/1000.0f, 7.0f) - 1.0f);
@@ -68,7 +77,7 @@ __kernel void pressure(__global float4* pos, __global float* density, __global f
                 float Pj = params->K*(density[j] - 1000.0f); //rest density
                 float kern = params->mass * Wij * (Pi + Pj) / (2.0f * density[j]);
                 f += kern * r;
-            }
+            //}
 
         }
     }

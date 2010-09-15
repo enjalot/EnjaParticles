@@ -66,7 +66,7 @@ typedef struct SPHParams
     params.rest_distance = sph_settings.particle_rest_distance;
     params.smoothing_distance = sph_settings.smoothing_distance;
     params.simulation_scale = sph_settings.simulation_scale;
-    params.boundary_stiffness = 20000.0f;
+    params.boundary_stiffness = 10000.0f;
     params.boundary_dampening = 256.0f;
     params.boundary_distance = sph_settings.particle_rest_distance * .5f;
     params.EPSILON = .00001f;
@@ -177,6 +177,7 @@ void SPH::update()
         k_euler.execute(num);
     }
 
+    /*
     std::vector<float4> ftest = cl_force.copyToHost(100);
     for(int i = 0; i < 100; i++)
     {
@@ -184,6 +185,7 @@ void SPH::update()
             printf("force: %f %f %f  \n", ftest[i].x, ftest[i].y, ftest[i].z);
     }
     printf("execute!\n");
+    */
 
 
     cl_position.release();

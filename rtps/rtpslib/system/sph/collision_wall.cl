@@ -23,9 +23,6 @@ typedef struct SPHParams
 //from Krog '10
 float4 calculateRepulsionForce(float4 normal, float4 vel, float boundary_stiffness, float boundary_dampening, float boundary_distance)
 {
-    //TODO
-    //right now these are the default values for SimpleSPH in Krog's SPHSimLib
-    //to be replaced with a parameter struct passed in
     vel.w = 0.0f;
     float4 repulsion_force = (boundary_stiffness * boundary_distance - boundary_dampening * dot(normal, vel))*normal;
     return repulsion_force;
@@ -52,14 +49,47 @@ __kernel void collision_wall(__global float4* pos, __global float4* vel,  __glob
     float EPSILON = .00001f;
 
     //bottom wall
-    float diff = params->boundary_distance - (p.z - params->grid_min.y) * params->simulation_scale;
-    //float diff = boundary_distance - (p.z - grid_min.y) * simulation_scale;
+    float diff = params->boundary_distance - (p.z - params->grid_min.z) * params->simulation_scale;
     if (diff > params->EPSILON)
     {
         float4 normal = (float4)(0.0f, 0.0f, 1.0f, 0.0f);
         r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, params->boundary_distance);
         //r_f += calculateRepulsionForce(normal, v, boundary_stiffness, boundary_dampening, boundary_distance);
     }
+
+    //Y walls
+    diff = params->boundary_distance - (p.y - params->grid_min.y) * params->simulation_scale;
+    if (diff > params->EPSILON)
+    {
+        float4 normal = (float4)(0.0f, 1.0f, 0.0f, 0.0f);
+        r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, params->boundary_distance);
+    }
+    diff = params->boundary_distance - (params->grid_max.y - p.y) * params->simulation_scale;
+    if (diff > params->EPSILON)
+    {
+        float4 normal = (float4)(0.0f, -1.0f, 0.0f, 0.0f);
+        r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, params->boundary_distance);
+    }
+
+    //X walls
+    diff = params->boundary_distance - (p.x - params->grid_min.x) * params->simulation_scale;
+    if (diff > params->EPSILON)
+    {
+        float4 normal = (float4)(1.0f, 0.0f, 0.0f, 0.0f);
+        r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, params->boundary_distance);
+    }
+    diff = params->boundary_distance - (params->grid_max.x - p.x) * params->simulation_scale;
+    if (diff > params->EPSILON)
+    {
+        float4 normal = (float4)(-1.0f, 0.0f, 0.0f, 0.0f);
+        r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, params->boundary_distance);
+    }
+
+
+
+
+
+
     force[i] += r_f;
     //TODO add more walls
 

@@ -131,7 +131,7 @@ void Render::render()
 		// draws circles instead of squares
         glEnable(GL_POINT_SMOOTH); 
         //TODO make the point size a setting
-        glPointSize(1.0f);
+        glPointSize(5.0f);
 
         drawArrays();
     //}

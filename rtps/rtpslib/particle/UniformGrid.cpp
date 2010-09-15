@@ -33,11 +33,11 @@ UniformGrid::~UniformGrid()
 void UniformGrid::make_cube(float4* position, float spacing, int num)
 {
     float xmin = min.x/2.5f;
-    float xmax = max.x/2.0f;
+    float xmax = max.x/4.0f;
     float ymin = min.y;
     float ymax = max.y;
     float zmin = min.z/2.0f;
-    float zmax = max.z/1.5f;
+    float zmax = max.z/4.5f;
 
     int i=0;
     //cube in corner
