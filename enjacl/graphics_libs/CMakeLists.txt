@@ -38,7 +38,7 @@ ADD_SUBDIRECTORY(utilities)
 ADD_SUBDIRECTORY(graphics_utils)
 #ADD_SUBDIRECTORY(cuda_utilities)
 ADD_SUBDIRECTORY(random)
-ADD_SUBDIRECTORY(opencl_utilities)
+#ADD_SUBDIRECTORY(opencl_utilities)
 #ADD_SUBDIRECTORY(opencl++_utilities)
 
 # examples require glew library, not installed on our systems.
@@ -55,5 +55,5 @@ ADD_SUBDIRECTORY(opencl_utilities)
 	endif (SWAN_CUDA OR SWAN_OPENCL)
 #endif (NOT ${CMAKE_SOURCE_DIR} MATCHES ${CMAKE_CURRENT_SOURCE_DIR})
 
-GET_DIRECTORY_PROPERTY(inc_examples_opencl DIRECTORY opencl_utilities INCLUDE_DIRECTORIES)
-message("inc_examples_opencl(opencl_utilities): ${inc_examples_opencl}")
+#GET_DIRECTORY_PROPERTY(inc_examples_opencl DIRECTORY opencl_utilities INCLUDE_DIRECTORIES)
+#message("inc_examples_opencl(opencl_utilities): ${inc_examples_opencl}")

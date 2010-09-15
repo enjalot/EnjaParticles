@@ -7,7 +7,7 @@
 #include <vector>
 #include <stdio.h>
 
-#include "cl.h"
+//#include "cl.h"
 #include <CL/cl.hpp>
 
 #include "system.h"

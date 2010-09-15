@@ -12,6 +12,8 @@ message("${CMAKE_MODULE_PATH}\n")
 # appears in RadixSort.cl
 IF(APPLE)
 	ADD_DEFINITIONS(-DMAC)
+ELSE(APPLE)
+   ADD_DEFINITIONS(-DLINUX)
 ENDIF()
 ADD_DEFINITIONS(-DCL_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/physics")
 ADD_DEFINITIONS(-DCL_SORT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/oclRadixSortKeysValues")
@@ -77,7 +79,7 @@ TARGET_LINK_LIBRARIES (${EXEC_CL}
     #$ENV{OPENCL_HOME}/common/lib/liboclUtil_x86_64.a
    ${ocllib}
    utilities
-   cl_utilities_cpp
+   #cl_utilities_cpp
    #${CMAKE_CURRENT_BINARY_DIR}/graphics_libs/opencl_utilities/libcl_utilities_cpp.a
    #${CMAKE_CURRENT_BINARY_DIR}/graphics_libs/utilities/libutilities.a
    #${CMAKE_CURRENT_BINARY_DIR}/graphics_libs/opencl_utilities/libcl_utilities_cpp.a

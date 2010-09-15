@@ -1,5 +1,5 @@
 
-#include <array_opencl_1d.h>
+//#include <array_opencl_1d.h>
 using namespace std;
 
 #include <CL/cl_platform.h>
@@ -33,7 +33,7 @@ char* EnjaParticles::getSourceString(const char* path_to_source_file)
 //----------------------------------------------------------------------
 void EnjaParticles::neighbor_search()
 {
-	static cll_Program* prog = 0;
+	static int prog = 0;
 
 	if (prog == 0) {
 		try {
@@ -65,12 +65,16 @@ void EnjaParticles::neighbor_search()
 
 	size_t global = (size_t) nb_el;
 	//size_t local = cl.getMaxWorkSize(kern.getKernel());
-	size_t local = cl.getMaxWorkSize(kern());
+	//size_t local = cl.getMaxWorkSize(kern());
+    //cl_int getWorkGroupInfo(kern, device_id, CL_KERNEL_WORK_GROUP_SIZE, 
+        //const Device& device, cl_kernel_work_group_info name, T* param) const
+	size_t local = 64;
 	printf("local= %d, global= %d\n", local, global);
 
     err = queue.enqueueNDRangeKernel(kern, cl::NullRange, cl::NDRange(nb_el), cl::NDRange(local), NULL, &event);
 
 	//cl_event exec = kern.exec(1, &global, &local);
-	cl.waitForKernelsToFinish();
+	queue.finish();
+	//cl.waitForKernelsToFinish();
 }
 

@@ -21,7 +21,7 @@
 #endif
 
 // GE opencl library
-#include <cl.h>
+//#include <cl.h>
 
 
 
