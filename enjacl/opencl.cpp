@@ -133,14 +133,16 @@ int EnjaParticles::update()
 #endif
 
 #if 1
-    printf("about to hash\n");
-	#if 1
 	hash();
     printf("done with hash\n");
 	sort(cl_sort_hashes, cl_sort_indices); // sort hash values in place. Should also reorder cl_sort_indices
+    printf("done with sort\n");
 	buildDataStructures();
+    printf("done with buildDataStructures\n");
 
+	#if 1
 	neighbor_search();
+	printf("done with neighbor search\n");
 	#endif
 	//computeStep1();
 
@@ -157,6 +159,7 @@ void EnjaParticles::setupArrays()
 	int nb_bytes;
 
 	nb_el = (2 << 13);  // number of particles
+	//printf("nb_el= %d\n", nb_el); exit(0);
 	nb_vars = 4;        // number of cl_float4 variables to reorder
 	printf("nb_el= %d\n", nb_el); 
 
@@ -318,6 +321,8 @@ void EnjaParticles::buildDataStructures()
 
 	int nb_bytes;
 
+#if 0
+	// DATA SHOULD STAY ON THE GPU
 	try {
 		nb_bytes = nb_el*nb_vars*sizeof(cl_float4);
     	err = queue.enqueueReadBuffer(cl_vars_unsorted,  CL_TRUE, 0, nb_bytes, &vars_unsorted[0],  NULL, &event);
@@ -330,6 +335,7 @@ void EnjaParticles::buildDataStructures()
         printf("1 ERROR(buildDatastructures): %s(%s)\n", er.what(), oclErrorString(er.err()));
 		exit(0);
 	}
+#endif
 
 
 	#if 0
@@ -360,15 +366,18 @@ void EnjaParticles::buildDataStructures()
 
 	#endif
 
-	printf("return from BuildDataStructures\n");
+	//printf("return from BuildDataStructures\n");
 }
 //----------------------------------------------------------------------
 void EnjaParticles::hash()
 // Generate hash list: stored in cl_sort_hashes
 {
 	try {
+		#if 0
+		// data should already be on the GPU
     	err = queue.enqueueReadBuffer(cl_cells,  CL_TRUE, 0, nb_el*sizeof(cl_float4), &cells[0],  NULL, &event);
 		queue.finish();
+		#endif
 	} catch(cl::Error er) {
         printf("0 ERROR(hash): %s(%s)\n", er.what(), oclErrorString(er.err()));
 		exit(0);
@@ -387,7 +396,7 @@ void EnjaParticles::hash()
 	int err;
 
 
-    printf("setting up hash kernel\n");
+//    printf("setting up hash kernel\n");
 	try {
     	err = hash_kernel.setArg(0, nb_el);
     	err = hash_kernel.setArg(1, cl_cells);
@@ -401,7 +410,7 @@ void EnjaParticles::hash()
 
     queue.finish();
 
-    printf("executing hash kernel\n");
+    //printf("executing hash kernel\n");
     err = queue.enqueueNDRangeKernel(hash_kernel, cl::NullRange, cl::NDRange(nb_el), cl::NDRange(ctaSize), NULL, &event);
     queue.finish();
 
@@ -431,7 +440,7 @@ void EnjaParticles::hash()
 #endif
 #undef DEBUG
 
-        printf("about to read from buffers to see what they have\n");
+        //printf("about to read from buffers to see what they have\n");
 	#if 0
 		// SORT IN PLACE
         err = queue.enqueueReadBuffer(cl_sort_hashes, CL_TRUE, 0, nb_el*sizeof(cl_int), &sort_hashes[0], NULL, &event);
@@ -448,11 +457,13 @@ void EnjaParticles::hash()
 // Leave data on the gpu
 void EnjaParticles::sort(cl::Buffer cl_hashes, cl::Buffer cl_indices)
 {
+	static bool first_time = true;
+	static RadixSort* radixSort;
 // Sorting
 
     try {
 		// SORT IN PLACE
-		#if 0
+	#if 0
 		// cl_hashes and cl_indices are correct
         err = queue.enqueueReadBuffer(cl_hashes, CL_TRUE, 0, nb_el*sizeof(cl_int), &unsort_int[0], NULL, &event);
         err = queue.enqueueReadBuffer(cl_indices, CL_TRUE, 0, nb_el*sizeof(cl_int), &sort_int[0], NULL, &event);
@@ -465,13 +476,18 @@ void EnjaParticles::sort(cl::Buffer cl_hashes, cl::Buffer cl_indices)
 		printf("nb_el= %d\n", nb_el);
 		printf("size: %d\n", sizeof(cl_int));
 		exit(0);
-		#endif
+	#endif
 
 
 		// if ctaSize is too large, sorting is not possible. Number of elements has to lie between some MIN 
 		// and MAX array size, computed in oclRadixSort/src/RadixSort.cpp
 		int ctaSize = 64; // work group size
-	    RadixSort* radixSort = new RadixSort(context(), queue(), nb_el, "../oclRadixSort/", ctaSize, false);		    
+
+		// SHOULD ONLY BE DONE ONCE
+		if (first_time) {
+	    	radixSort = new RadixSort(context(), queue(), nb_el, "../oclRadixSort/", ctaSize, false);		    
+			first_time = false;
+		}
 		unsigned int keybits = 32;
 
 // **** BEFORE SORT
@@ -640,7 +656,7 @@ void EnjaParticles::popCorn()
     err = pos_update_kernel.setArg(1, cl_vert_gen);     //position generators
     err = pos_update_kernel.setArg(2, cl_velocities);   //velocities
 #endif    
-    printf("done with popCorn()\n");
+    //printf("done with popCorn()\n");
 
 }
 //----------------------------------------------------------------------

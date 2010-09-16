@@ -33,26 +33,29 @@ char* EnjaParticles::getSourceString(const char* path_to_source_file)
 //----------------------------------------------------------------------
 void EnjaParticles::neighbor_search()
 {
-	static cll_Program* prog = 0;
+	//static cll_Program* prog = 0;
+	static bool first_time = true;
 
 	printf("enter neighbor_search\n");
 
-	if (prog == 0) {
+	if (first_time) {
 		try {
 			string path(CL_SOURCE_DIR);
 			path = path + "/uniform_grid_utils.cl";
 			char* src = getSourceString(path.c_str());
         	step1_program = loadProgram(src);
-			printf("LOADED\n");
+			//printf("LOADED\n");
         	step1_kernel = cl::Kernel(step1_program, "K_SumStep1", &err);
-			printf("KERNEL\n");
+			//printf("KERNEL\n");
+			first_time = false;
 		} catch(cl::Error er) {
         	printf("ERROR(neighborSearch): %s(%s)\n", er.what(), oclErrorString(er.err()));
+			exit(1);
 		}
 	}
 
 	cl::Kernel kern = step1_kernel;
-	printf("sizeof(kern) = %d\n", sizeof(kern));
+	//printf("sizeof(kern) = %d\n", sizeof(kern));
 
 
 	int iarg = 0;
@@ -74,9 +77,9 @@ void EnjaParticles::neighbor_search()
 	int local = 128;
 
     err = queue.enqueueNDRangeKernel(kern, cl::NullRange, cl::NDRange(nb_el), cl::NDRange(local), NULL, &event);
-
 	queue.finish();
-	printf("after end of neighbor_search\n");
+
+	//printf("after end of neighbor_search\n");
 
 	//cl_event exec = kern.exec(1, &global, &local);
 	//cl.waitForKernelsToFinish();
