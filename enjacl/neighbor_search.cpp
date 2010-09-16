@@ -36,6 +36,8 @@ void EnjaParticles::neighbor_search()
 	//static cll_Program* prog = 0;
 	static bool first_time = true;
 
+	ts_cl[TI_NEIGH]->start();
+
 	printf("enter neighbor_search\n");
 
 	if (first_time) {
@@ -83,5 +85,7 @@ void EnjaParticles::neighbor_search()
 
 	//cl_event exec = kern.exec(1, &global, &local);
 	//cl.waitForKernelsToFinish();
+
+	ts_cl[TI_NEIGH]->end();
 }
 

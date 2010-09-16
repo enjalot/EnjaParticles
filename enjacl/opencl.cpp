@@ -150,6 +150,11 @@ int EnjaParticles::update()
 
 	//exit(0);
 
+	if (count == 300) {
+		GE::Time::printAll();
+		exit(0);
+	}
+
 #endif
 }
 //----------------------------------------------------------------------
@@ -292,6 +297,8 @@ void EnjaParticles::buildDataStructures()
 	// Stored in vars_sorted[nb_vars*nb_el]. Ordering is consistent 
 	// with vars_sorted[nb_vars][nb_el]
 
+	ts_cl[TI_BUILD]->start();
+
 	if (!first_time) {
 		first_time = true;
 	}
@@ -367,11 +374,14 @@ void EnjaParticles::buildDataStructures()
 	#endif
 
 	//printf("return from BuildDataStructures\n");
+
+	ts_cl[TI_BUILD]->end();
 }
 //----------------------------------------------------------------------
 void EnjaParticles::hash()
 // Generate hash list: stored in cl_sort_hashes
 {
+	ts_cl[TI_HASH]->start();
 	try {
 		#if 0
 		// data should already be on the GPU
@@ -450,6 +460,8 @@ void EnjaParticles::hash()
 			printf("xx index: %d, sort_indices: %d, sort_hashes: %d\n", i, sort_indices[i], sort_hashes[i]);
 		}
 	#endif
+
+	ts_cl[TI_HASH]->end();
 }
 //----------------------------------------------------------------------
 // Input: a list of integers in random order
@@ -460,6 +472,8 @@ void EnjaParticles::sort(cl::Buffer cl_hashes, cl::Buffer cl_indices)
 	static bool first_time = true;
 	static RadixSort* radixSort;
 // Sorting
+
+	ts_cl[TI_SORT]->start();
 
     try {
 		// SORT IN PLACE
@@ -541,6 +555,8 @@ void EnjaParticles::sort(cl::Buffer cl_hashes, cl::Buffer cl_indices)
 		printf("%d: sorted hash: %d, sorted index; %d\n", i, shash[i], sindex[i]);
 	}
 	#endif
+
+	ts_cl[TI_SORT]->end();
 }
 //----------------------------------------------------------------------
 void EnjaParticles::popCorn()
@@ -666,6 +682,11 @@ int EnjaParticles::init_cl()
 
     ts_cl[0] = new GE::Time("cl update routine", 5);
     ts_cl[1] = new GE::Time("execute kernels", 5);
+
+	ts_cl[TI_HASH] = new GE::Time("hash", 5);
+	ts_cl[TI_SORT] = new GE::Time("sort", 5);
+	ts_cl[TI_BUILD] = new GE::Time("build", 5);
+	ts_cl[TI_NEIGH] = new GE::Time("neighbors", 5);
 
     popCorn();
 
