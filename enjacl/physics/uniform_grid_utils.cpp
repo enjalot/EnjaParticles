@@ -1,35 +1,29 @@
 #ifndef _UNIFORM_GRID_UTILS_CL_
 #define _UNIFORM_GRID_UTILS_CL_
 
-// TO BE INCLUDED FROM OTHER FILES. In OpenCL, I believe that all device code
+
+/* TO BE INCLUDED FROM OTHER FILES. In OpenCL, I believe that all device code
 // must be in the same file as the kernel using it. 
+*/
 
-//----------------------------------------------------------------------
+/*----------------------------------------------------------------------*/
 
+#if 0
 // Template parameters
 //#define D Step1::Data
+#endif
+
 #define D float
 #define O SPHNeighborCalc<Step1::Calc, Step1::Data>
 
 #undef USE_TEX
 
 #include "cl_macros.h"
+#include "cl_structures.h"
+#include "neighbors.cl"
 
-#if 1
-struct GridParams
-{
-    float4          grid_size;
-    float4          grid_min;
-    float4          grid_max;
 
-    // number of cells in each dimension/side of grid
-    float4          grid_res;
-    float4          grid_delta;
-};
-
-#endif
-
-	//--------------------------------------------------------------
+/*--------------------------------------------------------------*/
 int4 calcGridCell(float4 p, float4 grid_min, float4 grid_delta)
 {
 	// subtract grid_min (cell position) and multiply by delta
@@ -50,7 +44,7 @@ int4 calcGridCell(float4 p, float4 grid_min, float4 grid_delta)
 	return ii;
 }
 
-	//--------------------------------------------------------------
+/*--------------------------------------------------------------*/
 uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 {
 	// each variable on single line or else STRINGIFY DOES NOT WORK
@@ -63,10 +57,12 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		int gsy = (int)floor(grid_res.y);
 		int gsz = (int)floor(grid_res.z);
 
+#if 0
 //          //power of 2 wrapping..
 //          gx = gridPos.x & gsx-1;
 //          gy = gridPos.y & gsy-1;
 //          gz = gridPos.z & gsz-1;
+#endif
 
 		// wrap grid... but since we can not assume size is power of 2 we can't use binary AND/& :/
 		gx = gridPos.x % gsx;
@@ -82,19 +78,21 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 	}
 
 
+	#if 0
 	//We choose to simply traverse the grid cells along the x, y, and z axes, in that order. The inverse of
 	//this space filling curve is then simply:
 	// index = x + y*width + z*width*height
 	//This means that we process the grid structure in "depth slice" order, and
 	//each such slice is processed in row-column order.
+	#endif
 
 	return (gz*grid_res.y + gy) * grid_res.x + gx; 
 }
 
-	//--------------------------------------------------------------
-	// Iterate over particles found in the nearby cells (including cell of position_i)
+	/*--------------------------------------------------------------*/
+	/* Iterate over particles found in the nearby cells (including cell of position_i)
 	//template<class O, class D>
-	//static __device__ void IterateParticlesInCell(
+	*/
 	void IterateParticlesInCell(
 		__constant int4 	cellPos,
 		__constant uint 	index_i, 
@@ -104,37 +102,42 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		__constant struct GridParams* cGridParams
     )
 	{
+		#if 0
 		// get hash (of position) of current cell
 		//volatile uint cellHash = UniformGridUtils::calcGridHash<true>(cellPos, cGridParams.grid_res);
 		// wrap edges (false)
+		#endif
 		uint cellHash = calcGridHash(cellPos, cGridParams->grid_res, false);
 
-		// get start/end positions for this cell/bucket
+		/* get start/end positions for this cell/bucket */
 		uint startIndex = FETCH(cell_indexes_start,cellHash);
 
 #if 1
-		// check cell is not empty
-		// WHERE IS 0xffffffff SET?  NO IDEA ************************
+		/* check cell is not empty
+		 * WHERE IS 0xffffffff SET?  NO IDEA ************************
+		 */
 		if (startIndex != 0xffffffff) 
 		{	   
 			uint endIndex = FETCH(cell_indexes_end, cellHash);
 
-			// iterate over particles in this cell
+			/* iterate over particles in this cell */
 			for(uint index_j=startIndex; index_j < endIndex; index_j++) 
 			{			
+				#if 0
 				// For now, nothing to loop over. ADD WHEN CODE WORKS. 
 				// Is there a neighbor?
 				//ForPossibleNeighbor(data, index_i, index_j, position_i);
 				;
+				#endif
 			}
 		}
 #endif
 	}
 
-	//--------------------------------------------------------------
-	// Iterate over particles found in the nearby cells (including cell of position_i)
-	//template<class O, class D>
-	//static __device__ void IterateParticlesInNearbyCells(
+	/*--------------------------------------------------------------*/
+	/* Iterate over particles found in the nearby cells (including cell of position_i) 
+	 *template<class O, class D>
+	 */
 	void IterateParticlesInNearbyCells(
 		__global float4* vars_sorted,
 		__constant uint 	index_i, 
@@ -167,11 +170,13 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 			}
 		}
 
+		#if 0
 		// TO REMOVE
 		//O::PostCalc(data, index_i);
 
 		// TO DO LATER
 		//PostCalc(data, index_i);
+		#endif
 
 	#endif
 	}
@@ -188,23 +193,25 @@ __kernel void K_SumStep1(
 				__constant struct GridParams* cGridParams
 				)
 {
+	#if 0
     // particle index
     //uint index = __umul24(blockIdx.x, blockDim.x) + threadIdx.x;
+	#endif
 
 	uint index = get_global_id(0);
     if (index >= numParticles) return;
 
-	#if 1
+	#if 0
     //Step1::Data data;
     //data.dParticleDataSorted = dParticleDataSorted;
 
 	//This is done as part of the template approach since the Data can then be used as a template object 
 	//in Cuda
+	#endif
 	vars = sorted_vars;
 
-	// assume position is 0th variable
+	/* assume position is 0th variable */
     float4 position_i = FETCH_VAR(vars, index, 0);
-	#endif
 
     // Do calculations on particles in neighboring cells
 
@@ -215,6 +222,6 @@ __kernel void K_SumStep1(
 
 }
 
-//--------------------------------------------------------------
+/*-------------------------------------------------------------- */
 #endif
 

@@ -41,7 +41,10 @@ void EnjaParticles::neighbor_search()
 			path = path + "/uniform_grid_utils.cl";
 			char* src = getSourceString(path.c_str());
         	step1_program = loadProgram(src);
+			printf("LOADED\n");
         	step1_kernel = cl::Kernel(step1_program, "K_SumStep1", &err);
+			printf("KERNEL\n");
+			exit(1);
 		} catch(cl::Error er) {
         	printf("ERROR(neighborSearch): %s(%s)\n", er.what(), oclErrorString(er.err()));
 		}

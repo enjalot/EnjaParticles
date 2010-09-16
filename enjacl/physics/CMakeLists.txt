@@ -1,0 +1,15 @@
+
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+project(enjacl)
+
+
+# List of files to precompile
+SET(FILES uniform_grid_utils)  # ignore cpp extension
+
+FOREACH(loop_var ${FILES})
+    message("var : ${loop_var}")
+	EXECUTE_PROCESS(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/compile_to_cl.x ${loop_var}
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+	)
+ENDFOREACH(loop_var)
+

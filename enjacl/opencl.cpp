@@ -153,7 +153,7 @@ void EnjaParticles::setupArrays()
 	int nb_bytes;
 
 	nb_el = (2 << 13);  // number of particles
-	nb_vars = 3;        // number of cl_float4 variables to reorder
+	nb_vars = 4;        // number of cl_float4 variables to reorder
 	printf("nb_el= %d\n", nb_el); 
 
 	cells.resize(nb_el);

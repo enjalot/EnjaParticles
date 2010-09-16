@@ -146,7 +146,7 @@ public:
 	int getNbVars() { return nb_vars; }
 	int getNbEl() { return nb_el; }
 
-	enum {POS=0, VEL, FOR};
+	enum {DENS=0, POS, VEL, ACC, FOR};
 // END
 
 public:
