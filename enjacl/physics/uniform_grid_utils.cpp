@@ -8,10 +8,8 @@
 
 /*----------------------------------------------------------------------*/
 
-#if 0
 // Template parameters
 //#define D Step1::Data
-#endif
 
 #define D float
 #define O SPHNeighborCalc<Step1::Calc, Step1::Data>
@@ -77,13 +75,11 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 	}
 
 
-	#if 0
 	//We choose to simply traverse the grid cells along the x, y, and z axes, in that order. The inverse of
 	//this space filling curve is then simply:
 	// index = x + y*width + z*width*height
 	//This means that we process the grid structure in "depth slice" order, and
 	//each such slice is processed in row-column order.
-	#endif
 
 	return (gz*grid_res.y + gy) * grid_res.x + gx; 
 }
@@ -111,7 +107,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		/* get start/end positions for this cell/bucket */
 		uint startIndex = FETCH(cell_indexes_start,cellHash);
 
-#if 1
 		/* check cell is not empty
 		 * WHERE IS 0xffffffff SET?  NO IDEA ************************
 		 */
@@ -124,10 +119,11 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 			{			
 				// For now, nothing to loop over. ADD WHEN CODE WORKS. 
 				// Is there a neighbor?
+#if 1
 				ForPossibleNeighbor(var_sorted, numParticles, index_i, index_j, position_i);
+#endif
 			}
 		}
-#endif
 	}
 
 	/*--------------------------------------------------------------*/
@@ -150,7 +146,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		// get cell in grid for the given position
 		int4 cell = calcGridCell(position_i, cGridParams->grid_min, cGridParams->grid_delta);
 
-	#if 1
 
 		// iterate through the 3^3 cells in and around the given position
 		// can't unroll these loops, they are not innermost 
@@ -162,20 +157,19 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 					ipos.y = y;
 					ipos.z = z;
 					ipos.w = 1;
+	#if 1
 					IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, cGridParams);
+	#endif
 				}
 			}
 		}
 
-		#if 0
 		// TO REMOVE
 		//O::PostCalc(data, index_i);
 
 		// TO DO LATER
 		//PostCalc(data, index_i);
-		#endif
 
-	#endif
 	}
 
 	//----------------------------------------------------------------------
@@ -210,7 +204,6 @@ __kernel void K_SumStep1(
 	#if 1
     IterateParticlesInNearbyCells(sorted_vars, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, cGridParams);
 	#endif
-
 }
 
 /*-------------------------------------------------------------- */

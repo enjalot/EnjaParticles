@@ -36,7 +36,10 @@
 //----------------------------------------------------------------------
 int EnjaParticles::update()
 {
-	printf("inside update\n");
+	static int count = 0;
+	printf("**** inside update, count= %d\n", count);
+	count++;
+
     //m_system->update();
 #if 0
 
@@ -130,19 +133,20 @@ int EnjaParticles::update()
 #endif
 
 #if 1
-	setupArrays();
     printf("about to hash\n");
+	#if 1
 	hash();
     printf("done with hash\n");
 	sort(cl_sort_hashes, cl_sort_indices); // sort hash values in place. Should also reorder cl_sort_indices
 	buildDataStructures();
 
 	neighbor_search();
+	#endif
 	//computeStep1();
 
 	// setup neighbors
 
-	exit(0);
+	//exit(0);
 
 #endif
 }
@@ -356,7 +360,7 @@ void EnjaParticles::buildDataStructures()
 
 	#endif
 
-	printf("exit BuildDataStructures\n");
+	printf("return from BuildDataStructures\n");
 }
 //----------------------------------------------------------------------
 void EnjaParticles::hash()
@@ -371,9 +375,11 @@ void EnjaParticles::hash()
 	}
 
 //  Have to make sure that the data associated with the pointers is on the GPU
+	#if 0
 	for (int i=0; i < 100; i++) {
 		printf("%d, %f, %f, %f, %f\n", i, cells[i].x, cells[i].y, cells[i].z, cells[i].w);
 	}
+	#endif
 
 	std::vector<cl_float4>& list = cells;
 
@@ -469,7 +475,7 @@ void EnjaParticles::sort(cl::Buffer cl_hashes, cl::Buffer cl_indices)
 		unsigned int keybits = 32;
 
 // **** BEFORE SORT
-#if 1
+#if 0
 	//printf("**** BEFORE SORT ******\n");
     err = queue.enqueueReadBuffer(cl_indices, CL_TRUE, 0, nb_el*sizeof(int), &sort_indices[0], NULL, &event);
     err = queue.enqueueReadBuffer(cl_hashes, CL_TRUE, 0, nb_el*sizeof(int), &unsort_int[0], NULL, &event);
@@ -506,7 +512,7 @@ void EnjaParticles::sort(cl::Buffer cl_hashes, cl::Buffer cl_indices)
 		exit(0);
     }
 
-	#if 1
+	#if 0
 	printf("\n**** AFTER SORT ******\n");
 	queue.finish();
     std::vector<int> shash(nb_el);

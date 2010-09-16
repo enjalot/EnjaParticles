@@ -140,6 +140,7 @@ private:
     cl::Program step1_program;
     cl::Kernel step1_kernel;
 
+public:
 	void setupArrays();
 
 public:

@@ -35,6 +35,8 @@ void EnjaParticles::neighbor_search()
 {
 	static cll_Program* prog = 0;
 
+	printf("enter neighbor_search\n");
+
 	if (prog == 0) {
 		try {
 			string path(CL_SOURCE_DIR);
@@ -44,7 +46,6 @@ void EnjaParticles::neighbor_search()
 			printf("LOADED\n");
         	step1_kernel = cl::Kernel(step1_program, "K_SumStep1", &err);
 			printf("KERNEL\n");
-			exit(1);
 		} catch(cl::Error er) {
         	printf("ERROR(neighborSearch): %s(%s)\n", er.what(), oclErrorString(er.err()));
 		}
@@ -56,7 +57,6 @@ void EnjaParticles::neighbor_search()
 
 	int iarg = 0;
 
-	exit(0);
 	kern.setArg(iarg++, nb_el);
 	kern.setArg(iarg++, nb_vars);
 	kern.setArg(iarg++, cl_vars_unsorted);

@@ -18,10 +18,6 @@ void ForNeighbor(__global float4*  var_sorted,
 //--------------------------------------------------
 
 
-
-
-
-#endif
 void ForPossibleNeighbor(__global float4* var_sorted, 
 						__constant uint numParticles, 
 						__constant uint index_i, 
@@ -44,13 +40,17 @@ void ForPossibleNeighbor(__global float4* var_sorted,
 		// |r|
 		float rlen = sqrtf(rlen_sq);
 
+		rlen = sqrt(rlen_sq);
+
 		// is this particle within cutoff?
 		float smoothing_length = 1.0;
-		/*if (rlen <= cFluidParams.smoothing_length)  */
-		if (rlen <= smoothing_length) {
+		if (rlen <= smoothing_length){
+#if 1
 			ForNeighbor(var_sorted, index_i, index_j, r, rlen, rlen_sq);
+#endif
 		}
 	}
 }
 
 //--------------------------------------------------
+#endif
