@@ -11,12 +11,11 @@ char* EnjaParticles::getSourceString(const char* path_to_source_file)
 	// Must find a way to only compile a single time. 
 	// Define all programs before starting the code? 
 
-	//printf("enter addProgramR\n");
-
     FILE* fd =  fopen(path_to_source_file, "r");
 	if (fd == 0) {
 		printf("cannot open file: %s\n", path_to_source_file);
 	}
+
 // should not limit string size
 	int max_len = 300000;
     char* source = new char [max_len];
@@ -59,7 +58,6 @@ void EnjaParticles::neighbor_search()
 	cl::Kernel kern = step1_kernel;
 	//printf("sizeof(kern) = %d\n", sizeof(kern));
 
-
 	int iarg = 0;
 
 	kern.setArg(iarg++, nb_el);
@@ -69,7 +67,6 @@ void EnjaParticles::neighbor_search()
 	kern.setArg(iarg++, cl_cell_indices_start);
 	kern.setArg(iarg++, cl_cell_indices_end);
 	kern.setArg(iarg++, cl_GridParams);
-
 
 
 	size_t global = (size_t) nb_el;

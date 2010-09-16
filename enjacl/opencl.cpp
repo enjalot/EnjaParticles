@@ -149,8 +149,9 @@ int EnjaParticles::update()
 	// setup neighbors
 
 	//exit(0);
+	printf("******************* enter hash, count = %d\n", count);
 
-	if (count == 300) {
+	if (count == 200) {
 		printf("nb particles (nb_el): %d\n", nb_el);
 		GE::Time::printAll();
 		exit(0);
@@ -183,7 +184,8 @@ void EnjaParticles::setupArrays()
 	gp.grid_size = float4(10.,10.,10.,1.);
 	gp.grid_min = float4(0.,0.,0.,1.);
 	gp.grid_max = float4(10.,10.,10.,1.);
-	gp.grid_res = float4(10.,10.,10.,1.);
+	float resol = 30.;
+	gp.grid_res = float4(resol,resol,resol,1.);
 	gp.grid_delta.x = gp.grid_size.x / gp.grid_res.x;
 	gp.grid_delta.y = gp.grid_size.y / gp.grid_res.y;
 	gp.grid_delta.z = gp.grid_size.z / gp.grid_res.z;
@@ -371,7 +373,6 @@ void EnjaParticles::buildDataStructures()
 		for (int i=0; i < grid_size; i++) {
 			printf("[%d]: %d, %d\n", i, cell_indices_start[i], cell_indices_end[i]);
 		}
-
 	#endif
 
 	//printf("return from BuildDataStructures\n");
@@ -383,6 +384,7 @@ void EnjaParticles::buildDataStructures()
 void EnjaParticles::hash()
 // Generate hash list: stored in cl_sort_hashes
 {
+
 	ts_cl[TI_HASH]->start();
 	try {
 		#if 0
@@ -401,6 +403,7 @@ void EnjaParticles::hash()
 		printf("%d, %f, %f, %f, %f\n", i, cells[i].x, cells[i].y, cells[i].z, cells[i].w);
 	}
 	#endif
+
 
 	std::vector<cl_float4>& list = cells;
 
@@ -687,6 +690,8 @@ int EnjaParticles::init_cl()
     ts_cl[0] = new GE::Time("cl update routine", 5);
     ts_cl[1] = new GE::Time("execute kernels", 5);
 
+	// 2nd argument: only consider every 5 timer events
+	// 3rd argument: printing frqeuency
 	ts_cl[TI_HASH] = new GE::Time("hash", 5);
 	ts_cl[TI_SORT] = new GE::Time("sort", 5);
 	ts_cl[TI_BUILD] = new GE::Time("build", 5);

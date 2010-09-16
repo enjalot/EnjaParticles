@@ -28,6 +28,7 @@ Time::Time(const char* name_, int offset, int nbCalls)
 		exit(0);
 	}
 	count = 0;
+	ocount = 0;
 	unit = "ms";
 	t = 0.0;
 	t1 = 0;
