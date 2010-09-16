@@ -3,6 +3,9 @@
 #ifndef _CL_MACROS_H_
 #define _CL_MACROS_H_
 
+
+
+
 // copied from SPHSimLib code
 #ifdef USE_TEX
 //#define FETCH(a, t, i) tex1Dfetch(t##_tex, i)
@@ -23,5 +26,18 @@
 #define FETCH_MATRIX3_NOTEX(a,t,i) a.t[i]
 //#define FETCH(a, t, i) (a + __mul24(i,sizeof(a)) + (void*)offsetof(a, t))
 #endif
+
+// 
+// Offsets into var_sorted array
+
+//enum {DENS=0, POS, VEL, ACC, FOR};
+#define DENS 0 
+#define POS 1
+#define VEL 2
+#define ACC 3
+#define FOR 3
+
+
+
 
 #endif

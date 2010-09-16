@@ -4,7 +4,10 @@ project(enjacl)
 
 
 # List of files to precompile
-SET(FILES uniform_grid_utils)  # ignore cpp extension
+SET(FILES 
+   uniform_grid_utils
+   neighbors
+)  # ignore cpp extension
 
 # Only executes when I do "cmake" 
 # I'd like it to execute when I do a make

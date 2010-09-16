@@ -20,7 +20,8 @@
 
 #include "cl_macros.h"
 #include "cl_structures.h"
-#include "neighbors.cl"
+#include "neighbors.cpp"
+
 
 
 /*--------------------------------------------------------------*/
@@ -57,12 +58,10 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		int gsy = (int)floor(grid_res.y);
 		int gsz = (int)floor(grid_res.z);
 
-#if 0
 //          //power of 2 wrapping..
 //          gx = gridPos.x & gsx-1;
 //          gy = gridPos.y & gsy-1;
 //          gz = gridPos.z & gsz-1;
-#endif
 
 		// wrap grid... but since we can not assume size is power of 2 we can't use binary AND/& :/
 		gx = gridPos.x % gsx;
@@ -94,6 +93,8 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 	//template<class O, class D>
 	*/
 	void IterateParticlesInCell(
+		__global float4*    var_sorted,
+		__constant uint 	numParticles, 
 		__constant int4 	cellPos,
 		__constant uint 	index_i, 
 		__constant float4 	position_i, 
@@ -102,11 +103,9 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		__constant struct GridParams* cGridParams
     )
 	{
-		#if 0
 		// get hash (of position) of current cell
 		//volatile uint cellHash = UniformGridUtils::calcGridHash<true>(cellPos, cGridParams.grid_res);
 		// wrap edges (false)
-		#endif
 		uint cellHash = calcGridHash(cellPos, cGridParams->grid_res, false);
 
 		/* get start/end positions for this cell/bucket */
@@ -123,12 +122,9 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 			/* iterate over particles in this cell */
 			for(uint index_j=startIndex; index_j < endIndex; index_j++) 
 			{			
-				#if 0
 				// For now, nothing to loop over. ADD WHEN CODE WORKS. 
 				// Is there a neighbor?
-				//ForPossibleNeighbor(data, index_i, index_j, position_i);
-				;
-				#endif
+				ForPossibleNeighbor(var_sorted, numParticles, index_i, index_j, position_i);
 			}
 		}
 #endif
@@ -140,6 +136,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 	 */
 	void IterateParticlesInNearbyCells(
 		__global float4* vars_sorted,
+		uint			numParticles,
 		__constant uint 	index_i, 
 		__constant float4   position_i, 
 		__global int* 		cell_indices_start,
@@ -165,7 +162,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 					ipos.y = y;
 					ipos.z = z;
 					ipos.w = 1;
-					IterateParticlesInCell(ipos, index_i, position_i, cell_indices_start, cell_indices_end, cGridParams);
+					IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, cGridParams);
 				}
 			}
 		}
@@ -193,31 +190,25 @@ __kernel void K_SumStep1(
 				__constant struct GridParams* cGridParams
 				)
 {
-	#if 0
     // particle index
-    //uint index = __umul24(blockIdx.x, blockDim.x) + threadIdx.x;
-	#endif
-
 	uint index = get_global_id(0);
     if (index >= numParticles) return;
 
-	#if 0
     //Step1::Data data;
     //data.dParticleDataSorted = dParticleDataSorted;
 
 	//This is done as part of the template approach since the Data can then be used as a template object 
 	//in Cuda
-	#endif
-	vars = sorted_vars;
+	vars = sorted_vars; // not needed
 
 	/* assume position is 0th variable */
-    float4 position_i = FETCH_VAR(vars, index, 0);
+    float4 position_i = FETCH_VAR(vars, index, POS);
 
     // Do calculations on particles in neighboring cells
 
 
 	#if 1
-    IterateParticlesInNearbyCells(sorted_vars, index, position_i, cell_indexes_start, cell_indexes_end, cGridParams);
+    IterateParticlesInNearbyCells(sorted_vars, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, cGridParams);
 	#endif
 
 }
