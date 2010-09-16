@@ -151,6 +151,7 @@ int EnjaParticles::update()
 	//exit(0);
 
 	if (count == 300) {
+		printf("nb particles (nb_el): %d\n", nb_el);
 		GE::Time::printAll();
 		exit(0);
 	}
@@ -163,8 +164,8 @@ void EnjaParticles::setupArrays()
 	// only for my test routines: sort, hash, datastructures
 	int nb_bytes;
 
-	nb_el = (2 << 13);  // number of particles
-	//printf("nb_el= %d\n", nb_el); exit(0);
+	nb_el = (2 << 15);  // number of particles
+	printf("nb_el= %d\n", nb_el); //exit(0);
 	nb_vars = 4;        // number of cl_float4 variables to reorder
 	printf("nb_el= %d\n", nb_el); 
 
