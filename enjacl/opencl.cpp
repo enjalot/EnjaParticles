@@ -164,7 +164,7 @@ void EnjaParticles::setupArrays()
 	// only for my test routines: sort, hash, datastructures
 	int nb_bytes;
 
-	nb_el = (2 << 17);  // number of particles
+	nb_el = (2 << 15);  // number of particles
 	printf("nb_el= %d\n", nb_el); //exit(0);
 	nb_vars = 4;        // number of cl_float4 variables to reorder
 	printf("nb_el= %d\n", nb_el); 
@@ -376,6 +376,7 @@ void EnjaParticles::buildDataStructures()
 
 	//printf("return from BuildDataStructures\n");
 
+    queue.finish();
 	ts_cl[TI_BUILD]->end();
 }
 //----------------------------------------------------------------------
@@ -462,6 +463,7 @@ void EnjaParticles::hash()
 		}
 	#endif
 
+    queue.finish();
 	ts_cl[TI_HASH]->end();
 }
 //----------------------------------------------------------------------
@@ -557,6 +559,7 @@ void EnjaParticles::sort(cl::Buffer cl_hashes, cl::Buffer cl_indices)
 	}
 	#endif
 
+    queue.finish();
 	ts_cl[TI_SORT]->end();
 }
 //----------------------------------------------------------------------

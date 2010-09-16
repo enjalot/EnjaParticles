@@ -86,6 +86,7 @@ void EnjaParticles::neighbor_search()
 	//cl_event exec = kern.exec(1, &global, &local);
 	//cl.waitForKernelsToFinish();
 
+    queue.finish();
 	ts_cl[TI_NEIGH]->end();
 }
 

@@ -41,3 +41,19 @@ Compute the forces on each particle (sum of all neighboring particles)o
 
 3) figure out how to restrict number of particles per cell to 8. 
 ----------------------------------------------------------------------
+9/16/2010
+256k particles
+********* printAll
+hash: tot (ms): 58.665, avg: 1.1733, (count=50)
+sort: tot (ms): 1107.73, avg: 22.1547, (count=50)
+build: tot (ms): 539.638, avg: 10.7928, (count=50)
+neighbors: tot (ms): 5173.49, avg: 103.47, (count=50)
+Total: 135 ms -> 6 fps
+
+65k particles
+hash: tot (ms): 82.762, avg: 1.65524, (count=50)
+sort: tot (ms): 379.977, avg: 7.59954, (count=50)
+build: tot (ms): 77.693, avg: 1.55386, (count=50)
+neighbors: tot (ms): 390.026, avg: 7.80052, (count=50)
+Total: 20ms -> 50fps
+----------------------------------------------------------------------
