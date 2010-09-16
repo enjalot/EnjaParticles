@@ -140,11 +140,14 @@ private:
     cl::Program step1_program;
     cl::Kernel step1_kernel;
 
+public:
 	void setupArrays();
 
 public:
 	int getNbVars() { return nb_vars; }
 	int getNbEl() { return nb_el; }
+
+	enum {DENS=0, POS, VEL, ACC, FOR};
 // END
 
 public:
@@ -298,7 +301,8 @@ public:
 
     //timers
     GE::Time *ts[3];    //library timers (update, render, total)
-    GE::Time *ts_cl[2]; //opencl timers (cl update routine, execute kernel)
+    GE::Time *ts_cl[10];    //library timers (update, render, total)
+	enum {TI_HASH=2, TI_SORT, TI_NEIGH, TI_BUILD};
 
     int init_cl();
     int setup_cl(); //helper function that initializes the devices and the context

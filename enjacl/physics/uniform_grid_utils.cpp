@@ -1,53 +1,28 @@
 #ifndef _UNIFORM_GRID_UTILS_CL_
 #define _UNIFORM_GRID_UTILS_CL_
 
-// TO BE INCLUDED FROM OTHER FILES. In OpenCL, I believe that all device code
-// must be in the same file as the kernel using it. 
 
-//----------------------------------------------------------------------
+/* TO BE INCLUDED FROM OTHER FILES. In OpenCL, I believe that all device code
+// must be in the same file as the kernel using it. 
+*/
+
+/*----------------------------------------------------------------------*/
 
 // Template parameters
 //#define D Step1::Data
+
 #define D float
 #define O SPHNeighborCalc<Step1::Calc, Step1::Data>
 
 #undef USE_TEX
 
-// copied from SPHSimLib code
-#ifdef USE_TEX
-//#define FETCH(a, t, i) tex1Dfetch(t##_tex, i)
-#define FETCH(t, i) tex1Dfetch(t##_tex, i)
-#define FETCH_NOTEX(a, t, i) a.t[i]
-#define FETCH_FLOAT3(a,t,i) make_float3(FETCH(a,t,i))
-#define FETCH_MATRIX3(a,t,i) tex1DfetchMatrix3(t##_tex,i)
-#define FETCH_MATRIX3_NOTEX(a,t,i) a.t[i]
-#else
-//#define FETCH(a, t, i) a.t[i]
-#define FETCH(t, i) t[i]
-#define FETCH_VAR(t, i, ivar) t[i+ivar*numParticles]
-//#define FETCH_NOTEX(a, t, i) a.t[i]
-#define FETCH_NOTEX(t, i) t[i]
-//#define FETCH_FLOAT3(a,t,i) make_float3(FETCH(a,t,i))
-#define FETCH_FLOAT3(t,i) make_float3(FETCH(t,i))
-#define FETCH_MATRIX3(a,t,i) a.t[i]
-#define FETCH_MATRIX3_NOTEX(a,t,i) a.t[i]
-//#define FETCH(a, t, i) (a + __mul24(i,sizeof(a)) + (void*)offsetof(a, t))
-#endif
-
-#if 0
-struct GridParams
-{
-    float4          grid_size;
-    float4          grid_min;
-    float4          grid_max;
-
-    // number of cells in each dimension/side of grid
-    float4          grid_res;
-    float4          grid_delta;
-};
+#include "cl_macros.h"
+#include "cl_structures.h"
+#include "neighbors.cpp"
 
 
-	//--------------------------------------------------------------
+
+/*--------------------------------------------------------------*/
 int4 calcGridCell(float4 p, float4 grid_min, float4 grid_delta)
 {
 	// subtract grid_min (cell position) and multiply by delta
@@ -68,7 +43,7 @@ int4 calcGridCell(float4 p, float4 grid_min, float4 grid_delta)
 	return ii;
 }
 
-	//--------------------------------------------------------------
+/*--------------------------------------------------------------*/
 uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 {
 	// each variable on single line or else STRINGIFY DOES NOT WORK
@@ -105,20 +80,16 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 	// index = x + y*width + z*width*height
 	//This means that we process the grid structure in "depth slice" order, and
 	//each such slice is processed in row-column order.
-	//return __mul24(__umul24(gz, grid_res.y), grid_res.x) + __mul24(gy, grid_res.x) + gx;
 
 	return (gz*grid_res.y + gy) * grid_res.x + gx; 
 }
-#endif
-	//--------------------------------------------------------------
 
-
-
-#if 0
-	// Iterate over particles found in the nearby cells (including cell of position_i)
-	//template<class O, class D>
-	//static __device__ void IterateParticlesInCell(
+	/*--------------------------------------------------------------*/
+	/* Iterate over particles found in the nearby cells (including cell of position_i)
+	*/
 	void IterateParticlesInCell(
+		__global float4*    var_sorted,
+		__constant uint 	numParticles, 
 		__constant int4 	cellPos,
 		__constant uint 	index_i, 
 		__constant float4 	position_i, 
@@ -132,41 +103,35 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		// wrap edges (false)
 		uint cellHash = calcGridHash(cellPos, cGridParams->grid_res, false);
 
-		// get start/end positions for this cell/bucket
-		//uint startIndex	= FETCH_NOTEX(dGridData,cell_indexes_start,cellHash);
-		//volatile uint startIndex = FETCH(dGridData,cell_indexes_start,cellHash);
+		/* get start/end positions for this cell/bucket */
 		uint startIndex = FETCH(cell_indexes_start,cellHash);
 
-		// check cell is not empty
-		if (startIndex != 0xffffffff) 
-		{	   
+		/* check cell is not empty
+		 * WHERE IS 0xffffffff SET?  NO IDEA ************************
+		 */
+		if (startIndex != 0xffffffff) {	   
 			uint endIndex = FETCH(cell_indexes_end, cellHash);
 
-			// iterate over particles in this cell
-			for(uint index_j=startIndex; index_j < endIndex; index_j++) 
-			{			
+			/* iterate over particles in this cell */
+			for(uint index_j=startIndex; index_j < endIndex; index_j++) {			
 				// For now, nothing to loop over. ADD WHEN CODE WORKS. 
-				//ForPossibleNeighbor(data, index_i, index_j, position_i);
-				;
+				// Is there a neighbor?
+#if 1
+				ForPossibleNeighbor(var_sorted, numParticles, index_i, index_j, position_i);
+#endif
 			}
 		}
 	}
 
-	//--------------------------------------------------------------
-	// Iterate over particles found in the nearby cells (including cell of position_i)
-	//template<class O, class D>
-	//static __device__ void IterateParticlesInNearbyCells(
+	/*--------------------------------------------------------------*/
+	/* Iterate over particles found in the nearby cells (including cell of position_i) 
+	 *template<class O, class D>
+	 */
 	void IterateParticlesInNearbyCells(
 		__global float4* vars_sorted,
-		//__global float4*     force_sorted,
-		//__global float4*     pressure_sorted,
-		//__global float4*     density_sorted,
-		//__global float4*     position_sorted,
-		//D 					data, 
+		uint			numParticles,
 		__constant uint 	index_i, 
-		//float3 const		&position_i, 
 		__constant float4   position_i, 
-		//GridData const	&dGridData
 		__global int* 		cell_indices_start,
 		__global int* 		cell_indices_end,
 		__constant struct GridParams* cGridParams)
@@ -178,6 +143,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		// get cell in grid for the given position
 		int4 cell = calcGridCell(position_i, cGridParams->grid_min, cGridParams->grid_delta);
 
+
 		// iterate through the 3^3 cells in and around the given position
 		// can't unroll these loops, they are not innermost 
 		for(int z=cell.z-1; z<=cell.z+1; ++z) {
@@ -188,7 +154,9 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 					ipos.y = y;
 					ipos.z = z;
 					ipos.w = 1;
-					IterateParticlesInCell(ipos, index_i, position_i, cell_indices_start, cell_indices_end, cGridParams);
+	#if 1
+					IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, cGridParams);
+	#endif
 				}
 			}
 		}
@@ -198,9 +166,9 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 
 		// TO DO LATER
 		//PostCalc(data, index_i);
+
 	}
 
-#endif
 	//----------------------------------------------------------------------
 //--------------------------------------------------------------
 __kernel void K_SumStep1(
@@ -214,35 +182,27 @@ __kernel void K_SumStep1(
 				)
 {
     // particle index
-    //uint index = __umul24(blockIdx.x, blockDim.x) + threadIdx.x;
-
 	uint index = get_global_id(0);
     if (index >= numParticles) return;
 
-	#if 0
     //Step1::Data data;
     //data.dParticleDataSorted = dParticleDataSorted;
 
-	vars = sorted_vars;
-	//force = force_sorted;
-	//pressure = pressure_sorted;
-	//density  = density_sorted;
-	//position = position_sorted;
+	//This is done as part of the template approach since the Data can then be used as a template object 
+	//in Cuda
+	vars = sorted_vars; // not needed
 
-	// assume position is 0th variable
-    float4 position_i = FETCH_VAR(vars, index, 0);
-	#endif
+	/* assume position is 0th variable */
+    float4 position_i = FETCH_VAR(vars, index, POS);
 
     // Do calculations on particles in neighboring cells
 
-    //IterateParticlesInNearbyCells(force_sorted, pressure_sorted, density_sorted, position_sorted, index, position_i, cell_indexes_start, cell_indexes_end, cGridParams);
 
-	#if 0
-    IterateParticlesInNearbyCells(sorted_vars, index, position_i, cell_indexes_start, cell_indexes_end, cGridParams);
+	#if 1
+    IterateParticlesInNearbyCells(sorted_vars, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, cGridParams);
 	#endif
-
 }
 
-//--------------------------------------------------------------
+/*-------------------------------------------------------------- */
 #endif
 

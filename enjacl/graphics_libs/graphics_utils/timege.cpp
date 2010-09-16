@@ -24,7 +24,7 @@ Time::Time()
 	reset();
 }
 //----------------------------------------------------------------------
-Time::Time(const char* name_, int nbCalls, int offset)
+Time::Time(const char* name_, int offset, int nbCalls)
 {
 	name = name_;
 

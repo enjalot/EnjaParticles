@@ -34,12 +34,13 @@ public:
 	// if nbCalls not -1, print time after nbCalls calls
 	// offset: how many calls to ignore
 	Time();
-	Time(const char* name, int nbCalls=-1, int offset=0);
+	Time(const char* name, int offset=0, int nbCalls=-1);
 	Time(const Time&);
 	~Time();
 	void reset();
 	void begin();
 	void end();
+	int getCount() { return count;}
 
 	void stop() { end(); }
 	void start() { begin(); }

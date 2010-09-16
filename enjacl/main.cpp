@@ -298,6 +298,9 @@ int main(int argc, char** argv)
     */
 
 
+	// only done once
+	enjas->setupArrays(); 
+
     glutMainLoop();
     
     printf("doesn't happen does it\n");

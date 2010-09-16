@@ -1,0 +1,38 @@
+hash: tot (ms): 88.917, avg: 1.77834, (count=50)
+sort: tot (ms): 212.323, avg: 4.24646, (count=50)
+build: tot (ms): 59.686, avg: 1.19372, (count=50)
+neighbors: tot (ms): 202.242, avg: 4.04484, (count=50)
+----------------------------------------------------------------------
+30x30x30, 2<<13 pts = 16k points
+hash: tot (ms): 67.619, avg: 1.35238, (count=50)
+sort: tot (ms): 176.967, avg: 3.53934, (count=50)
+build: tot (ms): 32.619, avg: 0.65238, (count=50)
+neighbors: tot (ms): 524.2, avg: 10.484, (count=50)
+----------------------------------------------------------------------
+30x30x30, 2<<13 pts
+hash: tot (ms): 37.711, avg: 1.14276, (count=33)
+sort: tot (ms): 159.593, avg: 4.83615, (count=33)
+build: tot (ms): 39.347, avg: 1.19233, (count=33)
+neighbors: tot (ms): 351.687, avg: 10.6572, (count=33)
+70
+----------------------------------------------------------------------
+30x30x30, 2<<15 pts
+nb particles (nb_el): 65536
+hash: tot (ms): 26.924, avg: 0.815879, (count=33)
+sort: tot (ms): 238.61, avg: 7.23061, (count=33)
+build: tot (ms): 49.595, avg: 1.50288, (count=33)
+neighbors: tot (ms): 4529.81, avg: 137.267, (count=33)
+----------------------------------------------------------------------
+40x40x40, 2<<15 pts
+hash: tot (ms): 42.101, avg: 1.27579, (count=33)
+sort: tot (ms): 237.478, avg: 7.1963, (count=33)
+build: tot (ms): 52.103, avg: 1.57888, (count=33)
+neighbors: tot (ms): 10631.2, avg: 322.157, (count=33)
+(SHOULD RUN FASTER THAN resolution of 30x30x30)!
+----------------------------------------------------------------------
+30x30x30, 2<<15 pts
+hash: tot (ms): 26.757, avg: 0.810818, (count=33)
+sort: tot (ms): 239.757, avg: 7.26536, (count=33)
+build: tot (ms): 49.813, avg: 1.50949, (count=33)
+neighbors: tot (ms): 4528.23, avg: 137.219, (count=33)
+----------------------------------------------------------------------
