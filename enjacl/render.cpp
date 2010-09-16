@@ -132,11 +132,10 @@ int EnjaParticles::render()
     ts[1]->stop();
 	ts[2]->stop();
     //printf("done rendering\n");
-    if (ts[2]->getCount() == 50)
-    {
-        printf("%s\n", printReport().c_str());
-    }
-
+    //if (ts[2]->getCount() == 50)
+    //{
+        //printf("%s\n", printReport().c_str());
+    //}
 }
 
 

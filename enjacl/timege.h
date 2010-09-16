@@ -1,8 +1,6 @@
 #ifndef _TIMEGE_H_
 #define _TIMEGE_H_
-/* 
- * Author: Gordon Erlebacher
- */
+
 // gettimeofday: measured in sec/microsec: wall clock time
 // irrespective of CPU/system/threads, etc.
 
@@ -29,26 +27,26 @@ private:
 	std::string unit;
 	int count;
 	int nbCalls;
-    int offset; //only time every offset times
-    int ocount;
+	int offset;
 
 public:
 	// nbCalls: how many calls before resetting the clock
 	// if nbCalls not -1, print time after nbCalls calls
+	// offset: how many calls to ignore
+	Time();
 	Time(const char* name, int offset=0, int nbCalls=-1);
+	Time(const Time&);
 	~Time();
 	void reset();
 	void begin();
 	void end();
+	int getCount() { return count;}
 
 	void stop() { end(); }
 	void start() { begin(); }
 	static void printAll();
 	void print();
 	void printReset();
-    const char* report(); //returns a string report instead of printing
-    float getAverage(); //returns the avg timing
-    int getCount();
 };
 
 }

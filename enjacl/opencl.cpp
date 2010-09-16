@@ -151,7 +151,7 @@ int EnjaParticles::update()
 	//exit(0);
 	printf("******************* enter hash, count = %d\n", count);
 
-	if (count == 200) {
+	if (count == 100) {
 		printf("nb particles (nb_el): %d\n", nb_el);
 		GE::Time::printAll();
 		exit(0);
@@ -184,7 +184,7 @@ void EnjaParticles::setupArrays()
 	gp.grid_size = float4(10.,10.,10.,1.);
 	gp.grid_min = float4(0.,0.,0.,1.);
 	gp.grid_max = float4(10.,10.,10.,1.);
-	float resol = 30.;
+	float resol = 10.;
 	gp.grid_res = float4(resol,resol,resol,1.);
 	gp.grid_delta.x = gp.grid_size.x / gp.grid_res.x;
 	gp.grid_delta.y = gp.grid_size.y / gp.grid_res.y;

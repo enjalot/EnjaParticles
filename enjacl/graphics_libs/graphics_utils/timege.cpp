@@ -2,14 +2,27 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include "timege.h"
-#include <sstream>
-#include <iomanip>
 
 using namespace GE;
 
 // Must initialize in cpp file to avoid multiple definitions
 std::vector<GE::Time*> GE::Time::timeList;
 
+//----------------------------------------------------------------------
+Time::Time()
+{
+	name = "";
+	scale = 0.;
+	count = 0;
+	unit = "ms";
+	t = 0.0; 
+	t1 = 0;
+	t2 = 0;
+
+	this->nbCalls = 0;
+	this->offset = 0;
+	reset();
+}
 //----------------------------------------------------------------------
 Time::Time(const char* name_, int offset, int nbCalls)
 {
@@ -23,7 +36,7 @@ Time::Time(const char* name_, int offset, int nbCalls)
 		scale = 1. / (float) CLOCKS_PER_SEC;
 		break;
 	default:
-		printf("Time does not handle this case\n");
+		printf("Time does handle this case\n");
 		printf("CLOCKS_PER_SEC= %ld\n", (long) CLOCKS_PER_SEC);
 		exit(0);
 	}
@@ -33,21 +46,29 @@ Time::Time(const char* name_, int offset, int nbCalls)
 	t1 = 0;
 	t2 = 0;
 
-	printf("++ nbCalls= %d\n", nbCalls);
-    count = 0;
-    this->offset = offset;
 	this->nbCalls = nbCalls;
+	this->offset = offset;
 	timeList.push_back(this);
 	//printf("constructor: this= %d, name= %s\n", this, name.c_str());
 	reset();
 }
 //----------------------------------------------------------------------
+Time::Time(const Time& t)
+{
+	name = t.name;
+	scale = t.scale;
+	count = t.count;
+	this->t = t.t;
+	this->t1 = t.t1;
+	this->t2 = t.t2;
+	this->nbCalls = t.nbCalls;
+	this->offset = t.offset;
+	this->timeList.push_back(this);
+	reset();
+}
+//----------------------------------------------------------------------
 Time::~Time()
 {
-}
-int Time::getCount()
-{
-    return count;
 }
 //----------------------------------------------------------------------
 void Time::reset()
@@ -59,10 +80,10 @@ void Time::reset()
 //----------------------------------------------------------------------
 void Time::begin()
 {
-    if(ocount != offset)
-    {
-        return;
-    }
+	if (count < offset) {
+		count++;
+		return;
+	}
 	gettimeofday(&t_start, NULL);
 	t1 = clock();
 	t2 = 0.0;
@@ -71,12 +92,8 @@ void Time::begin()
 //----------------------------------------------------------------------
 void Time::end()
 {
-    if(ocount != offset)
-    {
-        ocount++;
-        return;
-    }
-    ocount = 0;
+	if (count <= offset) return;
+
 	gettimeofday(&t_end, NULL);
 	double tt = (t_end.tv_sec - t_start.tv_sec) +
 	     (t_end.tv_usec - t_start.tv_usec) * 1.e-6;
@@ -85,7 +102,6 @@ void Time::end()
 
 	if (count == nbCalls) {
 		print();
-		exit(0); //*****
 		reset();
 	}
 
@@ -95,22 +111,9 @@ void Time::end()
 void Time::print()
 {
 	if (count <= 0) return;
+	int real_count = count - offset;
 	printf("%s: tot (ms): %g, avg: %g, (count=%d)\n", 
-		name.c_str(), t, t/count, count);
-}
-//----------------------------------------------------------------------
-const char* Time::report()
-{
-	if (count <= 0) return NULL;
-    std::stringstream ss;
-    ss << std::fixed << std::setprecision(6);
-	ss << name << ": tot (ms): " << t << ", (count=" << count << "), avg: " << t/count << std::ends; 
-    return ss.str().c_str();
-
-}
-float Time::getAverage()
-{
-    return t/count;
+		name.c_str(), t, t/real_count, real_count);
 }
 //----------------------------------------------------------------------
 void Time::printReset()
@@ -124,19 +127,9 @@ void Time::printReset()
 void Time::printAll()
 {
 #if 1
-	printf("********* printAll\n");
 	for (int i=0; i < timeList.size(); i++) {
 		Time& tim = *(timeList[i]);
 		tim.print();
-
-		/***
-		printf("*** tim= %d, msg= %s\n", &tim, tim.name.c_str());
-		if (tim.count <= 0) continue;
-		printf("tim.count= %d\n", tim.count);
-		printf("tim.t= %f\n", tim.t);
-		printf("%s: tot: %f, avg: %f (ms), (count=%d)\n", 
-			tim.name.c_str(), tim.t, tim.t/tim.count, tim.count);
-		***/
 	}
 #endif
 }

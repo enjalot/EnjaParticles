@@ -3,7 +3,6 @@
 
 #include "cl_macros.h"
 
-
 //----------------------------------------------------------------------
 void ForNeighbor(__global float4*  var_sorted, 
 				__constant uint index_i, 
@@ -16,8 +15,6 @@ void ForNeighbor(__global float4*  var_sorted,
 	;
 }
 //--------------------------------------------------
-
-
 void ForPossibleNeighbor(__global float4* var_sorted, 
 						__constant uint numParticles, 
 						__constant uint index_i, 
@@ -29,7 +26,7 @@ void ForPossibleNeighbor(__global float4* var_sorted,
 		// get the particle info (in the current grid) to test against
 		//float3 position_j = FETCH_VAR(var_sorted, index_j, DENS);
 		//float4 position_j = FETCH_VAR(var_sorted, index_j, DENS);
-		float4 position_j = FETCH_VAR(var_sorted, index_j, 0); // uses numParticles
+		float4 position_j = FETCH_VAR(var_sorted, index_j, DENS); // uses numParticles
 
 		// get the relative distance between the two particles, translate to simulation space
 		float scale_to_simulation = 1.0;
@@ -51,6 +48,5 @@ void ForPossibleNeighbor(__global float4* var_sorted,
 		}
 	}
 }
-
 //--------------------------------------------------
 #endif

@@ -86,7 +86,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 
 	/*--------------------------------------------------------------*/
 	/* Iterate over particles found in the nearby cells (including cell of position_i)
-	//template<class O, class D>
 	*/
 	void IterateParticlesInCell(
 		__global float4*    var_sorted,
@@ -110,13 +109,11 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		/* check cell is not empty
 		 * WHERE IS 0xffffffff SET?  NO IDEA ************************
 		 */
-		if (startIndex != 0xffffffff) 
-		{	   
+		if (startIndex != 0xffffffff) {	   
 			uint endIndex = FETCH(cell_indexes_end, cellHash);
 
 			/* iterate over particles in this cell */
-			for(uint index_j=startIndex; index_j < endIndex; index_j++) 
-			{			
+			for(uint index_j=startIndex; index_j < endIndex; index_j++) {			
 				// For now, nothing to loop over. ADD WHEN CODE WORKS. 
 				// Is there a neighbor?
 #if 1

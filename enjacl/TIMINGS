@@ -22,6 +22,17 @@ hash: tot (ms): 26.924, avg: 0.815879, (count=33)
 sort: tot (ms): 238.61, avg: 7.23061, (count=33)
 build: tot (ms): 49.595, avg: 1.50288, (count=33)
 neighbors: tot (ms): 4529.81, avg: 137.267, (count=33)
-(2 particles per grid cell on average). 
-Neighbor: too expensive!
+----------------------------------------------------------------------
+40x40x40, 2<<15 pts
+hash: tot (ms): 42.101, avg: 1.27579, (count=33)
+sort: tot (ms): 237.478, avg: 7.1963, (count=33)
+build: tot (ms): 52.103, avg: 1.57888, (count=33)
+neighbors: tot (ms): 10631.2, avg: 322.157, (count=33)
+(SHOULD RUN FASTER THAN resolution of 30x30x30)!
+----------------------------------------------------------------------
+30x30x30, 2<<15 pts
+hash: tot (ms): 26.757, avg: 0.810818, (count=33)
+sort: tot (ms): 239.757, avg: 7.26536, (count=33)
+build: tot (ms): 49.813, avg: 1.50949, (count=33)
+neighbors: tot (ms): 4528.23, avg: 137.219, (count=33)
 ----------------------------------------------------------------------
