@@ -292,7 +292,7 @@ void EnjaParticles::setupArrays()
 //----------------------------------------------------------------------
 void EnjaParticles::buildDataStructures()
 {
-	static bool first_time = false;
+	static bool first_time = true;
 
 	// nb_vars: number of float4 variables to reorder. 
 	// nb_el:   number of particles
@@ -302,9 +302,21 @@ void EnjaParticles::buildDataStructures()
 
 	ts_cl[TI_BUILD]->start();
 
-	if (!first_time) {
-		first_time = true;
+	if (first_time) {
+		try {
+			string path(CL_SOURCE_DIR);
+			path = path + "/datastructures_test.cl";
+			char* src = getSourceString(path.c_str());
+        	datastructures_program = loadProgram(src);
+        	datastructures_kernel = cl::Kernel(datastructures_program, "datastructures", &err);
+			first_time = false;
+		} catch(cl::Error er) {
+        	printf("ERROR(neighborSearch): %s(%s)\n", er.what(), oclErrorString(er.err()));
+			exit(1);
+		}
 	}
+
+	cl::Kernel kern = datastructures_kernel;
 
 	int ctaSize = 128;
 
@@ -384,8 +396,28 @@ void EnjaParticles::buildDataStructures()
 void EnjaParticles::hash()
 // Generate hash list: stored in cl_sort_hashes
 {
+	static bool first_time = true;
 
 	ts_cl[TI_HASH]->start();
+
+	if (first_time) {
+		try {
+			string path(CL_SOURCE_DIR);
+			path = path + "/uniform_hash.cl";
+			char* src = getSourceString(path.c_str());
+        	hash_program = loadProgram(src);
+			//printf("LOADED\n");
+        	hash_kernel = cl::Kernel(hash_program, "hash", &err);
+			//printf("KERNEL\n");
+			first_time = false;
+		} catch(cl::Error er) {
+        	printf("ERROR(neighborSearch): %s(%s)\n", er.what(), oclErrorString(er.err()));
+			exit(1);
+		}
+	}
+
+	cl::Kernel kern = hash_kernel;
+
 	try {
 		#if 0
 		// data should already be on the GPU

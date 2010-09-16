@@ -7,6 +7,8 @@ project(enjacl)
 SET(FILES 
    uniform_grid_utils
    neighbors
+   uniform_hash
+   datastructures_test
 )  # ignore cpp extension
 
 # Only executes when I do "cmake" 
