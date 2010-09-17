@@ -166,7 +166,7 @@ void EnjaParticles::setupArrays()
 	// only for my test routines: sort, hash, datastructures
 	int nb_bytes;
 
-	nb_el = (2 << 15);  // number of particles
+	nb_el = (1 << 18);  // number of particles
 	printf("nb_el= %d\n", nb_el); //exit(0);
 	nb_vars = 4;        // number of cl_float4 variables to reorder
 	printf("nb_el= %d\n", nb_el); 
@@ -182,18 +182,26 @@ void EnjaParticles::setupArrays()
 		//printf("%d, %f, %f, %f, %f\n", i, cells[i].x, cells[i].y, cells[i].z, cells[i].w);
 	}
 
+	float resol = 50.;
 	gp.grid_size = float4(10.,10.,10.,1.);
-	gp.grid_min = float4(0.,0.,0.,1.);
-	gp.grid_max = float4(10.,10.,10.,1.);
-	float resol = 10.;
-	gp.grid_res = float4(resol,resol,resol,1.);
+	gp.grid_min  = float4(0.,0.,0.,1.);
+	gp.grid_max.x = gp.grid_size.x + gp.grid_min.x; 
+	gp.grid_max.y = gp.grid_size.y + gp.grid_min.y; 
+	gp.grid_max.z = gp.grid_size.z + gp.grid_min.z; 
+	gp.grid_max.w = 1.0;
+	gp.grid_res  = float4(resol,resol,resol,1.);
 	gp.grid_delta.x = gp.grid_size.x / gp.grid_res.x;
 	gp.grid_delta.y = gp.grid_size.y / gp.grid_res.y;
 	gp.grid_delta.z = gp.grid_size.z / gp.grid_res.z;
+	// I want inverse of delta to use multiplication in the kernel
+	gp.grid_delta.x = 1. / gp.grid_delta.x;
+	gp.grid_delta.y = 1. / gp.grid_delta.y;
+	gp.grid_delta.z = 1. / gp.grid_delta.z;
 	gp.grid_delta.w = 1.;
 	printf("delta z= %f\n", gp.grid_delta.z);
 
-	grid_size = (int) (gp.grid_size.x * gp.grid_size.y * gp.grid_size.z);
+	grid_size = (int) (gp.grid_res.x * gp.grid_res.y * gp.grid_res.z);
+	printf("grid_size= %d\n", grid_size);
 
 	sort_int.resize(nb_el);
 	unsort_int.resize(nb_el);
@@ -267,14 +275,12 @@ void EnjaParticles::setupArrays()
 		cl_GridParams = BUFFER(nb_bytes);
 		WRITE_BUFFER(cl_GridParams, nb_bytes, &gp);
 
-
 		nb_bytes = grid_size * sizeof(int);
 		cl_cell_indices_start = BUFFER(nb_bytes);
 		WRITE_BUFFER(cl_cell_indices_start, nb_bytes, &cell_indices_start[0]);
 
 		cl_cell_indices_end = BUFFER(nb_bytes);
 		WRITE_BUFFER(cl_cell_indices_end, nb_bytes, &cell_indices_end[0]);
-
 
 		queue.finish();
 	} catch(cl::Error er) {
@@ -339,18 +345,24 @@ void EnjaParticles::buildDataStructures()
 
 	int err;
 
-    err = queue.enqueueNDRangeKernel(datastructures_kernel, cl::NullRange, cl::NDRange(nb_el), cl::NDRange(ctaSize), NULL, &event);
-	queue.finish();
+	try {
+    	err = queue.enqueueNDRangeKernel(datastructures_kernel, cl::NullRange, cl::NDRange(nb_el), cl::NDRange(ctaSize), NULL, &event);
+		queue.finish();
+	} catch(cl::Error er) {
+        printf("exec: ERROR(buildDataStructures): %s(%s)\n", er.what(), oclErrorString(er.err()));
+		exit(0);
+	}
 
 	int nb_bytes;
 
-#if 0
+#if 1
 	// DATA SHOULD STAY ON THE GPU
 	try {
 		nb_bytes = nb_el*nb_vars*sizeof(cl_float4);
     	err = queue.enqueueReadBuffer(cl_vars_unsorted,  CL_TRUE, 0, nb_bytes, &vars_unsorted[0],  NULL, &event);
 
     	err = queue.enqueueReadBuffer(cl_vars_sorted,  CL_TRUE, 0, nb_bytes, &vars_sorted[0],  NULL, &event);
+
 
 		nb_bytes = nb_el*sizeof(cl_int);
     	err = queue.enqueueReadBuffer(cl_sort_indices,  CL_TRUE, 0, nb_bytes, &sort_indices[0],  NULL, &event);
@@ -378,14 +390,24 @@ void EnjaParticles::buildDataStructures()
 
 
 	#if 0
+	try {
 		// PRINT OUT START and END CELL INDICES
-        err = queue.enqueueReadBuffer(cl_cell_indices_start, CL_TRUE, 0, nb_el*sizeof(cl_int), &cell_indices_start[0], NULL, &event);
-        err = queue.enqueueReadBuffer(cl_cell_indices_end, CL_TRUE, 0, nb_el*sizeof(cl_int), &cell_indices_end[0], NULL, &event);
+		nb_bytes = grid_size*sizeof(cl_int);
+        err = queue.enqueueReadBuffer(cl_cell_indices_start, CL_TRUE, 0, nb_bytes, &cell_indices_start[0], NULL, &event);
+        err = queue.enqueueReadBuffer(cl_cell_indices_end, CL_TRUE, 0, nb_bytes, &cell_indices_end[0], NULL, &event);
+	} catch(cl::Error er) {
+        printf("2 ERROR(buildDatastructures): %s(%s)\n", er.what(), oclErrorString(er.err()));
+		exit(0);
+	}
 
 		printf("cell_indices_start, end\n");
+		int nb_cells = 0;
 		for (int i=0; i < grid_size; i++) {
-			printf("[%d]: %d, %d\n", i, cell_indices_start[i], cell_indices_end[i]);
+			int nb = cell_indices_end[i]-cell_indices_start[i];
+			nb_cells += nb;
+			printf("[%d]: %d, %d, nb pts: %d\n", i, cell_indices_start[i], cell_indices_end[i], nb);
 		}
+		printf("total nb cells: %d\n", nb_cells);
 	#endif
 
 	//printf("return from BuildDataStructures\n");
@@ -563,7 +585,7 @@ void EnjaParticles::sort(cl::Buffer cl_hashes, cl::Buffer cl_indices)
 	queue.finish();
 
 	for (int i=0; i < 10; i++) {
-		// fist and 3rd columns are computed by sorting method
+		// first and 3rd columns are computed by sorting method
 		printf("%d: unsorted hashes: %d, sorted indices %d\n", i, unsort_int[i], sort_indices[i]);
 	}
     //err = queue.enqueueWriteBuffer(cl_indices, CL_TRUE, 0, nb_el*sizeof(int), &sort_indices[0], NULL, &event);

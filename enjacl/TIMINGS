@@ -1,38 +1,52 @@
-hash: tot (ms): 88.917, avg: 1.77834, (count=50)
-sort: tot (ms): 212.323, avg: 4.24646, (count=50)
-build: tot (ms): 59.686, avg: 1.19372, (count=50)
-neighbors: tot (ms): 202.242, avg: 4.04484, (count=50)
+Gridsize, nb particles
 ----------------------------------------------------------------------
-30x30x30, 2<<13 pts = 16k points
-hash: tot (ms): 67.619, avg: 1.35238, (count=50)
-sort: tot (ms): 176.967, avg: 3.53934, (count=50)
-build: tot (ms): 32.619, avg: 0.65238, (count=50)
-neighbors: tot (ms): 524.2, avg: 10.484, (count=50)
-----------------------------------------------------------------------
-30x30x30, 2<<13 pts
-hash: tot (ms): 37.711, avg: 1.14276, (count=33)
-sort: tot (ms): 159.593, avg: 4.83615, (count=33)
-build: tot (ms): 39.347, avg: 1.19233, (count=33)
-neighbors: tot (ms): 351.687, avg: 10.6572, (count=33)
-70
-----------------------------------------------------------------------
-30x30x30, 2<<15 pts
+30x30x30, 1<<16=65kpts
 nb particles (nb_el): 65536
-hash: tot (ms): 26.924, avg: 0.815879, (count=33)
-sort: tot (ms): 238.61, avg: 7.23061, (count=33)
-build: tot (ms): 49.595, avg: 1.50288, (count=33)
-neighbors: tot (ms): 4529.81, avg: 137.267, (count=33)
+hash: tot (ms): 84.643, avg: 0.890979, (count=95)
+sort: tot (ms): 820.204, avg: 8.63373, (count=95)
+build: tot (ms): 891.019, avg: 9.37915, (count=95)
+neighbors: tot (ms): 1009.93, avg: 10.6308, (count=95)
 ----------------------------------------------------------------------
-40x40x40, 2<<15 pts
-hash: tot (ms): 42.101, avg: 1.27579, (count=33)
-sort: tot (ms): 237.478, avg: 7.1963, (count=33)
-build: tot (ms): 52.103, avg: 1.57888, (count=33)
-neighbors: tot (ms): 10631.2, avg: 322.157, (count=33)
-(SHOULD RUN FASTER THAN resolution of 30x30x30)!
+20x20x20, 1<<16=65kpts (35 fps)
+nb particles (nb_el): 65536
+hash: tot (ms): 96.773, avg: 1.01866, (count=95)
+sort: tot (ms): 918.573, avg: 9.66919, (count=95)
+build: tot (ms): 978.964, avg: 10.3049, (count=95)
+neighbors: tot (ms): 500.649, avg: 5.26999, (count=95)
 ----------------------------------------------------------------------
-30x30x30, 2<<15 pts
-hash: tot (ms): 26.757, avg: 0.810818, (count=33)
-sort: tot (ms): 239.757, avg: 7.26536, (count=33)
-build: tot (ms): 49.813, avg: 1.50949, (count=33)
-neighbors: tot (ms): 4528.23, avg: 137.219, (count=33)
+10x10x10, 1<<16=65kpts (30fps)
+nb particles (nb_el): 65536
+hash: tot (ms): 86.297, avg: 0.908389, (count=95)
+sort: tot (ms): 830.752, avg: 8.74476, (count=95)
+build: tot (ms): 941.441, avg: 9.9099, (count=95)
+neighbors: tot (ms): 821.636, avg: 8.6488, (count=95)
 ----------------------------------------------------------------------
+----------------------------------------------------------------------
+50x50x50, 1 << 18 = 256kpts
+nb particles (nb_el): 262144
+hash: tot (ms): 107.752, avg: 1.13423, (count=95)
+sort: tot (ms): 2181.32, avg: 22.9612, (count=95)
+build: tot (ms): 2821.44, avg: 29.6994, (count=95)
+neighbors: tot (ms): 1675.25, avg: 17.6342, (count=95)
+----------------------------------------------------------------------
+30x30x30, 1 << 18 = 256kpts
+nb particles (nb_el): 262144
+hash: tot (ms): 107.724, avg: 1.13394, (count=95)
+sort: tot (ms): 2164.33, avg: 22.7825, (count=95)
+build: tot (ms): 2719.88, avg: 28.6304, (count=95)
+neighbors: tot (ms): 1482.04, avg: 15.6005, (count=95)
+----------------------------------------------------------------------
+20x20x20, 1 << 18 = 256kpts
+nb particles (nb_el): 262144
+hash: tot (ms): 108.454, avg: 1.14162, (count=95)
+sort: tot (ms): 2149.15, avg: 22.6226, (count=95)
+build: tot (ms): 2828.65, avg: 29.7753, (count=95)
+neighbors: tot (ms): 1842.69, avg: 19.3967, (count=95)
+//----------------------------------------------------------------------
+10x10x10, 1 << 18 = 256kpts
+hash: tot (ms): 108.26, avg: 1.13958, (count=95)
+sort: tot (ms): 2129.84, avg: 22.4194, (count=95)
+build: tot (ms): 2679.58, avg: 28.2062, (count=95)
+neighbors: tot (ms): 9884.48, avg: 104.047, (count=95)
+//----------------------------------------------------------------------
+
