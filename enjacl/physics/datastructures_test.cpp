@@ -4,19 +4,12 @@
 #ifndef _DATASTRUCTURES_
 #define _DATASTRUCTURES_
 
-//#ifndef __K_UniformGrid_Update_cu__
-//#define __K_UniformGrid_Update_cu__
-
-//#define STRINGIFY(A) #A
-
-//std::string datastructures_program_source = STRINGIFY(
-
-// read/write from the unsorted data structure to the sorted one
-//template <class T, class D> 
 
 __kernel void datastructures(
-					__constant int	    numParticles,
-					__constant int      nb_vars,
+					//__constant int	    numParticles,
+					//__constant int      nb_vars,
+					int	    numParticles,
+					int      nb_vars,
 					// D == float4
 					__global float4*   dParticles,
 					__global float4*   dParticlesSorted, 
@@ -46,7 +39,8 @@ __kernel void datastructures(
 
 	uint tid = get_local_id(0);
 
-	sharedHash[tid+1] = hash;
+#if 1
+	sharedHash[tid+1] = hash;  // SOMETHING WRONG WITH hash on Fermi
 
 	if (index > 0 && tid == 0) {
 		// first thread in block must load neighbor particle hash
@@ -91,6 +85,7 @@ __kernel void datastructures(
 		//dParticlesSorted[index+j*numParticles].z = 5.; // = (float4) (3.,3.,3.,3.);
 		//dParticlesSorted[index+j*numParticles].w = 6.; // = (float4) (3.,3.,3.,3.);
 	}
+#endif
 }
 
 //);

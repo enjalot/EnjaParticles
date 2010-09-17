@@ -1,4 +1,5 @@
 Gridsize, nb particles
+MacOSX: GT330
 ----------------------------------------------------------------------
 30x30x30, 1<<16=65kpts
 nb particles (nb_el): 65536
@@ -49,4 +50,26 @@ sort: tot (ms): 2129.84, avg: 22.4194, (count=95)
 build: tot (ms): 2679.58, avg: 28.2062, (count=95)
 neighbors: tot (ms): 9884.48, avg: 104.047, (count=95)
 //----------------------------------------------------------------------
-
+Kirk: , with force
+50x50x50
+nb particles (nb_el): 65536
+hash: tot (ms): 74.104, avg: 0.780042, (count=95)
+sort: tot (ms): 231.469, avg: 2.43652, (count=95)
+build: tot (ms): 704.891, avg: 7.4199, (count=95)
+neighbors: tot (ms): 849.383, avg: 8.94088, (count=95)
+----------------------------------------------------------------------
+kirk, 50x50x50, with force
+nb particles (nb_el): 262144
+hash: tot (ms): 80.905, avg: 0.851631, (count=95)
+sort: tot (ms): 444.519, avg: 4.67915, (count=95)
+build: tot (ms): 2542.86, avg: 26.767, (count=95)
+neighbors: tot (ms): 6543.2, avg: 68.8758, (count=95)
+----------------------------------------------------------------------
+Fermi, 50x50x50, with force
+nb particles (nb_el): 262144
+hash: tot (ms): 58.367, avg: 0.61439, (count=95)
+sort: tot (ms): 295.405, avg: 3.10953, (count=95)
+build: tot (ms): 1344.08, avg: 14.1482, (count=95)
+neighbors: tot (ms): 2428.6, avg: 25.5642, (count=95)
+(20 fps, 256k)
+----------------------------------------------------------------------

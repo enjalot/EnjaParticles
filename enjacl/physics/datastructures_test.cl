@@ -2,10 +2,18 @@
 # 1 "<built-in>"
 # 1 "<command-line>"
 # 1 "datastructures_test.cpp"
-# 17 "datastructures_test.cpp"
+
+
+
+
+
+
+
 __kernel void datastructures(
-     __constant int numParticles,
-     __constant int nb_vars,
+
+
+     int numParticles,
+     int nb_vars,
 
      __global float4* dParticles,
      __global float4* dParticlesSorted,
@@ -35,6 +43,7 @@ __kernel void datastructures(
 
  uint tid = get_local_id(0);
 
+
  sharedHash[tid+1] = hash;
 
  if (index > 0 && tid == 0) {
@@ -44,7 +53,7 @@ __kernel void datastructures(
 
 
  barrier(CLK_LOCAL_MEM_FENCE);
-# 67 "datastructures_test.cpp"
+# 61 "datastructures_test.cpp"
  if ((index == 0 || hash != sharedHash[tid]) )
  {
   cell_indexes_start[hash] = index;
@@ -72,4 +81,5 @@ __kernel void datastructures(
 
 
  }
+
 }

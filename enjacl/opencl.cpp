@@ -166,7 +166,7 @@ void EnjaParticles::setupArrays()
 	// only for my test routines: sort, hash, datastructures
 	int nb_bytes;
 
-	nb_el = (1 << 16);  // number of particles
+	nb_el = (1 << 18);  // number of particles
 	printf("nb_el= %d\n", nb_el); //exit(0);
 	nb_vars = 4;        // number of cl_float4 variables to reorder
 	printf("nb_el= %d\n", nb_el); 
@@ -348,11 +348,12 @@ void EnjaParticles::buildDataStructures()
     	err = datastructures_kernel.setArg(6, cl_cell_indices_start);
     	err = datastructures_kernel.setArg(7, cl_cell_indices_end);
 		// local memory
-    	err = datastructures_kernel.setArg(8, ctaSize*sizeof(int), 0);
+    	err = datastructures_kernel.setArg(8, (ctaSize+1)*sizeof(int), 0);
 	} catch(cl::Error er) {
         printf("0 ERROR(buildDataStructures): %s(%s)\n", er.what(), oclErrorString(er.err()));
 		exit(0);
 	}
+
 
 	int err;
 
@@ -480,11 +481,10 @@ void EnjaParticles::hash()
 
 //    printf("setting up hash kernel\n");
 	try {
-    	err = hash_kernel.setArg(0, nb_el);
-    	err = hash_kernel.setArg(1, cl_cells);
-    	err = hash_kernel.setArg(2, cl_sort_hashes);
-    	err = hash_kernel.setArg(3, cl_sort_indices);
-    	err = hash_kernel.setArg(4, cl_GridParams);
+    	err = hash_kernel.setArg(0, cl_cells);
+    	err = hash_kernel.setArg(1, cl_sort_hashes);
+    	err = hash_kernel.setArg(2, cl_sort_indices);
+    	err = hash_kernel.setArg(3, cl_GridParams);
 	} catch (cl::Error er) {
         printf("1 ERROR(hash): %s(%s)\n", er.what(), oclErrorString(er.err()));
 		exit(0);
