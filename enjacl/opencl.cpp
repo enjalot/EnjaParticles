@@ -133,6 +133,7 @@ int EnjaParticles::update()
 #endif
 
 #if 1
+	printf("before hash\n");
 	hash();
     printf("done with hash\n");
 	sort(cl_sort_hashes, cl_sort_indices); // sort hash values in place. Should also reorder cl_sort_indices
@@ -405,8 +406,9 @@ void EnjaParticles::hash()
 			string path(CL_SOURCE_DIR);
 			path = path + "/uniform_hash.cl";
 			char* src = getSourceString(path.c_str());
-        	hash_program = loadProgram(src);
+			printf("before load\n");
 			//printf("LOADED\n");
+        	hash_program = loadProgram(src);
         	hash_kernel = cl::Kernel(hash_program, "hash", &err);
 			//printf("KERNEL\n");
 			first_time = false;
@@ -637,11 +639,11 @@ void EnjaParticles::popCorn()
 		sort_kernel = cl::Kernel(sort_program, "sort", &err);
 #endif
 
-		hash_program = loadProgram(sources[HASH]);
-		hash_kernel = cl::Kernel(hash_program, "hash", &err);
+		//hash_program = loadProgram(sources[HASH]);
+		//hash_kernel = cl::Kernel(hash_program, "hash", &err);
 
-		datastructures_program = loadProgram(sources[DATASTRUCTURES]);
-		datastructures_kernel = cl::Kernel(datastructures_program, "datastructures", &err);
+		//datastructures_program = loadProgram(sources[DATASTRUCTURES]);
+		//datastructures_kernel = cl::Kernel(datastructures_program, "datastructures", &err);
     }
     catch (cl::Error er) {
 		printf("hash(): error\n");

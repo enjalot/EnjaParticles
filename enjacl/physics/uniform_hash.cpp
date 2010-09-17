@@ -1,34 +1,14 @@
 #ifndef _UNIFORM_HASH_H_
 #define _UNIFORM_HASH_H_
-//#define STRINGIFY(A) #A
-//
 
-//std::string hash_program_source = STRINGIFY(
 
-// This software contains source code provided by NVIDIA Corporation.
-// Specifically code from the CUDA 2.3 SDK "Particles" sample
 
-//#include "K_UniformGrid_Utils.cu"
+#include "cl_structures.h"
 
-#include "cl_macros.h"
-
-#if 0
-struct GridParams
-{
-    float4          grid_size;
-    float4          grid_min;
-    float4          grid_max;
-
-    // number of cells in each dimension/side of grid
-    float4          grid_res;
-    float4          grid_delta;
-};
-#
 
 //----------------------------------------------------------------------
 // find the grid cell from a position in world space
 // WHY static?
-//static int4 calcGridCell(float4 const &p, float4 grid_min, float4 grid_delta)
 int4 calcGridCell(float4 p, float4 grid_min, float4 grid_delta)
 {
 	// subtract grid_min (cell position) and multiply by delta
@@ -50,8 +30,6 @@ int4 calcGridCell(float4 p, float4 grid_min, float4 grid_delta)
 }
 
 //----------------------------------------------------------------------
-//template <bool wrapEdges>
-//static uint calcGridHash(int3 const &gridPos, float3 grid_res, __constant bool wrapEdges)
 uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 {
 	// each variable on single line or else STRINGIFY DOES NOT WORK
@@ -82,14 +60,12 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		gz = gridPos.z;
 	}
 
-	//return  __mul24(__mul24(gz, (int) cGridParams.grid_res.y)+gy, (int) cGridParams.grid_res.x) + gx;
 
 	//We choose to simply traverse the grid cells along the x, y, and z axes, in that order. The inverse of
 	//this space filling curve is then simply:
 	// index = x + y*width + z*width*height
 	//This means that we process the grid structure in "depth slice" order, and
 	//each such slice is processed in row-column order.
-	//return __mul24(__umul24(gz, grid_res.y), grid_res.x) + __mul24(gy, grid_res.x) + gx;
 
 	return (gz*grid_res.y + gy) * grid_res.x + gx; 
 }
@@ -107,18 +83,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 //    uint* cell_indexes_end;     // mapping between bucket hash and end index in sorted list
 //};
 
-struct GridParams
-{
-    float4          grid_size;
-    float4          grid_min;
-    float4          grid_max;
-
-    // number of cells in each dimension/side of grid
-    float4          grid_res;
-    float4          grid_delta;
-};
-
-
+//----------------------------------------------------------------------
 // comes from K_Grid_Hash
 // CANNOT USE references to structures/classes as aruguments!
 __kernel void hash(
@@ -161,7 +126,5 @@ __kernel void hash(
 }
 //----------------------------------------------------------------------
 
-
-//);
 
 #endif
