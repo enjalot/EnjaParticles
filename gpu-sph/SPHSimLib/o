@@ -1,27 +1,5 @@
-SimSimpleSPH.cuh:	float ComputeStep1(bool doTiming);
-SimSnowSPH.cuh:	float ComputeStep1(bool doTiming);
-K_SimpleSPH.cu:#include "K_SimpleSPH_Step1.cu"
-K_SimpleSPH_Step1.cu:#ifndef __K_SimpleSPH_Step1_cu__
-K_SimpleSPH_Step1.cu:#define __K_SimpleSPH_Step1_cu__
-K_SimpleSPH_Step1.cu:class Step1
-K_SimpleSPH_Step1.cu:__global__ void K_SumStep1(uint				numParticles,
-K_SimpleSPH_Step1.cu:	Step1::Data data;
-K_SimpleSPH_Step1.cu:	UniformGridUtils::IterateParticlesInNearbyCells<SPHNeighborCalc<Step1::Calc, Step1::Data>, Step1::Data>(data, index, position_i, dNeighborList);	
-K_SimpleSPH_Step1.cu:	UniformGridUtils::IterateParticlesInNearbyCells<SPHNeighborCalc<Step1::Calc, Step1::Data>, Step1::Data>(data, index, position_i, dGridData);
-K_SimpleSPH_Step1.cu:A = SPHNeighborCalc<Step1::Calc, Step1::Data>
-K_SimpleSPH_Step1.cu:B = Step1::Data
-K_SnowSPH.cu:#include "K_SnowSPH_Step1.cu"
-K_SnowSPH_Step1.cu:class Step1
-K_SnowSPH_Step1.cu:__global__ void K_SumStep1(uint			numParticles,
-K_SnowSPH_Step1.cu:	Step1::Data data;
-K_SnowSPH_Step1.cu:	UniformGridUtils::IterateParticlesInNearbyCells<SPHNeighborCalc<Step1::Calc, Step1::Data>, Step1::Data>(data, index, position_i, dNeighborList);	
-K_SnowSPH_Step1.cu:	UniformGridUtils::IterateParticlesInNearbyCells<SPHNeighborCalc<Step1::Calc, Step1::Data>, Step1::Data>(data, index, position_i, dGridData);
-SimSimpleSPH.cu:	time_computeDensity = ComputeStep1(doTiming);
-SimSimpleSPH.cu:float SimSimpleSPH::ComputeStep1(bool doTiming)
-SimSimpleSPH.cu:	K_SumStep1<<<numBlocks, numThreads>>>(
-SimSnowSPH.cu:	float time_hashSPHData,time_radixsort, time_updatelists, time_computeStep1, time_ComputeStep2, time_ComputeStep3, time_integrateForces;
-SimSnowSPH.cu:	time_computeStep1 = ComputeDensityAndBuildNeighborList(doTiming);
-SimSnowSPH.cu:	time_computeStep1 = ComputeStep1(doTiming);
-SimSnowSPH.cu:		sprintf(tmp,"%4.4f\t%4.4f\t%4.4f\t%4.4f\t%4.4f\t%4.4f\t%4.4f\t\n", time_hashSPHData, time_radixsort, time_updatelists, time_computeStep1, time_ComputeStep2, time_ComputeStep3, time_integrateForces);
-SimSnowSPH.cu:float SimSnowSPH::ComputeStep1(bool doTiming)
-SimSnowSPH.cu:	K_SumStep1<<<numBlocks, numThreads>>>(
+K_SPH_Common.cu:	static __device__ void ForPossibleNeighbor(D &data, uint const &index_i, uint const &index_j, float3 const &position_i)
+K_SimDEM.cu:		static __device__ void ForPossibleNeighbor(Data &data, uint const &index_i, uint const &index_j, float3 const &position_i)
+K_UniformGrid_NeighborList.cu:		static __device__ void ForPossibleNeighbor(Data &data, uint const &index_i, uint const &index_j, float3 const &position_i)
+K_UniformGrid_Utils.cu:				O::ForPossibleNeighbor(data, index_i, index_j, position_i);
+K_UniformGrid_Utils.cu:			O::ForPossibleNeighbor(data, index_i, index_j, position_i);

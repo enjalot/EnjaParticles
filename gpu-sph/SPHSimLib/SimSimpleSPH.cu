@@ -483,8 +483,7 @@ float SimSimpleSPH::ComputeStep1(bool doTiming)
 		computeGridSize(mNumParticles, threadsPerBlock, numBlocks, numThreads);
 	}
 
-	if(doTiming)
-	{
+	if(doTiming) {
 		mGPUTimer->start();
 	}
 

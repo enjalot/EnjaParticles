@@ -5,12 +5,13 @@
 #include "cl_structures.h"
 
 //----------------------------------------------------------------------
-void ForNeighbor(__global float4*  var_sorted,
+float4 ForNeighbor(__global float4*  var_sorted,
 				__constant uint index_i,
 				uint index_j,
 				float4 r,
 				float rlen,
 				float rlen_sq,
+				float4 force,
 	  			__constant struct GridParams* gp,
 	  			__constant struct FluidParams* fp)
 {
@@ -20,11 +21,12 @@ void ForNeighbor(__global float4*  var_sorted,
 #include "cl_snippet_sphere_forces.h"
 }
 //--------------------------------------------------
-void ForPossibleNeighbor(__global float4* var_sorted, 
+float4 ForPossibleNeighbor(__global float4* var_sorted, 
 						__constant uint numParticles, 
 						__constant uint index_i, 
 						uint index_j, 
 						__constant float4 position_i,
+						float4 force,
 	  					__constant struct GridParams* gp,
 	  					__constant struct FluidParams* fp)
 {
@@ -44,7 +46,7 @@ void ForPossibleNeighbor(__global float4* var_sorted,
 		// is this particle within cutoff?
 		if (rlen <= fp->smoothing_length) {
 #if 1
-			ForNeighbor(var_sorted, index_i, index_j, r, rlen, rlen_sq, gp, fp);
+			ForNeighbor(var_sorted, index_i, index_j, r, rlen, rlen_sq, force, gp, fp);
 #endif
 		}
 	}

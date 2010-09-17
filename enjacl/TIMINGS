@@ -100,3 +100,22 @@ build: tot (ms): 1344.08, avg: 14.1482, (count=95)
 neighbors: tot (ms): 2428.6, avg: 25.5642, (count=95)
 (20 fps, 256k)
 ----------------------------------------------------------------------
+Implemented force between particles as in the CUDA particle demo  (Simon Green)
+MacSOX: 330M
+50x50x50 grid
+nb particles (nb_el): 262144
+hash: tot (ms): 127.145, avg: 1.33837, (count=95)
+sort: tot (ms): 2150.18, avg: 22.6334, (count=95)
+build: tot (ms): 4451.78, avg: 46.8608, (count=95)
+neighbors: tot (ms): 6198.98, avg: 65.2525, (count=95)
+8 fps
+----------------------------------------------------------------------
+Macosx, 330M
+25x25x25 grid
+nb particles (nb_el): 65536
+hash: tot (ms): 96.703, avg: 1.01793, (count=95)
+sort: tot (ms): 898.248, avg: 9.45524, (count=95)
+build: tot (ms): 1127.19, avg: 11.8652, (count=95)
+neighbors: tot (ms): 2242.22, avg: 23.6023, (count=95)
+25 fps
+----------------------------------------------------------------------

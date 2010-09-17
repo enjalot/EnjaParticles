@@ -63,6 +63,13 @@ struct FluidParams
 	float scale_to_simulation;
 	float mass;
 	float dt;
+	float friction_coef;
+	float restitution_coef;
+	float damping;
+	float shear;
+	float attraction;
+	float spring;
+	float gravity; // -9.8 m/sec^2
 };
 
 

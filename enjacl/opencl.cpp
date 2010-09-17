@@ -166,7 +166,7 @@ void EnjaParticles::setupArrays()
 	// only for my test routines: sort, hash, datastructures
 	int nb_bytes;
 
-	nb_el = (1 << 18);  // number of particles
+	nb_el = (1 << 16);  // number of particles
 	printf("nb_el= %d\n", nb_el); //exit(0);
 	nb_vars = 4;        // number of cl_float4 variables to reorder
 	printf("nb_el= %d\n", nb_el); 
@@ -182,7 +182,8 @@ void EnjaParticles::setupArrays()
 		//printf("%d, %f, %f, %f, %f\n", i, cells[i].x, cells[i].y, cells[i].z, cells[i].w);
 	}
 
-	float resol = 50.;
+	//float resol = 50.;
+	float resol = 25.;
 	gp.grid_size = float4(10.,10.,10.,1.);
 	gp.grid_min  = float4(0.,0.,0.,1.);
 	gp.grid_max.x = gp.grid_size.x + gp.grid_min.x; 
@@ -245,6 +246,14 @@ void EnjaParticles::setupArrays()
 	fp.smoothing_length = radius; // SPH radius
 	fp.scale_to_simulation = 1.0; // overall scaling factor
 	fp.mass = 1.0; // mass of single particle (MIGHT HAVE TO BE CHANGED)
+	fp.friction_coef = 0.1;
+	fp.restitution_coef = 0.9;
+	fp.damping = 0.9;
+	fp.shear = 0.9;
+	fp.attraction = 0.9;
+	fp.spring = 0.5;
+	fp.gravity = -9.8; // -9.8 m/sec^2
+
 
 #define BUFFER(bytes) cl::Buffer(context, CL_MEM_READ_WRITE, bytes, NULL, &err);
 #define WRITE_BUFFER(cl_var, bytes, cpu_var_ptr) queue.enqueueWriteBuffer(cl_var, CL_TRUE, 0, bytes, cpu_var_ptr, NULL, &event)

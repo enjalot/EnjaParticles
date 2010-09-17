@@ -87,7 +87,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 	/*--------------------------------------------------------------*/
 	/* Iterate over particles found in the nearby cells (including cell of position_i)
 	*/
-	void IterateParticlesInCell(
+	float4 IterateParticlesInCell(
 		__global float4*    var_sorted,
 		__constant uint 	numParticles, 
 		__constant int4 	cellPos,
@@ -95,10 +95,12 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		__constant float4 	position_i, 
 		__global int* 		cell_indexes_start,
 		__global int* 		cell_indexes_end, 
+		float4 force, 
 		__constant struct GridParams* gp,
 		__constant struct FluidParams* fp
     )
 	{
+		return convert_float4(1.);
 		// get hash (of position) of current cell
 		//volatile uint cellHash = UniformGridUtils::calcGridHash<true>(cellPos, cGridParams.grid_res);
 		// wrap edges (false)
@@ -118,7 +120,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 				// For now, nothing to loop over. ADD WHEN CODE WORKS. 
 				// Is there a neighbor?
 #if 1
-				ForPossibleNeighbor(var_sorted, numParticles, index_i, index_j, position_i, gp, fp);
+				ForPossibleNeighbor(var_sorted, numParticles, index_i, index_j, position_i, force, gp, fp);
 #endif
 			}
 		}
@@ -128,7 +130,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 	/* Iterate over particles found in the nearby cells (including cell of position_i) 
 	 *template<class O, class D>
 	 */
-	void IterateParticlesInNearbyCells(
+	float4 IterateParticlesInNearbyCells(
 		__global float4* vars_sorted,
 		uint			numParticles,
 		__constant uint 	index_i, 
@@ -145,6 +147,8 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		// get cell in grid for the given position
 		int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_delta);
 
+		// initialize force on particle (collisions)
+		float4 force = convert_float4(0.);
 
 		// iterate through the 3^3 cells in and around the given position
 		// can't unroll these loops, they are not innermost 
@@ -157,11 +161,14 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 					ipos.z = z;
 					ipos.w = 1;
 	#if 1
-					IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp);
+					// I am summing much more than required
+					force += IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, force, gp, fp);
 	#endif
 				}
 			}
 		}
+
+		return force;
 
 		// TO REMOVE
 		//O::PostCalc(data, index_i);
@@ -200,9 +207,11 @@ __kernel void K_SumStep1(
 
     // Do calculations on particles in neighboring cells
 
+	float4 force;
+
 
 	#if 1
-    IterateParticlesInNearbyCells(sorted_vars, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp);
+    force = IterateParticlesInNearbyCells(sorted_vars, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp);
 	#endif
 }
 

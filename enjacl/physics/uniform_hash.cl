@@ -32,6 +32,13 @@ struct FluidParams
  float scale_to_simulation;
  float mass;
  float dt;
+ float friction_coef;
+ float restitution_coef;
+ float damping;
+ float shear;
+ float attraction;
+ float spring;
+ float gravity;
 };
 # 7 "uniform_hash.cpp" 2
 
