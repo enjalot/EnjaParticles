@@ -50,6 +50,33 @@ sort: tot (ms): 2129.84, avg: 22.4194, (count=95)
 build: tot (ms): 2679.58, avg: 28.2062, (count=95)
 neighbors: tot (ms): 9884.48, avg: 104.047, (count=95)
 //----------------------------------------------------------------------
+MacOSX, GPU: 330M
+50x50x50: added force calculation: 
+nb particles (nb_el): 262144
+hash: tot (ms): 287.847, avg: 3.02997, (count=95)
+sort: tot (ms): 2152.56, avg: 22.6586, (count=95)
+build: tot (ms): 4284.61, avg: 45.1012, (count=95)
+neighbors: tot (ms): 25025.2, avg: 263.423, (count=95)
+
+Adding: 
+    int numParticles = gp->numParticles;
+    float4 vi = FETCH_VEL(var_sorted, index_i);
+    float4 vj = FETCH_VEL(var_sorted, index_j);
+    float4 force_diff = 2.f*(vi-vj) / fp->dt; // assume gp->mass = 1.
+
+    // Update forces
+    float4 force_i = FETCH_FOR(var_sorted, index_i);
+    float4 force_j = FETCH_FOR(var_sorted, index_j);
+
+    // Signs may have to be changed
+    force_i += force_diff;
+    force_j -= force_diff;
+
+    FETCH_VEL(var_sorted, index_i) = force_i;
+    FETCH_VEL(var_sorted, index_j) = force_j;
+
+Made the neighbors time go from 17ms to 263 ms!!! Very very high!
+//----------------------------------------------------------------------
 Kirk: , with force
 50x50x50
 nb particles (nb_el): 65536
