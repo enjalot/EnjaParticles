@@ -95,7 +95,8 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		__constant float4 	position_i, 
 		__global int* 		cell_indexes_start,
 		__global int* 		cell_indexes_end, 
-		__constant struct GridParams* cGridParams
+		__constant struct GridParams* cGridParams,
+		__constant struct FluidParams* fp
     )
 	{
 		// get hash (of position) of current cell
@@ -117,7 +118,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 				// For now, nothing to loop over. ADD WHEN CODE WORKS. 
 				// Is there a neighbor?
 #if 1
-				ForPossibleNeighbor(var_sorted, numParticles, index_i, index_j, position_i);
+				ForPossibleNeighbor(var_sorted, numParticles, index_i, index_j, position_i, fp);
 #endif
 			}
 		}
@@ -134,7 +135,8 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		__constant float4   position_i, 
 		__global int* 		cell_indices_start,
 		__global int* 		cell_indices_end,
-		__constant struct GridParams* cGridParams)
+		__constant struct GridParams* cGridParams,
+		__constant struct FluidParams* fp)
 	{
 		// How to chose which PreCalc to use? 
 		// TODO LATER
@@ -155,7 +157,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 					ipos.z = z;
 					ipos.w = 1;
 	#if 1
-					IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, cGridParams);
+					IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, cGridParams, fp);
 	#endif
 				}
 			}
@@ -178,7 +180,8 @@ __kernel void K_SumStep1(
 				__global float4* sorted_vars,
         		__global int*    cell_indexes_start,
         		__global int*    cell_indexes_end,
-				__constant struct GridParams* cGridParams
+				__constant struct GridParams* cGridParams,
+				__constant struct GridParams* fp
 				)
 {
     // particle index
@@ -199,7 +202,7 @@ __kernel void K_SumStep1(
 
 
 	#if 1
-    IterateParticlesInNearbyCells(sorted_vars, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, cGridParams);
+    IterateParticlesInNearbyCells(sorted_vars, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, cGridParams, fp);
 	#endif
 }
 

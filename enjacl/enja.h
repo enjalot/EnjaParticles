@@ -54,6 +54,12 @@ struct GridParams
     float4          grid_delta;
 };
 
+struct FluidParams
+{
+	float smoothing_length; // SPH radius
+	float scale_to_simulation;
+};
+
 
 typedef struct Vec4
 {
@@ -123,6 +129,7 @@ private:
 	cl::Buffer cl_sort_hashes;
 	cl::Buffer cl_sort_indices;
 	cl::Buffer cl_GridParams;
+	cl::Buffer cl_FluidParams;
 	cl::Buffer cl_cells;
 	cl::Buffer cl_unsort;
 	cl::Buffer cl_sort;
@@ -136,6 +143,7 @@ private:
 	std::vector<int> sort_int;
 	std::vector<int> unsort_int;
 	GridParams gp;
+	FluidParams fp;
 
     cl::Program step1_program;
     cl::Kernel step1_kernel;

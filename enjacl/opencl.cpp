@@ -166,7 +166,7 @@ void EnjaParticles::setupArrays()
 	// only for my test routines: sort, hash, datastructures
 	int nb_bytes;
 
-	nb_el = (1 << 18);  // number of particles
+	nb_el = (1 << 16);  // number of particles
 	printf("nb_el= %d\n", nb_el); //exit(0);
 	nb_vars = 4;        // number of cl_float4 variables to reorder
 	printf("nb_el= %d\n", nb_el); 
@@ -238,6 +238,12 @@ void EnjaParticles::setupArrays()
 		//printf("f= %f, %f, %f, %f\n", f.x, f.y, f.z, f.w);
 	}
 
+	// SETUP FLUID PARAMETERS
+	// cell width is one diameter of particle, which imlies 27 neighbor searches
+	float radius = 0.5*gp.grid_delta.x;
+	fp.smoothing_length = radius; // SPH radius
+	fp.scale_to_simulation = 1.0; // overall scaling factor
+
 #define BUFFER(bytes) cl::Buffer(context, CL_MEM_READ_WRITE, bytes, NULL, &err);
 #define WRITE_BUFFER(cl_var, bytes, cpu_var_ptr) queue.enqueueWriteBuffer(cl_var, CL_TRUE, 0, bytes, cpu_var_ptr, NULL, &event)
 
@@ -275,6 +281,10 @@ void EnjaParticles::setupArrays()
 		cl_GridParams = BUFFER(nb_bytes);
 		WRITE_BUFFER(cl_GridParams, nb_bytes, &gp);
 
+		nb_bytes = sizeof(FluidParams);
+		cl_FluidParams = BUFFER(nb_bytes);
+		WRITE_BUFFER(cl_FluidParams, nb_bytes, &fp);
+
 		nb_bytes = grid_size * sizeof(int);
 		cl_cell_indices_start = BUFFER(nb_bytes);
 		WRITE_BUFFER(cl_cell_indices_start, nb_bytes, &cell_indices_start[0]);
@@ -289,7 +299,6 @@ void EnjaParticles::setupArrays()
 	}
 
 	//exit(0);
-
 
 
     printf("done with setup arrays\n");

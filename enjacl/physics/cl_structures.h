@@ -3,6 +3,7 @@
 #ifndef _CL_STRUCTURES_H_
 #define _CL_STRUCTURES_H_
 
+//----------------------------------------------------------------------
 struct GridParams
 {
     float4          grid_size;
@@ -13,6 +14,13 @@ struct GridParams
     float4          grid_res;
     float4          grid_delta;
 };
+//----------------------------------------------------------------------
+struct FluidParams
+{
+	float smoothing_length; // SPH radius
+	float scale_to_simulation;
+};
+//----------------------------------------------------------------------
 
 
 #endif

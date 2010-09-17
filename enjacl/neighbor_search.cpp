@@ -68,6 +68,7 @@ void EnjaParticles::neighbor_search()
 	kern.setArg(iarg++, cl_cell_indices_start);
 	kern.setArg(iarg++, cl_cell_indices_end);
 	kern.setArg(iarg++, cl_GridParams);
+	kern.setArg(iarg++, cl_FluidParams);
 
 
 	size_t global = (size_t) nb_el;
