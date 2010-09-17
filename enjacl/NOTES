@@ -41,19 +41,27 @@ Compute the forces on each particle (sum of all neighboring particles)o
 
 3) figure out how to restrict number of particles per cell to 8. 
 ----------------------------------------------------------------------
-9/16/2010
-256k particles
-********* printAll
-hash: tot (ms): 58.665, avg: 1.1733, (count=50)
-sort: tot (ms): 1107.73, avg: 22.1547, (count=50)
-build: tot (ms): 539.638, avg: 10.7928, (count=50)
-neighbors: tot (ms): 5173.49, avg: 103.47, (count=50)
-Total: 135 ms -> 6 fps
+Fri. Sept. 17, 2010
+Implement simple collisions detection: 
+Let particles fall due to gravity. Collision: given centers p1,p2, check that |p1-p2| < 2R. 
+(one could also make the force act BEFORE they collide)
+If so, update the force on the particles: (which is initially gravity)
+    Let rhat = (p2-p1)/|p2-p1| (points from 1 to 2)
+    F1 += 2*(relative momentum) / dt 
+	F1 += 2*m*(v2-v1) / dt
+	F2 -= 2*m*(v2-v1) / dt
+	relative momentum: (v2-v1)*m (m is mass: m1=m2)
 
-65k particles
-hash: tot (ms): 82.762, avg: 1.65524, (count=50)
-sort: tot (ms): 379.977, avg: 7.59954, (count=50)
-build: tot (ms): 77.693, avg: 1.55386, (count=50)
-neighbors: tot (ms): 390.026, avg: 7.80052, (count=50)
-Total: 20ms -> 50fps
+Euler (I should implement Verlet)
+v(n+1) = v(n) + dt * [F(n) / m]
+x(n+1) = x(n) + dt * v(n)
+F(n+1) = -g + collisions = -g +- 2*m*(v2-v1) / dt * C
+ (C=1 if collision, C=0 if no collision)
+
+Update x,v in one kernel
+Update force in collision kernel
+
+Time step dt < grid_size.x / vel_max (Courant conditions). So need grid_size iterations for 
+the fastest particles to go from one side of the cell to the other. So, for 50^3 grid, 
+one need 50 iterations = 1 sec of real time (reasonable). 
 ----------------------------------------------------------------------

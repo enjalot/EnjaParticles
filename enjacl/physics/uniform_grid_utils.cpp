@@ -95,14 +95,14 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		__constant float4 	position_i, 
 		__global int* 		cell_indexes_start,
 		__global int* 		cell_indexes_end, 
-		__constant struct GridParams* cGridParams,
+		__constant struct GridParams* gp,
 		__constant struct FluidParams* fp
     )
 	{
 		// get hash (of position) of current cell
 		//volatile uint cellHash = UniformGridUtils::calcGridHash<true>(cellPos, cGridParams.grid_res);
 		// wrap edges (false)
-		uint cellHash = calcGridHash(cellPos, cGridParams->grid_res, false);
+		uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
 
 		/* get start/end positions for this cell/bucket */
 		uint startIndex = FETCH(cell_indexes_start,cellHash);
@@ -118,7 +118,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 				// For now, nothing to loop over. ADD WHEN CODE WORKS. 
 				// Is there a neighbor?
 #if 1
-				ForPossibleNeighbor(var_sorted, numParticles, index_i, index_j, position_i, fp);
+				ForPossibleNeighbor(var_sorted, numParticles, index_i, index_j, position_i, gp, fp);
 #endif
 			}
 		}
@@ -135,7 +135,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		__constant float4   position_i, 
 		__global int* 		cell_indices_start,
 		__global int* 		cell_indices_end,
-		__constant struct GridParams* cGridParams,
+		__constant struct GridParams* gp,
 		__constant struct FluidParams* fp)
 	{
 		// How to chose which PreCalc to use? 
@@ -143,7 +143,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		//PreCalc(data, index_i); // TODO
 
 		// get cell in grid for the given position
-		int4 cell = calcGridCell(position_i, cGridParams->grid_min, cGridParams->grid_delta);
+		int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_delta);
 
 
 		// iterate through the 3^3 cells in and around the given position
@@ -157,7 +157,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 					ipos.z = z;
 					ipos.w = 1;
 	#if 1
-					IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, cGridParams, fp);
+					IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp);
 	#endif
 				}
 			}
@@ -180,7 +180,7 @@ __kernel void K_SumStep1(
 				__global float4* sorted_vars,
         		__global int*    cell_indexes_start,
         		__global int*    cell_indexes_end,
-				__constant struct GridParams* cGridParams,
+				__constant struct GridParams* gp,
 				__constant struct GridParams* fp
 				)
 {
@@ -202,7 +202,7 @@ __kernel void K_SumStep1(
 
 
 	#if 1
-    IterateParticlesInNearbyCells(sorted_vars, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, cGridParams, fp);
+    IterateParticlesInNearbyCells(sorted_vars, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp);
 	#endif
 }
 

@@ -198,6 +198,7 @@ void EnjaParticles::setupArrays()
 	gp.grid_delta.y = 1. / gp.grid_delta.y;
 	gp.grid_delta.z = 1. / gp.grid_delta.z;
 	gp.grid_delta.w = 1.;
+	gp.numParticles = nb_el;  // WRONG SPOT, BUT USEFUL for CL kernels arg passing
 	printf("delta z= %f\n", gp.grid_delta.z);
 
 	grid_size = (int) (gp.grid_res.x * gp.grid_res.y * gp.grid_res.z);
@@ -243,6 +244,7 @@ void EnjaParticles::setupArrays()
 	float radius = 0.5*gp.grid_delta.x;
 	fp.smoothing_length = radius; // SPH radius
 	fp.scale_to_simulation = 1.0; // overall scaling factor
+	fp.mass = 1.0; // mass of single particle (MIGHT HAVE TO BE CHANGED)
 
 #define BUFFER(bytes) cl::Buffer(context, CL_MEM_READ_WRITE, bytes, NULL, &err);
 #define WRITE_BUFFER(cl_var, bytes, cpu_var_ptr) queue.enqueueWriteBuffer(cl_var, CL_TRUE, 0, bytes, cpu_var_ptr, NULL, &event)

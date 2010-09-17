@@ -23,12 +23,15 @@ struct GridParams
 
     float4 grid_res;
     float4 grid_delta;
+    uint numParticles;
 };
 
 struct FluidParams
 {
  float smoothing_length;
  float scale_to_simulation;
+ float mass;
+ float dt;
 };
 # 7 "uniform_hash.cpp" 2
 

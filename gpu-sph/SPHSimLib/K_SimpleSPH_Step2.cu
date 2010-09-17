@@ -32,6 +32,7 @@ public:
 	public:
 
 		// this is called before the loop over each neighbor particle
+		//-------------------------------------------------
 		static __device__ void PreCalc(Data &data, uint index_i)
 		{
 			// read particle data from sorted arrays
@@ -43,6 +44,7 @@ public:
 			data.f_viscosity	= make_float3(0,0,0);
 		}
 
+		//-------------------------------------------------
 		static __device__ void ForNeighbor(Data &data, uint const &index_i, uint const &index_j, float3 const &r, float const& rlen, float const &rlen_sq)
 		{
 			data.veleval_j	= FETCH_FLOAT3(data.dParticleDataSorted, veleval, index_j);
@@ -75,6 +77,7 @@ public:
 			data.f_viscosity += ( (data.veleval_j  - data. veleval_i ) / (data.density_j * data.density_i) ) * SPH_Kernels::Wviscosity::Laplace_Variable(cFluidParams.smoothing_length, r, rlen);
 		}
 
+		//-------------------------------------------------
 		// this is called after the loop over each particle in a cell
 		static __device__ void PostCalc(Data &data, uint index_i)
 		{
@@ -87,6 +90,7 @@ public:
 
 };
 
+//-------------------------------------------------
 template <SPHSymmetrization symmetrization> 
 __global__ void K_SumStep2(uint			numParticles,
 						   SimpleSPHData	dParticleDataSorted,

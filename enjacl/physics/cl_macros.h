@@ -4,6 +4,15 @@
 #define _CL_MACROS_H_
 
 
+//---------------------------------------------------------------------- 
+// Offsets into var_sorted array
+
+//enum {DENS=0, POS, VEL, ACC, FOR};
+#define DENS 0 
+#define POS 1
+#define VEL 2
+#define ACC 3
+#define FOR 3
 
 
 // copied from SPHSimLib code
@@ -18,6 +27,12 @@
 //#define FETCH(a, t, i) a.t[i]
 #define FETCH(t, i) t[i]
 #define FETCH_VAR(t, i, ivar) t[i+ivar*numParticles]
+#define FETCH_VEL(t, i) t[i+VEL*numParticles]
+#define FETCH_DENS(t, i) t[i+DENS*numParticles]
+#define FETCH_FOR(t, i) t[i+FOR*numParticles]
+#define FETCH_ACC(t, i) t[i+ACC*numParticles]
+#define FETCH_POS(t, i) t[i+POS*numParticles]
+
 //#define FETCH_NOTEX(a, t, i) a.t[i]
 #define FETCH_NOTEX(t, i) t[i]
 //#define FETCH_FLOAT3(a,t,i) make_float3(FETCH(a,t,i))
@@ -26,16 +41,6 @@
 #define FETCH_MATRIX3_NOTEX(a,t,i) a.t[i]
 //#define FETCH(a, t, i) (a + __mul24(i,sizeof(a)) + (void*)offsetof(a, t))
 #endif
-
-// 
-// Offsets into var_sorted array
-
-//enum {DENS=0, POS, VEL, ACC, FOR};
-#define DENS 0 
-#define POS 1
-#define VEL 2
-#define ACC 3
-#define FOR 3
 
 
 

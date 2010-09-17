@@ -40,6 +40,7 @@ typedef struct int3 {
 	}
 } int3;
 
+//-------------------------------------------
 // GE: Sept8, 2010
 // From Krog's SPH code
 struct GridParams
@@ -52,15 +53,20 @@ struct GridParams
     float4          grid_res;
 
     float4          grid_delta;
+	int				numParticles;
 };
 
+//-------------------------------------------
 struct FluidParams
 {
 	float smoothing_length; // SPH radius
 	float scale_to_simulation;
+	float mass;
+	float dt;
 };
 
 
+//-------------------------------------------
 typedef struct Vec4
 {
     float x;
