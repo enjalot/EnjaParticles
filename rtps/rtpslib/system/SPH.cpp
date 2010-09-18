@@ -125,6 +125,10 @@ typedef struct SPHParams
     printf("create pressure kernel\n");
     loadPressure();
 
+    printf("create viscosity kernel\n");
+    loadViscosity();
+
+
     printf("create collision wall kernel\n");
     loadCollision_wall();
 
@@ -171,14 +175,14 @@ void SPH::update()
     {
         k_density.execute(num);
         k_pressure.execute(num);
+        k_viscosity.execute(num);
 
-        k_collision_wall.execute(num);
+        //k_collision_wall.execute(num);
 
         //euler integration
         k_euler.execute(num);
     }
 
-    /*
     std::vector<float4> ftest = cl_force.copyToHost(100);
     for(int i = 0; i < 100; i++)
     {
@@ -186,7 +190,6 @@ void SPH::update()
             printf("force: %f %f %f  \n", ftest[i].x, ftest[i].y, ftest[i].z);
     }
     printf("execute!\n");
-    */
 
 
     cl_position.release();
