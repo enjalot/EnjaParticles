@@ -166,7 +166,7 @@ void EnjaParticles::setupArrays()
 	// only for my test routines: sort, hash, datastructures
 	int nb_bytes;
 
-	nb_el = (1 << 17);  // number of particles
+	nb_el = (1 << 16);  // number of particles
 	printf("nb_el= %d\n", nb_el); //exit(0);
 	nb_vars = 3;        // number of cl_float4 variables to reorder
 	printf("nb_el= %d\n", nb_el); 
@@ -183,7 +183,7 @@ void EnjaParticles::setupArrays()
 	}
 
 	//float resol = 50.;
-	float resol = 30.;
+	float resol = 25.;
 	gp.grid_size = float4(10.,10.,10.,1.);
 	gp.grid_min  = float4(0.,0.,0.,1.);
 	gp.grid_max.x = gp.grid_size.x + gp.grid_min.x; 
@@ -338,7 +338,7 @@ void EnjaParticles::buildDataStructures()
         	datastructures_kernel = cl::Kernel(datastructures_program, "datastructures", &err);
 			first_time = false;
 		} catch(cl::Error er) {
-        	printf("ERROR(neighborSearch): %s(%s)\n", er.what(), oclErrorString(er.err()));
+        	printf("ERROR(buildDataStructures): %s(%s)\n", er.what(), oclErrorString(er.err()));
 			exit(1);
 		}
 	}
@@ -456,7 +456,7 @@ void EnjaParticles::hash()
 			//printf("KERNEL\n");
 			first_time = false;
 		} catch(cl::Error er) {
-        	printf("ERROR(neighborSearch): %s(%s)\n", er.what(), oclErrorString(er.err()));
+        	printf("ERROR(hash): %s(%s)\n", er.what(), oclErrorString(er.err()));
 			exit(1);
 		}
 	}
@@ -955,10 +955,14 @@ cl::Program EnjaParticles::loadProgram(std::string kernel_source)
 
     try
     {
-        //err = program.build(devices, "-cl-nv-verbose");
 		string path(CL_SOURCE_DIR);
-		string options ="-I/" + path;
-        err = program.build(devices, options.c_str()); //GE: include path
+		//string options ="-I/" + path;
+        //err = program.build(devices, "-cl-nv-verbose");
+        err = program.build(devices, "-cl-fast-relaxed-math");
+		//-cl-mad-enable not working on the mac!
+        //err = program.build(devices, "-cl-mad-enable -cl-nv-verbose");
+        //err = program.build(devices);
+        //err = program.build(devices, options.c_str()); //GE: include path
     }
     catch (cl::Error er) {
 		printf("loadProgram::program.build\n");

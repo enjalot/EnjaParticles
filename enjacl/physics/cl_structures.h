@@ -13,7 +13,7 @@ struct GridParams
     // number of cells in each dimension/side of grid
     float4          grid_res;
     float4          grid_delta;
-    uint            numParticles; // nb fluid particles: wrong spot for this variable
+    int            numParticles; // nb fluid particles: wrong spot for this variable
 };
 //----------------------------------------------------------------------
 struct FluidParams

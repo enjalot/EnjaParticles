@@ -131,7 +131,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 	 */
 	float4 IterateParticlesInNearbyCells(
 		__global float4* vars_sorted,
-		int			numParticles, // on Linux, remove __constant
+		int		numParticles, // on Linux, remove __constant
 		int 	index_i, 
 		__constant float4   position_i, 
 		__global int* 		cell_indices_start,
@@ -139,18 +139,21 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		__constant struct GridParams* gp,
 		__constant struct FluidParams* fp)
 	{
-
 		// initialize force on particle (collisions)
-		float4 force = convert_float4(0.);
-
-#if 0
-		// How to chose which PreCalc to use? 
+		//float4 force = convert_float4(0.);
+		float4 force;
+		//force = convert_float4(0.);
+		force.x = 0.;
+		force.y = 0.;
+		force.z = 0.;
+		force.w = 0.;
+#if 1
+		// How to choose which PreCalc to use? 
 		// TODO LATER
 		//PreCalc(data, index_i); // TODO
 
 		// get cell in grid for the given position
 		int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_delta);
-
 
 		// iterate through the 3^3 cells in and around the given position
 		// can't unroll these loops, they are not innermost 
@@ -185,19 +188,16 @@ __kernel void K_SumStep1(
         		__global int*    cell_indexes_start,
         		__global int*    cell_indexes_end,
 				__constant struct GridParams* gp,
-				__constant struct GridParams* fp
+				__constant struct FluidParams* fp
 				)
 {
     // particle index
-	uint index = get_global_id(0);
+	int index = get_global_id(0);
     if (index >= numParticles) return;
-
-    //Step1::Data data;
-    //data.dParticleDataSorted = dParticleDataSorted;
 
 	//This is done as part of the template approach since the Data can then be used as a template object 
 	//in Cuda
-	vars = sorted_vars; // not needed
+	//vars = sorted_vars; // not needed
 
     float4 position_i = FETCH_POS(sorted_vars, index);
 
@@ -205,12 +205,22 @@ __kernel void K_SumStep1(
 
 	float4 force;
 
-
 	#if 1
     force = IterateParticlesInNearbyCells(sorted_vars, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp);
 	#endif
 
-	FETCH_FOR(sorted_vars, index) = force;
+	// needed in this version
+	//FETCH_FOR(sorted_vars, index) = force;
+	//force = FETCH_FOR(sorted_vars, index);// = force;
+	//sorted_vars[index] = force;
+
+	//vars[mad(2,numParticles,index)] = force; // DOES NOT WORK
+	//vars[mad24(2,numParticles,index)] = force; // DOES NOT WORK
+
+	// If none of the two lines are enabled, timing is 24 ms!!
+	// WEIRD TO SAY THE LEAST!
+	//vars[index] = force; // 16 ms
+	vars[index+numParticles*2]; // 61 ms
 }
 
 /*-------------------------------------------------------------- */

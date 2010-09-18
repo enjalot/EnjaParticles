@@ -19,9 +19,8 @@ float4 ForNeighbor(__global float4*  vars_sorted,
 // #include FILE to deal with collisions or other stuff
 
 	int index = get_global_id(0);
-#include "cl_snippet_sphere_forces.h"
 
-	//float4 force = convert_float4(0.);
+#include "cl_snippet_sphere_forces.h"
 
 	return force;
 }
@@ -34,7 +33,12 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 	  					__constant struct GridParams* gp,
 	  					__constant struct FluidParams* fp)
 {
-	float4 force = convert_float4(0.f);
+	float4 force;
+	force.x = 0.;
+	force.y = 0.;
+	force.z = 0.;
+	force.w = 0.;
+	//float4 force = convert_float4(0.);
 
 	// check not colliding with self
 	if (index_j != index_i) {

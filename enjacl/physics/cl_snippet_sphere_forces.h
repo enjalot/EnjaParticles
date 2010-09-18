@@ -21,7 +21,13 @@ void ForNeighbor(__global float4*  vars_sorted,
 	float4 relPos = rj-ri;
 	float dist = length(relPos);
 	float collideDist = 2.*fp->smoothing_length; // smoothing_length = particle radius
+
+	// Need better way to deal with force
 	float4 force;
+	force.x = 0.;
+	force.y = 0.;
+	force.z = 0.;
+	force.w = 0.;
 
 	if (dist < collideDist) {
 		float4 vi = FETCH_VEL(vars_sorted, index_i);
@@ -35,7 +41,7 @@ void ForNeighbor(__global float4*  vars_sorted,
 		float4 tanVel = relVel - (dot(relVel, norm) * norm);
 
 		// spring force
-		float4 force = -fp->spring*(collideDist - dist) * norm;
+		force = -fp->spring*(collideDist - dist) * norm;
 
 		// dashpot (damping) force
 		force +=fp->damping*relVel;
@@ -43,8 +49,6 @@ void ForNeighbor(__global float4*  vars_sorted,
 		// tangential shear force
 		force += fp->shear*tanVel;
 		force += fp->attraction*relPos;
-
-	//FETCH_FOR(vars_sorted, index) = force;
 	}
 
 #endif

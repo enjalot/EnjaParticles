@@ -23,7 +23,7 @@ struct GridParams
 
     float4 grid_res;
     float4 grid_delta;
-    uint numParticles;
+    int numParticles;
 };
 
 struct FluidParams

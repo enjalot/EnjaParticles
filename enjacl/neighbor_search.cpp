@@ -45,6 +45,7 @@ void EnjaParticles::neighbor_search()
 			string path(CL_SOURCE_DIR);
 			path = path + "/uniform_grid_utils.cl";
 			char* src = getSourceString(path.c_str());
+			printf("============= NEIGHBOR SEARCH\n");
         	step1_program = loadProgram(src);
 			//printf("LOADED\n");
         	step1_kernel = cl::Kernel(step1_program, "K_SumStep1", &err);

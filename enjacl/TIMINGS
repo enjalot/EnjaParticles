@@ -119,3 +119,65 @@ build: tot (ms): 1127.19, avg: 11.8652, (count=95)
 neighbors: tot (ms): 2242.22, avg: 23.6023, (count=95)
 25 fps
 ----------------------------------------------------------------------
+MacOSX, 330M (WHY DO SLOW?)
+Morning of Sept. 18, 2010. The oclParticles is also running slow. 
+nb particles (nb_el): 65536
+hash: tot (ms): 297.088, avg: 3.12724, (count=95)
+sort: tot (ms): 2628.45, avg: 27.6679, (count=95)
+build: tot (ms): 4376.53, avg: 46.0687, (count=95)
+neighbors: tot (ms): 16093.2, avg: 169.402, (count=95)
+(I had to reboot the system)
+
+nb particles (nb_el): 65536, MacOSX
+hash: tot (ms): 76.041, avg: 0.800431, (count=95)
+sort: tot (ms): 724.16, avg: 7.62274, (count=95)
+build: tot (ms): 733.945, avg: 7.72574, (count=95)
+neighbors: tot (ms): 5862.12, avg: 61.7065, (count=95)
+
+nb particles (nb_el): 65536, MACOSX
+hash: tot (ms): 76.898, avg: 0.809453, (count=95)
+sort: tot (ms): 773.045, avg: 8.13732, (count=95)
+build: tot (ms): 756.552, avg: 7.96371, (count=95)
+neighbors: tot (ms): 5852.44, avg: 61.6046, (count=95)
+(above timings include a force update, once computed)
+
+nb particles (nb_el): 65536
+hash: tot (ms): 122.222, avg: 1.28655, (count=95)
+sort: tot (ms): 828.146, avg: 8.71733, (count=95)
+build: tot (ms): 1043.63, avg: 10.9856, (count=95)
+neighbors: tot (ms): 2384.14, avg: 25.0962, (count=95)
+(above timings removed the force update, once computed)
+(of course, I do not know what has been optimized away!)
+
+nb particles (nb_el): 65536
+hash: tot (ms): 77.548, avg: 0.816295, (count=95)
+sort: tot (ms): 768.18, avg: 8.08611, (count=95)
+build: tot (ms): 750.291, avg: 7.8978, (count=95)
+neighbors: tot (ms): 5831.16, avg: 61.3806, (count=95)
+FETCH_FOR(sorted_vars, index) = force;
+
+How can this be? Use of the 2nd line, below, is 30% faster on the mac!!
+Both arrays are __global float4* in uniform*utils.cpp. 
+//sorted_vars[index] = force; // 
+vars[index] = force;  // 30 percent faster
+
+At the end of K_Sum_Step1, I have two choices: 
+//vars[index+numParticles*2] = force; // much slower
+vars[index] = force;  // much faster
+Rest of the code is identical. 
+
+BUT THIS IS ILLOGICAL!!! index is get_global_id(0), so there is no coalescion problems. This is not good. "index+numParticles*2" is a MAD operation (multiply/add) and should have the same cost of "index" alone (assuming enough registers). 
+
+By adding the option -cl-fast-relaxed-math to the compiler, I get better
+timings with MAD options index+2*numParticles
+This is the same option used in the oclParticles demo by NVIDIA
+
+nb particles (nb_el): 65536
+hash: tot (ms): 78.41, avg: 0.825368, (count=95)
+sort: tot (ms): 747.908, avg: 7.87272, (count=95)
+build: tot (ms): 723.435, avg: 7.61511, (count=95)
+neighbors: tot (ms): 2380.64, avg: 25.0594, (count=95)
+25 fps , with vars[index+numParticles*2] = force
+HOWEVER, with vars[index] = force, the code crashes. WHY? 
+
+----------------------------------------------------------------------
