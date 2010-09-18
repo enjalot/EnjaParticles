@@ -60,8 +60,8 @@ __kernel void pressure(__global float4* pos, __global float* density, __global f
         {
             float r2 = rlen*rlen;
             float re2 = h*h;
-            //if(r2/re2 <= 4.f)
-            //{
+            if(r2/re2 <= 4.f)
+            {
                 //float R = sqrt(r2/re2);
                 //float Wij = alpha*(-2.25f + 2.375f*R - .625f*R*R);
                 float hr2 = (h - rlen);
@@ -78,7 +78,7 @@ __kernel void pressure(__global float4* pos, __global float* density, __global f
                 float kern = params->mass * -1.0f * Wij * (Pi + Pj) / (2.0f * density[j]);
                 //float kern = params->mass * -1.0f * Wij * (Pi + Pj) / (density[i] * density[j]);
                 f += kern * r;
-            //}
+            }
 
         }
     }

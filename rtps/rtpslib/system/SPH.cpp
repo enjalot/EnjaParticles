@@ -16,11 +16,21 @@ SPH::SPH(RTPS *psfr, int n)
     num = n;
 
     //*** Initialization, TODO: move out of here to the particle directory
+    std::vector<float4> colors(num);
+    /*
     std::vector<float4> positions(num);
     std::vector<float4> colors(num);
     std::vector<float4> forces(num);
     std::vector<float4> velocities(num);
     std::vector<float> densities(num);
+    */
+    positions.resize(num);
+    forces.resize(num);
+    velocities.resize(num);
+    densities.resize(num);
+
+    //for reading back different values from the kernel
+    std::vector<float4> error_check(num);
     
     
     //std::fill(positions.begin(), positions.end(),(float4) {0.0f, 0.0f, 0.0f, 1.0f});
@@ -85,6 +95,7 @@ typedef struct SPHParams
     std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
 
     std::fill(densities.begin(), densities.end(), 0.0f);
+    std::fill(error_check.begin(), error_check.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
 
     /*
     for(int i = 0; i < 20; i++)
@@ -117,6 +128,7 @@ typedef struct SPHParams
 
     cl_density = Buffer<float>(ps->cli, densities);
 
+    cl_error_check= Buffer<float4>(ps->cli, error_check);
 
 
     printf("create density kernel\n");
@@ -165,15 +177,35 @@ void SPH::update()
 {
     //call kernels
     //TODO: add timings
+#ifdef CPU
+    cpuDensity();
+    //cpuPressure();
+    //cpuEuler();
+#endif
+#ifdef GPU
     glFinish();
     cl_position.acquire();
     cl_color.acquire();
     
     //printf("execute!\n");
-
     for(int i=0; i < 10; i++)
     {
         k_density.execute(num);
+        //test density
+        std::vector<float> dens = cl_density.copyToHost(num);
+        float dens_sum = 0.0f;
+        for(int j = 0; j < num; j++)
+        {
+            dens_sum += dens[j];
+        }
+        printf("summed density: %f\n", dens_sum);
+        /*
+        std::vector<float4> er = cl_error_check.copyToHost(10);
+        for(int j = 0; j < 10; j++)
+        {
+            printf("rrrr[%d]: %f %f %f %f\n", j, er[j].x, er[j].y, er[j].z, er[j].w);
+        }
+        */
         k_pressure.execute(num);
         k_viscosity.execute(num);
 
@@ -182,7 +214,8 @@ void SPH::update()
         //euler integration
         k_euler.execute(num);
     }
-
+#endif
+    /*
     std::vector<float4> ftest = cl_force.copyToHost(100);
     for(int i = 0; i < 100; i++)
     {
@@ -190,6 +223,7 @@ void SPH::update()
             printf("force: %f %f %f  \n", ftest[i].x, ftest[i].y, ftest[i].z);
     }
     printf("execute!\n");
+    */
 
 
     cl_position.release();

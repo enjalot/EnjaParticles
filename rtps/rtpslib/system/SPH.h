@@ -68,11 +68,19 @@ private:
 
     Buffer<SPHParams> cl_params;
 
+
+    std::vector<float4> positions;
+    std::vector<float> densities;
+    std::vector<float4> forces;
+    std::vector<float4> velocities;
+
     Buffer<float4> cl_position;
     Buffer<float4> cl_color;
     Buffer<float> cl_density;
     Buffer<float4> cl_force;
     Buffer<float4> cl_velocity;
+    
+    Buffer<float4> cl_error_check;
 
     //these are defined in sph/ folder next to the kernels
     void loadDensity();
@@ -80,6 +88,9 @@ private:
     void loadViscosity();
     void loadCollision_wall();
     void loadEuler();
+
+
+    void cpuDensity();
 
 };
 
