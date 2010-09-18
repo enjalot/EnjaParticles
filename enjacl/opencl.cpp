@@ -166,9 +166,9 @@ void EnjaParticles::setupArrays()
 	// only for my test routines: sort, hash, datastructures
 	int nb_bytes;
 
-	nb_el = (1 << 16);  // number of particles
+	nb_el = (1 << 17);  // number of particles
 	printf("nb_el= %d\n", nb_el); //exit(0);
-	nb_vars = 4;        // number of cl_float4 variables to reorder
+	nb_vars = 3;        // number of cl_float4 variables to reorder
 	printf("nb_el= %d\n", nb_el); 
 
 	cells.resize(nb_el);
@@ -183,7 +183,7 @@ void EnjaParticles::setupArrays()
 	}
 
 	//float resol = 50.;
-	float resol = 25.;
+	float resol = 30.;
 	gp.grid_size = float4(10.,10.,10.,1.);
 	gp.grid_min  = float4(0.,0.,0.,1.);
 	gp.grid_max.x = gp.grid_size.x + gp.grid_min.x; 
@@ -242,7 +242,7 @@ void EnjaParticles::setupArrays()
 
 	// SETUP FLUID PARAMETERS
 	// cell width is one diameter of particle, which imlies 27 neighbor searches
-	float radius = 0.5*gp.grid_delta.x;
+	float radius = gp.grid_delta.x; 
 	fp.smoothing_length = radius; // SPH radius
 	fp.scale_to_simulation = 1.0; // overall scaling factor
 	fp.mass = 1.0; // mass of single particle (MIGHT HAVE TO BE CHANGED)

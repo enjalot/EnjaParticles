@@ -88,23 +88,23 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 	/* Iterate over particles found in the nearby cells (including cell of position_i)
 	*/
 	float4 IterateParticlesInCell(
-		__global float4*    var_sorted,
+		__global float4*    vars_sorted,
 		__constant uint 	numParticles, 
 		__constant int4 	cellPos,
 		__constant uint 	index_i, 
 		__constant float4 	position_i, 
 		__global int* 		cell_indexes_start,
 		__global int* 		cell_indexes_end, 
-		float4 force, 
 		__constant struct GridParams* gp,
 		__constant struct FluidParams* fp
     )
 	{
-		return convert_float4(1.);
 		// get hash (of position) of current cell
 		//volatile uint cellHash = UniformGridUtils::calcGridHash<true>(cellPos, cGridParams.grid_res);
 		// wrap edges (false)
 		uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
+
+		float4 force = convert_float4(0.0);
 
 		/* get start/end positions for this cell/bucket */
 		uint startIndex = FETCH(cell_indexes_start,cellHash);
@@ -120,7 +120,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 				// For now, nothing to loop over. ADD WHEN CODE WORKS. 
 				// Is there a neighbor?
 #if 1
-				ForPossibleNeighbor(var_sorted, numParticles, index_i, index_j, position_i, force, gp, fp);
+				force += ForPossibleNeighbor(vars_sorted, numParticles, index_i, index_j, position_i, gp, fp);
 #endif
 			}
 		}
@@ -162,24 +162,19 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 					ipos.w = 1;
 	#if 1
 					// I am summing much more than required
-					force += IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, force, gp, fp);
+					force += IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp);
 	#endif
 				}
 			}
 		}
 
 		return force;
-
-		// TO REMOVE
-		//O::PostCalc(data, index_i);
-
-		// TO DO LATER
-		//PostCalc(data, index_i);
-
 	}
 
 	//----------------------------------------------------------------------
 //--------------------------------------------------------------
+// compute forces on particles
+
 __kernel void K_SumStep1(
 				uint    numParticles,
 				uint	nb_vars,
@@ -202,8 +197,7 @@ __kernel void K_SumStep1(
 	//in Cuda
 	vars = sorted_vars; // not needed
 
-	/* assume position is 0th variable */
-    float4 position_i = FETCH_VAR(vars, index, POS);
+    float4 position_i = FETCH_VAR(sorted_vars, index, POS);
 
     // Do calculations on particles in neighboring cells
 
@@ -213,6 +207,8 @@ __kernel void K_SumStep1(
 	#if 1
     force = IterateParticlesInNearbyCells(sorted_vars, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp);
 	#endif
+
+	FETCH_FOR(sorted_vars, index) = force;
 }
 
 /*-------------------------------------------------------------- */

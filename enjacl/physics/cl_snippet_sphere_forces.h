@@ -2,7 +2,7 @@
 #define _cl_snippet_sphere_forces_h_
 
 #if 0
-void ForNeighbor(__global float4*  var_sorted,
+void ForNeighbor(__global float4*  vars_sorted,
 				__constant uint index_i,
 				uint index_j,
 				float4 r,
@@ -14,17 +14,18 @@ void ForNeighbor(__global float4*  var_sorted,
 }
 #endif
 
+#if 1
 	int numParticles = gp->numParticles;
-	float4 ri = FETCH_POS(var_sorted, index_i);
-	float4 rj = FETCH_POS(var_sorted, index_j);
+	float4 ri = FETCH_POS(vars_sorted, index_i);
+	float4 rj = FETCH_POS(vars_sorted, index_j);
 	float4 relPos = rj-ri;
 	float dist = length(relPos);
 	float collideDist = 2.*fp->smoothing_length; // smoothing_length = particle radius
+	float4 force;
 
 	if (dist < collideDist) {
-		float4 vi = FETCH_VEL(var_sorted, index_i);
-		float4 vj = FETCH_VEL(var_sorted, index_j);
-		//float4 force_diff = 2.f*(vi-vj) / fp->dt; // assume gp->mass = 1.
+		float4 vi = FETCH_VEL(vars_sorted, index_i);
+		float4 vj = FETCH_VEL(vars_sorted, index_j);
 		float4 norm = relPos / dist;
 
 		// relative velocity
@@ -42,27 +43,12 @@ void ForNeighbor(__global float4*  var_sorted,
 		// tangential shear force
 		force += fp->shear*tanVel;
 		force += fp->attraction*relPos;
+
+	//FETCH_FOR(vars_sorted, index) = force;
 	}
 
-	return force;
+#endif
 
 
-
-	#if 0
-	//dist = length(vi);
-
-	// Update forces
-	float4 force_i = FETCH_FOR(var_sorted, index_i);
-	float4 force_j = FETCH_FOR(var_sorted, index_j);
-
-	// Signs may have to be changed
-	//force_i += force_diff;
-	//force_j -= force_diff;
-
-	FETCH_VEL(var_sorted, index_i) = force_i;
-	FETCH_VEL(var_sorted, index_j) = force_j;
-
-	// Have to make sure gravity is included as an input
-	#endif
 
 #endif
