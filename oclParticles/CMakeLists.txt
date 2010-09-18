@@ -1,0 +1,61 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+project(particles)
+
+#need to include FindOPENCL.cmake to
+SET( CMAKE_MODULE_PATH
+   ${particles_SOURCE_DIR}/../cmake
+)
+
+#Only define this on the apple platform
+# appears in RadixSort.cl
+IF(APPLE)
+    ADD_DEFINITIONS(-DMAC)
+ELSE(APPLE)
+   ADD_DEFINITIONS(-DLINUX)
+ENDIF()
+ADD_DEFINITIONS(-DCL_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/physics")
+ADD_DEFINITIONS(-DCL_SORT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/oclRadixSortKeysValues")
+ADD_DEFINITIONS(-DGPU_PROFILING)
+
+FIND_PACKAGE (GLUT)
+FIND_PACKAGE (OpenGL)
+FIND_PACKAGE (OPENCL)
+FIND_PACKAGE (GLEW)
+
+SET(OPENCL_INCLUDE_DIR $ENV{OPENCL_HOME}/common/inc/CL)
+SET(OPENCL_OCL_INCLUDE_DIR $ENV{OPENCL_HOME}/common/inc)
+SET(OPENCL_shared_INCLUDE_DIR $ENV{OPENCL_HOME}/../shared/inc)
+SET(OPENGL_INCLUDE_DIR $ENV{CUDA_LOCAL}/common/inc)
+
+message("**** ${OPENCL_INCLUDE_DIR} ***")
+
+INCLUDE_DIRECTORIES(
+	${particles_SOURCE_DIR}/inc
+    ${GLUT_INCLUDE_DIR}
+    //${OPENGL_INCLUDE_DIR}
+    ${GLEW_INCLUDE_PATH}
+    ${OPENCL_INCLUDE_DIR}
+    ${OPENCL_OCL_INCLUDE_DIR}
+	${OPENCL_shared_INCLUDE_DIR}
+    ${particles_SOURCE_DIR}/../opencl11
+)
+
+#make OpenCL use the OpenGL context to avoid memory transfer
+ADD_DEFINITIONS(-DGL_INTEROP)
+ADD_DEFINITIONS(-DOPENCL_SHARED)
+ADD_DEFINITIONS(-g)
+
+ADD_EXECUTABLE(oclParticles.x ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
+
+TARGET_LINK_LIBRARIES( oclParticles.x
+    $ENV{OPENCL_HOME}/../shared/lib/libshrutil_x86_64.a
+	$ENV{OPENCL_HOME}/common/lib/liboclUtil_x86_64.a
+   particles
+   ${ocllib}
+   ${GLUT_LIBRARIES}
+   ${OPENCL_LIBRARIES}
+   ${OPENGL_LIBRARIES}
+   ${GLEW_LIBRARY}
+)
+
+ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/src)

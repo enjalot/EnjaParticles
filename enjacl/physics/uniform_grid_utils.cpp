@@ -128,18 +128,22 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 
 	/*--------------------------------------------------------------*/
 	/* Iterate over particles found in the nearby cells (including cell of position_i) 
-	 *template<class O, class D>
 	 */
 	float4 IterateParticlesInNearbyCells(
 		__global float4* vars_sorted,
-		uint			numParticles,
-		__constant uint 	index_i, 
+		int			numParticles, // on Linux, remove __constant
+		int 	index_i, 
 		__constant float4   position_i, 
 		__global int* 		cell_indices_start,
 		__global int* 		cell_indices_end,
 		__constant struct GridParams* gp,
 		__constant struct FluidParams* fp)
 	{
+
+		// initialize force on particle (collisions)
+		float4 force = convert_float4(0.);
+
+#if 0
 		// How to chose which PreCalc to use? 
 		// TODO LATER
 		//PreCalc(data, index_i); // TODO
@@ -147,8 +151,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		// get cell in grid for the given position
 		int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_delta);
 
-		// initialize force on particle (collisions)
-		float4 force = convert_float4(0.);
 
 		// iterate through the 3^3 cells in and around the given position
 		// can't unroll these loops, they are not innermost 
@@ -167,7 +169,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 				}
 			}
 		}
-
+#endif
 		return force;
 	}
 
@@ -197,7 +199,7 @@ __kernel void K_SumStep1(
 	//in Cuda
 	vars = sorted_vars; // not needed
 
-    float4 position_i = FETCH_VAR(sorted_vars, index, POS);
+    float4 position_i = FETCH_POS(sorted_vars, index);
 
     // Do calculations on particles in neighboring cells
 

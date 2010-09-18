@@ -1,0 +1,17 @@
+main.cpp:#include "oclUtils.h"
+main.cpp:    shrSetLogFileName ("oclParticles.txt");
+main.cpp:    //shrLogEx(LOGBOTH | MASTER, 0, "oclParticles, Throughput = %.4f KParticles/s, Time = %.5f s, Size = %u particles, NumDevsUsed = %u\n", 
+main.cpp:        //shrLogEx(LOGBOTH | CLOSELOG, 0, "oclParticles.exe Exiting...\n");
+main.cpp:        //shrLogEx(LOGBOTH | CLOSELOG, 0, "oclParticles.exe Exiting...\nPress <Enter> to Quit\n");
+oclBitonicSort_launcher.cpp:#include <oclUtils.h>
+oclBitonicSort_launcher.cpp:        char *cBitonicSort = oclLoadProgSource(shrFindFilePath("BitonicSort_b.cl", argv[0]), "// My comment\n", &kernelLength);
+oclBitonicSort_launcher.cpp:			oclLogBuildInfo(cpBitonicSort, oclGetFirstDev(cxGPUContext));
+oclBitonicSort_launcher.cpp:			oclLogPtx(cpBitonicSort, oclGetFirstDev(cxGPUContext), "oclBitonicSort.ptx");
+oclManager.cpp:    //shrLog("oclGetPlatformID...\n\n"); 
+oclManager.cpp:    ciErrNum = oclGetPlatformID(&cpPlatform);
+oclManager.cpp:    oclPrintDevInfo(LOGBOTH, cdDevice);
+oclParticles_launcher.cpp:#include <oclUtils.h>
+oclParticles_launcher.cpp:        char *cParticles = oclLoadProgSource(shrFindFilePath("Particles.cl", argv[0]), "// My comment\n", &kernelLength);
+oclParticles_launcher.cpp:			oclLogBuildInfo(cpParticles, oclGetFirstDev(cxGPUContext));
+oclParticles_launcher.cpp:			oclLogPtx(cpParticles, oclGetFirstDev(cxGPUContext), "oclParticles.ptx");
+oclParticles_launcher.cpp:    oclLogPtx(cpParticles, oclGetFirstDev(cxGPUContext), "Particles.ptx");
