@@ -6,7 +6,7 @@ RTPSettings::RTPSettings()
 {
     system = SPH;
     max_particles = 1024;
-    dt = .0005f;
+    dt = .005f;
 }
 
 }

@@ -38,12 +38,15 @@ SPH::SPH(RTPS *psfr, int n)
     sph_settings.rest_density = 1000;
     sph_settings.simulation_scale = .001;
 
+    //function of total mass and number of particles
     sph_settings.particle_mass = (128*1024)/num * .0002;
     printf("particle mass: %f\n", sph_settings.particle_mass);
+    //constant .87 is magic
     sph_settings.particle_rest_distance = .87 * pow(sph_settings.particle_mass / sph_settings.rest_density, 1./3.);
     printf("particle rest distance: %f\n", sph_settings.particle_rest_distance);
-   
-    sph_settings.smoothing_distance = 2.f * sph_settings.particle_rest_distance;
+    
+    //messing with smoothing distance, making it really small to remove interaction still results in weird force values
+    sph_settings.smoothing_distance = 2.0f * sph_settings.particle_rest_distance;
     sph_settings.boundary_distance = .5f * sph_settings.particle_rest_distance;
 
     sph_settings.spacing = sph_settings.particle_rest_distance / sph_settings.simulation_scale;
@@ -191,6 +194,7 @@ void SPH::update()
     for(int i=0; i < 10; i++)
     {
         k_density.execute(num);
+        /*
         //test density
         std::vector<float> dens = cl_density.copyToHost(num);
         float dens_sum = 0.0f;
@@ -199,6 +203,7 @@ void SPH::update()
             dens_sum += dens[j];
         }
         printf("summed density: %f\n", dens_sum);
+        */
         /*
         std::vector<float4> er = cl_error_check.copyToHost(10);
         for(int j = 0; j < 10; j++)
@@ -207,15 +212,14 @@ void SPH::update()
         }
         */
         k_pressure.execute(num);
-        k_viscosity.execute(num);
+        //k_viscosity.execute(num);
 
-        //k_collision_wall.execute(num);
+        k_collision_wall.execute(num);
 
         //euler integration
         k_euler.execute(num);
     }
 #endif
-    /*
     std::vector<float4> ftest = cl_force.copyToHost(100);
     for(int i = 0; i < 100; i++)
     {
@@ -223,7 +227,6 @@ void SPH::update()
             printf("force: %f %f %f  \n", ftest[i].x, ftest[i].y, ftest[i].z);
     }
     printf("execute!\n");
-    */
 
 
     cl_position.release();

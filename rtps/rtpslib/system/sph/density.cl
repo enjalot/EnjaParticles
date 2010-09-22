@@ -39,9 +39,9 @@ __kernel void density(__global float4* pos, __global float* density, __constant 
 
     float h = params->smoothing_distance;
     //stuff from Tim's code (need to match #s to papers)
-    float alpha = 315.f/208.f/params->PI/h/h/h;
-    //float h9 = h*h*h * h*h*h * h*h*h;
-    //float alpha = 315.f/64.0f/params->PI/h9;
+    //float alpha = 315.f/208.f/params->PI/h/h/h;
+    float h9 = h*h*h * h*h*h * h*h*h;
+    float alpha = 315.f/64.0f/params->PI/h9;
 
     float4 p = pos[i] * params->simulation_scale;
     density[i] = 0.0f;
@@ -61,10 +61,10 @@ __kernel void density(__global float4* pos, __global float* density, __constant 
             float re2 = h*h;
             if(r2/re2 <= 4.f)
             {
-                float R = sqrt(r2/re2);
-                float Wij = alpha*(2.f/3.f - 9.f*R*R/8.f + 19.f*R*R*R/24.f - 5.f*R*R*R*R/32.f);
-                //float hr2 = (h*h - r2);
-                //float Wij = alpha * hr2*hr2*hr2;
+                //float R = sqrt(r2/re2);
+                //float Wij = alpha*(2.f/3.f - 9.f*R*R/8.f + 19.f*R*R*R/24.f - 5.f*R*R*R*R/32.f);
+                float hr2 = (h*h - r2);
+                float Wij = alpha * hr2*hr2*hr2;
                 density[i] += params->mass * Wij;
             }
         }

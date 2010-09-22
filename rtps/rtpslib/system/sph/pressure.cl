@@ -82,7 +82,8 @@ __kernel void pressure(__global float4* pos, __global float* density, __global f
 
         }
     }
-    force[i] -= f;
+    //force is coming out to 1.0 in the Z direction
+    force[i] += f;
 
 }
 );
