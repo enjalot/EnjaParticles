@@ -133,8 +133,6 @@ int EnjaParticles::update()
 
 	sort(unsort_int, sort_int);
 
-
-
 	GridParams gp;
 	gp.grid_size = float3(1.,1.,1.);
 	gp.grid_min = float3(0.,0.,0.);
@@ -213,7 +211,7 @@ void EnjaParticles::hash(std::vector<cl_float4> list, GridParams& gp)
 		printf("%d, %f, %f, %f, %f\n", i, list[i].x, list[i].y, list[i].y, list[i].w);
 	}
 
-	exit(0);
+	//exit(0);
 #endif
 #undef DEBUG
 
