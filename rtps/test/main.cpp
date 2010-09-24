@@ -59,7 +59,7 @@ void *font = GLUT_BITMAP_8_BY_13;
 
 rtps::RTPS* ps;
 //#define NUM_PARTICLES 16384
-#define NUM_PARTICLES 1024
+#define NUM_PARTICLES 1024*1024
 
 
 //timers
@@ -118,7 +118,7 @@ int main(int argc, char** argv)
 }
 
 
-
+//----------------------------------------------------------------------
 void init_gl()
 {
     // default initialization
@@ -132,6 +132,7 @@ void init_gl()
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     //gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 100.0);
+    //glOrtho(0., window_width, 0., window_height, -100., 100.);
     gluPerspective(90.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 10000.0); //for lorentz
 
     // set view matrix
@@ -161,6 +162,7 @@ void appKeyboard(unsigned char key, int x, int y)
     }
 }
 
+//----------------------------------------------------------------------
 void appRender()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -177,6 +179,7 @@ void appRender()
 	//glDisable(GL_DEPTH_TEST);
 }
 
+//----------------------------------------------------------------------
 void appDestroy()
 {
 

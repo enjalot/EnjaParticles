@@ -69,7 +69,6 @@ __kernel void density(__global float4* pos, __global float* density, __constant 
             }
         }
     }
-
 }
 );
 
