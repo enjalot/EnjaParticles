@@ -17,6 +17,7 @@ BufferGE<T>::BufferGE(CL *cli, T* data, int sz)
 }
 
 //----------------------------------------------------------------------
+#if 0
 template <class T>
 BufferGE<T>::BufferGE(CL *cli, GLuint vbo_id)
 {
@@ -32,6 +33,7 @@ BufferGE<T>::BufferGE(CL *cli, GLuint vbo_id)
 	this->vbo_id = vbo_id;
     cl_buffer.push_back(cl::BufferGL(cli->context, CL_MEM_READ_WRITE, vbo_id, &cli->err));
 }
+#endif
 
 //----------------------------------------------------------------------
 template <class T>
@@ -44,6 +46,7 @@ BufferGE<T>::~BufferGE()
 }
 
 //----------------------------------------------------------------------
+#if 0
 template <class T>
 void BufferGE<T>::acquire()
 {
@@ -58,7 +61,7 @@ void BufferGE<T>::release()
     cli->err = cli->queue.enqueueReleaseGLObjects(&cl_buffer, NULL, &cli->event);
     cli->queue.finish();
 }
-
+#endif
 
 //----------------------------------------------------------------------
 template <class T>

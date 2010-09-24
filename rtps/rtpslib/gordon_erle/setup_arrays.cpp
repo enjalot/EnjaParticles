@@ -106,8 +106,8 @@ void DataStructures::setupArrays()
 
 	try {
 
-		cl_vars_unsorted = Buffer(ps->cli, vars_unsorted);
-		cl_vars_unsorted->copyToDevice();
+		cl_vars_unsorted = BufferGE(ps->cli, &vars_unsorted[0], vars_unsorted.size());
+		cl_vars_unsorted.copyToDevice();
 		//----------------
 		// float4 ELEMENTS
 		nb_bytes = nb_el*nb_vars*sizeof(cl_float4);

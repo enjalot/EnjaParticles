@@ -19,12 +19,13 @@ class BufferGE
 {
 private:
 	T* data;
-	GLuint vbo_id;
+	//GLuint vbo_id;
 	bool externalPtr;
 	int nb_el;
 
 public:
-    BufferGE(){ cli=NULL; vbo_id=0; data = 0;}
+    //BufferGE(){ cli=NULL; vbo_id=0; data = 0;}
+    BufferGE(){ cli=NULL; data = 0;}
 
     //create an OpenCL buffer from existing data
 	BufferGE(CL *cli, T* data, int sz);
@@ -32,7 +33,8 @@ public:
     //BufferGE(CL *cli, const std::vector<T> &data);
     //create a OpenCL BufferGL from a vbo_id
     //if managed is true then the destructor will delete the VBO
-    BufferGE(CL *cli, GLuint vbo_id=-1);
+    //BufferGE(CL *cli, GLuint vbo_id=-1);
+
     ~BufferGE();
 
     //we will want to access buffers by name when going across systems
@@ -47,11 +49,15 @@ public:
 
 
     //need to acquire and release arrays from OpenGL context if we have a VBO
-    void acquire();
-    void release();
+	// put in BufferVBO class
+    //void acquire();
+    //void release();
 
     void copyToDevice();
     void copyToHost();
+
+	T operator()(int i) { return data[i]; }
+	const T operator()(int i) const { return data[i]; }
 
     //void set(T val);
     //void set(const std::vector<T> &data);
