@@ -1,7 +1,7 @@
-#ifndef RTPS_BUFFER_H_INCLUDED
-#define RTPS_BUFFER_H_INCLUDED
+#ifndef RTPS_BUFFERGE_H_INCLUDED
+#define RTPS_BUFFERGE_H_INCLUDED
 /*
- * The Buffer class abstracts the OpenCL Buffer and BufferGL classes
+ * The BufferGE class abstracts the OpenCL BufferGE and BufferGEGL classes
  * by providing some convenience methods
  *
  * we pass in an OpenCL instance  to the constructor 
@@ -15,16 +15,25 @@
 namespace rtps {
 
 template <class T>
-class Buffer
+class BufferGE
 {
+private:
+	T* data;
+	GLuint vbo_id;
+	bool externalPtr;
+	int nb_el;
+
 public:
-    Buffer(){ cli=NULL; vbo_id=0; };
+    BufferGE(){ cli=NULL; vbo_id=0; data = 0;}
+
     //create an OpenCL buffer from existing data
-    Buffer(CL *cli, const std::vector<T> &data);
+	BufferGE(CL *cli, T* data, int sz);
+
+    //BufferGE(CL *cli, const std::vector<T> &data);
     //create a OpenCL BufferGL from a vbo_id
     //if managed is true then the destructor will delete the VBO
-    Buffer(CL *cli, GLuint vbo_id=-1);
-    ~Buffer();
+    BufferGE(CL *cli, GLuint vbo_id=-1);
+    ~BufferGE();
 
     //we will want to access buffers by name when going across systems
     //std::string name;
@@ -32,24 +41,26 @@ public:
     //cl::Memory cl_buffer;
     std::vector<cl::Memory> cl_buffer;
 
+	// I would make this static, unless there is a reason to have more than one, for 
+	// example when working on multiple GPUs. 
     CL *cli;
 
-    //if this is a VBO we store its id
-    GLuint vbo_id;
 
     //need to acquire and release arrays from OpenGL context if we have a VBO
     void acquire();
     void release();
 
-    void copyToDevice(const std::vector<T> &data);
-    std::vector<T> copyToHost(int num);
+    void copyToDevice();
+    void copyToHost();
 
-    void set(T val);
-    void set(const std::vector<T> &data);
+    //void set(T val);
+    //void set(const std::vector<T> &data);
 
+	T* getHostPtr() { return data; }
+	cl::Memory getDevicePtr() { return cl_buffer[0]; }
 };
 
-#include "Buffer.cpp"
+#include "BufferGE.cpp"
 
 }
 #endif

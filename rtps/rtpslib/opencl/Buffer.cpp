@@ -10,8 +10,6 @@ Buffer<T>::Buffer(CL *cli, const std::vector<T> &data)
 
     cl_buffer.push_back(cl::Buffer(cli->context, CL_MEM_READ_WRITE, data.size()*sizeof(T), NULL, &cli->err));
     copyToDevice(data);
-
-
 }
 
 

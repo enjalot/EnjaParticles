@@ -7,6 +7,7 @@
 #include "System.h"
 #include "../opencl/Kernel.h"
 #include "../opencl/Buffer.h"
+#include "../opencl/BufferGE.h"
 //#include "../util.h"
 #include "../particle/UniformGrid.h"
 

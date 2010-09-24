@@ -4,7 +4,7 @@ export BASE_DIR=${HOME}/grav/branch_grav/branch3/graphics_libs
 #this should be updated to where you have this code
 export ENJA_DIR=${HOME}/Documents/src/blender-particles/enjacl
 
-export GPU_SDK=/Developer/GPU\ Computing
+export GPU_SDK=/Developer/GPU_Computing
 export CUDA_HOME=${GPU_SDK}
 export CUDA_LOCAL=${GPU_SDK}/C
 export OPENCL_HOME=${GPU_SDK}/OpenCL
