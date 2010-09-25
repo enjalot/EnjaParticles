@@ -37,7 +37,13 @@ public:
 	#endif
 
 
+	inline cl_context getRawContext() {
+		return context();
+	}
 
+	inline cl_command_queue getRawQueue() {
+		return queue();
+	}
 
     //error checking stuff
     int err;

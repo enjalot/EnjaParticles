@@ -66,30 +66,6 @@ private:
 	BufferGE<int> cl_unsort;
 	BufferGE<int> cl_sort;
 
-
-	#if 0
-	std::vector<cl_uint> sort_indices;
-	std::vector<cl_uint> sort_hashes;
-	std::vector<cl_float4> vars_sorted; 
-	std::vector<cl_float4> vars_unsorted; 
-	std::vector<cl_uint> cell_indices_start;
-	std::vector<cl_uint> cell_indices_end;
-	std::vector<cl_float4> cells;
-	std::vector<int> sort_int;
-	std::vector<int> unsort_int;
-	//GridParams gp;
-	//FluidParams fp;
-	#endif
-
-
-    //std::string sort_program;     //sorting of integer array
-    //std::string hash_program;     //hashing of grid cells
-    //std::string datastructures_program;     //
-
-    //cl::Program sort_program;     //sorting of integer array
-    //cl::Program hash_program;     //hashing of grid cells
-    //cl::Program datastructures_program;     //
-
     Kernel sort_kernel;     //
     Kernel hash_kernel;     //
     Kernel datastructures_kernel;     //
@@ -98,10 +74,10 @@ private:
 
 	// GET THESE FROM ANOTHER CLASS
     //opencl
-    std::vector<cl::Device> devices;
-    cl::Context context;
-    cl::CommandQueue queue;
-    cl::Event event;
+    //std::vector<cl::Device> devices;
+    //cl::Context context;
+    //cl::CommandQueue queue;
+    //cl::Event event;
 
 	RTPS* ps;
 
