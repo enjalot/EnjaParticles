@@ -22,35 +22,45 @@ BufferGE<T>::BufferGE(CL *cli, T* data, int sz)
 template <class T>
 BufferGE<T>::BufferGE(CL *cli, int sz)
 {
+	printf("enter BufferGE and allocate data\n");
+	printf("sizeof(T): %d\n", sizeof(T));
     this->cli = cli;
-    this->data = data;
 	this->nb_el = sz;
 	externalPtr = false;
 	data = new T [nb_el];
 
 	// create buffer on GPU
    	cl_buffer.push_back(cl::Buffer(cli->context, CL_MEM_READ_WRITE, sz*sizeof(T), NULL, &cli->err));
+    printf("after data\n");
+	printf("buffer size: %d\n", sizeof(cl_buffer[0]));
+
+//if (sz == 1) exit(0);
     //copyToDevice();
+	printf("last line of BufferGE\n");
 }
 //----------------------------------------------------------------------
 template <class T>
 BufferGE<T>::~BufferGE()
 {
-	if (externalPtr == false && data) {
+	if (externalPtr && data) {
+		printf("DESTRUCTOR: delete data\n");
 		delete [] data;
 		data = 0;
 	}
+	printf("INSIDE DESTRUCTOR OF BUFFERGE\n");
 }
 
 //----------------------------------------------------------------------
 template <class T>
 void BufferGE<T>::copyToDevice()
 {
+	printf("copyToDevice: enter\n");
     //TODO clean up this memory/buffer issue (nasty pointer casting)
 	if (data) {
     	cli->err = cli->queue.enqueueWriteBuffer(*((cl::Buffer*)&cl_buffer[0]), CL_TRUE, 0, nb_el*sizeof(T), data, NULL, &cli->event);
     	cli->queue.finish();
 	}
+	printf("copyToDevice: exit\n");
 
 }
 

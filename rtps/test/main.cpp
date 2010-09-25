@@ -87,8 +87,9 @@ void testGordonApp()
 
 	ds.setupArrays();
 	ds.hash();
-	ds.sort();
-	ds.buildDataStructures();
+	//ds.sort();
+	//ds.buildDataStructures();
+	exit(0);
 	
 }
 //----------------------------------------------------------------------

@@ -8,10 +8,12 @@ void DataStructures::hash()
 
 	if (first_time) {
 		try {
-			string path(CL_SOURCE_DIR);
+			string path(CL_UTIL_SOURCE_DIR);
 			path = path + "/uniform_hash.cl";
+			printf("path= %s\n", path.c_str());
 			int length;
 			const char* src = file_contents(path.c_str(), &length);
+			//printf("src= %s\n", src);
 			std::string strg(src);
 
         	hash_kernel = Kernel(ps->cli, strg, "hash");
@@ -24,6 +26,11 @@ void DataStructures::hash()
 	}
 
 	Kernel kern = hash_kernel;
+
+	float4* cells = cl_cells.getHostPtr();
+	int* sort_hashes = cl_sort_hashes.getHostPtr();
+	int* sort_indices = cl_sort_indices.getHostPtr();
+
 
 //  Have to make sure that the data associated with the pointers is on the GPU
 	#if 0
@@ -38,25 +45,31 @@ void DataStructures::hash()
 	int err;
 
 
-	kern.setArg(0, cl_cells);
-	kern.setArg(1, cl_sort_hashes);
-	kern.setArg(2, cl_sort_indices);
-	kern.setArg(3, cl_GridParams);
+	//kern.setArg(0, cl_cells);
+	kern.setArg(0, cl_cells.getDevicePtr());
+	kern.setArg(1, cl_sort_hashes.getDevicePtr());
+	kern.setArg(2, cl_sort_indices.getDevicePtr());
+	kern.setArg(3, cl_GridParams.getDevicePtr());
 
     //printf("executing hash kernel\n");
+	printf("nb_el= %d\n", nb_el);
 	kern.execute(nb_el,ctaSize);
 
+#if 0
+	cl_GridParams.copyToHost();
+	GridParams& gp = *cl_GridParams.getHostPtr();
+	printf("%f, %f, %f\n", gp.grid_res.x, gp.grid_res.y, gp.grid_res.z);
+#endif
 
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
-	// the kernel computes these arrays
-	cl_sort_hashes.getDevicePtr();
-	cl_sort_indices.getDevicePtr();
-
-	for (int i=0; i < 4150; i++) {  // only first 4096 are ok. WHY? 
+	cl_sort_hashes.copyToHost();
+	cl_sort_indices.copyToHost();
+	for (int i=0; i < nb_el; i++) {  // only first 4096 are ok. WHY? 
+	//for (int i=0; i < 100; i++) {  // only first 4096 are ok. WHY? 
 	//for (int i=nb_el-10; i < nb_el; i++) {
-		printf("sort_index: %d, sort_hash: %u, %u\n", i, sort_hashes[i], sort_indices[i]);
-		printf("%d, %f, %f, %f, %f\n", i, cells[i].x, cells[i].y, cells[i].z, cells[i].w);
+		printf(" sort_hash[%d] %u, sort_indices[%d]: %u\n", i, sort_hashes[i], i, sort_indices[i]);
+		//printf("cells[%d], %f, %f, %f, %f\n", i, cells[i].x, cells[i].y, cells[i].z, cells[i].w);
 
 		#if 0
 		int gx = list[i].x;

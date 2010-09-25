@@ -9,7 +9,9 @@ void DataStructures::setupArrays()
 	nb_vars = 3;        // number of cl_float4 variables to reorder
 	printf("nb_el= %d\n", nb_el); 
 
+printf("\n\nBEFORE cell BufferGE<float4>\n"); //********************
 	cl_cells = BufferGE<float4>(ps->cli, nb_el);
+printf("AFTER cell BufferGE\n");
 	// notice the index rotation? 
 
 	for (int i=0; i < nb_el; i++) {
@@ -22,7 +24,10 @@ void DataStructures::setupArrays()
 	}
 	cl_cells.copyToDevice();
 
-	cl_GridParams = BufferGE<GridParams>(ps->cli, 1);
+printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
+// Need an assign operator (no memory allocation)
+	cl_GridParams = BufferGE<GridParams>(ps->cli, 1); // destroys ...
+
 	GridParams& gp = *(cl_GridParams.getHostPtr());
 	//float resol = 50.;
 	float resol = 25.;
@@ -43,27 +48,26 @@ void DataStructures::setupArrays()
 	gp.grid_delta.w = 1.;
 	gp.numParticles = nb_el;  // WRONG SPOT, BUT USEFUL for CL kernels arg passing
 	cl_GridParams.copyToDevice();
+//exit(0);
 
 	printf("delta z= %f\n", gp.grid_delta.z);
 
 	grid_size = (int) (gp.grid_res.x * gp.grid_res.y * gp.grid_res.z);
 	printf("grid_size= %d\n", grid_size);
 
-	//cl_sort_int = BufferGE<int>(ps->cli, nb_el);
-	//cl_unsort_int = BufferGE<int>(ps->cli, nb_el);
-
 	cl_unsort = BufferGE<int>(ps->cli, nb_el);
 	cl_sort   = BufferGE<int>(ps->cli, nb_el);
 
-	int* iu = cl_unsort.getHostPtr();
-	int* is = cl_sort.getHostPtr();
+	int* iunsort = cl_unsort.getHostPtr();
+	int* isort = cl_sort.getHostPtr();
 
 	for (int i=0; i < nb_el; i++) {
-		is[i] = i;
-		iu[i] = nb_el-i;
-		cl_sort[i] = i;  // DOES NOT WORK, but works with cl_cells
+		isort[i] = i;
+		iunsort[i] = nb_el-i;
+		//cl_sort[i] = i;  // DOES NOT WORK, but works with cl_cells
 		//cl_unsort[i] = nb_el-i;
 	}
+
 
 	// position POS=0
 	// velocity VEL=1

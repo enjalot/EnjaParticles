@@ -16,7 +16,7 @@ void DataStructures::buildDataStructures()
 
 	if (first_time) {
 		try {
-			string path(CL_SOURCE_DIR);
+			string path(CL_UTIL_SOURCE_DIR);
 			path = path + "/datastructures_test.cl";
 			int length;
 			const char* src = file_contents(path.c_str(), &length);
