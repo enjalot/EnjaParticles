@@ -16,24 +16,35 @@ SET( CMAKE_MODULE_PATH
 
 message("${CMAKE_MODULE_PATH}\n")
 
+#Only define this on the apple platform
+# appears in RadixSort.cl
+IF(APPLE)
+	ADD_DEFINITIONS(-DMAC)
+ENDIF()
+
 #FIND_PACKAGE (GLUT)
 FIND_PACKAGE (OpenGL)
 FIND_PACKAGE (OPENCL)
 FIND_PACKAGE (GLEW)
 
 set (rtpslib_INCLUDES
+    ${rtpslib_SOURCE_DIR}/oclRadixSortKeysValues/inc
     #${GLUT_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
     ${GLEW_INCLUDE_PATH}
     ${BASE_DIR}/opencl10
 	$ENV{OPENCL_HOME}/common/inc
 	$ENV{OPENCL_HOME}/../shared/inc
+	${rtpslib_SOURCE_DIR}/oclRadixSortKeysalues/inc
 )
 
 
 #library
 set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/gordon_erle/datastructures.cpp
+	${rtpslib_SOURCE_DIR}/oclRadixSortKeysValues/src/RadixSort.cpp
+	${rtpslib_SOURCE_DIR}/oclRadixSortKeysValues/src/Scan.cpp
+
     ${rtpslib_SOURCE_DIR}/RTPS.cpp
     ${rtpslib_SOURCE_DIR}/RTPSettings.cpp
     ${rtpslib_SOURCE_DIR}/util.cpp
@@ -60,9 +71,9 @@ set (rtpslib_SOURCES
     )
 
 
-
 ADD_DEFINITIONS(-g )
 ADD_DEFINITIONS(-DGPU)
+ADD_DEFINITIONS(-DCL_SORT_SOURCE_DIR="${rtpslib_SOURCE_DIR}/oclRadixSortKeysValues/")
 ADD_DEFINITIONS(-DCL_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/system/sph/")
 
 INCLUDE_DIRECTORIES(${rtpslib_INCLUDES})

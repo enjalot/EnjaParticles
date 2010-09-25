@@ -13,18 +13,15 @@ void DataStructures::buildDataStructures()
 
 	//ts_cl[TI_BUILD]->start();
 
-	CL cl;
 
 	if (first_time) {
 		try {
 			string path(CL_SOURCE_DIR);
 			path = path + "/datastructures_test.cl";
-			//char* src = getSourceString(path.c_str());
 			int length;
 			const char* src = file_contents(path.c_str(), &length);
-
-        	datastructures_program = cl.loadProgram(std::string(src));
-        	datastructures_kernel = cl::Kernel(datastructures_program, "datastructures", &err);
+			std::string strg(src);
+        	datastructures_kernel = Kernel(ps->cli, strg, "datastructures");
 			first_time = false;
 		} catch(cl::Error er) {
         	printf("ERROR(buildDataStructures): %s(%s)\n", er.what(), oclErrorString(er.err()));
@@ -32,38 +29,26 @@ void DataStructures::buildDataStructures()
 		}
 	}
 
-	cl::Kernel kern = datastructures_kernel;
+	Kernel kern = datastructures_kernel;
 
-	int ctaSize = 128;
+	int workSize = 128;
 
-	try {
-    	err = datastructures_kernel.setArg(0, nb_el);
-    	err = datastructures_kernel.setArg(1, nb_vars);
-    	err = datastructures_kernel.setArg(2, cl_vars_unsorted);
-    	err = datastructures_kernel.setArg(3, cl_vars_sorted);
-    	err = datastructures_kernel.setArg(4, cl_sort_hashes);
-    	err = datastructures_kernel.setArg(5, cl_sort_indices);
-    	err = datastructures_kernel.setArg(6, cl_cell_indices_start);
-    	err = datastructures_kernel.setArg(7, cl_cell_indices_end);
-		// local memory
-    	err = datastructures_kernel.setArg(8, (ctaSize+1)*sizeof(int), 0);
-	} catch(cl::Error er) {
-        printf("0 ERROR(buildDataStructures): %s(%s)\n", er.what(), oclErrorString(er.err()));
-		exit(0);
-	}
+	// HOW TO DEAL WITH ARGUMENTS
 
+	kern.setArg(0, nb_el);
+	kern.setArg(1, nb_vars);
+	kern.setArg(2, cl_vars_unsorted);
+	kern.setArg(3, cl_vars_sorted);
+	kern.setArg(4, cl_sort_hashes);
+	kern.setArg(5, cl_sort_indices);
+	kern.setArg(6, cl_cell_indices_start);
+	kern.setArg(7, cl_cell_indices_end);
+	// local memory
+	int nb_bytes = (workSize+1)*sizeof(int);
+    kern.setArgShared(8, nb_bytes);
 
 	int err;
-
-	try {
-    	err = queue.enqueueNDRangeKernel(datastructures_kernel, cl::NullRange, cl::NDRange(nb_el), cl::NDRange(ctaSize), NULL, &event);
-		queue.finish();
-	} catch(cl::Error er) {
-        printf("exec: ERROR(buildDataStructures): %s(%s)\n", er.what(), oclErrorString(er.err()));
-		exit(0);
-	}
-
-	int nb_bytes;
+   	kern.execute(nb_el, workSize); 
 
 #if 1
 	// DATA SHOULD STAY ON THE GPU
@@ -77,7 +62,6 @@ void DataStructures::buildDataStructures()
 		exit(0);
 	}
 #endif
-
 
 	#if 0
 	// PRINT OUT UNSORTED AND SORTED VARIABLES
@@ -118,7 +102,7 @@ void DataStructures::buildDataStructures()
 
 	//printf("return from BuildDataStructures\n");
 
-    queue.finish();
+    ps->cli->queue.finish();
 	//ts_cl[TI_BUILD]->end();
 }
 //----------------------------------------------------------------------

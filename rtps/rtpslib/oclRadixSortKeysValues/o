@@ -1,0 +1,68 @@
+131d130
+< 
+367c366
+< void radixSortBlockKeysValues(uint4 *key, uint4 *value, uint nbits, uint startbit, __local uint* sMem)
+---
+> void radixSortBlockKeysValues(uint4 *key, uint4 *value, uint nbits, uint startbit, __local uint* sMem, __local uint* sVMem)
+370a370
+> 
+380a381
+>         uint4 rv;
+382a384
+> 		//rv = rank4(lsb, sVMem);
+388a391,401
+> 
+>         barrier(CLK_LOCAL_MEM_FENCE);
+> 
+>         sVMem[(r.x & 3) * localSize + (r.x >> 2)] = (*value).x;
+>         sVMem[(r.y & 3) * localSize + (r.y >> 2)] = (*value).y;
+>         sVMem[(r.z & 3) * localSize + (r.z >> 2)] = (*value).z;
+>         sVMem[(r.w & 3) * localSize + (r.w >> 2)] = (*value).w;
+> 
+> 
+> 
+> 
+395a409,424
+> 
+> 		// I AM NOT CLEAR ON HOW TO HANDLE value ARRAY
+> 	}
+> 
+> 	for(uint shift = startbit; shift < (startbit + nbits); ++shift)
+> 	{
+> 		uint4 lsb;
+> 		lsb.x = !(((*key).x >> shift) & 0x1);
+> 		lsb.y = !(((*key).y >> shift) & 0x1);
+>         lsb.z = !(((*key).z >> shift) & 0x1);
+>         lsb.w = !(((*key).w >> shift) & 0x1);
+>         
+> 		uint4 r;
+> 		
+> 		r = rank4(lsb, sMem);
+> 
+398d426
+< 		#if 1
+406a435
+> 		barrier(CLK_LOCAL_MEM_FENCE);
+412d440
+< 		#endif
+414a443
+> 
+424c453,454
+< 									  __local uint* sMem)
+---
+> 									  __local uint* sMem,
+> 									  __local uint* sVMem)
+436c466
+< 	radixSortBlockKeysValues(&key, &value, nbits, startbit, sMem);
+---
+> 	radixSortBlockKeysValues(&key, &value, nbits, startbit, sMem, sVMem);
+572d601
+< 
+575c604
+<         sStartPointers[sRadix1[localId + groupSize - 1]] =  
+---
+>         sStartPointers[sRadix1[localId + groupSize - 1]] = 
+578c607
+< 
+---
+>         

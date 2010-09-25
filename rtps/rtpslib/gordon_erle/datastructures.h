@@ -10,6 +10,8 @@
 #include "../opencl/BufferGE.h"
 #include "../util.h"
 #include "../structs.h"
+#include "../opencl/Kernel.h"
+#include "../oclRadixSortKeysValues/inc/RadixSort.h"
 
 namespace rtps {
 
@@ -65,6 +67,7 @@ private:
 	BufferGE<int> cl_sort;
 
 
+	#if 0
 	std::vector<cl_uint> sort_indices;
 	std::vector<cl_uint> sort_hashes;
 	std::vector<cl_float4> vars_sorted; 
@@ -76,15 +79,20 @@ private:
 	std::vector<int> unsort_int;
 	//GridParams gp;
 	//FluidParams fp;
+	#endif
 
 
+    //std::string sort_program;     //sorting of integer array
+    //std::string hash_program;     //hashing of grid cells
+    //std::string datastructures_program;     //
 
-    cl::Program sort_program;     //sorting of integer array
-    cl::Program hash_program;     //hashing of grid cells
-    cl::Program datastructures_program;     //
-    cl::Kernel sort_kernel;     //
-    cl::Kernel hash_kernel;     //
-    cl::Kernel datastructures_kernel;     //
+    //cl::Program sort_program;     //sorting of integer array
+    //cl::Program hash_program;     //hashing of grid cells
+    //cl::Program datastructures_program;     //
+
+    Kernel sort_kernel;     //
+    Kernel hash_kernel;     //
+    Kernel datastructures_kernel;     //
 
 	int err;
 
@@ -100,7 +108,7 @@ private:
 public:
 	DataStructures(RTPS* ps);
 	void hash();
-	void sort();
+	void sort(); //BufferGE<int>& key, BufferGE<int>& value);
 	void setupArrays();
 	void buildDataStructures();
 };

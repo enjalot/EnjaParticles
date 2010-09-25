@@ -13,8 +13,7 @@ DataStructures::DataStructures(RTPS*  ps)
 
 #include "build_datastructures.cpp"
 #include "setup_arrays.cpp"
-//#include "hash.cpp"
-//#include "opencl.cpp"
-//#include "sort.cpp"
+#include "hash.cpp"
+#include "sort.cpp"
 
 }

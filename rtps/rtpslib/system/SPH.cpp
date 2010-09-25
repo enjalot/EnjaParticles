@@ -87,7 +87,11 @@ typedef struct SPHParams
     //TODO make a helper constructor for buffer to make a cl_mem from a struct
     std::vector<SPHParams> vparams(0);
     vparams.push_back(params);
+printf("ps= %d\n", ps);
+printf("ps->cli= %d\n", ps->cli);
+printf("vparams= %d\n", &vparams);
     cl_params = Buffer<SPHParams>(ps->cli, vparams);
+exit(0); // ERROR ON PREVIOUS LINE
 
 
     std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));

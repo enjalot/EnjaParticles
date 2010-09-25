@@ -3,13 +3,14 @@
 // Input: a list of integers in random order
 // Output: a list of sorted integers
 // Leave data on the gpu
-void DataStructures::sort(cl::Buffer cl_hashes, cl::Buffer cl_indices)
+//void DataStructures::sort(BufferGE<int>& cl_hashes, BufferGE<int>& cl_indices)
+void DataStructures::sort()
 {
 	static bool first_time = true;
 	static RadixSort* radixSort;
 // Sorting
 
-	ts_cl[TI_SORT]->start();
+	//ts_cl[TI_SORT]->start();
 
     try {
 		// SORT IN PLACE
@@ -38,6 +39,7 @@ void DataStructures::sort(cl::Buffer cl_hashes, cl::Buffer cl_indices)
 	    	radixSort = new RadixSort(context(), queue(), nb_el, "../oclRadixSort/", ctaSize, false);		    
 			first_time = false;
 		}
+
 		unsigned int keybits = 32;
 
 // **** BEFORE SORT
@@ -64,11 +66,10 @@ void DataStructures::sort(cl::Buffer cl_hashes, cl::Buffer cl_indices)
 	}
     //err = queue.enqueueWriteBuffer(cl_indices, CL_TRUE, 0, nb_el*sizeof(int), &sort_indices[0], NULL, &event);
 #endif
-// **************
 
-		// both arguments should already be on the GPU
+	// both arguments should already be on the GPU
 	//	printf("BEFORE SORT KERNEL\n");
-	    radixSort->sort(cl_hashes(), cl_indices(), nb_el, keybits);
+	    radixSort->sort(cl_sort_hashes.getDevicePtr(), cl_sort_indices.getDevicePtr(), nb_el, keybits);
 	//	printf("AFTER SORT KERNEL\n");
 
 		// Sort in place
@@ -92,7 +93,7 @@ void DataStructures::sort(cl::Buffer cl_hashes, cl::Buffer cl_indices)
 	}
 	#endif
 
-    queue.finish();
-	ts_cl[TI_SORT]->end();
+    ps->cli->queue.finish();
+	//ts_cl[TI_SORT]->end();
 }
 //----------------------------------------------------------------------

@@ -72,11 +72,14 @@ public:
     //void set(const std::vector<T> &data);
 
 	T* getHostPtr() { return data; }
-	cl::Memory getDevicePtr() { return cl_buffer[0]; }
+	// return a cl_mem object
+	//cl::Memory getDevicePtr() { return cl_buffer[0](); }
+	cl_mem getDevicePtr() { return cl_buffer[0](); }
 };
 
 #include "BufferGE.cpp"
 
 }
 #endif
+
 
