@@ -20,6 +20,9 @@
 #include "RTPS.h"
 //#include "timege.h"
 
+// GORDON APP TEST
+#include "datastructures.h"
+
 int window_width = 800;
 int window_height = 600;
 int glutWindowHandle = 0;
@@ -78,9 +81,19 @@ float rand_float(float mn, float mx)
 #endif
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
+void testGordonApp()
+{
+	rtps::DataStructures ds(ps);
+
+	ds.setupArrays();
+	ds.hash();
+	ds.sort();
+	ds.buildDataStructures();
+	
+}
+//----------------------------------------------------------------------
 int main(int argc, char** argv)
 {
-
     //initialize glut
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
@@ -115,10 +128,14 @@ int main(int argc, char** argv)
     //default constructor
     ps = new rtps::RTPS();
 
+	// TEST of my datastructures, sort, hash, build, step1
+	testGordonApp();
+
+	exit(0);
+
     glutMainLoop();
     return 0;
 }
-
 
 //----------------------------------------------------------------------
 void init_gl()

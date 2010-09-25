@@ -28,6 +28,7 @@ FIND_PACKAGE (OPENCL)
 FIND_PACKAGE (GLEW)
 
 set (rtpslib_INCLUDES
+    ${rtpslib_SOURCE_DIR}/gordon_erle
     ${rtpslib_SOURCE_DIR}/oclRadixSortKeysValues/inc
     #${GLUT_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
