@@ -27,13 +27,13 @@ public:
 	#if 1
     cl::Context context;
     cl::CommandQueue queue;
-	bool is_initialized;
+	//bool is_initialized;
 
     std::vector<cl::Device> devices;
     int deviceUsed;
-	cl::Device device; // = devices[deviceUsed]
+	//cl::Device device; // = devices[deviceUsed]
 
-	bool profiling;
+	//bool profiling;
 	#endif
 
 

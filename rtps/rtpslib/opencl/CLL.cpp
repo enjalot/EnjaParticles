@@ -29,8 +29,8 @@ bool CL::profiling = true;
 //----------------------------------------------------------------------
 CL::CL()
 {
-	if (is_initialized) return;
-	if (!is_initialized) is_initialized = true;
+	//if (is_initialized) return;
+	//if (!is_initialized) is_initialized = true;
 
     setup_gl_cl();
 }

@@ -4,7 +4,7 @@
 #define RTPS_UTIL_H_INCLUDED
 
 //OpenCL API
-#include "opencl/CLL.h"
+//#include "opencl/CLL.h"
 
 #include "structs.h"
 
