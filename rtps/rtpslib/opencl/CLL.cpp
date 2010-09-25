@@ -15,8 +15,23 @@
 
 namespace rtps {
 
+//----------------------------------------------------------------------
+// static initialization
+#if 0
+//cl::Context CL::context = 0;
+//cl::CommandQueue CL::queue = 0;
+bool CL::is_initialized = false;
+//cl_device_id CL::deviceUsed = 0;
+int CL::deviceUsed = 0;
+bool CL::profiling = true;
+#endif
+
+//----------------------------------------------------------------------
 CL::CL()
 {
+	if (is_initialized) return;
+	if (!is_initialized) is_initialized = true;
+
     setup_gl_cl();
 }
 
@@ -31,6 +46,7 @@ cl::Program CL::loadProgram(std::string kernel_source)
     //printf("kernel size: %d\n", pl);
     //printf("kernel: \n %s\n", kernel_source.c_str());
     cl::Program program;
+
     try
     {
         cl::Program::Sources source(1,
@@ -75,6 +91,7 @@ cl::Kernel CL::loadKernel(std::string kernel_source, std::string kernel_name)
     return kernel;
 }
 
+//----------------------------------------------------------------------
 void CL::setup_gl_cl()
 {
     std::vector<cl::Platform> platforms;
@@ -179,6 +196,7 @@ void CL::setup_gl_cl()
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
     }
 }
+//----------------------------------------------------------------------
 
 
 

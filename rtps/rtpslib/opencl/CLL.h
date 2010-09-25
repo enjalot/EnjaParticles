@@ -24,11 +24,20 @@ public:
     int addKernel(Kernel kern);
 */
 
+	#if 1
     cl::Context context;
     cl::CommandQueue queue;
+	bool is_initialized;
 
     std::vector<cl::Device> devices;
     int deviceUsed;
+	cl::Device device; // = devices[deviceUsed]
+
+	bool profiling;
+	#endif
+
+
+
 
     //error checking stuff
     int err;

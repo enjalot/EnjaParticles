@@ -9,18 +9,21 @@ void DataStructures::setupArrays()
 	nb_vars = 3;        // number of cl_float4 variables to reorder
 	printf("nb_el= %d\n", nb_el); 
 
-	cells.resize(nb_el);
+	cl_cells = BufferGE<float4>(ps->cli, nb_el);
 	// notice the index rotation? 
 
 	for (int i=0; i < nb_el; i++) {
-		cells[i].x = rand_float(0.,10.);
-		cells[i].y = rand_float(0.,10.);
-		cells[i].z = rand_float(0.,10.);
-		cells[i].w = 1.;
+		float aa = rand_float(0.,10.);
+		cl_cells[i].x = rand_float(0.,10.);
+		cl_cells[i].y = rand_float(0.,10.);
+		cl_cells[i].z = rand_float(0.,10.);
+		cl_cells[i].w = 1.;
 		//printf("%d, %f, %f, %f, %f\n", i, cells[i].x, cells[i].y, cells[i].z, cells[i].w);
 	}
+	cl_cells.copyToDevice();
 
-	GridParams gp;
+	cl_GridParams = BufferGE<GridParams>(ps->cli, 1);
+	GridParams& gp = *(cl_GridParams.getHostPtr());
 	//float resol = 50.;
 	float resol = 25.;
 	gp.grid_size = float4(10.,10.,10.,1.);
@@ -39,40 +42,54 @@ void DataStructures::setupArrays()
 	gp.grid_delta.z = 1. / gp.grid_delta.z;
 	gp.grid_delta.w = 1.;
 	gp.numParticles = nb_el;  // WRONG SPOT, BUT USEFUL for CL kernels arg passing
-	std::vector<GridParams> vgp(1);
-	vgp.push_back(gp);
-	cl_GridParams = Buffer<GridParams>(ps->cli, vgp);
+	cl_GridParams.copyToDevice();
 
 	printf("delta z= %f\n", gp.grid_delta.z);
 
 	grid_size = (int) (gp.grid_res.x * gp.grid_res.y * gp.grid_res.z);
 	printf("grid_size= %d\n", grid_size);
 
-	sort_int.resize(nb_el);
-	unsort_int.resize(nb_el);
+	//cl_sort_int = BufferGE<int>(ps->cli, nb_el);
+	//cl_unsort_int = BufferGE<int>(ps->cli, nb_el);
+
+	cl_unsort = BufferGE<int>(ps->cli, nb_el);
+	cl_sort   = BufferGE<int>(ps->cli, nb_el);
+
+	int* iu = cl_unsort.getHostPtr();
+	int* is = cl_sort.getHostPtr();
 
 	for (int i=0; i < nb_el; i++) {
-		sort_int.push_back(i);
-		unsort_int.push_back(nb_el-i);
+		is[i] = i;
+		iu[i] = nb_el-i;
+		cl_sort[i] = i;  // DOES NOT WORK, but works with cl_cells
+		//cl_unsort[i] = nb_el-i;
 	}
-
-	cl_unsort = Buffer<int>(ps->cli, unsort);
-	cl_sort   = Buffer<int>(ps->cli, sort);
 
 	// position POS=0
 	// velocity VEL=1
 	// Force    FOR=2
-	vars_unsorted.resize(nb_el*nb_vars);
-	vars_sorted.resize(nb_el*nb_vars);
-	cell_indices_start.resize(nb_el);
-	cell_indices_end.resize(nb_el);
-	sort_indices.resize(nb_el);
-	sort_hashes.resize(nb_el);
+	cl_vars_unsorted = BufferGE<float4>(ps->cli, nb_el*nb_vars);
+	cl_vars_sorted = BufferGE<float4>(ps->cli, nb_el*nb_vars);
+	cl_cell_indices_start = BufferGE<int>(ps->cli, nb_el);
+	cl_cell_indices_end   = BufferGE<int>(ps->cli, nb_el);
+	cl_sort_indices = BufferGE<int>(ps->cli, nb_el);
+	cl_sort_hashes = BufferGE<int>(ps->cli, nb_el);
     printf("about to start writing buffers\n");
 
+	#if 0
+	cl_vars_unsorted.copyToDevice();
+	cl_vars_sorted.copyToDevice();
+	cl_cell_indices_start.copyToDevice();
+	cl_cell_indices_end.copyToDevice();
+	cl_sort_indices.copyToDevice();
+	cl_sort_hashes.copyToDevice();
+	#endif
+
 	int nb_floats = nb_vars*nb_el;
-	cl_float4 f;
-	cl_float4 zero;
+	// WHY NOT cl_float4 (in CL/cl_platform.h)
+	float4 f;
+	float4 zero;
+
 	zero.x = zero.y = zero.z = 0.0;
 	zero.w = 1.;
 
@@ -81,13 +98,15 @@ void DataStructures::setupArrays()
 		f.y = rand_float(0., 1.);
 		f.z = rand_float(0., 1.);
 		f.w = 1.0;
-		vars_unsorted[i] = f;
-		vars_sorted[i]   = zero;
+		cl_vars_unsorted[i] = f;
+		cl_vars_sorted[i]   = zero;
 		//printf("f= %f, %f, %f, %f\n", f.x, f.y, f.z, f.w);
 	}
 
 	// SETUP FLUID PARAMETERS
 	// cell width is one diameter of particle, which imlies 27 neighbor searches
+	cl_FluidParams = BufferGE<FluidParams>(ps->cli, 1);
+	FluidParams& fp = *cl_FluidParams.getHostPtr();;
 	float radius = gp.grid_delta.x; 
 	fp.smoothing_length = radius; // SPH radius
 	fp.scale_to_simulation = 1.0; // overall scaling factor
@@ -99,70 +118,10 @@ void DataStructures::setupArrays()
 	fp.attraction = 0.9;
 	fp.spring = 0.5;
 	fp.gravity = -9.8; // -9.8 m/sec^2
+	cl_FluidParams.copyToDevice();
 
-
-#define BUFFER(bytes) cl::Buffer(context, CL_MEM_READ_WRITE, bytes, NULL, &err);
-#define WRITE_BUFFER(cl_var, bytes, cpu_var_ptr) queue.enqueueWriteBuffer(cl_var, CL_TRUE, 0, bytes, cpu_var_ptr, NULL, &event)
-
-	try {
-
-		cl_vars_unsorted = BufferGE(ps->cli, &vars_unsorted[0], vars_unsorted.size());
-		cl_vars_unsorted.copyToDevice();
-		//----------------
-		// float4 ELEMENTS
-		nb_bytes = nb_el*nb_vars*sizeof(cl_float4);
-
-		cl_vars_unsorted = BUFFER(nb_bytes);
-		WRITE_BUFFER(cl_vars_unsorted, nb_bytes, &vars_unsorted[0]);
-
-		cl_vars_sorted = BUFFER(nb_bytes); 
-		WRITE_BUFFER(cl_vars_sorted, nb_bytes, &vars_sorted[0]);
-
-		nb_bytes = nb_el*sizeof(cl_float4);
-		cl_cells = BUFFER(nb_bytes);
-		WRITE_BUFFER(cl_cells, nb_bytes, &cells[0]);
-
-		//----------------
-		// int ELEMENTS
-		nb_bytes = nb_el*sizeof(int);
-		cl_sort_hashes  = BUFFER(nb_bytes);
-		WRITE_BUFFER(cl_sort_hashes, nb_bytes, &sort_hashes[0]);
-
-		cl_sort_indices = BUFFER(nb_bytes);
-		WRITE_BUFFER(cl_sort_indices, nb_bytes, &sort_indices[0]);
-
-		cl_unsort = BUFFER(nb_bytes);
-		WRITE_BUFFER(cl_unsort, nb_bytes, &unsort_int);
-
-		cl_sort = BUFFER(nb_bytes);
-		WRITE_BUFFER(cl_sort, nb_bytes, &sort_int);
-
-		nb_bytes = sizeof(GridParams);
-		cl_GridParams = BUFFER(nb_bytes);
-		WRITE_BUFFER(cl_GridParams, nb_bytes, &gp);
-
-		nb_bytes = sizeof(FluidParams);
-		cl_FluidParams = BUFFER(nb_bytes);
-		WRITE_BUFFER(cl_FluidParams, nb_bytes, &fp);
-
-		nb_bytes = grid_size * sizeof(int);
-		cl_cell_indices_start = BUFFER(nb_bytes);
-		WRITE_BUFFER(cl_cell_indices_start, nb_bytes, &cell_indices_start[0]);
-
-		cl_cell_indices_end = BUFFER(nb_bytes);
-		WRITE_BUFFER(cl_cell_indices_end, nb_bytes, &cell_indices_end[0]);
-
-		queue.finish();
-	} catch(cl::Error er) {
-        printf("ERROR(setupArray): %s(%s)\n", er.what(), oclErrorString(er.err()));
-		exit(0);
-	}
-
-	//exit(0);
 
 
     printf("done with setup arrays\n");
-#undef BUFFER
-#undef WRITE_BUFFER
 }
 //----------------------------------------------------------------------

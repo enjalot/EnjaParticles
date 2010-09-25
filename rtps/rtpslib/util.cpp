@@ -135,5 +135,11 @@ cl_int oclGetPlatformID(cl_platform_id* clSelectedPlatformID)
 
     return CL_SUCCESS;
 }
-
+//----------------------------------------------------------------------
+float rand_float(float mn, float mx)
+{
+	float r = random() / (float) RAND_MAX;
+	return mn + (mx-mn)*r;
+}
+//----------------------------------------------------------------------
 

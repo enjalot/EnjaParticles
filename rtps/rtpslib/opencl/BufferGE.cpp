@@ -11,30 +11,27 @@ BufferGE<T>::BufferGE(CL *cli, T* data, int sz)
 
 	if (data) {
 		externalPtr = true;
+
+		// create buffer on GPU
     	cl_buffer.push_back(cl::Buffer(cli->context, CL_MEM_READ_WRITE, sz*sizeof(T), NULL, &cli->err));
-    	copyToDevice();
+    	//copyToDevice();
 	}
 }
 
 //----------------------------------------------------------------------
-#if 0
 template <class T>
-BufferGE<T>::BufferGE(CL *cli, GLuint vbo_id)
+BufferGE<T>::BufferGE(CL *cli, int sz)
 {
-	data = 0;
-	externalPtr = false;
-	this->nb_el = 0;
-
     this->cli = cli;
-	if (vbo_id == -1) {
-		glGenBuffers(1, &vbo_id);
-	}
+    this->data = data;
+	this->nb_el = sz;
+	externalPtr = false;
+	data = new T [nb_el];
 
-	this->vbo_id = vbo_id;
-    cl_buffer.push_back(cl::BufferGL(cli->context, CL_MEM_READ_WRITE, vbo_id, &cli->err));
+	// create buffer on GPU
+   	cl_buffer.push_back(cl::Buffer(cli->context, CL_MEM_READ_WRITE, sz*sizeof(T), NULL, &cli->err));
+    //copyToDevice();
 }
-#endif
-
 //----------------------------------------------------------------------
 template <class T>
 BufferGE<T>::~BufferGE()
@@ -44,24 +41,6 @@ BufferGE<T>::~BufferGE()
 		data = 0;
 	}
 }
-
-//----------------------------------------------------------------------
-#if 0
-template <class T>
-void BufferGE<T>::acquire()
-{
-    cli->err = cli->queue.enqueueAcquireGLObjects(&cl_buffer, NULL, &cli->event);
-    cli->queue.finish();
-}
-
-//----------------------------------------------------------------------
-template <class T>
-void BufferGE<T>::release()
-{
-    cli->err = cli->queue.enqueueReleaseGLObjects(&cl_buffer, NULL, &cli->event);
-    cli->queue.finish();
-}
-#endif
 
 //----------------------------------------------------------------------
 template <class T>

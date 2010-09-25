@@ -69,11 +69,13 @@ rtps::RTPS* ps;
 //#include "materials_lights.h"
 
 //----------------------------------------------------------------------
+#if 0
 float rand_float(float mn, float mx)
 {
 	float r = random() / (float) RAND_MAX;
 	return mn + (mx-mn)*r;
 }
+#endif
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
 int main(int argc, char** argv)

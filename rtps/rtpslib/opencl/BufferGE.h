@@ -24,11 +24,17 @@ private:
 	int nb_el;
 
 public:
-    //BufferGE(){ cli=NULL; vbo_id=0; data = 0;}
     BufferGE(){ cli=NULL; data = 0;}
 
-    //create an OpenCL buffer from existing data
+    //allocate memory
+	//do not transfer data to GPU by default
+	BufferGE(CL *cli, int sz);
+
+    //create an OpenCL buffer from existing external data
+	//do not transfer data to GPU by default
 	BufferGE(CL *cli, T* data, int sz);
+	//BufferGE(CL *cli, std::vector<T>& data);
+		
 
     //BufferGE(CL *cli, const std::vector<T> &data);
     //create a OpenCL BufferGL from a vbo_id
@@ -56,8 +62,11 @@ public:
     void copyToDevice();
     void copyToHost();
 
-	T operator()(int i) { return data[i]; }
-	const T operator()(int i) const { return data[i]; }
+	T& operator[](int i) { return data[i]; }
+	const T& operator[](const int i) const { return data[i]; }
+
+	T& operator()(int i) { return data[i]; }
+	const T& operator()(const int i) const { return data[i]; }
 
     //void set(T val);
     //void set(const std::vector<T> &data);

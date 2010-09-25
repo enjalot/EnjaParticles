@@ -26,11 +26,14 @@ set (rtpslib_INCLUDES
     ${OPENGL_INCLUDE_DIR}
     ${GLEW_INCLUDE_PATH}
     ${BASE_DIR}/opencl10
+	$ENV{OPENCL_HOME}/common/inc
+	$ENV{OPENCL_HOME}/../shared/inc
 )
 
 
 #library
 set (rtpslib_SOURCES
+    ${rtpslib_SOURCE_DIR}/gordon_erle/datastructures.cpp
     ${rtpslib_SOURCE_DIR}/RTPS.cpp
     ${rtpslib_SOURCE_DIR}/RTPSettings.cpp
     ${rtpslib_SOURCE_DIR}/util.cpp
@@ -60,6 +63,7 @@ set (rtpslib_SOURCES
 
 ADD_DEFINITIONS(-g )
 ADD_DEFINITIONS(-DGPU)
+ADD_DEFINITIONS(-DCL_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/system/sph/")
 
 INCLUDE_DIRECTORIES(${rtpslib_INCLUDES})
 ADD_LIBRARY(rtps STATIC ${rtpslib_SOURCES})

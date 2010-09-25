@@ -1,4 +1,5 @@
 
+
 //----------------------------------------------------------------------
 void DataStructures::buildDataStructures()
 {
@@ -10,14 +11,19 @@ void DataStructures::buildDataStructures()
 	// Stored in vars_sorted[nb_vars*nb_el]. Ordering is consistent 
 	// with vars_sorted[nb_vars][nb_el]
 
-	ts_cl[TI_BUILD]->start();
+	//ts_cl[TI_BUILD]->start();
+
+	CL cl;
 
 	if (first_time) {
 		try {
 			string path(CL_SOURCE_DIR);
 			path = path + "/datastructures_test.cl";
-			char* src = getSourceString(path.c_str());
-        	datastructures_program = loadProgram(src);
+			//char* src = getSourceString(path.c_str());
+			int length;
+			const char* src = file_contents(path.c_str(), &length);
+
+        	datastructures_program = cl.loadProgram(std::string(src));
         	datastructures_kernel = cl::Kernel(datastructures_program, "datastructures", &err);
 			first_time = false;
 		} catch(cl::Error er) {
@@ -63,13 +69,9 @@ void DataStructures::buildDataStructures()
 	// DATA SHOULD STAY ON THE GPU
 	try {
 		nb_bytes = nb_el*nb_vars*sizeof(cl_float4);
-    	err = queue.enqueueReadBuffer(cl_vars_unsorted,  CL_TRUE, 0, nb_bytes, &vars_unsorted[0],  NULL, &event);
-
-    	err = queue.enqueueReadBuffer(cl_vars_sorted,  CL_TRUE, 0, nb_bytes, &vars_sorted[0],  NULL, &event);
-
-
-		nb_bytes = nb_el*sizeof(cl_int);
-    	err = queue.enqueueReadBuffer(cl_sort_indices,  CL_TRUE, 0, nb_bytes, &sort_indices[0],  NULL, &event);
+		cl_vars_unsorted.copyToDevice();
+		cl_vars_sorted.copyToDevice();
+		cl_vars_sort_indices.copyToDevice();
 	} catch(cl::Error er) {
         printf("1 ERROR(buildDatastructures): %s(%s)\n", er.what(), oclErrorString(er.err()));
 		exit(0);
@@ -117,6 +119,6 @@ void DataStructures::buildDataStructures()
 	//printf("return from BuildDataStructures\n");
 
     queue.finish();
-	ts_cl[TI_BUILD]->end();
+	//ts_cl[TI_BUILD]->end();
 }
 //----------------------------------------------------------------------

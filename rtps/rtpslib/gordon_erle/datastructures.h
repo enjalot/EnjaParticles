@@ -1,7 +1,15 @@
 #ifndef _DATASTRUCTURES_H_
 #define _DATASTRUCTURES_H_
 
-#include "../opencl/Buffer.h"
+// for cl_float4, etc.
+#include <CL/cl_platform.h>
+
+#include <GL/glew.h>
+#include <string>
+#include "../RTPS.h"
+#include "../opencl/BufferGE.h"
+#include "../util.h"
+#include "../structs.h"
 
 namespace rtps {
 
@@ -40,19 +48,23 @@ class DataStructures
 private:
 // BEGIN
 // ADDED BY GORDON FOR TESTING of hash, sort, datastructures
-	//CL cl;  // GE CL library
 	int nb_el, nb_vars, grid_size;
-	Buffer cl_vars_sorted<float4>;
-	Buffer cl_vars_unsorted<float4>;
-	Buffer cl_cell_indices_start<int>;
-	Buffer cl_cell_indices_end<int>;
-	Buffer cl_sort_hashes<int>;
-	Buffer cl_sort_indices<int>;
-	Buffer cl_GridParams<GridParams>;
-	Buffer cl_FluidParams<FluidParams>;
-	Buffer cl_cells<int>;
-	Buffer cl_unsort<int>;
-	Buffer cl_sort<int>;
+	BufferGE<float4> cl_vars_sorted;
+	BufferGE<float4> cl_vars_unsorted;
+	BufferGE<int> cl_cell_indices_start;
+	BufferGE<int> cl_cell_indices_end;
+	BufferGE<int> cl_vars_sort_indices;
+	//BufferGE<int> cl_unsort_int;
+	//BufferGE<int> cl_sort_int;
+	BufferGE<int> cl_sort_hashes;
+	BufferGE<int> cl_sort_indices;
+	BufferGE<GridParams> cl_GridParams;
+	BufferGE<FluidParams> cl_FluidParams;
+	BufferGE<float4> cl_cells;
+	BufferGE<int> cl_unsort;
+	BufferGE<int> cl_sort;
+
+
 	std::vector<cl_uint> sort_indices;
 	std::vector<cl_uint> sort_hashes;
 	std::vector<cl_float4> vars_sorted; 
@@ -65,11 +77,32 @@ private:
 	//GridParams gp;
 	//FluidParams fp;
 
+
+
+    cl::Program sort_program;     //sorting of integer array
+    cl::Program hash_program;     //hashing of grid cells
+    cl::Program datastructures_program;     //
+    cl::Kernel sort_kernel;     //
+    cl::Kernel hash_kernel;     //
+    cl::Kernel datastructures_kernel;     //
+
+	int err;
+
+	// GET THESE FROM ANOTHER CLASS
+    //opencl
+    std::vector<cl::Device> devices;
+    cl::Context context;
+    cl::CommandQueue queue;
+    cl::Event event;
+
+	RTPS* ps;
+
 public:
-	hash();
-	sort();
-	setupArrays();
-	buildDataStructures();
+	DataStructures(RTPS* ps);
+	void hash();
+	void sort();
+	void setupArrays();
+	void buildDataStructures();
 };
 
 }
