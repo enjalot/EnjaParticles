@@ -10,6 +10,8 @@ void DataStructures::sort()
 	static RadixSort* radixSort;
 // Sorting
 
+	printf("ENTER sort\n");
+
 	//ts_cl[TI_SORT]->start();
 
     try {
@@ -48,6 +50,9 @@ void DataStructures::sort()
 			cl_sort_indices.getDevicePtr(), nb_el, keybits);
 	//	printf("AFTER SORT KERNEL\n");
 
+	printf("*** after sort def\n");
+
+
 		// Sort in place
 		// NOT REQUIRED EXCEPT FOR DEBUGGING
     } catch (cl::Error er) {
@@ -55,7 +60,7 @@ void DataStructures::sort()
 		exit(0);
     }
 
-	#if 0
+	#if 1
 	printf("\n**** AFTER SORT ******\n");
 	ps->cli->queue.finish();
 
