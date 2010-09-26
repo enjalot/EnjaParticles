@@ -103,7 +103,6 @@ void testGordonApp()
 	}
 
 	GE::Time::printAll();
-	exit(0);
 	
 }
 //----------------------------------------------------------------------
@@ -144,9 +143,8 @@ int main(int argc, char** argv)
     ps = new rtps::RTPS();
 
 	// TEST of my datastructures, sort, hash, build, step1
-	testGordonApp();
-
-	exit(0);
+	//testGordonApp();
+	//exit(0);
 
     glutMainLoop();
     return 0;

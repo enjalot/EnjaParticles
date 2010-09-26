@@ -30,8 +30,9 @@ void RTPS::Init()
     cli = new CL();
 
     //TODO choose based on settings
-    //system = new Simple(this, settings.max_particles);
-    system = new SPH(this, settings.max_particles);
+    system = new Simple(this, settings.max_particles);
+	printf("max_particles: %d\n", settings.max_particles);
+    //system = new SPH(this, settings.max_particles);
 
     //pass in the position and color vbo ids to the renderer
     //get the number from the system
