@@ -97,6 +97,7 @@ private:
 	void printSortDiagnostics();
 	void prepareSortData();
 	void printBuildDiagnostics();
+	void printHashDiagnostics();
 };
 
 }

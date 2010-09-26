@@ -18,18 +18,15 @@ void DataStructures::sort()
 
 		// SHOULD ONLY BE DONE ONCE
 		if (first_time) {
-	    	radixSort = new RadixSort(ps->cli->context(), ps->cli->queue(), nb_el, "../oclRadixSort/", ctaSize, false);		    
+	    	radixSort = new RadixSort(ps->cli->context(), ps->cli->queue(), nb_el, "../oooclRadixSort/", ctaSize, false);		    
 			first_time = false;
 		}
 
 		unsigned int keybits = 32;
 
-	// both arguments should already be on the GPU
-    radixSort->sort(cl_sort_hashes.getDevicePtr(), 
+		// both arguments should already be on the GPU
+    	radixSort->sort(cl_sort_hashes.getDevicePtr(), 
 			cl_sort_indices.getDevicePtr(), nb_el, keybits);
-
-		// Sort in place
-		// NOT REQUIRED EXCEPT FOR DEBUGGING
     } catch (cl::Error er) {
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
 		exit(0);

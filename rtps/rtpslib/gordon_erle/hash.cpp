@@ -10,14 +10,11 @@ void DataStructures::hash()
 		try {
 			string path(CL_UTIL_SOURCE_DIR);
 			path = path + "/uniform_hash.cl";
-			printf("path= %s\n", path.c_str());
 			int length;
 			const char* src = file_contents(path.c_str(), &length);
-			//printf("src= %s\n", src);
 			std::string strg(src);
 
         	hash_kernel = Kernel(ps->cli, strg, "hash");
-			//printf("KERNEL\n");
 			first_time = false;
 		} catch(cl::Error er) {
         	printf("ERROR(hash): %s(%s)\n", er.what(), oclErrorString(er.err()));
@@ -28,24 +25,12 @@ void DataStructures::hash()
 	Kernel kern = hash_kernel;
 
 	float4* cells = cl_cells.getHostPtr();
-	int* sort_hashes = cl_sort_hashes.getHostPtr();
+	int* sort_hashes  = cl_sort_hashes.getHostPtr();
 	int* sort_indices = cl_sort_indices.getHostPtr();
-
-
-//  Have to make sure that the data associated with the pointers is on the GPU
-	#if 0
-	for (int i=0; i < 100; i++) {
-		printf("%d, %f, %f, %f, %f\n", i, cells[i].x, cells[i].y, cells[i].z, cells[i].w);
-	}
-	#endif
-
-
 
 	int ctaSize = 128; // work group size
 	int err;
 
-
-	//kern.setArg(0, cl_cells);
 	kern.setArg(0, cl_cells.getDevicePtr());
 	kern.setArg(1, cl_sort_hashes.getDevicePtr());
 	kern.setArg(2, cl_sort_indices.getDevicePtr());
@@ -55,6 +40,12 @@ void DataStructures::hash()
 	printf("nb_el= %d\n", nb_el);
 	kern.execute(nb_el,ctaSize);
 
+	ps->cli->queue.finish();
+	ts_cl[TI_HASH]->end();
+}
+//----------------------------------------------------------------------
+void DataStructures::printHashDiagnostics()
+{
 #if 0
 	cl_GridParams.copyToHost();
 	GridParams& gp = *cl_GridParams.getHostPtr();
@@ -66,8 +57,6 @@ void DataStructures::hash()
 	cl_sort_hashes.copyToHost();
 	cl_sort_indices.copyToHost();
 	for (int i=0; i < nb_el; i++) {  // only first 4096 are ok. WHY? 
-	//for (int i=0; i < 100; i++) {  // only first 4096 are ok. WHY? 
-	//for (int i=nb_el-10; i < nb_el; i++) {
 		printf(" sort_hash[%d] %u, sort_indices[%d]: %u\n", i, sort_hashes[i], i, sort_indices[i]);
 		//printf("cells[%d], %f, %f, %f, %f\n", i, cells[i].x, cells[i].y, cells[i].z, cells[i].w);
 
@@ -94,7 +83,5 @@ void DataStructures::hash()
 			printf("xx index: %d, sort_indices: %d, sort_hashes: %d\n", i, sort_indices[i], sort_hashes[i]);
 		}
 	#endif
-
-	ts_cl[TI_HASH]->end();
 }
 //----------------------------------------------------------------------
