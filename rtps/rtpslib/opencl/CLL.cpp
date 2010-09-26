@@ -63,7 +63,9 @@ cl::Program CL::loadProgram(std::string kernel_source)
     try
     {
         //err = program.build(devices, "-cl-nv-verbose");
-        err = program.build(devices);
+		// IAN: do not remove this option
+        //err = program.build(devices, "-cl-fast-relaxed-math");
+        err = program.build(devices); 
     }
     catch (cl::Error er) {
 		printf("loadProgram::program.build\n");

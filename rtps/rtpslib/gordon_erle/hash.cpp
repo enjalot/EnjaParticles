@@ -4,7 +4,7 @@ void DataStructures::hash()
 {
 	static bool first_time = true;
 
-	//ts_cl[TI_HASH]->start();
+	ts_cl[TI_HASH]->start();
 
 	if (first_time) {
 		try {
@@ -61,7 +61,7 @@ void DataStructures::hash()
 	printf("%f, %f, %f\n", gp.grid_res.x, gp.grid_res.y, gp.grid_res.z);
 #endif
 
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
 	cl_sort_hashes.copyToHost();
 	cl_sort_indices.copyToHost();
@@ -95,6 +95,6 @@ void DataStructures::hash()
 		}
 	#endif
 
-	//ts_cl[TI_HASH]->end();
+	ts_cl[TI_HASH]->end();
 }
 //----------------------------------------------------------------------

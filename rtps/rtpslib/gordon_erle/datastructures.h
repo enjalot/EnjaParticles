@@ -4,6 +4,7 @@
 // for cl_float4, etc.
 #include <CL/cl_platform.h>
 
+#include <timege.h>
 #include <GL/glew.h>
 #include <string>
 #include "../RTPS.h"
@@ -82,11 +83,20 @@ private:
 	RTPS* ps;
 
 public:
+	enum {TI_HASH=0, TI_SORT, TI_BUILD};
+	GE::Time* ts_cl[5];
+
+public:
 	DataStructures(RTPS* ps);
 	void hash();
 	void sort(); //BufferGE<int>& key, BufferGE<int>& value);
 	void setupArrays();
 	void buildDataStructures();
+
+private:
+	void printSortDiagnostics();
+	void prepareSortData();
+	void printBuildDiagnostics();
 };
 
 }

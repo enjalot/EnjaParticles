@@ -42,6 +42,7 @@ set (rtpslib_INCLUDES
 
 #library
 set (rtpslib_SOURCES
+    ${rtpslib_SOURCE_DIR}/gordon_erle/timege.cpp
     ${rtpslib_SOURCE_DIR}/gordon_erle/datastructures.cpp
 	${rtpslib_SOURCE_DIR}/oclRadixSortKeysValues/src/RadixSort.cpp
 	${rtpslib_SOURCE_DIR}/oclRadixSortKeysValues/src/Scan.cpp

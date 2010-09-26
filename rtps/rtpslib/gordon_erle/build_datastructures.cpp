@@ -5,14 +5,7 @@ void DataStructures::buildDataStructures()
 {
 	static bool first_time = true;
 
-	// nb_vars: number of float4 variables to reorder. 
-	// nb_el:   number of particles
-	// Alternative: could construct float columns
-	// Stored in vars_sorted[nb_vars*nb_el]. Ordering is consistent 
-	// with vars_sorted[nb_vars][nb_el]
-
-	//ts_cl[TI_BUILD]->start();
-
+	ts_cl[TI_BUILD]->start();
 
 	if (first_time) {
 		try {
@@ -37,12 +30,13 @@ void DataStructures::buildDataStructures()
 
 	kern.setArg(0, nb_el);
 	kern.setArg(1, nb_vars);
-	kern.setArg(2, cl_vars_unsorted);
-	kern.setArg(3, cl_vars_sorted);
-	kern.setArg(4, cl_sort_hashes);
-	kern.setArg(5, cl_sort_indices);
-	kern.setArg(6, cl_cell_indices_start);
-	kern.setArg(7, cl_cell_indices_end);
+	kern.setArg(2, cl_vars_unsorted.getDevicePtr());
+	kern.setArg(3, cl_vars_sorted.getDevicePtr());
+	kern.setArg(4, cl_sort_hashes.getDevicePtr());
+	kern.setArg(5, cl_sort_indices.getDevicePtr());
+	kern.setArg(6, cl_cell_indices_start.getDevicePtr());
+	kern.setArg(7, cl_cell_indices_end.getDevicePtr());
+
 	// local memory
 	int nb_bytes = (workSize+1)*sizeof(int);
     kern.setArgShared(8, nb_bytes);
@@ -50,7 +44,16 @@ void DataStructures::buildDataStructures()
 	int err;
    	kern.execute(nb_el, workSize); 
 
-#if 1
+	printBuildDiagnostics();
+
+    ps->cli->queue.finish();
+	ts_cl[TI_BUILD]->end();
+}
+//----------------------------------------------------------------------
+void DataStructures::printBuildDiagnostics()
+{
+#if 0
+	// should try with and without exceptions. 
 	// DATA SHOULD STAY ON THE GPU
 	try {
 		nb_bytes = nb_el*nb_vars*sizeof(cl_float4);
@@ -61,30 +64,25 @@ void DataStructures::buildDataStructures()
         printf("1 ERROR(buildDatastructures): %s(%s)\n", er.what(), oclErrorString(er.err()));
 		exit(0);
 	}
-#endif
 
-	#if 0
 	// PRINT OUT UNSORTED AND SORTED VARIABLES
 	for (int k=0; k < nb_vars; k++) {
 		printf("================================================\n");
 		printf("=== VARIABLE: %d ===============================\n", k);
 	for (int i=0; i < nb_el; i++) {
-		cl_float4 us = vars_unsorted[i+k*nb_el];
-		cl_float4 so = vars_sorted[i+k*nb_el];
-		printf("[%d]: %d, (%f, %f), (%f, %f)\n", i, sort_indices[i], us.x, us.y, so.x, so.y);
+		float4 us = cl_vars_unsorted[i+k*nb_el];
+		float4 so = cl_vars_sorted[i+k*nb_el];
+		printf("[%d]: %d, (%f, %f), (%f, %f)\n", i, cl_sort_indices[i], us.x, us.y, so.x, so.y);
 	}
 	}
 	printf("===============================================\n");
 	printf("===============================================\n");
-	#endif
 
 
-	#if 0
 	try {
 		// PRINT OUT START and END CELL INDICES
-		nb_bytes = grid_size*sizeof(cl_int);
-        err = queue.enqueueReadBuffer(cl_cell_indices_start, CL_TRUE, 0, nb_bytes, &cell_indices_start[0], NULL, &event);
-        err = queue.enqueueReadBuffer(cl_cell_indices_end, CL_TRUE, 0, nb_bytes, &cell_indices_end[0], NULL, &event);
+		cl_cell_indices_start.copyToHost();
+		cl_cell_indices_end.copyToHost();
 	} catch(cl::Error er) {
         printf("2 ERROR(buildDatastructures): %s(%s)\n", er.what(), oclErrorString(er.err()));
 		exit(0);
@@ -93,16 +91,13 @@ void DataStructures::buildDataStructures()
 		printf("cell_indices_start, end\n");
 		int nb_cells = 0;
 		for (int i=0; i < grid_size; i++) {
-			int nb = cell_indices_end[i]-cell_indices_start[i];
+			int nb = cl_cell_indices_end[i]-cl_cell_indices_start[i];
 			nb_cells += nb;
-			printf("[%d]: %d, %d, nb pts: %d\n", i, cell_indices_start[i], cell_indices_end[i], nb);
+			printf("[%d]: %d, %d, nb pts: %d\n", i, cl_cell_indices_start[i], cl_cell_indices_end[i], nb);
 		}
 		printf("total nb cells: %d\n", nb_cells);
-	#endif
+#endif
 
 	//printf("return from BuildDataStructures\n");
-
-    ps->cli->queue.finish();
-	//ts_cl[TI_BUILD]->end();
 }
 //----------------------------------------------------------------------

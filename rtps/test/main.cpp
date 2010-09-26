@@ -3,6 +3,8 @@
 #include <math.h>
 #include <time.h>
 
+#include <timege.h>
+
 //#include <utils.h>
 //#include <string.h>
 //#include <string>
@@ -86,9 +88,19 @@ void testGordonApp()
 	rtps::DataStructures ds(ps);
 
 	ds.setupArrays();
+	ds.ts_cl[rtps::DataStructures::TI_HASH] = new GE::Time("hash", 5);
+	ds.ts_cl[rtps::DataStructures::TI_SORT] = new GE::Time("sort", 5);
+	ds.ts_cl[rtps::DataStructures::TI_BUILD] = new GE::Time("build", 5);
+
+	for (int i=0; i < 100; i++) {
+	printf("==========================================\n");
+	printf("ITERATION: %d\n", i);
 	ds.hash();
 	ds.sort();
-	//ds.buildDataStructures();
+	ds.buildDataStructures();
+	}
+
+	GE::Time::printAll();
 	exit(0);
 	
 }
