@@ -15,5 +15,7 @@ DataStructures::DataStructures(RTPS*  ps)
 #include "setup_arrays.cpp"
 #include "hash.cpp"
 #include "sort.cpp"
+#include "neighbor_search.cpp"
 
 }
+//----------------------------------------------------------------------

@@ -91,13 +91,15 @@ void testGordonApp()
 	ds.ts_cl[rtps::DataStructures::TI_HASH] = new GE::Time("hash", 5);
 	ds.ts_cl[rtps::DataStructures::TI_SORT] = new GE::Time("sort", 5);
 	ds.ts_cl[rtps::DataStructures::TI_BUILD] = new GE::Time("build", 5);
+	ds.ts_cl[rtps::DataStructures::TI_NEIGH] = new GE::Time("neigh", 5);
 
-	for (int i=0; i < 100; i++) {
+	for (int i=0; i < 30; i++) {
 	printf("==========================================\n");
 	printf("ITERATION: %d\n", i);
 	ds.hash();
 	ds.sort();
 	ds.buildDataStructures();
+	ds.neighbor_search();
 	}
 
 	GE::Time::printAll();

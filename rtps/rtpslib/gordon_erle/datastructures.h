@@ -70,6 +70,7 @@ private:
     Kernel sort_kernel;     //
     Kernel hash_kernel;     //
     Kernel datastructures_kernel;     //
+    Kernel step1_kernel;     //
 
 	int err;
 
@@ -83,8 +84,8 @@ private:
 	RTPS* ps;
 
 public:
-	enum {TI_HASH=0, TI_SORT, TI_BUILD};
-	GE::Time* ts_cl[5];
+	enum {TI_HASH=0, TI_SORT, TI_BUILD, TI_NEIGH};
+	GE::Time* ts_cl[10];
 
 public:
 	DataStructures(RTPS* ps);
@@ -92,6 +93,7 @@ public:
 	void sort(); //BufferGE<int>& key, BufferGE<int>& value);
 	void setupArrays();
 	void buildDataStructures();
+	void neighbor_search();
 
 private:
 	void printSortDiagnostics();
