@@ -1,8 +1,8 @@
-#include "../SPH.h"
+#include "../GE_SPH.h"
 
 namespace rtps {
 
-void SPH::loadEuler()
+void GE_SPH::loadEuler()
 {
     #include "euler.cl"
     //printf("%s\n", euler_program_source.c_str());

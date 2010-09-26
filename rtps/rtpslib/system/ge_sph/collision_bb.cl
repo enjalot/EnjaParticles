@@ -7,7 +7,7 @@
 //   across a corner, but this is unlikely to be a problem unless the 
 //   boxes are small. 
 
-// Sep. 5, 2010: enjalot version dealing with SPH forces instead of direct velocity changes
+// Sep. 5, 2010: enjalot version dealing with GE_SPH forces instead of direct velocity changes
 // 
 
 

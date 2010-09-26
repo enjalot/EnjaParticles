@@ -1,9 +1,9 @@
 #define STRINGIFY(A) #A
 
-//do the SPH pressure calculations and update the force
+//do the GE_SPH pressure calculations and update the force
 std::string viscosity_program_source = STRINGIFY(
 
-typedef struct SPHParams
+typedef struct GE_SPHParams
 {
     float3 grid_min;            //float3s are really float4 in opencl 1.0 & 1.1
     float3 grid_max;            //so we have padding in C++ definition
@@ -18,7 +18,7 @@ typedef struct SPHParams
     float PI;       //delicious
     float K;        //speed of sound
  
-} SPHParams;
+} GE_SPHParams;
 
 
 float magnitude(float4 vec)
@@ -31,7 +31,7 @@ float dist_squared(float4 vec)
 }
 
        
-__kernel void viscosity(__global float4* pos, __global float* vel, __global float4* density, __global float4* force, __constant struct SPHParams* params)
+__kernel void viscosity(__global float4* pos, __global float* vel, __global float4* density, __global float4* force, __constant struct GE_SPHParams* params)
 {
     unsigned int i = get_global_id(0);
 
@@ -67,7 +67,7 @@ __kernel void viscosity(__global float4* pos, __global float* vel, __global floa
                 //float Wij = alpha*(-2.25f + 2.375f*R - .625f*R*R);
                 float Wij = alpha * (h - rlen);
                 //from tim's code
-                //form simple SPH in Krog's thesis
+                //form simple GE_SPH in Krog's thesis
                 //force[i] += params->mass * Wij * (vel[j] - v) / (2.0f * density[j]);
             //}
 

@@ -1,8 +1,8 @@
-#include "../SPH.h"
+#include "../GE_SPH.h"
 
 namespace rtps {
 
-void SPH::loadViscosity()
+void GE_SPH::loadViscosity()
 {
     #include "viscosity.cl"
     //printf("%s\n", euler_program_source.c_str());

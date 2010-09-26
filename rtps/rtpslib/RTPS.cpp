@@ -1,6 +1,13 @@
 #include "RTPS.h"
+
+// POOR DESIGN: you'd have to load all the particle systems. If you define 
+// 30 different types, you'd have to load them all. Ok, but better approach
+// might be dynamically loadable libraries. Just a thought. GE. 
+
 #include "system/Simple.h"
 #include "system/SPH.h"
+#include "system/GE_SPH.h"
+
 
 
 namespace rtps{
@@ -30,9 +37,12 @@ void RTPS::Init()
     cli = new CL();
 
     //TODO choose based on settings
-    system = new Simple(this, settings.max_particles);
-	printf("max_particles: %d\n", settings.max_particles);
+    //system = new Simple(this, settings.max_particles);
+	printf("settings.max_particles: %d\n", settings.max_particles);
     //system = new SPH(this, settings.max_particles);
+
+	printf("Call GE_SPH\n");
+    system = new GE_SPH(this, settings.max_particles);
 
     //pass in the position and color vbo ids to the renderer
     //get the number from the system

@@ -1,9 +1,9 @@
 #define STRINGIFY(A) #A
 
-//update the SPH density
+//update the GE_SPH density
 std::string density_program_source = STRINGIFY(
 
-typedef struct SPHParams
+typedef struct GE_SPHParams
 {
     float3 grid_min;            //float3s are really float4 in opencl 1.0 & 1.1
     float3 grid_max;            //so we have padding in C++ definition
@@ -19,7 +19,7 @@ typedef struct SPHParams
     float K;        //speed of sound
 
  
-} SPHParams;
+} GE_SPHParams;
 
 
 float magnitude(float4 vec)
@@ -32,7 +32,7 @@ float dist_squared(float4 vec)
 }
 
 
-__kernel void density(__global float4* pos, __global float* density, __constant struct SPHParams* params, __global float4* error)
+__kernel void density(__global float4* pos, __global float* density, __constant struct GE_SPHParams* params, __global float4* error)
 {
     unsigned int i = get_global_id(0);
     int num = 1024;

@@ -1,9 +1,9 @@
 #define STRINGIFY(A) #A
 
-//do the SPH pressure calculations and update the force
+//do the GE_SPH pressure calculations and update the force
 std::string pressure_program_source = STRINGIFY(
 
-typedef struct SPHParams
+typedef struct GE_SPHParams
 {
     float3 grid_min;            //float3s are really float4 in opencl 1.0 & 1.1
     float3 grid_max;            //so we have padding in C++ definition
@@ -18,7 +18,7 @@ typedef struct SPHParams
     float PI;       //delicious
     float K;        //speed of sound
  
-} SPHParams;
+} GE_SPHParams;
 
 
 float magnitude(float4 vec)
@@ -31,7 +31,7 @@ float dist_squared(float4 vec)
 }
 
        
-__kernel void pressure(__global float4* pos, __global float* density, __global float4* force, __constant struct SPHParams* params)
+__kernel void pressure(__global float4* pos, __global float* density, __global float4* force, __constant struct GE_SPHParams* params)
 {
     unsigned int i = get_global_id(0);
     float4 f = (float4)(0.0f, 0.0f, 0.0f, 0.0f);
@@ -72,7 +72,7 @@ __kernel void pressure(__global float4* pos, __global float* density, __global f
                 float Pj = 1.013E5*(pow(density[j]/1000.0f, 7.0f) - 1.0f);
                 float kern = params->mass * Wij * (Pi + Pj) / (density[i] * density[j]);
                 */
-                //form simple SPH in Krog's thesis
+                //form simple GE_SPH in Krog's thesis
                 float Pi = params->K*(density[i] - 1000.0f); //rest density
                 float Pj = params->K*(density[j] - 1000.0f); //rest density
                 float kern = params->mass * -1.0f * Wij * (Pi + Pj) / (2.0f * density[j]);

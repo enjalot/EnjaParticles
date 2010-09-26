@@ -1,8 +1,8 @@
-#include "../SPH.h"
+#include "../GE_SPH.h"
 
 namespace rtps {
 
-void SPH::loadPressure()
+void GE_SPH::loadPressure()
 {
     #include "pressure.cl"
     //printf("%s\n", euler_program_source.c_str());

@@ -1,0 +1,8 @@
+simple/ : simple force of gravity
+ge_simple/ : simple force of gravity, linked to fast search
+
+Questions:
+---------
+What is max_particles under RTPSettings? 
+
+

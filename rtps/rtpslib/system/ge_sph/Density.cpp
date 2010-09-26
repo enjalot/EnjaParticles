@@ -1,9 +1,59 @@
-#include "../SPH.h"
+#include "../GE_SPH.h"
 #include <math.h>
 
 namespace rtps {
 
-void SPH::loadDensity()
+//----------------------------------------------------------------------
+void GE_SPH::computeDensity()
+{
+#if 0
+	static bool first_time = true;
+
+	ts_cl[TI_BUILD]->start();
+
+	if (first_time) {
+		try {
+			string path(CL_SPH_SOURCE_DIR);
+			path = path + "/density.cl";
+			int length;
+			const char* src = file_contents(path.c_str(), &length);
+			std::string strg(src);
+        	k_density = Kernel(ps->cli, strg, "density");
+			first_time = false;
+		} catch(cl::Error er) {
+        	printf("ERROR(buildDataStructures): %s(%s)\n", er.what(), oclErrorString(er.err()));
+			exit(1);
+		}
+	}
+
+	Kernel kern = k_density;
+
+	int workSize = 128;
+
+	// HOW TO DEAL WITH ARGUMENTS
+
+	//kern.setArg(7, cl_cell_indices_end.getDevicePtr());
+
+    k_density.setArg(0, cl_position.cl_buffer[0]);
+    k_density.setArg(1, cl_density.cl_buffer[0]);
+    k_density.setArg(2, cl_params.cl_buffer[0]);
+    k_density.setArg(3, cl_error_check.cl_buffer[0]);
+
+	// local memory
+	int nb_bytes = (workSize+1)*sizeof(int);
+    kern.setArgShared(8, nb_bytes);
+
+	int err;
+   	kern.execute(nb_el, workSize); 
+
+	printBuildDiagnostics();
+
+    ps->cli->queue.finish();
+	ts_cl[TI_BUILD]->end();
+#endif
+}
+//----------------------------------------------------------------------
+void GE_SPH::loadDensity()
 {
     #include "density.cl"
     //printf("%s\n", euler_program_source.c_str());
@@ -29,7 +79,7 @@ float dist_squared(float4 vec)
 
 
 
-void SPH::cpuDensity()
+void GE_SPH::cpuDensity()
 {
     float h = params.smoothing_distance;
     //stuff from Tim's code (need to match #s to papers)

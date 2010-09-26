@@ -61,12 +61,20 @@ set (rtpslib_SOURCES
     
     ${rtpslib_SOURCE_DIR}/system/Simple.cpp
     
-    ${rtpslib_SOURCE_DIR}/system/SPH.cpp
+    ${rtpslib_SOURCE_DIR}/system/GE_SPH.cpp     # NEW
+    #${rtpslib_SOURCE_DIR}/system/SPH.cpp
+
     ${rtpslib_SOURCE_DIR}/system/sph/Euler.cpp
     ${rtpslib_SOURCE_DIR}/system/sph/Density.cpp
     ${rtpslib_SOURCE_DIR}/system/sph/Pressure.cpp
     ${rtpslib_SOURCE_DIR}/system/sph/Viscosity.cpp
     ${rtpslib_SOURCE_DIR}/system/sph/Collision_wall.cpp
+
+    ${rtpslib_SOURCE_DIR}/system/ge_sph/Euler.cpp
+    ${rtpslib_SOURCE_DIR}/system/ge_sph/Density.cpp
+    ${rtpslib_SOURCE_DIR}/system/ge_sph/Pressure.cpp
+    ${rtpslib_SOURCE_DIR}/system/ge_sph/Viscosity.cpp
+    ${rtpslib_SOURCE_DIR}/system/ge_sph/Collision_wall.cpp
 
 
     #${rtpslib_SOURCE_DIR}/particle
@@ -78,6 +86,7 @@ ADD_DEFINITIONS(-DGPU)
 ADD_DEFINITIONS(-DCL_SORT_SOURCE_DIR="${rtpslib_SOURCE_DIR}/oclRadixSortKeysValues/")
 ADD_DEFINITIONS(-DCL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/system/sph/")
 ADD_DEFINITIONS(-DCL_UTIL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/gordon_erle/datastructures_cl")
+ADD_DEFINITIONS(-DCL_SPH_SOURCE_DIR="${rtpslib_SOURCE_DIR}/system/ge_sph")
 
 INCLUDE_DIRECTORIES(${rtpslib_INCLUDES})
 ADD_LIBRARY(rtps STATIC ${rtpslib_SOURCES})

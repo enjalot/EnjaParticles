@@ -2,13 +2,14 @@
 #include <GL/glew.h>
 #include <math.h>
 
-#include "SPH.h"
+#include "GE_SPH.h"
 #include "../particle/UniformGrid.h"
 
 namespace rtps {
 
 
-SPH::SPH(RTPS *psfr, int n)
+//----------------------------------------------------------------------
+GE_SPH::GE_SPH(RTPS *psfr, int n)
 {
     //store the particle system framework
     ps = psfr;
@@ -56,7 +57,7 @@ SPH::SPH(RTPS *psfr, int n)
 
 
 /*
-typedef struct SPHParams
+typedef struct GE_SPHParams
 {
     float4 grid_min;
     float4 grid_max;
@@ -68,7 +69,7 @@ typedef struct SPHParams
     float boundary_distance;
     float EPSILON;
  
-} SPHParams;
+} GE_SPHParams;
 */
 
     params.grid_min = grid.getMin();
@@ -85,12 +86,12 @@ typedef struct SPHParams
     params.K = 1.5f;
  
     //TODO make a helper constructor for buffer to make a cl_mem from a struct
-    std::vector<SPHParams> vparams(0);
+    std::vector<GE_SPHParams> vparams(0);
     vparams.push_back(params);
 //printf("ps= %d\n", ps);
 //printf("ps->cli= %d\n", ps->cli);
 //printf("vparams= %d\n", &vparams);
-    cl_params = Buffer<SPHParams>(ps->cli, vparams);
+    cl_params = Buffer<GE_SPHParams>(ps->cli, vparams);
 //exit(0); // ERROR ON PREVIOUS LINE
 
 
@@ -155,13 +156,14 @@ typedef struct SPHParams
 
 
     //check the params
-    //std::vector<SPHParams> test = cl_params.copyToHost(1);
+    //std::vector<GE_SPHParams> test = cl_params.copyToHost(1);
     //printf("mass: %f, EPSILON %f \n", test[0].mass, test[0].EPSILON);    
 
 
 }
 
-SPH::~SPH()
+//----------------------------------------------------------------------
+GE_SPH::~GE_SPH()
 {
     if(pos_vbo && managed)
     {
@@ -177,7 +179,8 @@ SPH::~SPH()
     }
 }
 
-void SPH::update()
+//----------------------------------------------------------------------
+void GE_SPH::update()
 {
     //call kernels
     //TODO: add timings
@@ -233,5 +236,6 @@ void SPH::update()
     cl_position.release();
     cl_color.release();
 }
+//----------------------------------------------------------------------
 
 }

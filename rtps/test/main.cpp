@@ -63,9 +63,6 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 rtps::RTPS* ps;
-//#define NUM_PARTICLES 16384
-#define NUM_PARTICLES 1024*1024
-
 
 //timers
 //GE::Time *ts[3];
@@ -117,7 +114,7 @@ int main(int argc, char** argv)
 
     
     std::stringstream ss;
-    ss << "Real-Time Particle System: " << NUM_PARTICLES << std::ends;
+    ss << "Real-Time Particle System (get nb particles from elsewhere)" << std::endl;
     glutWindowHandle = glutCreateWindow(ss.str().c_str());
 
     glutDisplayFunc(appRender); //main rendering function
@@ -143,8 +140,8 @@ int main(int argc, char** argv)
     ps = new rtps::RTPS();
 
 	// TEST of my datastructures, sort, hash, build, step1
-	//testGordonApp();
-	//exit(0);
+	testGordonApp();
+	exit(0);
 
     glutMainLoop();
     return 0;
