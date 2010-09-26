@@ -323,6 +323,9 @@ __kernel void K_SumStep1(
 
 
     force = IterateParticlesInNearbyCells(sorted_vars, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp);
-# 223 "uniform_grid_utils.cpp"
- vars[index+numParticles*2];
+# 222 "uniform_grid_utils.cpp"
+ vars[index+numParticles*2] = force;
+
+
+
 }

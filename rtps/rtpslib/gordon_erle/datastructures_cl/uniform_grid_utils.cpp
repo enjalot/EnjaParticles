@@ -217,10 +217,12 @@ __kernel void K_SumStep1(
 	//vars[mad(2,numParticles,index)] = force; // DOES NOT WORK
 	//vars[mad24(2,numParticles,index)] = force; // DOES NOT WORK
 
-	// If none of the two lines are enabled, timing is 24 ms!!
-	// WEIRD TO SAY THE LEAST!
-	//vars[index] = force; // 16 ms
-	vars[index+numParticles*2]; // 61 ms
+
+	// Without this line, 7 ms, with this line, 25 ms (for 65k particles)
+	vars[index+numParticles*2] = force; // 
+
+	// Same cost as previous line if MAD (multiply/add) enabled
+	//vars[index] = force; // 
 }
 
 /*-------------------------------------------------------------- */
