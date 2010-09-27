@@ -47,6 +47,12 @@ set (rtpslib_SOURCES
 	${rtpslib_SOURCE_DIR}/oclRadixSortKeysValues/src/RadixSort.cpp
 	${rtpslib_SOURCE_DIR}/oclRadixSortKeysValues/src/Scan.cpp
 
+    # "wrap" makes it clear we are talking about c++ code
+	${rtpslib_SOURCE_DIR}/system/utils/build_datastructures_wrap.cpp
+	${rtpslib_SOURCE_DIR}/system/utils/neighbor_search_wrap.cpp
+	${rtpslib_SOURCE_DIR}/system/utils/hash_wrap.cpp
+	${rtpslib_SOURCE_DIR}/system/utils/sort_wrap.cpp
+
     ${rtpslib_SOURCE_DIR}/RTPS.cpp
     ${rtpslib_SOURCE_DIR}/RTPSettings.cpp
     ${rtpslib_SOURCE_DIR}/util.cpp
@@ -87,6 +93,7 @@ ADD_DEFINITIONS(-DCL_SORT_SOURCE_DIR="${rtpslib_SOURCE_DIR}/oclRadixSortKeysValu
 ADD_DEFINITIONS(-DCL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/system/sph/")
 ADD_DEFINITIONS(-DCL_UTIL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/gordon_erle/datastructures_cl")
 ADD_DEFINITIONS(-DCL_SPH_SOURCE_DIR="${rtpslib_SOURCE_DIR}/system/ge_sph")
+ADD_DEFINITIONS(-DCL_SPH_UTIL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/system/utils")
 
 INCLUDE_DIRECTORIES(${rtpslib_INCLUDES})
 ADD_LIBRARY(rtps STATIC ${rtpslib_SOURCES})

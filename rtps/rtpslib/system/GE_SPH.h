@@ -22,8 +22,6 @@
 #define VEL 2
 #define FOR 3
 
-
-
 namespace rtps {
 
 //class DataStructures;
@@ -42,6 +40,39 @@ typedef struct GE_SPHSettings
 
 } GE_SPHSettings;
 
+//-------------------------
+// GORDON Datastructure for Grids. To be reconciled with Ian's
+struct GridParams
+{
+    float4          grid_size;
+    float4          grid_min;
+    float4          grid_max;
+
+    // number of cells in each dimension/side of grid
+    float4          grid_res;
+
+    float4          grid_delta;
+	int				numParticles;
+};
+
+// GORDON Datastructure for Fluid parameters. To be reconciled with Ian's
+// struct for fluid parameters
+struct FluidParams
+{
+	float smoothing_length; // SPH radius
+	float scale_to_simulation;
+	float mass;
+	float dt;
+	float friction_coef;
+	float restitution_coef;
+	float damping;
+	float shear;
+	float attraction;
+	float spring;
+	float gravity; // -9.8 m/sec^2
+};
+//-------------------------
+
 //pass parameters to OpenCL routines
 typedef struct GE_SPHParams
 {
@@ -59,7 +90,6 @@ typedef struct GE_SPHParams
     float EPSILON;
     float PI;       //delicious
     float K;        //speed of sound
- 
 } GE_SPHParams __attribute__((aligned(16)));
 
 class GE_SPH : public System
@@ -83,20 +113,22 @@ public:
 	int nb_el;
 	int nb_vars;
 	int grid_size;
-	BufferGE<float4> cl_vars_sorted;
-	BufferGE<float4> cl_vars_unsorted;
-	BufferGE<int> cl_cell_indices_start;
-	BufferGE<int> cl_cell_indices_end;
-	BufferGE<int> cl_vars_sort_indices;
-	//BufferGE<int> cl_unsort_int;
-	//BufferGE<int> cl_sort_int;
-	BufferGE<int> cl_sort_hashes;
-	BufferGE<int> cl_sort_indices;
-	//BufferGE<GridParams> cl_GridParams;
-	//BufferGE<FluidParams> cl_FluidParams;
-	BufferGE<float4> cl_cells;
-	BufferGE<int> cl_unsort;
-	BufferGE<int> cl_sort;
+
+	//BufferGE<int>		cl_unsort_int;
+	//BufferGE<int>		cl_sort_int;
+
+	BufferGE<float4> 	cl_vars_sorted;
+	BufferGE<float4> 	cl_vars_unsorted;
+	BufferGE<float4> 	cl_cells;
+	BufferGE<int> 		cl_cell_indices_start;
+	BufferGE<int> 		cl_cell_indices_end;
+	BufferGE<int> 		cl_vars_sort_indices;
+	BufferGE<int> 		cl_sort_hashes;
+	BufferGE<int> 		cl_sort_indices;
+	BufferGE<int> 		cl_unsort;
+	BufferGE<int> 		cl_sort;
+	BufferGE<GridParams> cl_GridParams;
+	BufferGE<FluidParams> cl_FluidParams;
 
 private:
 	//DataStructures* ds;
@@ -110,6 +142,12 @@ public:
 	void neighbor_search();
 
 private:
+	void printSortDiagnostics();
+	void prepareSortData();
+	void printBuildDiagnostics();
+	void printHashDiagnostics();
+
+private:
     //the particle system framework
     RTPS *ps;
 
@@ -119,6 +157,11 @@ private:
     Kernel k_density, k_pressure, k_viscosity;
     Kernel k_collision_wall;
     Kernel k_euler;
+
+	Kernel datastructures_kernel;
+	Kernel hash_kernel;
+	Kernel sort_kernel;
+	Kernel step1_kernel;
 
     //Buffer<GE_SPHParams> cl_params;
     BufferGE<GE_SPHParams> cl_params;
@@ -150,9 +193,7 @@ private:
 	void computePressure(); //GE
 	void computeViscosity(); //GE
 
-
     void cpuDensity();
-
 };
 
 }

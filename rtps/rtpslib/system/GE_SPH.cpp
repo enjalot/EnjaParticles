@@ -309,7 +309,7 @@ printf("AFTER cell BufferGE\n");
 
 printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
 // Need an assign operator (no memory allocation)
-	#if 0
+	#if 1
 	cl_GridParams = BufferGE<GridParams>(ps->cli, 1); // destroys ...
 
 	GridParams& gp = *(cl_GridParams.getHostPtr());
@@ -394,7 +394,7 @@ printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
 
 	// SETUP FLUID PARAMETERS
 	// cell width is one diameter of particle, which imlies 27 neighbor searches
-	#if 0
+	#if 1
 	cl_FluidParams = BufferGE<FluidParams>(ps->cli, 1);
 	FluidParams& fp = *cl_FluidParams.getHostPtr();;
 	float radius = gp.grid_delta.x; 
