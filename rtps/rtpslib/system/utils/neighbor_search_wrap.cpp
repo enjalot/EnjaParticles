@@ -16,7 +16,7 @@ void GE_SPH::neighbor_search()
 
 	if (first_time) {
 		try {
-			string path(CL_UTIL_SOURCE_DIR);
+			string path(CL_SPH_UTIL_SOURCE_DIR);
 			path = path + "/uniform_grid_utils.cl";
 			int length;
 			char* src = file_contents(path.c_str(), &length);

@@ -59,7 +59,6 @@ void GE_SPH::loadDensity()
     k_density.setArg(1, cl_density.cl_buffer[0]);
     k_density.setArg(2, cl_params.cl_buffer[0]);
     k_density.setArg(3, cl_error_check.cl_buffer[0]);
-
 } 
 #endif
 

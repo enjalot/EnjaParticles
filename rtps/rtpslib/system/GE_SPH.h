@@ -107,8 +107,8 @@ public:
 // MORE ARRAYS THAN NEEDED ...
 
 	// Timers
-	enum {TI_HASH=0, TI_SORT, TI_BUILD, TI_NEIGH, TI_DENS, TI_PRES, TI_EULER, TI_VISC};
-	GE::Time* ts_cl[10];   // ts_cl  is GE::Time**
+	enum {TI_HASH=0, TI_SORT, TI_BUILD, TI_NEIGH, TI_DENS, TI_PRES, TI_EULER, TI_VISC, TI_UPDATE};
+	GE::Time* ts_cl[20];   // ts_cl  is GE::Time**
 
 	int nb_el;
 	int nb_vars;
@@ -193,7 +193,13 @@ private:
 	void computePressure(); //GE
 	void computeViscosity(); //GE
 
+	// diagnostics, checking results of CPU and GPU code
+	void checkDensity();
+
     void cpuDensity();
+
+	void computeOnGPU();
+	void computeOnCPU();
 };
 
 }

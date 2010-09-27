@@ -16,7 +16,7 @@ void GE_SPH::hash()
 
 	if (first_time) {
 		try {
-			string path(CL_UTIL_SOURCE_DIR);
+			string path(CL_SPH_UTIL_SOURCE_DIR);
 			path = path + "/uniform_hash.cl";
 			int length;
 			const char* src = file_contents(path.c_str(), &length);

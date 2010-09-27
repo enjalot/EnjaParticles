@@ -151,40 +151,23 @@ typedef struct GE_SPHParams
 
     cl_error_check= Buffer<float4>(ps->cli, error_check);
 
-
-    //printf("create density kernel\n");
-    //loadDensity();
-
-    //printf("create pressure kernel\n");
-    //loadPressure();
-
-    //printf("create viscosity kernel\n");
-    //loadViscosity();
-
-
     printf("create collision wall kernel\n");
     loadCollision_wall();
 
-    //could generalize this to other integration methods later (leapfrog, RK4)
-    //printf("create euler kernel\n");
-    //loadEuler();
-    //printf("euler kernel created\n");
-
-
-    //check the params
-    //std::vector<GE_SPHParams> test = cl_params.copyToHost(1);
-    //printf("mass: %f, EPSILON %f \n", test[0].mass, test[0].EPSILON);    
-
 	setupArrays(); // From GE structures
 
-	ts_cl[TI_HASH] = new GE::Time("hash", 5);
-	ts_cl[TI_SORT] = new GE::Time("sort", 5);
-	ts_cl[TI_BUILD] = new GE::Time("build", 5);
-	ts_cl[TI_NEIGH] = new GE::Time("neigh", 5);
-	ts_cl[TI_DENS] = new GE::Time("density", 5, 20);
-	ts_cl[TI_PRES] = new GE::Time("pressure", 5, 20);
-	ts_cl[TI_VISC] = new GE::Time("viscosity", 5, 20);
-	ts_cl[TI_EULER] = new GE::Time("euler", 5, 20);
+	int print_freq = 20000;
+	int time_offset = 5;
+
+	ts_cl[TI_HASH]   = new GE::Time("hash",      time_offset, print_freq);
+	ts_cl[TI_SORT]   = new GE::Time("sort",      time_offset, print_freq);
+	ts_cl[TI_BUILD]  = new GE::Time("build",     time_offset, print_freq);
+	ts_cl[TI_NEIGH]  = new GE::Time("neigh",     time_offset, print_freq);
+	ts_cl[TI_DENS]   = new GE::Time("density",   time_offset, print_freq);
+	ts_cl[TI_PRES]   = new GE::Time("pressure",  time_offset, print_freq);
+	ts_cl[TI_VISC]   = new GE::Time("viscosity", time_offset, print_freq);
+	ts_cl[TI_EULER]  = new GE::Time("euler",     time_offset, print_freq);
+	ts_cl[TI_UPDATE] = new GE::Time("update",    time_offset, print_freq);
 	//ps->setTimers(ts_cl);
 
 	// copy pos, vel, dens into vars_unsorted()
@@ -222,50 +205,18 @@ GE_SPH::~GE_SPH()
 //----------------------------------------------------------------------
 void GE_SPH::update()
 {
+	static int count=0;
+
+	ts_cl[TI_UPDATE]->start(); // OK
+
     //call kernels
     //TODO: add timings
 #ifdef CPU
-    cpuDensity();
-    //cpuPressure();
-    //cpuEuler();
+	computeOnCPU();
 #endif
+
 #ifdef GPU
-    glFinish();
-    cl_position.acquire();
-    cl_color.acquire();
-    
-    //printf("execute!\n");
-    for(int i=0; i < 10; i++)
-    {
-		computeDensity();
-        //k_density.execute(num);
-        //test density
-        std::vector<float> dens = cl_density.copyToHost(num);
-        float dens_sum = 0.0f;
-        for(int j = 0; j < num; j++)
-        {
-            dens_sum += dens[j];
-        }
-        printf("summed density: %f\n", dens_sum);
-        /*
-        std::vector<float4> er = cl_error_check.copyToHost(10);
-        for(int j = 0; j < 10; j++)
-        {
-            printf("rrrr[%d]: %f %f %f %f\n", j, er[j].x, er[j].y, er[j].z, er[j].w);
-        }
-        */
-        computePressure();
-        //k_pressure.execute(num);
-
-        computeViscosity();
-        //k_viscosity.execute(num);
-
-        //k_collision_wall.execute(num);
-
-        //euler integration
-        //k_euler.execute(num);
-		computeEuler();
-    }
+	computeOnGPU();
 #endif
     /*
     std::vector<float4> ftest = cl_force.copyToHost(100);
@@ -277,9 +228,14 @@ void GE_SPH::update()
     printf("execute!\n");
     */
 
+	ts_cl[TI_UPDATE]->end(); // OK
 
-    cl_position.release();
-    cl_color.release();
+	count++;
+	printf("count= %d\n", count);
+	if (count%10 == 0) {
+		count = 0;
+		GE::Time::printAll();
+	}
 }
 //----------------------------------------------------------------------
 void GE_SPH::setupArrays()
@@ -413,6 +369,73 @@ printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
 
     printf("done with setup arrays\n");
 }
+//----------------------------------------------------------------------
+void GE_SPH::checkDensity()
+{
+        //test density
+		// Density checks should be in Density.cpp I believe (perhaps not)
+        std::vector<float> dens = cl_density.copyToHost(num);
+        float dens_sum = 0.0f;
+        for(int j = 0; j < num; j++)
+        {
+            dens_sum += dens[j];
+        }
+        printf("summed density: %f\n", dens_sum);
+        /*
+        std::vector<float4> er = cl_error_check.copyToHost(10);
+        for(int j = 0; j < 10; j++)
+        {
+            printf("rrrr[%d]: %f %f %f %f\n", j, er[j].x, er[j].y, er[j].z, er[j].w);
+        }
+        */
+}
+//----------------------------------------------------------------------
+void GE_SPH::computeOnGPU()
+{
+    glFinish();
+    cl_position.acquire();
+    cl_color.acquire();
+    
+    //printf("execute!\n");
+	// More steps per update for visualization purposes
+    //for(int i=0; i < 10; i++)
+
+    for(int i=0; i < 1; i++)
+    {
+		// ***** DENSITY UPDATE *****
+		computeDensity();
+		checkDensity();
+
+
+		// ***** PRESSURE UPDATE *****
+        computePressure();
+        //k_pressure.execute(num);
+
+		// ***** VISCOSITY UPDATE *****
+        //computeViscosity();
+
+		// ***** WALL COLLISIONS *****
+        //k_collision_wall.execute(num);
+
+        // ***** EULER UPDATE *****
+		computeEuler();
+    }
+
+    cl_position.release();
+    cl_color.release();
+}
+//----------------------------------------------------------------------
+void GE_SPH::computeOnCPU()
+{
+    cpuDensity();
+    //cpuPressure();
+    //cpuEuler();
+}
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
 //----------------------------------------------------------------------
 
 }

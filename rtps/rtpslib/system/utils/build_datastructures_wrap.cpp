@@ -14,7 +14,7 @@ void GE_SPH::buildDataStructures()
 
 	if (first_time) {
 		try {
-			string path(CL_UTIL_SOURCE_DIR);
+			string path(CL_SPH_UTIL_SOURCE_DIR);
 			path = path + "/datastructures_test.cl";
 			int length;
 			const char* src = file_contents(path.c_str(), &length);
