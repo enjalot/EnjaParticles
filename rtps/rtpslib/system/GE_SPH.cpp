@@ -24,7 +24,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     ps = psfr;
 
     num = n;
-	nb_vars = 3;  // for array structure in OpenCL
+	nb_vars = 4;  // for array structure in OpenCL
 	nb_el = n;
 	printf("num_particles= %d\n", num);
 
@@ -155,20 +155,20 @@ typedef struct GE_SPHParams
     //printf("create density kernel\n");
     //loadDensity();
 
-    printf("create pressure kernel\n");
-    loadPressure();
+    //printf("create pressure kernel\n");
+    //loadPressure();
 
-    printf("create viscosity kernel\n");
-    loadViscosity();
+    //printf("create viscosity kernel\n");
+    //loadViscosity();
 
 
     printf("create collision wall kernel\n");
     loadCollision_wall();
 
-    //could generalize this to other integration methods later (leap frog, RK4)
-    printf("create euler kernel\n");
-    loadEuler();
-    printf("euler kernel created\n");
+    //could generalize this to other integration methods later (leapfrog, RK4)
+    //printf("create euler kernel\n");
+    //loadEuler();
+    //printf("euler kernel created\n");
 
 
     //check the params
@@ -182,8 +182,9 @@ typedef struct GE_SPHParams
 	ts_cl[TI_BUILD] = new GE::Time("build", 5);
 	ts_cl[TI_NEIGH] = new GE::Time("neigh", 5);
 	ts_cl[TI_DENS] = new GE::Time("density", 5, 20);
-	ts_cl[TI_PRES] = new GE::Time("pressure", 5);
-	ts_cl[TI_EULER] = new GE::Time("euler", 5);
+	ts_cl[TI_PRES] = new GE::Time("pressure", 5, 20);
+	ts_cl[TI_VISC] = new GE::Time("viscosity", 5, 20);
+	ts_cl[TI_EULER] = new GE::Time("euler", 5, 20);
 	//ps->setTimers(ts_cl);
 
 	// copy pos, vel, dens into vars_unsorted()
@@ -195,7 +196,7 @@ typedef struct GE_SPHParams
 		// HOW TO DEAL WITH THIS WITHOUT DOUBLING MEMORY ACCESS in 
 		// buildDataStructures. 
 
-		//cl_vars_unsorted(i+DENS*num) = densities[i];
+		cl_vars_unsorted(i+DENS*num).x = densities[i];
 		cl_vars_unsorted(i+POS*num) = positions[i];
 		cl_vars_unsorted(i+VEL*num) = velocities[i];
 	}
@@ -253,13 +254,17 @@ void GE_SPH::update()
             printf("rrrr[%d]: %f %f %f %f\n", j, er[j].x, er[j].y, er[j].z, er[j].w);
         }
         */
-        k_pressure.execute(num);
-        k_viscosity.execute(num);
+        computePressure();
+        //k_pressure.execute(num);
+
+        computeViscosity();
+        //k_viscosity.execute(num);
 
         //k_collision_wall.execute(num);
 
         //euler integration
-        k_euler.execute(num);
+        //k_euler.execute(num);
+		computeEuler();
     }
 #endif
     /*
@@ -405,8 +410,6 @@ printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
 	fp.gravity = -9.8; // -9.8 m/sec^2
 	cl_FluidParams.copyToDevice();
 	#endif
-
-
 
     printf("done with setup arrays\n");
 }

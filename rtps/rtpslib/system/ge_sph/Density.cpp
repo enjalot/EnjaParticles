@@ -31,21 +31,14 @@ void GE_SPH::computeDensity()
 	}
 
 	Kernel kern = k_density;
-
 	int workSize = 128;
-
-	// HOW TO DEAL WITH ARGUMENTS
 
     k_density.setArg(0, nb_vars);
     k_density.setArg(1, cl_vars_sorted.getDevicePtr());
     k_density.setArg(2, cl_params.getDevicePtr());
     k_density.setArg(3, cl_error_check.cl_buffer[0]);
 
-	// local memory
-
-	int err;
    	kern.execute(nb_el, workSize); 
-
 
 	//printBuildDiagnostics();
 
@@ -70,7 +63,6 @@ void GE_SPH::loadDensity()
 } 
 #endif
 
-
 float magnitude(float4 vec)
 {
     return sqrt(vec.x*vec.x + vec.y*vec.y + vec.z*vec.z);
@@ -80,8 +72,7 @@ float dist_squared(float4 vec)
     return vec.x*vec.x + vec.y*vec.y + vec.z*vec.z;
 }
 
-
-
+//----------------------------------------------------------------------
 void GE_SPH::cpuDensity()
 {
     float h = params.smoothing_distance;
@@ -136,5 +127,6 @@ void GE_SPH::cpuDensity()
     }
     printf("CPU: sum_densities = %f\n", sum_densities);
 }
+//----------------------------------------------------------------------
 
 }

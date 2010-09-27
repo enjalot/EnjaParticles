@@ -77,7 +77,7 @@ public:
 // MORE ARRAYS THAN NEEDED ...
 
 	// Timers
-	enum {TI_HASH=0, TI_SORT, TI_BUILD, TI_NEIGH, TI_DENS, TI_PRES, TI_EULER};
+	enum {TI_HASH=0, TI_SORT, TI_BUILD, TI_NEIGH, TI_DENS, TI_PRES, TI_EULER, TI_VISC};
 	GE::Time* ts_cl[10];   // ts_cl  is GE::Time**
 
 	int nb_el;
@@ -144,7 +144,11 @@ private:
     void loadCollision_wall();
     void loadEuler();
 
+	// loads kernel the first time, executes kernel every time
+	void computeEuler(); //GE
 	void computeDensity(); //GE
+	void computePressure(); //GE
+	void computeViscosity(); //GE
 
 
     void cpuDensity();
