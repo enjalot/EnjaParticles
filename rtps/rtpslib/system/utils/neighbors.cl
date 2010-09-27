@@ -23,7 +23,8 @@ struct GridParams
 
     float4 grid_res;
     float4 grid_delta;
-    int numParticles;
+    float4 grid_inv_delta;
+    int num;
 };
 
 struct FluidParams
@@ -60,9 +61,9 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
 # 1 "cl_snippet_sphere_forces.h" 1
 # 18 "cl_snippet_sphere_forces.h"
- int numParticles = gp->numParticles;
- float4 ri = vars_sorted[index_i+0*numParticles];
- float4 rj = vars_sorted[index_j+0*numParticles];
+ int num = gp->num;
+ float4 ri = vars_sorted[index_i+1*num];
+ float4 rj = vars_sorted[index_j+1*num];
  float4 relPos = rj-ri;
  float dist = length(relPos);
  float collideDist = 2.*fp->smoothing_length;
@@ -75,8 +76,8 @@ float4 ForNeighbor(__global float4* vars_sorted,
  force.w = 0.;
 
  if (dist < collideDist) {
-  float4 vi = vars_sorted[index_i+1*numParticles];
-  float4 vj = vars_sorted[index_j+1*numParticles];
+  float4 vi = vars_sorted[index_i+2*num];
+  float4 vj = vars_sorted[index_j+2*num];
   float4 norm = relPos / dist;
 
 
@@ -101,7 +102,7 @@ float4 ForNeighbor(__global float4* vars_sorted,
 }
 
 float4 ForPossibleNeighbor(__global float4* vars_sorted,
-      __constant uint numParticles,
+      __constant uint num,
       __constant uint index_i,
       uint index_j,
       __constant float4 position_i,
@@ -118,7 +119,7 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 
  if (index_j != index_i) {
 
-  float4 position_j = vars_sorted[index_j+0*numParticles];
+  float4 position_j = vars_sorted[index_j+1*num];
 
 
   float4 r = (position_i - position_j) * fp->scale_to_simulation;

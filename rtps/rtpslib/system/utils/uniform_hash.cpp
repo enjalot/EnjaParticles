@@ -9,17 +9,17 @@
 //----------------------------------------------------------------------
 // find the grid cell from a position in world space
 // WHY static?
-int4 calcGridCell(float4 p, float4 grid_min, float4 grid_delta)
+int4 calcGridCell(float4 p, float4 grid_min, float4 grid_inv_delta)
 {
     // subtract grid_min (cell position) and multiply by delta
     //return make_int4((p-grid_min) * grid_delta);
 
     //float4 pp = (p-grid_min)*grid_delta;
     float4 pp;
-    pp.x = (p.x-grid_min.x)*grid_delta.x;
-    pp.y = (p.y-grid_min.y)*grid_delta.y;
-    pp.z = (p.z-grid_min.z)*grid_delta.z;
-    pp.w = (p.w-grid_min.w)*grid_delta.w;
+    pp.x = (p.x-grid_min.x)*grid_inv_delta.x;
+    pp.y = (p.y-grid_min.y)*grid_inv_delta.y;
+    pp.z = (p.z-grid_min.z)*grid_inv_delta.z;
+    pp.w = (p.w-grid_min.w)*grid_inv_delta.w;
 
     int4 ii;
     ii.x = (int) pp.x;
@@ -60,7 +60,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
         gz = gridPos.z;
     }
 
-
     //We choose to simply traverse the grid cells along the x, y, and z axes, in that order. The inverse of
     //this space filling curve is then simply:
     // index = x + y*width + z*width*height
@@ -90,7 +89,9 @@ __kernel void hash(
            __global float4* dParticlePositions,
            __global uint* sort_hashes,
            __global uint* sort_indexes,
-           __constant struct GridParams* gp)
+           __constant struct GridParams* gp) 
+           //, __global float4* fdebug,
+           //__global int4* idebug)
 {
     // particle index
     uint index = get_global_id(0);
@@ -100,9 +101,10 @@ __kernel void hash(
     float4 p = dParticlePositions[index];
 
     // get address in grid
-    int4 gridPos = calcGridCell(p, gp->grid_min, gp->grid_delta);
+    int4 gridPos = calcGridCell(p, gp->grid_min, gp->grid_inv_delta);
     bool wrap_edges = false;
     uint hash = (uint) calcGridHash(gridPos, gp->grid_res, wrap_edges);
+
 
     // store grid hash and particle index
 
@@ -111,6 +113,7 @@ __kernel void hash(
 
     sort_indexes[index] = index;
 
+	//idebug[index] = gridPos;
 }
 //----------------------------------------------------------------------
 

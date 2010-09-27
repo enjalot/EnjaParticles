@@ -12,19 +12,19 @@ std::string hash_program_source = STRINGIFY(
 // WHY static?
 //static int3 calcGridCell(float3 const &p, float3 grid_min, float3 grid_delta)
 #if 1
-int3 calcGridCell(__constant float3 p, float3 grid_min, float3 grid_delta)
+int4 calcGridCell(__constant float4 p, float4 grid_min, float4 grid_delta)
 //int4 calcGridCell(float4 const &p, float4 grid_min, float4 grid_delta)
 {
 	// subtract grid_min (cell position) and multiply by delta
 	//return make_int3((p-grid_min) * grid_delta);
-	return (int3) ((p-grid_min) * grid_delta);
+	return (int4) ((p-grid_min) * grid_delta);
 }
 #endif
 
 //----------------------------------------------------------------------
 //template <bool wrapEdges>
 //static uint calcGridHash(int3 const &gridPos, float3 grid_res, __constant bool wrapEdges)
-uint calcGridHash(__constant int3 gridPos, float3 grid_res, __constant bool wrapEdges)
+uint calcGridHash(__constant int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 {
 	// each variable on single line or else STRINGIFY DOES NOT WORK
 	int gx;
@@ -82,13 +82,13 @@ uint calcGridHash(__constant int3 gridPos, float3 grid_res, __constant bool wrap
 
 struct GridParams
 {
-    float3          grid_size;
-    float3          grid_min;
-    float3          grid_max;
+    float4          grid_size;
+    float4          grid_min;
+    float4          grid_max;
 
     // number of cells in each dimension/side of grid
-    float3          grid_res;
-    float3          grid_delta;
+    float4          grid_res;
+    float4          grid_delta;
 };
 
 
@@ -115,7 +115,7 @@ __kernel void hash (
 
 	// get address in grid
 	//int3 gridPos = calcGridCell(make_float3(p), cGridParams.grid_min, cGridParams.grid_delta);
-	int3 gridPos = calcGridCell(p.xyz, cGridParams->grid_min, cGridParams->grid_delta);
+	int4 gridPos = calcGridCell(p.xyz, cGridParams->grid_min, cGridParams->grid_delta);
 	bool t = true;
 	uint hash = calcGridHash(gridPos, cGridParams->grid_res, t);
 

@@ -28,7 +28,6 @@ FIND_PACKAGE (OPENCL)
 FIND_PACKAGE (GLEW)
 
 set (rtpslib_INCLUDES
-    ${rtpslib_SOURCE_DIR}/ge_datastructures
     ${rtpslib_SOURCE_DIR}/oclRadixSortKeysValues/inc
     #${GLUT_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
@@ -37,13 +36,14 @@ set (rtpslib_INCLUDES
 	$ENV{OPENCL_HOME}/common/inc
 	$ENV{OPENCL_HOME}/../shared/inc
 	${rtpslib_SOURCE_DIR}/oclRadixSortKeysalues/inc
+    ${rtpslib_SOURCE_DIR}/ge_datastructures
 )
 
 
 #library
 set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/ge_datastructures/timege.cpp
-    ${rtpslib_SOURCE_DIR}/ge_datastructures/datastructures.cpp
+    #${rtpslib_SOURCE_DIR}/ge_datastructures/datastructures.cpp
 	${rtpslib_SOURCE_DIR}/oclRadixSortKeysValues/src/RadixSort.cpp
 	${rtpslib_SOURCE_DIR}/oclRadixSortKeysValues/src/Scan.cpp
 
@@ -91,7 +91,7 @@ ADD_DEFINITIONS(-g )
 ADD_DEFINITIONS(-DGPU)
 ADD_DEFINITIONS(-DCL_SORT_SOURCE_DIR="${rtpslib_SOURCE_DIR}/oclRadixSortKeysValues/")
 ADD_DEFINITIONS(-DCL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/system/sph/")
-ADD_DEFINITIONS(-DCL_UTIL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/gordon_erle/datastructures_cl")
+#ADD_DEFINITIONS(-DCL_UTIL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/gordon_erle/datastructures_cl")
 ADD_DEFINITIONS(-DCL_SPH_SOURCE_DIR="${rtpslib_SOURCE_DIR}/system/ge_sph")
 ADD_DEFINITIONS(-DCL_SPH_UTIL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/system/utils")
 
@@ -105,4 +105,5 @@ TARGET_LINK_LIBRARIES (rtps
    ${GLEW_LIBRARY}
 )
 
-ADD_SUBDIRECTORY(gordon_erle/datastructures_cl)
+#ADD_SUBDIRECTORY(gordon_erle/datastructures_cl)
+ADD_SUBDIRECTORY(system/utils)

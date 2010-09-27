@@ -23,6 +23,7 @@ struct GridParams
 
     float4 grid_res;
     float4 grid_delta;
+    float4 grid_inv_delta;
     int numParticles;
 };
 
@@ -46,17 +47,17 @@ struct FluidParams
 
 
 
-int4 calcGridCell(float4 p, float4 grid_min, float4 grid_delta)
+int4 calcGridCell(float4 p, float4 grid_min, float4 grid_inv_delta)
 {
 
 
 
 
     float4 pp;
-    pp.x = (p.x-grid_min.x)*grid_delta.x;
-    pp.y = (p.y-grid_min.y)*grid_delta.y;
-    pp.z = (p.z-grid_min.z)*grid_delta.z;
-    pp.w = (p.w-grid_min.w)*grid_delta.w;
+    pp.x = (p.x-grid_min.x)*grid_inv_delta.x;
+    pp.y = (p.y-grid_min.y)*grid_inv_delta.y;
+    pp.z = (p.z-grid_min.z)*grid_inv_delta.z;
+    pp.w = (p.w-grid_min.w)*grid_inv_delta.w;
 
     int4 ii;
     ii.x = (int) pp.x;
@@ -96,15 +97,23 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
         gy = gridPos.y;
         gz = gridPos.z;
     }
-# 70 "uniform_hash.cpp"
+
+
+
+
+
+
+
     return (gz*grid_res.y + gy) * grid_res.x + gx;
 }
-# 89 "uniform_hash.cpp"
+# 88 "uniform_hash.cpp"
 __kernel void hash(
            __global float4* dParticlePositions,
            __global uint* sort_hashes,
            __global uint* sort_indexes,
            __constant struct GridParams* gp)
+
+
 {
 
     uint index = get_global_id(0);
@@ -114,9 +123,10 @@ __kernel void hash(
     float4 p = dParticlePositions[index];
 
 
-    int4 gridPos = calcGridCell(p, gp->grid_min, gp->grid_delta);
+    int4 gridPos = calcGridCell(p, gp->grid_min, gp->grid_inv_delta);
     bool wrap_edges = false;
     uint hash = (uint) calcGridHash(gridPos, gp->grid_res, wrap_edges);
+
 
 
 
@@ -124,5 +134,6 @@ __kernel void hash(
     int pp = (int) p.x;
 
     sort_indexes[index] = index;
+
 
 }

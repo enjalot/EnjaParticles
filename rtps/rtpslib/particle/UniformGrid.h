@@ -9,21 +9,24 @@ class UniformGrid
 {
 public:
     UniformGrid(){};
-    UniformGrid(float3 min, float3 max, float cell_size);
+    UniformGrid(float4 min, float4 max, float cell_size);
     ~UniformGrid();
 
     void make_cube(float4 *positions, float spacing, int num);
 
-    float3 getMin(){ return min; };
-    float3 getMax(){ return max; };
+    float4 getMin(){ return min; };
+    float4 getMax(){ return max; };
+	float4 getDelta() { return delta; };
+	float4 getRes() { return res; };
+	float4 getSize() { return size; };
 
 private:
-    float3 min;
-    float3 max; 
+    float4 min;
+    float4 max; 
 
-    float3 size;
-    float3 res;
-    float3 delta;
+    float4 size;
+    float4 res;
+    float4 delta;
 
 
 };

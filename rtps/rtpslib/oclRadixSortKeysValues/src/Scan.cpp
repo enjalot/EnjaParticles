@@ -41,13 +41,6 @@ Scan::Scan(cl_context GPUContext,
 
 	char *SourceFile = "Scan_b.cl";
 
-    //printf("cScan, path= %s\n", path);
-	//printf("path: %s\n", shrFindFilePath(SourceFile, path));
-
-    //char *cScan = oclLoadProgSource(shrFindFilePath(SourceFile, path), "// My comment\n", &szKernelLength);
-
-    //char *cScan = oclLoadProgSource(".", "// My comment\n", &szKernelLength);
-
 	// IAN: FIX CODE AND REMOVE HARDCODING (path to cl files)
 	// cScan should contain the source code
 
@@ -55,17 +48,12 @@ Scan::Scan(cl_context GPUContext,
 	paths = paths + "/Scan_b.cl";
 	const char* pathr = paths.c_str();
 
-	//char* pathr= "/Users/erlebach/Documents/src/blender-particles/enjacl/build/RadixSort.cl";
-	//const char* pathr= "/Users/erlebach/Documents/src/blender-particles/enjacl/build/Scan_b.cl";
-	//char* pathr= "/panfs/panasas1/users/idj03/research/enjasph/enjacl/oclRadixSort/Scan_b.cl";
-
 	FILE* fd = fopen(pathr, "r");
-	char* cScan = new char [10000];
+	char* cScan = new char [20000];
 	int nb = fread(cScan, 1, 10000, fd);
     szKernelLength = nb;
 
     //printf("cScan: %s\n", cScan);
-	printf("nb= %d\n", nb);
 	//printf("cScan= %s\n", cScan);
 
     ////oclCheckErrorEX(cScan == NULL, false, NULL);

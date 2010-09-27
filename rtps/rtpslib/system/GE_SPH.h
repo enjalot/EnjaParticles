@@ -52,6 +52,7 @@ struct GridParams
     float4          grid_res;
 
     float4          grid_delta;
+    float4          grid_inv_delta;
 	int				numParticles;
 };
 
@@ -76,9 +77,9 @@ struct FluidParams
 //pass parameters to OpenCL routines
 typedef struct GE_SPHParams
 {
-    float3 grid_min;
+    float4 grid_min; // changed by GE
+    float4 grid_max;
     float grid_min_padding;     //float3s take up a float4 of space in OpenCL 1.0 and 1.1
-    float3 grid_max;
     float grid_max_padding;
     float mass;
     float rest_distance;
@@ -119,7 +120,7 @@ public:
 
 	BufferGE<float4> 	cl_vars_sorted;
 	BufferGE<float4> 	cl_vars_unsorted;
-	BufferGE<float4> 	cl_cells;
+	BufferGE<float4> 	cl_cells; // positions in Ian code
 	BufferGE<int> 		cl_cell_indices_start;
 	BufferGE<int> 		cl_cell_indices_end;
 	BufferGE<int> 		cl_vars_sort_indices;
@@ -129,6 +130,9 @@ public:
 	BufferGE<int> 		cl_sort;
 	BufferGE<GridParams> cl_GridParams;
 	BufferGE<FluidParams> cl_FluidParams;
+
+	BufferGE<float4>	clf_debug;  //just for debugging cl files
+	BufferGE<int4>		cli_debug;  //just for debugging cl files
 
 private:
 	//DataStructures* ds;

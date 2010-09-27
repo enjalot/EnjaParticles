@@ -28,6 +28,7 @@ struct GridParams
     float4          grid_res;
 
     float4          grid_delta;
+    float4          grid_inv_delta;
 	int				numParticles;
 };
 

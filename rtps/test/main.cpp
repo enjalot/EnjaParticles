@@ -104,6 +104,9 @@ void testGE_SPH()
 //----------------------------------------------------------------------
 void testGordonApp()
 {
+#if 0
+// I removed ge_datastructures from Cmakefile
+
 	rtps::DataStructures ds(ps);
 
 	ds.setupArrays();
@@ -125,7 +128,7 @@ void testGordonApp()
 	}
 
 	GE::Time::printAll();
-	
+#endif
 }
 //----------------------------------------------------------------------
 int main(int argc, char** argv)

@@ -21,7 +21,8 @@ struct GridParams
 
     float4 grid_res;
     float4 grid_delta;
-    int numParticles;
+    float4 grid_inv_delta;
+    int num;
 };
 
 struct FluidParams
@@ -64,9 +65,9 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
 # 1 "cl_snippet_sphere_forces.h" 1
 # 18 "cl_snippet_sphere_forces.h"
- int numParticles = gp->numParticles;
- float4 ri = vars_sorted[index_i+0*numParticles];
- float4 rj = vars_sorted[index_j+0*numParticles];
+ int num = gp->num;
+ float4 ri = vars_sorted[index_i+1*num];
+ float4 rj = vars_sorted[index_j+1*num];
  float4 relPos = rj-ri;
  float dist = length(relPos);
  float collideDist = 2.*fp->smoothing_length;
@@ -79,8 +80,8 @@ float4 ForNeighbor(__global float4* vars_sorted,
  force.w = 0.;
 
  if (dist < collideDist) {
-  float4 vi = vars_sorted[index_i+1*numParticles];
-  float4 vj = vars_sorted[index_j+1*numParticles];
+  float4 vi = vars_sorted[index_i+2*num];
+  float4 vj = vars_sorted[index_j+2*num];
   float4 norm = relPos / dist;
 
 
@@ -105,7 +106,7 @@ float4 ForNeighbor(__global float4* vars_sorted,
 }
 
 float4 ForPossibleNeighbor(__global float4* vars_sorted,
-      __constant uint numParticles,
+      __constant uint num,
       __constant uint index_i,
       uint index_j,
       __constant float4 position_i,
@@ -122,7 +123,7 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 
  if (index_j != index_i) {
 
-  float4 position_j = vars_sorted[index_j+0*numParticles];
+  float4 position_j = vars_sorted[index_j+1*num];
 
 
   float4 r = (position_i - position_j) * fp->scale_to_simulation;
@@ -205,7 +206,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 
  float4 IterateParticlesInCell(
   __global float4* vars_sorted,
-  __constant uint numParticles,
+  __constant uint num,
   __constant int4 cellPos,
   __constant uint index_i,
   __constant float4 position_i,
@@ -236,7 +237,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 
 
 
-    force += ForPossibleNeighbor(vars_sorted, numParticles, index_i, index_j, position_i, gp, fp);
+    force += ForPossibleNeighbor(vars_sorted, num, index_i, index_j, position_i, gp, fp);
 
    }
   }
@@ -247,7 +248,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 
  float4 IterateParticlesInNearbyCells(
   __global float4* vars_sorted,
-  int numParticles,
+  int num,
   int index_i,
   __constant float4 position_i,
   __global int* cell_indices_start,
@@ -283,7 +284,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
      ipos.w = 1;
 
 
-     force += IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp);
+     force += IterateParticlesInCell(vars_sorted, num, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp);
 
     }
    }
@@ -297,7 +298,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 
 
 __kernel void K_SumStep1(
-    uint numParticles,
+    uint num,
     uint nb_vars,
     __global float4* vars,
     __global float4* sorted_vars,
@@ -309,22 +310,22 @@ __kernel void K_SumStep1(
 {
 
  int index = get_global_id(0);
-    if (index >= numParticles) return;
+    if (index >= num) return;
 
 
 
 
 
-    float4 position_i = sorted_vars[index+0*numParticles];
+    float4 position_i = sorted_vars[index+1*num];
 
 
 
  float4 force;
 
 
-    force = IterateParticlesInNearbyCells(sorted_vars, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp);
+    force = IterateParticlesInNearbyCells(sorted_vars, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp);
 # 222 "uniform_grid_utils.cpp"
- vars[index+numParticles*2] = force;
+ vars[index+num*2] = force;
 
 
 

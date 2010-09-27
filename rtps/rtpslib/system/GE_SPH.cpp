@@ -65,9 +65,8 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     printf("particle radius: %f\n", particle_radius);
 
     //grid = UniformGrid(float3(0,0,0), float3(1024, 1024, 1024), sph_settings.smoothing_distance / sph_settings.simulation_scale);
-    grid = UniformGrid(float3(-512,0,-512), float3(512, 1024, 512), sph_settings.smoothing_distance / sph_settings.simulation_scale);
+    grid = UniformGrid(float4(-512,0,-512,1.), float4(512, 1024, 512, 1.), sph_settings.smoothing_distance / sph_settings.simulation_scale);
     grid.make_cube(&positions[0], sph_settings.spacing, num);
-
 
 /*
 typedef struct GE_SPHParams
@@ -110,7 +109,6 @@ typedef struct GE_SPHParams
 	cl_params.copyToDevice();
 //exit(0); // ERROR ON PREVIOUS LINE
 
-
     std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));
     std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 1.0f, 0.0f));
     std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -126,9 +124,6 @@ typedef struct GE_SPHParams
     */
 
     //*** end Initialization
-   
-
-
 
     // VBO creation, TODO: should be abstracted to another class
     managed = true;
@@ -241,59 +236,59 @@ void GE_SPH::update()
 void GE_SPH::setupArrays()
 {
 	// only for my test routines: sort, hash, datastructures
-	int nb_bytes;
+	//printf("setupArrays, nb_el= %d\n", nb_el); exit(0);
 
-	//nb_el = (1 << 16);  // number of particles
-	printf("nb_el= %d\n", nb_el); //exit(0);
-	//nb_vars = 3;        // number of cl_float4 variables to reorder
-	printf("nb_el= %d\n", nb_el); 
-
-printf("\n\nBEFORE cell BufferGE<float4>\n"); //********************
-	cl_cells = BufferGE<float4>(ps->cli, nb_el);
+	//cl_cells = BufferGE<float4>(ps->cli, nb_el);
+	positions[0] = float4(45., -234., 129., 1.); // test sort
+	cl_cells = BufferGE<float4>(ps->cli, &positions[0], nb_el);
 printf("AFTER cell BufferGE\n");
 	// notice the index rotation? 
 
 	for (int i=0; i < nb_el; i++) {
 		float aa = rand_float(0.,10.);
-		cl_cells[i].x = rand_float(0.,10.);
-		cl_cells[i].y = rand_float(0.,10.);
-		cl_cells[i].z = rand_float(0.,10.);
-		cl_cells[i].w = 1.;
+		float4* cells = cl_cells.getHostPtr();
 		//printf("%d, %f, %f, %f, %f\n", i, cells[i].x, cells[i].y, cells[i].z, cells[i].w);
 	}
+	//exit(0);
 	cl_cells.copyToDevice();
 
 printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
 // Need an assign operator (no memory allocation)
 	#if 1
+	printf("allocate BufferGE<GridParams>\n");
+	printf("sizeof(GridParams): %d\n", sizeof(GridParams));
 	cl_GridParams = BufferGE<GridParams>(ps->cli, 1); // destroys ...
 
 	GridParams& gp = *(cl_GridParams.getHostPtr());
-	//float resol = 50.;
-	float resol = 25.;
-	gp.grid_size = float4(10.,10.,10.,1.);
-	gp.grid_min  = float4(0.,0.,0.,1.);
-	gp.grid_max.x = gp.grid_size.x + gp.grid_min.x; 
-	gp.grid_max.y = gp.grid_size.y + gp.grid_min.y; 
-	gp.grid_max.z = gp.grid_size.z + gp.grid_min.z; 
-	gp.grid_max.w = 1.0;
-	gp.grid_res  = float4(resol,resol,resol,1.);
-	gp.grid_delta.x = gp.grid_size.x / gp.grid_res.x;
-	gp.grid_delta.y = gp.grid_size.y / gp.grid_res.y;
-	gp.grid_delta.z = gp.grid_size.z / gp.grid_res.z;
-	// I want inverse of delta to use multiplication in the kernel
-	gp.grid_delta.x = 1. / gp.grid_delta.x;
-	gp.grid_delta.y = 1. / gp.grid_delta.y;
-	gp.grid_delta.z = 1. / gp.grid_delta.z;
-	gp.grid_delta.w = 1.;
-	gp.numParticles = nb_el;  // WRONG SPOT, BUT USEFUL for CL kernels arg passing
+
+	gp.grid_min = grid.getMin();
+	gp.grid_max = grid.getMax();
+	gp.grid_res = grid.getRes();
+	gp.grid_size = grid.getSize();
+	gp.grid_delta = grid.getDelta();
+	gp.numParticles = nb_el;
+
+	gp.grid_inv_delta.x = 1. / gp.grid_delta.x;
+	gp.grid_inv_delta.y = 1. / gp.grid_delta.y;
+	gp.grid_inv_delta.z = 1. / gp.grid_delta.z;
+	gp.grid_inv_delta.w = 1.;
+	gp.grid_inv_delta.print("inv delta");
+
+	printf("size: %d\n", sizeof(gp));
 	cl_GridParams.copyToDevice();
-//exit(0);
 
 	printf("delta z= %f\n", gp.grid_delta.z);
 
 	grid_size = (int) (gp.grid_res.x * gp.grid_res.y * gp.grid_res.z);
 	printf("grid_size= %d\n", grid_size);
+	gp.grid_size.print("grid size (domain dimensions)"); // domain dimensions
+	gp.grid_delta.print("grid delta (cell size)"); // cell size
+	gp.grid_min.print("grid min");
+	gp.grid_max.print("grid max");
+	gp.grid_res.print("grid res (nb points)"); // number of points
+	gp.grid_delta.print("grid delta");
+	gp.grid_inv_delta.print("grid inv delta");
+	//exit(0);
 	#endif
 
 	cl_unsort = BufferGE<int>(ps->cli, nb_el);
@@ -320,6 +315,9 @@ printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
 	cl_sort_indices = BufferGE<int>(ps->cli, nb_el);
 	cl_sort_hashes = BufferGE<int>(ps->cli, nb_el);
     printf("about to start writing buffers\n");
+
+	clf_debug = BufferGE<float4>(ps->cli, nb_el);
+	cli_debug = BufferGE<int4>(ps->cli, nb_el);
 
 	#if 0
 	cl_vars_unsorted.copyToDevice();
@@ -403,9 +401,13 @@ void GE_SPH::computeOnGPU()
     for(int i=0; i < 1; i++)
     {
 		// ***** Create HASH ****
+		printf("before hash\n");
 		hash();
+		printf("after hash\n");
+		// SORTING NOT WORKING PROPERLY!! WHY?
 		sort();
-		buildDataStructures();
+		//buildDataStructures(); // BUG
+		exit(0);
 
 		// ***** DENSITY UPDATE *****
 		computeDensity();
