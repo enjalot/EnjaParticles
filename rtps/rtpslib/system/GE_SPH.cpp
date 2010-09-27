@@ -402,6 +402,11 @@ void GE_SPH::computeOnGPU()
 
     for(int i=0; i < 1; i++)
     {
+		// ***** Create HASH ****
+		hash();
+		sort();
+		buildDataStructures();
+
 		// ***** DENSITY UPDATE *****
 		computeDensity();
 		checkDensity();

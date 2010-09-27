@@ -18,6 +18,9 @@ void GE_SPH::sort()
 	static bool first_time = true;
 	static RadixSort* radixSort;
 
+	// No error with the print, error without
+	//printf("ENTER SORT ****\n");
+
 	ts_cl[TI_SORT]->start();
 
     try {
@@ -41,10 +44,11 @@ void GE_SPH::sort()
 		exit(0);
     }
 
-	printSortDiagnostics();
-
     ps->cli->queue.finish();
 	ts_cl[TI_SORT]->end();
+
+	printSortDiagnostics();
+
 }
 //----------------------------------------------------------------------
 void GE_SPH::printSortDiagnostics()
