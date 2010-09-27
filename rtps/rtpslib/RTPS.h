@@ -18,6 +18,9 @@
 //settings class to configure the framework
 #include "RTPSettings.h"
 
+// Timer class
+#include <timege.h>
+
 //defines useful structs like float3 and float4
 #include "util.h"
 
@@ -26,12 +29,22 @@ namespace rtps {
 class RTPS
 {
 public:
+	GE::Time** ts_cl; // CL timers
+
+public:
     //default constructor
     RTPS();
     //Setup CL, Render, initial values and System based on settings
     RTPS(RTPSettings s);
 
     ~RTPS();
+
+	//--------------------
+	// Gordon additions
+	void setTimers(GE::Time** timers) {
+		this->ts_cl = timers;
+	}
+	//--------------------
 
     void Init();
 

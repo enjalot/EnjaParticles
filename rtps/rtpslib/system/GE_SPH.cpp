@@ -5,9 +5,18 @@
 #include "GE_SPH.h"
 #include "../particle/UniformGrid.h"
 
+// GE: need it have access to my datastructure (GE). Will remove 
+// eventually. 
+//#include "datastructures.h"
+
 namespace rtps {
 
 
+//----------------------------------------------------------------------
+//void GE_SPH::setGEDataStructures(DataStructures* ds)
+//{
+	//this->ds = ds;
+//}
 //----------------------------------------------------------------------
 GE_SPH::GE_SPH(RTPS *psfr, int n)
 {
@@ -15,6 +24,9 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     ps = psfr;
 
     num = n;
+	nb_vars = 3;  // for array structure in OpenCL
+	nb_el = n;
+	printf("num_particles= %d\n", num);
 
     //*** Initialization, TODO: move out of here to the particle directory
     std::vector<float4> colors(num);
@@ -29,6 +41,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     forces.resize(num);
     velocities.resize(num);
     densities.resize(num);
+
 
     //for reading back different values from the kernel
     std::vector<float4> error_check(num);
@@ -72,6 +85,8 @@ typedef struct GE_SPHParams
 } GE_SPHParams;
 */
 
+    cl_params = BufferGE<GE_SPHParams>(ps->cli, 1);
+	GE_SPHParams& params = *(cl_params.getHostPtr());
     params.grid_min = grid.getMin();
     params.grid_max = grid.getMax();
     params.mass = sph_settings.particle_mass;
@@ -86,12 +101,13 @@ typedef struct GE_SPHParams
     params.K = 1.5f;
  
     //TODO make a helper constructor for buffer to make a cl_mem from a struct
-    std::vector<GE_SPHParams> vparams(0);
-    vparams.push_back(params);
+    //std::vector<GE_SPHParams> vparams(0);
+    //vparams.push_back(params);
 //printf("ps= %d\n", ps);
 //printf("ps->cli= %d\n", ps->cli);
 //printf("vparams= %d\n", &vparams);
-    cl_params = Buffer<GE_SPHParams>(ps->cli, vparams);
+    //cl_params = Buffer<GE_SPHParams>(ps->cli, vparams);
+	cl_params.copyToDevice();
 //exit(0); // ERROR ON PREVIOUS LINE
 
 
@@ -136,8 +152,8 @@ typedef struct GE_SPHParams
     cl_error_check= Buffer<float4>(ps->cli, error_check);
 
 
-    printf("create density kernel\n");
-    loadDensity();
+    //printf("create density kernel\n");
+    //loadDensity();
 
     printf("create pressure kernel\n");
     loadPressure();
@@ -159,7 +175,30 @@ typedef struct GE_SPHParams
     //std::vector<GE_SPHParams> test = cl_params.copyToHost(1);
     //printf("mass: %f, EPSILON %f \n", test[0].mass, test[0].EPSILON);    
 
+	setupArrays(); // From GE structures
 
+	ts_cl[TI_HASH] = new GE::Time("hash", 5);
+	ts_cl[TI_SORT] = new GE::Time("sort", 5);
+	ts_cl[TI_BUILD] = new GE::Time("build", 5);
+	ts_cl[TI_NEIGH] = new GE::Time("neigh", 5);
+	ts_cl[TI_DENS] = new GE::Time("density", 5, 20);
+	ts_cl[TI_PRES] = new GE::Time("pressure", 5);
+	ts_cl[TI_EULER] = new GE::Time("euler", 5);
+	//ps->setTimers(ts_cl);
+
+	// copy pos, vel, dens into vars_unsorted()
+	// COULD DO THIS ON GPU
+	float4* vars = cl_vars_unsorted.getHostPtr();
+	for (int i=0; i < num; i++) {
+		//vars[i+DENS*num] = densities[i];
+		// PROBLEM: density is float, but vars_unsorted is float4
+		// HOW TO DEAL WITH THIS WITHOUT DOUBLING MEMORY ACCESS in 
+		// buildDataStructures. 
+
+		//cl_vars_unsorted(i+DENS*num) = densities[i];
+		cl_vars_unsorted(i+POS*num) = positions[i];
+		cl_vars_unsorted(i+VEL*num) = velocities[i];
+	}
 }
 
 //----------------------------------------------------------------------
@@ -197,7 +236,8 @@ void GE_SPH::update()
     //printf("execute!\n");
     for(int i=0; i < 10; i++)
     {
-        k_density.execute(num);
+		computeDensity();
+        //k_density.execute(num);
         //test density
         std::vector<float> dens = cl_density.copyToHost(num);
         float dens_sum = 0.0f;
@@ -235,6 +275,140 @@ void GE_SPH::update()
 
     cl_position.release();
     cl_color.release();
+}
+//----------------------------------------------------------------------
+void GE_SPH::setupArrays()
+{
+	// only for my test routines: sort, hash, datastructures
+	int nb_bytes;
+
+	//nb_el = (1 << 16);  // number of particles
+	printf("nb_el= %d\n", nb_el); //exit(0);
+	//nb_vars = 3;        // number of cl_float4 variables to reorder
+	printf("nb_el= %d\n", nb_el); 
+
+printf("\n\nBEFORE cell BufferGE<float4>\n"); //********************
+	cl_cells = BufferGE<float4>(ps->cli, nb_el);
+printf("AFTER cell BufferGE\n");
+	// notice the index rotation? 
+
+	for (int i=0; i < nb_el; i++) {
+		float aa = rand_float(0.,10.);
+		cl_cells[i].x = rand_float(0.,10.);
+		cl_cells[i].y = rand_float(0.,10.);
+		cl_cells[i].z = rand_float(0.,10.);
+		cl_cells[i].w = 1.;
+		//printf("%d, %f, %f, %f, %f\n", i, cells[i].x, cells[i].y, cells[i].z, cells[i].w);
+	}
+	cl_cells.copyToDevice();
+
+printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
+// Need an assign operator (no memory allocation)
+	#if 0
+	cl_GridParams = BufferGE<GridParams>(ps->cli, 1); // destroys ...
+
+	GridParams& gp = *(cl_GridParams.getHostPtr());
+	//float resol = 50.;
+	float resol = 25.;
+	gp.grid_size = float4(10.,10.,10.,1.);
+	gp.grid_min  = float4(0.,0.,0.,1.);
+	gp.grid_max.x = gp.grid_size.x + gp.grid_min.x; 
+	gp.grid_max.y = gp.grid_size.y + gp.grid_min.y; 
+	gp.grid_max.z = gp.grid_size.z + gp.grid_min.z; 
+	gp.grid_max.w = 1.0;
+	gp.grid_res  = float4(resol,resol,resol,1.);
+	gp.grid_delta.x = gp.grid_size.x / gp.grid_res.x;
+	gp.grid_delta.y = gp.grid_size.y / gp.grid_res.y;
+	gp.grid_delta.z = gp.grid_size.z / gp.grid_res.z;
+	// I want inverse of delta to use multiplication in the kernel
+	gp.grid_delta.x = 1. / gp.grid_delta.x;
+	gp.grid_delta.y = 1. / gp.grid_delta.y;
+	gp.grid_delta.z = 1. / gp.grid_delta.z;
+	gp.grid_delta.w = 1.;
+	gp.numParticles = nb_el;  // WRONG SPOT, BUT USEFUL for CL kernels arg passing
+	cl_GridParams.copyToDevice();
+//exit(0);
+
+	printf("delta z= %f\n", gp.grid_delta.z);
+
+	grid_size = (int) (gp.grid_res.x * gp.grid_res.y * gp.grid_res.z);
+	printf("grid_size= %d\n", grid_size);
+	#endif
+
+	cl_unsort = BufferGE<int>(ps->cli, nb_el);
+	cl_sort   = BufferGE<int>(ps->cli, nb_el);
+
+	int* iunsort = cl_unsort.getHostPtr();
+	int* isort = cl_sort.getHostPtr();
+
+	for (int i=0; i < nb_el; i++) {
+		isort[i] = i;
+		iunsort[i] = nb_el-i;
+		//cl_sort[i] = i;  // DOES NOT WORK, but works with cl_cells
+		//cl_unsort[i] = nb_el-i;
+	}
+
+
+	// position POS=0
+	// velocity VEL=1
+	// Force    FOR=2
+	cl_vars_unsorted = BufferGE<float4>(ps->cli, nb_el*nb_vars);
+	cl_vars_sorted = BufferGE<float4>(ps->cli, nb_el*nb_vars);
+	cl_cell_indices_start = BufferGE<int>(ps->cli, nb_el);
+	cl_cell_indices_end   = BufferGE<int>(ps->cli, nb_el);
+	cl_sort_indices = BufferGE<int>(ps->cli, nb_el);
+	cl_sort_hashes = BufferGE<int>(ps->cli, nb_el);
+    printf("about to start writing buffers\n");
+
+	#if 0
+	cl_vars_unsorted.copyToDevice();
+	cl_vars_sorted.copyToDevice();
+	cl_cell_indices_start.copyToDevice();
+	cl_cell_indices_end.copyToDevice();
+	cl_sort_indices.copyToDevice();
+	cl_sort_hashes.copyToDevice();
+	#endif
+
+	int nb_floats = nb_vars*nb_el;
+	// WHY NOT cl_float4 (in CL/cl_platform.h)
+	float4 f;
+	float4 zero;
+
+	zero.x = zero.y = zero.z = 0.0;
+	zero.w = 1.;
+
+	for (int i=0; i < nb_floats; i++) {
+		f.x = rand_float(0., 1.);
+		f.y = rand_float(0., 1.);
+		f.z = rand_float(0., 1.);
+		f.w = 1.0;
+		cl_vars_unsorted[i] = f;
+		cl_vars_sorted[i]   = zero;
+		//printf("f= %f, %f, %f, %f\n", f.x, f.y, f.z, f.w);
+	}
+
+	// SETUP FLUID PARAMETERS
+	// cell width is one diameter of particle, which imlies 27 neighbor searches
+	#if 0
+	cl_FluidParams = BufferGE<FluidParams>(ps->cli, 1);
+	FluidParams& fp = *cl_FluidParams.getHostPtr();;
+	float radius = gp.grid_delta.x; 
+	fp.smoothing_length = radius; // SPH radius
+	fp.scale_to_simulation = 1.0; // overall scaling factor
+	fp.mass = 1.0; // mass of single particle (MIGHT HAVE TO BE CHANGED)
+	fp.friction_coef = 0.1;
+	fp.restitution_coef = 0.9;
+	fp.damping = 0.9;
+	fp.shear = 0.9;
+	fp.attraction = 0.9;
+	fp.spring = 0.5;
+	fp.gravity = -9.8; // -9.8 m/sec^2
+	cl_FluidParams.copyToDevice();
+	#endif
+
+
+
+    printf("done with setup arrays\n");
 }
 //----------------------------------------------------------------------
 

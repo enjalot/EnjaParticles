@@ -8,11 +8,12 @@
 // Offsets into var_sorted array
 
 //enum {DENS=0, POS, VEL, ACC, FOR};
-#define POS 0
-#define VEL 1
-#define FOR 2
-#define ACC 3
-#define DEN 4
+#define DENS 0
+#define POS 1
+#define VEL 2
+#define FOR 3
+//#define ACC 3
+//#define DEN 4
 
 
 // copied from SPHSimLib code

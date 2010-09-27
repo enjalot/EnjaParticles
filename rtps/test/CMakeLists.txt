@@ -25,7 +25,7 @@ FIND_PACKAGE (OPENCL)
 FIND_PACKAGE (GLEW)
 
 set (test_INCLUDES
-	${RTPS_DIR}/gordon_erle
+	${RTPS_DIR}/ge_datastructures
     ${RTPS_DIR}
     ${GLUT_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}

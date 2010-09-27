@@ -7,12 +7,14 @@
 #include <timege.h>
 #include <GL/glew.h>
 #include <string>
-#include "../RTPS.h"
 #include "../opencl/BufferGE.h"
 #include "../util.h"
 #include "../structs.h"
 #include "../opencl/Kernel.h"
 #include "../oclRadixSortKeysValues/inc/RadixSort.h"
+
+#include "../RTPS.h"
+//class RTPS;
 
 namespace rtps {
 
@@ -84,8 +86,10 @@ private:
 	RTPS* ps;
 
 public:
-	enum {TI_HASH=0, TI_SORT, TI_BUILD, TI_NEIGH};
+	enum {TI_HASH=0, TI_SORT, TI_BUILD, TI_NEIGH, TI_DENS, TI_PRES, TI_EULER};
 	GE::Time* ts_cl[10];
+
+	int getNbVars();
 
 public:
 	DataStructures(RTPS* ps);

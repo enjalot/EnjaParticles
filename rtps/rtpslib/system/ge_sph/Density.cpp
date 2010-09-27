@@ -1,24 +1,28 @@
 #include "../GE_SPH.h"
 #include <math.h>
+#include "timer_macros.h"
+#include <string>
 
 namespace rtps {
 
 //----------------------------------------------------------------------
 void GE_SPH::computeDensity()
 {
-#if 0
+#if 1
 	static bool first_time = true;
 
-	ts_cl[TI_BUILD]->start();
+	ts_cl[TI_DENS]->start(); // OK
 
 	if (first_time) {
 		try {
-			string path(CL_SPH_SOURCE_DIR);
+			std::string path(CL_SPH_SOURCE_DIR);
+			printf("path= %s\n", path.c_str());
 			path = path + "/density.cl";
+			printf("path= %s\n", path.c_str());
 			int length;
 			const char* src = file_contents(path.c_str(), &length);
 			std::string strg(src);
-        	k_density = Kernel(ps->cli, strg, "density");
+        	k_density = Kernel(ps->cli, strg, "ge_density");
 			first_time = false;
 		} catch(cl::Error er) {
         	printf("ERROR(buildDataStructures): %s(%s)\n", er.what(), oclErrorString(er.err()));
@@ -32,27 +36,25 @@ void GE_SPH::computeDensity()
 
 	// HOW TO DEAL WITH ARGUMENTS
 
-	//kern.setArg(7, cl_cell_indices_end.getDevicePtr());
-
-    k_density.setArg(0, cl_position.cl_buffer[0]);
-    k_density.setArg(1, cl_density.cl_buffer[0]);
-    k_density.setArg(2, cl_params.cl_buffer[0]);
+    k_density.setArg(0, nb_vars);
+    k_density.setArg(1, cl_vars_sorted.getDevicePtr());
+    k_density.setArg(2, cl_params.getDevicePtr());
     k_density.setArg(3, cl_error_check.cl_buffer[0]);
 
 	// local memory
-	int nb_bytes = (workSize+1)*sizeof(int);
-    kern.setArgShared(8, nb_bytes);
 
 	int err;
    	kern.execute(nb_el, workSize); 
 
-	printBuildDiagnostics();
+
+	//printBuildDiagnostics();
 
     ps->cli->queue.finish();
-	ts_cl[TI_BUILD]->end();
+	ts_cl[TI_DENS]->end();
 #endif
 }
 //----------------------------------------------------------------------
+#if 0
 void GE_SPH::loadDensity()
 {
     #include "density.cl"
@@ -66,6 +68,7 @@ void GE_SPH::loadDensity()
     k_density.setArg(3, cl_error_check.cl_buffer[0]);
 
 } 
+#endif
 
 
 float magnitude(float4 vec)

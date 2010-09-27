@@ -3,6 +3,9 @@
 #include <math.h>
 #include <time.h>
 
+#include "timers.h"
+
+
 #include <timege.h>
 
 //#include <utils.h>
@@ -79,6 +82,25 @@ float rand_float(float mn, float mx)
 }
 #endif
 //----------------------------------------------------------------------
+void testGE_SPH()
+{
+	#if 0
+	rtps::DataStructures ds(ps);
+
+	ds.setupArrays();
+	ds.ts_cl[rtps::DataStructures::TI_HASH] = new GE::Time("hash", 5);
+	ds.ts_cl[rtps::DataStructures::TI_SORT] = new GE::Time("sort", 5);
+	ds.ts_cl[rtps::DataStructures::TI_BUILD] = new GE::Time("build", 5);
+	ds.ts_cl[rtps::DataStructures::TI_NEIGH] = new GE::Time("neigh", 5);
+	ds.ts_cl[rtps::DataStructures::TI_DENS] = new GE::Time("density", 5);
+	ds.ts_cl[rtps::DataStructures::TI_PRES] = new GE::Time("pressure", 5);
+	ds.ts_cl[rtps::DataStructures::TI_EULER] = new GE::Time("euler", 5);
+	ps->setTimers(ds.ts_cl);
+	#endif
+
+
+	//GE::Time::printAll();
+}
 //----------------------------------------------------------------------
 void testGordonApp()
 {
@@ -89,6 +111,9 @@ void testGordonApp()
 	ds.ts_cl[rtps::DataStructures::TI_SORT] = new GE::Time("sort", 5);
 	ds.ts_cl[rtps::DataStructures::TI_BUILD] = new GE::Time("build", 5);
 	ds.ts_cl[rtps::DataStructures::TI_NEIGH] = new GE::Time("neigh", 5);
+	ds.ts_cl[rtps::DataStructures::TI_DENS] = new GE::Time("density", 5);
+	ds.ts_cl[rtps::DataStructures::TI_PRES] = new GE::Time("pressure", 5);
+	ds.ts_cl[rtps::DataStructures::TI_EULER] = new GE::Time("euler", 5);
 
 	for (int i=0; i < 30; i++) {
 	printf("==========================================\n");
@@ -139,9 +164,11 @@ int main(int argc, char** argv)
     //default constructor
     ps = new rtps::RTPS();
 
+	testGE_SPH();
+
 	// TEST of my datastructures, sort, hash, build, step1
-	testGordonApp();
-	exit(0);
+	//testGordonApp();
+	//exit(0);
 
     glutMainLoop();
     return 0;

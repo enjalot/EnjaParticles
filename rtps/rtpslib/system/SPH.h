@@ -57,6 +57,7 @@ public:
 
     void update();
 
+
 private:
     //the particle system framework
     RTPS *ps;

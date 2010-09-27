@@ -28,7 +28,7 @@ FIND_PACKAGE (OPENCL)
 FIND_PACKAGE (GLEW)
 
 set (rtpslib_INCLUDES
-    ${rtpslib_SOURCE_DIR}/gordon_erle
+    ${rtpslib_SOURCE_DIR}/ge_datastructures
     ${rtpslib_SOURCE_DIR}/oclRadixSortKeysValues/inc
     #${GLUT_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
@@ -42,8 +42,8 @@ set (rtpslib_INCLUDES
 
 #library
 set (rtpslib_SOURCES
-    ${rtpslib_SOURCE_DIR}/gordon_erle/timege.cpp
-    ${rtpslib_SOURCE_DIR}/gordon_erle/datastructures.cpp
+    ${rtpslib_SOURCE_DIR}/ge_datastructures/timege.cpp
+    ${rtpslib_SOURCE_DIR}/ge_datastructures/datastructures.cpp
 	${rtpslib_SOURCE_DIR}/oclRadixSortKeysValues/src/RadixSort.cpp
 	${rtpslib_SOURCE_DIR}/oclRadixSortKeysValues/src/Scan.cpp
 

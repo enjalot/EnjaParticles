@@ -3,17 +3,30 @@
 
 #include <string>
 
+// in ge_datastructures/
+// inlcludes RTPS, so recursion
+//#include "datastructures.h"
+
 #include "../RTPS.h"
 #include "System.h"
 #include "../opencl/Kernel.h"
 #include "../opencl/Buffer.h"
-//#include "../opencl/BufferGE.h"
+#include "../opencl/BufferGE.h"
 //#include "../opencl/BufferVBO.h"
 //#include "../util.h"
 #include "../particle/UniformGrid.h"
 
+// Make sure it is same as in density.cl
+#define DENS 0
+#define POS 1
+#define VEL 2
+#define FOR 3
+
+
 
 namespace rtps {
+
+//class DataStructures;
 
 //keep track of the fluid settings
 typedef struct GE_SPHSettings
@@ -56,6 +69,45 @@ public:
     ~GE_SPH();
 
     void update();
+	//void setGEDataStructures(DataStructures* ds);
+
+// BEGIN
+// ADDED BY GORDON FOR TESTING of hash, sort, datastructures
+// TO BE ADDED to System class
+// MORE ARRAYS THAN NEEDED ...
+
+	// Timers
+	enum {TI_HASH=0, TI_SORT, TI_BUILD, TI_NEIGH, TI_DENS, TI_PRES, TI_EULER};
+	GE::Time* ts_cl[10];   // ts_cl  is GE::Time**
+
+	int nb_el;
+	int nb_vars;
+	int grid_size;
+	BufferGE<float4> cl_vars_sorted;
+	BufferGE<float4> cl_vars_unsorted;
+	BufferGE<int> cl_cell_indices_start;
+	BufferGE<int> cl_cell_indices_end;
+	BufferGE<int> cl_vars_sort_indices;
+	//BufferGE<int> cl_unsort_int;
+	//BufferGE<int> cl_sort_int;
+	BufferGE<int> cl_sort_hashes;
+	BufferGE<int> cl_sort_indices;
+	//BufferGE<GridParams> cl_GridParams;
+	//BufferGE<FluidParams> cl_FluidParams;
+	BufferGE<float4> cl_cells;
+	BufferGE<int> cl_unsort;
+	BufferGE<int> cl_sort;
+
+private:
+	//DataStructures* ds;
+
+public:
+// Added by GE
+	void hash();
+	void sort(); //BufferGE<int>& key, BufferGE<int>& value);
+	void setupArrays();
+	void buildDataStructures();
+	void neighbor_search();
 
 private:
     //the particle system framework
@@ -68,7 +120,8 @@ private:
     Kernel k_collision_wall;
     Kernel k_euler;
 
-    Buffer<GE_SPHParams> cl_params;
+    //Buffer<GE_SPHParams> cl_params;
+    BufferGE<GE_SPHParams> cl_params;
 
 
     std::vector<float4> positions;
