@@ -2,6 +2,7 @@
 #include <GL/glew.h>
 #include <math.h>
 
+#include "System.h"
 #include "SPH.h"
 #include "../particle/UniformGrid.h"
 

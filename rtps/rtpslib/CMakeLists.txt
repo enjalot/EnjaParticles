@@ -72,3 +72,22 @@ TARGET_LINK_LIBRARIES (rtps
 )
 
 
+#Doxygen
+find_package(Doxygen REQUIRED)
+set(DOXYGEN_INPUT   ${rtpslib_SOURCE_DIR}/doc/doxyfile)
+set(DOXYGEN_OUTPUT  ${rtpslib_BINARY_DIR}/html/index.html)
+file(MAKE_DIRECTORY ${rtpslib_BINARY_DIR}/html)
+
+configure_file(
+  ${rtpslib_SOURCE_DIR}/doc/doxyfile
+  ${DOXYGEN_INPUT} @ONLY
+)
+
+add_custom_command(
+  OUTPUT  ${DOXYGEN_OUTPUT}
+  COMMAND ${DOXYGEN} ${DOXYGEN_INPUT}
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+  DEPENDS ${DOXYGEN_INPUT}
+)
+
+add_custom_target(doc DEPENDS ${DOXYGEN_OUTPUT})

@@ -1,6 +1,8 @@
 #include <stdio.h>
 
 #include <GL/glew.h>
+
+#include "System.h"
 #include "Simple.h"
 
 namespace rtps {

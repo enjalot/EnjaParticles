@@ -2,9 +2,9 @@
 #define RTPS_STRUCTS_H_INCLUDED
 
 
-// GE: Sept. 8, 2010
 typedef struct float3 {
-	float x, y, z;
+    //we have to add 4th component to match how OpenCL does float3 on GPU
+	float x, y, z, w;
 	float3() {}
 	float3(float x, float y, float z) {
 		this->x = x;
