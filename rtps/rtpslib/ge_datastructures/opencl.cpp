@@ -166,16 +166,31 @@ void EnjaParticles::setupArrays()
 	// only for my test routines: sort, hash, datastructures
 	int nb_bytes;
 
-	nb_el = (1 << 17);  // number of particles
+	nb_el = (1 << 16);  // number of particles
 	printf("nb_el= %d\n", nb_el); //exit(0);
 	nb_vars = 3;        // number of cl_float4 variables to reorder
 	printf("nb_el= %d\n", nb_el); 
 
-	GridParams gp;
-	gp.grid_size = float3(1.,1.,1.);
-	gp.grid_min = float3(0.,0.,0.);
-	gp.grid_max = float3(1.,1.,1.);
-	gp.grid_res = float3(10,10,10);
+	cells.resize(nb_el);
+	// notice the index rotation? 
+
+	for (int i=0; i < nb_el; i++) {
+		cells[i].x = rand_float(0.,10.);
+		cells[i].y = rand_float(0.,10.);
+		cells[i].z = rand_float(0.,10.);
+		cells[i].w = 1.;
+		//printf("%d, %f, %f, %f, %f\n", i, cells[i].x, cells[i].y, cells[i].z, cells[i].w);
+	}
+
+	//float resol = 50.;
+	float resol = 25.;
+	gp.grid_size = float4(10.,10.,10.,1.);
+	gp.grid_min  = float4(0.,0.,0.,1.);
+	gp.grid_max.x = gp.grid_size.x + gp.grid_min.x; 
+	gp.grid_max.y = gp.grid_size.y + gp.grid_min.y; 
+	gp.grid_max.z = gp.grid_size.z + gp.grid_min.z; 
+	gp.grid_max.w = 1.0;
+	gp.grid_res  = float4(resol,resol,resol,1.);
 	gp.grid_delta.x = gp.grid_size.x / gp.grid_res.x;
 	gp.grid_delta.y = gp.grid_size.y / gp.grid_res.y;
 	gp.grid_delta.z = gp.grid_size.z / gp.grid_res.z;
@@ -323,7 +338,7 @@ void EnjaParticles::buildDataStructures()
         	datastructures_kernel = cl::Kernel(datastructures_program, "datastructures", &err);
 			first_time = false;
 		} catch(cl::Error er) {
-        	printf("ERROR(neighborSearch): %s(%s)\n", er.what(), oclErrorString(er.err()));
+        	printf("ERROR(buildDataStructures): %s(%s)\n", er.what(), oclErrorString(er.err()));
 			exit(1);
 		}
 	}
@@ -441,7 +456,7 @@ void EnjaParticles::hash()
 			//printf("KERNEL\n");
 			first_time = false;
 		} catch(cl::Error er) {
-        	printf("ERROR(neighborSearch): %s(%s)\n", er.what(), oclErrorString(er.err()));
+        	printf("ERROR(hash): %s(%s)\n", er.what(), oclErrorString(er.err()));
 			exit(1);
 		}
 	}
@@ -501,7 +516,18 @@ void EnjaParticles::hash()
     err = queue.enqueueReadBuffer(cl_sort_indices, CL_TRUE, 0, nb_el*sizeof(cl_uint), &sort_indices[0], NULL, &event);
     queue.finish();
 
-	//exit(0);
+	for (int i=0; i < 4150; i++) {  // only first 4096 are ok. WHY? 
+	//for (int i=nb_el-10; i < nb_el; i++) {
+		printf("sort_index: %d, sort_hash: %u, %u\n", i, sort_hashes[i], sort_indices[i]);
+		printf("%d, %f, %f, %f, %f\n", i, cells[i].x, cells[i].y, cells[i].z, cells[i].w);
+
+		int gx = list[i].x;
+		int gy = list[i].y;
+		int gz = list[i].z;
+		unsigned int idx = (gz*gp.grid_res.y + gy) * gp.grid_res.x + gx; 
+		printf("exact hash: %d\n", idx);
+		printf("---------------------------\n");
+	}
 #endif
 #undef DEBUG
 
@@ -929,10 +955,14 @@ cl::Program EnjaParticles::loadProgram(std::string kernel_source)
 
     try
     {
-        //err = program.build(devices, "-cl-nv-verbose");
 		string path(CL_SOURCE_DIR);
-		string options ="-I/" + path;
-        err = program.build(devices, options.c_str()); //GE: include path
+		//string options ="-I/" + path;
+        //err = program.build(devices, "-cl-nv-verbose");
+        err = program.build(devices, "-cl-fast-relaxed-math");
+		//-cl-mad-enable not working on the mac!
+        //err = program.build(devices, "-cl-mad-enable -cl-nv-verbose");
+        //err = program.build(devices);
+        //err = program.build(devices, options.c_str()); //GE: include path
     }
     catch (cl::Error er) {
 		printf("loadProgram::program.build\n");

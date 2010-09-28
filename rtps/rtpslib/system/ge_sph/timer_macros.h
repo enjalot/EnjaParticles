@@ -1,0 +1,6 @@
+#ifndef _TIMER_MACROS_H_
+#define _TIMER_MACROS_H_
+
+enum {TI_HASH=0, TI_SORT, TI_BUILD, TI_NEIGH, TI_DENS, TI_PRES, TI_EULER};
+
+#endif
