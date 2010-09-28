@@ -90,17 +90,8 @@ typedef struct GE_SPHParams
     params.EPSILON = .00001f;
     params.PI = 3.14159265f;
     params.K = 1.5f;
-
  
-    //TODO make a helper constructor for buffer to make a cl_mem from a struct
-    //std::vector<GE_SPHParams> vparams(0);
-    //vparams.push_back(params);
-//printf("ps= %d\n", ps);
-//printf("ps->cli= %d\n", ps->cli);
-//printf("vparams= %d\n", &vparams);
-    //cl_params = Buffer<GE_SPHParams>(ps->cli, vparams);
 	cl_params->copyToDevice();
-//exit(0); // ERROR ON PREVIOUS LINE
 
     std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));
     std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 1.0f, 0.0f));
@@ -164,6 +155,8 @@ typedef struct GE_SPHParams
 		// PROBLEM: density is float, but vars_unsorted is float4
 		// HOW TO DEAL WITH THIS WITHOUT DOUBLING MEMORY ACCESS in 
 		// buildDataStructures. 
+
+		//printf("%d, %d, %d, %d\n", DENS, POS, VEL, FOR); exit(0);
 
 		BufferGE<float4>& un = *cl_vars_unsorted;
 		un(i+DENS*nb_el).x = densities[i];
