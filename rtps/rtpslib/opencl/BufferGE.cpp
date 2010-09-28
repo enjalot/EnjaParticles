@@ -19,6 +19,7 @@ BufferGE<T>::BufferGE(CL *cli, T* data, int sz)
 		printf("BufferGE constructor: err= %d, sz= %d\n", cli->err, sz);
     	//copyToDevice();
 	}
+	printf("exit constructor 1\n");
 }
 
 //----------------------------------------------------------------------
@@ -42,6 +43,7 @@ BufferGE<T>::BufferGE(CL *cli, int sz)
 //if (sz == 1) exit(0);
     //copyToDevice();
 	printf("last line of BufferGE\n");
+	printf("exit constructor 2\n");
 }
 //----------------------------------------------------------------------
 template <class T>

@@ -76,8 +76,8 @@ typedef struct GE_SPHParams
 } GE_SPHParams;
 */
 
-    cl_params = BufferGE<GE_SPHParams>(ps->cli, 1);
-	GE_SPHParams& params = *(cl_params.getHostPtr());
+    cl_params = new BufferGE<GE_SPHParams>(ps->cli, 1);
+	GE_SPHParams& params = *(cl_params->getHostPtr());
     params.grid_min = grid.getMin();
     params.grid_max = grid.getMax();
     params.mass = sph_settings.particle_mass;
@@ -90,6 +90,7 @@ typedef struct GE_SPHParams
     params.EPSILON = .00001f;
     params.PI = 3.14159265f;
     params.K = 1.5f;
+
  
     //TODO make a helper constructor for buffer to make a cl_mem from a struct
     //std::vector<GE_SPHParams> vparams(0);
@@ -98,7 +99,7 @@ typedef struct GE_SPHParams
 //printf("ps->cli= %d\n", ps->cli);
 //printf("vparams= %d\n", &vparams);
     //cl_params = Buffer<GE_SPHParams>(ps->cli, vparams);
-	cl_params.copyToDevice();
+	cl_params->copyToDevice();
 //exit(0); // ERROR ON PREVIOUS LINE
 
     std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));
@@ -157,20 +158,21 @@ typedef struct GE_SPHParams
 
 	// copy pos, vel, dens into vars_unsorted()
 	// COULD DO THIS ON GPU
-	float4* vars = cl_vars_unsorted.getHostPtr();
+	float4* vars = cl_vars_unsorted->getHostPtr();
 	for (int i=0; i < nb_el; i++) {
 		//vars[i+DENS*num] = densities[i];
 		// PROBLEM: density is float, but vars_unsorted is float4
 		// HOW TO DEAL WITH THIS WITHOUT DOUBLING MEMORY ACCESS in 
 		// buildDataStructures. 
 
-		cl_vars_unsorted(i+DENS*nb_el).x = densities[i];
-		cl_vars_unsorted(i+DENS*nb_el).y = 0.0;
-		cl_vars_unsorted(i+DENS*nb_el).z = 0.0;
-		cl_vars_unsorted(i+DENS*nb_el).w = 0.0;
-		cl_vars_unsorted(i+POS*nb_el) = positions[i];
-		cl_vars_unsorted(i+VEL*nb_el) = velocities[i];
-		cl_vars_unsorted(i+FOR*nb_el) = forces[i];
+		BufferGE<float4>& un = *cl_vars_unsorted;
+		un(i+DENS*nb_el).x = densities[i];
+		un(i+DENS*nb_el).y = 0.0;
+		un(i+DENS*nb_el).z = 0.0;
+		un(i+DENS*nb_el).w = 0.0;
+		un(i+POS*nb_el) = positions[i];
+		un(i+VEL*nb_el) = velocities[i];
+		un(i+FOR*nb_el) = forces[i];
 	}
 }
 
@@ -209,7 +211,7 @@ void GE_SPH::update()
 #endif
 
     /*
-    std::vector<float4> ftest = cl_force.copyToHost(100);
+    std::vector<float4> ftest = cl_force->copyToHost(100);
     for(int i = 0; i < 100; i++)
     {
         if(ftest[i].z != 0.0)
@@ -236,11 +238,11 @@ void GE_SPH::setupArrays()
 	//cl_cells = BufferGE<float4>(ps->cli, nb_el);
 	positions[0] = float4(45., -234., 129., 1.); // test sort
 	//cl_cells = BufferGE<float4>(ps->cli, &positions[0], nb_el);
-	cl_cells = BufferGE<float4>(ps->cli, nb_el);
+	cl_cells = new BufferGE<float4>(ps->cli, nb_el);
 	for (int i=0; i < nb_el; i++) {
-		cl_cells[i] = positions[i];
+		(*cl_cells)[i] = positions[i];
 	}
-	cl_cells.copyToDevice();
+	cl_cells->copyToDevice();
 
 printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
 // Need an assign operator (no memory allocation)
@@ -248,9 +250,9 @@ printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
 	#if 1
 	printf("allocate BufferGE<GridParams>\n");
 	printf("sizeof(GridParams): %d\n", sizeof(GridParams));
-	cl_GridParams = BufferGE<GridParams>(ps->cli, 1); // destroys ...
+	cl_GridParams = new BufferGE<GridParams>(ps->cli, 1); // destroys ...
 
-	GridParams& gp = *(cl_GridParams.getHostPtr());
+	GridParams& gp = *(cl_GridParams->getHostPtr());
 
 	gp.grid_min = grid.getMin();
 	gp.grid_max = grid.getMax();
@@ -266,7 +268,7 @@ printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
 	gp.grid_inv_delta.print("inv delta");
 
 	printf("size: %d\n", sizeof(gp));
-	cl_GridParams.copyToDevice();
+	cl_GridParams->copyToDevice();
 
 	grid_size = (int) (gp.grid_res.x * gp.grid_res.y * gp.grid_res.z);
 	printf("grid_size= %d\n", grid_size);
@@ -282,15 +284,15 @@ printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
 
 //printf("nb_vars= %d\n", nb_vars); exit(1);
 
-	cl_vars_unsorted = BufferGE<float4>(ps->cli, nb_el*nb_vars);
-	cl_vars_sorted   = BufferGE<float4>(ps->cli, nb_el*nb_vars);
-	cl_sort_indices  = BufferGE<int>(ps->cli, nb_el);
-	cl_sort_hashes   = BufferGE<int>(ps->cli, nb_el);
-	cl_cell_indices_start = BufferGE<int>(ps->cli, nb_el);
-	cl_cell_indices_end   = BufferGE<int>(ps->cli, nb_el);
+	cl_vars_unsorted = new BufferGE<float4>(ps->cli, nb_el*nb_vars);
+	cl_vars_sorted   = new BufferGE<float4>(ps->cli, nb_el*nb_vars);
+	cl_sort_indices  = new BufferGE<int>(ps->cli, nb_el);
+	cl_sort_hashes   = new BufferGE<int>(ps->cli, nb_el);
+	cl_cell_indices_start = new BufferGE<int>(ps->cli, nb_el);
+	cl_cell_indices_end   = new BufferGE<int>(ps->cli, nb_el);
 
-	clf_debug = BufferGE<float4>(ps->cli, nb_el);
-	cli_debug = BufferGE<int4>(ps->cli, nb_el);
+	clf_debug = new BufferGE<float4>(ps->cli, nb_el);
+	cli_debug = new BufferGE<int4>(ps->cli, nb_el);
 
 
 	int nb_floats = nb_vars*nb_el;
@@ -316,8 +318,8 @@ printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
 	// SETUP FLUID PARAMETERS
 	// cell width is one diameter of particle, which imlies 27 neighbor searches
 	#if 1
-	cl_FluidParams = BufferGE<FluidParams>(ps->cli, 1);
-	FluidParams& fp = *cl_FluidParams.getHostPtr();;
+	cl_FluidParams = new BufferGE<FluidParams>(ps->cli, 1);
+	FluidParams& fp = *cl_FluidParams->getHostPtr();;
 	float radius = gp.grid_delta.x; 
 	fp.smoothing_length = radius; // SPH radius
 	fp.scale_to_simulation = 1.0; // overall scaling factor
@@ -329,7 +331,7 @@ printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
 	fp.attraction = 0.9;
 	fp.spring = 0.5;
 	fp.gravity = -9.8; // -9.8 m/sec^2
-	cl_FluidParams.copyToDevice();
+	cl_FluidParams->copyToDevice();
 	#endif
 
     printf("done with setup arrays\n");
@@ -337,9 +339,10 @@ printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
 //----------------------------------------------------------------------
 void GE_SPH::checkDensity()
 {
+#if 0
         //test density
 		// Density checks should be in Density.cpp I believe (perhaps not)
-        std::vector<float> dens = cl_density.copyToHost(num);
+        std::vector<float> dens = cl_density->copyToHost(num);
         float dens_sum = 0.0f;
         for(int j = 0; j < num; j++)
         {
@@ -347,12 +350,13 @@ void GE_SPH::checkDensity()
         }
         printf("summed density: %f\n", dens_sum);
         /*
-        std::vector<float4> er = cl_error_check.copyToHost(10);
+        std::vector<float4> er = cl_error_check->copyToHost(10);
         for(int j = 0; j < 10; j++)
         {
             printf("rrrr[%d]: %f %f %f %f\n", j, er[j].x, er[j].y, er[j].z, er[j].w);
         }
         */
+#endif
 }
 //----------------------------------------------------------------------
 void GE_SPH::computeOnGPU()

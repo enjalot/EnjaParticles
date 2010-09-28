@@ -44,17 +44,17 @@ void GE_SPH::sort()
 	try {
 		//prepareSortData();
 		printf("nb_el= %d\n", nb_el);
-		cl_sort_hashes.copyToHost();
-		cl_sort_indices.copyToHost();
+		cl_sort_hashes->copyToHost();
+		cl_sort_indices->copyToHost();
 		for (int i=0; i < nb_el; i++) {
-			printf("** hash: %d, index: %d\n", cl_sort_hashes[i], cl_sort_indices[i]);
+			printf("** hash: %d, index: %d\n", (*cl_sort_hashes)[i], (*cl_sort_indices)[i]);
 		}
 
 	//printf("nb_el= %d\n", nb_el); exit(0);
 	// both arguments should already be on the GPU
 		// CRASHES EVERY 2-3 runs. WHY? 
-   		radixSort->sort(cl_sort_hashes.getDevicePtr(), 
-			cl_sort_indices.getDevicePtr(), nb_el, keybits);
+   		radixSort->sort(cl_sort_hashes->getDevicePtr(), 
+			cl_sort_indices->getDevicePtr(), nb_el, keybits);
 	} catch (cl::Error er) {
         printf("ERROR(radixSort->sort): %s(%s)\n", er.what(), oclErrorString(er.err()));
 		exit(0);
@@ -74,12 +74,12 @@ void GE_SPH::sort()
 void GE_SPH::printSortDiagnostics()
 {
 #if 1
-    cl_sort_hashes.copyToHost(); 
-    cl_sort_indices.copyToHost(); 
+    cl_sort_hashes->copyToHost(); 
+    cl_sort_indices->copyToHost(); 
 	ps->cli->queue.finish();
 
-	int* hashi = cl_sort_hashes.getHostPtr();
-	int* sorti = cl_sort_indices.getHostPtr();
+	int* hashi = cl_sort_hashes->getHostPtr();
+	int* sorti = cl_sort_indices->getHostPtr();
 
 	for (int i=0; i < nb_el; i++) {
 	//for (int i=0; i < 200; i++) {
@@ -94,12 +94,12 @@ void GE_SPH::prepareSortData()
 #if 1
 	printf("**** BEFORE SORT ****\n");
 		// cl_hashes and cl_indices are correct
-        cl_sort_hashes.copyToHost(); 
-        cl_sort_indices.copyToHost(); 
+        cl_sort_hashes->copyToHost(); 
+        cl_sort_indices->copyToHost(); 
 		ps->cli->queue.finish();
 
-		int* hashi = cl_sort_hashes.getHostPtr();
-		int* sorti = cl_sort_indices.getHostPtr();
+		int* hashi = cl_sort_hashes->getHostPtr();
+		int* sorti = cl_sort_indices->getHostPtr();
 
 		for (int i=0; i < nb_el; i++) {
 		//for (int i=0; i < 200; i++) {

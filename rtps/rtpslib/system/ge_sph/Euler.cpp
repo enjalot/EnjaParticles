@@ -30,7 +30,7 @@ void GE_SPH::computeEuler()
   
     //TODO: fix the way we are wrapping buffers
     kern.setArg(0, nb_vars);
-    kern.setArg(1, cl_vars_sorted.getDevicePtr());
+    kern.setArg(1, cl_vars_sorted->getDevicePtr());
     kern.setArg(2, ps->settings.dt); //time step
 
 	int workSize = 128;

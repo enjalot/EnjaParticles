@@ -118,21 +118,21 @@ public:
 	//BufferGE<int>		cl_unsort_int;
 	//BufferGE<int>		cl_sort_int;
 
-	BufferGE<float4> 	cl_vars_sorted;
-	BufferGE<float4> 	cl_vars_unsorted;
-	BufferGE<float4> 	cl_cells; // positions in Ian code
-	BufferGE<int> 		cl_cell_indices_start;
-	BufferGE<int> 		cl_cell_indices_end;
-	BufferGE<int> 		cl_vars_sort_indices;
-	BufferGE<int> 		cl_sort_hashes;
-	BufferGE<int> 		cl_sort_indices;
-	BufferGE<int> 		cl_unsort;
-	BufferGE<int> 		cl_sort;
-	BufferGE<GridParams> cl_GridParams;
-	BufferGE<FluidParams> cl_FluidParams;
+	BufferGE<float4>* 	cl_vars_sorted;
+	BufferGE<float4>* 	cl_vars_unsorted;
+	BufferGE<float4>* 	cl_cells; // positions in Ian code
+	BufferGE<int>* 		cl_cell_indices_start;
+	BufferGE<int>* 		cl_cell_indices_end;
+	BufferGE<int>* 		cl_vars_sort_indices;
+	BufferGE<int>* 		cl_sort_hashes;
+	BufferGE<int>* 		cl_sort_indices;
+	BufferGE<int>* 		cl_unsort;
+	BufferGE<int>* 		cl_sort;
+	BufferGE<GridParams>*  cl_GridParams;
+	BufferGE<FluidParams>* cl_FluidParams;
 
-	BufferGE<float4>	clf_debug;  //just for debugging cl files
-	BufferGE<int4>		cli_debug;  //just for debugging cl files
+	BufferGE<float4>*	clf_debug;  //just for debugging cl files
+	BufferGE<int4>*		cli_debug;  //just for debugging cl files
 
 private:
 	//DataStructures* ds;
@@ -168,7 +168,7 @@ private:
 	Kernel step1_kernel;
 
     //Buffer<GE_SPHParams> cl_params;
-    BufferGE<GE_SPHParams> cl_params;
+    BufferGE<GE_SPHParams>* cl_params;
 
 
     std::vector<float4> positions;

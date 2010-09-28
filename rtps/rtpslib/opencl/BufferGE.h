@@ -75,6 +75,12 @@ public:
 	// return a cl_mem object
 	//cl::Memory getDevicePtr() { return cl_buffer[0](); }
 	cl_mem getDevicePtr() { return cl_buffer[0](); }
+
+private:
+	BufferGE(const BufferGE&); // copy constructor
+	const BufferGE& operator=(const BufferGE&) const;
+	BufferGE& operator=(BufferGE&);
+
 };
 
 #include "BufferGE.cpp"

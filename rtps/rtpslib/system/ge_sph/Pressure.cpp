@@ -29,8 +29,8 @@ void GE_SPH::computePressure()
 	int workSize = 128;
 
     kern.setArg(0, nb_vars);
-    kern.setArg(1, cl_vars_sorted.getDevicePtr());
-    kern.setArg(2, cl_params.getDevicePtr());
+    kern.setArg(1, cl_vars_sorted->getDevicePtr());
+    kern.setArg(2, cl_params->getDevicePtr());
 
    	kern.execute(nb_el, workSize); 
 

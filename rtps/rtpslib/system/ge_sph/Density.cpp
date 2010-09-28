@@ -34,8 +34,8 @@ void GE_SPH::computeDensity()
 	int workSize = 128;
 
     k_density.setArg(0, nb_vars);
-    k_density.setArg(1, cl_vars_sorted.getDevicePtr());
-    k_density.setArg(2, cl_params.getDevicePtr());
+    k_density.setArg(1, cl_vars_sorted->getDevicePtr());
+    k_density.setArg(2, cl_params->getDevicePtr());
     k_density.setArg(3, cl_error_check.cl_buffer[0]);
 
    	kern.execute(nb_el, workSize); 

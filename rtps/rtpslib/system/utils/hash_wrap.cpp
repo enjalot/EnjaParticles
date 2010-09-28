@@ -30,15 +30,15 @@ void GE_SPH::hash()
 	}
 
 	Kernel kern = hash_kernel;
-	float4* cells = cl_cells.getHostPtr();
+	float4* cells = cl_cells->getHostPtr();
 	int ctaSize = 128; // work group size
 
-	kern.setArg(0, cl_cells.getDevicePtr());
-	kern.setArg(1, cl_sort_hashes.getDevicePtr());
-	kern.setArg(2, cl_sort_indices.getDevicePtr());
-	kern.setArg(3, cl_GridParams.getDevicePtr());
-	//kern.setArg(4, clf_debug.getDevicePtr());
-	//kern.setArg(5, cli_debug.getDevicePtr());
+	kern.setArg(0, cl_cells->getDevicePtr());
+	kern.setArg(1, cl_sort_hashes->getDevicePtr());
+	kern.setArg(2, cl_sort_indices->getDevicePtr());
+	kern.setArg(3, cl_GridParams->getDevicePtr());
+	//kern.setArg(4, clf_debug->getDevicePtr());
+	//kern.setArg(5, cli_debug->getDevicePtr());
 
 	kern.execute(nb_el,ctaSize);
 
@@ -52,11 +52,11 @@ void GE_SPH::printHashDiagnostics()
 {
 #if 1
 	printf("***** PRINT hash diagnostics ******\n");
-	cl_sort_hashes.copyToHost();
-	cl_sort_indices.copyToHost();
-	cl_cells.copyToHost();
-	cl_GridParams.copyToHost();
-	GridParams& gp = *cl_GridParams.getHostPtr();
+	cl_sort_hashes->copyToHost();
+	cl_sort_indices->copyToHost();
+	cl_cells->copyToHost();
+	cl_GridParams->copyToHost();
+	GridParams& gp = *cl_GridParams->getHostPtr();
 	gp.grid_size.print("grid size (domain dimensions)"); // domain dimensions
 	gp.grid_delta.print("grid delta (cell size)"); // cell size
 	gp.grid_min.print("grid min");
@@ -65,10 +65,10 @@ void GE_SPH::printHashDiagnostics()
 	gp.grid_delta.print("grid delta");
 	gp.grid_inv_delta.print("grid inv delta");
 
-	//cli_debug.copyToHost();
+	//cli_debug->copyToHost();
 
 	for (int i=0; i < nb_el; i++) {  // only first 4096 are ok. WHY? 
-		printf(" cl_sort_hash[%d] %u, cl_sort_indices[%d]: %u\n", i, cl_sort_hashes[i], i, cl_sort_indices[i]);
+		printf(" cl_sort_hash[%d] %u, cl_sort_indices[%d]: %u\n", i, (*cl_sort_hashes)[i], i, (*cl_sort_indices)[i]);
 
 		#if 0
 		int gx = (cl_cells[i].x - gp.grid_min.x) * gp.grid_inv_delta.x ;

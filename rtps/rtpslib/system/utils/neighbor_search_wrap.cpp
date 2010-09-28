@@ -35,12 +35,12 @@ void GE_SPH::neighbor_search()
 
 	kern.setArg(iarg++, nb_el);
 	kern.setArg(iarg++, nb_vars);
-	kern.setArg(iarg++, cl_vars_unsorted.getDevicePtr());
-	kern.setArg(iarg++, cl_vars_sorted.getDevicePtr());
-	kern.setArg(iarg++, cl_cell_indices_start.getDevicePtr());
-	kern.setArg(iarg++, cl_cell_indices_end.getDevicePtr());
-	kern.setArg(iarg++, cl_GridParams.getDevicePtr());
-	kern.setArg(iarg++, cl_FluidParams.getDevicePtr());
+	kern.setArg(iarg++, cl_vars_unsorted->getDevicePtr());
+	kern.setArg(iarg++, cl_vars_sorted->getDevicePtr());
+	kern.setArg(iarg++, cl_cell_indices_start->getDevicePtr());
+	kern.setArg(iarg++, cl_cell_indices_end->getDevicePtr());
+	kern.setArg(iarg++, cl_GridParams->getDevicePtr());
+	kern.setArg(iarg++, cl_FluidParams->getDevicePtr());
 
 
 	size_t global = (size_t) nb_el;
