@@ -44,6 +44,11 @@ void GE_SPH::sort()
 	try {
 		//prepareSortData();
 		printf("nb_el= %d\n", nb_el);
+		cl_sort_hashes.copyToHost();
+		cl_sort_indices.copyToHost();
+		for (int i=0; i < nb_el; i++) {
+			printf("** hash: %d, index: %d\n", cl_sort_hashes[i], cl_sort_indices[i]);
+		}
 
 	//printf("nb_el= %d\n", nb_el); exit(0);
 	// both arguments should already be on the GPU

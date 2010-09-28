@@ -30,13 +30,6 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 
     //*** Initialization, TODO: move out of here to the particle directory
     std::vector<float4> colors(num);
-    /*
-    std::vector<float4> positions(num);
-    std::vector<float4> colors(num);
-    std::vector<float4> forces(num);
-    std::vector<float4> velocities(num);
-    std::vector<float> densities(num);
-    */
     positions.resize(num);
     forces.resize(num);
     velocities.resize(num);
@@ -47,7 +40,6 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     std::vector<float4> error_check(num);
     
     
-    //std::fill(positions.begin(), positions.end(),(float4) {0.0f, 0.0f, 0.0f, 1.0f});
     //init sph stuff
     sph_settings.rest_density = 1000;
     sph_settings.simulation_scale = .001;
@@ -166,7 +158,7 @@ typedef struct GE_SPHParams
 	// copy pos, vel, dens into vars_unsorted()
 	// COULD DO THIS ON GPU
 	float4* vars = cl_vars_unsorted.getHostPtr();
-	for (int i=0; i < num; i++) {
+	for (int i=0; i < nb_el; i++) {
 		//vars[i+DENS*num] = densities[i];
 		// PROBLEM: density is float, but vars_unsorted is float4
 		// HOW TO DEAL WITH THIS WITHOUT DOUBLING MEMORY ACCESS in 
@@ -215,6 +207,7 @@ void GE_SPH::update()
 #ifdef GPU
 	computeOnGPU();
 #endif
+
     /*
     std::vector<float4> ftest = cl_force.copyToHost(100);
     for(int i = 0; i < 100; i++)
