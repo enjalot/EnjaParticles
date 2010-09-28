@@ -141,9 +141,7 @@ typedef struct GE_SPHParams
     //pure opencl buffers
     cl_force = Buffer<float4>(ps->cli, forces);
     cl_velocity = Buffer<float4>(ps->cli, velocities);
-
     cl_density = Buffer<float>(ps->cli, densities);
-
     cl_error_check= Buffer<float4>(ps->cli, error_check);
 
     printf("create collision wall kernel\n");
@@ -174,9 +172,13 @@ typedef struct GE_SPHParams
 		// HOW TO DEAL WITH THIS WITHOUT DOUBLING MEMORY ACCESS in 
 		// buildDataStructures. 
 
-		cl_vars_unsorted(i+DENS*num).x = densities[i];
-		cl_vars_unsorted(i+POS*num) = positions[i];
-		cl_vars_unsorted(i+VEL*num) = velocities[i];
+		cl_vars_unsorted(i+DENS*nb_el).x = densities[i];
+		cl_vars_unsorted(i+DENS*nb_el).y = 0.0;
+		cl_vars_unsorted(i+DENS*nb_el).z = 0.0;
+		cl_vars_unsorted(i+DENS*nb_el).w = 0.0;
+		cl_vars_unsorted(i+POS*nb_el) = positions[i];
+		cl_vars_unsorted(i+VEL*nb_el) = velocities[i];
+		cl_vars_unsorted(i+FOR*nb_el) = forces[i];
 	}
 }
 
@@ -240,20 +242,16 @@ void GE_SPH::setupArrays()
 
 	//cl_cells = BufferGE<float4>(ps->cli, nb_el);
 	positions[0] = float4(45., -234., 129., 1.); // test sort
-	cl_cells = BufferGE<float4>(ps->cli, &positions[0], nb_el);
-printf("AFTER cell BufferGE\n");
-	// notice the index rotation? 
-
+	//cl_cells = BufferGE<float4>(ps->cli, &positions[0], nb_el);
+	cl_cells = BufferGE<float4>(ps->cli, nb_el);
 	for (int i=0; i < nb_el; i++) {
-		float aa = rand_float(0.,10.);
-		float4* cells = cl_cells.getHostPtr();
-		//printf("%d, %f, %f, %f, %f\n", i, cells[i].x, cells[i].y, cells[i].z, cells[i].w);
+		cl_cells[i] = positions[i];
 	}
-	//exit(0);
 	cl_cells.copyToDevice();
 
 printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
 // Need an assign operator (no memory allocation)
+
 	#if 1
 	printf("allocate BufferGE<GridParams>\n");
 	printf("sizeof(GridParams): %d\n", sizeof(GridParams));
@@ -277,8 +275,6 @@ printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
 	printf("size: %d\n", sizeof(gp));
 	cl_GridParams.copyToDevice();
 
-	printf("delta z= %f\n", gp.grid_delta.z);
-
 	grid_size = (int) (gp.grid_res.x * gp.grid_res.y * gp.grid_res.z);
 	printf("grid_size= %d\n", grid_size);
 	gp.grid_size.print("grid size (domain dimensions)"); // domain dimensions
@@ -291,42 +287,18 @@ printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
 	//exit(0);
 	#endif
 
-	cl_unsort = BufferGE<int>(ps->cli, nb_el);
-	cl_sort   = BufferGE<int>(ps->cli, nb_el);
+//printf("nb_vars= %d\n", nb_vars); exit(1);
 
-	int* iunsort = cl_unsort.getHostPtr();
-	int* isort = cl_sort.getHostPtr();
-
-	for (int i=0; i < nb_el; i++) {
-		isort[i] = i;
-		iunsort[i] = nb_el-i;
-		//cl_sort[i] = i;  // DOES NOT WORK, but works with cl_cells
-		//cl_unsort[i] = nb_el-i;
-	}
-
-
-	// position POS=0
-	// velocity VEL=1
-	// Force    FOR=2
 	cl_vars_unsorted = BufferGE<float4>(ps->cli, nb_el*nb_vars);
-	cl_vars_sorted = BufferGE<float4>(ps->cli, nb_el*nb_vars);
+	cl_vars_sorted   = BufferGE<float4>(ps->cli, nb_el*nb_vars);
+	cl_sort_indices  = BufferGE<int>(ps->cli, nb_el);
+	cl_sort_hashes   = BufferGE<int>(ps->cli, nb_el);
 	cl_cell_indices_start = BufferGE<int>(ps->cli, nb_el);
 	cl_cell_indices_end   = BufferGE<int>(ps->cli, nb_el);
-	cl_sort_indices = BufferGE<int>(ps->cli, nb_el);
-	cl_sort_hashes = BufferGE<int>(ps->cli, nb_el);
-    printf("about to start writing buffers\n");
 
 	clf_debug = BufferGE<float4>(ps->cli, nb_el);
 	cli_debug = BufferGE<int4>(ps->cli, nb_el);
 
-	#if 0
-	cl_vars_unsorted.copyToDevice();
-	cl_vars_sorted.copyToDevice();
-	cl_cell_indices_start.copyToDevice();
-	cl_cell_indices_end.copyToDevice();
-	cl_sort_indices.copyToDevice();
-	cl_sort_hashes.copyToDevice();
-	#endif
 
 	int nb_floats = nb_vars*nb_el;
 	// WHY NOT cl_float4 (in CL/cl_platform.h)
@@ -336,6 +308,7 @@ printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
 	zero.x = zero.y = zero.z = 0.0;
 	zero.w = 1.;
 
+	#if 0
 	for (int i=0; i < nb_floats; i++) {
 		f.x = rand_float(0., 1.);
 		f.y = rand_float(0., 1.);
@@ -345,6 +318,7 @@ printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
 		cl_vars_sorted[i]   = zero;
 		//printf("f= %f, %f, %f, %f\n", f.x, f.y, f.z, f.w);
 	}
+	#endif
 
 	// SETUP FLUID PARAMETERS
 	// cell width is one diameter of particle, which imlies 27 neighbor searches
@@ -404,9 +378,16 @@ void GE_SPH::computeOnGPU()
 		printf("before hash\n");
 		hash();
 		printf("after hash\n");
+		//exit(0);
+
 		// SORTING NOT WORKING PROPERLY!! WHY?
+		// Crashes (scan) every 3-4 tries. WHY???
+		// crashes more often if buildDataStructures is enabled. WHY? 
+		printf("start sorting *****\n");
 		sort();
-		//buildDataStructures(); // BUG
+		exit(0);
+
+		buildDataStructures(); // BUG
 		exit(0);
 
 		// ***** DENSITY UPDATE *****

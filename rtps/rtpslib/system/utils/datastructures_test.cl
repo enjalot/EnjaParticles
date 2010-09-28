@@ -10,14 +10,10 @@
 
 
 __kernel void datastructures(
-
-
      int numParticles,
      int nb_vars,
-
      __global float4* dParticles,
      __global float4* dParticlesSorted,
-
         __global uint* sort_hashes,
         __global uint* sort_indexes,
         __global uint* cell_indexes_start,
@@ -25,6 +21,7 @@ __kernel void datastructures(
      __local uint* sharedHash
      )
 {
+
  uint index = get_global_id(0);
 
 
@@ -53,7 +50,7 @@ __kernel void datastructures(
 
 
  barrier(CLK_LOCAL_MEM_FENCE);
-# 61 "datastructures_test.cpp"
+# 58 "datastructures_test.cpp"
  if ((index == 0 || hash != sharedHash[tid]) )
  {
   cell_indexes_start[hash] = index;
@@ -62,15 +59,11 @@ __kernel void datastructures(
   }
  }
 
- if (index == numParticles - 1)
- {
+ if (index == numParticles - 1) {
   cell_indexes_end[hash] = index + 1;
  }
 
  uint sortedIndex = sort_indexes[index];
-
-
-
 
 
 

@@ -10,6 +10,8 @@ void GE_SPH::buildDataStructures()
 {
 	static bool first_time = true;
 
+	printf("ENTER BUILD\n");
+
 	ts_cl[TI_BUILD]->start();
 
 	if (first_time) {
@@ -18,6 +20,7 @@ void GE_SPH::buildDataStructures()
 			path = path + "/datastructures_test.cl";
 			int length;
 			const char* src = file_contents(path.c_str(), &length);
+			printf("length= %d\n", length);
 			std::string strg(src);
         	datastructures_kernel = Kernel(ps->cli, strg, "datastructures");
 			first_time = false;
@@ -33,6 +36,8 @@ void GE_SPH::buildDataStructures()
 
 	// HOW TO DEAL WITH ARGUMENTS
 
+	printf("BEFORE BUILD ARGS\n");
+
 	kern.setArg(0, nb_el);
 	kern.setArg(1, nb_vars);
 	kern.setArg(2, cl_vars_unsorted.getDevicePtr());
@@ -42,14 +47,20 @@ void GE_SPH::buildDataStructures()
 	kern.setArg(6, cl_cell_indices_start.getDevicePtr());
 	kern.setArg(7, cl_cell_indices_end.getDevicePtr());
 
+
 	// local memory
 	int nb_bytes = (workSize+1)*sizeof(int);
     kern.setArgShared(8, nb_bytes);
 
-	int err;
-   	kern.execute(nb_el, workSize); 
+	printf("AFTER BUILD ARGS\n");
 
-	printBuildDiagnostics();
+	int err;
+	printf("EXECUTE BUILD\n");
+   	kern.execute(nb_el, workSize); 
+//	exit(0);
+
+//	printBuildDiagnostics();
+//	exit(0);
 
     ps->cli->queue.finish();
 	ts_cl[TI_BUILD]->end();
@@ -57,11 +68,10 @@ void GE_SPH::buildDataStructures()
 //----------------------------------------------------------------------
 void GE_SPH::printBuildDiagnostics()
 {
-#if 0
+#if 1
 	// should try with and without exceptions. 
 	// DATA SHOULD STAY ON THE GPU
 	try {
-		nb_bytes = nb_el*nb_vars*sizeof(cl_float4);
 		cl_vars_unsorted.copyToDevice();
 		cl_vars_sorted.copyToDevice();
 		cl_vars_sort_indices.copyToDevice();

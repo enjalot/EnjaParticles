@@ -205,6 +205,7 @@ void RadixSort::radixSortStepKeysOnly(cl_mem d_keys, unsigned int nbits, unsigne
 }
 #endif
 
+//----------------------------------------------------------------------
 // Added by G. Erlebacher, 9/11/2010
 void RadixSort::radixSortStepKeysValues(cl_mem d_keys, cl_mem d_values, unsigned int nbits, unsigned int startbit, unsigned int numElements)
 {
@@ -216,6 +217,8 @@ void RadixSort::radixSortStepKeysValues(cl_mem d_keys, cl_mem d_values, unsigned
 
 	findRadixOffsetsOCL(startbit, numElements);
 
+	printf("numElements= %d\n", numElements);
+	printf("CTA_SIZE=%d\n", CTA_SIZE);
 	scan.scanExclusiveLarge(mCountersSum, mCounters, 1, numElements/2/CTA_SIZE*16);
 
 	//reorderDataKeysOnlyOCL(d_keys, startbit, numElements);

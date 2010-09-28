@@ -21,7 +21,6 @@ void GE_SPH::hash()
 			int length;
 			const char* src = file_contents(path.c_str(), &length);
 			std::string strg(src);
-
         	hash_kernel = Kernel(ps->cli, strg, "hash");
 			first_time = false;
 		} catch(cl::Error er) {
@@ -30,14 +29,9 @@ void GE_SPH::hash()
 		}
 	}
 
-
 	Kernel kern = hash_kernel;
-
 	float4* cells = cl_cells.getHostPtr();
-
 	int ctaSize = 128; // work group size
-	int err;
-
 
 	kern.setArg(0, cl_cells.getDevicePtr());
 	kern.setArg(1, cl_sort_hashes.getDevicePtr());
@@ -46,8 +40,6 @@ void GE_SPH::hash()
 	//kern.setArg(4, clf_debug.getDevicePtr());
 	//kern.setArg(5, cli_debug.getDevicePtr());
 
-    //printf("executing hash kernel\n");
-	printf("nb_el= %d\n", nb_el);
 	kern.execute(nb_el,ctaSize);
 
 	ps->cli->queue.finish();
@@ -58,8 +50,7 @@ void GE_SPH::hash()
 //----------------------------------------------------------------------
 void GE_SPH::printHashDiagnostics()
 {
-
-#if 0
+#if 1
 	printf("***** PRINT hash diagnostics ******\n");
 	cl_sort_hashes.copyToHost();
 	cl_sort_indices.copyToHost();
@@ -76,36 +67,25 @@ void GE_SPH::printHashDiagnostics()
 
 	//cli_debug.copyToHost();
 
-	//for (int i=0; i < nb_el; i++) {  // only first 4096 are ok. WHY? 
-	for (int i=0; i < 200; i++) {  // only first 4096 are ok. WHY? 
+	for (int i=0; i < nb_el; i++) {  // only first 4096 are ok. WHY? 
 		printf(" cl_sort_hash[%d] %u, cl_sort_indices[%d]: %u\n", i, cl_sort_hashes[i], i, cl_sort_indices[i]);
 
-		#if 1
+		#if 0
 		int gx = (cl_cells[i].x - gp.grid_min.x) * gp.grid_inv_delta.x ;
 		int gy = (cl_cells[i].y - gp.grid_min.y) * gp.grid_inv_delta.y ;
 		int gz = (cl_cells[i].z - gp.grid_min.z) * gp.grid_inv_delta.z ;
-		printf("cl_cells,cl_cells,cl_cells= %f, %f, %f\n", cl_cells[i].x, cl_cells[i].y, cl_cells[i].z);
-		gp.grid_min.print("grid min");
-		printf("gx,gy,gz= %d, %d, %d\n", gx, gy, gz);
+		//printf("cl_cells,cl_cells,cl_cells= %f, %f, %f\n", cl_cells[i].x, cl_cells[i].y, cl_cells[i].z);
+		//gp.grid_min.print("grid min");
+		//printf("gx,gy,gz= %d, %d, %d\n", gx, gy, gz);
 		unsigned int idx = (gz*gp.grid_res.y + gy) * gp.grid_res.x + gx; 
-		printf("exact hash: %d\n", idx);
+		if (idx != cl_sort_hashes[i]) {
+			printf("hash indices (exact vs GPU do not match)\n");
+		}
 		//printf("cli_debug: %d, %d, %d\n", cli_debug[i].x, cli_debug[i].y, cli_debug[i].z);
-		printf("---------------------------\n");
+		//printf("---------------------------\n");
 		#endif
 	}
 #endif
-
-        //printf("about to read from buffers to see what they have\n");
-	#if 0
-		// SORT IN PLACE
-		cl_sort_hashes.getDevices();
-		cl_sort_indices.getDevices();
-
-		ps->cli->queue.finish();
-		for (int i=0; i < 300; i++) {
-			printf("xx index: %d, sort_indices: %d, sort_hashes: %d\n", i, sort_indices[i], sort_hashes[i]);
-		}
-	#endif
 }
 //----------------------------------------------------------------------
 

@@ -4,23 +4,20 @@
 #ifndef _DATASTRUCTURES_
 #define _DATASTRUCTURES_
 
-
+//----------------------------------------------------------------------
 __kernel void datastructures(
-					//__constant int	    numParticles,
-					//__constant int      nb_vars,
 					int	    numParticles,
 					int      nb_vars,
-					// D == float4
 					__global float4*   dParticles,
 					__global float4*   dParticlesSorted, 
-					//GridData dGridData,
 		   			__global uint* sort_hashes,
 		   			__global uint* sort_indexes,
 		   			__global uint* cell_indexes_start,
 		   			__global uint* cell_indexes_end,
-					__local uint* sharedHash
+					__local  uint* sharedHash
 			  )
 {
+	//return;
 	uint index = get_global_id(0);
 
 	// particle index	
@@ -66,17 +63,13 @@ __kernel void datastructures(
 		}
 	}
 
-	if (index == numParticles - 1)
-	{
+	if (index == numParticles - 1) {
 		cell_indexes_end[hash] = index + 1;
 	}
 
 	uint sortedIndex = sort_indexes[index];
 
 	// Copy data from old unsorted buffer to sorted buffer
-#if 0
-	T::UpdateSortedValues(dParticlesSorted, dParticles, index, sortedIndex);
-#endif
 
 	for (int j=0; j < nb_vars; j++) {
 		dParticlesSorted[index+j*numParticles]	= dParticles[sortedIndex+j*numParticles];
@@ -87,6 +80,7 @@ __kernel void datastructures(
 	}
 #endif
 }
+//----------------------------------------------------------------------
 
 //);
 
