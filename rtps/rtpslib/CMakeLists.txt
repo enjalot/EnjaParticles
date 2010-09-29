@@ -30,6 +30,7 @@ FIND_PACKAGE (GLEW)
 set (rtpslib_INCLUDES
     ${rtpslib_SOURCE_DIR}/oclRadixSortKeysValues/inc
     ${rtpslib_SOURCE_DIR}/bitonic_sort/src
+    ${rtpslib_SOURCE_DIR}/opencl
     ${rtpslib_SOURCE_DIR}/
     ${rtpslib_SOURCE_DIR}/system
     #${GLUT_INCLUDE_DIR}
@@ -58,6 +59,7 @@ set (rtpslib_SOURCES
 	${rtpslib_SOURCE_DIR}/system/utils/hash_wrap.cpp
 	${rtpslib_SOURCE_DIR}/system/utils/sort_wrap.cpp
 	#${rtpslib_SOURCE_DIR}/system/utils/bitonic_sort_wrap.cpp
+	${rtpslib_SOURCE_DIR}/system/utils/temp_bitonic_wrap.cpp
 
     ${rtpslib_SOURCE_DIR}/RTPS.cpp
     ${rtpslib_SOURCE_DIR}/RTPSettings.cpp

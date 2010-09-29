@@ -54,6 +54,7 @@ extern "C" int validateValues(
 ////////////////////////////////////////////////////////////////////////////////
 // OpenCL bitonic sort
 ////////////////////////////////////////////////////////////////////////////////
+#if 0
 extern "C" void initBitonicSort(cl_context cxGPUContext, cl_command_queue cqParamCommandQue, const char **argv);
 
 extern "C" void closeBitonicSort(void);
@@ -68,3 +69,4 @@ extern"C" size_t bitonicSort(
     uint arrayLength,
     uint dir
 );
+#endif

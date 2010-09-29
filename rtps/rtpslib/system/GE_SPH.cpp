@@ -398,7 +398,8 @@ void GE_SPH::computeOnGPU()
 		// Crashes (scan) every 3-4 tries. WHY???
 		// crashes more often if buildDataStructures is enabled. WHY? 
 		printf("start sorting *****\n");
-		sort();
+		//sort();
+		bitonic_sort();
 		return;
 
 		buildDataStructures(); // BUG

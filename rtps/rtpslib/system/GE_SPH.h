@@ -144,12 +144,15 @@ public:
 // Added by GE
 	void hash();
 	void sort(); //BufferGE<int>& key, BufferGE<int>& value);
+	void bitonic_sort(); //not in place, but keys/values
 	void setupArrays();
 	void buildDataStructures();
 	void neighbor_search();
 
 private:
 	void printSortDiagnostics();
+	//void printBiSortDiagnostics();
+	void printBiSortDiagnostics(BufferGE<int>& cl_sort_output_hashes, BufferGE<int>& cl_sort_output_indices);
 	void prepareSortData();
 	void printBuildDiagnostics();
 	void printHashDiagnostics();
