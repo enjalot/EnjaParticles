@@ -16,6 +16,8 @@
 //#include "../util.h"
 #include "../particle/UniformGrid.h"
 
+#include "RadixSort.h"
+
 // Make sure it is same as in density.cl
 #define DENS 0
 #define POS 1
@@ -133,6 +135,7 @@ public:
 
 	BufferGE<float4>*	clf_debug;  //just for debugging cl files
 	BufferGE<int4>*		cli_debug;  //just for debugging cl files
+	RadixSort*   radixSort;
 
 private:
 	//DataStructures* ds;

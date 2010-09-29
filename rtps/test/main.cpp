@@ -242,8 +242,9 @@ void appRender()
 void appDestroy()
 {
 
+	printf("**** before delete ps\n");
     delete ps;
-
+	printf("**** after delete ps\n");
 
     if(glutWindowHandle)glutDestroyWindow(glutWindowHandle);
     printf("about to exit!\n");

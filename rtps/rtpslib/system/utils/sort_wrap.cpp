@@ -1,5 +1,5 @@
-#include "../GE_SPH.h"
-#include "../oclRadixSortKeysValues/inc/RadixSort.h"
+#include "GE_SPH.h"
+#include "RadixSort.h"
 
 #include <string>
 using namespace std;
@@ -16,7 +16,6 @@ namespace rtps {
 void GE_SPH::sort()
 {
 	static bool first_time = true;
-	static RadixSort* radixSort;
 	int ctaSize = 64; // work group size
 
 	printf("ENTER SORT\n");

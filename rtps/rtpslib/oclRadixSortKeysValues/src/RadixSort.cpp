@@ -123,14 +123,15 @@ RadixSort::RadixSort(cl_context GPUContext,
 RadixSort::~RadixSort()
 {
 	//clReleaseKernel(ckRadixSortBlocksKeysOnly);
-	//clReleaseKernel(ckRadixSortBlocksKeysOnly);
 	clReleaseKernel(ckRadixSortBlocksKeysValues);
 	clReleaseKernel(ckFindRadixOffsets);
 	clReleaseKernel(ckScanNaive);
 	//clReleaseKernel(ckReorderDataKeysOnly);
 	clReleaseKernel(ckReorderDataKeysValues);
 	clReleaseProgram(cpProgram);
+
 	clReleaseMemObject(d_tempKeys);
+	clReleaseMemObject(d_tempValues);
 	clReleaseMemObject(mCounters);
 	clReleaseMemObject(mCountersSum);
 	clReleaseMemObject(mBlockOffsets);

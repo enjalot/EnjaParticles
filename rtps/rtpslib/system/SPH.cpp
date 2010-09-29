@@ -163,6 +163,7 @@ typedef struct SPHParams
 
 SPH::~SPH()
 {
+	printf("INSIDE SPH desctructor\n");
     if(pos_vbo && managed)
     {
         glBindBuffer(1, pos_vbo);

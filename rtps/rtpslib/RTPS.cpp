@@ -26,9 +26,14 @@ RTPS::RTPS(RTPSettings s)
 
 RTPS::~RTPS()
 {
+	printf("*** RTPS destructor ****\n");
+	printf("*** before delete system ***\n");
     delete system;
+	printf("*** after delete system ***\n");
     delete cli;
+	printf("*** after delete cli ***\n");
     delete renderer;
+	printf("*** after delete renderer ***\n");
 }
 
 void RTPS::Init()

@@ -172,6 +172,8 @@ typedef struct GE_SPHParams
 //----------------------------------------------------------------------
 GE_SPH::~GE_SPH()
 {
+	printf("**** inside GE_SPH destructor ****\n");
+
     if(pos_vbo && managed)
     {
         glBindBuffer(1, pos_vbo);
@@ -184,6 +186,28 @@ GE_SPH::~GE_SPH()
         glDeleteBuffers(1, (GLuint*)&col_vbo);
         col_vbo = 0;
     }
+
+	#if 1
+	delete 	cl_vars_sorted;
+	delete 	cl_vars_unsorted;
+	delete 	cl_cells; // positions in Ian code
+	delete 	cl_cell_indices_start;
+	delete 	cl_cell_indices_end;
+	delete 	cl_vars_sort_indices;
+	delete 	cl_sort_hashes;
+	delete 	cl_sort_indices;
+	delete 	cl_unsort;
+	delete 	cl_sort;
+	delete  cl_GridParams;
+	delete  cl_FluidParams;
+	delete  cl_params;
+	delete	clf_debug;  //just for debugging cl files
+	delete	cli_debug;  //just for debugging cl files
+	#endif
+
+	delete radixSort;
+
+	printf("***** exit GE_SPH destructor **** \n");
 }
 
 //----------------------------------------------------------------------
@@ -375,7 +399,7 @@ void GE_SPH::computeOnGPU()
 		// crashes more often if buildDataStructures is enabled. WHY? 
 		printf("start sorting *****\n");
 		sort();
-		exit(0);
+		return;
 
 		buildDataStructures(); // BUG
 		exit(0);
