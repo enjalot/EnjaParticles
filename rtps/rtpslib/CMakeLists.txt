@@ -58,8 +58,8 @@ set (rtpslib_SOURCES
 	${rtpslib_SOURCE_DIR}/system/utils/neighbor_search_wrap.cpp
 	${rtpslib_SOURCE_DIR}/system/utils/hash_wrap.cpp
 	${rtpslib_SOURCE_DIR}/system/utils/sort_wrap.cpp
-	#${rtpslib_SOURCE_DIR}/system/utils/bitonic_sort_wrap.cpp
-	${rtpslib_SOURCE_DIR}/system/utils/temp_bitonic_wrap.cpp
+	${rtpslib_SOURCE_DIR}/system/utils/bitonic_sort_wrap.cpp
+	#${rtpslib_SOURCE_DIR}/system/utils/temp_bitonic_wrap.cpp
 
     ${rtpslib_SOURCE_DIR}/RTPS.cpp
     ${rtpslib_SOURCE_DIR}/RTPSettings.cpp

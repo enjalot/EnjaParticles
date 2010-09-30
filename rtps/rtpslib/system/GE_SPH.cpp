@@ -26,7 +26,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     num = n;
 	nb_vars = 4;  // for array structure in OpenCL
 	nb_el = n;
-	printf("num_particles= %d\n", num);
+	//printf("num_particles= %d\n", num);
 
     //*** Initialization, TODO: move out of here to the particle directory
     std::vector<float4> colors(num);
@@ -45,16 +45,16 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     sph_settings.simulation_scale = .001;
 
     sph_settings.particle_mass = (128*1024)/num * .0002;
-    printf("particle mass: %f\n", sph_settings.particle_mass);
+    //printf("particle mass: %f\n", sph_settings.particle_mass);
     sph_settings.particle_rest_distance = .87 * pow(sph_settings.particle_mass / sph_settings.rest_density, 1./3.);
-    printf("particle rest distance: %f\n", sph_settings.particle_rest_distance);
+    //printf("particle rest distance: %f\n", sph_settings.particle_rest_distance);
    
     sph_settings.smoothing_distance = 2.f * sph_settings.particle_rest_distance;
     sph_settings.boundary_distance = .5f * sph_settings.particle_rest_distance;
 
     sph_settings.spacing = sph_settings.particle_rest_distance / sph_settings.simulation_scale;
     float particle_radius = sph_settings.spacing;
-    printf("particle radius: %f\n", particle_radius);
+    //printf("particle radius: %f\n", particle_radius);
 
     //grid = UniformGrid(float3(0,0,0), float3(1024, 1024, 1024), sph_settings.smoothing_distance / sph_settings.simulation_scale);
     grid = UniformGrid(float4(-512,0,-512,1.), float4(512, 1024, 512, 1.), sph_settings.smoothing_distance / sph_settings.simulation_scale);
@@ -389,25 +389,26 @@ void GE_SPH::computeOnGPU()
     for(int i=0; i < 1; i++)
     {
 		// ***** Create HASH ****
-		printf("before hash\n");
+		//printf("before hash\n");
 		hash();
-		printf("after hash\n");
+		//printf("after hash\n");
 		//exit(0);
 
 		// SORTING NOT WORKING PROPERLY!! WHY?
 		// Crashes (scan) every 3-4 tries. WHY???
 		// crashes more often if buildDataStructures is enabled. WHY? 
-		printf("start sorting *****\n");
+		//printf("start sorting *****\n");
 		//sort();
 		bitonic_sort();
-		return;
+		//return;
 
-		buildDataStructures(); // BUG
-		exit(0);
+		//buildDataStructures(); // BUG
+		//exit(0);
+		//return;
 
 		// ***** DENSITY UPDATE *****
-		computeDensity();
-		checkDensity();
+		//computeDensity();
+		//checkDensity();
 
 
 		// ***** PRESSURE UPDATE *****

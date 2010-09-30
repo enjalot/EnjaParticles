@@ -63,6 +63,7 @@ void GE_SPH::bitonic_sort()
 	BufferGE<int> cl_sort_output_indices(ps->cli, nb_el);
 
 	try {
+	#if 0
 		//prepareSortData();
 		printf("nb_el= %d\n", nb_el);
 		cl_sort_hashes->copyToHost();
@@ -70,6 +71,7 @@ void GE_SPH::bitonic_sort()
 		for (int i=0; i < nb_el; i++) {
 			printf("** hash: %d, index: %d\n", (*cl_sort_hashes)[i], (*cl_sort_indices)[i]);
 		}
+	#endif
 
 
 	//printf("nb_el= %d\n", nb_el); exit(0);
