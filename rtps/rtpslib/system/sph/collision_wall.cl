@@ -34,7 +34,7 @@ __kernel void collision_wall(__global float4* pos, __global float4* vel,  __glob
     unsigned int i = get_global_id(0);
 
     float4 p = pos[i];
-    float4 v = vel[i];
+    float4 v = vel[i] * params->simulation_scale;
     float4 r_f = (float4)(0.f, 0.f, 0.f, 0.f);
 
     //TODO paramater struct, grid walls passed in
@@ -72,7 +72,6 @@ __kernel void collision_wall(__global float4* pos, __global float4* vel,  __glob
         float4 normal = (float4)(0.0f, -1.0f, 0.0f, 0.0f);
         r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, params->boundary_distance);
     }
-
     //X walls
     diff = params->boundary_distance - (p.x - params->grid_min.x) * params->simulation_scale;
     if (diff > params->EPSILON)
@@ -90,6 +89,7 @@ __kernel void collision_wall(__global float4* pos, __global float4* vel,  __glob
 
     //TODO add friction forces
 
+    force[i] += r_f;
 
 }
 );

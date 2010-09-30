@@ -24,7 +24,7 @@ int window_width = 800;
 int window_height = 600;
 int glutWindowHandle = 0;
 float translate_x = -400.f;
-float translate_y = -300.f;
+float translate_y = 300.f;
 float translate_z = 350.f;
 
 // mouse controls
@@ -59,7 +59,7 @@ void *font = GLUT_BITMAP_8_BY_13;
 
 rtps::RTPS* ps;
 //#define NUM_PARTICLES 16384
-#define NUM_PARTICLES 16
+#define NUM_PARTICLES 512
 
 
 //timers
@@ -111,7 +111,7 @@ int main(int argc, char** argv)
 
         
     //default constructor
-    rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, .001f);
+    rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, .01f);
     ps = new rtps::RTPS(settings);
 
     glutMainLoop();
@@ -141,7 +141,7 @@ void init_gl()
     glLoadIdentity();
     glRotatef(-90, 1.0, 0.0, 0.0);
     //glTranslatef(translate_x, translate_z, translate_y);
-    glTranslatef(0, translate_z, 0);
+    glTranslatef(0, translate_z, translate_y);
     //glRotatef(-90, 1.0, 0.0, 0.0);
 
     return;
@@ -167,8 +167,8 @@ void appRender()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     ps->update();
-
-	//glEnable(GL_DEPTH_TEST);
+	
+    //glEnable(GL_DEPTH_TEST);
 
     ps->render();
 
@@ -233,7 +233,7 @@ void appMotion(int x, int y)
     glLoadIdentity();
     glRotatef(-90, 1.0, 0.0, 0.0);
     //glTranslatef(translate_x, translate_z, translate_y);
-    glTranslatef(0, translate_z, 0);
+    glTranslatef(0, translate_z, translate_y);
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
     glutPostRedisplay();

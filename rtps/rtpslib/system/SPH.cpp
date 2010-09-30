@@ -56,11 +56,11 @@ SPH::SPH(RTPS *psfr, int n)
 
     //grid = UniformGrid(float3(0,0,0), float3(1024, 1024, 1024), sph_settings.smoothing_distance / sph_settings.simulation_scale);
     grid = UniformGrid(float3(-512,0,-512), float3(512, 1024, 512), sph_settings.smoothing_distance / sph_settings.simulation_scale);
-    //grid.make_cube(&positions[0], sph_settings.spacing, num);
-    int new_num = grid.make_line(&positions[0], sph_settings.spacing, num);
+    grid.make_cube(&positions[0], sph_settings.spacing, num);
+    //int new_num = grid.make_line(&positions[0], sph_settings.spacing, num);
     //less particles will be in play
     //not sure this is 100% right
-    num = new_num;
+    //num = new_num;
 
 
 /*
@@ -85,7 +85,7 @@ typedef struct SPHParams
     params.rest_distance = sph_settings.particle_rest_distance;
     params.smoothing_distance = sph_settings.smoothing_distance;
     params.simulation_scale = sph_settings.simulation_scale;
-    params.boundary_stiffness = 10000.0f;
+    params.boundary_stiffness = 500.0f;
     params.boundary_dampening = 256.0f;
     params.boundary_distance = sph_settings.particle_rest_distance * .5f;
     params.EPSILON = .00001f;
@@ -186,9 +186,18 @@ void SPH::update()
     //call kernels
     //TODO: add timings
 #ifdef CPU
+
     cpuDensity();
     cpuPressure();
-    //cpuEuler();
+    cpuCollision_wall();
+    cpuEuler();
+    //printf("positions[0].z %f\n", positions[0].z);
+
+    glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
+    glBufferData(GL_ARRAY_BUFFER, num * sizeof(float4), &positions[0], GL_DYNAMIC_DRAW);
+
+
+
 #endif
 #ifdef GPU
     glFinish();
@@ -199,7 +208,6 @@ void SPH::update()
     for(int i=0; i < 10; i++)
     {
         k_density.execute(num);
-        /*
         //test density
         /*
         std::vector<float> dens = cl_density.copyToHost(num);
@@ -234,6 +242,7 @@ void SPH::update()
             printf("force: %f %f %f  \n", ftest[i].x, ftest[i].y, ftest[i].z);
     }
     printf("execute!\n");
+    */
 
 
     cl_position.release();

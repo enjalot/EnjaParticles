@@ -60,8 +60,8 @@ set (rtpslib_SOURCES
 
 
 ADD_DEFINITIONS(-g )
-ADD_DEFINITIONS(-DGPU)
-#ADD_DEFINITIONS(-DCPU)
+#ADD_DEFINITIONS(-DGPU)
+ADD_DEFINITIONS(-DCPU)
 
 INCLUDE_DIRECTORIES(${rtpslib_INCLUDES})
 ADD_LIBRARY(rtps STATIC ${rtpslib_SOURCES})
@@ -75,7 +75,8 @@ TARGET_LINK_LIBRARIES (rtps
 
 
 #Doxygen
-find_package(Doxygen REQUIRED)
+#find_package(Doxygen REQUIRED)
+find_package(Doxygen)
 set(DOXYGEN_INPUT   ${rtpslib_SOURCE_DIR}/doc/doxyfile)
 set(DOXYGEN_OUTPUT  ${rtpslib_BINARY_DIR}/html/index.html)
 file(MAKE_DIRECTORY ${rtpslib_BINARY_DIR}/html)

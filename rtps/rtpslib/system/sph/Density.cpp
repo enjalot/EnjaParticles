@@ -98,10 +98,10 @@ void SPH::cpuDensity()
             }
      
         }
-        printf("neighbor_count[%d] = %d; density = %f\n", i, neighbor_count, densities[i]);
-        sum_densities += densities[i];
+        //printf("neighbor_count[%d] = %d; density = %f\n", i, neighbor_count, densities[i]);
+        //sum_densities += densities[i];
     }
-    printf("CPU: sum_densities = %f\n", sum_densities);
+    //printf("CPU: sum_densities = %f\n", sum_densities);
 }
 
 }
