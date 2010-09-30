@@ -9,4 +9,11 @@ RTPSettings::RTPSettings()
     dt = .0005f;
 }
 
+RTPSettings::RTPSettings(SysType system, int max_particles, float dt)
+{
+    this->system = system;
+    this->max_particles = max_particles;
+    this->dt = dt;
+}
+
 }

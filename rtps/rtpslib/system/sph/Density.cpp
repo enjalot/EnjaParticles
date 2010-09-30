@@ -1,6 +1,19 @@
 #include "../SPH.h"
 #include <math.h>
 
+
+float magnitude(float4 vec)
+{
+    return sqrt(vec.x*vec.x + vec.y*vec.y + vec.z*vec.z);
+}
+float dist_squared(float4 vec)
+{
+    return vec.x*vec.x + vec.y*vec.y + vec.z*vec.z;
+}
+
+
+
+
 namespace rtps {
 
 void SPH::loadDensity()
@@ -17,16 +30,15 @@ void SPH::loadDensity()
 
 } 
 
-
-float magnitude(float4 vec)
+float SPH::Wpoly6(float4 r, float h)
 {
-    return sqrt(vec.x*vec.x + vec.y*vec.y + vec.z*vec.z);
+    float h9 = h*h*h * h*h*h * h*h*h;
+    float alpha = 315.f/64.0f/params.PI/h9;
+    float r2 = dist_squared(r);
+    float hr2 = (h*h - r2);
+    float Wij = alpha * hr2*hr2*hr2;
+    return Wij;
 }
-float dist_squared(float4 vec)
-{
-    return vec.x*vec.x + vec.y*vec.y + vec.z*vec.z;
-}
-
 
 
 void SPH::cpuDensity()
@@ -34,9 +46,10 @@ void SPH::cpuDensity()
     float h = params.smoothing_distance;
     //stuff from Tim's code (need to match #s to papers)
     //float alpha = 315.f/208.f/params.PI/h/h/h;
-    float h9 = h*h*h * h*h*h * h*h*h;
-    float alpha = 315.f/64.0f/params.PI/h9;
-    printf("alpha: %f\n", alpha);
+    //
+    //float h9 = h*h*h * h*h*h * h*h*h;
+    //float alpha = 315.f/64.0f/params.PI/h9;
+    //printf("alpha: %f\n", alpha);
 
     //sooo slow t.t
 
@@ -49,12 +62,10 @@ void SPH::cpuDensity()
         p = float4(p.x * scale, p.y * scale, p.z * scale, p.w * scale);
         densities[i] = 0.0f;
 
-
-
         int neighbor_count = 0;
         for(int j = 0; j < num; j++)
         {
-            if(j == i) continue;
+//            if(j == i) continue;
             float4 pj = positions[j];
             pj = float4(pj.x * scale, pj.y * scale, pj.z * scale, pj.w * scale);
             float4 r = float4(p.x - pj.x, p.y - pj.y, p.z - pj.z, p.w - pj.w);
@@ -70,9 +81,18 @@ void SPH::cpuDensity()
                     neighbor_count++;
                     //float R = sqrt(r2/re2);
                     //float Wij = alpha*(2.f/3.f - 9.f*R*R/8.f + 19.f*R*R*R/24.f - 5.f*R*R*R*R/32.f);
-                    float hr2 = (h*h - r2);
-                    float Wij = alpha * hr2*hr2*hr2;
-                    printf("%f ", Wij);
+                    //
+                    //float hr2 = (h*h - r2);
+                    //float Wij = alpha * hr2*hr2*hr2;
+                    float Wij = Wpoly6(r, h);
+                    /*
+                    if(i == j)
+                    {
+                        printf("rlen: %f\n", rlen);
+                        printf("Wij = %f\n", Wij);
+                    }
+                    */
+                   //printf("%f ", Wij);
                     densities[i] += params.mass * Wij;
                 }
             }

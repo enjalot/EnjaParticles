@@ -34,6 +34,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/RTPS.cpp
     ${rtpslib_SOURCE_DIR}/RTPSettings.cpp
     ${rtpslib_SOURCE_DIR}/util.cpp
+    ${rtpslib_SOURCE_DIR}/structs.cpp
 
     ${rtpslib_SOURCE_DIR}/opencl/CLL.cpp
     ${rtpslib_SOURCE_DIR}/opencl/Kernel.cpp
@@ -60,6 +61,7 @@ set (rtpslib_SOURCES
 
 ADD_DEFINITIONS(-g )
 ADD_DEFINITIONS(-DGPU)
+#ADD_DEFINITIONS(-DCPU)
 
 INCLUDE_DIRECTORIES(${rtpslib_INCLUDES})
 ADD_LIBRARY(rtps STATIC ${rtpslib_SOURCES})

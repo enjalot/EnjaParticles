@@ -48,6 +48,11 @@ typedef struct float4
 } float4;
 
 
+//maybe these helper functions should go elsewhere? 
+//or be functions of the structs
+float magnitude(float4 vec);
+float dist_squared(float4 vec);
+
 
 
 #endif

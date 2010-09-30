@@ -59,7 +59,7 @@ void *font = GLUT_BITMAP_8_BY_13;
 
 rtps::RTPS* ps;
 //#define NUM_PARTICLES 16384
-#define NUM_PARTICLES 1024
+#define NUM_PARTICLES 16
 
 
 //timers
@@ -111,7 +111,8 @@ int main(int argc, char** argv)
 
         
     //default constructor
-    ps = new rtps::RTPS();
+    rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, .001f);
+    ps = new rtps::RTPS(settings);
 
     glutMainLoop();
     return 0;

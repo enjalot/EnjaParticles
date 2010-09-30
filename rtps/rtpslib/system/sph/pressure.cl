@@ -82,7 +82,7 @@ __kernel void pressure(__global float4* pos, __global float* density, __global f
 
         }
     }
-    force[i] -= f;
+    force[i] = f;
 
 }
 );

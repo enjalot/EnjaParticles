@@ -44,7 +44,7 @@ SPH::SPH(RTPS *psfr, int n)
     sph_settings.particle_rest_distance = .87 * pow(sph_settings.particle_mass / sph_settings.rest_density, 1./3.);
     printf("particle rest distance: %f\n", sph_settings.particle_rest_distance);
    
-    sph_settings.smoothing_distance = 2.f * sph_settings.particle_rest_distance;
+    sph_settings.smoothing_distance = 1.5f * sph_settings.particle_rest_distance;
     sph_settings.boundary_distance = .5f * sph_settings.particle_rest_distance;
 
     sph_settings.spacing = sph_settings.particle_rest_distance / sph_settings.simulation_scale;
@@ -53,7 +53,11 @@ SPH::SPH(RTPS *psfr, int n)
 
     //grid = UniformGrid(float3(0,0,0), float3(1024, 1024, 1024), sph_settings.smoothing_distance / sph_settings.simulation_scale);
     grid = UniformGrid(float3(-512,0,-512), float3(512, 1024, 512), sph_settings.smoothing_distance / sph_settings.simulation_scale);
-    grid.make_cube(&positions[0], sph_settings.spacing, num);
+    //grid.make_cube(&positions[0], sph_settings.spacing, num);
+    int new_num = grid.make_line(&positions[0], sph_settings.spacing, num);
+    //less particles will be in play
+    //not sure this is 100% right
+    num = new_num;
 
 
 /*
@@ -180,7 +184,7 @@ void SPH::update()
     //TODO: add timings
 #ifdef CPU
     cpuDensity();
-    //cpuPressure();
+    cpuPressure();
     //cpuEuler();
 #endif
 #ifdef GPU
@@ -193,6 +197,7 @@ void SPH::update()
     {
         k_density.execute(num);
         //test density
+        /*
         std::vector<float> dens = cl_density.copyToHost(num);
         float dens_sum = 0.0f;
         for(int j = 0; j < num; j++)
@@ -200,6 +205,7 @@ void SPH::update()
             dens_sum += dens[j];
         }
         printf("summed density: %f\n", dens_sum);
+        */
         /*
         std::vector<float4> er = cl_error_check.copyToHost(10);
         for(int j = 0; j < 10; j++)
@@ -210,12 +216,12 @@ void SPH::update()
         k_pressure.execute(num);
         k_viscosity.execute(num);
 
-        //k_collision_wall.execute(num);
+        k_collision_wall.execute(num);
 
         //euler integration
         k_euler.execute(num);
     }
-#endif
+
     /*
     std::vector<float4> ftest = cl_force.copyToHost(100);
     for(int i = 0; i < 100; i++)
@@ -229,6 +235,10 @@ void SPH::update()
 
     cl_position.release();
     cl_color.release();
+
+
+#endif
 }
 
-}
+
+} //end namespace
