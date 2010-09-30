@@ -169,6 +169,8 @@ typedef struct GE_SPHParams
 		un(i+VEL*nb_el) = velocities[i];
 		un(i+FOR*nb_el) = forces[i];
 	}
+
+	cl_vars_unsorted->copyToDevice();
 }
 
 //----------------------------------------------------------------------
@@ -404,13 +406,17 @@ void GE_SPH::computeOnGPU()
 		// Crashes (scan) every 3-4 tries. WHY???
 		// crashes more often if buildDataStructures is enabled. WHY? 
 		//printf("start sorting *****\n");
-		sort();
-		//bitonic_sort();
+		//sort();
+		//return;
+		bitonic_sort();
+		//exit(0);
 		//return;
 
 		buildDataStructures(); // BUG
 		//exit(0);
-		//return;
+
+		neighbor_search();
+		return;
 
 		// ***** DENSITY UPDATE *****
 		//computeDensity();
@@ -418,7 +424,7 @@ void GE_SPH::computeOnGPU()
 
 
 		// ***** PRESSURE UPDATE *****
-        computePressure();
+        //computePressure();
         //k_pressure.execute(num);
 
 		// ***** VISCOSITY UPDATE *****
@@ -428,7 +434,7 @@ void GE_SPH::computeOnGPU()
         //k_collision_wall.execute(num);
 
         // ***** EULER UPDATE *****
-		computeEuler();
+		//computeEuler();
     }
 
     cl_position.release();

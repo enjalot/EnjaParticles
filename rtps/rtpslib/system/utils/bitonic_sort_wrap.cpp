@@ -71,11 +71,10 @@ void GE_SPH::bitonic_sort()
 	#endif
 
 
+
 	//printf("nb_el= %d\n", nb_el); exit(0);
 	// both arguments should already be on the GPU
 		// CRASHES EVERY 2-3 runs. WHY? 
-   		//radixSort->sort(cl_sort_hashes->getDevicePtr(), 
-			//cl_sort_indices->getDevicePtr(), nb_el, keybits);
 
 		int dir = 1; 		// dir: direction
 		int batch = nb_el;
@@ -120,7 +119,7 @@ void GE_SPH::bitonic_sort()
 	}
 
 	cl_sort_hashes->copyToDevice();
-	cl_sort_hashes->copyToDevice();
+	cl_sort_indices->copyToDevice();
 	#endif
 
     ps->cli->queue.finish();
@@ -128,9 +127,9 @@ void GE_SPH::bitonic_sort()
 
 	printf("enter sort diagonistics ****\n");
 
-	//printBiSortDiagnostics(cl_sort_output_hashes, cl_sort_output_indices);
+	printBiSortDiagnostics(cl_sort_output_hashes, cl_sort_output_indices);
 
-	//printf("EXIT BISORT \n");
+	printf("EXIT BISORT \n");
 }
 //----------------------------------------------------------------------
 void GE_SPH::printBiSortDiagnostics(BufferGE<int>& cl_sort_output_hashes, BufferGE<int>& cl_sort_output_indices)
@@ -151,8 +150,8 @@ void GE_SPH::printBiSortDiagnostics(BufferGE<int>& cl_sort_output_hashes, Buffer
 	for (int i=0; i < nb_el; i++) {
 	//for (int i=0; i < 200; i++) {
 		printf("=========================================\n");
-		//printf("sorted hash[%d]: %d, sorted index[%d]: %d\n", i, hashi[i], i, sorti[i]);
-		printf("sorted hash[%d]: %d, osorted indx[%d]: %d\n", i, ohashi[i], i, osorti[i]);
+		printf("sorted hash[%d]: %d, sorted index[%d]: %d\n", i, hashi[i], i, sorti[i]);
+		printf("osorted hash[%d]: %d, osorted indx[%d]: %d\n", i, ohashi[i], i, osorti[i]);
 	}
 #endif
 }

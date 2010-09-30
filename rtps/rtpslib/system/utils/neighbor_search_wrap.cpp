@@ -47,6 +47,7 @@ void GE_SPH::neighbor_search()
 	int local = 128;
 
 	kern.execute(nb_el, local);
+	exit(0);
 
 	ps->cli->queue.finish();
 	ts_cl[TI_NEIGH]->end();

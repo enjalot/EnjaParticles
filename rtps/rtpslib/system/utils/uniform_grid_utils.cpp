@@ -119,10 +119,12 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 			for(uint index_j=startIndex; index_j < endIndex; index_j++) {			
 				// For now, nothing to loop over. ADD WHEN CODE WORKS. 
 				// Is there a neighbor?
-#if 1
+#if 0
 				force += ForPossibleNeighbor(vars_sorted, numParticles, index_i, index_j, position_i, gp, fp);
 #endif
+				return;  // no crash
 			}
+			//return; // crash
 		}
 	}
 
@@ -195,6 +197,7 @@ __kernel void K_SumStep1(
 	int index = get_global_id(0);
     if (index >= numParticles) return;
 
+
 	//This is done as part of the template approach since the Data can then be used as a template object 
 	//in Cuda
 	//vars = sorted_vars; // not needed
@@ -208,6 +211,7 @@ __kernel void K_SumStep1(
 	#if 1
     force = IterateParticlesInNearbyCells(sorted_vars, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp);
 	#endif
+
 
 	// needed in this version
 	//FETCH_FOR(sorted_vars, index) = force;

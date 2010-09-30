@@ -10,6 +10,8 @@ void GE_SPH::buildDataStructures()
 {
 	static bool first_time = true;
 
+	//printf("buildData\n"); exit(0);
+
 	printf("ENTER BUILD\n");
 
 	ts_cl[TI_BUILD]->start();
@@ -57,10 +59,10 @@ void GE_SPH::buildDataStructures()
 	int err;
 	printf("EXECUTE BUILD\n");
    	kern.execute(nb_el, workSize); 
-//	exit(0);
+	printf("AFTER EXECUTE BUILD\n");
 
-//	printBuildDiagnostics();
-//	exit(0);
+	//printBuildDiagnostics();
+	//exit(0);
 
     ps->cli->queue.finish();
 	ts_cl[TI_BUILD]->end();
@@ -73,9 +75,11 @@ void GE_SPH::printBuildDiagnostics()
 	// should try with and without exceptions. 
 	// DATA SHOULD STAY ON THE GPU
 	try {
-		cl_vars_unsorted->copyToDevice();
-		cl_vars_sorted->copyToDevice();
-		cl_vars_sort_indices->copyToDevice();
+		cl_vars_unsorted->copyToHost();
+		cl_vars_sorted->copyToHost();
+		cl_sort_indices->copyToHost();
+		//cl_vars_sort_indices->copyToDevice(); // not defineed
+		//exit(0);
 	} catch(cl::Error er) {
         printf("1 ERROR(buildDatastructures): %s(%s)\n", er.what(), oclErrorString(er.err()));
 		exit(0);
@@ -83,21 +87,27 @@ void GE_SPH::printBuildDiagnostics()
 
 	float4* us =  cl_vars_unsorted->getHostPtr();
 	float4* so =  cl_vars_sorted->getHostPtr();
+	int* si =  cl_sort_indices->getHostPtr();
 
 	// PRINT OUT UNSORTED AND SORTED VARIABLES
 	#if 1
-	for (int k=0; k < nb_vars; k++) {
+	//for (int k=0; k < nb_vars; k++) {
+	for (int k=0; k < 2; k++) {
 		printf("================================================\n");
 		printf("=== VARIABLE: %d ===============================\n", k);
 	for (int i=0; i < nb_el; i++) {
 		float4 uss = us[i+k*nb_el];
+		//printf("uss= %f, %f, %f, %f\n", uss.x, uss.y, uss.z, uss.w);
 		float4 soo = so[i+k*nb_el];
-		printf("[%d]: %d, (%f, %f), (%f, %f)\n", i, cl_sort_indices[i], uss.x, uss.y, soo.x, soo.y);
+		//printf("soo= %f, %f, %f, %f\n", soo.x, soo.y, soo.z, soo.w);
+		printf("[%d]: cl_sort_indices: %d, vars_unsorted: (%f, %f), vars_sorted: (%f, %f)\n", i, si[i], uss.x, uss.y, soo.x, soo.y);
+		//printf("[%d]: %d \n", i, si[i]);
 	}
 	}
 	printf("===============================================\n");
 	printf("===============================================\n");
 	#endif
+	exit(0);
 
 
 	try {
@@ -108,6 +118,7 @@ void GE_SPH::printBuildDiagnostics()
         printf("2 ERROR(buildDatastructures): %s(%s)\n", er.what(), oclErrorString(er.err()));
 		exit(0);
 	}
+
 
 		printf("cell_indices_start, end\n");
 		int nb_cells = 0;
