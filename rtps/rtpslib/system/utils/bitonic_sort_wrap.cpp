@@ -35,7 +35,7 @@ void GE_SPH::bitonic_sort()
 	static bool first_time = true;
 	int ctaSize = 64; // work group size
 
-	printf("ENTER SORT\n");
+	//printf("ENTER BISORT\n");
 
 	ts_cl[TI_SORT]->start();
 
@@ -45,10 +45,7 @@ void GE_SPH::bitonic_sort()
 
 		// SHOULD ONLY BE DONE ONCE
 		if (first_time) {
-			printf("radixSort: nb_el= %d\n", nb_el);
-	    	radixSort = new RadixSort(ps->cli->context(), ps->cli->queue(), nb_el, "../oooclRadixSort/", ctaSize, false);		    
-        	//initBitonicSort(ps->cli->context(), ps->cli->queue(), argv);
-        	initBitonicSort(ps->cli->context(), ps->cli->queue(), 0); // no argv
+        	initBitonicSort(ps->cli->context(), ps->cli->queue(), 0); // no argv (last arg)
 			first_time = false;
 		}
     } catch (cl::Error er) {
@@ -106,7 +103,7 @@ void GE_SPH::bitonic_sort()
 		exit(0);
 	}
 
-	#if 0
+	#if 1
 	cl_sort_output_hashes.copyToHost();
 	cl_sort_output_indices.copyToHost();
 
@@ -133,8 +130,7 @@ void GE_SPH::bitonic_sort()
 
 	//printBiSortDiagnostics(cl_sort_output_hashes, cl_sort_output_indices);
 
-	printf("EXIT SORT \n");
-
+	//printf("EXIT BISORT \n");
 }
 //----------------------------------------------------------------------
 void GE_SPH::printBiSortDiagnostics(BufferGE<int>& cl_sort_output_hashes, BufferGE<int>& cl_sort_output_indices)

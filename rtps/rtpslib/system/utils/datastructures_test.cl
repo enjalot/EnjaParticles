@@ -21,7 +21,6 @@ __kernel void datastructures(
      __local uint* sharedHash
      )
 {
-
  uint index = get_global_id(0);
 
 
@@ -50,7 +49,7 @@ __kernel void datastructures(
 
 
  barrier(CLK_LOCAL_MEM_FENCE);
-# 58 "datastructures_test.cpp"
+# 57 "datastructures_test.cpp"
  if ((index == 0 || hash != sharedHash[tid]) )
  {
   cell_indexes_start[hash] = index;
@@ -58,6 +57,7 @@ __kernel void datastructures(
    cell_indexes_end[sharedHash[tid]] = index;
   }
  }
+
 
  if (index == numParticles - 1) {
   cell_indexes_end[hash] = index + 1;

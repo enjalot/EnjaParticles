@@ -15,11 +15,11 @@ namespace rtps {
 
 void GE_SPH::sort()
 {
-	exit(0);
+	//exit(0);
 	static bool first_time = true;
 	int ctaSize = 64; // work group size
 
-	printf("ENTER SORT\n");
+	//printf("ENTER SORT\n");
 
 	ts_cl[TI_SORT]->start();
 
@@ -43,12 +43,14 @@ void GE_SPH::sort()
 
 	try {
 		//prepareSortData();
+		#if 0
 		printf("nb_el= %d\n", nb_el);
 		cl_sort_hashes->copyToHost();
 		cl_sort_indices->copyToHost();
 		for (int i=0; i < nb_el; i++) {
 			printf("** hash: %d, index: %d\n", (*cl_sort_hashes)[i], (*cl_sort_indices)[i]);
 		}
+		#endif
 
 	//printf("nb_el= %d\n", nb_el); exit(0);
 	// both arguments should already be on the GPU
@@ -63,12 +65,10 @@ void GE_SPH::sort()
     ps->cli->queue.finish();
 	ts_cl[TI_SORT]->end();
 
-	printf("enter sort diagonistics ****\n");
+	//printf("enter sort diagonistics ****\n");
+	//printSortDiagnostics();
 
-	printSortDiagnostics();
-
-	printf("EXIT SORT \n");
-
+	//printf("EXIT SORT \n");
 }
 //----------------------------------------------------------------------
 void GE_SPH::printSortDiagnostics()

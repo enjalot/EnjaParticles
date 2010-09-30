@@ -23,6 +23,8 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     //store the particle system framework
     ps = psfr;
 
+	radixSort = 0;
+
     num = n;
 	nb_vars = 4;  // for array structure in OpenCL
 	nb_el = n;
@@ -205,7 +207,7 @@ GE_SPH::~GE_SPH()
 	delete	cli_debug;  //just for debugging cl files
 	#endif
 
-	delete radixSort;
+	if (radixSort) delete radixSort;
 
 	printf("***** exit GE_SPH destructor **** \n");
 }
@@ -305,8 +307,12 @@ printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
 	cl_vars_sorted   = new BufferGE<float4>(ps->cli, nb_el*nb_vars);
 	cl_sort_indices  = new BufferGE<int>(ps->cli, nb_el);
 	cl_sort_hashes   = new BufferGE<int>(ps->cli, nb_el);
-	cl_cell_indices_start = new BufferGE<int>(ps->cli, nb_el);
-	cl_cell_indices_end   = new BufferGE<int>(ps->cli, nb_el);
+	cl_cell_indices_start = new BufferGE<int>(ps->cli, grid_size);
+	cl_cell_indices_end   = new BufferGE<int>(ps->cli, grid_size);
+
+	printf("nb_el= %d\n", nb_el);
+	printf("grid size: %d\n", grid_size); 
+	//exit(0);
 
 	clf_debug = new BufferGE<float4>(ps->cli, nb_el);
 	cli_debug = new BufferGE<int4>(ps->cli, nb_el);
@@ -398,11 +404,11 @@ void GE_SPH::computeOnGPU()
 		// Crashes (scan) every 3-4 tries. WHY???
 		// crashes more often if buildDataStructures is enabled. WHY? 
 		//printf("start sorting *****\n");
-		//sort();
-		bitonic_sort();
+		sort();
+		//bitonic_sort();
 		//return;
 
-		//buildDataStructures(); // BUG
+		buildDataStructures(); // BUG
 		//exit(0);
 		//return;
 

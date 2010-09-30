@@ -17,7 +17,6 @@ __kernel void datastructures(
 					__local  uint* sharedHash
 			  )
 {
-	//return;
 	uint index = get_global_id(0);
 
 	// particle index	
@@ -57,11 +56,12 @@ __kernel void datastructures(
 
 	if ((index == 0 || hash != sharedHash[tid]) )
 	{
-		cell_indexes_start[hash] = index;
+		cell_indexes_start[hash] = index; // ERROR
 		if (index > 0) {
 			cell_indexes_end[sharedHash[tid]] = index;
 		}
 	}
+	//return;
 
 	if (index == numParticles - 1) {
 		cell_indexes_end[hash] = index + 1;

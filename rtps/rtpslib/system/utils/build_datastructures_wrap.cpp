@@ -20,7 +20,7 @@ void GE_SPH::buildDataStructures()
 			path = path + "/datastructures_test.cl";
 			int length;
 			const char* src = file_contents(path.c_str(), &length);
-			printf("length= %d\n", length);
+			//printf("length= %d\n", length);
 			std::string strg(src);
         	datastructures_kernel = Kernel(ps->cli, strg, "datastructures");
 			first_time = false;
@@ -64,6 +64,7 @@ void GE_SPH::buildDataStructures()
 
     ps->cli->queue.finish();
 	ts_cl[TI_BUILD]->end();
+	//exit(0);
 }
 //----------------------------------------------------------------------
 void GE_SPH::printBuildDiagnostics()
@@ -84,6 +85,7 @@ void GE_SPH::printBuildDiagnostics()
 	float4* so =  cl_vars_sorted->getHostPtr();
 
 	// PRINT OUT UNSORTED AND SORTED VARIABLES
+	#if 1
 	for (int k=0; k < nb_vars; k++) {
 		printf("================================================\n");
 		printf("=== VARIABLE: %d ===============================\n", k);
@@ -95,6 +97,7 @@ void GE_SPH::printBuildDiagnostics()
 	}
 	printf("===============================================\n");
 	printf("===============================================\n");
+	#endif
 
 
 	try {
