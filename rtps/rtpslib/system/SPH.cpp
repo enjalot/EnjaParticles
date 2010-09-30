@@ -2,6 +2,7 @@
 #include <GL/glew.h>
 #include <math.h>
 
+#include "System.h"
 #include "SPH.h"
 #include "../particle/UniformGrid.h"
 
@@ -55,7 +56,11 @@ SPH::SPH(RTPS *psfr, int n)
 
     //grid = UniformGrid(float3(0,0,0), float3(1024, 1024, 1024), sph_settings.smoothing_distance / sph_settings.simulation_scale);
     grid = UniformGrid(float3(-512,0,-512), float3(512, 1024, 512), sph_settings.smoothing_distance / sph_settings.simulation_scale);
-    grid.make_cube(&positions[0], sph_settings.spacing, num);
+    //grid.make_cube(&positions[0], sph_settings.spacing, num);
+    int new_num = grid.make_line(&positions[0], sph_settings.spacing, num);
+    //less particles will be in play
+    //not sure this is 100% right
+    num = new_num;
 
 
 /*
@@ -182,7 +187,7 @@ void SPH::update()
     //TODO: add timings
 #ifdef CPU
     cpuDensity();
-    //cpuPressure();
+    cpuPressure();
     //cpuEuler();
 #endif
 #ifdef GPU
@@ -196,6 +201,7 @@ void SPH::update()
         k_density.execute(num);
         /*
         //test density
+        /*
         std::vector<float> dens = cl_density.copyToHost(num);
         float dens_sum = 0.0f;
         for(int j = 0; j < num; j++)
@@ -219,7 +225,8 @@ void SPH::update()
         //euler integration
         k_euler.execute(num);
     }
-#endif
+
+    /*
     std::vector<float4> ftest = cl_force.copyToHost(100);
     for(int i = 0; i < 100; i++)
     {
@@ -231,6 +238,10 @@ void SPH::update()
 
     cl_position.release();
     cl_color.release();
+
+
+#endif
 }
 
-}
+
+} //end namespace

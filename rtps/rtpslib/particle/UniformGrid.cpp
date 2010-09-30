@@ -54,5 +54,20 @@ void UniformGrid::make_cube(float4* position, float spacing, int num)
 
 }
 
+int UniformGrid::make_line(float4* position, float spacing, int num)
+{
+    float xmin = min.x;
+    float xmax = max.x;
+    int i = 0;
+    float y = min.y + (max.y - min.y)/2.0f;
+    float z = min.z + (max.z - min.z)/2.0f;
+    for (float x = xmin; x <= xmax; x+= spacing) {
+        if(i >= num) break;
+        position[i] = float4(x,y,z,1.0f);
+        i++;
+    }
+    return i;
+}
+
 
 }

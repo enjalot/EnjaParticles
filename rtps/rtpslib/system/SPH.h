@@ -89,10 +89,16 @@ private:
     void loadCollision_wall();
     void loadEuler();
 
-
+    //CPU functions
     void cpuDensity();
+    void cpuPressure();
+
+    float Wpoly6(float4 r, float h);
+    float Wspiky(float4 r, float h);
 
 };
+
+
 
 }
 

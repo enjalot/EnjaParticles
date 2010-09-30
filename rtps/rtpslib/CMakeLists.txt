@@ -34,6 +34,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/RTPS.cpp
     ${rtpslib_SOURCE_DIR}/RTPSettings.cpp
     ${rtpslib_SOURCE_DIR}/util.cpp
+    ${rtpslib_SOURCE_DIR}/structs.cpp
 
     ${rtpslib_SOURCE_DIR}/opencl/CLL.cpp
     ${rtpslib_SOURCE_DIR}/opencl/Kernel.cpp
@@ -60,6 +61,7 @@ set (rtpslib_SOURCES
 
 ADD_DEFINITIONS(-g )
 ADD_DEFINITIONS(-DGPU)
+#ADD_DEFINITIONS(-DCPU)
 
 INCLUDE_DIRECTORIES(${rtpslib_INCLUDES})
 ADD_LIBRARY(rtps STATIC ${rtpslib_SOURCES})
@@ -72,3 +74,22 @@ TARGET_LINK_LIBRARIES (rtps
 )
 
 
+#Doxygen
+find_package(Doxygen REQUIRED)
+set(DOXYGEN_INPUT   ${rtpslib_SOURCE_DIR}/doc/doxyfile)
+set(DOXYGEN_OUTPUT  ${rtpslib_BINARY_DIR}/html/index.html)
+file(MAKE_DIRECTORY ${rtpslib_BINARY_DIR}/html)
+
+configure_file(
+  ${rtpslib_SOURCE_DIR}/doc/doxyfile
+  ${DOXYGEN_INPUT} @ONLY
+)
+
+add_custom_command(
+  OUTPUT  ${DOXYGEN_OUTPUT}
+  COMMAND ${DOXYGEN} ${DOXYGEN_INPUT}
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+  DEPENDS ${DOXYGEN_INPUT}
+)
+
+add_custom_target(doc DEPENDS ${DOXYGEN_OUTPUT})
