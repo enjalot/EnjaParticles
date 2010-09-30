@@ -65,7 +65,7 @@ void SPH::cpuDensity()
         int neighbor_count = 0;
         for(int j = 0; j < num; j++)
         {
-//            if(j == i) continue;
+            if(j == i) continue;
             float4 pj = positions[j];
             pj = float4(pj.x * scale, pj.y * scale, pj.z * scale, pj.w * scale);
             float4 r = float4(p.x - pj.x, p.y - pj.y, p.z - pj.z, p.w - pj.w);

@@ -111,7 +111,7 @@ int main(int argc, char** argv)
 
         
     //default constructor
-    rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, .01f);
+    rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, .001f);
     ps = new rtps::RTPS(settings);
 
     glutMainLoop();

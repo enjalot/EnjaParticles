@@ -85,7 +85,7 @@ typedef struct SPHParams
     params.rest_distance = sph_settings.particle_rest_distance;
     params.smoothing_distance = sph_settings.smoothing_distance;
     params.simulation_scale = sph_settings.simulation_scale;
-    params.boundary_stiffness = 500.0f;
+    params.boundary_stiffness = 10000.0f;
     params.boundary_dampening = 256.0f;
     params.boundary_distance = sph_settings.particle_rest_distance * .5f;
     params.EPSILON = .00001f;
@@ -189,6 +189,8 @@ void SPH::update()
 
     cpuDensity();
     cpuPressure();
+    //cpuViscosity();
+    //cpuXSPH();
     cpuCollision_wall();
     cpuEuler();
     //printf("positions[0].z %f\n", positions[0].z);

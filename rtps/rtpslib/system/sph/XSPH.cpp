@@ -2,7 +2,7 @@
 
 namespace rtps {
 
-void SPH::loadViscosity()
+void SPH::loadXSPH()
 {
     #include "viscosity.cl"
     //printf("%s\n", euler_program_source.c_str());
@@ -18,23 +18,11 @@ void SPH::loadViscosity()
 } 
 
 
-float SPH::Wviscosity(float4 r, float h)
-{
-    //from simple SPH in Krog's thesis
-    float h6 = h*h*h * h*h*h;
-    float alpha = 45.f/params.PI/h6;
-    float rlen = magnitude(r);
-    float Wij = alpha * (h - rlen);
-    return Wij;
-
-}
-
-void SPH::cpuViscosity()
+void SPH::cpuXSPH()
 {
 
     float scale = params.simulation_scale;
     float h = params.smoothing_distance;
-    float mu = 1.0f; //viscosity coefficient (how to select?)
 
     for(int i = 0; i < num; i++)
     {
@@ -67,8 +55,8 @@ void SPH::cpuViscosity()
                 {
                     //float R = sqrt(r2/re2);
                     //float Wij = alpha*(-2.25f + 2.375f*R - .625f*R*R);
-                    float Wij = Wviscosity(r, h);
-                    float fcoeff = mu * params.mass * Wij / (densities[j] * densities[i]);
+                    float Wij = Wpoly6(r, h);
+                    float fcoeff = 2.0f * params.mass * Wij / (densities[j] + densities[i]);
                     f.x += fcoeff * (velocities[j].x - v.x); 
                     f.y += fcoeff * (velocities[j].y - v.y); 
                     f.z += fcoeff * (velocities[j].z - v.z); 
@@ -76,9 +64,12 @@ void SPH::cpuViscosity()
 
             }
         }
+        //modifies velocity 
+        /*
         forces[i].x += f.x;
         forces[i].y += f.y;
         forces[i].z += f.z;
+        */
     }
 
 }

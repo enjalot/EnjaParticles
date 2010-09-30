@@ -51,6 +51,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/sph/Density.cpp
     ${rtpslib_SOURCE_DIR}/system/sph/Pressure.cpp
     ${rtpslib_SOURCE_DIR}/system/sph/Viscosity.cpp
+    ${rtpslib_SOURCE_DIR}/system/sph/XSPH.cpp
     ${rtpslib_SOURCE_DIR}/system/sph/Collision_wall.cpp
 
 

@@ -86,17 +86,21 @@ private:
     void loadDensity();
     void loadPressure();
     void loadViscosity();
+    void loadXSPH();
     void loadCollision_wall();
     void loadEuler();
 
     //CPU functions
     void cpuDensity();
     void cpuPressure();
+    void cpuViscosity();
+    void cpuXSPH();
     void cpuEuler();
     void cpuCollision_wall();
 
     float Wpoly6(float4 r, float h);
     float Wspiky(float4 r, float h);
+    float Wviscosity(float4 r, float h);
 
 };
 

@@ -79,7 +79,8 @@ void SPH::cpuPressure()
                     float Pj = params.K*(densities[j] - 1000.0f); //rest density
                     //float kern = params->mass * -1.0f * Wij * (Pi + Pj) / (2.0f * density[j]);
                     float Wij = Wspiky(r, h);
-                    float kern = params.mass * 1.0f * Wij * (Pi + Pj) / (densities[i] * densities[j]);
+                    //float kern = params.mass * 1.0f * Wij * (Pi + Pj) / (densities[i] * densities[j]);
+                    float kern = params.mass * 1.0f * Wij * (Pi/(densities[i]*densities[i]) + Pj/(densities[j]*densities[j]));
                     f.x += kern * r.x;
                     f.y += kern * r.y;
                     f.z += kern * r.z;
@@ -87,7 +88,7 @@ void SPH::cpuPressure()
 
             }
         }
-        printf("forces[%d] = %f %f %f\n", i, f.x, f.y, f.z);
+        //printf("forces[%d] = %f %f %f\n", i, f.x, f.y, f.z);
         forces[i] = f;
 
     }

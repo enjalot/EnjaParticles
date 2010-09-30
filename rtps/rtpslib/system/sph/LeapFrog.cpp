@@ -2,6 +2,7 @@
 
 namespace rtps {
 
+/*
 void SPH::loadEuler()
 {
     #include "euler.cl"
@@ -15,8 +16,9 @@ void SPH::loadEuler()
     k_euler.setArg(3, ps->settings.dt); //time step
 
 } 
+*/
 
-void SPH::cpuEuler()
+void SPH::cpuLeapFrogStep1()
 {
     float h = ps->settings.dt;
     for(int i = 0; i < num; i++)
@@ -36,10 +38,10 @@ void SPH::cpuEuler()
             f.z *= 600.0f/speed;
         }
 
-        float scale = params.simulation_scale;
-        v.x += h*f.x / scale;
-        v.y += h*f.y / scale;
-        v.z += h*f.z / scale;
+        float4 vnext = v;
+        v.x += h*f.x/2.0f;
+        v.y += h*f.y/2.0f;
+        v.z += h*f.z/2.0f;
         
         p.x += h*v.x;
         p.y += h*v.y;
@@ -50,6 +52,10 @@ void SPH::cpuEuler()
         positions[i] = p;
     }
     //printf("v.z %f p.z %f \n", velocities[0].z, positions[0].z);
+}
+void SPH::cpuLeapFrogStep2()
+{
+    //v.x += xpsh[i] * xpsh_factor;
 }
 
 }
