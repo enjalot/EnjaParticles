@@ -12,23 +12,28 @@ float4 ForNeighbor(__global float4*  vars_sorted,
 				float rlen,
 				float rlen_sq,
 	  			__constant struct GridParams* gp,
-	  			__constant struct FluidParams* fp)
+	  			__constant struct FluidParams* fp,
+	  			__constant struct SPHParams* sphp)
 {
 // the density sum using Wpoly6 kernel
-//data.sum_density += SPH_Kernels::Wpoly6::Kernel_Variable(fp->smoothing_length_pow2, r, rlen_sq);	
+// data.sum_density += SPH_Kernels::Wpoly6::Kernel_Variable(fp->smoothing_length_pow2, r, rlen_sq);	
 // #include FILE to deal with collisions or other stuff
 
 	if (fp->choice == 1) {
 		// update density
+		#include "density_update.cl"
+		;
 	}
 
 	if (fp->choice == 2) {
 		// update pressure
+		//#include "pressure_update.cl"
 	}
 
-	int index = get_global_id(0);
 
-#include "cl_snippet_sphere_forces.h"
+//	int index = get_global_id(0);
+
+//#include "cl_snippet_sphere_forces.h"
 	//return r;
 }
 //--------------------------------------------------
@@ -38,13 +43,14 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 						uint index_j, 
 						__constant float4 position_i,
 	  					__constant struct GridParams* gp,
-	  					__constant struct FluidParams* fp)
+	  					__constant struct FluidParams* fp,
+	  					__constant struct SPHParams* sphp)
 {
-	float4 force;
-	force.x = 0.;
-	force.y = 0.;
-	force.z = 0.;
-	force.w = 0.;
+	float4 frce;
+	frce.x = 0.;
+	frce.y = 0.;
+	frce.z = 0.;
+	frce.w = 0.;
 	//float4 force = convert_float4(0.);
 
 	// check not colliding with self
@@ -63,11 +69,11 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 		// is this particle within cutoff?
 		if (rlen <= fp->smoothing_length) {
 #if 1
-			force = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, rlen_sq, gp, fp);
+			frce = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, rlen_sq, gp, fp, sphp);
 #endif
 		}
 	}
-	return force;
+	return frce;
 }
 //--------------------------------------------------
 #endif

@@ -12,7 +12,7 @@
 #include "../opencl/Kernel.h"
 #include "../opencl/Buffer.h"
 #include "../opencl/BufferGE.h"
-//#include "../opencl/BufferVBO.h"
+#include "../opencl/BufferVBO.h"
 //#include "../util.h"
 #include "../particle/UniformGrid.h"
 
@@ -73,6 +73,7 @@ struct FluidParams
 	float attraction;
 	float spring;
 	float gravity; // -9.8 m/sec^2
+	int   choice; // which kind of calculation to invoke
 };
 //-------------------------
 
@@ -173,7 +174,6 @@ private:
 	Kernel sort_kernel;
 	Kernel step1_kernel;
 
-    //Buffer<GE_SPHParams> cl_params;
     BufferGE<GE_SPHParams>* cl_params;
 
 
@@ -182,13 +182,13 @@ private:
     std::vector<float4> forces;
     std::vector<float4> velocities;
 
-    Buffer<float4> cl_position;
-    Buffer<float4> cl_color;
-    Buffer<float> cl_density;
-    Buffer<float4> cl_force;
-    Buffer<float4> cl_velocity;
+    BufferVBO<float4>* cl_position;
+    BufferVBO<float4>* cl_color;
+    BufferGE<float>*   cl_density;
+    BufferGE<float4>*  cl_force;
+    BufferGE<float4>*  cl_velocity;
     
-    Buffer<float4> cl_error_check;
+    BufferGE<float4>* cl_error_check;
 
     //these are defined in ge_sph/ folder next to the kernels
     void loadDensity();

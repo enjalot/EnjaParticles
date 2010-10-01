@@ -6,6 +6,7 @@
 namespace rtps {
 
 
+//----------------------------------------------------------------------
 Simple::Simple(RTPS *psfr, int n)
 {
     num = n;
@@ -52,6 +53,7 @@ Simple::Simple(RTPS *psfr, int n)
     k_euler.setArg(3, .01f); //time step (should be set from settings)
     printf("euler created\n");
 }
+//----------------------------------------------------------------------
 
 Simple::~Simple()
 {
@@ -68,6 +70,7 @@ Simple::~Simple()
         col_vbo = 0;
     }
 }
+//----------------------------------------------------------------------
 
 void Simple::update()
 {
@@ -91,6 +94,7 @@ void Simple::update()
     //printf("release gl: %s\n", oclErrorString(err));
 
 }
+//----------------------------------------------------------------------
 
 
 }

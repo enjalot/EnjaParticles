@@ -121,14 +121,14 @@ typedef struct GE_SPHParams
     // end VBO creation
 
     //vbo buffers
-    cl_position = Buffer<float4>(ps->cli, pos_vbo);
-    cl_color = Buffer<float4>(ps->cli, col_vbo);
+    cl_position = new BufferVBO<float4>(ps->cli, pos_vbo);
+    cl_color = new BufferVBO<float4>(ps->cli, col_vbo);
 
     //pure opencl buffers
-    cl_force = Buffer<float4>(ps->cli, forces);
-    cl_velocity = Buffer<float4>(ps->cli, velocities);
-    cl_density = Buffer<float>(ps->cli, densities);
-    cl_error_check= Buffer<float4>(ps->cli, error_check);
+    cl_force = new BufferGE<float4>(ps->cli, &forces[0], forces.size());
+    cl_velocity = new BufferGE<float4>(ps->cli, &velocities[0], velocities.size());
+    cl_density = new BufferGE<float>(ps->cli, &densities[0], densities.size());
+    cl_error_check= new BufferGE<float4>(ps->cli, &error_check[0], error_check.size());
 
     printf("create collision wall kernel\n");
     loadCollision_wall();
@@ -207,6 +207,12 @@ GE_SPH::~GE_SPH()
 	delete  cl_params;
 	delete	clf_debug;  //just for debugging cl files
 	delete	cli_debug;  //just for debugging cl files
+
+    delete cl_force;
+    delete cl_velocity;
+    delete cl_density;
+	delete cl_position;
+	delete cl_color;
 	#endif
 
 	if (radixSort) delete radixSort;
@@ -256,19 +262,14 @@ void GE_SPH::setupArrays()
 	// only for my test routines: sort, hash, datastructures
 	//printf("setupArrays, nb_el= %d\n", nb_el); exit(0);
 
-	//cl_cells = BufferGE<float4>(ps->cli, nb_el);
-	positions[0] = float4(45., -234., 129., 1.); // test sort
-	//cl_cells = BufferGE<float4>(ps->cli, &positions[0], nb_el);
 	cl_cells = new BufferGE<float4>(ps->cli, nb_el);
 	for (int i=0; i < nb_el; i++) {
 		(*cl_cells)[i] = positions[i];
 	}
 	cl_cells->copyToDevice();
 
-printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
 // Need an assign operator (no memory allocation)
 
-	#if 1
 	printf("allocate BufferGE<GridParams>\n");
 	printf("sizeof(GridParams): %d\n", sizeof(GridParams));
 	cl_GridParams = new BufferGE<GridParams>(ps->cli, 1); // destroys ...
@@ -288,7 +289,6 @@ printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
 	gp.grid_inv_delta.w = 1.;
 	gp.grid_inv_delta.print("inv delta");
 
-	printf("size: %d\n", sizeof(gp));
 	cl_GridParams->copyToDevice();
 
 	grid_size = (int) (gp.grid_res.x * gp.grid_res.y * gp.grid_res.z);
@@ -300,10 +300,7 @@ printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
 	gp.grid_res.print("grid res (nb points)"); // number of points
 	gp.grid_delta.print("grid delta");
 	gp.grid_inv_delta.print("grid inv delta");
-	//exit(0);
-	#endif
 
-//printf("nb_vars= %d\n", nb_vars); exit(1);
 
 	cl_vars_unsorted = new BufferGE<float4>(ps->cli, nb_el*nb_vars);
 	cl_vars_sorted   = new BufferGE<float4>(ps->cli, nb_el*nb_vars);
@@ -312,9 +309,6 @@ printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
 	cl_cell_indices_start = new BufferGE<int>(ps->cli, grid_size);
 	cl_cell_indices_end   = new BufferGE<int>(ps->cli, grid_size);
 
-	printf("nb_el= %d\n", nb_el);
-	printf("grid size: %d\n", grid_size); 
-	//exit(0);
 
 	clf_debug = new BufferGE<float4>(ps->cli, nb_el);
 	cli_debug = new BufferGE<int4>(ps->cli, nb_el);
@@ -328,17 +322,6 @@ printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
 	zero.x = zero.y = zero.z = 0.0;
 	zero.w = 1.;
 
-	#if 0
-	for (int i=0; i < nb_floats; i++) {
-		f.x = rand_float(0., 1.);
-		f.y = rand_float(0., 1.);
-		f.z = rand_float(0., 1.);
-		f.w = 1.0;
-		cl_vars_unsorted[i] = f;
-		cl_vars_sorted[i]   = zero;
-		//printf("f= %f, %f, %f, %f\n", f.x, f.y, f.z, f.w);
-	}
-	#endif
 
 	// SETUP FLUID PARAMETERS
 	// cell width is one diameter of particle, which imlies 27 neighbor searches
@@ -356,6 +339,7 @@ printf("\n\nBEFORE BufferGE<GridParams> check\n"); //**********************
 	fp.attraction = 0.9;
 	fp.spring = 0.5;
 	fp.gravity = -9.8; // -9.8 m/sec^2
+	fp.choice = 0; // compute density
 	cl_FluidParams->copyToDevice();
 	#endif
 
@@ -387,8 +371,8 @@ void GE_SPH::checkDensity()
 void GE_SPH::computeOnGPU()
 {
     glFinish();
-    cl_position.acquire();
-    cl_color.acquire();
+    cl_position->acquire();
+    cl_color->acquire();
     
     //printf("execute!\n");
 	// More steps per update for visualization purposes
@@ -438,8 +422,8 @@ void GE_SPH::computeOnGPU()
 		//computeEuler();
     }
 
-    cl_position.release();
-    cl_color.release();
+    cl_position->release();
+    cl_color->release();
 }
 //----------------------------------------------------------------------
 void GE_SPH::computeOnCPU()

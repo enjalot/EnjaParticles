@@ -41,12 +41,15 @@ void GE_SPH::neighbor_search()
 	kern.setArg(iarg++, cl_cell_indices_end->getDevicePtr());
 	kern.setArg(iarg++, cl_GridParams->getDevicePtr());
 	kern.setArg(iarg++, cl_FluidParams->getDevicePtr());
+	kern.setArg(iarg++, cl_params->getDevicePtr());
+
 
 
 	size_t global = (size_t) nb_el;
 	int local = 128;
 
 	kern.execute(nb_el, local);
+	printf("AFTER EXEC\n");
 
 	ps->cli->queue.finish();
 	ts_cl[TI_NEIGH]->end();

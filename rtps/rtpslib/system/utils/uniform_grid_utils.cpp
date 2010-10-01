@@ -89,22 +89,28 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 	*/
 	float4 IterateParticlesInCell(
 		__global float4*    vars_sorted,
-		__constant uint 	numParticles, 
+		__constant uint 	numParticles,
 		__constant int4 	cellPos,
-		__constant uint 	index_i, 
-		__constant float4 	position_i, 
+		__constant uint 	index_i,
+		__constant float4 	position_i,
 		__global int* 		cell_indexes_start,
-		__global int* 		cell_indexes_end, 
+		__global int* 		cell_indexes_end,
 		__constant struct GridParams* gp,
-		__constant struct FluidParams* fp
+		__constant struct FluidParams* fp,
+		__constant struct SPHParams* sphp
     )
 	{
 		// get hash (of position) of current cell
 		//volatile uint cellHash = UniformGridUtils::calcGridHash<true>(cellPos, cGridParams.grid_res);
 		// wrap edges (false)
-		uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
 
-		float4 force = convert_float4(0.0);
+		float4 frce; // = convert_float4(0.0);  (CREATES PROBLEMS)
+		frce.x = 0.;
+		frce.y = 0.;
+		frce.z = 0.;
+		frce.w = 0.;
+#if 1
+		uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
 
 		/* get start/end positions for this cell/bucket */
 		uint startIndex = FETCH(cell_indexes_start,cellHash);
@@ -120,12 +126,14 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 				// For now, nothing to loop over. ADD WHEN CODE WORKS. 
 				// Is there a neighbor?
 #if 1
-				force += ForPossibleNeighbor(vars_sorted, numParticles, index_i, index_j, position_i, gp, fp);
+				frce += ForPossibleNeighbor(vars_sorted, numParticles, index_i, index_j, position_i, gp, fp, sphp);
 #endif
 				//return;  // no crash
 			}
-			return; // crash
+			//return; // crash
 		}
+#endif
+		return frce;
 	}
 
 	/*--------------------------------------------------------------*/
@@ -139,16 +147,17 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		__global int* 		cell_indices_start,
 		__global int* 		cell_indices_end,
 		__constant struct GridParams* gp,
-		__constant struct FluidParams* fp)
+		__constant struct FluidParams* fp,
+		__constant struct SPHParams* sphp)
 	{
 		// initialize force on particle (collisions)
 		//float4 force = convert_float4(0.);
-		float4 force;
+		float4 frce;
 		//force = convert_float4(0.);
-		force.x = 0.;
-		force.y = 0.;
-		force.z = 0.;
-		force.w = 0.;
+		frce.x = 0.;
+		frce.y = 0.;
+		frce.z = 0.;
+		frce.w = 0.;
 #if 1
 		// How to choose which PreCalc to use? 
 		// TODO LATER
@@ -169,13 +178,13 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 					ipos.w = 1;
 	#if 1
 					// I am summing much more than required
-					force += IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp);
+					frce += IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp);
 	#endif
 				}
 			}
 		}
 #endif
-		return force;
+		return frce;
 	}
 
 	//----------------------------------------------------------------------
@@ -186,11 +195,12 @@ __kernel void K_SumStep1(
 				uint    numParticles,
 				uint	nb_vars, 
 				__global float4* vars,   // *** ERROR
-				__global float4* sorted_vars,
+				__global float4* vars_sorted,
         		__global int*    cell_indexes_start,
         		__global int*    cell_indexes_end,
 				__constant struct GridParams* gp,
-				__constant struct FluidParams* fp
+				__constant struct FluidParams* fp, 
+				__constant struct SPHParams* sphp 
 				)
 {
     // particle index
@@ -200,30 +210,31 @@ __kernel void K_SumStep1(
 
 	//This is done as part of the template approach since the Data can then be used as a template object 
 	//in Cuda
-	//vars = sorted_vars; // not needed
+	//vars = vars_sorted; // not needed
 
-    float4 position_i = FETCH_POS(sorted_vars, index);
+    float4 position_i = pos(index);
 
     // Do calculations on particles in neighboring cells
 
-	float4 force;
+	float4 frce;
 
 	#if 1
-    force = IterateParticlesInNearbyCells(sorted_vars, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp);
+    frce = IterateParticlesInNearbyCells(vars_sorted, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp);
 	#endif
 
 
 	// needed in this version
-	//FETCH_FOR(sorted_vars, index) = force;
-	//force = FETCH_FOR(sorted_vars, index);// = force;
-	//sorted_vars[index] = force;
+	//FETCH_FOR(vars_sorted, index) = force;
+	//force = FETCH_FOR(vars_sorted, index);// = force;
+	//vars_sorted[index] = force;
 
 	//vars[mad(2,numParticles,index)] = force; // DOES NOT WORK
 	//vars[mad24(2,numParticles,index)] = force; // DOES NOT WORK
 
 
 	// Without this line, 7 ms, with this line, 25 ms (for 65k particles)
-	vars[index+numParticles*FOR] = force; // 
+	//vars[index+numParticles*FOR] = force; // 
+	force(index) = frce;
 
 	// Same cost as previous line if MAD (multiply/add) enabled
 	//vars[index] = force; // 

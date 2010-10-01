@@ -47,7 +47,7 @@ message("rtpslib_SOURCE_DIR: ${rtpslib_SOURCE_DIR}")
 
 #library
 set (rtpslib_SOURCES
-    ${rtpslib_SOURCE_DIR}/ge_datastructures/timege.cpp
+    ${rtpslib_SOURCE_DIR}/timege.cpp
     #${rtpslib_SOURCE_DIR}/ge_datastructures/datastructures.cpp
 	${rtpslib_SOURCE_DIR}/oclRadixSortKeysValues/src/RadixSort.cpp
 	${rtpslib_SOURCE_DIR}/oclRadixSortKeysValues/src/Scan.cpp
@@ -66,7 +66,6 @@ set (rtpslib_SOURCES
 
     ${rtpslib_SOURCE_DIR}/opencl/CLL.cpp
     ${rtpslib_SOURCE_DIR}/opencl/Kernel.cpp
-    #${rtpslib_SOURCE_DIR}/opencl/Buffer.cpp
 
     ${rtpslib_SOURCE_DIR}/render/Render.cpp
 
@@ -75,22 +74,21 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/Simple.cpp
     
     ${rtpslib_SOURCE_DIR}/system/GE_SPH.cpp     # NEW
-    #${rtpslib_SOURCE_DIR}/system/SPH.cpp
 
-    ${rtpslib_SOURCE_DIR}/system/sph/Euler.cpp
-    ${rtpslib_SOURCE_DIR}/system/sph/Density.cpp
-    ${rtpslib_SOURCE_DIR}/system/sph/Pressure.cpp
-    ${rtpslib_SOURCE_DIR}/system/sph/Viscosity.cpp
-    ${rtpslib_SOURCE_DIR}/system/sph/Collision_wall.cpp
+    #${rtpslib_SOURCE_DIR}/system/SPH.cpp
+    #${rtpslib_SOURCE_DIR}/opencl/Buffer.cpp
+
+    #${rtpslib_SOURCE_DIR}/system/sph/Euler.cpp
+    #${rtpslib_SOURCE_DIR}/system/sph/Density.cpp
+    #${rtpslib_SOURCE_DIR}/system/sph/Pressure.cpp
+    #${rtpslib_SOURCE_DIR}/system/sph/Viscosity.cpp
+    #${rtpslib_SOURCE_DIR}/system/sph/Collision_wall.cpp
 
     ${rtpslib_SOURCE_DIR}/system/ge_sph/Euler.cpp
     ${rtpslib_SOURCE_DIR}/system/ge_sph/Density.cpp
     ${rtpslib_SOURCE_DIR}/system/ge_sph/Pressure.cpp
     ${rtpslib_SOURCE_DIR}/system/ge_sph/Viscosity.cpp
     ${rtpslib_SOURCE_DIR}/system/ge_sph/Collision_wall.cpp
-
-
-    #${rtpslib_SOURCE_DIR}/particle
     )
 
 

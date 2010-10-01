@@ -40,6 +40,26 @@ struct FluidParams
  float attraction;
  float spring;
  float gravity;
+ int choice;
+};
+
+
+struct SPHParams
+{
+    float4 grid_min;
+    float4 grid_max;
+    float grid_min_padding;
+    float grid_max_padding;
+    float mass;
+    float rest_distance;
+    float smoothing_distance;
+    float simulation_scale;
+    float boundary_stiffness;
+    float boundary_dampening;
+    float boundary_distance;
+    float EPSILON;
+    float PI;
+    float K;
 };
 # 6 "neighbors.cpp" 2
 
@@ -51,56 +71,40 @@ float4 ForNeighbor(__global float4* vars_sorted,
     float rlen,
     float rlen_sq,
       __constant struct GridParams* gp,
-      __constant struct FluidParams* fp)
+      __constant struct FluidParams* fp,
+      __constant struct SPHParams* sphp)
 {
 
 
 
 
- int index = get_global_id(0);
+ if (fp->choice == 1) {
 
-# 1 "cl_snippet_sphere_forces.h" 1
-# 18 "cl_snippet_sphere_forces.h"
- int num = gp->num;
- float4 ri = vars_sorted[index_i+1*num];
- float4 rj = vars_sorted[index_j+1*num];
- float4 relPos = rj-ri;
- float dist = length(relPos);
- float collideDist = 2.*fp->smoothing_length;
+# 1 "density_update.cl" 1
 
 
- float4 force;
- force.x = 0.;
- force.y = 0.;
- force.z = 0.;
- force.w = 0.;
 
- if (dist < collideDist) {
-  float4 vi = vars_sorted[index_i+2*num];
-  float4 vj = vars_sorted[index_j+2*num];
-  float4 norm = relPos / dist;
+ float h = sphp->smoothing_distance;
+ float re2 = h*h;
+    float R = sqrt(rlen_sq/re2);
+    float alpha = 315.f/208.f/sphp->PI/h/h/h;
+ float Wij = alpha*(2.f/3.f - 9.f*R*R/8.f + 19.f*R*R*R/24.f - 5.f*R*R*R*R/32.f);
+ int num = get_global_id(0);
+ vars_sorted[index_i+0*num].x += sphp->mass * Wij;
+ return ssphp->mass*Wij;
+# 25 "neighbors.cpp" 2
+  ;
+ }
 
-
-  float4 relVel = vj - vi;
-
-
-  float4 tanVel = relVel - (dot(relVel, norm) * norm);
+ if (fp->choice == 2) {
 
 
-  force = -fp->spring*(collideDist - dist) * norm;
-
-
-  force +=fp->damping*relVel;
-
-
-  force += fp->shear*tanVel;
-  force += fp->attraction*relPos;
  }
 
 
 
- return force;
-# 24 "neighbors.cpp" 2
+
+
 
 }
 
@@ -110,13 +114,14 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
       uint index_j,
       __constant float4 position_i,
         __constant struct GridParams* gp,
-        __constant struct FluidParams* fp)
+        __constant struct FluidParams* fp,
+        __constant struct SPHParams* sphp)
 {
- float4 force;
- force.x = 0.;
- force.y = 0.;
- force.z = 0.;
- force.w = 0.;
+ float4 frce;
+ frce.x = 0.;
+ frce.y = 0.;
+ frce.z = 0.;
+ frce.w = 0.;
 
 
 
@@ -135,9 +140,9 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 
   if (rlen <= fp->smoothing_length) {
 
-   force = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, rlen_sq, gp, fp);
+   frce = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, rlen_sq, gp, fp, sphp);
 
   }
  }
- return force;
+ return frce;
 }

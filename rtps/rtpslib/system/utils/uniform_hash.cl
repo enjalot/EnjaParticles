@@ -40,6 +40,26 @@ struct FluidParams
  float attraction;
  float spring;
  float gravity;
+ int choice;
+};
+
+
+struct SPHParams
+{
+    float4 grid_min;
+    float4 grid_max;
+    float grid_min_padding;
+    float grid_max_padding;
+    float mass;
+    float rest_distance;
+    float smoothing_distance;
+    float simulation_scale;
+    float boundary_stiffness;
+    float boundary_dampening;
+    float boundary_distance;
+    float EPSILON;
+    float PI;
+    float K;
 };
 # 7 "uniform_hash.cpp" 2
 

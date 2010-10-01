@@ -52,6 +52,9 @@ public:
     //void copyToHost();
 
 	GLuint getVboId() { return vbo_id; }
+
+	cl_mem getDevicePtr() { return cl_buffer[0](); }
+	//cl_mem getHostPtr() { return cl_buffer[0](); }
 };
 
 #include "BufferVBO.cpp"
