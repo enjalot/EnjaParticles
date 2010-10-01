@@ -3,6 +3,7 @@
 
 #include "cl_macros.h"
 #include "cl_structures.h"
+#include "wpoly6.cl"
 
 //----------------------------------------------------------------------
 float4 ForNeighbor(__global float4*  vars_sorted,
@@ -21,7 +22,7 @@ float4 ForNeighbor(__global float4*  vars_sorted,
 
 	if (fp->choice == 1) {
 		// update density
-		// return density for single neighbor
+		// return density.x for single neighbor
 		#include "density_update.cl"
 		;
 	}

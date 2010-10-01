@@ -66,6 +66,22 @@ struct SPHParams
 
 
 
+# 1 "wpoly6.cl" 1
+
+
+
+
+float Wpoly6(float4 r, float h, __constant struct SPHParams* params)
+{
+    float r2 = r.x*r.x + r.y*r.y + r.z*r.z;
+ float h9 = h*h;
+ float hr2 = (h9-r2);
+ h9 = h9*h;
+    float alpha = 315.f/64.0f/params->PI/(h9*h9*h9);
+    float Wij = alpha * hr2*hr2*hr2;
+    return Wij;
+}
+# 7 "neighbors.cpp" 2
 
 
 float4 ForNeighbor(__global float4* vars_sorted,
@@ -89,16 +105,9 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
 
 
-
- float h = sphp->smoothing_distance;
- float re2 = h*h;
-    float R = sqrt(rlen_sq/re2);
-    float alpha = 315.f/208.f/sphp->PI/h/h/h;
- float Wij = alpha*(2.f/3.f - 9.f*R*R/8.f + 19.f*R*R*R/24.f - 5.f*R*R*R*R/32.f);
- int num = get_global_id(0);
- vars_sorted[index_i+0*num].x += sphp->mass * Wij;
- return sphp->mass*Wij;
-# 26 "neighbors.cpp" 2
+    float Wij = Wpoly6(rlen, sphp->smoothing_distance, sphp);
+ return (float4)(sphp->mass*Wij, 0., 0., 0.);
+# 27 "neighbors.cpp" 2
   ;
  }
 
