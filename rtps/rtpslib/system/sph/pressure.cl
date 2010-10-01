@@ -7,6 +7,7 @@ typedef struct SPHParams
 {
     float3 grid_min;            //float3s are really float4 in opencl 1.0 & 1.1
     float3 grid_max;            //so we have padding in C++ definition
+    int num;
     float mass;
     float rest_distance;
     float smoothing_distance;
@@ -30,16 +31,17 @@ float dist_squared(float4 vec)
     return vec.x*vec.x + vec.y*vec.y + vec.z*vec.z;
 }
 
-       
 __kernel void pressure(__global float4* pos, __global float* density, __global float4* force, __constant struct SPHParams* params)
 {
     unsigned int i = get_global_id(0);
     float4 f = (float4)(0.0f, 0.0f, 0.0f, 0.0f);
 
     float4 p = pos[i] * params->simulation_scale;
+    float di = density[i];
 
     //obviously this is going to be passed in as a parameter
-    int num = 1024;
+    //int num = params->num;
+    int num = get_global_size(0);
     float h = params->smoothing_distance;
 
     //stuff from Tim's code (need to match #s to papers)
@@ -72,18 +74,20 @@ __kernel void pressure(__global float4* pos, __global float* density, __global f
                 float Pj = 1.013E5*(pow(density[j]/1000.0f, 7.0f) - 1.0f);
                 float kern = params->mass * Wij * (Pi + Pj) / (density[i] * density[j]);
                 */
+                float dj = density[j];
                 //form simple SPH in Krog's thesis
-                float Pi = params->K*(density[i] - 1000.0f); //rest density
-                float Pj = params->K*(density[j] - 1000.0f); //rest density
-                float kern = params->mass * -1.0f * Wij * (Pi + Pj) / (2.0f * density[j]);
+                float Pi = params->K*(di - 1000.0f); //rest density
+                float Pj = params->K*(dj - 1000.0f); //rest density
+                //float kern = params->mass * -1.0f * Wij * (Pi + Pj) / (2.0f * density[j]);
                 //float kern = params->mass * -1.0f * Wij * (Pi + Pj) / (density[i] * density[j]);
+                float kern = params->mass * 1.0f * Wij * (Pi + Pj) / (di * dj);
+                //float kern = params->mass * 1.0f * Wij * (Pi/(di*di) + Pj/(dj*dj));
                 f += kern * r;
             }
 
         }
     }
     force[i] = f;
-
 }
 );
 

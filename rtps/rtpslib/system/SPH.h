@@ -31,9 +31,10 @@ typedef struct SPHSettings
 typedef struct SPHParams
 {
     float3 grid_min;
-    float grid_min_padding;     //float3s take up a float4 of space in OpenCL 1.0 and 1.1
+    //float grid_min_padding;     //float3s take up a float4 of space in OpenCL 1.0 and 1.1
     float3 grid_max;
-    float grid_max_padding;
+    //float grid_max_padding;
+    int num;
     float mass;
     float rest_distance;
     float smoothing_distance;
@@ -43,7 +44,7 @@ typedef struct SPHParams
     float boundary_distance;
     float EPSILON;
     float PI;       //delicious
-    float K;        //speed of sound
+    float K;        //gas constant
  
 } SPHParams __attribute__((aligned(16)));
 

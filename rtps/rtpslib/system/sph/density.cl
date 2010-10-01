@@ -7,6 +7,7 @@ typedef struct SPHParams
 {
     float3 grid_min;            //float3s are really float4 in opencl 1.0 & 1.1
     float3 grid_max;            //so we have padding in C++ definition
+    int num;
     float mass;
     float rest_distance;
     float smoothing_distance;
@@ -32,10 +33,10 @@ float dist_squared(float4 vec)
 }
 
 
-__kernel void density(__global float4* pos, __global float* density, __constant struct SPHParams* params, __global float4* error)
+__kernel void density(__global float4* pos, __global float* density, __constant struct SPHParams* params)//, __global float4* error)
 {
     unsigned int i = get_global_id(0);
-    int num = 1024;
+    int num = get_global_size(0);
 
     float h = params->smoothing_distance;
     //stuff from Tim's code (need to match #s to papers)
@@ -53,7 +54,7 @@ __kernel void density(__global float4* pos, __global float* density, __constant 
         if(j == i) continue;
         float4 pj = pos[j] * params->simulation_scale;
         float4 r = p - pj;
-        error[i] = r;
+        //error[i] = r;
         float rlen = magnitude(r);
         if(rlen < h)
         {

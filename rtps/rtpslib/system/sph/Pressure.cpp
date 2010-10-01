@@ -11,6 +11,7 @@ void SPH::loadPressure()
     //printf("%s\n", euler_program_source.c_str());
     k_pressure = Kernel(ps->cli, pressure_program_source, "pressure");
   
+    printf("asdf\n");
     //TODO: fix the way we are wrapping buffers
     k_pressure.setArg(0, cl_position.cl_buffer[0]);
     k_pressure.setArg(1, cl_density.cl_buffer[0]);
@@ -79,6 +80,7 @@ void SPH::cpuPressure()
                     float Pj = params.K*(densities[j] - 1000.0f); //rest density
                     //float kern = params->mass * -1.0f * Wij * (Pi + Pj) / (2.0f * density[j]);
                     float Wij = Wspiky(r, h);
+                    //not sure why we don't multiply by -1, the formulation has negative
                     //float kern = params.mass * 1.0f * Wij * (Pi + Pj) / (densities[i] * densities[j]);
                     float kern = params.mass * 1.0f * Wij * (Pi/(densities[i]*densities[i]) + Pj/(densities[j]*densities[j]));
                     f.x += kern * r.x;

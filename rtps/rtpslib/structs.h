@@ -15,7 +15,7 @@ typedef struct float3 {
 
 // GE: Sept. 8, 2010
 typedef struct int3 {
-	int x, y, z;
+	int x, y, z, w;
 	int3() {}
 	int3(float x, float y, float z) {
 		this->x = x;

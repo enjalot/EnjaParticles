@@ -40,7 +40,7 @@ SPH::SPH(RTPS *psfr, int n)
     sph_settings.simulation_scale = .001;
 
     //function of total mass and number of particles
-    sph_settings.particle_mass = (128*1024)/num * .0002;
+    sph_settings.particle_mass = (128*1024.0)/num * .0002;
     printf("particle mass: %f\n", sph_settings.particle_mass);
     //constant .87 is magic
     sph_settings.particle_rest_distance = .87 * pow(sph_settings.particle_mass / sph_settings.rest_density, 1./3.);
@@ -207,9 +207,11 @@ void SPH::update()
     cl_color.acquire();
     
     //printf("execute!\n");
-    for(int i=0; i < 10; i++)
+//    for(int i=0; i < 10; i++)
     {
+        printf("about to execute density\n");
         k_density.execute(num);
+        printf("executed density\n");
         //test density
         /*
         std::vector<float> dens = cl_density.copyToHost(num);

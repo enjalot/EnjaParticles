@@ -13,6 +13,7 @@ void SPH::loadEuler()
     k_euler.setArg(1, cl_velocity.cl_buffer[0]);
     k_euler.setArg(2, cl_force.cl_buffer[0]);
     k_euler.setArg(3, ps->settings.dt); //time step
+    k_euler.setArg(4, cl_params.cl_buffer[0]);
 
 } 
 

@@ -37,19 +37,6 @@ __kernel void collision_wall(__global float4* pos, __global float4* vel,  __glob
     float4 v = vel[i] * params->simulation_scale;
     float4 r_f = (float4)(0.f, 0.f, 0.f, 0.f);
 
-    //TODO paramater struct, grid walls passed in
-    //we should have a grid data structure passed in with min/max to calculate these things
-    /*
-    float4 grid_min = (0.0f, 0.0f, 0.0f, 0.0f);
-    float4 grid_max = (1024.0f, 1024.0f, 1024.0f, 0.0f);
-    float simulation_scale = .001f;
-    float boundary_stiffness = 20000.0f;
-    float boundary_dampening = 256.0f;
-    float rest_distance = 0.025641;
-    float boundary_distance = rest_distance * .5f;
-    float EPSILON = .00001f;
-    */
-
     //bottom wall
     float diff = params->boundary_distance - (p.z - params->grid_min.z) * params->simulation_scale;
     if (diff > params->EPSILON)
