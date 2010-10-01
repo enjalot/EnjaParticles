@@ -14,18 +14,13 @@ __kernel void datastructures(
 		   			__global uint* sort_indices,
 		   			__global uint* cell_indices_start,
 		   			__global uint* cell_indices_end,
-					__local  uint* sharedHash
+					__local  uint* sharedHash   // blockSize+1 elements
 			  )
 {
 	uint index = get_global_id(0);
 
 	// particle index	
-	//uint index = __umul24(blockIdx.x, blockDim.x) + threadIdx.x;		
 	if (index >= numParticles) return;
-
-
-	// blockSize + 1 elements	
-	//extern __shared__ uint sharedHash[];	
 
 	uint hash = sort_hashes[index];
 
@@ -41,11 +36,12 @@ __kernel void datastructures(
 	if (index > 0 && tid == 0) {
 		// first thread in block must load neighbor particle hash
 		sharedHash[0] = sort_hashes[index-1];
-	}
+	} //else {
+		//sharedHash[0] = -1; // Why does adding this mess things up? 
+	//}
 
 #ifndef __DEVICE_EMULATION__
 	barrier(CLK_LOCAL_MEM_FENCE);
-	//__syncthreads ();
 #endif
 
 	// If this particle has a different cell index to the previous

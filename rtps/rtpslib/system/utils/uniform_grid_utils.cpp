@@ -119,12 +119,12 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 			for(uint index_j=startIndex; index_j < endIndex; index_j++) {			
 				// For now, nothing to loop over. ADD WHEN CODE WORKS. 
 				// Is there a neighbor?
-#if 0
+#if 1
 				force += ForPossibleNeighbor(vars_sorted, numParticles, index_i, index_j, position_i, gp, fp);
 #endif
-				return;  // no crash
+				//return;  // no crash
 			}
-			//return; // crash
+			return; // crash
 		}
 	}
 
@@ -155,7 +155,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		//PreCalc(data, index_i); // TODO
 
 		// get cell in grid for the given position
-		int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_delta);
+		int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_inv_delta);
 
 		// iterate through the 3^3 cells in and around the given position
 		// can't unroll these loops, they are not innermost 
@@ -184,7 +184,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 
 __kernel void K_SumStep1(
 				uint    numParticles,
-				uint	nb_vars,
+				uint	nb_vars, 
 				__global float4* vars,   // *** ERROR
 				__global float4* sorted_vars,
         		__global int*    cell_indexes_start,
@@ -223,7 +223,7 @@ __kernel void K_SumStep1(
 
 
 	// Without this line, 7 ms, with this line, 25 ms (for 65k particles)
-	vars[index+numParticles*2] = force; // 
+	vars[index+numParticles*FOR] = force; // 
 
 	// Same cost as previous line if MAD (multiply/add) enabled
 	//vars[index] = force; // 

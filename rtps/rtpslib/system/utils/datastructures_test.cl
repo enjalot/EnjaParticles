@@ -24,12 +24,7 @@ __kernel void datastructures(
  uint index = get_global_id(0);
 
 
-
  if (index >= numParticles) return;
-
-
-
-
 
  uint hash = sort_hashes[index];
 
@@ -48,8 +43,10 @@ __kernel void datastructures(
  }
 
 
+
+
  barrier(CLK_LOCAL_MEM_FENCE);
-# 57 "datastructures_test.cpp"
+# 53 "datastructures_test.cpp"
  if ((index == 0 || hash != sharedHash[tid]) )
  {
   cell_indices_start[hash] = index;

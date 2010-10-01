@@ -210,6 +210,9 @@ private:
 
 	void computeOnGPU();
 	void computeOnCPU();
+
+	void computeCellStartEndGPU();
+	void computeCellStartEndCPU();
 };
 
 }

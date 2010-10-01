@@ -53,6 +53,7 @@ void UniformGrid::make_cube(float4* position, float spacing, int num)
     //float zmin = min.z/2.0f;
     float zmin = min.z + max.z/2.0f;
     float zmax = max.z/4.5f;
+	printf("spacing= %f\n", spacing);
 
     int i=0;
     //cube in corner

@@ -34,11 +34,20 @@ void GE_SPH::buildDataStructures()
 
 	Kernel kern = datastructures_kernel;
 
-	int workSize = 128;
+	int workSize = 64;
 
 	// HOW TO DEAL WITH ARGUMENTS
 
 	printf("BEFORE BUILD ARGS\n");
+
+	// Set cl_cell_indices_start to -1 (0xffffffff)
+	// INEFFICIENTLY
+	int* st = cl_cell_indices_start->getHostPtr();
+	for (int i=0; i < grid_size; i++) {
+		st[i] = 0xffffffff;
+	}
+	cl_cell_indices_start->copyToDevice();
+		
 
 	kern.setArg(0, nb_el);
 	kern.setArg(1, nb_vars);
@@ -57,11 +66,12 @@ void GE_SPH::buildDataStructures()
 	printf("AFTER BUILD ARGS\n");
 
 	int err;
-	printf("EXECUTE BUILD\n");
+	//printf("EXECUTE BUILD\n");
    	kern.execute(nb_el, workSize); 
-	printf("AFTER EXECUTE BUILD\n");
+	//printf("AFTER EXECUTE BUILD\n");
 
 	//printBuildDiagnostics();
+	//printf("after build diagnostics\n");
 	//exit(0);
 
     ps->cli->queue.finish();
@@ -92,7 +102,7 @@ void GE_SPH::printBuildDiagnostics()
 	// PRINT OUT UNSORTED AND SORTED VARIABLES
 	#if 1
 	//for (int k=0; k < nb_vars; k++) {
-	for (int k=0; k < 2; k++) {
+	for (int k=1; k < 2; k++) {
 		printf("================================================\n");
 		printf("=== VARIABLE: %d ===============================\n", k);
 	for (int i=0; i < nb_el; i++) {
@@ -107,7 +117,6 @@ void GE_SPH::printBuildDiagnostics()
 	printf("===============================================\n");
 	printf("===============================================\n");
 	#endif
-	exit(0);
 
 
 	try {
@@ -119,19 +128,36 @@ void GE_SPH::printBuildDiagnostics()
 		exit(0);
 	}
 
-
-		printf("cell_indices_start, end\n");
-		int nb_cells = 0;
-		for (int i=0; i < grid_size; i++) {
-			int nb = (*cl_cell_indices_end)[i]-(*cl_cell_indices_start)[i];
-			nb_cells += nb;
-			printf("[%d]: %d, %d, nb pts: %d\n", i, (*cl_cell_indices_start)[i], (*cl_cell_indices_end)[i], nb);
-		}
-		printf("total nb cells: %d\n", nb_cells);
-#endif
-
+	computeCellStartEndGPU();
 	//printf("return from BuildDataStructures\n");
 }
 //----------------------------------------------------------------------
+void GE_SPH::computeCellStartEndGPU()
+{
+	int* is = cl_cell_indices_start->getHostPtr();
+	int* ie = cl_cell_indices_end->getHostPtr();
+
+		printf("cell_indices_start, end (GPU)\n");
+		int nb_particles = 0;
+		for (int i=0; i < grid_size; i++) {
+			int nb = ie[i] - is[i];
+			if (nb > 0 && is[i] != -1) {
+				nb_particles += nb;
+				//printf("nb= %d\n", nb);
+			}
+			//if (is[i] != -1) {
+				//printf("(GPU) [%d]: indices_start: %d, indices_end: %d, nb pts: %d\n", i, is[i], ie[i], nb);
+			//}
+		}
+		if (nb_particles != nb_el) {
+			printf("nb particles: %d\n", nb_particles);
+			printf("nb_el: %d\n", nb_el);
+			printf("(computeCellStartEndGPU) (count != nb_el)\n");
+			exit(1);
+		}
+}
+//----------------------------------------------------------------------
+#endif
+
 
 } // namespace

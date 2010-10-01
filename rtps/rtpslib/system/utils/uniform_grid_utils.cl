@@ -237,11 +237,11 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 
 
 
+    force += ForPossibleNeighbor(vars_sorted, num, index_i, index_j, position_i, gp, fp);
 
 
-    return;
    }
-
+   return;
   }
  }
 
@@ -272,7 +272,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 
 
 
-  int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_delta);
+  int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_inv_delta);
 
 
 
@@ -328,7 +328,7 @@ __kernel void K_SumStep1(
 
     force = IterateParticlesInNearbyCells(sorted_vars, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp);
 # 226 "uniform_grid_utils.cpp"
- vars[index+num*2] = force;
+ vars[index+num*3] = force;
 
 
 

@@ -125,9 +125,13 @@ void GE_SPH::bitonic_sort()
     ps->cli->queue.finish();
 	ts_cl[TI_SORT]->end();
 
-	printf("enter sort diagonistics ****\n");
+	//printf("enter sort diagonistics ****\n");
+	//printBiSortDiagnostics(cl_sort_output_hashes, cl_sort_output_indices);
+	//printf("exit sort diagonistics ****\n");
 
-	printBiSortDiagnostics(cl_sort_output_hashes, cl_sort_output_indices);
+	//printf("enter computeCellStartEndCPU\n");
+	//computeCellStartEndCPU();
+	//printf("exit computeCellStartEndCPU\n");
 
 	printf("EXIT BISORT \n");
 }
@@ -149,13 +153,17 @@ void GE_SPH::printBiSortDiagnostics(BufferGE<int>& cl_sort_output_hashes, Buffer
 
 	for (int i=0; i < nb_el; i++) {
 	//for (int i=0; i < 200; i++) {
-		printf("=========================================\n");
+		//printf("=========================================\n");
 		printf("sorted hash[%d]: %d, sorted index[%d]: %d\n", i, hashi[i], i, sorti[i]);
-		printf("osorted hash[%d]: %d, osorted indx[%d]: %d\n", i, ohashi[i], i, osorti[i]);
+		//printf("osorted hash[%d]: %d, osorted indx[%d]: %d\n", i, ohashi[i], i, osorti[i]);
 	}
+
+	//printf("EXIT: 000\n"); exit(0);
+
 #endif
 }
 //----------------------------------------------------------------------
+#if 0
 void GE_SPH::prepareSortData()
 {
 #if 1
@@ -173,6 +181,58 @@ void GE_SPH::prepareSortData()
 			printf("*** i: %d, unsorted hash: %d, index: %d\n", i, hashi[i], sorti[i]);
 		}
 #endif
+}
+#endif
+//----------------------------------------------------------------------
+void GE_SPH::computeCellStartEndCPU()
+{
+	// COMPUTE cl_cell_indices_start and cl_cell_indices_end manual
+	// Code is NOT going into this function even if called!!!
+
+	printf(">>>>>>>>>>>>>>>>>>>>\n");
+	int* ohashi = cl_sort_hashes->getHostPtr();
+	int* osorti = cl_sort_indices->getHostPtr();
+
+	printf("\n\n PRINT cl_cell_indices_start/end on CPU\n");
+	int* start = new int [grid_size];
+	int* end   = new int [grid_size];
+	for (int i=0; i < grid_size; i++) {
+		start[i] = -1;
+		end[i]   = -1;
+	}
+
+	int ix, i, hash;
+	for (hash=ohashi[0], ix=0, i=0; i < nb_el; i++) {
+		if (ohashi[i] != hash) {
+			start[hash] = ix;
+			end[hash]   = i;
+			hash = ohashi[i];
+			ix = i;
+		}
+	}
+	if (ohashi[nb_el-1] == hash) {
+		start[hash] = ix;
+		end[hash] = nb_el;
+	}
+
+	int count = 0;
+	for (int i=0; i < grid_size; i++) {
+		count += end[i]-start[i];
+		//if (start[i] != -1) {
+			//printf("(CPU) [%d], start: %d, end: %d, count: %d\n", i, start[i], end[i], end[i]-start[i]);
+		//}
+	}
+	if (count != nb_el) {
+		printf("total nb particles: %d\n", count);
+		printf("nb_el: %d\n", nb_el);
+		printf("(computeCellStartEndCPU) (count != nb_el)\n");
+		exit(1);
+	}
+
+	delete [] start;
+	delete [] end;
+	printf("EXIT>..\n");
+	//exit(0);
 }
 //----------------------------------------------------------------------
 

@@ -46,12 +46,12 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     sph_settings.rest_density = 1000;
     sph_settings.simulation_scale = .001;
 
-    sph_settings.particle_mass = (128*1024)/num * .0002;
-    //printf("particle mass: %f\n", sph_settings.particle_mass);
+    sph_settings.particle_mass = (128*1024.)/num * .0002;
+    printf("particle mass: %f\n", sph_settings.particle_mass);
     sph_settings.particle_rest_distance = .87 * pow(sph_settings.particle_mass / sph_settings.rest_density, 1./3.);
-    //printf("particle rest distance: %f\n", sph_settings.particle_rest_distance);
+    printf("particle rest distance: %f\n", sph_settings.particle_rest_distance);
    
-    sph_settings.smoothing_distance = 2.f * sph_settings.particle_rest_distance;
+    sph_settings.smoothing_distance = 2.f * sph_settings.particle_rest_distance; // *2 decreases grid resolution
     sph_settings.boundary_distance = .5f * sph_settings.particle_rest_distance;
 
     sph_settings.spacing = sph_settings.particle_rest_distance / sph_settings.simulation_scale;
@@ -407,16 +407,17 @@ void GE_SPH::computeOnGPU()
 		// crashes more often if buildDataStructures is enabled. WHY? 
 		//printf("start sorting *****\n");
 		//sort();
-		//return;
 		bitonic_sort();
 		//exit(0);
 		//return;
 
 		buildDataStructures(); // BUG
-		//exit(0);
 
+		printf("before neighbor search\n");
 		neighbor_search();
-		return;
+		printf("exit neighbor search\n");
+		//exit(0);
+		//return;
 
 		// ***** DENSITY UPDATE *****
 		//computeDensity();
