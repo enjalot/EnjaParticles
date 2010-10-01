@@ -18,11 +18,18 @@ float4 ForNeighbor(__global float4*  vars_sorted,
 //data.sum_density += SPH_Kernels::Wpoly6::Kernel_Variable(fp->smoothing_length_pow2, r, rlen_sq);	
 // #include FILE to deal with collisions or other stuff
 
+	if (fp->choice == 1) {
+		// update density
+	}
+
+	if (fp->choice == 2) {
+		// update pressure
+	}
+
 	int index = get_global_id(0);
 
 #include "cl_snippet_sphere_forces.h"
-
-	return force;
+	//return r;
 }
 //--------------------------------------------------
 float4 ForPossibleNeighbor(__global float4* vars_sorted, 

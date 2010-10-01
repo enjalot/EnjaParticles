@@ -53,6 +53,8 @@ void ForNeighbor(__global float4*  vars_sorted,
 
 #endif
 
+	return force;
+
 
 
 #endif

@@ -100,9 +100,12 @@ float4 ForNeighbor(__global float4* vars_sorted,
   force += fp->shear*tanVel;
   force += fp->attraction*relPos;
  }
-# 24 "neighbors.cpp" 2
+
+
 
  return force;
+# 24 "neighbors.cpp" 2
+
 }
 
 float4 ForPossibleNeighbor(__global float4* vars_sorted,
