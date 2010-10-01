@@ -34,7 +34,7 @@ typedef struct SPHParams
     //float grid_min_padding;     //float3s take up a float4 of space in OpenCL 1.0 and 1.1
     float3 grid_max;
     //float grid_max_padding;
-    int num;
+//    int num;
     float mass;
     float rest_distance;
     float smoothing_distance;
