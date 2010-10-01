@@ -81,6 +81,15 @@ float Wpoly6(float4 r, float h, __constant struct SPHParams* params)
     float Wij = alpha * hr2*hr2*hr2;
     return Wij;
 }
+
+float Wspiky(float rlen, float h, __constant struct SPHParams* params)
+{
+    float h6 = h*h*h * h*h*h;
+    float alpha = 45.f/params->PI/h6;
+ float hr2 = (h - rlen);
+ float Wij = alpha * hr2*hr2*hr2/rlen;
+ return Wij;
+}
 # 7 "neighbors.cpp" 2
 
 
@@ -98,6 +107,8 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
 
 
+ int num = get_global_size(0);
+
  if (fp->choice == 1) {
 
 
@@ -107,13 +118,33 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
     float Wij = Wpoly6(rlen, sphp->smoothing_distance, sphp);
  return (float4)(sphp->mass*Wij, 0., 0., 0.);
-# 27 "neighbors.cpp" 2
+# 29 "neighbors.cpp" 2
   ;
  }
 
  if (fp->choice == 2) {
 
+# 1 "pressure_update.cl" 1
 
+
+
+ float Wij = Wspiky(rlen, sphp->smoothing_distance, sphp);
+
+ float di = vars_sorted[index_i+0*num].x;
+ float dj = vars_sorted[index_j+0*num].x;
+
+
+ float Pi = sphp->K*(di - 1000.0f);
+ float Pj = sphp->K*(dj - 1000.0f);
+
+ float kern = sphp->mass * 1.0f * Wij * (Pi + Pj) / (di * dj);
+
+
+
+
+
+ return kern*r;
+# 35 "neighbors.cpp" 2
  }
 
 

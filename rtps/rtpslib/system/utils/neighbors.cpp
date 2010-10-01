@@ -20,6 +20,8 @@ float4 ForNeighbor(__global float4*  vars_sorted,
 // data.sum_density += SPH_Kernels::Wpoly6::Kernel_Variable(fp->smoothing_length_pow2, r, rlen_sq);	
 // #include FILE to deal with collisions or other stuff
 
+	int num = get_global_size(0);
+
 	if (fp->choice == 1) {
 		// update density
 		// return density.x for single neighbor
@@ -29,7 +31,7 @@ float4 ForNeighbor(__global float4*  vars_sorted,
 
 	if (fp->choice == 2) {
 		// update pressure
-		//#include "pressure_update.cl"
+		#include "pressure_update.cl"
 	}
 
 
