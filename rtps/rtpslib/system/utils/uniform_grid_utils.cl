@@ -84,7 +84,9 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
  if (fp->choice == 1) {
 
+
 # 1 "density_update.cl" 1
+
 
 
 
@@ -95,8 +97,8 @@ float4 ForNeighbor(__global float4* vars_sorted,
  float Wij = alpha*(2.f/3.f - 9.f*R*R/8.f + 19.f*R*R*R/24.f - 5.f*R*R*R*R/32.f);
  int num = get_global_id(0);
  vars_sorted[index_i+0*num].x += sphp->mass * Wij;
- return ssphp->mass*Wij;
-# 25 "neighbors.cpp" 2
+ return sphp->mass*Wij;
+# 26 "neighbors.cpp" 2
   ;
  }
 

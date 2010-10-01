@@ -21,6 +21,7 @@ float4 ForNeighbor(__global float4*  vars_sorted,
 
 	if (fp->choice == 1) {
 		// update density
+		// return density for single neighbor
 		#include "density_update.cl"
 		;
 	}

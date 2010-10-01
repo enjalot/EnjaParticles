@@ -54,6 +54,7 @@ set (rtpslib_SOURCES
 	${rtpslib_SOURCE_DIR}/bitonic_sort/src/oclBitonicSort_launcher.cpp
 
     # "wrap" makes it clear we are talking about c++ code
+	# each file wraps a single device kernel and calls it
 	${rtpslib_SOURCE_DIR}/system/utils/build_datastructures_wrap.cpp
 	${rtpslib_SOURCE_DIR}/system/utils/neighbor_search_wrap.cpp
 	${rtpslib_SOURCE_DIR}/system/utils/hash_wrap.cpp
@@ -68,12 +69,18 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/opencl/Kernel.cpp
 
     ${rtpslib_SOURCE_DIR}/render/Render.cpp
-
     ${rtpslib_SOURCE_DIR}/particle/UniformGrid.cpp
-    
     ${rtpslib_SOURCE_DIR}/system/Simple.cpp
-    
     ${rtpslib_SOURCE_DIR}/system/GE_SPH.cpp     # NEW
+
+    ${rtpslib_SOURCE_DIR}/system/ge_sph/Euler.cpp
+    ${rtpslib_SOURCE_DIR}/system/ge_sph/Density.cpp
+    ${rtpslib_SOURCE_DIR}/system/ge_sph/Pressure.cpp
+    ${rtpslib_SOURCE_DIR}/system/ge_sph/Viscosity.cpp
+    ${rtpslib_SOURCE_DIR}/system/ge_sph/Collision_wall.cpp
+
+
+
 
     #${rtpslib_SOURCE_DIR}/system/SPH.cpp
     #${rtpslib_SOURCE_DIR}/opencl/Buffer.cpp
@@ -83,12 +90,6 @@ set (rtpslib_SOURCES
     #${rtpslib_SOURCE_DIR}/system/sph/Pressure.cpp
     #${rtpslib_SOURCE_DIR}/system/sph/Viscosity.cpp
     #${rtpslib_SOURCE_DIR}/system/sph/Collision_wall.cpp
-
-    ${rtpslib_SOURCE_DIR}/system/ge_sph/Euler.cpp
-    ${rtpslib_SOURCE_DIR}/system/ge_sph/Density.cpp
-    ${rtpslib_SOURCE_DIR}/system/ge_sph/Pressure.cpp
-    ${rtpslib_SOURCE_DIR}/system/ge_sph/Viscosity.cpp
-    ${rtpslib_SOURCE_DIR}/system/ge_sph/Collision_wall.cpp
     )
 
 
