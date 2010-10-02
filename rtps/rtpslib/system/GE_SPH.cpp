@@ -125,10 +125,10 @@ typedef struct GE_SPHParams
     cl_color = new BufferVBO<float4>(ps->cli, col_vbo);
 
     //pure opencl buffers
-    cl_force = new BufferGE<float4>(ps->cli, &forces[0], forces.size());
-    cl_velocity = new BufferGE<float4>(ps->cli, &velocities[0], velocities.size());
-    cl_density = new BufferGE<float>(ps->cli, &densities[0], densities.size());
-    cl_error_check= new BufferGE<float4>(ps->cli, &error_check[0], error_check.size());
+    cl_force       = new BufferGE<float4>(ps->cli, &forces[0], forces.size());
+    cl_velocity    = new BufferGE<float4>(ps->cli, &velocities[0], velocities.size());
+    cl_density     = new BufferGE<float>(ps->cli, &densities[0], densities.size());
+    cl_error_check = new BufferGE<float4>(ps->cli, &error_check[0], error_check.size());
 
     printf("create collision wall kernel\n");
     loadCollision_wall();
