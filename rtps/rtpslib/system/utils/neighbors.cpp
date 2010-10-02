@@ -22,14 +22,13 @@ float4 ForNeighbor(__global float4*  vars_sorted,
 
 	int num = get_global_size(0);
 
-	if (fp->choice == 1) {
+	if (fp->choice == 0) {
 		// update density
 		// return density.x for single neighbor
 		#include "density_update.cl"
-		;
 	}
 
-	if (fp->choice == 2) {
+	if (fp->choice == 1) {
 		// update pressure
 		#include "pressure_update.cl"
 	}

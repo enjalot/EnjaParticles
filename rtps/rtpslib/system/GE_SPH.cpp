@@ -398,7 +398,7 @@ void GE_SPH::computeOnGPU()
 		buildDataStructures(); // BUG
 
 		printf("before neighbor search\n");
-		neighbor_search();
+		//neighbor_search();
 		printf("exit neighbor search\n");
 		//exit(0);
 		//return;
@@ -406,11 +406,13 @@ void GE_SPH::computeOnGPU()
 		// ***** DENSITY UPDATE *****
 		//computeDensity();
 		//checkDensity();
+		neighbor_search(0); //density
 
 
 		// ***** PRESSURE UPDATE *****
         //computePressure();
         //k_pressure.execute(num);
+		neighbor_search(1); //pressure
 
 		// ***** VISCOSITY UPDATE *****
         //computeViscosity();

@@ -109,7 +109,7 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
  int num = get_global_size(0);
 
- if (fp->choice == 1) {
+ if (fp->choice == 0) {
 
 
 # 1 "density_update.cl" 1
@@ -119,10 +119,9 @@ float4 ForNeighbor(__global float4* vars_sorted,
     float Wij = Wpoly6(rlen, sphp->smoothing_distance, sphp);
  return (float4)(sphp->mass*Wij, 0., 0., 0.);
 # 29 "neighbors.cpp" 2
-  ;
  }
 
- if (fp->choice == 2) {
+ if (fp->choice == 1) {
 
 # 1 "pressure_update.cl" 1
 
@@ -144,7 +143,7 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
 
  return kern*r;
-# 35 "neighbors.cpp" 2
+# 34 "neighbors.cpp" 2
  }
 
 

@@ -8,11 +8,16 @@ namespace rtps {
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-void GE_SPH::neighbor_search()
+void GE_SPH::neighbor_search(int which)
 {
 	static bool first_time = true;
 
-	ts_cl[TI_NEIGH]->start();
+	// which == 0 : density update
+	// which == 1 : pressure update
+
+	if (which == 0) ts_cl[TI_DENS]->start();
+	if (which == 1) ts_cl[TI_PRES]->start();
+	//ts_cl[TI_NEIGH]->start();
 
 	if (first_time) {
 		try {
@@ -33,6 +38,10 @@ void GE_SPH::neighbor_search()
 
 	int iarg = 0;
 
+	FluidParams* fp = cl_FluidParams->getHostPtr();
+	fp->choice = which;
+	cl_FluidParams->copyToDevice();
+	
 	kern.setArg(iarg++, nb_el);
 	kern.setArg(iarg++, nb_vars);
 	kern.setArg(iarg++, cl_vars_unsorted->getDevicePtr());
@@ -44,7 +53,6 @@ void GE_SPH::neighbor_search()
 	kern.setArg(iarg++, cl_params->getDevicePtr());
 
 
-
 	size_t global = (size_t) nb_el;
 	int local = 128;
 
@@ -52,7 +60,9 @@ void GE_SPH::neighbor_search()
 	printf("AFTER EXEC\n");
 
 	ps->cli->queue.finish();
-	ts_cl[TI_NEIGH]->end();
+	//ts_cl[TI_NEIGH]->end();
+	if (which == 0) ts_cl[TI_DENS]->end();
+	if (which == 1) ts_cl[TI_PRES]->end();
 }
 //----------------------------------------------------------------------
 
