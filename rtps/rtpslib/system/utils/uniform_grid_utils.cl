@@ -270,11 +270,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 
 
 
-  float4 frce;
-  frce.x = 0.;
-  frce.y = 0.;
-  frce.z = 0.;
-  frce.w = 0.;
+  float4 frce = (float4) (0.,0.,0.,0.);
 
   uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
 
@@ -317,13 +313,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
   __constant struct SPHParams* sphp)
  {
 
-
-  float4 frce;
-
-  frce.x = 0.;
-  frce.y = 0.;
-  frce.z = 0.;
-  frce.w = 0.;
+  float4 frce = (float4) (0.,0.,0.,0.);
 
 
 
@@ -337,11 +327,11 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
   for(int z=cell.z-1; z<=cell.z+1; ++z) {
    for(int y=cell.y-1; y<=cell.y+1; ++y) {
     for(int x=cell.x-1; x<=cell.x+1; ++x) {
-     int4 ipos;
-     ipos.x = x;
-     ipos.y = y;
-     ipos.z = z;
-     ipos.w = 1;
+     int4 ipos = (int4) (x,y,z,1);
+
+
+
+
 
 
      frce += IterateParticlesInCell(vars_sorted, num, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp);

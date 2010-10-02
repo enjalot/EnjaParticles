@@ -104,11 +104,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		//volatile uint cellHash = UniformGridUtils::calcGridHash<true>(cellPos, cGridParams.grid_res);
 		// wrap edges (false)
 
-		float4 frce; // = convert_float4(0.0);  (CREATES PROBLEMS)
-		frce.x = 0.;
-		frce.y = 0.;
-		frce.z = 0.;
-		frce.w = 0.;
+		float4 frce = (float4) (0.,0.,0.,0.); // = convert_float4(0.0);  (CREATES PROBLEMS)
 #if 1
 		uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
 
@@ -151,13 +147,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		__constant struct SPHParams* sphp)
 	{
 		// initialize force on particle (collisions)
-		//float4 force = convert_float4(0.);
-		float4 frce;
-		//force = convert_float4(0.);
-		frce.x = 0.;
-		frce.y = 0.;
-		frce.z = 0.;
-		frce.w = 0.;
+		float4 frce = (float4) (0.,0.,0.,0.);
 #if 1
 		// How to choose which PreCalc to use? 
 		// TODO LATER
@@ -171,11 +161,11 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		for(int z=cell.z-1; z<=cell.z+1; ++z) {
 			for(int y=cell.y-1; y<=cell.y+1; ++y) {
 				for(int x=cell.x-1; x<=cell.x+1; ++x) {
-					int4 ipos;
-					ipos.x = x;
-					ipos.y = y;
-					ipos.z = z;
-					ipos.w = 1;
+					int4 ipos = (int4) (x,y,z,1);
+					//ipos.x = x;
+					//ipos.y = y;
+					//ipos.z = z;
+					//ipos.w = 1;
 	#if 1
 					// I am summing much more than required
 					frce += IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp);
