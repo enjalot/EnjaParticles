@@ -47,6 +47,8 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     sph_settings.simulation_scale = .001;
 
     sph_settings.particle_mass = (128*1024.)/num * .0002;
+	printf("num= %d\n", num);
+	printf("1 mass= %f\n", sph_settings.particle_mass);
     printf("particle mass: %f\n", sph_settings.particle_mass);
     sph_settings.particle_rest_distance = .87 * pow(sph_settings.particle_mass / sph_settings.rest_density, 1./3.);
     printf("particle rest distance: %f\n", sph_settings.particle_rest_distance);
@@ -56,7 +58,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 
     sph_settings.spacing = sph_settings.particle_rest_distance / sph_settings.simulation_scale;
     float particle_radius = sph_settings.spacing;
-    //printf("particle radius: %f\n", particle_radius);
+    printf("particle radius: %f\n", particle_radius);
 
     //grid = UniformGrid(float3(0,0,0), float3(1024, 1024, 1024), sph_settings.smoothing_distance / sph_settings.simulation_scale);
     grid = UniformGrid(float4(-512,0,-512,1.), float4(512, 1024, 512, 1.), sph_settings.smoothing_distance / sph_settings.simulation_scale);
@@ -94,6 +96,10 @@ typedef struct GE_SPHParams
     params.K = 1.5f;
  
 	cl_params->copyToDevice();
+	printf("2 mass: %f\n", params.mass);
+	cl_params->copyToHost();
+	GE_SPHParams& pparams = *(cl_params->getHostPtr());
+	printf("2a mass: %f\n", pparams.mass);
 
     std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));
     std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 1.0f, 0.0f));
@@ -153,6 +159,9 @@ typedef struct GE_SPHParams
 	// copy pos, vel, dens into vars_unsorted()
 	// COULD DO THIS ON GPU
 	float4* vars = cl_vars_unsorted->getHostPtr();
+	BufferGE<float4>& un = *cl_vars_unsorted;
+	BufferGE<float4>& so = *cl_vars_sorted;
+
 	for (int i=0; i < nb_el; i++) {
 		//vars[i+DENS*num] = densities[i];
 		// PROBLEM: density is float, but vars_unsorted is float4
@@ -161,7 +170,6 @@ typedef struct GE_SPHParams
 
 		//printf("%d, %d, %d, %d\n", DENS, POS, VEL, FOR); exit(0);
 
-		BufferGE<float4>& un = *cl_vars_unsorted;
 		un(i+DENS*nb_el).x = densities[i];
 		un(i+DENS*nb_el).y = 0.0;
 		un(i+DENS*nb_el).z = 0.0;
@@ -169,9 +177,19 @@ typedef struct GE_SPHParams
 		un(i+POS*nb_el) = positions[i];
 		un(i+VEL*nb_el) = velocities[i];
 		un(i+FOR*nb_el) = forces[i];
+
+		// SHOULD NOT BE REQUIRED
+		so(i+DENS*nb_el).x = densities[i];
+		so(i+DENS*nb_el).y = 0.0;
+		so(i+DENS*nb_el).z = 0.0;
+		so(i+DENS*nb_el).w = 0.0;
+		so(i+POS*nb_el) = positions[i];
+		so(i+VEL*nb_el) = velocities[i];
+		so(i+FOR*nb_el) = forces[i];
 	}
 
 	cl_vars_unsorted->copyToDevice();
+	cl_vars_sorted->copyToDevice(); // shoudl not be required
 }
 
 //----------------------------------------------------------------------
@@ -236,6 +254,7 @@ void GE_SPH::update()
 
 #ifdef GPU
 	computeOnGPU();
+	exit(0);
 #endif
 
     /*
@@ -385,24 +404,18 @@ void GE_SPH::computeOnGPU()
 		hash();
 
 		// **** Sort arrays ****
-		sort();
-		//bitonic_sort();
+		//sort();
+		bitonic_sort();
 
 		// **** Reorder pos, vel
 		buildDataStructures(); 
-
-		//printf("before neighbor search\n");
-		//neighbor_search();
-		//printf("exit neighbor search\n");
-		//exit(0);
-		//return;
 
 		// ***** DENSITY UPDATE *****
 		//computeDensity();
 		//checkDensity();
 		neighbor_search(0); //density
 
-
+		#if 0
 		// ***** PRESSURE UPDATE *****
         //computePressure();
         //k_pressure.execute(num);
@@ -413,10 +426,20 @@ void GE_SPH::computeOnGPU()
 
 		// ***** WALL COLLISIONS *****
         //k_collision_wall.execute(num);
+		#endif
 
         // ***** EULER UPDATE *****
 		//printf("before computeEuler\n");
 		computeEuler();
+
+		//  print out density
+		cl_vars_unsorted->copyToHost();
+		float4* density = cl_vars_unsorted->getHostPtr() + 0*nb_el;
+		float4* density1 = cl_vars_sorted->getHostPtr() + 0*nb_el;
+		for (int i=0; i < nb_el; i++) {
+			printf("==================\n");
+			printf("dens[%d]= %f, sorted den: %f\n", i, density[i].x, density1[i].x);
+		}
     }
 
     cl_position->release();

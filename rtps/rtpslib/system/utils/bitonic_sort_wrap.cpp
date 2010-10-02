@@ -103,6 +103,7 @@ void GE_SPH::bitonic_sort()
 	}
 
 	#if 1
+	// SHOULD EXECUTE the following on the GPU or not use bitonic
 	cl_sort_output_hashes.copyToHost();
 	cl_sort_output_indices.copyToHost();
 

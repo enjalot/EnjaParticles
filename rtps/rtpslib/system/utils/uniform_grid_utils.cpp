@@ -98,6 +98,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		__constant struct GridParams* gp,
 		__constant struct FluidParams* fp,
 		__constant struct SPHParams* sphp
+		DUMMY_ARGS
     )
 	{
 		// get hash (of position) of current cell
@@ -119,7 +120,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 			/* iterate over particles in this cell */
 			for(uint index_j=startIndex; index_j < endIndex; index_j++) {			
 #if 1
-				frce += ForPossibleNeighbor(vars_sorted, numParticles, index_i, index_j, position_i, gp, fp, sphp);
+				frce += ForPossibleNeighbor(vars_sorted, numParticles, index_i, index_j, position_i, gp, fp, sphp ARGS);
 #endif
 			}
 		}
@@ -138,7 +139,9 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		__global int* 		cell_indices_end,
 		__constant struct GridParams* gp,
 		__constant struct FluidParams* fp,
-		__constant struct SPHParams* sphp)
+		__constant struct SPHParams* sphp
+		DUMMY_ARGS
+		)
 	{
 		// initialize force on particle (collisions)
 		float4 frce = (float4) (0.,0.,0.,0.);
@@ -154,7 +157,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 					int4 ipos = (int4) (x,y,z,1);
 	#if 1
 					// I am summing much more than required
-					frce += IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp);
+					frce += IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp ARGS);
 	#endif
 				}
 			}
@@ -177,6 +180,7 @@ __kernel void K_SumStep1(
 				__constant struct GridParams* gp,
 				__constant struct FluidParams* fp, 
 				__constant struct SPHParams* sphp 
+				DUMMY_ARGS
 				)
 {
     // particle index
@@ -195,7 +199,7 @@ __kernel void K_SumStep1(
 	float4 frce;
 
 	#if 1
-    frce = IterateParticlesInNearbyCells(vars_sorted, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp);
+    frce = IterateParticlesInNearbyCells(vars_sorted, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
 	#endif
 
 	if (fp->choice == 0) { // update density

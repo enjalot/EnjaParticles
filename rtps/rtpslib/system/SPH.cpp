@@ -55,22 +55,6 @@ SPH::SPH(RTPS *psfr, int n)
     grid.make_cube(&positions[0], sph_settings.spacing, num);
 
 
-/*
-typedef struct SPHParams
-{
-    float4 grid_min;
-    float4 grid_max;
-    float mass;
-    float rest_distance;
-    float simulation_scale;
-    float boundary_stiffness;
-    float boundary_dampening;
-    float boundary_distance;
-    float EPSILON;
- 
-} SPHParams;
-*/
-
     params.grid_min = grid.getMin();
     params.grid_max = grid.getMax();
     params.mass = sph_settings.particle_mass;
@@ -83,15 +67,12 @@ typedef struct SPHParams
     params.EPSILON = .00001f;
     params.PI = 3.14159265f;
     params.K = 1.5f;
+
  
     //TODO make a helper constructor for buffer to make a cl_mem from a struct
     std::vector<SPHParams> vparams(0);
     vparams.push_back(params);
-//printf("ps= %d\n", ps);
-//printf("ps->cli= %d\n", ps->cli);
-//printf("vparams= %d\n", &vparams);
     cl_params = Buffer<SPHParams>(ps->cli, vparams);
-//exit(0); // ERROR ON PREVIOUS LINE
 
 
     std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));

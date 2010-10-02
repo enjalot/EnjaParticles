@@ -35,25 +35,12 @@ __kernel void ge_euler(
     //vel(i) = v;
     //pos(i) = p;
 
-    //if(progress)
-    //{
         uint originalIndex = sort_indices[i];
 
         // writeback to unsorted buffer
 		unsorted_pos(originalIndex) = p;
 		unsorted_vel(originalIndex) = v;
-
-		//force(originalIndex) = f;
-        //dParticleData.position[originalIndex]   = make_vec(pos);
-        //dParticleData.velocity[originalIndex]   = make_vec(vel);
-        //dParticleData.veleval[originalIndex]    = make_vec(vel_eval);
-
-        //float3 color = CalculateColor(coloringGradient, coloringSource, vnext, sph_pressure, sph_force);
-        //dParticleData.color[originalIndex]  = make_float4(color, 1);
-    //}
-
-
-
+		unsorted_density(originalIndex) = density(i); // FOR DEBUGGING ONLY
 #endif
 }
 

@@ -97,7 +97,9 @@ float4 ForNeighbor(__global float4* vars_sorted,
     float rlen_sq,
       __constant struct GridParams* gp,
       __constant struct FluidParams* fp,
-      __constant struct SPHParams* sphp)
+      __constant struct SPHParams* sphp
+      , __global float4* clf, __global int* cli
+    )
 {
  int num = get_global_size(0);
 
@@ -109,8 +111,9 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
 
     float Wij = Wpoly6(rlen, sphp->smoothing_distance, sphp);
- return (float4)(sphp->mass*Wij, 0., 0., 0.);
-# 25 "neighbors.cpp" 2
+
+ return (float)(1., 0., 0., 0.);
+# 27 "neighbors.cpp" 2
  }
 
  if (fp->choice == 1) {
@@ -135,7 +138,7 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
 
  return kern*r;
-# 30 "neighbors.cpp" 2
+# 32 "neighbors.cpp" 2
  }
 }
 
@@ -146,12 +149,15 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
       __constant float4 position_i,
         __constant struct GridParams* gp,
         __constant struct FluidParams* fp,
-        __constant struct SPHParams* sphp)
+        __constant struct SPHParams* sphp
+        , __global float4* clf, __global int* cli
+      )
 {
  float4 frce = (float4) (0.,0.,0.,0.);
 
 
  if (index_j != index_i) {
+
 
   float4 position_j = vars_sorted[index_j+1*num];
 
@@ -165,7 +171,7 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 
   if (rlen <= fp->smoothing_length) {
 
-   frce = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, rlen_sq, gp, fp, sphp);
+   frce = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, rlen_sq, gp, fp, sphp , clf, cli);
 
   }
  }

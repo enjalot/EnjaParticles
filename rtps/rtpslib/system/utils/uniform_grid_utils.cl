@@ -101,7 +101,9 @@ float4 ForNeighbor(__global float4* vars_sorted,
     float rlen_sq,
       __constant struct GridParams* gp,
       __constant struct FluidParams* fp,
-      __constant struct SPHParams* sphp)
+      __constant struct SPHParams* sphp
+      , __global float4* clf, __global int* cli
+    )
 {
  int num = get_global_size(0);
 
@@ -113,8 +115,9 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
 
     float Wij = Wpoly6(rlen, sphp->smoothing_distance, sphp);
- return (float4)(sphp->mass*Wij, 0., 0., 0.);
-# 25 "neighbors.cpp" 2
+
+ return (float)(1., 0., 0., 0.);
+# 27 "neighbors.cpp" 2
  }
 
  if (fp->choice == 1) {
@@ -139,7 +142,7 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
 
  return kern*r;
-# 30 "neighbors.cpp" 2
+# 32 "neighbors.cpp" 2
  }
 }
 
@@ -150,12 +153,15 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
       __constant float4 position_i,
         __constant struct GridParams* gp,
         __constant struct FluidParams* fp,
-        __constant struct SPHParams* sphp)
+        __constant struct SPHParams* sphp
+        , __global float4* clf, __global int* cli
+      )
 {
  float4 frce = (float4) (0.,0.,0.,0.);
 
 
  if (index_j != index_i) {
+
 
   float4 position_j = vars_sorted[index_j+1*num];
 
@@ -169,7 +175,7 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 
   if (rlen <= fp->smoothing_length) {
 
-   frce = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, rlen_sq, gp, fp, sphp);
+   frce = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, rlen_sq, gp, fp, sphp , clf, cli);
 
   }
  }
@@ -248,6 +254,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
   __constant struct GridParams* gp,
   __constant struct FluidParams* fp,
   __constant struct SPHParams* sphp
+  , __global float4* clf, __global int* cli
     )
  {
 
@@ -269,7 +276,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 
    for(uint index_j=startIndex; index_j < endIndex; index_j++) {
 
-    frce += ForPossibleNeighbor(vars_sorted, num, index_i, index_j, position_i, gp, fp, sphp);
+    frce += ForPossibleNeighbor(vars_sorted, num, index_i, index_j, position_i, gp, fp, sphp , clf, cli);
 
    }
   }
@@ -288,7 +295,9 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
   __global int* cell_indices_end,
   __constant struct GridParams* gp,
   __constant struct FluidParams* fp,
-  __constant struct SPHParams* sphp)
+  __constant struct SPHParams* sphp
+  , __global float4* clf, __global int* cli
+  )
  {
 
   float4 frce = (float4) (0.,0.,0.,0.);
@@ -304,7 +313,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
      int4 ipos = (int4) (x,y,z,1);
 
 
-     frce += IterateParticlesInCell(vars_sorted, num, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp);
+     frce += IterateParticlesInCell(vars_sorted, num, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp , clf, cli);
 
     }
    }
@@ -327,6 +336,7 @@ __kernel void K_SumStep1(
     __constant struct GridParams* gp,
     __constant struct FluidParams* fp,
     __constant struct SPHParams* sphp
+    , __global float4* clf, __global int* cli
     )
 {
 
@@ -345,7 +355,7 @@ __kernel void K_SumStep1(
  float4 frce;
 
 
-    frce = IterateParticlesInNearbyCells(vars_sorted, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp);
+    frce = IterateParticlesInNearbyCells(vars_sorted, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
 
 
  if (fp->choice == 0) {

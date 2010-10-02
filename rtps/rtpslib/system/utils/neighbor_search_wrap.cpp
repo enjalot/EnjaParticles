@@ -51,7 +51,12 @@ void GE_SPH::neighbor_search(int which)
 	kern.setArg(iarg++, cl_GridParams->getDevicePtr());
 	kern.setArg(iarg++, cl_FluidParams->getDevicePtr());
 	kern.setArg(iarg++, cl_params->getDevicePtr());
+	kern.setArg(iarg++, clf_debug->getDevicePtr());
+	kern.setArg(iarg++, cli_debug->getDevicePtr());
 
+	GE_SPHParams& params = *(cl_params->getHostPtr());
+	printf("h= %f\n", params.smoothing_distance); 
+	printf("mass= %f\n", params.mass); 
 
 	size_t global = (size_t) nb_el;
 	int local = 128;

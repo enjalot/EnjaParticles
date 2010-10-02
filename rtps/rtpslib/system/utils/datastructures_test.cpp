@@ -80,6 +80,7 @@ __kernel void datastructures(
 	// Variables to sort could change for different types of simulations 
 	pos(index) = unsorted_pos(sorted_index);
 	vel(index) = unsorted_vel(sorted_index);
+	density(index) = unsorted_density(sorted_index); // only for debugging
 #endif
 }
 //----------------------------------------------------------------------
