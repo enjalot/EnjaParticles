@@ -35,7 +35,18 @@ void GE_SPH::computeEuler()
     kern.setArg(3, cl_params->getDevicePtr());
     kern.setArg(4, ps->settings.dt); //time step
 
-	printf("dt= %f\n", ps->settings.dt);
+//	printf("dt= %f\n", ps->settings.dt);
+
+	cl_vars_unsorted->copyToHost();
+	float4* vars = cl_vars_unsorted->getHostPtr();
+	printf("==================\n");
+	for (int i=0; i < 5; i++) {
+		int i1 = i + 1*nb_el;
+		int i2 = i + 2*nb_el;
+		printf("pos[%d] = %f, %f, %f, %f, %f\n", i, vars[i1].x, vars[i1].y, vars[i1].z, vars[i1].w);
+		printf("vel[%d] = %f, %f, %f, %f, %f\n", i, vars[i2].x, vars[i2].y, vars[i2].z, vars[i2].w);
+	}
+	
 
    	kern.execute(nb_el, workSize); 
 
