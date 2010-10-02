@@ -40,8 +40,9 @@ __kernel void ge_euler(
         uint originalIndex = sort_indices[i];
 
         // writeback to unsorted buffer
-		pos(originalIndex) = p;
-		vel(originalIndex) = v;
+		unsorted_pos(originalIndex) = p;
+		unsorted_vel(originalIndex) = v;
+
 		//force(originalIndex) = f;
         //dParticleData.position[originalIndex]   = make_vec(pos);
         //dParticleData.velocity[originalIndex]   = make_vec(vel);

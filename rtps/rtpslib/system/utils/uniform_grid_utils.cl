@@ -103,10 +103,6 @@ float4 ForNeighbor(__global float4* vars_sorted,
       __constant struct FluidParams* fp,
       __constant struct SPHParams* sphp)
 {
-
-
-
-
  int num = get_global_size(0);
 
  if (fp->choice == 0) {
@@ -118,7 +114,7 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
     float Wij = Wpoly6(rlen, sphp->smoothing_distance, sphp);
  return (float4)(sphp->mass*Wij, 0., 0., 0.);
-# 29 "neighbors.cpp" 2
+# 25 "neighbors.cpp" 2
  }
 
  if (fp->choice == 1) {
@@ -143,14 +139,8 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
 
  return kern*r;
-# 34 "neighbors.cpp" 2
+# 30 "neighbors.cpp" 2
  }
-
-
-
-
-
-
 }
 
 float4 ForPossibleNeighbor(__global float4* vars_sorted,
@@ -162,12 +152,7 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
         __constant struct FluidParams* fp,
         __constant struct SPHParams* sphp)
 {
- float4 frce;
- frce.x = 0.;
- frce.y = 0.;
- frce.z = 0.;
- frce.w = 0.;
-
+ float4 frce = (float4) (0.,0.,0.,0.);
 
 
  if (index_j != index_i) {
@@ -179,8 +164,7 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 
   float rlen_sq = dot(r,r);
 
-  float rlen;
-  rlen = sqrt(rlen_sq);
+  float rlen = length(rlen_sq);
 
 
   if (rlen <= fp->smoothing_length) {
@@ -271,7 +255,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 
 
   float4 frce = (float4) (0.,0.,0.,0.);
-
   uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
 
 
@@ -286,15 +269,10 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 
    for(uint index_j=startIndex; index_j < endIndex; index_j++) {
 
-
-
     frce += ForPossibleNeighbor(vars_sorted, num, index_i, index_j, position_i, gp, fp, sphp);
 
-
    }
-
   }
-
   return frce;
  }
 
@@ -316,10 +294,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
   float4 frce = (float4) (0.,0.,0.,0.);
 
 
-
-
-
-
   int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_inv_delta);
 
 
@@ -328,10 +302,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
    for(int y=cell.y-1; y<=cell.y+1; ++y) {
     for(int x=cell.x-1; x<=cell.x+1; ++x) {
      int4 ipos = (int4) (x,y,z,1);
-
-
-
-
 
 
      frce += IterateParticlesInCell(vars_sorted, num, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp);

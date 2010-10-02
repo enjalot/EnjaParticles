@@ -105,7 +105,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		// wrap edges (false)
 
 		float4 frce = (float4) (0.,0.,0.,0.); // = convert_float4(0.0);  (CREATES PROBLEMS)
-#if 1
 		uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
 
 		/* get start/end positions for this cell/bucket */
@@ -119,16 +118,11 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 
 			/* iterate over particles in this cell */
 			for(uint index_j=startIndex; index_j < endIndex; index_j++) {			
-				// For now, nothing to loop over. ADD WHEN CODE WORKS. 
-				// Is there a neighbor?
 #if 1
 				frce += ForPossibleNeighbor(vars_sorted, numParticles, index_i, index_j, position_i, gp, fp, sphp);
 #endif
-				//return;  // no crash
 			}
-			//return; // crash
 		}
-#endif
 		return frce;
 	}
 
@@ -149,10 +143,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		// initialize force on particle (collisions)
 		float4 frce = (float4) (0.,0.,0.,0.);
 #if 1
-		// How to choose which PreCalc to use? 
-		// TODO LATER
-		//PreCalc(data, index_i); // TODO
-
 		// get cell in grid for the given position
 		int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_inv_delta);
 
@@ -162,10 +152,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 			for(int y=cell.y-1; y<=cell.y+1; ++y) {
 				for(int x=cell.x-1; x<=cell.x+1; ++x) {
 					int4 ipos = (int4) (x,y,z,1);
-					//ipos.x = x;
-					//ipos.y = y;
-					//ipos.z = z;
-					//ipos.w = 1;
 	#if 1
 					// I am summing much more than required
 					frce += IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp);

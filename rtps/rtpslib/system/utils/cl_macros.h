@@ -39,6 +39,11 @@
 #define density(i) 	vars_sorted[i+DENS*numParticles].x
 #define force(i) 	vars_sorted[i+FOR*numParticles]
 
+#define unsorted_pos(i) 		vars_unsorted[i+POS*numParticles]
+#define unsorted_vel(i) 		vars_unsorted[i+VEL*numParticles]
+#define unsorted_density(i) 	vars_unsorted[i+DENS*numParticles].x
+#define unsorted_force(i) 		vars_unsorted[i+FOR*numParticles]
+
 //#define FETCH_NOTEX(a, t, i) a.t[i]
 #define FETCH_NOTEX(t, i) t[i]
 //#define FETCH_FLOAT3(a,t,i) make_float4(FETCH(a,t,i))
