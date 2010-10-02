@@ -68,9 +68,9 @@ void GE_SPH::sort()
 	//printf("enter sort diagonistics ****\n");
 	//printSortDiagnostics();
 
-	printf("enter computeCellStartEndCPU\n");
-	computeCellStartEndCPU();
-	printf("exit computeCellStartEndCPU\n");
+	//printf("enter computeCellStartEndCPU\n");
+	//computeCellStartEndCPU();
+	//printf("exit computeCellStartEndCPU\n");
 
 	//printf("EXIT SORT \n");
 }

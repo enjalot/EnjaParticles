@@ -218,8 +218,8 @@ void RadixSort::radixSortStepKeysValues(cl_mem d_keys, cl_mem d_values, unsigned
 
 	findRadixOffsetsOCL(startbit, numElements);
 
-	printf("numElements= %d\n", numElements);
-	printf("CTA_SIZE=%d\n", CTA_SIZE);
+	//printf("numElements= %d\n", numElements);
+	//printf("CTA_SIZE=%d\n", CTA_SIZE);
 	scan.scanExclusiveLarge(mCountersSum, mCounters, 1, numElements/2/CTA_SIZE*16);
 
 	//reorderDataKeysOnlyOCL(d_keys, startbit, numElements);

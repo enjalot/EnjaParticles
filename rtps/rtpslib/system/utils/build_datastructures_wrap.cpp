@@ -12,7 +12,7 @@ void GE_SPH::buildDataStructures()
 
 	//printf("buildData\n"); exit(0);
 
-	printf("ENTER BUILD\n");
+	//printf("ENTER BUILD\n");
 
 	ts_cl[TI_BUILD]->start();
 
@@ -38,7 +38,7 @@ void GE_SPH::buildDataStructures()
 
 	// HOW TO DEAL WITH ARGUMENTS
 
-	printf("BEFORE BUILD ARGS\n");
+	//printf("BEFORE BUILD ARGS\n");
 
 	// Set cl_cell_indices_start to -1 (0xffffffff)
 	// INEFFICIENTLY
@@ -63,7 +63,7 @@ void GE_SPH::buildDataStructures()
 	int nb_bytes = (workSize+1)*sizeof(int);
     kern.setArgShared(8, nb_bytes);
 
-	printf("AFTER BUILD ARGS\n");
+	//printf("AFTER BUILD ARGS\n");
 
 	int err;
 	//printf("EXECUTE BUILD\n");

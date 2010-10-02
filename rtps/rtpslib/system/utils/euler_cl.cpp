@@ -4,9 +4,14 @@
 
         
  
-__kernel void ge_euler(__global float4* vars_sorted, __constant struct SPHParams* params, __constant float dt)
+__kernel void ge_euler(
+		__global int* sort_indices,  
+		__global float4* vars_unsorted, 
+		__global float4* vars_sorted, 
+		__constant struct SPHParams* params, 
+		__constant float dt)
 {
-#if 0
+#if 1
     unsigned int i = get_global_id(0);
 	int num = get_global_size(0); // for access functions in cl_macros.h
 
@@ -27,8 +32,27 @@ __kernel void ge_euler(__global float4* vars_sorted, __constant struct SPHParams
     p += dt*v;
     p.w = 1.0f; //just in case
 
-    vel(i) = v;
-    pos(i) = p;
+    //vel(i) = v;
+    //pos(i) = p;
+
+    //if(progress)
+    //{
+        uint originalIndex = sort_indices[i];
+
+        // writeback to unsorted buffer
+		pos(originalIndex) = p;
+		vel(originalIndex) = v;
+		//force(originalIndex) = f;
+        //dParticleData.position[originalIndex]   = make_vec(pos);
+        //dParticleData.velocity[originalIndex]   = make_vec(vel);
+        //dParticleData.veleval[originalIndex]    = make_vec(vel_eval);
+
+        //float3 color = CalculateColor(coloringGradient, coloringSource, vnext, sph_pressure, sph_force);
+        //dParticleData.color[originalIndex]  = make_float4(color, 1);
+    //}
+
+
+
 #endif
 }
 

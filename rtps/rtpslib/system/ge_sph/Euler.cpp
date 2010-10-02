@@ -29,9 +29,11 @@ void GE_SPH::computeEuler()
 	Kernel kern = k_euler;
 	int workSize = 128;
 
-    kern.setArg(0, cl_vars_sorted->getDevicePtr());
-    kern.setArg(1, cl_params->getDevicePtr());
-    kern.setArg(2, ps->settings.dt); //time step
+    kern.setArg(0, cl_sort_indices->getDevicePtr());
+    kern.setArg(1, cl_vars_unsorted->getDevicePtr());
+    kern.setArg(2, cl_vars_sorted->getDevicePtr());
+    kern.setArg(3, cl_params->getDevicePtr());
+    kern.setArg(4, ps->settings.dt); //time step
 
    	kern.execute(nb_el, workSize); 
 

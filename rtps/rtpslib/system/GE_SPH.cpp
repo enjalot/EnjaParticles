@@ -250,7 +250,7 @@ void GE_SPH::update()
 	ts_cl[TI_UPDATE]->end(); // OK
 
 	count++;
-	printf("count= %d\n", count);
+	//printf("count= %d\n", count);
 	if (count%10 == 0) {
 		count = 0;
 		GE::Time::printAll();
@@ -390,16 +390,16 @@ void GE_SPH::computeOnGPU()
 		// Crashes (scan) every 3-4 tries. WHY???
 		// crashes more often if buildDataStructures is enabled. WHY? 
 		//printf("start sorting *****\n");
-		//sort();
-		bitonic_sort();
+		sort();
+		//bitonic_sort();
 		//exit(0);
 		//return;
 
 		buildDataStructures(); // BUG
 
-		printf("before neighbor search\n");
+		//printf("before neighbor search\n");
 		//neighbor_search();
-		printf("exit neighbor search\n");
+		//printf("exit neighbor search\n");
 		//exit(0);
 		//return;
 
@@ -421,7 +421,7 @@ void GE_SPH::computeOnGPU()
         //k_collision_wall.execute(num);
 
         // ***** EULER UPDATE *****
-		printf("before computeEuler\n");
+		//printf("before computeEuler\n");
 		computeEuler();
     }
 

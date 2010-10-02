@@ -222,19 +222,16 @@ __kernel void K_SumStep1(
     frce = IterateParticlesInNearbyCells(vars_sorted, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp);
 	#endif
 
-
-	// needed in this version
-	//FETCH_FOR(vars_sorted, index) = force;
-	//force = FETCH_FOR(vars_sorted, index);// = force;
-	//vars_sorted[index] = force;
-
-	//vars[mad(2,numParticles,index)] = force; // DOES NOT WORK
-	//vars[mad24(2,numParticles,index)] = force; // DOES NOT WORK
-
+	if (fp->choice == 0) { // update density
+		density(index) = frce.x;
+	}
+	if (fp->choice == 1) { // update pressure
+		force(index) = frce;
+	}
 
 	// Without this line, 7 ms, with this line, 25 ms (for 65k particles)
 	//vars[index+numParticles*FOR] = force; // 
-	force(index) = frce;
+	//force(index) = frce;
 
 	// Same cost as previous line if MAD (multiply/add) enabled
 	//vars[index] = force; // 

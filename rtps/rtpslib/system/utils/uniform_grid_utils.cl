@@ -386,8 +386,18 @@ __kernel void K_SumStep1(
 
 
     frce = IterateParticlesInNearbyCells(vars_sorted, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp);
-# 237 "uniform_grid_utils.cpp"
- vars_sorted[index+3*num] = frce;
+
+
+ if (fp->choice == 0) {
+  vars_sorted[index+0*num].x = frce.x;
+ }
+ if (fp->choice == 1) {
+  vars_sorted[index+3*num] = frce;
+ }
+
+
+
+
 
 
 
