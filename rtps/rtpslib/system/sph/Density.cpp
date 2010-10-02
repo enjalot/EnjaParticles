@@ -75,7 +75,8 @@ void SPH::cpuDensity()
             {
                 float r2 = dist_squared(r);
                 float re2 = h*h;
-                if(r2/re2 <= 4.f)
+                //if(r2/re2 <= 4.f)
+                //if(r/h <= 2.f)
                 {
                     //printf("i: %d j: %d\n", i, j);
                     neighbor_count++;
