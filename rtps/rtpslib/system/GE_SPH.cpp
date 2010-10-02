@@ -419,7 +419,8 @@ void GE_SPH::computeOnGPU()
         //k_collision_wall.execute(num);
 
         // ***** EULER UPDATE *****
-		//computeEuler();
+		printf("before computeEuler\n");
+		computeEuler();
     }
 
     cl_position->release();

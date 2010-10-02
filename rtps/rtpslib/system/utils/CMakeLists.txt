@@ -8,6 +8,7 @@ SET(FILES
    neighbors
    uniform_hash
    datastructures_test
+   euler_cl
 )  # ignore cpp extension
 
 # Only executes when I do "cmake"
