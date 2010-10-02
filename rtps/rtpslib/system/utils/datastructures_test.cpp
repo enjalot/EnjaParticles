@@ -4,12 +4,14 @@
 #ifndef _DATASTRUCTURES_
 #define _DATASTRUCTURES_
 
+#include "cl_macros.h"
+
 //----------------------------------------------------------------------
 __kernel void datastructures(
 					int	    numParticles,
 					int      nb_vars,
-					__global float4*   dParticles,
-					__global float4*   dParticlesSorted, 
+					__global float4*   vars_unsorted,
+					__global float4*   vars_sorted, 
 		   			__global uint* sort_hashes,
 		   			__global uint* sort_indices,
 		   			__global uint* cell_indices_start,
@@ -36,9 +38,7 @@ __kernel void datastructures(
 	if (index > 0 && tid == 0) {
 		// first thread in block must load neighbor particle hash
 		sharedHash[0] = sort_hashes[index-1];
-	} //else {
-		//sharedHash[0] = -1; // Why does adding this mess things up? 
-	//}
+	}
 
 #ifndef __DEVICE_EMULATION__
 	barrier(CLK_LOCAL_MEM_FENCE);
@@ -63,21 +63,25 @@ __kernel void datastructures(
 		cell_indices_end[hash] = index + 1;
 	}
 
-	uint sortedIndex = sort_indices[index];
+	uint sorted_index = sort_indices[index];
 
 	// Copy data from old unsorted buffer to sorted buffer
 
+	#if 0
 	for (int j=0; j < nb_vars; j++) {
-		dParticlesSorted[index+j*numParticles]	= dParticles[sortedIndex+j*numParticles];
+		vars_sorted[index+j*numParticles]	= vars_unsorted[sorted_index+j*numParticles];
 		//dParticlesSorted[index+j*numParticles].x = 3.; // = (float4) (3.,3.,3.,3.);
 		//dParticlesSorted[index+j*numParticles].y = 4.; // = (float4) (3.,3.,3.,3.);
 		//dParticlesSorted[index+j*numParticles].z = 5.; // = (float4) (3.,3.,3.,3.);
 		//dParticlesSorted[index+j*numParticles].w = 6.; // = (float4) (3.,3.,3.,3.);
 	}
+	#endif
+
+	// Variables to sort could change for different types of simulations 
+	pos(index) = unsorted_pos(sorted_index);
+	vel(index) = unsorted_vel(sorted_index);
 #endif
 }
 //----------------------------------------------------------------------
-
-//);
 
 #endif

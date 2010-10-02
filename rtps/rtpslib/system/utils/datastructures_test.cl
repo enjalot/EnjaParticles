@@ -8,12 +8,15 @@
 
 
 
+# 1 "cl_macros.h" 1
+# 8 "datastructures_test.cpp" 2
+
 
 __kernel void datastructures(
-     int numParticles,
+     int num,
      int nb_vars,
-     __global float4* dParticles,
-     __global float4* dParticlesSorted,
+     __global float4* vars_unsorted,
+     __global float4* vars_sorted,
         __global uint* sort_hashes,
         __global uint* sort_indices,
         __global uint* cell_indices_start,
@@ -24,7 +27,7 @@ __kernel void datastructures(
  uint index = get_global_id(0);
 
 
- if (index >= numParticles) return;
+ if (index >= num) return;
 
  uint hash = sort_hashes[index];
 
@@ -43,8 +46,6 @@ __kernel void datastructures(
  }
 
 
-
-
  barrier(CLK_LOCAL_MEM_FENCE);
 # 53 "datastructures_test.cpp"
  if ((index == 0 || hash != sharedHash[tid]) )
@@ -56,20 +57,13 @@ __kernel void datastructures(
  }
 
 
- if (index == numParticles - 1) {
+ if (index == num - 1) {
   cell_indices_end[hash] = index + 1;
  }
 
- uint sortedIndex = sort_indices[index];
-
-
-
- for (int j=0; j < nb_vars; j++) {
-  dParticlesSorted[index+j*numParticles] = dParticles[sortedIndex+j*numParticles];
-
-
-
-
- }
+ uint sorted_index = sort_indices[index];
+# 81 "datastructures_test.cpp"
+ vars_sorted[index+1*num] = vars_unsorted[sorted_index+1*num];
+ vars_sorted[index+2*num] = vars_unsorted[sorted_index+2*num];
 
 }

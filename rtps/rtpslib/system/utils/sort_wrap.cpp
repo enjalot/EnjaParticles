@@ -19,9 +19,9 @@ void GE_SPH::sort()
 	static bool first_time = true;
 	int ctaSize = 64; // work group size
 
-	//printf("ENTER SORT\n");
+	//printf("ENTER RADIX SORT\n");
 
-	ts_cl[TI_SORT]->start();
+	ts_cl[TI_RADIX_SORT]->start();
 
     try {
 		// if ctaSize is too large, sorting is not possible. Number of elements has to lie between some MIN 
@@ -63,7 +63,7 @@ void GE_SPH::sort()
 	}
 
     ps->cli->queue.finish();
-	ts_cl[TI_SORT]->end();
+	ts_cl[TI_RADIX_SORT]->end();
 
 	//printf("enter sort diagonistics ****\n");
 	//printSortDiagnostics();

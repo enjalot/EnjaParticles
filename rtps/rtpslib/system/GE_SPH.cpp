@@ -139,7 +139,8 @@ typedef struct GE_SPHParams
 	int time_offset = 5;
 
 	ts_cl[TI_HASH]   = new GE::Time("hash",      time_offset, print_freq);
-	ts_cl[TI_SORT]   = new GE::Time("sort",      time_offset, print_freq);
+	ts_cl[TI_RADIX_SORT]   = new GE::Time("radix sort",   time_offset, print_freq);
+	ts_cl[TI_BITONIC_SORT] = new GE::Time("bitonic sort", time_offset, print_freq);
 	ts_cl[TI_BUILD]  = new GE::Time("build",     time_offset, print_freq);
 	ts_cl[TI_NEIGH]  = new GE::Time("neigh",     time_offset, print_freq);
 	ts_cl[TI_DENS]   = new GE::Time("density",   time_offset, print_freq);
@@ -381,21 +382,14 @@ void GE_SPH::computeOnGPU()
     for(int i=0; i < 1; i++)
     {
 		// ***** Create HASH ****
-		//printf("before hash\n");
 		hash();
-		//printf("after hash\n");
-		//exit(0);
 
-		// SORTING NOT WORKING PROPERLY!! WHY?
-		// Crashes (scan) every 3-4 tries. WHY???
-		// crashes more often if buildDataStructures is enabled. WHY? 
-		//printf("start sorting *****\n");
+		// **** Sort arrays ****
 		sort();
 		//bitonic_sort();
-		//exit(0);
-		//return;
 
-		buildDataStructures(); // BUG
+		// **** Reorder pos, vel
+		buildDataStructures(); 
 
 		//printf("before neighbor search\n");
 		//neighbor_search();

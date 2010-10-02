@@ -37,7 +37,7 @@ void GE_SPH::bitonic_sort()
 
 	//printf("ENTER BISORT\n");
 
-	ts_cl[TI_SORT]->start();
+	ts_cl[TI_BITONIC_SORT]->start();
 
     try {
 		// if ctaSize is too large, sorting is not possible. Number of elements has to lie between some MIN 
@@ -123,7 +123,7 @@ void GE_SPH::bitonic_sort()
 	#endif
 
     ps->cli->queue.finish();
-	ts_cl[TI_SORT]->end();
+	ts_cl[TI_BITONIC_SORT]->end();
 
 	//printf("enter sort diagonistics ****\n");
 	//printBiSortDiagnostics(cl_sort_output_hashes, cl_sort_output_indices);

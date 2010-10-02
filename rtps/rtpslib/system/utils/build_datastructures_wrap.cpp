@@ -40,6 +40,8 @@ void GE_SPH::buildDataStructures()
 
 	//printf("BEFORE BUILD ARGS\n");
 
+	#if 0
+	// Slowdown by fact of 3
 	// Set cl_cell_indices_start to -1 (0xffffffff)
 	// INEFFICIENTLY
 	int* st = cl_cell_indices_start->getHostPtr();
@@ -47,6 +49,7 @@ void GE_SPH::buildDataStructures()
 		st[i] = 0xffffffff;
 	}
 	cl_cell_indices_start->copyToDevice();
+	#endif
 		
 
 	kern.setArg(0, nb_el);

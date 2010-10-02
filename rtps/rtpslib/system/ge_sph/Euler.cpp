@@ -35,6 +35,8 @@ void GE_SPH::computeEuler()
     kern.setArg(3, cl_params->getDevicePtr());
     kern.setArg(4, ps->settings.dt); //time step
 
+	printf("dt= %f\n", ps->settings.dt);
+
    	kern.execute(nb_el, workSize); 
 
     ps->cli->queue.finish();
