@@ -20,6 +20,8 @@ float4 ForNeighbor(__global float4*  vars_sorted,
 {
 	int num = get_global_size(0);
 
+	cli[index_i].x++;
+
 	if (fp->choice == 0) {
 		// update density
 		// return density.x for single neighbor
@@ -46,20 +48,31 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 	float4 frce = (float4) (0.,0.,0.,0.);
 
 	// check not colliding with self
-	if (index_j != index_i) {  // RESTORE WHEN DEBUGGED
-	//{
+	//if (index_j != index_i) {  // RESTORE WHEN DEBUGGED
+
+	// self-collisions ok when computing density
+	//if (fp->choice == 0 || index_j != index_i) {  // RESTORE WHEN DEBUGGED
+		//cli[index_i].y++;    // two less than cli[index_i].x  (WHY???) Should be one less
+	{
 		// get the particle info (in the current grid) to test against
 		float4 position_j = FETCH_POS(vars_sorted, index_j); // uses numParticles
 
 		// get the relative distance between the two particles, translate to simulation space
-		float4 r = (position_i - position_j) * fp->scale_to_simulation;
+		float4 r = (position_i - position_j); // * fp->scale_to_simulation;
 
 		float rlen_sq = dot(r,r);
 		// |r|
-		float rlen = length(rlen_sq);
+		float rlen = length(r);
+		//clf[index_i].x = rlen;
+		//clf[index_i].w = sphp->smoothing_distance;
 
 		// is this particle within cutoff?
-		if (rlen <= fp->smoothing_length) {
+	clf[index_i].x =  rlen;
+	clf[index_i].y =  sphp->smoothing_distance;
+	return frce;
+
+		if (rlen <= sphp->smoothing_distance) {
+			cli[index_i].z++;
 #if 1
 			frce = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, rlen_sq, gp, fp, sphp ARGS);
 #endif

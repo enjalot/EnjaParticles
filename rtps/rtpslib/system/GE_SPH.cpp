@@ -37,6 +37,21 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     velocities.resize(num);
     densities.resize(num);
 
+	double volume = 1024.*1024.*1024.; //(ft)
+	// 1 particle per cell
+	// grid resolution: res
+	int nb_cells_x = 64; // number of cells along x
+	// cell volume
+	double cell_size = 1024./nb_cells_x; // in ft
+	double cell_vol = cell_size*cell_size*cell_size; // ft^3
+
+	// Density (mass per unit vol)
+	// mass of water: 1 kg / dm^3 (62lb/ft^3)
+	// mass in single cell
+	double density = 62.; // water: 62 lb/ft^3
+	double mass_single_cell = density/ cell_vol; // lb (force or mass?)
+	printf("mass_single_cell= %f\n", mass_single_cell);
+
 
     //for reading back different values from the kernel
     std::vector<float4> error_check(num);
@@ -44,24 +59,39 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     
     //init sph stuff
     sph_settings.rest_density = 1000;
-    sph_settings.simulation_scale = .001;
+    //sph_settings.simulation_scale = .001; // should not be required if other parameters set correctly
+    sph_settings.simulation_scale = 1.0;
 
     sph_settings.particle_mass = (128*1024.)/num * .0002;
 	printf("num= %d\n", num);
 	printf("1 mass= %f\n", sph_settings.particle_mass);
+    sph_settings.particle_mass = mass_single_cell;
     printf("particle mass: %f\n", sph_settings.particle_mass);
+
+	// Do not know why required
     sph_settings.particle_rest_distance = .87 * pow(sph_settings.particle_mass / sph_settings.rest_density, 1./3.);
     printf("particle rest distance: %f\n", sph_settings.particle_rest_distance);
    
     sph_settings.smoothing_distance = 2.f * sph_settings.particle_rest_distance; // *2 decreases grid resolution
     sph_settings.boundary_distance = .5f * sph_settings.particle_rest_distance;
 
+	printf("rest_distance= %f\n", sph_settings.particle_rest_distance);
+	printf("simulation_scale= %f\n", sph_settings.simulation_scale);
+
     sph_settings.spacing = sph_settings.particle_rest_distance / sph_settings.simulation_scale;
-    float particle_radius = sph_settings.spacing;
+    sph_settings.spacing = cell_size;
+
+    float particle_radius = 0.5*sph_settings.spacing;  // one particle fits per cell (PERHAPS CHANGE?)
     printf("particle radius: %f\n", particle_radius);
+    sph_settings.smoothing_distance = particle_radius; 
+
+	double pi = 3.14;
+	double mass_one = (4.*pi)/3. * pow(particle_radius,3.) * density;
+	printf("mass_one= %f\n", mass_one);
+	exit(0); 
 
     //grid = UniformGrid(float3(0,0,0), float3(1024, 1024, 1024), sph_settings.smoothing_distance / sph_settings.simulation_scale);
-    grid = UniformGrid(float4(-512,0,-512,1.), float4(512, 1024, 512, 1.), sph_settings.smoothing_distance / sph_settings.simulation_scale);
+    grid = UniformGrid(float4(-512,0,-512,1.), float4(512, 1024, 512, 1.), nb_cells_x); //sph_settings.smoothing_distance / sph_settings.simulation_scale);
     grid.make_cube(&positions[0], sph_settings.spacing, num);
 
 /*

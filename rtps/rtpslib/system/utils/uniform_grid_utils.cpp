@@ -121,6 +121,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 			for(uint index_j=startIndex; index_j < endIndex; index_j++) {			
 #if 1
 				frce += ForPossibleNeighbor(vars_sorted, numParticles, index_i, index_j, position_i, gp, fp, sphp ARGS);
+		//cli[index_i].x++;  
 #endif
 			}
 		}
@@ -202,12 +203,15 @@ __kernel void K_SumStep1(
     frce = IterateParticlesInNearbyCells(vars_sorted, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
 	#endif
 
+
 	if (fp->choice == 0) { // update density
 		density(index) = frce.x;
+		// code reaches this point on first call
 	}
 	if (fp->choice == 1) { // update pressure
 		force(index) = frce;
 	}
+
 
 	// Without this line, 7 ms, with this line, 25 ms (for 65k particles)
 	//vars[index+numParticles*FOR] = force; // 

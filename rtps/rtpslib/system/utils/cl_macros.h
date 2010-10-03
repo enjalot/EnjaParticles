@@ -55,7 +55,7 @@
 
 
 // FOR DEBUGGING
-#define DUMMY_ARGS  , __global float4* clf, __global int* cli
+#define DUMMY_ARGS  , __global float4* clf, __global int4* cli
 #define       ARGS  , clf, cli
 
 

@@ -98,10 +98,12 @@ float4 ForNeighbor(__global float4* vars_sorted,
       __constant struct GridParams* gp,
       __constant struct FluidParams* fp,
       __constant struct SPHParams* sphp
-      , __global float4* clf, __global int* cli
+      , __global float4* clf, __global int4* cli
     )
 {
  int num = get_global_size(0);
+
+ cli[index_i].x++;
 
  if (fp->choice == 0) {
 
@@ -110,10 +112,22 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
 
 
-    float Wij = Wpoly6(rlen, sphp->smoothing_distance, sphp);
 
- return (float)(1., 0., 0., 0.);
-# 27 "neighbors.cpp" 2
+
+ float h = sphp->smoothing_distance;
+ clf[index_i].x = h;
+    float r2 = r.x*r.x + r.y*r.y + r.z*r.z;
+ float h9 = h*h;
+ float hr2 = (h9-r2);
+ h9 = h9*h;
+    float alpha = 315.f/64.0f/sphp->PI/(h9*h9*h9);
+
+ clf[index_i].z = hr2;
+ clf[index_i].w = sphp->mass;
+    float Wij = alpha * hr2*hr2*hr2;
+# 35 "density_update.cl"
+ return (float4)(sphp->mass*Wij, 0., 0., 0.);
+# 29 "neighbors.cpp" 2
  }
 
  if (fp->choice == 1) {
@@ -138,7 +152,7 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
 
  return kern*r;
-# 32 "neighbors.cpp" 2
+# 34 "neighbors.cpp" 2
  }
 }
 
@@ -150,26 +164,37 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
         __constant struct GridParams* gp,
         __constant struct FluidParams* fp,
         __constant struct SPHParams* sphp
-        , __global float4* clf, __global int* cli
+        , __global float4* clf, __global int4* cli
       )
 {
  float4 frce = (float4) (0.,0.,0.,0.);
 
 
- if (index_j != index_i) {
 
+
+
+
+
+ {
 
   float4 position_j = vars_sorted[index_j+1*num];
 
 
-  float4 r = (position_i - position_j) * fp->scale_to_simulation;
+  float4 r = (position_i - position_j);
 
   float rlen_sq = dot(r,r);
 
-  float rlen = length(rlen_sq);
+  float rlen = length(r);
 
 
-  if (rlen <= fp->smoothing_length) {
+
+
+ clf[index_i].x = rlen;
+ clf[index_i].y = sphp->smoothing_distance;
+ return frce;
+
+  if (rlen <= sphp->smoothing_distance) {
+   cli[index_i].z++;
 
    frce = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, rlen_sq, gp, fp, sphp , clf, cli);
 

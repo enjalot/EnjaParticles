@@ -4,6 +4,7 @@
 
 namespace rtps {
 
+//----------------------------------------------------------------------
 UniformGrid::UniformGrid(float4 min, float4 max, float cell_size)
 {
     this->min = min;
@@ -14,12 +15,12 @@ UniformGrid::UniformGrid(float4 min, float4 max, float cell_size)
                   max.y - min.y,
                   max.z - min.z, 1.);
 
-	//  how many points in each direction. 
+	//  how many cells in each direction. 
     res = float4(ceil(size.x / cell_size),
                  ceil(size.y / cell_size),
                  ceil(size.z / cell_size), 1.);
 
-	// Modified dimesions
+	// Modified dimensions
     size = float4(res.x * cell_size,
                   res.y * cell_size,
                   res.z * cell_size,
@@ -37,7 +38,30 @@ UniformGrid::UniformGrid(float4 min, float4 max, float cell_size)
 				   1.);
 
 }
+//----------------------------------------------------------------------
+UniformGrid::UniformGrid(float4 min, float4 max, int nb_cells_x)
+{
+    this->min = min;
+    this->max = max;
 
+	// domain dimensions
+    size = float4(max.x - min.x,
+                  max.y - min.y,
+                  max.z - min.z, 1.);
+
+	//  how many cells in each direction. 
+    res = float4(nb_cells_x, 
+    			 nb_cells_x, 
+    			 nb_cells_x, 
+    			 1);
+
+    delta = float4(size.x / res.x, 
+                   size.y / res.y,
+                   size.z / res.z, 
+				   1.);
+
+}
+//----------------------------------------------------------------------
 UniformGrid::~UniformGrid()
 {
 }

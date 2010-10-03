@@ -36,7 +36,16 @@ void GE_SPH::neighbor_search(int which)
 
 	Kernel kern = step1_kernel;
 
+	float4* fclf = clf_debug->getHostPtr();
+	int4* icli = cli_debug->getHostPtr();
+
 	int iarg = 0;
+	for (int i=0; i < nb_el; i++) { 
+		fclf[i].x = 0.; fclf[i].y = 0.; fclf[i].z = 0.; fclf[i].w = 0.;
+		icli[i].x = 0; icli[i].y = 0; icli[i].z = 0; icli[i].w = 0;
+	}
+	clf_debug->copyToDevice();
+	cli_debug->copyToDevice();
 
 	FluidParams* fp = cl_FluidParams->getHostPtr();
 	fp->choice = which;
@@ -54,6 +63,8 @@ void GE_SPH::neighbor_search(int which)
 	kern.setArg(iarg++, clf_debug->getDevicePtr());
 	kern.setArg(iarg++, cli_debug->getDevicePtr());
 
+
+
 	GE_SPHParams& params = *(cl_params->getHostPtr());
 	printf("h= %f\n", params.smoothing_distance); 
 	printf("mass= %f\n", params.mass); 
@@ -68,6 +79,17 @@ void GE_SPH::neighbor_search(int which)
 	//ts_cl[TI_NEIGH]->end();
 	if (which == 0) ts_cl[TI_DENS]->end();
 	if (which == 1) ts_cl[TI_PRES]->end();
+
+
+	clf_debug->copyToHost();
+	cli_debug->copyToHost();
+
+	for (int i=0; i < nb_el; i++) { 
+		printf("----------------------------\n");
+		printf("clf[%d]= %f, %f, %f, %f\n", i, fclf[i].x, fclf[i].y, fclf[i].z, fclf[i].w);
+		printf("cli[%d]= %d, %d, %d, %d\n", i, icli[i].x, icli[i].y, icli[i].z, icli[i].w);
+	}
+	exit(0);
 }
 //----------------------------------------------------------------------
 
