@@ -24,8 +24,8 @@
 	float dj = density(index_j);
 
 	//form simple SPH in Krog's thesis
-	float Pi = sphp->K*(di - 1000.0f); //rest density
-	float Pj = sphp->K*(dj - 1000.0f); //rest density
+	float Pi = sphp->K*(di - sphp->rest_density); 
+	float Pj = sphp->K*(dj - sphp->rest_density);
 
 	float kern = sphp->mass * 1.0f * Wij * (Pi + Pj) / (di * dj);
 

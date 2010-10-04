@@ -47,77 +47,50 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	int nb_cells_x = 64; // number of cells along x
 	// cell volume
 	double cell_size = domain_size_x/nb_cells_x; // in ft
-	printf("cell_size= %f\n", cell_size);
 
 	double pi = 3.14;
-	printf("*** cell_size= %f\n", cell_size);
-	double cell_volume = pow(cell_size, 3.); // ft^3
+	double cell_volume = pow(cell_size, 3.); // m^3
 
 	// Density (mass per unit vol)
 	// mass of water: 1000 kg/m^3  (62lb/ft^3)
 	// mass in single cell
 	double density = 1000.; // water: 62 lb/ft^3 = 1000 kg/m^3
 	double mass_single_cell = density * cell_volume; // lb (force or mass?)
-	//printf("*** mass_single_cell= %f\n", mass_single_cell);
 
 
     //for reading back different values from the kernel
     std::vector<float4> error_check(num);
     
-    
     //init sph stuff
     sph_settings.rest_density = density; //1000;
-    //sph_settings.simulation_scale = .001; // should not be required if other parameters set correctly
     sph_settings.simulation_scale = 1.0;
 
-    //sph_settings.particle_mass = (128*1024.)/num * .0002;
-	//printf("1 mass= %f\n", sph_settings.particle_mass);
-	//printf("num= %d\n", num);
-
     sph_settings.particle_mass = mass_single_cell;
-    //printf("*** sph_settings.particle mass: %f\n", sph_settings.particle_mass);
 
 	// Do not know why required
     sph_settings.particle_rest_distance = .87 * pow(sph_settings.particle_mass / sph_settings.rest_density, 1./3.);
-    //printf("particle rest distance: %f\n", sph_settings.particle_rest_distance);
    
     sph_settings.smoothing_distance = 2.f * sph_settings.particle_rest_distance; // *2 decreases grid resolution
     sph_settings.boundary_distance = .5f * sph_settings.particle_rest_distance;
 
-	//printf("rest_distance= %f\n", sph_settings.particle_rest_distance);
-	//printf("simulation_scale= %f\n", sph_settings.simulation_scale);
-
-    //sph_settings.spacing = sph_settings.particle_rest_distance / sph_settings.simulation_scale;
     sph_settings.spacing = cell_size;
 
 	// particle radius is the radius of the W function
-    float particle_radius = sph_settings.spacing;  // one particle fits per cell (PERHAPS CHANGE?)
-    //printf("particle radius: %f\n", particle_radius);
+    float particle_radius = 0.5*sph_settings.spacing;  // one particle fits per cell (PERHAPS CHANGE?)
 	double particle_volume = (4.*pi/3.) * pow(particle_radius, 3.);
-	//printf("particle_volume= %f\n", particle_volume);
 
-	//printf("cell_size= %f\n", cell_size);
     sph_settings.smoothing_distance = particle_radius*2;   // CHECK THIS. Width of W function
     sph_settings.particle_radius = particle_radius; 
 
-
 	// mass of single fluid particle
 	double mass_single_particle = particle_volume * density;
-	//double mass_one = pow(particle_radius,3.) * density;
-	//printf("*** particle_radius= %f\n", particle_radius);
-	//printf("*** mass_one= %f\n", mass_single_particle);
     sph_settings.particle_mass = mass_single_particle;
-    //printf("*** sph_settings.particle mass: %f\n", sph_settings.particle_mass);
 
-
-    //grid = UniformGrid(float3(0,0,0), float3(1024, 1024, 1024), sph_settings.smoothing_distance / sph_settings.simulation_scale);
 
 	float sz = domain_size_x;
 	int num_old = num;
     grid = UniformGrid(float4(0.,0.,0.,1.), float4(sz, sz, sz, 1.), nb_cells_x); 
 
-	//printf("spacing= %f\n", sph_settings.spacing);
-	//printf("cell size: %f\n", cell_size);
 	printf("**** particle covers four cells ****\n");
 
 	grid.delta.print("delta");
@@ -154,6 +127,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     params.grid_max = grid.getMax();
     params.mass = sph_settings.particle_mass;
     params.rest_distance = sph_settings.particle_rest_distance;
+    params.rest_density = sph_settings.rest_density;
     params.smoothing_distance = sph_settings.smoothing_distance;
     params.particle_radius = sph_settings.particle_radius;
     params.simulation_scale = sph_settings.simulation_scale;

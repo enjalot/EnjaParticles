@@ -42,6 +42,7 @@ struct SPHParams
     float grid_max_padding;
     float mass;
     float rest_distance;
+    float rest_density;
     float smoothing_distance;
     float particle_radius;
     float simulation_scale;

@@ -125,6 +125,7 @@ typedef struct GE_SPHParams
     float grid_max_padding;
     float mass;
     float rest_distance;
+    float rest_density;
     float smoothing_distance;
     float particle_radius;
     float simulation_scale;
@@ -144,6 +145,7 @@ typedef struct GE_SPHParams
 		printf("grid_max_padding= %f\n", grid_max_padding);
 		printf("mass= %f\n", mass);
 		printf("rest_distance= %f\n", rest_distance);
+		printf("rest_density= %f\n", rest_density);
 		printf("smoothing_distance= %f\n", smoothing_distance);
 		printf("particle_radius= %f\n", particle_radius);
 		printf("simulation_scale= %f\n", simulation_scale);
