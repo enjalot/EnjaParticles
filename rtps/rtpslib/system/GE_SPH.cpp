@@ -54,9 +54,9 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	double cell_volume = pow(cell_size, 3.); // ft^3
 
 	// Density (mass per unit vol)
-	// mass of water: 1 kg / dm^3 (62lb/ft^3)
+	// mass of water: 1000 kg/m^3  (62lb/ft^3)
 	// mass in single cell
-	double density = 62.; // water: 62 lb/ft^3
+	double density = 1000.; // water: 62 lb/ft^3 = 1000 kg/m^3
 	double mass_single_cell = density * cell_volume; // lb (force or mass?)
 	//printf("*** mass_single_cell= %f\n", mass_single_cell);
 
@@ -129,8 +129,8 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 
 	float x1 = domain_size_x*.2;
 	float x2 = domain_size_x*.8;
-	float z1 = domain_size_x*0.05;
-	float z2 = domain_size_x*.95;
+	float z1 = domain_size_x*0.65;
+	float z2 = domain_size_x*0.95;
 	float y1 = domain_size_x*0.2;
 	float y2 = domain_size_x*.8;
 	float4 pmin(x1, y1, z1, 1.);
@@ -157,8 +157,8 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     params.smoothing_distance = sph_settings.smoothing_distance;
     params.particle_radius = sph_settings.particle_radius;
     params.simulation_scale = sph_settings.simulation_scale;
-    params.boundary_stiffness = 200.;  //10000.0f;
-    params.boundary_dampening = 100.; //256.0f;
+    params.boundary_stiffness = 10000.;  //10000.0f;
+    params.boundary_dampening = 256.; //256.0f;
     params.boundary_distance = sph_settings.particle_rest_distance * .5f;
     params.EPSILON = .00001f;
     params.PI = 3.14159265f;

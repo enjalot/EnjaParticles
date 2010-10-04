@@ -130,25 +130,16 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
 
 # 1 "pressure_update.cl" 1
+# 20 "pressure_update.cl"
+ float Wij = Wspiky(rlen, sphp->smoothing_distance, sphp);
 
 
-
-
- float Wij;
-
- float pi45 = 45.f/sphp->PI;
- float h = sphp->smoothing_distance;
-    float h3 = h*h*h;
-    float alpha = pi45/h3;
- float hr2 = 1.f - rlen/h;
- Wij = alpha * hr2*hr2*hr2/rlen;
-# 23 "pressure_update.cl"
  float di = vars_sorted[index_i+0*num].x;
  float dj = vars_sorted[index_j+0*num].x;
 
 
- float Pi = sphp->K*(di - 1000.0f);
- float Pj = sphp->K*(dj - 1000.0f);
+ float Pi = sphp->K*(di - 62.0f);
+ float Pj = sphp->K*(dj - 62.0f);
 
  float kern = sphp->mass * 1.0f * Wij * (Pi + Pj) / (di * dj);
 

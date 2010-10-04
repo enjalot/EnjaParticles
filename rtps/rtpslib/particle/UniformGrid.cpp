@@ -97,8 +97,8 @@ void UniformGrid::makeCube(float4* position, float4 pmin, float4 pmax, float spa
 {
     int i=0;
 
-    for (float y = pmin.y; y <= pmax.y; y+=spacing) {
     for (float z = pmin.z; z <= pmax.z; z+=spacing) {
+    for (float y = pmin.y; y <= pmax.y; y+=spacing) {
     for (float x = pmin.x; x <= pmax.x; x+=spacing) {
         if (i >= num) break;
         position[i++] = float4(x,y,z,1.0f);

@@ -1,7 +1,7 @@
 #ifndef _PRESSURE_UPDATE_CL_
 #define _PRESSURE_UPDATE_CL_
 
-#if 1
+#if -1
 	float Wij;
 	#if 1
 	float pi45 = 45.f/sphp->PI;
