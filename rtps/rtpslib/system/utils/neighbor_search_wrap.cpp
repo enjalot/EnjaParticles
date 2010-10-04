@@ -39,6 +39,7 @@ void GE_SPH::neighbor_search(int which)
 	float4* fclf = clf_debug->getHostPtr();
 	int4* icli = cli_debug->getHostPtr();
 
+	// Need to set this to zero
 	int iarg = 0;
 	for (int i=0; i < nb_el; i++) { 
 		fclf[i].x = 0.; fclf[i].y = 0.; fclf[i].z = 0.; fclf[i].w = 0.;
@@ -85,12 +86,14 @@ void GE_SPH::neighbor_search(int which)
 	clf_debug->copyToHost();
 	cli_debug->copyToHost();
 
+	#if 1
 	for (int i=0; i < nb_el; i++) { 
 		printf("----------------------------\n");
 		printf("clf[%d]= %f, %f, %f, %f\n", i, fclf[i].x, fclf[i].y, fclf[i].z, fclf[i].w);
 		printf("cli[%d]= %d, %d, %d, %d\n", i, icli[i].x, icli[i].y, icli[i].z, icli[i].w);
 	}
-	//exit(0);
+	#endif
+	if (which ==1) exit(0);
 }
 //----------------------------------------------------------------------
 

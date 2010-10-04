@@ -495,12 +495,16 @@ void GE_SPH::computeOnGPU()
 		neighbor_search(0); //density
 		printf("after DENSITY CALCULATION\n");
 
-		#if 0
+		#if 1
 		// ***** PRESSURE UPDATE *****
         //computePressure();
         //k_pressure.execute(num);
 		neighbor_search(1); //pressure
+		printf("after PRESSURE CALCULATION\n");
+		//exit(1);
+		#endif
 
+		#if 0
 		// ***** VISCOSITY UPDATE *****
         //computeViscosity();
 
@@ -510,17 +514,21 @@ void GE_SPH::computeOnGPU()
 
         // ***** EULER UPDATE *****
 		//printf("before computeEuler\n");
-		computeEuler();
+		//computeEuler();
 
 		//  print out density
 		cl_vars_unsorted->copyToHost();
 		float4* density = cl_vars_unsorted->getHostPtr() + 0*nb_el;
 		float4* density1 = cl_vars_sorted->getHostPtr() + 0*nb_el;
+		float4* force = cl_vars_unsorted->getHostPtr() + 3*nb_el;
+		float4* force1 = cl_vars_sorted->getHostPtr() + 3*nb_el;
 		for (int i=0; i < nb_el; i++) {
 			printf("==================\n");
 			printf("dens[%d]= %f, sorted den: %f\n", i, density[i].x, density1[i].x);
+			printf("force[%d]= %f, sorted force: %f\n", i, force[i].x, force1[i].x);
 		}
     }
+	exit(0);
 
     cl_position->release();
     cl_color->release();

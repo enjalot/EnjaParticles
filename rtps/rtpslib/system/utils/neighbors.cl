@@ -111,6 +111,7 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
  if (fp->choice == 0) {
   cli[index_i].y++;
+  cli[index_i].w = -999.;
 
 
 # 1 "density_update.cl" 1
@@ -119,18 +120,28 @@ float4 ForNeighbor(__global float4* vars_sorted,
 # 35 "density_update.cl"
  clf[index_i].x = sphp->mass;
  clf[index_i].y = Wij;
+ cli[index_i].x = -17.;
  return (float4)(sphp->mass*Wij, 0., 0., 0.);
-# 33 "neighbors.cpp" 2
+# 34 "neighbors.cpp" 2
  }
 
  if (fp->choice == 1) {
+
 
 # 1 "pressure_update.cl" 1
 
 
 
- float Wij = Wspiky(rlen, sphp->smoothing_distance, sphp);
 
+ float Wij;
+
+ float pi45 = 45.f/sphp->PI;
+ float h = sphp->smoothing_distance;
+    float h3 = h*h*h;
+    float alpha = pi45/h3;
+ float hr2 = 1.f - rlen/h;
+ Wij = alpha * hr2*hr2*hr2/rlen;
+# 23 "pressure_update.cl"
  float di = vars_sorted[index_i+0*num].x;
  float dj = vars_sorted[index_j+0*num].x;
 
@@ -143,9 +154,17 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
 
 
+ cli[index_i].y++;
+ cli[index_i].x = -998;
 
  return kern*r;
-# 38 "neighbors.cpp" 2
+
+ clf[index_i].x = sphp->smoothing_distance;
+ clf[index_i].y = di;
+ clf[index_i].z = Pi;
+ clf[index_i].w = kern;
+ return Wij;
+# 40 "neighbors.cpp" 2
  }
 }
 
@@ -167,8 +186,9 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 
 
 
+ if (fp->choice == 0 || index_j != index_i) {
 
- {
+
 
   float4 position_j = vars_sorted[index_j+1*num];
 
@@ -178,11 +198,14 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
   float rlen_sq = dot(r,r);
 
   float rlen = length(r);
-# 80 "neighbors.cpp"
+# 83 "neighbors.cpp"
   if (rlen <= sphp->smoothing_distance) {
    cli[index_i].z++;
 
    frce = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, rlen_sq, gp, fp, sphp , clf, cli);
+
+
+
 
   }
  }

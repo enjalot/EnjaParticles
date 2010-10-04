@@ -27,6 +27,7 @@ float4 ForNeighbor(__global float4*  vars_sorted,
 
 	if (fp->choice == 0) {
 		cli[index_i].y++;
+		cli[index_i].w = -999.;
 		// update density
 		// return density.x for single neighbor
 		#include "density_update.cl"
@@ -34,6 +35,7 @@ float4 ForNeighbor(__global float4*  vars_sorted,
 
 	if (fp->choice == 1) {
 		// update pressure
+//clf[index_i].w = -17.;
 		#include "pressure_update.cl"
 	}
 }
@@ -55,14 +57,15 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 	//if (index_j != index_i) {  // RESTORE WHEN DEBUGGED
 
 	// self-collisions ok when computing density
-	//if (fp->choice == 0 || index_j != index_i) {  // RESTORE WHEN DEBUGGED
+	// no self-collisions in the case of pressure
+	if (fp->choice == 0 || index_j != index_i) {  // RESTORE WHEN DEBUGGED
 		//cli[index_i].y++;    // two less than cli[index_i].x  (WHY???) Should be one less
-	{
+	//{
 		// get the particle info (in the current grid) to test against
-		float4 position_j = FETCH_POS(vars_sorted, index_j); // uses numParticles
+		float4 position_j = pos(index_j); //FETCH_POS(vars_sorted, index_j); // uses numParticles
 
 		// get the relative distance between the two particles, translate to simulation space
-		float4 r = (position_i - position_j); // * fp->scale_to_simulation;
+		float4 r = (position_i - position_j); 
 	//clf[index_i] = position_i; return frce;
 		float rlen_sq = dot(r,r);
 		// |r|
@@ -81,6 +84,9 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 			cli[index_i].z++;
 #if 1
 			frce = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, rlen_sq, gp, fp, sphp ARGS);
+			// the force summation is different than if I put clf inside pressure_update.cl
+			//clf[index_i] += frce;
+			//cli[index_i].w = 2;
 #endif
 		}
 	}

@@ -118,13 +118,17 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 			uint endIndex = FETCH(cell_indexes_end, cellHash);
 
 			/* iterate over particles in this cell */
+//clf[index_i].w = -17.;
 			for(uint index_j=startIndex; index_j < endIndex; index_j++) {			
 				//cli[index_i].x++;  
 #if 1
 				frce += ForPossibleNeighbor(vars_sorted, numParticles, index_i, index_j, position_i, gp, fp, sphp ARGS);
+				//clf[index_i] += frce;
+				//cli[index_i].w = 3;
 #endif
 			}
 		}
+		//clf[index_i] = frce;
 		return frce;
 	}
 
@@ -159,6 +163,9 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 	#if 1
 					// I am summing much more than required
 					frce += IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp ARGS);
+				clf[index_i] += frce;
+				cli[index_i].w = 4;
+				// SERIOUS PROBLEM: Results different than results with cli = 5 (bottom of this file)
 	#endif
 				}
 			}
@@ -189,20 +196,13 @@ __kernel void K_SumStep1(
     if (index >= numParticles) return;
 
 
-	//This is done as part of the template approach since the Data can then be used as a template object 
-	//in Cuda
-	//vars = vars_sorted; // not needed
-
     float4 position_i = pos(index);
 
     // Do calculations on particles in neighboring cells
 
-	float4 frce;
-
 	#if 1
-    frce = IterateParticlesInNearbyCells(vars_sorted, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
+    float4 frce = IterateParticlesInNearbyCells(vars_sorted, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
 	#endif
-
 
 	if (fp->choice == 0) { // update density
 		density(index) = frce.x;
@@ -210,15 +210,10 @@ __kernel void K_SumStep1(
 	}
 	if (fp->choice == 1) { // update pressure
 		force(index) = frce;
+		//cli[index].w = 5;
+		//clf[index] = frce;
+		// SERIOUS PROBLEM: Results different than results with cli = 4 (bottom of this file)
 	}
-
-
-	// Without this line, 7 ms, with this line, 25 ms (for 65k particles)
-	//vars[index+numParticles*FOR] = force; // 
-	//force(index) = frce;
-
-	// Same cost as previous line if MAD (multiply/add) enabled
-	//vars[index] = force; // 
 }
 
 /*-------------------------------------------------------------- */

@@ -115,6 +115,7 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
  if (fp->choice == 0) {
   cli[index_i].y++;
+  cli[index_i].w = -999.;
 
 
 # 1 "density_update.cl" 1
@@ -123,18 +124,28 @@ float4 ForNeighbor(__global float4* vars_sorted,
 # 35 "density_update.cl"
  clf[index_i].x = sphp->mass;
  clf[index_i].y = Wij;
+ cli[index_i].x = -17.;
  return (float4)(sphp->mass*Wij, 0., 0., 0.);
-# 33 "neighbors.cpp" 2
+# 34 "neighbors.cpp" 2
  }
 
  if (fp->choice == 1) {
+
 
 # 1 "pressure_update.cl" 1
 
 
 
- float Wij = Wspiky(rlen, sphp->smoothing_distance, sphp);
 
+ float Wij;
+
+ float pi45 = 45.f/sphp->PI;
+ float h = sphp->smoothing_distance;
+    float h3 = h*h*h;
+    float alpha = pi45/h3;
+ float hr2 = 1.f - rlen/h;
+ Wij = alpha * hr2*hr2*hr2/rlen;
+# 23 "pressure_update.cl"
  float di = vars_sorted[index_i+0*num].x;
  float dj = vars_sorted[index_j+0*num].x;
 
@@ -147,9 +158,17 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
 
 
+ cli[index_i].y++;
+ cli[index_i].x = -998;
 
  return kern*r;
-# 38 "neighbors.cpp" 2
+
+ clf[index_i].x = sphp->smoothing_distance;
+ clf[index_i].y = di;
+ clf[index_i].z = Pi;
+ clf[index_i].w = kern;
+ return Wij;
+# 40 "neighbors.cpp" 2
  }
 }
 
@@ -171,8 +190,9 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 
 
 
+ if (fp->choice == 0 || index_j != index_i) {
 
- {
+
 
   float4 position_j = vars_sorted[index_j+1*num];
 
@@ -182,11 +202,14 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
   float rlen_sq = dot(r,r);
 
   float rlen = length(r);
-# 80 "neighbors.cpp"
+# 83 "neighbors.cpp"
   if (rlen <= sphp->smoothing_distance) {
    cli[index_i].z++;
 
    frce = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, rlen_sq, gp, fp, sphp , clf, cli);
+
+
+
 
   }
  }
@@ -285,13 +308,17 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
    uint endIndex = cell_indexes_end[cellHash];
 
 
+
    for(uint index_j=startIndex; index_j < endIndex; index_j++) {
 
 
     frce += ForPossibleNeighbor(vars_sorted, num, index_i, index_j, position_i, gp, fp, sphp , clf, cli);
 
+
+
    }
   }
+
   return frce;
  }
 
@@ -326,6 +353,9 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 
 
      frce += IterateParticlesInCell(vars_sorted, num, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp , clf, cli);
+    clf[index_i] += frce;
+    cli[index_i].w = 4;
+
 
     }
    }
@@ -356,19 +386,14 @@ __kernel void K_SumStep1(
     if (index >= num) return;
 
 
-
-
-
-
     float4 position_i = vars_sorted[index+1*num];
 
 
 
- float4 frce;
+ float4 frce = (float4) (0.,0.,0.,0.);
 
 
     frce = IterateParticlesInNearbyCells(vars_sorted, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
-
 
 
  if (fp->choice == 0) {
@@ -377,6 +402,9 @@ __kernel void K_SumStep1(
  }
  if (fp->choice == 1) {
   vars_sorted[index+3*num] = frce;
+  cli[index].w = 5;
+  clf[index] = frce;
+
  }
-# 222 "uniform_grid_utils.cpp"
+# 227 "uniform_grid_utils.cpp"
 }
