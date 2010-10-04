@@ -66,7 +66,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     
     
     //init sph stuff
-    sph_settings.rest_density = 1000;
+    sph_settings.rest_density = density; //1000;
     //sph_settings.simulation_scale = .001; // should not be required if other parameters set correctly
     sph_settings.simulation_scale = 1.0;
 
@@ -127,12 +127,12 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 
     //grid.make_cube(&positions[0], sph_settings.spacing, num);
 
-	float x1 = domain_size_x*.05;
-	float x2 = domain_size_x*.95;
+	float x1 = domain_size_x*.2;
+	float x2 = domain_size_x*.8;
 	float z1 = domain_size_x*0.05;
 	float z2 = domain_size_x*.95;
-	float y1 = domain_size_x*0.05;
-	float y2 = domain_size_x*.95;
+	float y1 = domain_size_x*0.2;
+	float y2 = domain_size_x*.8;
 	float4 pmin(x1, y1, z1, 1.);
 	float4 pmax(x2, y2, z2, 1.);
 	grid.makeCube(&positions[0], pmin, pmax, sph_settings.spacing, num);
@@ -157,8 +157,8 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     params.smoothing_distance = sph_settings.smoothing_distance;
     params.particle_radius = sph_settings.particle_radius;
     params.simulation_scale = sph_settings.simulation_scale;
-    params.boundary_stiffness = 10000.0f;
-    params.boundary_dampening = 256.0f;
+    params.boundary_stiffness = 200.;  //10000.0f;
+    params.boundary_dampening = 100.; //256.0f;
     params.boundary_distance = sph_settings.particle_rest_distance * .5f;
     params.EPSILON = .00001f;
     params.PI = 3.14159265f;
