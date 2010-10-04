@@ -204,9 +204,6 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     cl_density     = new BufferGE<float>(ps->cli, &densities[0], densities.size());
     cl_error_check = new BufferGE<float4>(ps->cli, &error_check[0], error_check.size());
 
-    //printf("create collision wall kernel\n");
-    //loadCollision_wall();
-
 	setupArrays(); // From GE structures
 
 	printf("=========================================\n");
@@ -234,6 +231,8 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	ts_cl[TI_VISC]   = new GE::Time("viscosity", time_offset, print_freq);
 	ts_cl[TI_EULER]  = new GE::Time("euler",     time_offset, print_freq);
 	ts_cl[TI_UPDATE] = new GE::Time("update",    time_offset, print_freq);
+	ts_cl[TI_COLLISION_WALL] 
+	                 = new GE::Time("collision wall",    time_offset, print_freq);
 	//ps->setTimers(ts_cl);
 
 	// copy pos, vel, dens into vars_unsorted()
@@ -351,7 +350,7 @@ void GE_SPH::update()
 
 	count++;
 	//printf("count= %d\n", count);
-	if (count%10 == 0) {
+	if (count%20 == 0) {
 		count = 0;
 		GE::Time::printAll();
 	}
@@ -501,10 +500,10 @@ void GE_SPH::computeOnGPU()
 		#if 0
 		// ***** VISCOSITY UPDATE *****
         //computeViscosity();
+		#endif
 
 		// ***** WALL COLLISIONS *****
-        //k_collision_wall.execute(num);
-		#endif
+		computeCollisionWall();
 
         // ***** EULER UPDATE *****
 		computeEuler();

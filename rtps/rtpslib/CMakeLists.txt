@@ -60,6 +60,7 @@ set (rtpslib_SOURCES
 	${rtpslib_SOURCE_DIR}/system/utils/hash_wrap.cpp
 	${rtpslib_SOURCE_DIR}/system/utils/sort_wrap.cpp
 	${rtpslib_SOURCE_DIR}/system/utils/bitonic_sort_wrap.cpp
+	${rtpslib_SOURCE_DIR}/system/utils/collision_wall_wrap.cpp
 
     ${rtpslib_SOURCE_DIR}/RTPS.cpp
     ${rtpslib_SOURCE_DIR}/RTPSettings.cpp
@@ -77,7 +78,6 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/ge_sph/Density.cpp
     ${rtpslib_SOURCE_DIR}/system/ge_sph/Pressure.cpp
     ${rtpslib_SOURCE_DIR}/system/ge_sph/Viscosity.cpp
-    ${rtpslib_SOURCE_DIR}/system/ge_sph/Collision_wall.cpp
 
 
 
