@@ -67,9 +67,13 @@ void RTPS::render()
 
     UniformGrid grid = system->getGrid();
     //should check if grid exists
-    renderer->render_box(grid.getMin(), grid.getMax());
 
+	glPushMatrix();
+	float scale = 20;
+	glScalef(scale,scale,scale);
+    renderer->render_box(grid.getMin(), grid.getMax());
     renderer->render();
+	glPopMatrix();
 }
 
 }

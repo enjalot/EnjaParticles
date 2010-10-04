@@ -513,7 +513,7 @@ void GE_SPH::computeOnGPU()
 		computeEuler();
 		printf("after computeEuler\n");
 
-		#if 0
+		#if 1
 		//  print out density
 		cl_vars_unsorted->copyToHost();
 		cl_vars_sorted->copyToHost();
@@ -528,21 +528,21 @@ void GE_SPH::computeOnGPU()
 		float4* vel1     = cl_vars_sorted->getHostPtr() + 2*nb_el;
 		float4* force1   = cl_vars_sorted->getHostPtr() + 3*nb_el;
 
-		for (int i=0; i < nb_el; i++) {
+		for (int i=30; i < 31; i++) {
 			printf("==================\n");
-			printf("dens[%d]= %f, sorted den: %f\n", i, density[i].x, density1[i].x);
+			//printf("dens[%d]= %f, sorted den: %f\n", i, density[i].x, density1[i].x);
 			pos[i].print("un pos");
 			vel[i].print("un vel");
 			force[i].print("un force");
-			pos1[i].print("so pos1");
-			vel1[i].print("so vel1");
-			force1[i].print("so force1");
+			//pos1[i].print("so pos1");
+			//vel1[i].print("so vel1");
+			//force1[i].print("so force1");
 		} 
-		exit(0);
+		//exit(0);
 		#endif
 	}
 
-	printf("before release\n");
+	//printf("before release\n");
     cl_position->release();
     cl_color->release();
 }

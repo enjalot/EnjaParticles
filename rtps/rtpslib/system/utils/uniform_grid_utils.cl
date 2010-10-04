@@ -108,14 +108,14 @@ float4 ForNeighbor(__global float4* vars_sorted,
 {
  int num = get_global_size(0);
 
- cli[index_i].x++;
+
 
 
 
 
  if (fp->choice == 0) {
-  cli[index_i].y++;
-  cli[index_i].w = -999.;
+
+
 
 
 # 1 "density_update.cl" 1
@@ -203,7 +203,7 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
   float rlen = length(r);
 # 83 "neighbors.cpp"
   if (rlen <= sphp->smoothing_distance) {
-   cli[index_i].z++;
+
 
    frce = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, rlen_sq, gp, fp, sphp , clf, cli);
 

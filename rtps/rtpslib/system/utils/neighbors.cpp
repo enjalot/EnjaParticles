@@ -20,14 +20,14 @@ float4 ForNeighbor(__global float4*  vars_sorted,
 {
 	int num = get_global_size(0);
 
-	cli[index_i].x++;
+	//cli[index_i].x++;
 	//cli[index_i].y = fp->choice;
 	//clf[index_i].x = fp->choice;
 	//cli[index_i].x = fp->choice;
 
 	if (fp->choice == 0) {
-		cli[index_i].y++;
-		cli[index_i].w = -999.;
+		//cli[index_i].y++;
+		//cli[index_i].w = -999.;
 		// update density
 		// return density.x for single neighbor
 		#include "density_update.cl"
@@ -81,7 +81,7 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 	//return frce;
 
 		if (rlen <= sphp->smoothing_distance) {
-			cli[index_i].z++;
+			//cli[index_i].z++;
 #if 1
 			frce = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, rlen_sq, gp, fp, sphp ARGS);
 			// the force summation is different than if I put clf inside pressure_update.cl
