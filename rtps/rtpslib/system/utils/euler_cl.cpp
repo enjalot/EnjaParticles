@@ -11,7 +11,7 @@ __kernel void ge_euler(
 		// should not be required since part of vars_unsorted
 		__global float4* positions,  // for VBO 
 		__constant struct SPHParams* params, 
-		__constant float dt)
+		float dt)
 {
 #if 1
     unsigned int i = get_global_id(0);
