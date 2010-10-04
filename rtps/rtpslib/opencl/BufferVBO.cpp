@@ -12,7 +12,8 @@ BufferVBO<T>::BufferVBO(CL *cli, GLuint vbo_id)
 
     this->cli = cli;
 	if (vbo_id == -1) {
-		glGenBuffers(1, &vbo_id);
+		//glGenBuffers(1, &vbo_id);
+        vbo_id = registerVBO();
 	}
 
 	this->vbo_id = vbo_id;

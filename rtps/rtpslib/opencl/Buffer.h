@@ -18,12 +18,9 @@ template <class T>
 class Buffer
 {
 public:
-    Buffer(){ cli=NULL; vbo_id=0; };
+    Buffer(){ cli=NULL; };
     //create an OpenCL buffer from existing data
     Buffer(CL *cli, const std::vector<T> &data);
-    //create a OpenCL BufferGL from a vbo_id
-    //if managed is true then the destructor will delete the VBO
-    Buffer(CL *cli, GLuint vbo_id=-1);
     ~Buffer();
 
     //we will want to access buffers by name when going across systems
@@ -33,13 +30,6 @@ public:
     std::vector<cl::Memory> cl_buffer;
 
     CL *cli;
-
-    //if this is a VBO we store its id
-    GLuint vbo_id;
-
-    //need to acquire and release arrays from OpenGL context if we have a VBO
-    void acquire();
-    void release();
 
     void copyToDevice(const std::vector<T> &data);
     std::vector<T> copyToHost(int num);

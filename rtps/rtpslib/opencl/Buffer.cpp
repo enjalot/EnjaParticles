@@ -14,30 +14,8 @@ Buffer<T>::Buffer(CL *cli, const std::vector<T> &data)
 
 
 template <class T>
-Buffer<T>::Buffer(CL *cli, GLuint vbo_id)
-{
-    this->cli = cli;
-    cl_buffer.push_back(cl::BufferGL(cli->context, CL_MEM_READ_WRITE, vbo_id, &cli->err));
-}
-
-template <class T>
 Buffer<T>::~Buffer()
 {
-}
-
-template <class T>
-void Buffer<T>::acquire()
-{
-    cli->err = cli->queue.enqueueAcquireGLObjects(&cl_buffer, NULL, &cli->event);
-    cli->queue.finish();
-}
-
-
-template <class T>
-void Buffer<T>::release()
-{
-    cli->err = cli->queue.enqueueReleaseGLObjects(&cl_buffer, NULL, &cli->event);
-    cli->queue.finish();
 }
 
 

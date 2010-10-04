@@ -13,7 +13,10 @@
  * 
  */
 
-#include <oclUtils.h>
+//#include <oclUtils.h>
+#include "CL/cl.hpp"
+#include <string.h>
+#include <stdio.h>
 #include "oclSortingNetworks_common.h"
 
 extern "C" void closeBitonicSort(void);
@@ -45,7 +48,7 @@ extern "C" void initBitonicSort(cl_context cxGPUContext, cl_command_queue cqPara
         //char *cBitonicSort = oclLoadProgSource(shrFindFilePath("BitonicSort.cl", argv[0]), "// My comment\n", &kernelLength);
         //oclCheckError(cBitonicSort != NULL, shrTRUE);
 
-	string paths(CL_BITONIC_SORT_SOURCE_DIR);
+    std::string paths(CL_BITONIC_SORT_SOURCE_DIR);
 	paths = paths + "/BitonicSort.cl";
 	const char* pathr = paths.c_str();
 	FILE* fd =fopen(pathr, "r");
