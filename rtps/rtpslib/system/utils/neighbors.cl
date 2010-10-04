@@ -117,10 +117,7 @@ float4 ForNeighbor(__global float4* vars_sorted,
 # 1 "density_update.cl" 1
 # 21 "density_update.cl"
     float Wij = Wpoly6(r, sphp->smoothing_distance, sphp);
-# 35 "density_update.cl"
- clf[index_i].x = sphp->mass;
- clf[index_i].y = Wij;
- cli[index_i].x = -17.;
+# 38 "density_update.cl"
  return (float4)(sphp->mass*Wij, 0., 0., 0.);
 # 34 "neighbors.cpp" 2
  }
@@ -152,10 +149,12 @@ float4 ForNeighbor(__global float4* vars_sorted,
  float kern = sphp->mass * 1.0f * Wij * (Pi + Pj) / (di * dj);
 
 
+ cli[index_i].w = 1;
 
 
- cli[index_i].y++;
- cli[index_i].x = -998;
+
+
+
 
  return kern*r;
 

@@ -22,18 +22,23 @@ __kernel void ge_euler(
     //external force is gravity
     f.z += -9.8f;
 
+	// REMOVE FOR DEBUGGING
+	#if 0
     float speed = length(f);
     if(speed > 600.0f) //velocity limit, need to pass in as struct
     {
         f *= 600.0f/speed;
     }
+	#endif
 
-    v += dt*f / params->simulation_scale;
+    v += dt*f;  //    / params->simulation_scale;
     p += dt*v;
     p.w = 1.0f; //just in case
 
-    //vel(i) = v;
-    //pos(i) = p;
+	// REMOVE AFTER DEBUGGED
+    vel(i) = v;
+    pos(i) = p;
+	force(i) = f; // ONLY FOR DEBUGGING
 
         uint originalIndex = sort_indices[i];
 
@@ -41,6 +46,7 @@ __kernel void ge_euler(
 		unsorted_pos(originalIndex) = p;
 		unsorted_vel(originalIndex) = v;
 		unsorted_density(originalIndex) = density(i); // FOR DEBUGGING ONLY
+		unsorted_force(originalIndex) = f; // FOR DEBUGGING ONLY
 #endif
 }
 

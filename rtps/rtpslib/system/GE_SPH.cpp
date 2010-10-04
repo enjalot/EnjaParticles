@@ -490,15 +490,11 @@ void GE_SPH::computeOnGPU()
 		buildDataStructures(); 
 
 		// ***** DENSITY UPDATE *****
-		//computeDensity();
-		//checkDensity();
 		neighbor_search(0); //density
 		printf("after DENSITY CALCULATION\n");
 
 		#if 1
 		// ***** PRESSURE UPDATE *****
-        //computePressure();
-        //k_pressure.execute(num);
 		neighbor_search(1); //pressure
 		printf("after PRESSURE CALCULATION\n");
 		//exit(1);
@@ -513,19 +509,33 @@ void GE_SPH::computeOnGPU()
 		#endif
 
         // ***** EULER UPDATE *****
-		//printf("before computeEuler\n");
-		//computeEuler();
+		printf("before computeEuler\n");
+		computeEuler();
 
 		//  print out density
 		cl_vars_unsorted->copyToHost();
+		cl_vars_sorted->copyToHost();
+
 		float4* density = cl_vars_unsorted->getHostPtr() + 0*nb_el;
+		float4* pos     = cl_vars_unsorted->getHostPtr() + 1*nb_el;
+		float4* vel     = cl_vars_unsorted->getHostPtr() + 2*nb_el;
+		float4* force   = cl_vars_unsorted->getHostPtr() + 3*nb_el;
+
 		float4* density1 = cl_vars_sorted->getHostPtr() + 0*nb_el;
-		float4* force = cl_vars_unsorted->getHostPtr() + 3*nb_el;
-		float4* force1 = cl_vars_sorted->getHostPtr() + 3*nb_el;
+		float4* pos1     = cl_vars_sorted->getHostPtr() + 1*nb_el;
+		float4* vel1     = cl_vars_sorted->getHostPtr() + 2*nb_el;
+		float4* force1   = cl_vars_sorted->getHostPtr() + 3*nb_el;
+
 		for (int i=0; i < nb_el; i++) {
+		//for (int i=0; i < 10; i++) {
 			printf("==================\n");
 			printf("dens[%d]= %f, sorted den: %f\n", i, density[i].x, density1[i].x);
-			printf("force[%d]= %f, sorted force: %f\n", i, force[i].x, force1[i].x);
+			pos[i].print("un pos");
+			vel[i].print("un vel");
+			force[i].print("un force");
+			pos1[i].print("so pos1");
+			vel1[i].print("so vel1");
+			force1[i].print("so force1");
 		}
     }
 	exit(0);

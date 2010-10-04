@@ -121,10 +121,7 @@ float4 ForNeighbor(__global float4* vars_sorted,
 # 1 "density_update.cl" 1
 # 21 "density_update.cl"
     float Wij = Wpoly6(r, sphp->smoothing_distance, sphp);
-# 35 "density_update.cl"
- clf[index_i].x = sphp->mass;
- clf[index_i].y = Wij;
- cli[index_i].x = -17.;
+# 38 "density_update.cl"
  return (float4)(sphp->mass*Wij, 0., 0., 0.);
 # 34 "neighbors.cpp" 2
  }
@@ -156,10 +153,12 @@ float4 ForNeighbor(__global float4* vars_sorted,
  float kern = sphp->mass * 1.0f * Wij * (Pi + Pj) / (di * dj);
 
 
+ cli[index_i].w = 1;
 
 
- cli[index_i].y++;
- cli[index_i].x = -998;
+
+
+
 
  return kern*r;
 
@@ -353,8 +352,10 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 
 
      frce += IterateParticlesInCell(vars_sorted, num, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp , clf, cli);
-    clf[index_i] += frce;
-    cli[index_i].w = 4;
+
+
+
+
 
 
     }
@@ -390,10 +391,8 @@ __kernel void K_SumStep1(
 
 
 
- float4 frce = (float4) (0.,0.,0.,0.);
 
-
-    frce = IterateParticlesInNearbyCells(vars_sorted, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
+    float4 frce = IterateParticlesInNearbyCells(vars_sorted, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
 
 
  if (fp->choice == 0) {
@@ -401,10 +400,10 @@ __kernel void K_SumStep1(
 
  }
  if (fp->choice == 1) {
+
   vars_sorted[index+3*num] = frce;
   cli[index].w = 5;
   clf[index] = frce;
 
  }
-# 227 "uniform_grid_utils.cpp"
 }

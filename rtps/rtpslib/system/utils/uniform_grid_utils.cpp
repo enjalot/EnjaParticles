@@ -123,7 +123,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 				//cli[index_i].x++;  
 #if 1
 				frce += ForPossibleNeighbor(vars_sorted, numParticles, index_i, index_j, position_i, gp, fp, sphp ARGS);
-				//clf[index_i] += frce;
+				//clf[index_i] = frce;
 				//cli[index_i].w = 3;
 #endif
 			}
@@ -163,8 +163,10 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 	#if 1
 					// I am summing much more than required
 					frce += IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp ARGS);
-				clf[index_i] += frce;
-				cli[index_i].w = 4;
+
+				//barrier(CLK_LOCAL_MEM_FENCE); // DEBUG
+				//clf[index_i] = frce;
+				//cli[index_i].w = 4;
 				// SERIOUS PROBLEM: Results different than results with cli = 5 (bottom of this file)
 	#endif
 				}
@@ -209,9 +211,10 @@ __kernel void K_SumStep1(
 		// code reaches this point on first call
 	}
 	if (fp->choice == 1) { // update pressure
-		force(index) = frce;
-		//cli[index].w = 5;
-		//clf[index] = frce;
+		//barrier(CLK_LOCAL_MEM_FENCE); // DEBUG
+		force(index) = frce; // Does not seem maintain value into euler.cl
+		cli[index].w = 5;
+		clf[index] = frce;
 		// SERIOUS PROBLEM: Results different than results with cli = 4 (bottom of this file)
 	}
 }

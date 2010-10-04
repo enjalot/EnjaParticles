@@ -87,13 +87,14 @@ void GE_SPH::neighbor_search(int which)
 	cli_debug->copyToHost();
 
 	#if 1
-	for (int i=0; i < nb_el; i++) { 
+	//for (int i=0; i < nb_el; i++) { 
+	for (int i=0; i < 10; i++) { 
 		printf("----------------------------\n");
 		printf("clf[%d]= %f, %f, %f, %f\n", i, fclf[i].x, fclf[i].y, fclf[i].z, fclf[i].w);
 		printf("cli[%d]= %d, %d, %d, %d\n", i, icli[i].x, icli[i].y, icli[i].z, icli[i].w);
 	}
 	#endif
-	if (which ==1) exit(0);
+	//if (which ==1) exit(0);
 }
 //----------------------------------------------------------------------
 

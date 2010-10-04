@@ -37,6 +37,7 @@ void GE_SPH::computeEuler()
 
 //	printf("dt= %f\n", ps->settings.dt);
 
+	#if 0
 	cl_vars_unsorted->copyToHost();
 	float4* vars = cl_vars_unsorted->getHostPtr();
 	printf("==================\n");
@@ -46,6 +47,7 @@ void GE_SPH::computeEuler()
 		printf("pos[%d] = %f, %f, %f, %f, %f\n", i, vars[i1].x, vars[i1].y, vars[i1].z, vars[i1].w);
 		printf("vel[%d] = %f, %f, %f, %f, %f\n", i, vars[i2].x, vars[i2].y, vars[i2].z, vars[i2].w);
 	}
+	#endif
 	
 
    	kern.execute(nb_el, workSize); 
