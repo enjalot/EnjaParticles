@@ -402,8 +402,8 @@ __kernel void K_SumStep1(
  if (fp->choice == 1) {
 
   vars_sorted[index+3*num] = frce;
-  cli[index].w = 5;
-  clf[index] = frce;
+
+
 
  }
 }

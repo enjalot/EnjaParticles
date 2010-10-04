@@ -83,10 +83,10 @@ void GE_SPH::neighbor_search(int which)
 	if (which == 1) ts_cl[TI_PRES]->end();
 
 
+	#if 0
 	clf_debug->copyToHost();
 	cli_debug->copyToHost();
 
-	#if 1
 	//for (int i=0; i < nb_el; i++) { 
 	for (int i=0; i < 10; i++) { 
 		printf("----------------------------\n");

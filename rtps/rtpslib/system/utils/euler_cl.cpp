@@ -36,9 +36,11 @@ __kernel void ge_euler(
     p.w = 1.0f; //just in case
 
 	// REMOVE AFTER DEBUGGED
+	#if 0
     vel(i) = v;
     pos(i) = p;
 	force(i) = f; // ONLY FOR DEBUGGING
+	#endif
 
         uint originalIndex = sort_indices[i];
 

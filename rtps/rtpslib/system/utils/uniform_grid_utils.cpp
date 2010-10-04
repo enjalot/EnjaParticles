@@ -213,8 +213,8 @@ __kernel void K_SumStep1(
 	if (fp->choice == 1) { // update pressure
 		//barrier(CLK_LOCAL_MEM_FENCE); // DEBUG
 		force(index) = frce; // Does not seem maintain value into euler.cl
-		cli[index].w = 5;
-		clf[index] = frce;
+		//cli[index].w = 5;
+		//clf[index] = frce;
 		// SERIOUS PROBLEM: Results different than results with cli = 4 (bottom of this file)
 	}
 }
