@@ -36,21 +36,23 @@ void GE_SPH::neighbor_search(int which)
 
 	Kernel kern = step1_kernel;
 
+	#if 0
 	float4* fclf = clf_debug->getHostPtr();
 	int4* icli = cli_debug->getHostPtr();
 
 	// Need to set this to zero
-	int iarg = 0;
 	for (int i=0; i < nb_el; i++) { 
 		fclf[i].x = 0.; fclf[i].y = 0.; fclf[i].z = 0.; fclf[i].w = 0.;
 		icli[i].x = 0; icli[i].y = 0; icli[i].z = 0; icli[i].w = 0;
 	}
 	clf_debug->copyToDevice();
 	cli_debug->copyToDevice();
+	#endif
 
 	FluidParams* fp = cl_FluidParams->getHostPtr();
 	fp->choice = which;
 	cl_FluidParams->copyToDevice();
+	int iarg = 0;
 	
 	kern.setArg(iarg++, nb_el);
 	kern.setArg(iarg++, nb_vars);
@@ -66,9 +68,11 @@ void GE_SPH::neighbor_search(int which)
 
 
 
+	#if 0
 	GE_SPHParams& params = *(cl_params->getHostPtr());
 	printf("h= %f\n", params.smoothing_distance); 
 	printf("mass= %f\n", params.mass); 
+	#endif
 
 	size_t global = (size_t) nb_el;
 	int local = 128;

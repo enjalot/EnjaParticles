@@ -131,21 +131,22 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	float x2 = domain_size_x*.7;
 	float z1 = domain_size_x*.2;
 	float z2 = domain_size_x*.8;
-	float  y = domain_size_x*.5;
-	float4 pmin(x1, y, z1, 1.);
-	float4 pmax(x2, y, z2, 1.);
+	float y1 = domain_size_x*.4;
+	float y2 = domain_size_x*.6;
+	float4 pmin(x1, y1, z1, 1.);
+	float4 pmax(x2, y2, z2, 1.);
 	grid.makeCube(&positions[0], pmin, pmax, sph_settings.spacing, num);
 
 	if (num != num_old) {
+		printf("Less than the full number of particles are used\n");
 		printf("mismatch of num. Deal with it\n");
 		printf("num, num_old= %d, %d\n", num, num_old);
 		exit(1);
 	}
 
-	for (int i=0; i < num; i++) {
-		positions[i].print("pos");
-	}
-//void UniformGrid::makeCube(float4* position, float4 pmin, float4 pmax, float spacing, int num)
+	//for (int i=0; i < num; i++) {
+		//positions[i].print("pos");
+	//}
 
     cl_params = new BufferGE<GE_SPHParams>(ps->cli, 1);
 	GE_SPHParams& params = *(cl_params->getHostPtr());
@@ -195,7 +196,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 
     //vbo buffers
     cl_position = new BufferVBO<float4>(ps->cli, pos_vbo);
-    cl_color = new BufferVBO<float4>(ps->cli, col_vbo);
+    cl_color    = new BufferVBO<float4>(ps->cli, col_vbo);
 
     //pure opencl buffers
     cl_force       = new BufferGE<float4>(ps->cli, &forces[0], forces.size());
@@ -204,7 +205,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     cl_error_check = new BufferGE<float4>(ps->cli, &error_check[0], error_check.size());
 
     //printf("create collision wall kernel\n");
-    loadCollision_wall();
+    //loadCollision_wall();
 
 	setupArrays(); // From GE structures
 
@@ -491,13 +492,10 @@ void GE_SPH::computeOnGPU()
 
 		// ***** DENSITY UPDATE *****
 		neighbor_search(0); //density
-		printf("after DENSITY CALCULATION\n");
 
 		#if 1
 		// ***** PRESSURE UPDATE *****
 		neighbor_search(1); //pressure
-		printf("after PRESSURE CALCULATION\n");
-		//exit(1);
 		#endif
 
 		#if 0
@@ -509,11 +507,21 @@ void GE_SPH::computeOnGPU()
 		#endif
 
         // ***** EULER UPDATE *****
-		printf("before computeEuler\n");
 		computeEuler();
-		printf("after computeEuler\n");
 
-		#if 1
+		#if 0
+		//Update position array (should be done on GPU)
+		cl_vars_unsorted->copyToHost();
+		float4* pos  = cl_vars_unsorted->getHostPtr() + 1*nb_el;
+		for (int i=0; i < nb_el; i++) {
+			//printf("i= %d\n", i);
+			positions[i] = pos[i];
+		}
+		positions[50].print("pos50");
+		#endif
+
+
+		#if 0
 		//  print out density
 		cl_vars_unsorted->copyToHost();
 		cl_vars_sorted->copyToHost();

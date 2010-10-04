@@ -8,6 +8,8 @@ __kernel void ge_euler(
 		__global int* sort_indices,  
 		__global float4* vars_unsorted, 
 		__global float4* vars_sorted, 
+		// should not be required since part of vars_unsorted
+		__global float4* positions,  // for VBO 
 		__constant struct SPHParams* params, 
 		__constant float dt)
 {
@@ -23,7 +25,7 @@ __kernel void ge_euler(
     f.z += -9.8f;
 
 	// REMOVE FOR DEBUGGING
-	#if 0
+	#if 1
     float speed = length(f);
     if(speed > 600.0f) //velocity limit, need to pass in as struct
     {
@@ -47,8 +49,9 @@ __kernel void ge_euler(
         // writeback to unsorted buffer
 		unsorted_pos(originalIndex) = p;
 		unsorted_vel(originalIndex) = v;
-		unsorted_density(originalIndex) = density(i); // FOR DEBUGGING ONLY
-		unsorted_force(originalIndex) = f; // FOR DEBUGGING ONLY
+		//unsorted_density(originalIndex) = density(i); // FOR DEBUGGING ONLY
+		//unsorted_force(originalIndex) = f; // FOR DEBUGGING ONLY
+		positions[originalIndex] = f; 
 #endif
 }
 

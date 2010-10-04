@@ -32,8 +32,9 @@ void GE_SPH::computeEuler()
     kern.setArg(0, cl_sort_indices->getDevicePtr());
     kern.setArg(1, cl_vars_unsorted->getDevicePtr());
     kern.setArg(2, cl_vars_sorted->getDevicePtr());
-    kern.setArg(3, cl_params->getDevicePtr());
-    kern.setArg(4, ps->settings.dt); //time step
+    kern.setArg(3, cl_position->getDevicePtr());
+    kern.setArg(4, cl_params->getDevicePtr());
+    kern.setArg(5, ps->settings.dt); //time step
 
 //	printf("dt= %f\n", ps->settings.dt);
 
