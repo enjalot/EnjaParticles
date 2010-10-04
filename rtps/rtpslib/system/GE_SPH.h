@@ -10,7 +10,7 @@
 #include "../RTPS.h"
 #include "System.h"
 #include "../opencl/Kernel.h"
-//#include "../opencl/Buffer.h"
+#include "../opencl/Buffer.h"
 #include "../opencl/BufferGE.h"
 #include "../opencl/BufferVBO.h"
 //#include "../util.h"

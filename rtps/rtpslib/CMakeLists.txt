@@ -83,7 +83,7 @@ set (rtpslib_SOURCES
 
 
     #${rtpslib_SOURCE_DIR}/system/SPH.cpp
-    #${rtpslib_SOURCE_DIR}/opencl/Buffer.cpp
+   ${rtpslib_SOURCE_DIR}/opencl/Buffer.cpp
 
     #${rtpslib_SOURCE_DIR}/system/sph/Euler.cpp
     #${rtpslib_SOURCE_DIR}/system/sph/Density.cpp
