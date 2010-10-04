@@ -21,8 +21,8 @@ struct FluidParams
 {
 	float smoothing_length; // SPH radius
 	float scale_to_simulation;
-	float mass;
-	float dt; // Time step, not necessarily best location
+	//float mass;
+	//float dt; // Time step, not necessarily best location
 	float friction_coef;
 	float restitution_coef;
 	float damping;

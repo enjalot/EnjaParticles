@@ -40,6 +40,17 @@ typedef struct GE_SPHSettings
     float spacing;
     float grid_cell_size;
 
+	void print() {
+		printf("----- GE_SPHSettings ----\n");
+		printf("rest_density: %f\n", rest_density);
+		printf("simulation_scale: %f\n", simulation_scale);
+		printf("particle_mass: %f\n", particle_mass);
+		printf("smoothing_distance: %f\n", smoothing_distance);
+		printf("boundary_distance: %f\n", boundary_distance);
+		printf("spacing: %f\n", spacing);
+		printf("grid_cell_size: %f\n", grid_cell_size);
+	}
+
 } GE_SPHSettings;
 
 //-------------------------
@@ -56,6 +67,17 @@ struct GridParams
     float4          grid_delta;
     float4          grid_inv_delta;
 	int				numParticles;
+
+	void print() {
+		printf("----- GridParms ----\n");
+		grid_size.print("grid_size"); 
+		grid_min.print("grid_min"); 
+		grid_max.print("grid_max"); 
+		grid_res.print("grid_res"); 
+		grid_delta.print("grid_delta"); 
+		grid_inv_delta.print("grid_inv_delta"); 
+		printf("numParticles= %d\n", numParticles);
+	}
 };
 
 // GORDON Datastructure for Fluid parameters. To be reconciled with Ian's
@@ -64,7 +86,7 @@ struct FluidParams
 {
 	float smoothing_length; // SPH radius
 	float scale_to_simulation;
-	float mass;
+	//float mass;
 	float dt;
 	float friction_coef;
 	float restitution_coef;
@@ -74,6 +96,21 @@ struct FluidParams
 	float spring;
 	float gravity; // -9.8 m/sec^2
 	int   choice; // which kind of calculation to invoke
+
+	void print() {
+		printf("----- FluidParams ----\n");
+		printf("scale_to_simulation: %f\n", scale_to_simulation);
+		//printf("mass: %f\n", mass);
+		//printf("dt: %f\n", dt);
+		printf("friction_coef: %f\n", friction_coef);
+		printf("restitution_coef: %f\n", restitution_coef);
+		printf("damping: %f\n", damping);
+		printf("shear: %f\n", shear);
+		printf("attraction: %f\n", attraction);
+		printf("spring: %f\n", spring);
+		printf("gravity: %f\n", gravity);
+		printf("choice: %d\n", choice);
+	}
 };
 //-------------------------
 
@@ -93,7 +130,26 @@ typedef struct GE_SPHParams
     float boundary_distance;
     float EPSILON;
     float PI;       //delicious
-    float K;        //speed of sound
+    float K;        //speed of sound (what units?)
+
+	void print()
+	{
+		printf("----- GE_SPHParams ----\n");
+		grid_min.print("grid_min");
+		grid_max.print("grid_max");
+		printf("grid_min_padding= %f\n", grid_min_padding);
+		printf("grid_max_padding= %f\n", grid_max_padding);
+		printf("mass= %f\n", mass);
+		printf("rest_distance= %f\n", rest_distance);
+		printf("smoothing_distance= %f\n", smoothing_distance);
+		printf("simulation_scale= %f\n", simulation_scale);
+		printf("boundary_stiffness= %f\n", boundary_stiffness);
+		printf("boundary_dampening= %f\n", boundary_dampening);
+		printf("boundary_distance= %f\n", boundary_distance);
+		printf("EPSILON= %f\n", EPSILON);
+		printf("PI= %f\n", PI);
+		printf("K= %f\n", K);
+	}
 } GE_SPHParams __attribute__((aligned(16)));
 
 class GE_SPH : public System

@@ -66,6 +66,7 @@ UniformGrid::~UniformGrid()
 {
 }
 
+//----------------------------------------------------------------------
 void UniformGrid::make_cube(float4* position, float spacing, int num)
 {
     //float xmin = min.x/2.5f;
@@ -91,5 +92,20 @@ void UniformGrid::make_cube(float4* position, float spacing, int num)
 
 }
 
+//----------------------------------------------------------------------
+void UniformGrid::makeCube(float4* position, float4 pmin, float4 pmax, float spacing, int& num)
+{
+    int i=0;
+
+    for (float y = pmin.y; y <= pmax.y; y+=spacing) {
+    for (float z = pmin.z; z <= pmax.z; z+=spacing) {
+    for (float x = pmin.x; x <= pmax.x; x+=spacing) {
+        if (i >= num) break;
+        position[i++] = float4(x,y,z,1.0f);
+    }}}
+
+	num = i;
+}
+//----------------------------------------------------------------------
 
 } // namespace
