@@ -51,7 +51,7 @@ __kernel void ge_euler(
 		unsorted_vel(originalIndex) = v;
 		//unsorted_density(originalIndex) = density(i); // FOR DEBUGGING ONLY
 		//unsorted_force(originalIndex) = f; // FOR DEBUGGING ONLY
-		positions[originalIndex] = f; 
+		positions[originalIndex] = p; 
 #endif
 }
 
