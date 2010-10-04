@@ -31,8 +31,8 @@ struct FluidParams
 {
  float smoothing_length;
  float scale_to_simulation;
- float mass;
- float dt;
+
+
  float friction_coef;
  float restitution_coef;
  float damping;
@@ -53,6 +53,7 @@ struct SPHParams
     float mass;
     float rest_distance;
     float smoothing_distance;
+    float particle_radius;
     float simulation_scale;
     float boundary_stiffness;
     float boundary_dampening;
@@ -105,29 +106,21 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
  cli[index_i].x++;
 
+
+
+
  if (fp->choice == 0) {
+  cli[index_i].y++;
 
 
 # 1 "density_update.cl" 1
-
-
-
-
-
- float h = sphp->smoothing_distance;
- clf[index_i].x = h;
-    float r2 = r.x*r.x + r.y*r.y + r.z*r.z;
- float h9 = h*h;
- float hr2 = (h9-r2);
- h9 = h9*h;
-    float alpha = 315.f/64.0f/sphp->PI/(h9*h9*h9);
-
- clf[index_i].z = hr2;
- clf[index_i].w = sphp->mass;
-    float Wij = alpha * hr2*hr2*hr2;
+# 21 "density_update.cl"
+    float Wij = Wpoly6(r, sphp->smoothing_distance, sphp);
 # 35 "density_update.cl"
+ clf[index_i].x = sphp->mass;
+ clf[index_i].y = Wij;
  return (float4)(sphp->mass*Wij, 0., 0., 0.);
-# 29 "neighbors.cpp" 2
+# 33 "neighbors.cpp" 2
  }
 
  if (fp->choice == 1) {
@@ -152,7 +145,7 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
 
  return kern*r;
-# 34 "neighbors.cpp" 2
+# 38 "neighbors.cpp" 2
  }
 }
 
@@ -185,14 +178,7 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
   float rlen_sq = dot(r,r);
 
   float rlen = length(r);
-
-
-
-
- clf[index_i].x = rlen;
- clf[index_i].y = sphp->smoothing_distance;
- return frce;
-
+# 80 "neighbors.cpp"
   if (rlen <= sphp->smoothing_distance) {
    cli[index_i].z++;
 

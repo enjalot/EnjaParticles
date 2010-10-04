@@ -43,6 +43,7 @@ struct SPHParams
     float mass;
     float rest_distance;
     float smoothing_distance;
+    float particle_radius;
     float simulation_scale;
     float boundary_stiffness;
     float boundary_dampening;

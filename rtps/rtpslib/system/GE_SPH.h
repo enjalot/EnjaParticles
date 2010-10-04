@@ -36,6 +36,7 @@ typedef struct GE_SPHSettings
     float particle_mass;
     float particle_rest_distance;
     float smoothing_distance;
+    float particle_radius;
     float boundary_distance;
     float spacing;
     float grid_cell_size;
@@ -46,6 +47,7 @@ typedef struct GE_SPHSettings
 		printf("simulation_scale: %f\n", simulation_scale);
 		printf("particle_mass: %f\n", particle_mass);
 		printf("smoothing_distance: %f\n", smoothing_distance);
+		printf("particle_radius: %f\n", particle_radius);
 		printf("boundary_distance: %f\n", boundary_distance);
 		printf("spacing: %f\n", spacing);
 		printf("grid_cell_size: %f\n", grid_cell_size);
@@ -87,7 +89,7 @@ struct FluidParams
 	float smoothing_length; // SPH radius
 	float scale_to_simulation;
 	//float mass;
-	float dt;
+	//float dt;
 	float friction_coef;
 	float restitution_coef;
 	float damping;
@@ -124,6 +126,7 @@ typedef struct GE_SPHParams
     float mass;
     float rest_distance;
     float smoothing_distance;
+    float particle_radius;
     float simulation_scale;
     float boundary_stiffness;
     float boundary_dampening;
@@ -142,6 +145,7 @@ typedef struct GE_SPHParams
 		printf("mass= %f\n", mass);
 		printf("rest_distance= %f\n", rest_distance);
 		printf("smoothing_distance= %f\n", smoothing_distance);
+		printf("particle_radius= %f\n", particle_radius);
 		printf("simulation_scale= %f\n", simulation_scale);
 		printf("boundary_stiffness= %f\n", boundary_stiffness);
 		printf("boundary_dampening= %f\n", boundary_dampening);

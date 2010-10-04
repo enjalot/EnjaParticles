@@ -31,8 +31,8 @@ struct FluidParams
 {
  float smoothing_length;
  float scale_to_simulation;
- float mass;
- float dt;
+
+
  float friction_coef;
  float restitution_coef;
  float damping;
@@ -53,6 +53,7 @@ struct SPHParams
     float mass;
     float rest_distance;
     float smoothing_distance;
+    float particle_radius;
     float simulation_scale;
     float boundary_stiffness;
     float boundary_dampening;

@@ -119,9 +119,9 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 
 			/* iterate over particles in this cell */
 			for(uint index_j=startIndex; index_j < endIndex; index_j++) {			
+				//cli[index_i].x++;  
 #if 1
 				frce += ForPossibleNeighbor(vars_sorted, numParticles, index_i, index_j, position_i, gp, fp, sphp ARGS);
-		//cli[index_i].x++;  
 #endif
 			}
 		}

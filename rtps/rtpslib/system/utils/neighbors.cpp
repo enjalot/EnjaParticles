@@ -21,8 +21,12 @@ float4 ForNeighbor(__global float4*  vars_sorted,
 	int num = get_global_size(0);
 
 	cli[index_i].x++;
+	//cli[index_i].y = fp->choice;
+	//clf[index_i].x = fp->choice;
+	//cli[index_i].x = fp->choice;
 
 	if (fp->choice == 0) {
+		cli[index_i].y++;
 		// update density
 		// return density.x for single neighbor
 		#include "density_update.cl"
@@ -59,17 +63,19 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 
 		// get the relative distance between the two particles, translate to simulation space
 		float4 r = (position_i - position_j); // * fp->scale_to_simulation;
-
+	//clf[index_i] = position_i; return frce;
 		float rlen_sq = dot(r,r);
 		// |r|
 		float rlen = length(r);
 		//clf[index_i].x = rlen;
+		//clf[index_i].z = rlen;
 		//clf[index_i].w = sphp->smoothing_distance;
+		//return frce;
 
 		// is this particle within cutoff?
-	clf[index_i].x =  rlen;
-	clf[index_i].y =  sphp->smoothing_distance;
-	return frce;
+	//clf[index_i].x =  rlen;
+	//clf[index_i].y =  sphp->smoothing_distance;
+	//return frce;
 
 		if (rlen <= sphp->smoothing_distance) {
 			cli[index_i].z++;

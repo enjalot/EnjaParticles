@@ -72,6 +72,7 @@ void GE_SPH::neighbor_search(int which)
 	size_t global = (size_t) nb_el;
 	int local = 128;
 
+	printf("fp->choice= %d\n", fp->choice);
 	kern.execute(nb_el, local);
 	//printf("AFTER EXEC\n");
 
@@ -89,7 +90,7 @@ void GE_SPH::neighbor_search(int which)
 		printf("clf[%d]= %f, %f, %f, %f\n", i, fclf[i].x, fclf[i].y, fclf[i].z, fclf[i].w);
 		printf("cli[%d]= %d, %d, %d, %d\n", i, icli[i].x, icli[i].y, icli[i].z, icli[i].w);
 	}
-	exit(0);
+	//exit(0);
 }
 //----------------------------------------------------------------------
 
