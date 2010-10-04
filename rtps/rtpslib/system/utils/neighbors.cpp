@@ -26,7 +26,7 @@ float4 ForNeighbor(__global float4*  vars_sorted,
 	//cli[index_i].x = fp->choice;
 
 	if (fp->choice == 0) {
-		//cli[index_i].y++;
+		cli[index_i].y++;
 		//cli[index_i].w = -999.;
 		// update density
 		// return density.x for single neighbor
@@ -73,6 +73,7 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 		//clf[index_i].x = rlen;
 		//clf[index_i].z = rlen;
 		//clf[index_i].w = sphp->smoothing_distance;
+		cli[index_i].x++;
 		//return frce;
 
 		// is this particle within cutoff?

@@ -111,7 +111,7 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
 
  if (fp->choice == 0) {
-
+  cli[index_i].y++;
 
 
 
@@ -130,16 +130,8 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
 
 
+ float Wij = Wspiky(rlen, sphp->smoothing_distance, sphp);
 
- float Wij;
-
- float pi45 = 45.f/sphp->PI;
- float h = sphp->smoothing_distance;
-    float h3 = h*h*h;
-    float alpha = pi45/h3;
- float hr2 = 1.f - rlen/h;
- Wij = alpha * hr2*hr2*hr2/rlen;
-# 23 "pressure_update.cl"
  float di = vars_sorted[index_i+0*num].x;
  float dj = vars_sorted[index_j+0*num].x;
 
@@ -147,7 +139,7 @@ float4 ForNeighbor(__global float4* vars_sorted,
  float Pi = sphp->K*(di - sphp->rest_density);
  float Pj = sphp->K*(dj - sphp->rest_density);
 
- float kern = sphp->mass * 1.0f * Wij * (Pi + Pj) / (di * dj);
+ float kern = sphp->mass * Wij * (Pi + Pj) / (di * dj);
 
 
  cli[index_i].w = 1;
@@ -198,7 +190,17 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
   float rlen_sq = dot(r,r);
 
   float rlen = length(r);
-# 83 "neighbors.cpp"
+
+
+
+  cli[index_i].x++;
+
+
+
+
+
+
+
   if (rlen <= sphp->smoothing_distance) {
 
 
