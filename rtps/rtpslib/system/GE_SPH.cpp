@@ -127,12 +127,12 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 
     //grid.make_cube(&positions[0], sph_settings.spacing, num);
 
-	float x1 = domain_size_x*.2;
-	float x2 = domain_size_x*.7;
-	float z1 = domain_size_x*.2;
-	float z2 = domain_size_x*.8;
-	float y1 = domain_size_x*.4;
-	float y2 = domain_size_x*.6;
+	float x1 = domain_size_x*.05;
+	float x2 = domain_size_x*.95;
+	float z1 = domain_size_x*0.05;
+	float z2 = domain_size_x*.95;
+	float y1 = domain_size_x*0.05;
+	float y2 = domain_size_x*.95;
 	float4 pmin(x1, y1, z1, 1.);
 	float4 pmax(x2, y2, z2, 1.);
 	grid.makeCube(&positions[0], pmin, pmax, sph_settings.spacing, num);
