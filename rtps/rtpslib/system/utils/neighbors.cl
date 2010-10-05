@@ -188,14 +188,19 @@ float4 ForNeighbor(__global float4* vars_sorted,
  float Pi = sphp->K*(di - sphp->rest_density);
  float Pj = sphp->K*(dj - sphp->rest_density);
 
- float kern = -0.5 * sphp->mass * dWijdr * (Pi + Pj) / (di * dj);
-# 40 "pressure_update.cl"
- return kern*r;
+ float kern = -0.5 * dWijdr * (Pi + Pj);
 
- clf[index_i].x = sphp->smoothing_distance;
- clf[index_i].y = di;
- clf[index_i].z = Pi;
- clf[index_i].w = kern;
+
+ float4 stress = kern*r;
+
+ float4 veli = vars_sorted[index_i+2*num];
+ float4 velj = vars_sorted[index_j+2*num];
+
+ float vvisc = 1000.;
+ float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
+ stress += vvisc * (velj-veli) * dWijlapl;
+
+ return stress*sphp->mass/(di*dj);
 # 38 "neighbors.cpp" 2
  }
 }

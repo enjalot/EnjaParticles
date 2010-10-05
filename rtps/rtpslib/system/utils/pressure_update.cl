@@ -23,25 +23,18 @@
 	float Pi = sphp->K*(di - sphp->rest_density); 
 	float Pj = sphp->K*(dj - sphp->rest_density);
 
-	float kern = -0.5 * sphp->mass * dWijdr * (Pi + Pj) / (di * dj);
+	float kern = -0.5 * dWijdr * (Pi + Pj);
 
-	//clf[index_i] += r*kern; // why is there a w component?
-	//cli[index_i].w = 1;
+	// Add viscous forces
+	float4 stress = kern*r;
 
-	//clf[index_i] += Wij;
-	//clf[index_i].w= Pi;  // Pi and Pj are negative!!
-	//cli[index_i].y++;
-	//cli[index_i].x = -998;
+	float4 veli = vel(index_i);
+	float4 velj = vel(index_j);
 
-//clf[index_i].x = kern;
-//clf[index_i].y = rlen;
-//clf[index_i].w = -17.;
+	float vvisc = 100.; // SHOULD BE SET IN GE_SPH.cpp
+	float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
+	stress += vvisc * (velj-veli) * dWijlapl;
 
-	return kern*r;  // original
-
-	clf[index_i].x = sphp->smoothing_distance;
-	clf[index_i].y = di;
-	clf[index_i].z = Pi;
-	clf[index_i].w = kern;   // last two are inf
+	return stress*sphp->mass/(di*dj);  // original
 
 #endif
