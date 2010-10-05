@@ -44,7 +44,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 
 	// 1 particle per cell
 	// grid resolution: res
-	int nb_cells_x = 64; // number of cells along x
+	int nb_cells_x = 96; // number of cells along x
 	// cell volume
 	double cell_size = domain_size_x/nb_cells_x; // in ft
 
@@ -70,7 +70,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	// Do not know why required
     sph_settings.particle_rest_distance = .87 * pow(sph_settings.particle_mass / sph_settings.rest_density, 1./3.);
    
-    sph_settings.smoothing_distance = 2.f * sph_settings.particle_rest_distance; // *2 decreases grid resolution
+    sph_settings.smoothing_distance = 2.0f * sph_settings.particle_rest_distance; // *2 decreases grid resolution
     sph_settings.boundary_distance = .5f * sph_settings.particle_rest_distance;
 
     sph_settings.spacing = cell_size;
@@ -108,15 +108,32 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 
     //grid.make_cube(&positions[0], sph_settings.spacing, num);
 
+	float4 center(5., 5., 8., 1.);
+	float radius = 1.0;
+	int offset = 0;
+	printf("original offset: %d\n", offset);
+	grid.makeSphere(&positions[0], center, radius, num, offset, 
+		sph_settings.spacing);
+	printf("after sphere, offset: %d\n", offset);
+
 	float x1 = domain_size_x*0.;
 	float x2 = domain_size_x*.8;
-	float z1 = domain_size_x*0.35;
-	float z2 = domain_size_x*0.95;
+	float z1 = domain_size_x*0.0;
+	float z2 = domain_size_x*0.35;
 	float y1 = domain_size_x*0.2;
 	float y2 = domain_size_x*.8;
 	float4 pmin(x1, y1, z1, 1.);
 	float4 pmax(x2, y2, z2, 1.);
-	grid.makeCube(&positions[0], pmin, pmax, sph_settings.spacing, num);
+	grid.makeCube(&positions[0], pmin, pmax, sph_settings.spacing, num, offset);
+	printf("after cube, offset: %d\n", offset);
+	printf("after cube, num: %d\n", num);
+
+	//exit(0);
+
+	if (num_old != nb_el) {
+		printf("nb_el should equal num_old\n");
+		exit(0);
+	}
 
 	if (num != num_old) {
 		printf("Less than the full number of particles are used\n");
@@ -139,8 +156,8 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     params.smoothing_distance = sph_settings.smoothing_distance;
     params.particle_radius = sph_settings.particle_radius;
     params.simulation_scale = sph_settings.simulation_scale;
-    params.boundary_stiffness = 8000.;  //10000.0f;
-    params.boundary_dampening = 250.; //256.0f;
+    params.boundary_stiffness = 5000.;  //10000.0f;
+    params.boundary_dampening = 100.; 
     params.boundary_distance = sph_settings.particle_rest_distance * .5f;
     params.EPSILON = .00001f;
     params.PI = 3.14159265f;

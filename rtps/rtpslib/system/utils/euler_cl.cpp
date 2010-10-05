@@ -21,7 +21,8 @@ __kernel void ge_euler(
     float4 f = force(i);
 
     //external force is gravity
-    f.z += -9.8f;
+    f.z += -9.8f * 0.707;
+	f.x += -9.8f * 0.707;
 
 	// REMOVE FOR DEBUGGING
     float speed = length(f);
