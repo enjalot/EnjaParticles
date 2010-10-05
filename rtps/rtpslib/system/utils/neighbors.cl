@@ -160,7 +160,7 @@ float4 ForNeighbor(__global float4* vars_sorted,
  float Pi = sphp->K*(di - sphp->rest_density);
  float Pj = sphp->K*(dj - sphp->rest_density);
 
- float kern = 0.5 * sphp->mass * dWijdr * (Pi + Pj) / (di * dj);
+ float kern = -0.5 * sphp->mass * dWijdr * (Pi + Pj) / (di * dj);
 # 40 "pressure_update.cl"
  return kern*r;
 

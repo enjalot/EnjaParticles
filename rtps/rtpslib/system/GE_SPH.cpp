@@ -132,7 +132,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     params.smoothing_distance = sph_settings.smoothing_distance;
     params.particle_radius = sph_settings.particle_radius;
     params.simulation_scale = sph_settings.simulation_scale;
-    params.boundary_stiffness = 100.;  //10000.0f;
+    params.boundary_stiffness = 1000.;  //10000.0f;
     params.boundary_dampening = 100.; //256.0f;
     params.boundary_distance = sph_settings.particle_rest_distance * .5f;
     params.EPSILON = .00001f;

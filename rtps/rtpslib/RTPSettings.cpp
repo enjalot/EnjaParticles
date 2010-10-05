@@ -8,7 +8,7 @@ RTPSettings::RTPSettings()
     //max_particles = 1024*4 * 4 * 4 * 2 * 2;  // 256k
     //max_particles = 1024*4 * 4 * 4;   // 64k
     //max_particles = 1024*4 * 4;   // 16k
-    max_particles = 1024 *  4 ; //*  4 * 2;
+    max_particles = 1024 *  16 ; //*  4 * 2;
 	// Code works only for 1024 particles? 
     //max_particles = 1024;
     dt = .005f;
