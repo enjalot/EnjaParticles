@@ -24,10 +24,10 @@ void SPH::loadPressure()
 float SPH::Wspiky(float4 r, float h)
 {
     float h6 = h*h*h * h*h*h;
-    float alpha = 45.f/params.PI/h6;
+    float alpha = -45.f/params.PI/h6;
     float rlen = magnitude(r);
     float hr2 = (h - rlen);
-    float Wij = alpha * hr2*hr2*hr2/rlen;
+    float Wij = alpha * hr2*hr2/rlen;
     return Wij;
 }
 /*
@@ -80,9 +80,8 @@ void SPH::cpuPressure()
                     float Pj = params.K*(densities[j] - 1000.0f); //rest density
                     //float kern = params->mass * -1.0f * Wij * (Pi + Pj) / (2.0f * density[j]);
                     float Wij = Wspiky(r, h);
-                    //not sure why we don't multiply by -1, the formulation has negative
-                    //float kern = params.mass * 1.0f * Wij * (Pi + Pj) / (densities[i] * densities[j]);
-                    float kern = params.mass * 1.0f * Wij * (Pi/(densities[i]*densities[i]) + Pj/(densities[j]*densities[j]));
+                    //float kern = params.mass * -1.0f * Wij * (Pi + Pj) / (densities[i] * densities[j]);
+                    float kern = params.mass * -1.0f * Wij * (Pi/(densities[i]*densities[i]) + Pj/(densities[j]*densities[j]));
                     f.x += kern * r.x;
                     f.y += kern * r.y;
                     f.z += kern * r.z;

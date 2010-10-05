@@ -47,7 +47,7 @@ __kernel void pressure(__global float4* pos, __global float* density, __global f
     //stuff from Tim's code (need to match #s to papers)
     //float alpha = 315.f/208.f/params->PI/h/h/h;
     float h6 = h*h*h * h*h*h;
-    float alpha = 45.f/params->PI/h6;
+    float alpha = -45.f/params->PI/h6;
 
 
     //super slow way, we need to use grid + sort method to get nearest neighbors
@@ -67,7 +67,7 @@ __kernel void pressure(__global float4* pos, __global float* density, __global f
                 //float R = sqrt(r2/re2);
                 //float Wij = alpha*(-2.25f + 2.375f*R - .625f*R*R);
                 float hr2 = (h - rlen);
-                float Wij = alpha * hr2*hr2*hr2/rlen;
+                float Wij = alpha * hr2*hr2/rlen;
                 //from tim's code
                 /*
                 float Pi = 1.013E5*(pow(density[i]/1000.0f, 7.0f) - 1.0f);
@@ -80,8 +80,8 @@ __kernel void pressure(__global float4* pos, __global float* density, __global f
                 float Pj = params->K*(dj - 1000.0f); //rest density
                 //float kern = params->mass * -1.0f * Wij * (Pi + Pj) / (2.0f * density[j]);
                 //float kern = params->mass * -1.0f * Wij * (Pi + Pj) / (density[i] * density[j]);
-                float kern = params->mass * 1.0f * Wij * (Pi + Pj) / (di * dj);
-                //float kern = params->mass * 1.0f * Wij * (Pi/(di*di) + Pj/(dj*dj));
+                float kern = params->mass * -1.0f * Wij * (Pi + Pj) / (di * dj);
+                //float kern = params->mass * -1.0f * Wij * (Pi/(di*di) + Pj/(dj*dj));
                 f += kern * r;
             }
 
