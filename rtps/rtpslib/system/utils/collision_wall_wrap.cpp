@@ -31,8 +31,9 @@ void GE_SPH::computeCollisionWall()
 	int workSize = 128;
   
     //TODO: fix the way we are wrapping buffers
-    k_collision_wall.setArg(0, nb_vars);
-    k_collision_wall.setArg(1, cl_vars_sorted->getDevicePtr());
+    //k_collision_wall.setArg(0, nb_vars);
+    k_collision_wall.setArg(0, cl_vars_sorted->getDevicePtr());
+    k_collision_wall.setArg(1, cl_GridParams->getDevicePtr());
     k_collision_wall.setArg(2, cl_params->getDevicePtr());
 
    	kern.execute(nb_el, workSize); 

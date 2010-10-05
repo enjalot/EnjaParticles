@@ -99,7 +99,6 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	float sz = domain_size_x;
 	int num_old = num;
     grid = UniformGrid(float4(0.,0.,0.,1.), float4(sz, sz, sz, 1.), nb_cells_x); 
-
 	printf("**** particle covers four cells ****\n");
 
 	grid.delta.print("delta");
@@ -369,6 +368,8 @@ void GE_SPH::setupArrays()
 	gp.grid_inv_delta.z = 1. / gp.grid_delta.z;
 	gp.grid_inv_delta.w = 1.;
 	gp.grid_inv_delta.print("inv delta");
+	gp.nb_vars = nb_vars;
+
 
 	cl_GridParams->copyToDevice();
 

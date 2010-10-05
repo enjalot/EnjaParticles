@@ -23,6 +23,7 @@ struct GridParams
     float4 grid_delta;
     float4 grid_inv_delta;
     int num;
+    int nb_vars;
 };
 
 struct FluidParams
@@ -372,8 +373,8 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 
 
 __kernel void K_SumStep1(
-    uint num,
-    uint nb_vars,
+
+
     __global float4* vars_sorted,
           __global int* cell_indexes_start,
           __global int* cell_indexes_end,
@@ -383,6 +384,9 @@ __kernel void K_SumStep1(
     , __global float4* clf, __global int4* cli
     )
 {
+
+ int nb_vars = gp->nb_vars;
+ int num = gp->num;
 
  int index = get_global_id(0);
     if (index >= num) return;

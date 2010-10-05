@@ -22,15 +22,17 @@ float4 calculateRepulsionForce(
 
 //----------------------------------------------------------------------
 __kernel void collision_wall(
-		__constant int nb_vars, 
+		//__constant int nb_vars, 
 		__global float4* vars_sorted, 
 		//__global float4* pos, 
 		//__global float4* vel,  
 		//__global float4* force, 
+		__constant struct GridParams* gp,
 		__constant struct SPHParams* params)
 {
     unsigned int i = get_global_id(0);
 	int num = get_global_size(0);
+	int nb_vars = gp->nb_vars;
 
     float4 p = pos(i); //  pos[i];
     float4 v = vel(i); //  vel[i];

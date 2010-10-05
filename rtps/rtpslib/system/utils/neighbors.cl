@@ -25,6 +25,7 @@ struct GridParams
     float4 grid_delta;
     float4 grid_inv_delta;
     int num;
+    int nb_vars;
 };
 
 struct FluidParams
