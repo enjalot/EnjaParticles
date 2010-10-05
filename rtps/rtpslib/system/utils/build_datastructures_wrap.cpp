@@ -52,19 +52,20 @@ void GE_SPH::buildDataStructures()
 	#endif
 		
 
-	kern.setArg(0, nb_el);
-	kern.setArg(1, nb_vars);
-	kern.setArg(2, cl_vars_unsorted->getDevicePtr());
-	kern.setArg(3, cl_vars_sorted->getDevicePtr());
-	kern.setArg(4, cl_sort_hashes->getDevicePtr());
-	kern.setArg(5, cl_sort_indices->getDevicePtr());
-	kern.setArg(6, cl_cell_indices_start->getDevicePtr());
-	kern.setArg(7, cl_cell_indices_end->getDevicePtr());
+	int iarg = 0;
+	kern.setArg(iarg++, cl_vars_unsorted->getDevicePtr());
+	kern.setArg(iarg++, cl_vars_sorted->getDevicePtr());
+	kern.setArg(iarg++, cl_sort_hashes->getDevicePtr());
+	kern.setArg(iarg++, cl_sort_indices->getDevicePtr());
+	kern.setArg(iarg++, cl_cell_indices_start->getDevicePtr());
+	kern.setArg(iarg++, cl_cell_indices_end->getDevicePtr());
+	kern.setArg(iarg++, cl_GridParams->getDevicePtr());
 
 
 	// local memory
 	int nb_bytes = (workSize+1)*sizeof(int);
-    kern.setArgShared(8, nb_bytes);
+    kern.setArgShared(iarg++, nb_bytes);
+
 
 	//printf("AFTER BUILD ARGS\n");
 

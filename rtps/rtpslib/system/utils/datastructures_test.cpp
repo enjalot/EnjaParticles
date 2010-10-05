@@ -5,21 +5,25 @@
 #define _DATASTRUCTURES_
 
 #include "cl_macros.h"
+#include "cl_structures.h"
 
 //----------------------------------------------------------------------
 __kernel void datastructures(
-					int	    numParticles,
-					int      nb_vars,
+					//int	    numParticles,
+					//int      nb_vars,
 					__global float4*   vars_unsorted,
 					__global float4*   vars_sorted, 
 		   			__global uint* sort_hashes,
 		   			__global uint* sort_indices,
 		   			__global uint* cell_indices_start,
 		   			__global uint* cell_indices_end,
+		   			__constant struct GridParams* gp,
 					__local  uint* sharedHash   // blockSize+1 elements
 			  )
 {
 	uint index = get_global_id(0);
+	int nb_vars = gp->nb_vars;
+	int numParticles = get_global_size(0);
 
 	// particle index	
 	if (index >= numParticles) return;
