@@ -50,11 +50,11 @@ template <class T>
 BufferGE<T>::~BufferGE()
 {
 	if (externalPtr && data) {
-		printf("DESTRUCTOR: delete data\n");
+		printf("BufferGE DESTRUCTOR: delete data\n");
 		delete [] data;
 		data = 0;
 	}
-	printf("INSIDE DESTRUCTOR OF BUFFERGE\n");
+	//printf("INSIDE DESTRUCTOR OF BUFFERGE\n");
 }
 
 //----------------------------------------------------------------------

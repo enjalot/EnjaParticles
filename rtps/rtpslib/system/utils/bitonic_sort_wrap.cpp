@@ -56,9 +56,6 @@ void GE_SPH::bitonic_sort()
 	//return;
 	unsigned int keybits = 32;
 
-	BufferGE<int> cl_sort_output_hashes(ps->cli, nb_el);
-	BufferGE<int> cl_sort_output_indices(ps->cli, nb_el);
-
 	try {
 	#if 0
 		//prepareSortData();
@@ -84,8 +81,8 @@ void GE_SPH::bitonic_sort()
                 NULL,
                 //d_OutputKey,
                 //d_OutputVal,
-				cl_sort_output_hashes.getDevicePtr(), 
-				cl_sort_output_indices.getDevicePtr(), 
+				cl_sort_output_hashes->getDevicePtr(), 
+				cl_sort_output_indices->getDevicePtr(), 
 				cl_sort_hashes->getDevicePtr(), 
 				cl_sort_indices->getDevicePtr(), 
                 //d_InputKey,
@@ -103,18 +100,18 @@ void GE_SPH::bitonic_sort()
 	}
 
 	#if 1
+	// accounts for 75% of sort with 4k particles
+	// accounts for 50% of sort with 16k particles
 	// SHOULD EXECUTE the following on the GPU or not use bitonic
-	cl_sort_output_hashes.copyToHost();
-	cl_sort_output_indices.copyToHost();
+	cl_sort_output_hashes->copyToHost();
+	cl_sort_output_indices->copyToHost();
 
 	int* sh = cl_sort_hashes->getHostPtr();
 	int* si = cl_sort_indices->getHostPtr();
-	int* soh = cl_sort_output_hashes.getHostPtr();
-	int* soi = cl_sort_output_indices.getHostPtr();
+	int* soh = cl_sort_output_hashes->getHostPtr();
+	int* soi = cl_sort_output_indices->getHostPtr();
 
 	for (int i=0; i < nb_el; i++) {
-		//cl_sort_hashes[i] = cl_sort_output_hashes[i];
-		//cl_sort_indices[i] = cl_sort_output_indices[i];
 		sh[i] = soh[i];
 		si[i] = soi[i];
 	}
@@ -126,15 +123,10 @@ void GE_SPH::bitonic_sort()
     ps->cli->queue.finish();
 	ts_cl[TI_BITONIC_SORT]->end();
 
-	//printf("enter sort diagonistics ****\n");
 	//printBiSortDiagnostics(cl_sort_output_hashes, cl_sort_output_indices);
-	//printf("exit sort diagonistics ****\n");
+	//computeCellStartEndCPU(); // diagnostic check
 
-	//printf("enter computeCellStartEndCPU\n");
-	//computeCellStartEndCPU();
-	//printf("exit computeCellStartEndCPU\n");
-
-	printf("EXIT BISORT \n");
+	//printf("EXIT BISORT \n");
 }
 //----------------------------------------------------------------------
 void GE_SPH::printBiSortDiagnostics(BufferGE<int>& cl_sort_output_hashes, BufferGE<int>& cl_sort_output_indices)

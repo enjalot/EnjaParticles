@@ -184,6 +184,12 @@ public:
 	//BufferGE<int>		cl_unsort_int;
 	//BufferGE<int>		cl_sort_int;
 
+	// Two arrays for bitonic sort (sort not done in place)
+	BufferGE<int>* cl_sort_output_hashes;
+	BufferGE<int>* cl_sort_output_indices;
+	//BufferGE<int> cl_sort_output_hashes(ps->cli, nb_el);
+	//BufferGE<int> cl_sort_output_indices(ps->cli, nb_el);
+
 	BufferGE<float4>* 	cl_vars_sorted;
 	BufferGE<float4>* 	cl_vars_unsorted;
 	BufferGE<float4>* 	cl_cells; // positions in Ian code
@@ -207,7 +213,7 @@ private:
 public:
 // Added by GE
 	void hash();
-	void sort(); //BufferGE<int>& key, BufferGE<int>& value);
+	void radix_sort(); //BufferGE<int>& key, BufferGE<int>& value);
 	void bitonic_sort(); //not in place, but keys/values
 	void setupArrays();
 	void buildDataStructures();
@@ -277,6 +283,8 @@ private:
 
 	void computeCellStartEndGPU();
 	void computeCellStartEndCPU();
+
+	void printGPUDiagnostics();
 };
 
 }

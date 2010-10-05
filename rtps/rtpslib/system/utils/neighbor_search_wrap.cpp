@@ -62,23 +62,16 @@ void GE_SPH::neighborSearch(int which)
 	kern.setArg(iarg++, cl_GridParams->getDevicePtr());
 	kern.setArg(iarg++, cl_FluidParams->getDevicePtr());
 	kern.setArg(iarg++, cl_params->getDevicePtr());
+
+	// ONLY IF DEBUGGING
 	kern.setArg(iarg++, clf_debug->getDevicePtr());
 	kern.setArg(iarg++, cli_debug->getDevicePtr());
 
 
-
-	#if 0
-	GE_SPHParams& params = *(cl_params->getHostPtr());
-	printf("h= %f\n", params.smoothing_distance); 
-	printf("mass= %f\n", params.mass); 
-	#endif
-
 	size_t global = (size_t) nb_el;
 	int local = 128;
 
-	printf("fp->choice= %d\n", fp->choice);
 	kern.execute(nb_el, local);
-	//printf("AFTER EXEC\n");
 
 	ps->cli->queue.finish();
 	//ts_cl[TI_NEIGH]->end();

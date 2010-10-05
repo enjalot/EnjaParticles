@@ -13,7 +13,7 @@ namespace rtps {
 // Output: a list of sorted integers
 // Leave data on the gpu
 
-void GE_SPH::sort()
+void GE_SPH::radix_sort()
 {
 	//exit(0);
 	static bool first_time = true;

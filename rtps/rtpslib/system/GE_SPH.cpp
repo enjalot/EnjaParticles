@@ -80,12 +80,20 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     float particle_radius = 0.5*sph_settings.spacing;  
 	double particle_volume = (4.*pi/3.) * pow(particle_radius,3.);
 
-    sph_settings.smoothing_distance = particle_radius*2.5;   // CHECK THIS. Width of W function
+    sph_settings.smoothing_distance = particle_radius*2.0;   // CHECK THIS. Width of W function
     sph_settings.particle_radius = particle_radius; 
 
 	// mass of single fluid particle
 	double mass_single_particle = particle_volume * density;
     sph_settings.particle_mass = mass_single_particle;
+
+	#if 0
+	double sig = 1.3; // Monaghan 2005., p. 21
+	double hh = sig*pow(mass_single_particle/density, 1./3.);
+	printf("hh= %f\n", hh);
+	printf("cell_size= %f\n", cell_size);  
+	exit(0);
+	#endif
 
 
 	float sz = domain_size_x;
@@ -132,8 +140,8 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     params.smoothing_distance = sph_settings.smoothing_distance;
     params.particle_radius = sph_settings.particle_radius;
     params.simulation_scale = sph_settings.simulation_scale;
-    params.boundary_stiffness = 10000.;  //10000.0f;
-    params.boundary_dampening = 100.; //256.0f;
+    params.boundary_stiffness = 8000.;  //10000.0f;
+    params.boundary_dampening = 250.; //256.0f;
     params.boundary_distance = sph_settings.particle_rest_distance * .5f;
     params.EPSILON = .00001f;
     params.PI = 3.14159265f;
@@ -308,7 +316,6 @@ void GE_SPH::update()
 
 #ifdef GPU
 	computeOnGPU();
-	//exit(0);
 #endif
 
     /*
@@ -383,6 +390,12 @@ void GE_SPH::setupArrays()
 	cl_cell_indices_start = new BufferGE<int>(ps->cli, grid_size);
 	cl_cell_indices_end   = new BufferGE<int>(ps->cli, grid_size);
 
+	// For bitonic sort. Remove when bitonic sort no longer used
+	// Currently, there is an error in the Radix Sort (just run both
+	// sorts and compare outputs visually
+	cl_sort_output_hashes = new BufferGE<int>(ps->cli, nb_el);
+	cl_sort_output_indices = new BufferGE<int>(ps->cli, nb_el);
+
 
 	clf_debug = new BufferGE<float4>(ps->cli, nb_el);
 	cli_debug = new BufferGE<int4>(ps->cli, nb_el);
@@ -448,17 +461,13 @@ void GE_SPH::computeOnGPU()
     cl_position->acquire();
     cl_color->acquire();
     
-    //printf("execute!\n");
-	// More steps per update for visualization purposes
-    //for(int i=0; i < 10; i++)
-
     for(int i=0; i < 1; i++)
     {
 		// ***** Create HASH ****
 		hash();
 
 		// **** Sort arrays ****
-		//sort();
+		//radix_sort();
 		bitonic_sort();
 
 		// **** Reorder pos, vel
@@ -484,6 +493,24 @@ void GE_SPH::computeOnGPU()
         // ***** EULER UPDATE *****
 		computeEuler();
 
+		// *** OUTPUT PHYSICAL VARIABLES FROM THE GPU
+		//printGPUDiagnostics();
+
+	}
+
+    cl_position->release();
+    cl_color->release();
+}
+//----------------------------------------------------------------------
+void GE_SPH::computeOnCPU()
+{
+    cpuDensity();
+    //cpuPressure();
+    //cpuEuler();
+}
+//----------------------------------------------------------------------
+void GE_SPH::printGPUDiagnostics()
+{
 		#if 0
 		//Update position array (should be done on GPU)
 		cl_vars_unsorted->copyToHost();
@@ -493,10 +520,9 @@ void GE_SPH::computeOnGPU()
 			positions[i] = pos[i];
 		}
 		#endif
-		//positions[50].print("pos50");
 
 
-		#if 1
+		#if 0
 		//  print out density
 		cl_vars_unsorted->copyToHost();
 		cl_vars_sorted->copyToHost();
@@ -524,20 +550,7 @@ void GE_SPH::computeOnGPU()
 		} 
 		//exit(0);
 		#endif
-	}
-
-	//printf("before release\n");
-    cl_position->release();
-    cl_color->release();
 }
-//----------------------------------------------------------------------
-void GE_SPH::computeOnCPU()
-{
-    cpuDensity();
-    //cpuPressure();
-    //cpuEuler();
-}
-//----------------------------------------------------------------------
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
