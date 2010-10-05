@@ -211,7 +211,7 @@ public:
 	void bitonic_sort(); //not in place, but keys/values
 	void setupArrays();
 	void buildDataStructures();
-	void neighbor_search(int choice);
+	void neighborSearch(int choice);
 
 private:
 	void printSortDiagnostics();

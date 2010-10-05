@@ -101,6 +101,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		DUMMY_ARGS
     )
 	{
+
 		// get hash (of position) of current cell
 		//volatile uint cellHash = UniformGridUtils::calcGridHash<true>(cellPos, cGridParams.grid_res);
 		// wrap edges (false)
@@ -183,7 +184,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 __kernel void K_SumStep1(
 				uint    numParticles,
 				uint	nb_vars, 
-				__global float4* vars,   // *** ERROR
 				__global float4* vars_sorted,
         		__global int*    cell_indexes_start,
         		__global int*    cell_indexes_end,

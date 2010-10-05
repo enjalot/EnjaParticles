@@ -8,7 +8,7 @@ namespace rtps {
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-void GE_SPH::neighbor_search(int which)
+void GE_SPH::neighborSearch(int which)
 {
 	static bool first_time = true;
 
@@ -38,7 +38,7 @@ void GE_SPH::neighbor_search(int which)
 
 	#if 1
 	float4* fclf = clf_debug->getHostPtr();
-	int4* icli = cli_debug->getHostPtr();
+	int4*   icli = cli_debug->getHostPtr();
 
 	// Need to set this to zero
 	for (int i=0; i < nb_el; i++) { 
@@ -56,7 +56,6 @@ void GE_SPH::neighbor_search(int which)
 	
 	kern.setArg(iarg++, nb_el);
 	kern.setArg(iarg++, nb_vars);
-	kern.setArg(iarg++, cl_vars_unsorted->getDevicePtr());
 	kern.setArg(iarg++, cl_vars_sorted->getDevicePtr());
 	kern.setArg(iarg++, cl_cell_indices_start->getDevicePtr());
 	kern.setArg(iarg++, cl_cell_indices_end->getDevicePtr());
@@ -88,6 +87,8 @@ void GE_SPH::neighbor_search(int which)
 
 
 	#if 0
+if (which == 1) {
+	printf("which == 1 *** \n");
 	clf_debug->copyToHost();
 	cli_debug->copyToHost();
 
@@ -97,7 +98,8 @@ void GE_SPH::neighbor_search(int which)
 		printf("clf[%d]= %f, %f, %f, %f\n", i, fclf[i].x, fclf[i].y, fclf[i].z, fclf[i].w);
 		printf("cli[%d]= %d, %d, %d, %d\n", i, icli[i].x, icli[i].y, icli[i].z, icli[i].w);
 	}
-	exit(0);
+	//exit(0);
+}
 	#endif
 	//if (which ==1) exit(0);
 }

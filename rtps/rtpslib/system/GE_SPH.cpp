@@ -76,10 +76,11 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     sph_settings.spacing = cell_size;
 
 	// particle radius is the radius of the W function
-    float particle_radius = 0.5*sph_settings.spacing;  // one particle fits per cell (PERHAPS CHANGE?)
-	double particle_volume = (4.*pi/3.) * pow(particle_radius, 3.);
+	// one particle fits per cell (PERHAPS CHANGE?)
+    float particle_radius = 0.5*sph_settings.spacing;  
+	double particle_volume = (4.*pi/3.) * pow(particle_radius,3.);
 
-    sph_settings.smoothing_distance = particle_radius*2;   // CHECK THIS. Width of W function
+    sph_settings.smoothing_distance = particle_radius*2.5;   // CHECK THIS. Width of W function
     sph_settings.particle_radius = particle_radius; 
 
 	// mass of single fluid particle
@@ -100,8 +101,8 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 
     //grid.make_cube(&positions[0], sph_settings.spacing, num);
 
-	float x1 = domain_size_x*.2;
-	float x2 = domain_size_x*.8;
+	float x1 = domain_size_x*0.;
+	float x2 = domain_size_x*.4;
 	float z1 = domain_size_x*0.65;
 	float z2 = domain_size_x*0.95;
 	float y1 = domain_size_x*0.2;
@@ -131,8 +132,8 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     params.smoothing_distance = sph_settings.smoothing_distance;
     params.particle_radius = sph_settings.particle_radius;
     params.simulation_scale = sph_settings.simulation_scale;
-    params.boundary_stiffness = 10000.;  //10000.0f;
-    params.boundary_dampening = 256.; //256.0f;
+    params.boundary_stiffness = 100.;  //10000.0f;
+    params.boundary_dampening = 100.; //256.0f;
     params.boundary_distance = sph_settings.particle_rest_distance * .5f;
     params.EPSILON = .00001f;
     params.PI = 3.14159265f;
@@ -464,11 +465,11 @@ void GE_SPH::computeOnGPU()
 		buildDataStructures(); 
 
 		// ***** DENSITY UPDATE *****
-		neighbor_search(0); //density
+		neighborSearch(0); //density
 
 		#if 1
 		// ***** PRESSURE UPDATE *****
-		neighbor_search(1); //pressure
+		neighborSearch(1); //pressure
 		#endif
 
 		#if 0
@@ -477,6 +478,7 @@ void GE_SPH::computeOnGPU()
 		#endif
 
 		// ***** WALL COLLISIONS *****
+		// COLLISIONS makes force ZERO
 		computeCollisionWall();
 
         // ***** EULER UPDATE *****
@@ -490,11 +492,11 @@ void GE_SPH::computeOnGPU()
 			//printf("i= %d\n", i);
 			positions[i] = pos[i];
 		}
-		positions[50].print("pos50");
 		#endif
+		//positions[50].print("pos50");
 
 
-		#if 0
+		#if 1
 		//  print out density
 		cl_vars_unsorted->copyToHost();
 		cl_vars_sorted->copyToHost();
@@ -509,12 +511,13 @@ void GE_SPH::computeOnGPU()
 		float4* vel1     = cl_vars_sorted->getHostPtr() + 2*nb_el;
 		float4* force1   = cl_vars_sorted->getHostPtr() + 3*nb_el;
 
-		for (int i=30; i < 31; i++) {
-			printf("==================\n");
+		for (int i=0; i < 10; i++) {
+			printf("=== i= %d ==========\n", i);
 			//printf("dens[%d]= %f, sorted den: %f\n", i, density[i].x, density1[i].x);
 			pos[i].print("un pos");
 			vel[i].print("un vel");
 			force[i].print("un force");
+			density[i].print("un density");
 			//pos1[i].print("so pos1");
 			//vel1[i].print("so vel1");
 			//force1[i].print("so force1");

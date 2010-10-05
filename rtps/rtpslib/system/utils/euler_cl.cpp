@@ -13,7 +13,6 @@ __kernel void ge_euler(
 		__constant struct SPHParams* params, 
 		float dt)
 {
-#if 1
     unsigned int i = get_global_id(0);
 	int num = get_global_size(0); // for access functions in cl_macros.h
 
@@ -25,13 +24,11 @@ __kernel void ge_euler(
     f.z += -9.8f;
 
 	// REMOVE FOR DEBUGGING
-	#if 1
     float speed = length(f);
     if(speed > 600.0f) //velocity limit, need to pass in as struct
     {
         f *= 600.0f/speed;
     }
-	#endif
 
     v += dt*f;  //    / params->simulation_scale;
     p += dt*v;
@@ -49,9 +46,8 @@ __kernel void ge_euler(
         // writeback to unsorted buffer
 		unsorted_pos(originalIndex) = p;
 		unsorted_vel(originalIndex) = v;
-		//unsorted_density(originalIndex) = density(i); // FOR DEBUGGING ONLY
-		//unsorted_force(originalIndex) = f; // FOR DEBUGGING ONLY
+		unsorted_density(originalIndex) = density(i); // FOR DEBUGGING ONLY
+		unsorted_force(originalIndex) = f; // FOR DEBUGGING ONLY
 		positions[originalIndex] = p; 
-#endif
 }
 

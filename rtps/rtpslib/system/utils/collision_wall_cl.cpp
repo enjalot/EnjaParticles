@@ -76,5 +76,5 @@ __kernel void collision_wall(
 
     //TODO add friction forces
 
-	force(i) = r_f;   //sorted force
+	force(i) += r_f;   //sorted force
 }
