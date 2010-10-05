@@ -18,12 +18,9 @@ template <class T>
 class Buffer
 {
 public:
-    Buffer(){ cli=NULL; vbo_id=0; };
+    Buffer(){ cli=NULL; };
     //create an OpenCL buffer from existing data
     Buffer(CL *cli, const std::vector<T> &data);
-    //create a OpenCL BufferGL from a vbo_id
-    //if managed is true then the destructor will delete the VBO
-    Buffer(CL *cli, GLuint vbo_id=-1);
     ~Buffer();
 
     //we will want to access buffers by name when going across systems
@@ -34,13 +31,6 @@ public:
 
     CL *cli;
 
-    //if this is a VBO we store its id
-    GLuint vbo_id;
-
-    //need to acquire and release arrays from OpenGL context if we have a VBO
-    void acquire();
-    void release();
-
     void copyToDevice(const std::vector<T> &data);
     std::vector<T> copyToHost(int num);
 
@@ -49,7 +39,46 @@ public:
 
 };
 
-#include "Buffer.cpp"
+//#include "Buffer.cpp"
+template <class T>
+Buffer<T>::Buffer(CL *cli, const std::vector<T> &data)
+{
+    this->cli = cli;
+    //this->data = data;
+
+    cl_buffer.push_back(cl::Buffer(cli->context, CL_MEM_READ_WRITE, data.size()*sizeof(T), NULL, &cli->err));
+    copyToDevice(data);
+}
+
+
+template <class T>
+Buffer<T>::~Buffer()
+{
+}
+
+
+template <class T>
+void Buffer<T>::copyToDevice(const std::vector<T> &data)
+{
+    //TODO clean up this memory/buffer issue (nasty pointer casting)
+    cli->err = cli->queue.enqueueWriteBuffer(*((cl::Buffer*)&cl_buffer[0]), CL_TRUE, 0, data.size()*sizeof(T), &data[0], NULL, &cli->event);
+    cli->queue.finish();
+
+}
+
+
+template <class T>
+std::vector<T> Buffer<T>::copyToHost(int num)
+{
+    //TODO clean up this memory/buffer issue
+    std::vector<T> data(num);
+    //TODO pass back a pointer instead of a copy
+    //std::vector<T> data = new std::vector<T>(num);
+    cli->err = cli->queue.enqueueReadBuffer(*((cl::Buffer*)&cl_buffer[0]), CL_TRUE, 0, data.size()*sizeof(T), &data[0], NULL, &cli->event);
+    cli->queue.finish();
+    return data;
+
+}
 
 }
 #endif

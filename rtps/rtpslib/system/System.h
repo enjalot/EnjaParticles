@@ -11,6 +11,8 @@
 
 #include "../particle/UniformGrid.h"
 
+#include <stdio.h>
+
 namespace rtps {
 
 class System
@@ -23,6 +25,7 @@ public:
     virtual int getNum(){ return num; };
     virtual GLuint getPosVBO() { return pos_vbo; };
     virtual GLuint getColVBO() { return col_vbo; };
+    virtual ~System() {printf("System destructor\n");}
     
 
 protected:

@@ -36,7 +36,7 @@ void GE_SPH::computeDensity()
     k_density.setArg(0, nb_vars);
     k_density.setArg(1, cl_vars_sorted->getDevicePtr());
     k_density.setArg(2, cl_params->getDevicePtr());
-    k_density.setArg(3, cl_error_check.cl_buffer[0]);
+    k_density.setArg(3, cl_error_check->getDevicePtr());
 
    	kern.execute(nb_el, workSize); 
 
@@ -91,8 +91,6 @@ void GE_SPH::cpuDensity()
         float4 p = positions[i];
         p = float4(p.x * scale, p.y * scale, p.z * scale, p.w * scale);
         densities[i] = 0.0f;
-
-
 
         int neighbor_count = 0;
         for(int j = 0; j < num; j++)

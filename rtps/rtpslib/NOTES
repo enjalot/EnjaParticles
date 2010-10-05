@@ -1,0 +1,13 @@
+Oct. 4. 2010
+- grad(pressure) on a sheet of particles: nonzero on boundary, zero in interior (makes sense). 
+
+TODO: understand better boundary properties. 
+----------------------------------------------------------------------
+If timestep is too large, code crashes after some time. 
+Otherwise (smaller time step), no crash, even if particles crunch together. 
+
+How to prevent over-crunching?
+----------------------------------------------------------------------
+Could gain speed on non-Fermi with textures (probably factor 2)
+(see Krog thesis)
+----------------------------------------------------------------------

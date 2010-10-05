@@ -38,6 +38,15 @@ int deleteVBO(GLuint id)
     return 1; //success
 }
 
+
+
+GLuint registerVBO()
+{
+    GLuint id = 0;
+    glGenBuffers(1, &id);
+}
+
+
 GLuint createVBO(const void* data, int dataSize, GLenum target, GLenum usage)
 {
     GLuint id = 0;  // 0 is reserved, glGenBuffersARB() will return non-zero id if success

@@ -12,9 +12,11 @@
 #include "../opencl/Kernel.h"
 #include "../opencl/Buffer.h"
 #include "../opencl/BufferGE.h"
-//#include "../opencl/BufferVBO.h"
+#include "../opencl/BufferVBO.h"
 //#include "../util.h"
 #include "../particle/UniformGrid.h"
+
+#include "RadixSort.h"
 
 // Make sure it is same as in density.cl
 #define DENS 0
@@ -34,9 +36,22 @@ typedef struct GE_SPHSettings
     float particle_mass;
     float particle_rest_distance;
     float smoothing_distance;
+    float particle_radius;
     float boundary_distance;
     float spacing;
     float grid_cell_size;
+
+	void print() {
+		printf("----- GE_SPHSettings ----\n");
+		printf("rest_density: %f\n", rest_density);
+		printf("simulation_scale: %f\n", simulation_scale);
+		printf("particle_mass: %f\n", particle_mass);
+		printf("smoothing_distance: %f\n", smoothing_distance);
+		printf("particle_radius: %f\n", particle_radius);
+		printf("boundary_distance: %f\n", boundary_distance);
+		printf("spacing: %f\n", spacing);
+		printf("grid_cell_size: %f\n", grid_cell_size);
+	}
 
 } GE_SPHSettings;
 
@@ -54,6 +69,17 @@ struct GridParams
     float4          grid_delta;
     float4          grid_inv_delta;
 	int				numParticles;
+
+	void print() {
+		printf("----- GridParms ----\n");
+		grid_size.print("grid_size"); 
+		grid_min.print("grid_min"); 
+		grid_max.print("grid_max"); 
+		grid_res.print("grid_res"); 
+		grid_delta.print("grid_delta"); 
+		grid_inv_delta.print("grid_inv_delta"); 
+		printf("numParticles= %d\n", numParticles);
+	}
 };
 
 // GORDON Datastructure for Fluid parameters. To be reconciled with Ian's
@@ -62,8 +88,8 @@ struct FluidParams
 {
 	float smoothing_length; // SPH radius
 	float scale_to_simulation;
-	float mass;
-	float dt;
+	//float mass;
+	//float dt;
 	float friction_coef;
 	float restitution_coef;
 	float damping;
@@ -71,6 +97,22 @@ struct FluidParams
 	float attraction;
 	float spring;
 	float gravity; // -9.8 m/sec^2
+	int   choice; // which kind of calculation to invoke
+
+	void print() {
+		printf("----- FluidParams ----\n");
+		printf("scale_to_simulation: %f\n", scale_to_simulation);
+		//printf("mass: %f\n", mass);
+		//printf("dt: %f\n", dt);
+		printf("friction_coef: %f\n", friction_coef);
+		printf("restitution_coef: %f\n", restitution_coef);
+		printf("damping: %f\n", damping);
+		printf("shear: %f\n", shear);
+		printf("attraction: %f\n", attraction);
+		printf("spring: %f\n", spring);
+		printf("gravity: %f\n", gravity);
+		printf("choice: %d\n", choice);
+	}
 };
 //-------------------------
 
@@ -83,14 +125,37 @@ typedef struct GE_SPHParams
     float grid_max_padding;
     float mass;
     float rest_distance;
+    float rest_density;
     float smoothing_distance;
+    float particle_radius;
     float simulation_scale;
     float boundary_stiffness;
     float boundary_dampening;
     float boundary_distance;
     float EPSILON;
     float PI;       //delicious
-    float K;        //speed of sound
+    float K;        //speed of sound (what units?)
+
+	void print()
+	{
+		printf("----- GE_SPHParams ----\n");
+		grid_min.print("grid_min");
+		grid_max.print("grid_max");
+		printf("grid_min_padding= %f\n", grid_min_padding);
+		printf("grid_max_padding= %f\n", grid_max_padding);
+		printf("mass= %f\n", mass);
+		printf("rest_distance= %f\n", rest_distance);
+		printf("rest_density= %f\n", rest_density);
+		printf("smoothing_distance= %f\n", smoothing_distance);
+		printf("particle_radius= %f\n", particle_radius);
+		printf("simulation_scale= %f\n", simulation_scale);
+		printf("boundary_stiffness= %f\n", boundary_stiffness);
+		printf("boundary_dampening= %f\n", boundary_dampening);
+		printf("boundary_distance= %f\n", boundary_distance);
+		printf("EPSILON= %f\n", EPSILON);
+		printf("PI= %f\n", PI);
+		printf("K= %f\n", K);
+	}
 } GE_SPHParams __attribute__((aligned(16)));
 
 class GE_SPH : public System
@@ -108,7 +173,8 @@ public:
 // MORE ARRAYS THAN NEEDED ...
 
 	// Timers
-	enum {TI_HASH=0, TI_SORT, TI_BUILD, TI_NEIGH, TI_DENS, TI_PRES, TI_EULER, TI_VISC, TI_UPDATE};
+	enum {TI_HASH=0, TI_RADIX_SORT, TI_BITONIC_SORT, TI_BUILD, TI_NEIGH, 
+		  TI_DENS, TI_PRES, TI_EULER, TI_VISC, TI_UPDATE, TI_COLLISION_WALL};
 	GE::Time* ts_cl[20];   // ts_cl  is GE::Time**
 
 	int nb_el;
@@ -117,6 +183,12 @@ public:
 
 	//BufferGE<int>		cl_unsort_int;
 	//BufferGE<int>		cl_sort_int;
+
+	// Two arrays for bitonic sort (sort not done in place)
+	BufferGE<int>* cl_sort_output_hashes;
+	BufferGE<int>* cl_sort_output_indices;
+	//BufferGE<int> cl_sort_output_hashes(ps->cli, nb_el);
+	//BufferGE<int> cl_sort_output_indices(ps->cli, nb_el);
 
 	BufferGE<float4>* 	cl_vars_sorted;
 	BufferGE<float4>* 	cl_vars_unsorted;
@@ -133,6 +205,7 @@ public:
 
 	BufferGE<float4>*	clf_debug;  //just for debugging cl files
 	BufferGE<int4>*		cli_debug;  //just for debugging cl files
+	RadixSort*   radixSort;
 
 private:
 	//DataStructures* ds;
@@ -140,13 +213,16 @@ private:
 public:
 // Added by GE
 	void hash();
-	void sort(); //BufferGE<int>& key, BufferGE<int>& value);
+	void radix_sort(); //BufferGE<int>& key, BufferGE<int>& value);
+	void bitonic_sort(); //not in place, but keys/values
 	void setupArrays();
 	void buildDataStructures();
-	void neighbor_search();
+	void neighborSearch(int choice);
 
 private:
 	void printSortDiagnostics();
+	//void printBiSortDiagnostics();
+	void printBiSortDiagnostics(BufferGE<int>& cl_sort_output_hashes, BufferGE<int>& cl_sort_output_indices);
 	void prepareSortData();
 	void printBuildDiagnostics();
 	void printHashDiagnostics();
@@ -167,7 +243,6 @@ private:
 	Kernel sort_kernel;
 	Kernel step1_kernel;
 
-    //Buffer<GE_SPHParams> cl_params;
     BufferGE<GE_SPHParams>* cl_params;
 
 
@@ -176,13 +251,13 @@ private:
     std::vector<float4> forces;
     std::vector<float4> velocities;
 
-    Buffer<float4> cl_position;
-    Buffer<float4> cl_color;
-    Buffer<float> cl_density;
-    Buffer<float4> cl_force;
-    Buffer<float4> cl_velocity;
+    BufferVBO<float4>* cl_position;
+    BufferVBO<float4>* cl_color;
+    BufferGE<float>*   cl_density;
+    BufferGE<float4>*  cl_force;
+    BufferGE<float4>*  cl_velocity;
     
-    Buffer<float4> cl_error_check;
+    BufferGE<float4>* cl_error_check;
 
     //these are defined in ge_sph/ folder next to the kernels
     void loadDensity();
@@ -192,6 +267,7 @@ private:
     void loadEuler();
 
 	// loads kernel the first time, executes kernel every time
+	void computeCollisionWall(); //GE
 	void computeEuler(); //GE
 	void computeDensity(); //GE
 	void computePressure(); //GE
@@ -204,6 +280,11 @@ private:
 
 	void computeOnGPU();
 	void computeOnCPU();
+
+	void computeCellStartEndGPU();
+	void computeCellStartEndCPU();
+
+	void printGPUDiagnostics();
 };
 
 }

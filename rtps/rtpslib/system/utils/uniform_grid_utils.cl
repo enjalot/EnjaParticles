@@ -29,8 +29,8 @@ struct FluidParams
 {
  float smoothing_length;
  float scale_to_simulation;
- float mass;
- float dt;
+
+
  float friction_coef;
  float restitution_coef;
  float damping;
@@ -38,6 +38,28 @@ struct FluidParams
  float attraction;
  float spring;
  float gravity;
+ int choice;
+};
+
+
+struct SPHParams
+{
+    float4 grid_min;
+    float4 grid_max;
+    float grid_min_padding;
+    float grid_max_padding;
+    float mass;
+    float rest_distance;
+    float rest_density;
+    float smoothing_distance;
+    float particle_radius;
+    float simulation_scale;
+    float boundary_stiffness;
+    float boundary_dampening;
+    float boundary_distance;
+    float EPSILON;
+    float PI;
+    float K;
 };
 # 21 "uniform_grid_utils.cpp" 2
 # 1 "neighbors.cpp" 1
@@ -46,6 +68,41 @@ struct FluidParams
 
 
 
+# 1 "wpoly6.cl" 1
+
+
+
+
+float Wpoly6(float4 r, float h, __constant struct SPHParams* params)
+{
+    float r2 = r.x*r.x + r.y*r.y + r.z*r.z;
+ float h9 = h*h;
+ float hr2 = (h9-r2);
+ h9 = h9*h;
+    float alpha = 315.f/64.0f/params->PI/(h9*h9*h9);
+    float Wij = alpha * hr2*hr2*hr2;
+    return Wij;
+}
+
+float Wspiky(float rlen, float h, __constant struct SPHParams* params)
+{
+    float h6 = h*h*h * h*h*h;
+    float alpha = 45.f/params->PI/h6;
+ float hr2 = (h - rlen);
+ float Wij = alpha * hr2*hr2*hr2;
+ return Wij;
+}
+
+float Wspiky_dr(float rlen, float h, __constant struct SPHParams* params)
+{
+
+    float h6 = h*h*h * h*h*h;
+    float alpha = 45.f/(params->PI * rlen*h6);
+ float hr2 = (h - rlen);
+ float Wij = -alpha * (hr2*hr2);
+ return Wij;
+}
+# 7 "neighbors.cpp" 2
 
 
 float4 ForNeighbor(__global float4* vars_sorted,
@@ -53,56 +110,70 @@ float4 ForNeighbor(__global float4* vars_sorted,
     uint index_j,
     float4 r,
     float rlen,
-    float rlen_sq,
       __constant struct GridParams* gp,
-      __constant struct FluidParams* fp)
+      __constant struct FluidParams* fp,
+      __constant struct SPHParams* sphp
+      , __global float4* clf, __global int4* cli
+    )
 {
+ int num = get_global_size(0);
 
 
 
 
- int index = get_global_id(0);
-
-# 1 "cl_snippet_sphere_forces.h" 1
-# 18 "cl_snippet_sphere_forces.h"
- int num = gp->num;
- float4 ri = vars_sorted[index_i+1*num];
- float4 rj = vars_sorted[index_j+1*num];
- float4 relPos = rj-ri;
- float dist = length(relPos);
- float collideDist = 2.*fp->smoothing_length;
 
 
- float4 force;
- force.x = 0.;
- force.y = 0.;
- force.z = 0.;
- force.w = 0.;
-
- if (dist < collideDist) {
-  float4 vi = vars_sorted[index_i+2*num];
-  float4 vj = vars_sorted[index_j+2*num];
-  float4 norm = relPos / dist;
+ if (fp->choice == 0) {
+  cli[index_i].y++;
 
 
-  float4 relVel = vj - vi;
 
-
-  float4 tanVel = relVel - (dot(relVel, norm) * norm);
-
-
-  force = -fp->spring*(collideDist - dist) * norm;
-
-
-  force +=fp->damping*relVel;
-
-
-  force += fp->shear*tanVel;
-  force += fp->attraction*relPos;
+# 1 "density_update.cl" 1
+# 21 "density_update.cl"
+    float Wij = Wpoly6(r, sphp->smoothing_distance, sphp);
+# 38 "density_update.cl"
+ return (float4)(sphp->mass*Wij, 0., 0., 0.);
+# 33 "neighbors.cpp" 2
  }
-# 24 "neighbors.cpp" 2
 
- return force;
+ if (fp->choice == 1) {
+
+# 1 "pressure_update.cl" 1
+
+
+
+
+
+ float h = sphp->smoothing_distance;
+    float h6 = h*h*h * h*h*h;
+    float alpha = 45.f/(sphp->PI * rlen*h6);
+ float hr2 = (h - rlen);
+ float dWijdr = -alpha * (hr2*hr2);
+ clf[index_i].x = h;
+ clf[index_i].y = rlen;
+ clf[index_i].z = dWijdr;
+ clf[index_i].z = hr2;
+
+
+
+
+ float di = vars_sorted[index_i+0*num].x;
+ float dj = vars_sorted[index_j+0*num].x;
+
+
+ float Pi = sphp->K*(di - sphp->rest_density);
+ float Pj = sphp->K*(dj - sphp->rest_density);
+
+ float kern = -0.5 * sphp->mass * dWijdr * (Pi + Pj) / (di * dj);
+# 40 "pressure_update.cl"
+ return kern*r;
+
+ clf[index_i].x = sphp->smoothing_distance;
+ clf[index_i].y = di;
+ clf[index_i].z = Pi;
+ clf[index_i].w = kern;
+# 38 "neighbors.cpp" 2
+ }
 }
 
 float4 ForPossibleNeighbor(__global float4* vars_sorted,
@@ -111,36 +182,38 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
       uint index_j,
       __constant float4 position_i,
         __constant struct GridParams* gp,
-        __constant struct FluidParams* fp)
+        __constant struct FluidParams* fp,
+        __constant struct SPHParams* sphp
+        , __global float4* clf, __global int4* cli
+      )
 {
- float4 force;
- force.x = 0.;
- force.y = 0.;
- force.z = 0.;
- force.w = 0.;
+ float4 frce = (float4) (0.,0.,0.,0.);
 
 
 
- if (index_j != index_i) {
+
+
+
+ if (fp->choice == 0 || index_j != index_i) {
+
 
   float4 position_j = vars_sorted[index_j+1*num];
 
 
-  float4 r = (position_i - position_j) * fp->scale_to_simulation;
+  float4 r = (position_i - position_j);
 
-  float rlen_sq = dot(r,r);
-
-  float rlen;
-  rlen = sqrt(rlen_sq);
+  float rlen = length(r);
 
 
-  if (rlen <= fp->smoothing_length) {
 
-   force = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, rlen_sq, gp, fp);
+  if (rlen <= sphp->smoothing_distance) {
+   cli[index_i].x++;
+
+   frce = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, gp, fp, sphp , clf, cli);
 
   }
  }
- return force;
+ return frce;
 }
 # 22 "uniform_grid_utils.cpp" 2
 
@@ -213,15 +286,18 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
   __global int* cell_indexes_start,
   __global int* cell_indexes_end,
   __constant struct GridParams* gp,
-  __constant struct FluidParams* fp
+  __constant struct FluidParams* fp,
+  __constant struct SPHParams* sphp
+  , __global float4* clf, __global int4* cli
     )
  {
 
 
 
-  uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
 
-  float4 force = convert_float4(0.0);
+
+  float4 frce = (float4) (0.,0.,0.,0.);
+  uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
 
 
   uint startIndex = cell_indexes_start[cellHash];
@@ -233,14 +309,18 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
    uint endIndex = cell_indexes_end[cellHash];
 
 
+
    for(uint index_j=startIndex; index_j < endIndex; index_j++) {
 
 
+    frce += ForPossibleNeighbor(vars_sorted, num, index_i, index_j, position_i, gp, fp, sphp , clf, cli);
 
-    force += ForPossibleNeighbor(vars_sorted, num, index_i, index_j, position_i, gp, fp);
+
 
    }
   }
+
+  return frce;
  }
 
 
@@ -254,43 +334,37 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
   __global int* cell_indices_start,
   __global int* cell_indices_end,
   __constant struct GridParams* gp,
-  __constant struct FluidParams* fp)
+  __constant struct FluidParams* fp,
+  __constant struct SPHParams* sphp
+  , __global float4* clf, __global int4* cli
+  )
  {
 
-
-  float4 force;
-
-  force.x = 0.;
-  force.y = 0.;
-  force.z = 0.;
-  force.w = 0.;
+  float4 frce = (float4) (0.,0.,0.,0.);
 
 
-
-
-
-
-  int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_delta);
+  int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_inv_delta);
 
 
 
   for(int z=cell.z-1; z<=cell.z+1; ++z) {
    for(int y=cell.y-1; y<=cell.y+1; ++y) {
     for(int x=cell.x-1; x<=cell.x+1; ++x) {
-     int4 ipos;
-     ipos.x = x;
-     ipos.y = y;
-     ipos.z = z;
-     ipos.w = 1;
+     int4 ipos = (int4) (x,y,z,1);
 
 
-     force += IterateParticlesInCell(vars_sorted, num, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp);
+     frce += IterateParticlesInCell(vars_sorted, num, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp , clf, cli);
+
+
+
+
+
 
     }
    }
   }
 
-  return force;
+  return frce;
  }
 
 
@@ -300,12 +374,13 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 __kernel void K_SumStep1(
     uint num,
     uint nb_vars,
-    __global float4* vars,
-    __global float4* sorted_vars,
+    __global float4* vars_sorted,
           __global int* cell_indexes_start,
           __global int* cell_indexes_end,
     __constant struct GridParams* gp,
-    __constant struct FluidParams* fp
+    __constant struct FluidParams* fp,
+    __constant struct SPHParams* sphp
+    , __global float4* clf, __global int4* cli
     )
 {
 
@@ -313,20 +388,25 @@ __kernel void K_SumStep1(
     if (index >= num) return;
 
 
+    float4 position_i = vars_sorted[index+1*num];
 
 
 
-    float4 position_i = sorted_vars[index+1*num];
+
+    float4 frce = IterateParticlesInNearbyCells(vars_sorted, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
 
 
+ if (fp->choice == 0) {
+  vars_sorted[index+0*num].x = frce.x;
+  cli[index].w = 4;
+  clf[index].x = vars_sorted[index+0*num].x;
 
- float4 force;
+ }
+ if (fp->choice == 1) {
 
+  vars_sorted[index+3*num] = frce;
+  cli[index].w = 5;
+  clf[index] = frce;
 
-    force = IterateParticlesInNearbyCells(sorted_vars, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp);
-# 222 "uniform_grid_utils.cpp"
- vars[index+num*2] = force;
-
-
-
+ }
 }

@@ -26,9 +26,14 @@ RTPS::RTPS(RTPSettings s)
 
 RTPS::~RTPS()
 {
+	printf("*** RTPS destructor ****\n");
+	printf("*** before delete system ***\n");
     delete system;
+	printf("*** after delete system ***\n");
     delete cli;
+	printf("*** after delete cli ***\n");
     delete renderer;
+	printf("*** after delete renderer ***\n");
 }
 
 void RTPS::Init()
@@ -62,9 +67,13 @@ void RTPS::render()
 
     UniformGrid grid = system->getGrid();
     //should check if grid exists
-    renderer->render_box(grid.getMin(), grid.getMax());
 
+	glPushMatrix();
+	float scale = 50;
+	glScalef(scale,scale,scale);
+    renderer->render_box(grid.getMin(), grid.getMax());
     renderer->render();
+	glPopMatrix();
 }
 
 }

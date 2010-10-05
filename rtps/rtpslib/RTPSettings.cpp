@@ -5,8 +5,18 @@ namespace rtps {
 RTPSettings::RTPSettings()
 {
     system = SPH;
-    max_particles = 1024*2*2*2 ;
-    dt = .0005f;
+	int n1k = 1024 * 1;
+	int n2k = 1024 * 2;
+	int n4k = 1024 * 4;
+	int n8k = 1024 * 8;
+	int n16k = 1024 * 16;
+	int n32k = 1024 * 32;
+	int n64k = 1024 * 64;
+	int n128k = 1024 * 128;
+	int n256k = 1024 * 256;
+
+    max_particles = n16k;
+    dt = .005f;
 }
 
 }

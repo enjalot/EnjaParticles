@@ -21,8 +21,8 @@ struct FluidParams
 {
 	float smoothing_length; // SPH radius
 	float scale_to_simulation;
-	float mass;
-	float dt; // Time step, not necessarily best location
+	//float mass;
+	//float dt; // Time step, not necessarily best location
 	float friction_coef;
 	float restitution_coef;
 	float damping;
@@ -30,6 +30,28 @@ struct FluidParams
 	float attraction;
 	float spring;
 	float gravity; // -9.8 m/sec^2
+	int choice; // EASY WAY TO SELECT KERNELS
+};
+//----------------------------------------------------------------------
+//pass parameters to OpenCL routines
+struct SPHParams
+{
+    float4 grid_min; // changed by GE
+    float4 grid_max;
+    float grid_min_padding;     //float3s take up a float4 of space in OpenCL 1.0 and 1.1
+    float grid_max_padding;
+    float mass;
+    float rest_distance;
+    float rest_density;
+    float smoothing_distance;
+    float particle_radius;
+    float simulation_scale;
+    float boundary_stiffness;
+    float boundary_dampening;
+    float boundary_distance;
+    float EPSILON;
+    float PI;       //delicious
+    float K;        //speed of sound
 };
 //----------------------------------------------------------------------
 

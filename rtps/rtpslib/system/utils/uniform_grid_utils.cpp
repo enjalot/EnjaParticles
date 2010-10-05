@@ -89,22 +89,25 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 	*/
 	float4 IterateParticlesInCell(
 		__global float4*    vars_sorted,
-		__constant uint 	numParticles, 
+		__constant uint 	numParticles,
 		__constant int4 	cellPos,
-		__constant uint 	index_i, 
-		__constant float4 	position_i, 
+		__constant uint 	index_i,
+		__constant float4 	position_i,
 		__global int* 		cell_indexes_start,
-		__global int* 		cell_indexes_end, 
+		__global int* 		cell_indexes_end,
 		__constant struct GridParams* gp,
-		__constant struct FluidParams* fp
+		__constant struct FluidParams* fp,
+		__constant struct SPHParams* sphp
+		DUMMY_ARGS
     )
 	{
+
 		// get hash (of position) of current cell
 		//volatile uint cellHash = UniformGridUtils::calcGridHash<true>(cellPos, cGridParams.grid_res);
 		// wrap edges (false)
-		uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
 
-		float4 force = convert_float4(0.0);
+		float4 frce = (float4) (0.,0.,0.,0.); // = convert_float4(0.0);  (CREATES PROBLEMS)
+		uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
 
 		/* get start/end positions for this cell/bucket */
 		uint startIndex = FETCH(cell_indexes_start,cellHash);
@@ -116,14 +119,18 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 			uint endIndex = FETCH(cell_indexes_end, cellHash);
 
 			/* iterate over particles in this cell */
+//clf[index_i].w = -17.;
 			for(uint index_j=startIndex; index_j < endIndex; index_j++) {			
-				// For now, nothing to loop over. ADD WHEN CODE WORKS. 
-				// Is there a neighbor?
+				//cli[index_i].x++;  
 #if 1
-				force += ForPossibleNeighbor(vars_sorted, numParticles, index_i, index_j, position_i, gp, fp);
+				frce += ForPossibleNeighbor(vars_sorted, numParticles, index_i, index_j, position_i, gp, fp, sphp ARGS);
+				//clf[index_i] = frce;
+				//cli[index_i].w = 3;
 #endif
 			}
 		}
+		//clf[index_i] = frce;
+		return frce;
 	}
 
 	/*--------------------------------------------------------------*/
@@ -137,43 +144,37 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 		__global int* 		cell_indices_start,
 		__global int* 		cell_indices_end,
 		__constant struct GridParams* gp,
-		__constant struct FluidParams* fp)
+		__constant struct FluidParams* fp,
+		__constant struct SPHParams* sphp
+		DUMMY_ARGS
+		)
 	{
 		// initialize force on particle (collisions)
-		//float4 force = convert_float4(0.);
-		float4 force;
-		//force = convert_float4(0.);
-		force.x = 0.;
-		force.y = 0.;
-		force.z = 0.;
-		force.w = 0.;
+		float4 frce = (float4) (0.,0.,0.,0.);
 #if 1
-		// How to choose which PreCalc to use? 
-		// TODO LATER
-		//PreCalc(data, index_i); // TODO
-
 		// get cell in grid for the given position
-		int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_delta);
+		int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_inv_delta);
 
 		// iterate through the 3^3 cells in and around the given position
 		// can't unroll these loops, they are not innermost 
 		for(int z=cell.z-1; z<=cell.z+1; ++z) {
 			for(int y=cell.y-1; y<=cell.y+1; ++y) {
 				for(int x=cell.x-1; x<=cell.x+1; ++x) {
-					int4 ipos;
-					ipos.x = x;
-					ipos.y = y;
-					ipos.z = z;
-					ipos.w = 1;
+					int4 ipos = (int4) (x,y,z,1);
 	#if 1
 					// I am summing much more than required
-					force += IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp);
+					frce += IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp ARGS);
+
+				//barrier(CLK_LOCAL_MEM_FENCE); // DEBUG
+				//clf[index_i] = frce;
+				//cli[index_i].w = 4;
+				// SERIOUS PROBLEM: Results different than results with cli = 5 (bottom of this file)
 	#endif
 				}
 			}
 		}
 #endif
-		return force;
+		return frce;
 	}
 
 	//----------------------------------------------------------------------
@@ -182,47 +183,42 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 
 __kernel void K_SumStep1(
 				uint    numParticles,
-				uint	nb_vars,
-				__global float4* vars,   // *** ERROR
-				__global float4* sorted_vars,
+				uint	nb_vars, 
+				__global float4* vars_sorted,
         		__global int*    cell_indexes_start,
         		__global int*    cell_indexes_end,
 				__constant struct GridParams* gp,
-				__constant struct FluidParams* fp
+				__constant struct FluidParams* fp, 
+				__constant struct SPHParams* sphp 
+				DUMMY_ARGS
 				)
 {
     // particle index
 	int index = get_global_id(0);
     if (index >= numParticles) return;
 
-	//This is done as part of the template approach since the Data can then be used as a template object 
-	//in Cuda
-	//vars = sorted_vars; // not needed
 
-    float4 position_i = FETCH_POS(sorted_vars, index);
+    float4 position_i = pos(index);
 
     // Do calculations on particles in neighboring cells
 
-	float4 force;
-
 	#if 1
-    force = IterateParticlesInNearbyCells(sorted_vars, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp);
+    float4 frce = IterateParticlesInNearbyCells(vars_sorted, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
 	#endif
 
-	// needed in this version
-	//FETCH_FOR(sorted_vars, index) = force;
-	//force = FETCH_FOR(sorted_vars, index);// = force;
-	//sorted_vars[index] = force;
-
-	//vars[mad(2,numParticles,index)] = force; // DOES NOT WORK
-	//vars[mad24(2,numParticles,index)] = force; // DOES NOT WORK
-
-
-	// Without this line, 7 ms, with this line, 25 ms (for 65k particles)
-	vars[index+numParticles*2] = force; // 
-
-	// Same cost as previous line if MAD (multiply/add) enabled
-	//vars[index] = force; // 
+	if (fp->choice == 0) { // update density
+		density(index) = frce.x;
+		cli[index].w = 4;
+		clf[index].x = density(index);
+		// code reaches this point on first call
+	}
+	if (fp->choice == 1) { // update pressure
+		//barrier(CLK_LOCAL_MEM_FENCE); // DEBUG
+		force(index) = frce; // Does not seem maintain value into euler.cl
+		cli[index].w = 5;
+		clf[index] = frce;
+		// SERIOUS PROBLEM: Results different than results with cli = 4 (bottom of this file)
+	}
 }
 
 /*-------------------------------------------------------------- */

@@ -7,6 +7,7 @@
 #include "System.h"
 #include "../opencl/Kernel.h"
 #include "../opencl/Buffer.h"
+#include "../opencl/BufferVBO.h"
 //#include "../util.h"
 
 namespace rtps {
@@ -24,8 +25,8 @@ public:
 
     Kernel k_euler;
 
-    Buffer<float4> cl_position;
-    Buffer<float4> cl_color;
+    BufferVBO<float4> cl_position;
+    BufferVBO<float4> cl_color;
     Buffer<float4> cl_force;
     Buffer<float4> cl_velocity;
 

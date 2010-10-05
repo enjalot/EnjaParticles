@@ -1,11 +1,12 @@
 #include <stdio.h>
 
-#include <GL/glew.h>
+//#include <GL/glew.h>
 #include "Simple.h"
 
 namespace rtps {
 
 
+//----------------------------------------------------------------------
 Simple::Simple(RTPS *psfr, int n)
 {
     num = n;
@@ -31,8 +32,8 @@ Simple::Simple(RTPS *psfr, int n)
     printf("col vbo: %d\n", col_vbo);
 
     //vbo buffers
-    cl_position = Buffer<float4>(ps->cli, pos_vbo);
-    cl_color = Buffer<float4>(ps->cli, col_vbo);
+    cl_position = BufferVBO<float4>(ps->cli, pos_vbo);
+    cl_color = BufferVBO<float4>(ps->cli, col_vbo);
 
     //pure opencl buffers
     cl_force = Buffer<float4>(ps->cli, forces);
@@ -52,22 +53,22 @@ Simple::Simple(RTPS *psfr, int n)
     k_euler.setArg(3, .01f); //time step (should be set from settings)
     printf("euler created\n");
 }
+//----------------------------------------------------------------------
 
 Simple::~Simple()
 {
     if(pos_vbo && managed)
     {
-        glBindBuffer(1, pos_vbo);
-        glDeleteBuffers(1, (GLuint*)&pos_vbo);
+        deleteVBO(pos_vbo);
         pos_vbo = 0;
     }
     if(col_vbo && managed)
     {
-        glBindBuffer(1, col_vbo);
-        glDeleteBuffers(1, (GLuint*)&col_vbo);
+        deleteVBO(col_vbo);
         col_vbo = 0;
     }
 }
+//----------------------------------------------------------------------
 
 void Simple::update()
 {
@@ -91,6 +92,7 @@ void Simple::update()
     //printf("release gl: %s\n", oclErrorString(err));
 
 }
+//----------------------------------------------------------------------
 
 
 }

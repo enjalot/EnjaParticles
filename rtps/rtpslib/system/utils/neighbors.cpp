@@ -3,6 +3,7 @@
 
 #include "cl_macros.h"
 #include "cl_structures.h"
+#include "wpoly6.cl"
 
 //----------------------------------------------------------------------
 float4 ForNeighbor(__global float4*  vars_sorted,
@@ -10,19 +11,31 @@ float4 ForNeighbor(__global float4*  vars_sorted,
 				uint index_j,
 				float4 r,
 				float rlen,
-				float rlen_sq,
 	  			__constant struct GridParams* gp,
-	  			__constant struct FluidParams* fp)
+	  			__constant struct FluidParams* fp,
+	  			__constant struct SPHParams* sphp
+	  			DUMMY_ARGS
+				)
 {
-// the density sum using Wpoly6 kernel
-//data.sum_density += SPH_Kernels::Wpoly6::Kernel_Variable(fp->smoothing_length_pow2, r, rlen_sq);	
-// #include FILE to deal with collisions or other stuff
+	int num = get_global_size(0);
 
-	int index = get_global_id(0);
+	//cli[index_i].x++;
+	//cli[index_i].y = fp->choice;
+	//clf[index_i].x = fp->choice;
+	//cli[index_i].x = fp->choice;
 
-#include "cl_snippet_sphere_forces.h"
+	if (fp->choice == 0) {
+		cli[index_i].y++;
+		//cli[index_i].w = -999.;
+		// update density
+		// return density.x for single neighbor
+		#include "density_update.cl"
+	}
 
-	return force;
+	if (fp->choice == 1) {
+		// update pressure
+		#include "pressure_update.cl"
+	}
 }
 //--------------------------------------------------
 float4 ForPossibleNeighbor(__global float4* vars_sorted, 
@@ -31,36 +44,38 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 						uint index_j, 
 						__constant float4 position_i,
 	  					__constant struct GridParams* gp,
-	  					__constant struct FluidParams* fp)
+	  					__constant struct FluidParams* fp,
+	  					__constant struct SPHParams* sphp
+	  					DUMMY_ARGS
+						)
 {
-	float4 force;
-	force.x = 0.;
-	force.y = 0.;
-	force.z = 0.;
-	force.w = 0.;
-	//float4 force = convert_float4(0.);
+	float4 frce = (float4) (0.,0.,0.,0.);
 
 	// check not colliding with self
-	if (index_j != index_i) {
+	//if (index_j != index_i) {  // RESTORE WHEN DEBUGGED
+
+	// self-collisions ok when computing density
+	// no self-collisions in the case of pressure
+	if (fp->choice == 0 || index_j != index_i) {  // RESTORE WHEN DEBUGGED
+	//{
 		// get the particle info (in the current grid) to test against
-		float4 position_j = FETCH_POS(vars_sorted, index_j); // uses numParticles
+		float4 position_j = pos(index_j); 
 
 		// get the relative distance between the two particles, translate to simulation space
-		float4 r = (position_i - position_j) * fp->scale_to_simulation;
-
-		float rlen_sq = dot(r,r);
+		float4 r = (position_i - position_j); 
 		// |r|
-		float rlen;
-		rlen = sqrt(rlen_sq);
+		float rlen = length(r);
 
 		// is this particle within cutoff?
-		if (rlen <= fp->smoothing_length) {
+
+		if (rlen <= sphp->smoothing_distance) {
+			cli[index_i].x++;
 #if 1
-			force = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, rlen_sq, gp, fp);
+			frce = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, gp, fp, sphp ARGS);
 #endif
 		}
 	}
-	return force;
+	return frce;
 }
 //--------------------------------------------------
 #endif

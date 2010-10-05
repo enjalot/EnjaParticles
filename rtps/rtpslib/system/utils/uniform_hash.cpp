@@ -4,6 +4,7 @@
 
 
 #include "cl_structures.h"
+#include "cl_macros.h"
 
 
 //----------------------------------------------------------------------
@@ -86,19 +87,27 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 // comes from K_Grid_Hash
 // CANNOT USE references to structures/classes as arguments!
 __kernel void hash(
-           __global float4* dParticlePositions,
+           //__global float4* dParticlePositions,
+           __global float4* vars_unsorted,
            __global uint* sort_hashes,
            __global uint* sort_indexes,
+           __global uint* cell_indices_start,
            __constant struct GridParams* gp) 
            //, __global float4* fdebug,
            //__global int4* idebug)
 {
     // particle index
     uint index = get_global_id(0);
-    if (index >= gp->numParticles) return;
+	// do not use gp->numParticles (since it numParticles changed via define)
+	int num = get_global_size(0);
+    if (index >= num) return; 
+
+	// initialize to -1 (used in kernel datastructures in build_datastructures_wrap.cpp
+	cell_indices_start = 0xffffffff;
 
     // particle position
-    float4 p = dParticlePositions[index];
+    //float4 p = dParticlePositions[index];
+    float4 p = unsorted_pos(index); // macro
 
     // get address in grid
     int4 gridPos = calcGridCell(p, gp->grid_min, gp->grid_inv_delta);

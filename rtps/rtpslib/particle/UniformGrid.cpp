@@ -4,6 +4,7 @@
 
 namespace rtps {
 
+//----------------------------------------------------------------------
 UniformGrid::UniformGrid(float4 min, float4 max, float cell_size)
 {
     this->min = min;
@@ -14,12 +15,12 @@ UniformGrid::UniformGrid(float4 min, float4 max, float cell_size)
                   max.y - min.y,
                   max.z - min.z, 1.);
 
-	//  how many points in each direction. 
+	//  how many cells in each direction. 
     res = float4(ceil(size.x / cell_size),
                  ceil(size.y / cell_size),
                  ceil(size.z / cell_size), 1.);
 
-	// Modified dimesions
+	// Modified dimensions
     size = float4(res.x * cell_size,
                   res.y * cell_size,
                   res.z * cell_size,
@@ -37,11 +38,35 @@ UniformGrid::UniformGrid(float4 min, float4 max, float cell_size)
 				   1.);
 
 }
+//----------------------------------------------------------------------
+UniformGrid::UniformGrid(float4 min, float4 max, int nb_cells_x)
+{
+    this->min = min;
+    this->max = max;
 
+	// domain dimensions
+    size = float4(max.x - min.x,
+                  max.y - min.y,
+                  max.z - min.z, 1.);
+
+	//  how many cells in each direction. 
+    res = float4(nb_cells_x, 
+    			 nb_cells_x, 
+    			 nb_cells_x, 
+    			 1);
+
+    delta = float4(size.x / res.x, 
+                   size.y / res.y,
+                   size.z / res.z, 
+				   1.);
+
+}
+//----------------------------------------------------------------------
 UniformGrid::~UniformGrid()
 {
 }
 
+//----------------------------------------------------------------------
 void UniformGrid::make_cube(float4* position, float spacing, int num)
 {
     //float xmin = min.x/2.5f;
@@ -51,8 +76,9 @@ void UniformGrid::make_cube(float4* position, float spacing, int num)
     float ymin = min.y + max.y/4.0f;
     float ymax = max.y;
     //float zmin = min.z/2.0f;
-    float zmin = min.z + max.z/2.0f;
-    float zmax = max.z/4.5f;
+    float zmin = min.z; // + max.z/2.0f;
+    float zmax = min.z + max.z/3.0; //4.5f;
+	printf("spacing= %f\n", spacing);
 
     int i=0;
     //cube in corner
@@ -66,5 +92,20 @@ void UniformGrid::make_cube(float4* position, float spacing, int num)
 
 }
 
+//----------------------------------------------------------------------
+void UniformGrid::makeCube(float4* position, float4 pmin, float4 pmax, float spacing, int& num)
+{
+    int i=0;
 
+    for (float z = pmin.z; z <= pmax.z; z+=spacing) {
+    for (float y = pmin.y; y <= pmax.y; y+=spacing) {
+    for (float x = pmin.x; x <= pmax.x; x+=spacing) {
+        if (i >= num) break;
+        position[i++] = float4(x,y,z,1.0f);
+    }}}
+
+	num = i;
 }
+//----------------------------------------------------------------------
+
+} // namespace

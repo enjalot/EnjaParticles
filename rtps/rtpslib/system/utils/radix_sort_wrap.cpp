@@ -1,5 +1,5 @@
-#include "../GE_SPH.h"
-#include "../oclRadixSortKeysValues/inc/RadixSort.h"
+#include "GE_SPH.h"
+#include "RadixSort.h"
 
 #include <string>
 using namespace std;
@@ -13,15 +13,15 @@ namespace rtps {
 // Output: a list of sorted integers
 // Leave data on the gpu
 
-void GE_SPH::sort()
+void GE_SPH::radix_sort()
 {
+	//exit(0);
 	static bool first_time = true;
-	static RadixSort* radixSort;
 	int ctaSize = 64; // work group size
 
-	printf("ENTER SORT\n");
+	//printf("ENTER RADIX SORT\n");
 
-	ts_cl[TI_SORT]->start();
+	ts_cl[TI_RADIX_SORT]->start();
 
     try {
 		// if ctaSize is too large, sorting is not possible. Number of elements has to lie between some MIN 
@@ -43,12 +43,14 @@ void GE_SPH::sort()
 
 	try {
 		//prepareSortData();
+		#if 0
 		printf("nb_el= %d\n", nb_el);
 		cl_sort_hashes->copyToHost();
 		cl_sort_indices->copyToHost();
 		for (int i=0; i < nb_el; i++) {
 			printf("** hash: %d, index: %d\n", (*cl_sort_hashes)[i], (*cl_sort_indices)[i]);
 		}
+		#endif
 
 	//printf("nb_el= %d\n", nb_el); exit(0);
 	// both arguments should already be on the GPU
@@ -61,14 +63,16 @@ void GE_SPH::sort()
 	}
 
     ps->cli->queue.finish();
-	ts_cl[TI_SORT]->end();
+	ts_cl[TI_RADIX_SORT]->end();
 
-	printf("enter sort diagonistics ****\n");
+	//printf("enter sort diagonistics ****\n");
+	//printSortDiagnostics();
 
-	printSortDiagnostics();
+	//printf("enter computeCellStartEndCPU\n");
+	//computeCellStartEndCPU();
+	//printf("exit computeCellStartEndCPU\n");
 
-	printf("EXIT SORT \n");
-
+	//printf("EXIT SORT \n");
 }
 //----------------------------------------------------------------------
 void GE_SPH::printSortDiagnostics()

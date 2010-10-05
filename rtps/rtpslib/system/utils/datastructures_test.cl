@@ -8,29 +8,26 @@
 
 
 
+# 1 "cl_macros.h" 1
+# 8 "datastructures_test.cpp" 2
+
 
 __kernel void datastructures(
-     int numParticles,
+     int num,
      int nb_vars,
-     __global float4* dParticles,
-     __global float4* dParticlesSorted,
+     __global float4* vars_unsorted,
+     __global float4* vars_sorted,
         __global uint* sort_hashes,
-        __global uint* sort_indexes,
-        __global uint* cell_indexes_start,
-        __global uint* cell_indexes_end,
+        __global uint* sort_indices,
+        __global uint* cell_indices_start,
+        __global uint* cell_indices_end,
      __local uint* sharedHash
      )
 {
-
  uint index = get_global_id(0);
 
 
-
- if (index >= numParticles) return;
-
-
-
-
+ if (index >= num) return;
 
  uint hash = sort_hashes[index];
 
@@ -50,29 +47,24 @@ __kernel void datastructures(
 
 
  barrier(CLK_LOCAL_MEM_FENCE);
-# 58 "datastructures_test.cpp"
+# 53 "datastructures_test.cpp"
  if ((index == 0 || hash != sharedHash[tid]) )
  {
-  cell_indexes_start[hash] = index;
+  cell_indices_start[hash] = index;
   if (index > 0) {
-   cell_indexes_end[sharedHash[tid]] = index;
+   cell_indices_end[sharedHash[tid]] = index;
   }
  }
 
- if (index == numParticles - 1) {
-  cell_indexes_end[hash] = index + 1;
+
+ if (index == num - 1) {
+  cell_indices_end[hash] = index + 1;
  }
 
- uint sortedIndex = sort_indexes[index];
-
-
-
- for (int j=0; j < nb_vars; j++) {
-  dParticlesSorted[index+j*numParticles] = dParticles[sortedIndex+j*numParticles];
-
-
-
-
- }
+ uint sorted_index = sort_indices[index];
+# 81 "datastructures_test.cpp"
+ vars_sorted[index+1*num] = vars_unsorted[sorted_index+1*num];
+ vars_sorted[index+2*num] = vars_unsorted[sorted_index+2*num];
+ vars_sorted[index+0*num].x = vars_unsorted[sorted_index+0*num].x;
 
 }
