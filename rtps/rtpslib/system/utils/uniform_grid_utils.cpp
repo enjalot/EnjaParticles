@@ -182,8 +182,8 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 // compute forces on particles
 
 __kernel void K_SumStep1(
-				uint    numParticles,
-				uint	nb_vars, 
+				//uint    numParticles,
+				//uint	nb_vars, 
 				__global float4* vars_sorted,
         		__global int*    cell_indexes_start,
         		__global int*    cell_indexes_end,
@@ -194,6 +194,9 @@ __kernel void K_SumStep1(
 				)
 {
     // particle index
+	int nb_vars = gp->nb_vars;
+	int numParticles = gp->numParticles;
+
 	int index = get_global_id(0);
     if (index >= numParticles) return;
 

@@ -54,8 +54,8 @@ void GE_SPH::neighborSearch(int which)
 	cl_FluidParams->copyToDevice();
 	int iarg = 0;
 	
-	kern.setArg(iarg++, nb_el);
-	kern.setArg(iarg++, nb_vars);
+	//kern.setArg(iarg++, nb_el);
+	//kern.setArg(iarg++, nb_vars);
 	kern.setArg(iarg++, cl_vars_sorted->getDevicePtr());
 	kern.setArg(iarg++, cl_cell_indices_start->getDevicePtr());
 	kern.setArg(iarg++, cl_cell_indices_end->getDevicePtr());

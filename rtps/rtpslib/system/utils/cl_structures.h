@@ -15,6 +15,7 @@ struct GridParams
     float4          grid_delta;
     float4          grid_inv_delta;
     int             numParticles; // nb fluid particles: wrong spot for this variable
+    int             nb_vars; // for combined variables (vars_sorted, etc.)
 };
 //----------------------------------------------------------------------
 struct FluidParams
