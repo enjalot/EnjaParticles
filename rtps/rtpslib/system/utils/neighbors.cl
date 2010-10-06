@@ -63,6 +63,7 @@ struct SPHParams
     float EPSILON;
     float PI;
     float K;
+ float dt;
 };
 # 6 "neighbors.cpp" 2
 # 1 "wpoly6.cl" 1
@@ -93,10 +94,37 @@ float Wspiky(float rlen, float h, __constant struct SPHParams* params)
 float Wspiky_dr(float rlen, float h, __constant struct SPHParams* params)
 {
 
+
     float h6 = h*h*h * h*h*h;
     float alpha = 45.f/(params->PI * rlen*h6);
  float hr2 = (h - rlen);
  float Wij = -alpha * (hr2*hr2);
+ return Wij;
+}
+
+float Wvisc(float rlen, float h, __constant struct SPHParams* params)
+{
+ float alpha = 15./(2.*params->PI*h*h*h);
+ float rh = rlen / h;
+ float Wij = rh*rh*(1.-0.5*rh) + 0.5/rh - 1.;
+ return alpha*Wij;
+}
+
+float Wvisc_dr(float rlen, float h, __constant struct SPHParams* params)
+
+
+{
+ float alpha = 15./(2.*params->PI * h*h*h * rlen);
+ float rh = rlen / h;
+ float Wij = (-1.5*rh + 2.)/(h*h) - 0.5/(rh*rlen*rlen);
+ return Wij;
+}
+
+float Wvisc_lapl(float rlen, float h, __constant struct SPHParams* params)
+{
+ float h3 = h*h*h;
+ float alpha = 15./(params->PI * h3*h3);
+ float Wij = alpha*(h-rlen);
  return Wij;
 }
 # 7 "neighbors.cpp" 2
@@ -154,21 +182,28 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
 
 
- float di = vars_sorted[index_i+0*num].x;
- float dj = vars_sorted[index_j+0*num].x;
+ float4 di = vars_sorted[index_i+0*num].x;
+ float4 dj = vars_sorted[index_j+0*num].x;
 
 
- float Pi = sphp->K*(di - sphp->rest_density);
- float Pj = sphp->K*(dj - sphp->rest_density);
+ float Pi = sphp->K*(di.x - sphp->rest_density);
+ float Pj = sphp->K*(dj.x - sphp->rest_density);
 
- float kern = -0.5 * sphp->mass * dWijdr * (Pi + Pj) / (di * dj);
-# 40 "pressure_update.cl"
- return kern*r;
+ float kern = -0.5 * 1. * dWijdr * (Pi + Pj);
+ float4 stress = kern*r;
 
- clf[index_i].x = sphp->smoothing_distance;
- clf[index_i].y = di;
- clf[index_i].z = Pi;
- clf[index_i].w = kern;
+
+
+
+ float4 veli = vars_sorted[index_i+2*num];
+ float4 velj = vars_sorted[index_j+2*num];
+
+ float vvisc = 0.001f;
+ float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
+ stress += vvisc * (velj-veli) * dWijlapl;
+ stress *= sphp->mass/(di.x*dj.x);
+# 51 "pressure_update.cl"
+ return stress;
 # 38 "neighbors.cpp" 2
  }
 }

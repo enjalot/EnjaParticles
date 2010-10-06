@@ -36,8 +36,11 @@
 
 #define pos(i) 		vars_sorted[i+POS*numParticles]
 #define vel(i) 		vars_sorted[i+VEL*numParticles]
-#define density(i) 	vars_sorted[i+DENS*numParticles].x
 #define force(i) 	vars_sorted[i+FOR*numParticles]
+// accessing density and color requires two memory access. 
+// Could be more efficient if stored in local point-based array
+#define density(i) 	vars_sorted[i+DENS*numParticles].x
+#define color(i)    vars_sorted[i+DENS*numParticles].y
 
 #define unsorted_pos(i) 		vars_unsorted[i+POS*numParticles]
 #define unsorted_vel(i) 		vars_unsorted[i+VEL*numParticles]

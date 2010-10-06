@@ -10,11 +10,14 @@
 float4 calculateRepulsionForce(
       __constant float4 normal, 
 	  __constant float4 vel, 
-	  __constant float boundary_stiffness, 
-	  __constant float boundary_dampening, 
-	  __constant float boundary_distance)
+	  float boundary_stiffness, 
+	  float boundary_dampening, 
+	  float boundary_distance)
+	  //__constant float boundary_stiffness, 
+	  //__constant float boundary_dampening, 
+	  //__constant float boundary_distance)
 {
-    vel.w = 0.0f;
+    vel.w = 0.0f;  // WHY? 
     float4 repulsion_force = (boundary_stiffness * boundary_distance - boundary_dampening * dot(normal, vel))*normal;
     return repulsion_force;
 }
@@ -43,6 +46,7 @@ __kernel void collision_wall(
     float diff = params->boundary_distance - (p.z - params->grid_min.z);
     if (diff > params->EPSILON)
     {
+		// normal points into the domain
         float4 normal = (float4)(0.0f, 0.0f, 1.0f, 0.0f);
         r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, params->boundary_distance);
         //r_f += calculateRepulsionForce(normal, v, boundary_stiffness, boundary_dampening, boundary_distance);

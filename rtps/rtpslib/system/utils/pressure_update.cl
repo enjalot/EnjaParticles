@@ -16,32 +16,38 @@
 	float dWijdr = Wspiky_dr(rlen, sphp->smoothing_distance, sphp);
 #endif
 
-	float di = density(index_i);  // should not repeat di=
-	float dj = density(index_j);
+	float4 di = density(index_i);  // should not repeat di=
+	float4 dj = density(index_j);
 
 	//form simple SPH in Krog's thesis
-	float Pi = sphp->K*(di - sphp->rest_density); 
-	float Pj = sphp->K*(dj - sphp->rest_density);
+	float Pi = sphp->K*(di.x - sphp->rest_density); 
+	float Pj = sphp->K*(dj.x - sphp->rest_density);
 
-	float kern = -0.5 * sphp->mass * dWijdr * (Pi + Pj) / (di * dj);
+	float kern = -0.5 * 1. * dWijdr * (Pi + Pj);
+	float4 stress = kern*r;
 
-	//clf[index_i] += r*kern; // why is there a w component?
-	//cli[index_i].w = 1;
+	#if 1
+	// Add viscous forces
 
-	//clf[index_i] += Wij;
-	//clf[index_i].w= Pi;  // Pi and Pj are negative!!
-	//cli[index_i].y++;
-	//cli[index_i].x = -998;
+	float4 veli = vel(index_i);
+	float4 velj = vel(index_j);
 
-//clf[index_i].x = kern;
-//clf[index_i].y = rlen;
-//clf[index_i].w = -17.;
+	float vvisc = 0.001f; // SHOULD BE SET IN GE_SPH.cpp
+	float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
+	stress += vvisc * (velj-veli) * dWijlapl;
+	stress *=  sphp->mass/(di.x*dj.x);  // original
+	#endif
 
-	return kern*r;  // original
 
-	clf[index_i].x = sphp->smoothing_distance;
-	clf[index_i].y = di;
-	clf[index_i].z = Pi;
-	clf[index_i].w = kern;   // last two are inf
+	#if 0
+	// Add XSPH stabilization term
+	float Wijpol6 = Wpoly6(rlen, sphp->smoothing_distance, sphp);
+	//stress +=  (2.f * sphp->mass * (velj-veli)/(di.x+dj.x) 
+    //    * Wijpol6) / sphp->dt;
+	stress +=  (1.f * sphp->mass * (velj-veli)/(di.x+dj.x) 
+	    * Wijpol6);
+	#endif
+
+	return stress;
 
 #endif

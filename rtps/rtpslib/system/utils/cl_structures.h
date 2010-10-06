@@ -53,6 +53,7 @@ struct SPHParams
     float EPSILON;
     float PI;       //delicious
     float K;        //speed of sound
+	float dt;
 };
 //----------------------------------------------------------------------
 
