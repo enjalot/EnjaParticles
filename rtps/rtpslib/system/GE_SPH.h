@@ -136,6 +136,7 @@ typedef struct GE_SPHParams
     float EPSILON;
     float PI;       //delicious
     float K;        //speed of sound (what units?)
+	float dt;
 
 	void print()
 	{
@@ -156,6 +157,7 @@ typedef struct GE_SPHParams
 		printf("EPSILON= %f\n", EPSILON);
 		printf("PI= %f\n", PI);
 		printf("K= %f\n", K);
+		printf("dt= %f\n", dt);
 	}
 } GE_SPHParams __attribute__((aligned(16)));
 

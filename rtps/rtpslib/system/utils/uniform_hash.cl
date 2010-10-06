@@ -63,6 +63,7 @@ struct SPHParams
     float EPSILON;
     float PI;
     float K;
+ float dt;
 };
 # 7 "uniform_hash.cpp" 2
 # 1 "cl_macros.h" 1

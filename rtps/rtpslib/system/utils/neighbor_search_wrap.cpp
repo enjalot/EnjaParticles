@@ -53,6 +53,16 @@ void GE_SPH::neighborSearch(int which)
 	fp->choice = which;
 	cl_FluidParams->copyToDevice();
 	int iarg = 0;
+
+	#if 0
+	// print sorted density prior to routine
+	printf("SORTED DENSITY BEFORE\n");
+	cl_vars_sorted->copyToHost();
+	float4* d = cl_vars_sorted->getHostPtr();
+	for (int i=0; i < 5; i++) {
+		printf("dens[%d]= %f\n", d[i].x);
+	}
+	#endif
 	
 	//kern.setArg(iarg++, nb_el);
 	//kern.setArg(iarg++, nb_vars);

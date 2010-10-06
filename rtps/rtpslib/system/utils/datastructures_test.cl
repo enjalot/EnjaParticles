@@ -66,6 +66,7 @@ struct SPHParams
     float EPSILON;
     float PI;
     float K;
+ float dt;
 };
 # 9 "datastructures_test.cpp" 2
 
@@ -126,6 +127,6 @@ __kernel void datastructures(
 # 85 "datastructures_test.cpp"
  vars_sorted[index+1*num] = vars_unsorted[sorted_index+1*num];
  vars_sorted[index+2*num] = vars_unsorted[sorted_index+2*num];
- vars_sorted[index+0*num].x = vars_unsorted[sorted_index+0*num].x;
+
 
 }

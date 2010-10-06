@@ -44,7 +44,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 
 	// 1 particle per cell
 	// grid resolution: res
-	int nb_cells_x = 96; // number of cells along x
+	int nb_cells_x = 64; // number of cells along x
 	// cell volume
 	double cell_size = domain_size_x/nb_cells_x; // in ft
 
@@ -69,19 +69,24 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 
 	// Do not know why required
     sph_settings.particle_rest_distance = .87 * pow(sph_settings.particle_mass / sph_settings.rest_density, 1./3.);
-   
-    sph_settings.smoothing_distance = 2.0f * sph_settings.particle_rest_distance; // *2 decreases grid resolution
-    sph_settings.boundary_distance = .5f * sph_settings.particle_rest_distance;
 
     sph_settings.spacing = cell_size;
+   
+    //sph_settings.smoothing_distance = 2.0f * sph_settings.particle_rest_distance; // *2 decreases grid resolution
+	// from paper by Colagrossi & Landrini (JCP, #191, 2003, pp. 448-475
+    //sph_settings.smoothing_distance = sph_settings.spacing / 1.33; 
 
 	// particle radius is the radius of the W function
 	// one particle fits per cell (PERHAPS CHANGE?)
     float particle_radius = 0.5*sph_settings.spacing;  
+    //float particle_radius = 1.0*sph_settings.spacing;  
 	double particle_volume = (4.*pi/3.) * pow(particle_radius,3.);
 
     sph_settings.smoothing_distance = particle_radius*2.0;   // CHECK THIS. Width of W function
     sph_settings.particle_radius = particle_radius; 
+
+    //sph_settings.boundary_distance = .5f * sph_settings.particle_rest_distance;
+    sph_settings.boundary_distance = sph_settings.particle_radius;
 
 	// mass of single fluid particle
 	double mass_single_particle = particle_volume * density;
@@ -108,7 +113,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 
     //grid.make_cube(&positions[0], sph_settings.spacing, num);
 
-	float4 center(5., 5., 8., 1.);
+	float4 center(5., 5., 5., 1.);
 	float radius = 1.0;
 	int offset = 0;
 	printf("original offset: %d\n", offset);
@@ -116,14 +121,17 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 		sph_settings.spacing);
 	printf("after sphere, offset: %d\n", offset);
 
-	float x1 = domain_size_x*0.;
+	float x1 = domain_size_x*0.2;
 	float x2 = domain_size_x*.8;
-	float z1 = domain_size_x*0.0;
-	float z2 = domain_size_x*0.35;
+	float z1 = domain_size_x*0.05;
+	float z2 = domain_size_x*0.6;
 	float y1 = domain_size_x*0.2;
 	float y2 = domain_size_x*.8;
 	float4 pmin(x1, y1, z1, 1.);
 	float4 pmax(x2, y2, z2, 1.);
+	pmin.print("pmin");
+	pmax.print("pmax");
+	//exit(0);
 	grid.makeCube(&positions[0], pmin, pmax, sph_settings.spacing, num, offset);
 	printf("after cube, offset: %d\n", offset);
 	printf("after cube, num: %d\n", num);
@@ -157,11 +165,13 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     params.particle_radius = sph_settings.particle_radius;
     params.simulation_scale = sph_settings.simulation_scale;
     params.boundary_stiffness = 5000.;  //10000.0f;
-    params.boundary_dampening = 100.; 
-    params.boundary_distance = sph_settings.particle_rest_distance * .5f;
+    params.boundary_dampening = 256.; 
+    params.boundary_distance = sph_settings.boundary_distance;
     params.EPSILON = .00001f;
     params.PI = 3.14159265f;
     params.K = 1.5f;
+	params.dt = psfr->settings.dt;
+	//printf("dt= %f\n", params.dt); exit(0);
  
 	cl_params->copyToDevice();
 	cl_params->copyToHost();
@@ -249,7 +259,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 		//printf("%d, %d, %d, %d\n", DENS, POS, VEL, FOR); exit(0);
 
 		un(i+DENS*nb_el).x = densities[i];
-		un(i+DENS*nb_el).y = 0.0;
+		un(i+DENS*nb_el).y = 1.0; // for surface tension (always 1)
 		un(i+DENS*nb_el).z = 0.0;
 		un(i+DENS*nb_el).w = 0.0;
 		un(i+POS*nb_el) = positions[i];
@@ -258,7 +268,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 
 		// SHOULD NOT BE REQUIRED
 		so(i+DENS*nb_el).x = densities[i];
-		so(i+DENS*nb_el).y = 0.0;
+		so(i+DENS*nb_el).y = 1.0;  // for surface tension (always 1)
 		so(i+DENS*nb_el).z = 0.0;
 		so(i+DENS*nb_el).w = 0.0;
 		so(i+POS*nb_el) = positions[i];
@@ -479,8 +489,9 @@ void GE_SPH::computeOnGPU()
     cl_position->acquire();
     cl_color->acquire();
     
-    for(int i=0; i < 1; i++)
+    for(int i=0; i < 10; i++)
     {
+		printf("i= %d\n", i);
 		// ***** Create HASH ****
 		hash();
 

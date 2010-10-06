@@ -63,6 +63,7 @@ struct SPHParams
     float EPSILON;
     float PI;
     float K;
+ float dt;
 };
 # 6 "neighbors.cpp" 2
 # 1 "wpoly6.cl" 1
@@ -181,26 +182,28 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
 
 
- float di = vars_sorted[index_i+0*num].x;
- float dj = vars_sorted[index_j+0*num].x;
+ float4 di = vars_sorted[index_i+0*num].x;
+ float4 dj = vars_sorted[index_j+0*num].x;
 
 
- float Pi = sphp->K*(di - sphp->rest_density);
- float Pj = sphp->K*(dj - sphp->rest_density);
+ float Pi = sphp->K*(di.x - sphp->rest_density);
+ float Pj = sphp->K*(dj.x - sphp->rest_density);
 
- float kern = -0.5 * dWijdr * (Pi + Pj);
-
-
+ float kern = -0.5 * 1. * dWijdr * (Pi + Pj);
  float4 stress = kern*r;
+
+
+
 
  float4 veli = vars_sorted[index_i+2*num];
  float4 velj = vars_sorted[index_j+2*num];
 
- float vvisc = 1000.;
+ float vvisc = 0.001f;
  float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
  stress += vvisc * (velj-veli) * dWijlapl;
-
- return stress*sphp->mass/(di*dj);
+ stress *= sphp->mass/(di.x*dj.x);
+# 51 "pressure_update.cl"
+ return stress;
 # 38 "neighbors.cpp" 2
  }
 }

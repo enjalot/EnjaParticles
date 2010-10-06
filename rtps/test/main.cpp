@@ -162,7 +162,6 @@ int main(int argc, char** argv)
     init_gl();
 
     printf("before we call enjas functions\n");
-
         
     //default constructor
     ps = new rtps::RTPS();
@@ -192,15 +191,16 @@ void init_gl()
     glLoadIdentity();
     //gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 100.0);
     //glOrtho(0., window_width, 0., window_height, -100., 100.);
-    gluPerspective(40.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 10000.0); //for lorentz
+    gluPerspective(40.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 100.0); //for lorentz
 
     // set view matrix
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glRotatef(-90, 1.0, 0.0, 0.0);
+
+    //glRotatef(-90, 1.0, 0.0, 0.0);
     //glTranslatef(translate_x, translate_z, translate_y);
-    glTranslatef(0, translate_z, 0);
+    //glTranslatef(0, translate_z, 0);
     //glRotatef(-90, 1.0, 0.0, 0.0);
 
     return;
@@ -225,6 +225,10 @@ void appKeyboard(unsigned char key, int x, int y)
 void appRender()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	gluLookAt(0.,0., 10., 5.,5.,0., 0., 0., 1.);
 
     ps->update();
 
@@ -293,11 +297,15 @@ void appMotion(int x, int y)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+
+#if 1
     glRotatef(-90, 1.0, 0.0, 0.0);
     //glTranslatef(translate_x, translate_z, translate_y);
     glTranslatef(0, translate_z, 0);
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
+#endif
+
     glutPostRedisplay();
 }
 
