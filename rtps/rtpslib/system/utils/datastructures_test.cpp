@@ -25,6 +25,7 @@ __kernel void datastructures(
 	int nb_vars = gp->nb_vars;
 	int numParticles = get_global_size(0);
 
+
 	// particle index	
 	if (index >= numParticles) return;
 

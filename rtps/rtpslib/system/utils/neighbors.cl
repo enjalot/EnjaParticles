@@ -186,8 +186,8 @@ float4 ForNeighbor(__global float4* vars_sorted,
  float4 dj = vars_sorted[index_j+0*num].x;
 
 
- float Pi = sphp->K*(di.x - sphp->rest_density);
- float Pj = sphp->K*(dj.x - sphp->rest_density);
+ float Pi = sphp->K*(di.x - .0* sphp->rest_density);
+ float Pj = sphp->K*(dj.x - .0* sphp->rest_density);
 
  float kern = -0.5 * 1. * dWijdr * (Pi + Pj);
  float4 stress = kern*r;

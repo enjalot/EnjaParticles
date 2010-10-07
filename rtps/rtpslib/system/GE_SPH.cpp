@@ -54,7 +54,8 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	// Density (mass per unit vol)
 	// mass of water: 1000 kg/m^3  (62lb/ft^3)
 	// mass in single cell
-	double density = 1000.; // water: 62 lb/ft^3 = 1000 kg/m^3
+	//double density = 1000.; // water: 62 lb/ft^3 = 1000 kg/m^3
+	double density = 10.; // water: 62 lb/ft^3 = 1000 kg/m^3
 	double mass_single_cell = density * cell_volume; // lb (force or mass?)
 
 
@@ -82,7 +83,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     //float particle_radius = 1.0*sph_settings.spacing;  
 	double particle_volume = (4.*pi/3.) * pow(particle_radius,3.);
 
-    sph_settings.smoothing_distance = particle_radius*2.0;   // CHECK THIS. Width of W function
+    sph_settings.smoothing_distance = particle_radius*3.0;   // CHECK THIS. Width of W function
     sph_settings.particle_radius = particle_radius; 
 
     //sph_settings.boundary_distance = .5f * sph_settings.particle_rest_distance;
@@ -121,12 +122,12 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 		sph_settings.spacing);
 	printf("after sphere, offset: %d\n", offset);
 
-	float x1 = domain_size_x*0.05;
-	float x2 = domain_size_x*.95;
-	float z1 = domain_size_x*0.05;
+	float x1 = domain_size_x*0.20;
+	float x2 = domain_size_x*.80;
+	float z1 = domain_size_x*0.00;
 	float z2 = domain_size_x*0.4;
-	float y1 = domain_size_x*0.05;
-	float y2 = domain_size_x*.95;
+	float y1 = domain_size_x*0.2;
+	float y2 = domain_size_x*.8;
 	float4 pmin(x1, y1, z1, 1.);
 	float4 pmax(x2, y2, z2, 1.);
 	pmin.print("pmin");
@@ -443,8 +444,8 @@ void GE_SPH::setupArrays()
 	#if 1
 	cl_FluidParams = new BufferGE<FluidParams>(ps->cli, 1);
 	FluidParams& fp = *cl_FluidParams->getHostPtr();;
-	float radius = gp.grid_delta.x; 
-	fp.smoothing_length = radius; // SPH radius
+	float radius = sph_settings.particle_radius;
+	fp.smoothing_length = sph_settings.smoothing_distance; // SPH radius
 	fp.scale_to_simulation = 1.0; // overall scaling factor
 	//fp.mass = 1.0; // mass of single particle (MIGHT HAVE TO BE CHANGED)
 	fp.friction_coef = 0.1;

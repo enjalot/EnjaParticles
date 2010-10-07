@@ -89,6 +89,7 @@ __kernel void datastructures(
  int num = get_global_size(0);
 
 
+
  if (index >= num) return;
 
  uint hash = sort_hashes[index];
@@ -109,7 +110,7 @@ __kernel void datastructures(
 
 
  barrier(CLK_LOCAL_MEM_FENCE);
-# 57 "datastructures_test.cpp"
+# 58 "datastructures_test.cpp"
  if ((index == 0 || hash != sharedHash[tid]) )
  {
   cell_indices_start[hash] = index;
@@ -124,7 +125,7 @@ __kernel void datastructures(
  }
 
  uint sorted_index = sort_indices[index];
-# 85 "datastructures_test.cpp"
+# 86 "datastructures_test.cpp"
  vars_sorted[index+1*num] = vars_unsorted[sorted_index+1*num];
  vars_sorted[index+2*num] = vars_unsorted[sorted_index+2*num];
 
