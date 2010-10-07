@@ -71,7 +71,7 @@ rtps::RTPS* ps;
 //GE::Time *ts[3];
 
 //================
-//#include "materials_lights.h"
+#include "materials_lights.h"
 
 //----------------------------------------------------------------------
 #if 0
@@ -151,7 +151,7 @@ int main(int argc, char** argv)
     glutMouseFunc(appMouse);
     glutMotionFunc(appMotion);
 
-	//define_lights_and_materials();
+	define_lights_and_materials();
 
     // initialize necessary OpenGL extensions
     glewInit();

@@ -4,6 +4,7 @@
 #if defined __APPLE__ || defined(MACOSX)
     //OpenGL stuff
     #include <OpenGL/gl.h>
+    #include <OpenGL/glu.h>
 #else
     //OpenGL stuff
     #include <GL/gl.h>
@@ -28,6 +29,7 @@ public:
 
     GLuint pos_vbo;
     GLuint col_vbo;
+	GLUquadric* qu;
 
     void render();
     void drawArrays();

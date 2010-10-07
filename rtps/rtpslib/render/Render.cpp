@@ -20,6 +20,10 @@ Render::Render(GLuint pos, GLuint col, int n)
     pos_vbo = pos;
     col_vbo = col;
     num = n;
+	qu = gluNewQuadric();
+	if (qu == 0) {
+		printf("Insufficient memory for quadric allocation\n");
+	}
 }
 
 Render::~Render()
@@ -59,13 +63,23 @@ void Render::drawArrays()
     glVertexPointer(4, GL_FLOAT, 0, 0);
 
     // map the buffer object into client's memory
-    /*
-    void* ptr = glMapBufferARB(GL_ARRAY_BUFFER, GL_READ_ONLY_ARB);
-    printf("Pos PTR[400]: %f\n", ((float*)ptr)[400]);
-    printf("Pos PTR[401]: %f\n", ((float*)ptr)[401]);
-    printf("Pos PTR[402]: %f\n", ((float*)ptr)[402]);
+    #if 1
+    float* ptr = (float*) glMapBufferARB(GL_ARRAY_BUFFER, GL_READ_ONLY_ARB);
+    //void* ptr = glMapBufferARB(GL_ARRAY_BUFFER, GL_READ_ONLY_ARB);
+    //printf("Pos PTR[400]: %f\n", ((float*)ptr)[400]);
+    //printf("Pos PTR[401]: %f\n", ((float*)ptr)[401]);
+    //printf("Pos PTR[402]: %f\n", ((float*)ptr)[402]);
+	int count = 0;
+	//float* fp = (float*) ptr;
+	for (int i=0; i < num; i++, count+=4) {
+		glPushMatrix();
+		glTranslatef(ptr[count], ptr[count+1], ptr[count+2]);
+		gluSphere(qu, .05, 5, 5);
+		glPopMatrix();
+	}
     glUnmapBufferARB(GL_ARRAY_BUFFER); 
-    */
+    #endif
+
     
     //printf("enable client state\n");
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -79,7 +93,7 @@ void Render::drawArrays()
     //printf("draw arrays num: %d\n", num);
 
     //printf("NUM %d\n", num);
-    glDrawArrays(GL_POINTS, 0, num);
+    //glDrawArrays(GL_POINTS, 0, num);
 
     //printf("disable stuff\n");
     //glDisableClientState(GL_INDEX_ARRAY);
@@ -125,22 +139,24 @@ void Render::render()
     else   // do not use glsl
     {
 */
-        glDisable(GL_LIGHTING);
+        glEnable(GL_LIGHTING);
         //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		// draws circles instead of squares
         glEnable(GL_POINT_SMOOTH); 
         //TODO make the point size a setting
-        glPointSize(5.0f);
+        //glPointSize(5.0f);
 
-        drawArrays();
+        drawArrays();  // the one used
+    	glDisable(GL_LIGHTING);
+    	glDisable(GL_BLEND);
     //}
     //printf("done rendering, clean up\n");
    
     glPopClientAttrib();
     glPopAttrib();
     //glDisable(GL_POINT_SMOOTH);
-    //glDisable(GL_BLEND);
     //glEnable(GL_LIGHTING);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
