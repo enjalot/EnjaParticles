@@ -121,12 +121,12 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 		sph_settings.spacing);
 	printf("after sphere, offset: %d\n", offset);
 
-	float x1 = domain_size_x*0.2;
-	float x2 = domain_size_x*.8;
+	float x1 = domain_size_x*0.05;
+	float x2 = domain_size_x*.95;
 	float z1 = domain_size_x*0.05;
-	float z2 = domain_size_x*0.6;
-	float y1 = domain_size_x*0.2;
-	float y2 = domain_size_x*.8;
+	float z2 = domain_size_x*0.4;
+	float y1 = domain_size_x*0.05;
+	float y2 = domain_size_x*.95;
 	float4 pmin(x1, y1, z1, 1.);
 	float4 pmax(x2, y2, z2, 1.);
 	pmin.print("pmin");
@@ -164,7 +164,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     params.smoothing_distance = sph_settings.smoothing_distance;
     params.particle_radius = sph_settings.particle_radius;
     params.simulation_scale = sph_settings.simulation_scale;
-    params.boundary_stiffness = 5000.;  //10000.0f;
+    params.boundary_stiffness = 10000.;  //10000.0f;
     params.boundary_dampening = 256.; 
     params.boundary_distance = sph_settings.boundary_distance;
     params.EPSILON = .00001f;

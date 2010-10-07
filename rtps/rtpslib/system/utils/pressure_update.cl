@@ -32,7 +32,7 @@
 	float4 veli = vel(index_i);
 	float4 velj = vel(index_j);
 
-	float vvisc = 0.01f; // SHOULD BE SET IN GE_SPH.cpp
+	float vvisc = 0.001f; // SHOULD BE SET IN GE_SPH.cpp
 	float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
 	stress += vvisc * (velj-veli) * dWijlapl;
 	stress *=  sphp->mass/(di.x*dj.x);  // original
@@ -44,7 +44,7 @@
 	float Wijpol6 = Wpoly6(rlen, sphp->smoothing_distance, sphp);
 	//stress +=  (2.f * sphp->mass * (velj-veli)/(di.x+dj.x) 
     //    * Wijpol6) / sphp->dt;
-	stress +=  (1.f * sphp->mass * (velj-veli)/(di.x+dj.x) 
+	stress +=  (2.f * sphp->mass * (velj-veli)/(di.x+dj.x) 
 	    * Wijpol6);
 	#endif
 
