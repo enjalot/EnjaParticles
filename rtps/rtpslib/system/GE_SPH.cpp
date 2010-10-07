@@ -114,7 +114,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     //grid.make_cube(&positions[0], sph_settings.spacing, num);
 
 	float4 center(5., 5., 5., 1.);
-	float radius = 1.0;
+	float radius = 0.3;
 	int offset = 0;
 	printf("original offset: %d\n", offset);
 	grid.makeSphere(&positions[0], center, radius, num, offset, 

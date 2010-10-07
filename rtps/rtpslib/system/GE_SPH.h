@@ -229,6 +229,7 @@ private:
 	void prepareSortData();
 	void printBuildDiagnostics();
 	void printHashDiagnostics();
+	GE_SPHParams& getParams() {return params;}
 
 private:
     //the particle system framework
