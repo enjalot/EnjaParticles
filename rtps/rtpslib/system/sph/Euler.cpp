@@ -26,6 +26,12 @@ void SPH::cpuEuler()
         float4 v = velocities[i];
         float4 f = forces[i];
 
+		if (i == 0) {
+			printf("==================================\n");
+			printf("Euler: p[%d]= %d, %f, %f, %f\n", i, p.x, p.y, p.z, p.w);
+			printf("       v[%d]= %f, %f, %f, %f\n", i, v.x, v.y, v.z, v.w);
+		}
+
         //external force is gravity
         f.z += -9.8f;
 
