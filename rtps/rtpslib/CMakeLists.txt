@@ -45,6 +45,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/particle/UniformGrid.cpp
     
     ${rtpslib_SOURCE_DIR}/system/Simple.cpp
+    ${rtpslib_SOURCE_DIR}/system/simple/Euler.cpp
     
     ${rtpslib_SOURCE_DIR}/system/SPH.cpp
     ${rtpslib_SOURCE_DIR}/system/sph/Euler.cpp
@@ -61,8 +62,8 @@ set (rtpslib_SOURCES
 
 
 ADD_DEFINITIONS(-g )
-ADD_DEFINITIONS(-DGPU)
-#ADD_DEFINITIONS(-DCPU)
+#ADD_DEFINITIONS(-DGPU)
+ADD_DEFINITIONS(-DCPU)
 
 INCLUDE_DIRECTORIES(${rtpslib_INCLUDES})
 ADD_LIBRARY(rtps STATIC ${rtpslib_SOURCES})

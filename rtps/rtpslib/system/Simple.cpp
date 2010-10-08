@@ -14,17 +14,33 @@ Simple::Simple(RTPS *psfr, int n)
     //store the particle system framework
     ps = psfr;
 
+    /*
     std::vector<float4> positions(num);
     std::vector<float4> colors(num);
     std::vector<float4> forces(num);
     std::vector<float4> velocities(num);
+    */
+    printf("num: %d\n", num);
+    positions.resize(num);
+    colors.resize(num);
+    forces.resize(num);
+    velocities.resize(num);
     
+    int j = 0;
+    for(int i = 0; i < num; i++)
+    {
+        positions[i] = float4(i % 16, j, 0.0f, 0.0f);
+        colors[i] = float4(1.0f, 0.0f, 0.0f, 0.0f);
+        if(i % 16 == 0)
+        {
+            j++;
+        }
+    }
+    //std::fill(positions.begin(), positions.end(), float4(0.0f, 0.0f, 0.0f, 1.0f));
+    //std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));
+    std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
+    std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     
-    std::fill(positions.begin(), positions.end(), float4(0.0f, 0.0f, 0.0f, 1.0f));
-    std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));
-    std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 1.0f, 0.0f));
-    std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, -9.8f, 0.0f));
-
     
     managed = true;
     pos_vbo = createVBO(&positions[0], positions.size()*sizeof(float4), GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
@@ -33,9 +49,12 @@ Simple::Simple(RTPS *psfr, int n)
     printf("col vbo: %d\n", col_vbo);
 
     //vbo buffers
+    printf("making cl_buffers\n");
     cl_position = Buffer<float4>(ps->cli, pos_vbo);
     cl_color = Buffer<float4>(ps->cli, col_vbo);
+    printf("done with cl_buffers\n");
 
+    /*
     //pure opencl buffers
     cl_force = Buffer<float4>(ps->cli, forces);
     cl_velocity = Buffer<float4>(ps->cli, velocities);;
@@ -53,6 +72,7 @@ Simple::Simple(RTPS *psfr, int n)
     k_euler.setArg(2, cl_force.cl_buffer[0]);
     k_euler.setArg(3, .01f); //time step (should be set from settings)
     printf("euler created\n");
+    */
 }
 
 Simple::~Simple()
@@ -73,6 +93,20 @@ Simple::~Simple()
 
 void Simple::update()
 {
+#ifdef CPU
+
+    //printf("calling cpuEuler\n");
+    cpuEuler();
+
+    //printf("pushing positions to gpu\n");
+    glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
+    glBufferData(GL_ARRAY_BUFFER, num * sizeof(float4), &positions[0], GL_DYNAMIC_DRAW);
+    //printf("done pushing to gpu\n");
+
+
+#endif
+#ifdef GPU
+
     //call kernels
     //add timings
     glFinish();
@@ -91,7 +125,7 @@ void Simple::update()
     cl_position.release();
     cl_color.release();
     //printf("release gl: %s\n", oclErrorString(err));
-
+#endif
 }
 
 
