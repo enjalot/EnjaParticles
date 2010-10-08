@@ -23,6 +23,8 @@
 #define POS 1
 #define VEL 2
 #define FOR 3
+#define SURF_TENS 4
+#define COL 5
 
 namespace rtps {
 

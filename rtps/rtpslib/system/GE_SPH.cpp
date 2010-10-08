@@ -29,7 +29,8 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	radixSort = 0;
 
     num = n;
-	nb_vars = 4;  // for array structure in OpenCL
+	// density, force, pos, vel, surf tension, color
+	nb_vars = 6;  // for array structure in OpenCL
 	nb_el = n;
 	//printf("num_particles= %d\n", num);
 
@@ -201,12 +202,13 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     params.smoothing_distance = sph_settings.smoothing_distance;
     params.particle_radius = sph_settings.particle_radius;
     params.simulation_scale = sph_settings.simulation_scale;
-    params.boundary_stiffness = 10000.;  //10000.0f;
+	// does scale_simulation influence stiffness and dampening?
+    params.boundary_stiffness = 400.;  //10000.0f;  (scale from 20000 to 20)
     params.boundary_dampening = 256.;//256.; 
     params.boundary_distance = sph_settings.boundary_distance;
     params.EPSILON = .00001f;
     params.PI = 3.14159265f;
-    params.K = 1.5f; //1.5f;
+    params.K = 1.0f; //1.5f;
 	params.dt = psfr->settings.dt;
 	//printf("dt= %f\n", params.dt); exit(0);
  
@@ -550,7 +552,7 @@ void GE_SPH::computeOnGPU()
     cl_position->acquire();
     cl_color->acquire();
     
-    for(int i=0; i < 1; i++)
+    for(int i=0; i < 10; i++)
     {
 		printf("i= %d\n", i);
 		// ***** Create HASH ****

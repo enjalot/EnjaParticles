@@ -155,7 +155,7 @@ __kernel void hash(
 
 
 
-    float4 p = vars_unsorted[index+1*num];
+    float4 p = vars_unsorted[index+1 *num];
 
 
     int4 gridPos = calcGridCell(p, gp->grid_min, gp->grid_inv_delta);

@@ -8,13 +8,13 @@
 //----------------------------------------------------------------------
 //from Krog '10
 float4 calculateRepulsionForce(
-      __constant float4 normal, 
-	  __constant float4 vel, 
+      float4 normal, 
+	  float4 vel, 
 	  float boundary_stiffness, 
 	  float boundary_dampening, 
 	  float boundary_distance)
 {
-    vel.w = 0.0f;  // WHY? 
+    vel.w = 0.0f;  // Removed influence of 4th component of velocity (does not exist)
     float4 repulsion_force = (boundary_stiffness * boundary_distance - boundary_dampening * dot(normal, vel))*normal;
     return repulsion_force;
 }
@@ -22,11 +22,7 @@ float4 calculateRepulsionForce(
 
 //----------------------------------------------------------------------
 __kernel void collision_wall(
-		//__constant int nb_vars, 
 		__global float4* vars_sorted, 
-		//__global float4* pos, 
-		//__global float4* vel,  
-		//__global float4* force, 
 		__constant struct GridParams* gp,
 		__constant struct SPHParams* params)
 {

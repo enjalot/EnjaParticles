@@ -126,8 +126,8 @@ __kernel void datastructures(
 
  uint sorted_index = sort_indices[index];
 # 86 "datastructures_test.cpp"
- vars_sorted[index+1*num] = vars_unsorted[sorted_index+1*num];
- vars_sorted[index+2*num] = vars_unsorted[sorted_index+2*num];
+ vars_sorted[index+1*num] = vars_unsorted[sorted_index+1 *num];
+ vars_sorted[index+2*num] = vars_unsorted[sorted_index+2 *num];
 
 
 }
