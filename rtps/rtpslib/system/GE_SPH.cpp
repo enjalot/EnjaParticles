@@ -33,25 +33,20 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	nb_el = n;
 	//printf("num_particles= %d\n", num);
 
-    //*** Initialization, TODO: move out of here to the particle directory
-    std::vector<float4> colors(num);
-    positions.resize(num);
-    forces.resize(num);
-    velocities.resize(num);
-    densities.resize(num);
-
-
-
-	double domain_size_x = 1.; // ft
-	double domain_size_y = 1.; // ft
-	double domain_size_z = 1.; // ft
-	double domain_volume = domain_size_x * domain_size_y * domain_size_z;
-	double ratio = 0.4; // 0.4
-	double fluid_volume = 0.4*domain_volume; // height of fluid = 0.4*zmax
+	// STRATEGY
+	// mass of single particle based on density and particle radius
+	// mass of single cell of the grid, assuming np particles per cell
+	//   (np is 1 or 8 in 3D)
 
 	// Density (mass per unit vol)
 	// density of water: 1000 kg/m^3  (62lb/ft^3)
 	double density = 1000.; // water: 62 lb/ft^3 = 1000 kg/m^3
+
+	// domain occupied by the fluid
+	double fluid_size_x = 1.; // meters
+	double fluid_size_y = 1.; // 
+	double fluid_size_z = 1.; // 
+	double fluid_volume = fluid_size_x * fluid_size_y * fluid_size_z;
 
 	double pi = 3.14159;
 	double nb_particles = num;
@@ -59,36 +54,47 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	double particle_radius = pow(particle_volume*3./(4.*pi), 1./3.);
 	double particle_mass = particle_volume * density;
 
-	// desired number of particles within the smoothing_distance
-	int nb_interact_part = 10;
+	int nb_particles_in_cell = 1;
+	float cell_mass = nb_particles_in_cell*particle_mass;
+	float cell_volume = cell_mass / density;
+	float cell_sz = pow(cell_volume, 1./3.);
+
+	float spacing;
+	if (nb_particles_in_cell == 1) {
+		spacing = cell_sz;
+	} else if (nb_particles_in_cell == 8) {
+		spacing = 0.5*cell_sz;
+	} else {
+		printf("only consider 1 or 8 particles per cell\n");
+		exit(0);
+	}
+
+	printf("cell_sz= %f\n", cell_sz);
+	printf("particle_radius= %f\n", particle_radius);
+	printf("spacing= %f\n", spacing);
+	//exit(0);
+
+	// desired number of particles within the smoothing_distance sphere
+	int nb_interact_part = 15;
 	// (h/radius)^3 = nb_interact_part
 	double h = pow(nb_interact_part, 1./3.) * particle_radius;
 
 	//-------------------------------
 
-	// 1 particle per cell
-	// grid resolution: res
-	double cell_size;
-	double cell_volume; 
+	double cell_size = cell_sz;
 	int    nb_cells_x; // number of cells along x
 	int    nb_cells_y; 
 	int    nb_cells_z;
 
-	// one cell contains 8 particles
-	// cell mass = 1 * particle mass
-	cell_volume = particle_volume * 1;
-	cell_size = pow(cell_volume, 1./3.);
+	double domain_size_x = 1.2 * fluid_size_x; // meters
+	double domain_size_y = 1.2 * fluid_size_y; // 
+	double domain_size_z = 2.0 * fluid_size_z; // 
 
 	nb_cells_x = (int) (domain_size_x / cell_size);
 	nb_cells_y = (int) (domain_size_y / cell_size);
 	nb_cells_z = (int) (domain_size_z / cell_size);
 
-	//nb_cells_x = 64; // number of cells along x
-	//nb_cells_y = 64;
-	//nb_cells_z = 64;
-
-	printf("cell_size= %f\n", cell_size);
-	printf("particle_radius= %f\n", particle_radius);
+	printf("nb cells: %d, %d, %d\n", nb_cells_x, nb_cells_y, nb_cells_z);
 	//exit(0);
 
 	//-------------------------------
@@ -102,24 +108,16 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     sph_settings.particle_rest_distance = .87 * pow(sph_settings.particle_mass / sph_settings.rest_density, 1./3.);
 
 	// one cell = 2 particles
-    sph_settings.spacing = cell_size/2.;  // distance between particles
-   
-	// particle radius is the radius of the W function
-	// eight particle fits per cell (PERHAPS CHANGE?)
-
+    sph_settings.spacing = spacing;  // distance between particles
     sph_settings.smoothing_distance = h;   // CHECK THIS. Width of W function
     sph_settings.particle_radius = particle_radius; 
 
     //sph_settings.boundary_distance = .5f * sph_settings.particle_rest_distance;
     sph_settings.boundary_distance = sph_settings.particle_radius;
 
-	domain_size_x = cell_size * nb_cells_x;
-	domain_size_y = cell_size * nb_cells_y;
-	domain_size_z = cell_size * nb_cells_z;
-
 	printf("domain size: %f, %f, %f\n", domain_size_x, domain_size_y, domain_size_z);
+	//exit(0);
 
-	float sz = domain_size_x;
 	float4 domain_size(domain_size_x, domain_size_y, domain_size_z, 1.);
 	float4 domain_origin(0., 0., 0., 1.);
 	nb_cells = int4(nb_cells_x, nb_cells_y, nb_cells_z, 1);
@@ -127,8 +125,13 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     grid = UniformGrid(domain_origin, domain_size, nb_cells); 
 
 
-    //grid.make_cube(&positions[0], sph_settings.spacing, num);
+    //*** Initialization, TODO: move out of here to the particle directory
+    positions.resize(num);
+    forces.resize(num);
+    velocities.resize(num);
+    densities.resize(num);
 
+	// CREATE FLUID SPHERE
 	float4 center(5., 5., 8., 1.);
 	float radius = 0.5;
 	int offset = 0;
@@ -137,12 +140,31 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	//	sph_settings.spacing);
 	printf("after sphere, offset: %d\n", offset);
 
+	// CREATE FLUID CUBE
 	float x1 = domain_size_x*0.10;
 	float x2 = domain_size_x*.90;
 	float y1 = domain_size_y*0.1;
 	float y2 = domain_size_y*.9;
 	float z1 = particle_radius;
-	float z2 = domain_size_z*0.4;
+	float z2 = fluid_size_z;
+
+	#if 0
+	x1 = 0.;
+	y1 = 0.;
+	z1 = 0.;
+	x2 = fluid_size_x;
+	y2 = fluid_size_y;
+	z2 = fluid_size_z;
+
+	float vol = (x2-x1)*(y2-y1)*(z2-z1);
+	float total_mass_dom = vol*density;
+	float total_mass_cells = num*density*cell_volume;
+	float total_mass_par = num*sph_settings.particle_mass;
+	printf("mass and mass: %f, %f\n", total_mass_dom, total_mass_par);
+	printf("mass cells: %f\n", total_mass_cells);
+	//exit(0);
+	#endif
+
 	float4 pmin(x1, y1, z1, 1.);
 	float4 pmax(x2, y2, z2, 1.);
 	pmin.print("pmin");
@@ -152,7 +174,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	printf("after cube, offset: %d\n", offset);
 	printf("after cube, num: %d\n", num);
 
-
+	#if 0
 	if (num_old != nb_el) {
 		printf("nb_el should equal num_old\n");
 		exit(0);
@@ -164,6 +186,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 		printf("num, num_old= %d, %d\n", num, num_old);
 		exit(1);
 	}
+	#endif
 
     cl_params = new BufferGE<GE_SPHParams>(ps->cli, 1);
 	GE_SPHParams& params = *(cl_params->getHostPtr());
@@ -187,6 +210,14 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	cl_params->copyToDevice();
 	cl_params->copyToHost();
 	GE_SPHParams& pparams = *(cl_params->getHostPtr());
+
+	// Decrease/increase num (nb particles as necessary)
+    //*** Initialization, TODO: move out of here to the particle directory
+    std::vector<float4> colors(num);
+    positions.resize(num);
+    forces.resize(num);
+    velocities.resize(num);
+    densities.resize(num);
 
     std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));
     std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 1.0f, 0.0f));
@@ -357,6 +388,7 @@ void GE_SPH::update()
 
 #ifdef GPU
 	computeOnGPU();
+	exit(0);
 #endif
 
     /*
