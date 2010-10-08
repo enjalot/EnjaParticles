@@ -16,7 +16,7 @@ float Wpoly6(float4 r, float h, __constant struct SPHParams* params)
 float Wspiky(float rlen, float h, __constant struct SPHParams* params)
 {
     float h6 = h*h*h * h*h*h;
-    float alpha = 45.f/params->PI/h6;
+    float alpha = 15.f/params->PI/h6;
 	float hr2 = (h - rlen);
 	float Wij = alpha * hr2*hr2*hr2;
 	return Wij;
@@ -45,7 +45,7 @@ float Wvisc_dr(float rlen, float h, __constant struct SPHParams* params)
 // Derivative with respect to |r| divided by |r|
 // 
 {
-	float alpha = 15./(2.*params->PI * h*h*h * rlen);
+	float alpha = 15./(2.*params->PI * h*h*h);
 	float rh = rlen / h;
 	float Wij = (-1.5*rh + 2.)/(h*h) - 0.5/(rh*rlen*rlen);
 	return Wij;

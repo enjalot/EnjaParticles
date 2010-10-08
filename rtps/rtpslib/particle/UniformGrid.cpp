@@ -1,4 +1,5 @@
 #include <math.h>
+#include <stdlib.h>
 
 #include "UniformGrid.h"
 
@@ -48,6 +49,8 @@ UniformGrid::UniformGrid(float4 min, float4 max, int4 nb_cells)
     size = float4(max.x - min.x,
                   max.y - min.y,
                   max.z - min.z, 1.);
+	printf("UniformGrid: grid_size= %f, %f, %f\n", size.x, size.y, size.z);
+	//exit(0);
 
 	//  how many cells in each direction. 
     res = float4(nb_cells.x, 

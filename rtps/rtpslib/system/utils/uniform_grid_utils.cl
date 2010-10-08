@@ -89,7 +89,7 @@ float Wpoly6(float4 r, float h, __constant struct SPHParams* params)
 float Wspiky(float rlen, float h, __constant struct SPHParams* params)
 {
     float h6 = h*h*h * h*h*h;
-    float alpha = 45.f/params->PI/h6;
+    float alpha = 15.f/params->PI/h6;
  float hr2 = (h - rlen);
  float Wij = alpha * hr2*hr2*hr2;
  return Wij;
@@ -118,7 +118,7 @@ float Wvisc_dr(float rlen, float h, __constant struct SPHParams* params)
 
 
 {
- float alpha = 15./(2.*params->PI * h*h*h * rlen);
+ float alpha = 15./(2.*params->PI * h*h*h);
  float rh = rlen / h;
  float Wij = (-1.5*rh + 2.)/(h*h) - 0.5/(rh*rlen*rlen);
  return Wij;
@@ -190,8 +190,10 @@ float4 ForNeighbor(__global float4* vars_sorted,
  float4 dj = vars_sorted[index_j+0*num].x;
 
 
- float Pi = sphp->K*(di.x - .0* sphp->rest_density);
- float Pj = sphp->K*(dj.x - .0* sphp->rest_density);
+ float fact = 1.;
+
+ float Pi = sphp->K*(di.x - fact * sphp->rest_density);
+ float Pj = sphp->K*(dj.x - fact * sphp->rest_density);
 
  float kern = -0.5 * 1. * dWijdr * (Pi + Pj);
  float4 stress = kern*r;
@@ -206,7 +208,7 @@ float4 ForNeighbor(__global float4* vars_sorted,
  float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
  stress += vvisc * (velj-veli) * dWijlapl;
  stress *= sphp->mass/(di.x*dj.x);
-# 51 "pressure_update.cl"
+# 53 "pressure_update.cl"
  return stress;
 # 38 "neighbors.cpp" 2
  }
@@ -437,14 +439,15 @@ __kernel void K_SumStep1(
 
  if (fp->choice == 0) {
   vars_sorted[index+0*num].x = frce.x;
-
-
+  cli[index].w = 4;
+  clf[index].x = vars_sorted[index+0*num].x;
 
  }
  if (fp->choice == 1) {
 
   vars_sorted[index+3*num] = frce;
-
+  cli[index].w = 5;
+  cli[index].x++;
 
 
  }

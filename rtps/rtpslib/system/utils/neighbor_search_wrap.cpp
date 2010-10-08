@@ -89,20 +89,24 @@ void GE_SPH::neighborSearch(int which)
 	if (which == 1) ts_cl[TI_PRES]->end();
 
 
-	#if 0
+	#if 1
 if (which == 1) {
 	printf("which == 1 *** \n");
+} else {
+	printf("which == 0 *** \n");
+}
+
 	clf_debug->copyToHost();
 	cli_debug->copyToHost();
 
-	for (int i=0; i < nb_el; i++) { 
+	//for (int i=0; i < nb_el; i++) { 
 	//for (int i=0; i < 10; i++) { 
+	for (int i=500; i < 510; i++) { 
 		printf("----------------------------\n");
 		printf("clf[%d]= %f, %f, %f, %f\n", i, fclf[i].x, fclf[i].y, fclf[i].z, fclf[i].w);
 		printf("cli[%d]= %d, %d, %d, %d\n", i, icli[i].x, icli[i].y, icli[i].z, icli[i].w);
 	}
 	//exit(0);
-}
 	#endif
 	//if (which ==1) exit(0);
 }

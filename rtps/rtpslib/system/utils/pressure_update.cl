@@ -20,8 +20,10 @@
 	float4 dj = density(index_j);
 
 	//form simple SPH in Krog's thesis
-	float Pi = sphp->K*(di.x - sphp->rest_density); 
-	float Pj = sphp->K*(dj.x - sphp->rest_density);
+	float fact = 1.; // 5.812
+	// rest density does not appear to be correct. 
+	float Pi = sphp->K*(di.x - fact * sphp->rest_density); 
+	float Pj = sphp->K*(dj.x - fact * sphp->rest_density);
 
 	float kern = -0.5 * 1. * dWijdr * (Pi + Pj);
 	float4 stress = kern*r;

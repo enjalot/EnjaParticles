@@ -183,6 +183,7 @@ public:
 	int nb_el;
 	int nb_vars;
 	int grid_size;
+	int4 nb_cells;
 
 	//BufferGE<int>		cl_unsort_int;
 	//BufferGE<int>		cl_sort_int;

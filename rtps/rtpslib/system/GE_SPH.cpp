@@ -46,6 +46,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	double domain_size_y = 1.; // ft
 	double domain_size_z = 1.; // ft
 	double domain_volume = domain_size_x * domain_size_y * domain_size_z;
+	double ratio = 0.4; // 0.4
 	double fluid_volume = 0.4*domain_volume; // height of fluid = 0.4*zmax
 
 	// Density (mass per unit vol)
@@ -58,7 +59,8 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	double particle_radius = pow(particle_volume*3./(4.*pi), 1./3.);
 	double particle_mass = particle_volume * density;
 
-	int nb_interact_part = 20;
+	// desired number of particles within the smoothing_distance
+	int nb_interact_part = 10;
 	// (h/radius)^3 = nb_interact_part
 	double h = pow(nb_interact_part, 1./3.) * particle_radius;
 
@@ -73,14 +75,17 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	int    nb_cells_z;
 
 	// one cell contains 8 particles
-	// cell mass = 8 * particle mass
-	cell_volume = particle_volume * 8;
+	// cell mass = 1 * particle mass
+	cell_volume = particle_volume * 1;
 	cell_size = pow(cell_volume, 1./3.);
 
-	nb_cells_x = 64; // number of cells along x
-	nb_cells_y = 64;
-	nb_cells_z = 64;
+	nb_cells_x = (int) (domain_size_x / cell_size);
+	nb_cells_y = (int) (domain_size_y / cell_size);
+	nb_cells_z = (int) (domain_size_z / cell_size);
 
+	//nb_cells_x = 64; // number of cells along x
+	//nb_cells_y = 64;
+	//nb_cells_z = 64;
 
 	printf("cell_size= %f\n", cell_size);
 	printf("particle_radius= %f\n", particle_radius);
@@ -117,7 +122,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	float sz = domain_size_x;
 	float4 domain_size(domain_size_x, domain_size_y, domain_size_z, 1.);
 	float4 domain_origin(0., 0., 0., 1.);
-	int4 nb_cells = int4(nb_cells_x, nb_cells_y, nb_cells_z, 1);
+	nb_cells = int4(nb_cells_x, nb_cells_y, nb_cells_z, 1);
 	int num_old = num;
     grid = UniformGrid(domain_origin, domain_size, nb_cells); 
 
@@ -147,7 +152,6 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	printf("after cube, offset: %d\n", offset);
 	printf("after cube, num: %d\n", num);
 
-	//exit(0);
 
 	if (num_old != nb_el) {
 		printf("nb_el should equal num_old\n");
@@ -210,6 +214,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     //printf("col vbo: %d\n", col_vbo);
     // end VBO creation
 
+
     //vbo buffers
     cl_position = new BufferVBO<float4>(ps->cli, pos_vbo);
     cl_color    = new BufferVBO<float4>(ps->cli, col_vbo);
@@ -220,7 +225,9 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     cl_density     = new BufferGE<float>(ps->cli, &densities[0], densities.size());
     cl_error_check = new BufferGE<float4>(ps->cli, &error_check[0], error_check.size());
 
+
 	setupArrays(); // From GE structures
+
 
 	printf("=========================================\n");
 	printf("Spacing =  particle_radius\n");
@@ -232,7 +239,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	cl_GridParams->getHostPtr()->print();
 	cl_FluidParams->getHostPtr()->print();
 	printf("=========================================\n");
-	exit(0);
+	//exit(0);
 
 
 	int print_freq = 20000;
@@ -291,7 +298,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 //----------------------------------------------------------------------
 GE_SPH::~GE_SPH()
 {
-	printf("**** inside GE_SPH destructor ****\n");
+	//printf("**** inside GE_SPH destructor ****\n");
 
     if(pos_vbo && managed)
     {
@@ -323,16 +330,16 @@ GE_SPH::~GE_SPH()
 	delete	clf_debug;  //just for debugging cl files
 	delete	cli_debug;  //just for debugging cl files
 
-    delete cl_force;
     delete cl_velocity;
     delete cl_density;
 	delete cl_position;
 	delete cl_color;
+	delete cl_force;
 	#endif
 
 	if (radixSort) delete radixSort;
 
-	printf("***** exit GE_SPH destructor **** \n");
+	//printf("***** exit GE_SPH destructor **** \n");
 }
 
 //----------------------------------------------------------------------
@@ -390,11 +397,13 @@ void GE_SPH::setupArrays()
 	cl_GridParams = new BufferGE<GridParams>(ps->cli, 1); // destroys ...
 
 	GridParams& gp = *(cl_GridParams->getHostPtr());
+	printf("gp(host)= %ld\n", (long) &gp);
 
 	gp.grid_min = grid.getMin();
 	gp.grid_max = grid.getMax();
 	gp.grid_res = grid.getRes();
 	gp.grid_size = grid.getSize();
+	printf("*** grid_size= %d\n", grid_size);
 	gp.grid_delta = grid.getDelta();
 	gp.numParticles = nb_el;
 
@@ -408,8 +417,6 @@ void GE_SPH::setupArrays()
 
 	cl_GridParams->copyToDevice();
 
-	grid_size = (int) (gp.grid_res.x * gp.grid_res.y * gp.grid_res.z);
-	printf("grid_size= %d\n", grid_size);
 	gp.grid_size.print("grid size (domain dimensions)"); // domain dimensions
 	gp.grid_delta.print("grid delta (cell size)"); // cell size
 	gp.grid_min.print("grid min");
@@ -423,6 +430,11 @@ void GE_SPH::setupArrays()
 	cl_vars_sorted   = new BufferGE<float4>(ps->cli, nb_el*nb_vars);
 	cl_sort_indices  = new BufferGE<int>(ps->cli, nb_el);
 	cl_sort_hashes   = new BufferGE<int>(ps->cli, nb_el);
+
+	// ERROR
+	int grid_size = nb_cells.x * nb_cells.y * nb_cells.z;
+	printf("grid_size= %d\n", grid_size);
+
 	cl_cell_indices_start = new BufferGE<int>(ps->cli, grid_size);
 	cl_cell_indices_end   = new BufferGE<int>(ps->cli, grid_size);
 
