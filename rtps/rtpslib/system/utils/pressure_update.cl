@@ -51,6 +51,8 @@
 	    * Wijpol6);
 	#endif
 
-	return stress;
+	pt->force = stress;
+
+	//return stress;
 
 #endif

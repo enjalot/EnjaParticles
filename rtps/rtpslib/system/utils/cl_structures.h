@@ -3,6 +3,16 @@
 #ifndef _CL_STRUCTURES_H_
 #define _CL_STRUCTURES_H_
 
+// Will be local variable
+// used to output multiple variables per point
+typedef struct PointData
+{
+	float4 density;
+	float4 color;  // x component
+	float4 normal;
+	float4 force;
+	float4 surf_tens;
+} PointData;
 //----------------------------------------------------------------------
 struct GridParams
 {

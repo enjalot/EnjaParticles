@@ -6,7 +6,18 @@
 #include "wpoly6.cl"
 
 //----------------------------------------------------------------------
-float4 ForNeighbor(__global float4*  vars_sorted,
+void zeroPoint(PointData* pt)
+{
+	pt->density = (float4)(0.,0.,0.,0.);
+	pt->color = (float4)(0.,0.,0.,0.);
+	pt->normal = (float4)(0.,0.,0.,0.);
+	pt->force = (float4)(0.,0.,0.,0.);
+	pt->surf_tens = (float4)(0.,0.,0.,0.);
+}
+//----------------------------------------------------------------------
+//float4 ForNeighbor(__global float4*  vars_sorted,
+void ForNeighbor(__global float4*  vars_sorted,
+				PointData* pt,
 				__constant uint index_i,
 				uint index_j,
 				float4 r,
@@ -39,6 +50,7 @@ float4 ForNeighbor(__global float4*  vars_sorted,
 }
 //--------------------------------------------------
 float4 ForPossibleNeighbor(__global float4* vars_sorted, 
+						PointData* pt,
 						__constant uint numParticles, 
 						__constant uint index_i, 
 						uint index_j, 
@@ -49,6 +61,7 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 	  					DUMMY_ARGS
 						)
 {
+	// not really needed if pt approach works
 	float4 frce = (float4) (0.,0.,0.,0.);
 
 	// check not colliding with self
@@ -71,11 +84,13 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 		if (rlen <= sphp->smoothing_distance) {
 			//cli[index_i].x++;
 #if 1
-			frce = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, gp, fp, sphp ARGS);
+			//ForNeighbor(vars_sorted, index_i, index_j, r, rlen, gp, fp, sphp ARGS);
+			// return updated pt
+			ForNeighbor(vars_sorted, pt, index_i, index_j, r, rlen, gp, fp, sphp ARGS);
 #endif
 		}
 	}
-	return frce;
+	//return frce;
 }
 //--------------------------------------------------
 #endif

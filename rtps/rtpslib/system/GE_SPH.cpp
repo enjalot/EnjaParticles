@@ -30,7 +30,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 
     num = n;
 	// density, force, pos, vel, surf tension, color
-	nb_vars = 6;  // for array structure in OpenCL
+	nb_vars = 7;  // for array structure in OpenCL
 	nb_el = n;
 	//printf("num_particles= %d\n", num);
 

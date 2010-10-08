@@ -14,6 +14,16 @@
 
 
 
+
+typedef struct PointData
+{
+ float4 density;
+ float4 color;
+ float4 normal;
+ float4 force;
+ float4 surf_tens;
+} PointData;
+
 struct GridParams
 {
     float4 grid_size;
@@ -130,7 +140,18 @@ float Wvisc_lapl(float rlen, float h, __constant struct SPHParams* params)
 # 7 "neighbors.cpp" 2
 
 
-float4 ForNeighbor(__global float4* vars_sorted,
+void zeroPoint(PointData* pt)
+{
+ pt->density = (float4)(0.,0.,0.,0.);
+ pt->color = (float4)(0.,0.,0.,0.);
+ pt->normal = (float4)(0.,0.,0.,0.);
+ pt->force = (float4)(0.,0.,0.,0.);
+ pt->surf_tens = (float4)(0.,0.,0.,0.);
+}
+
+
+void ForNeighbor(__global float4* vars_sorted,
+    PointData* pt,
     __constant uint index_i,
     uint index_j,
     float4 r,
@@ -156,9 +177,9 @@ float4 ForNeighbor(__global float4* vars_sorted,
 # 1 "density_update.cl" 1
 # 21 "density_update.cl"
     float Wij = Wpoly6(r, sphp->smoothing_distance, sphp);
-# 38 "density_update.cl"
- return (float4)(sphp->mass*Wij, 0., 0., 0.);
-# 33 "neighbors.cpp" 2
+# 39 "density_update.cl"
+ pt->density = (float4)(sphp->mass*Wij, 0., 0., 0.);
+# 44 "neighbors.cpp" 2
  }
 
  if (fp->choice == 1) {
@@ -203,12 +224,13 @@ float4 ForNeighbor(__global float4* vars_sorted,
      * Wijpol6);
 
 
- return stress;
-# 38 "neighbors.cpp" 2
+ pt->force = stress;
+# 49 "neighbors.cpp" 2
  }
 }
 
 float4 ForPossibleNeighbor(__global float4* vars_sorted,
+      PointData* pt,
       __constant uint num,
       __constant uint index_i,
       uint index_j,
@@ -219,6 +241,7 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
         , __global float4* clf, __global int4* cli
       )
 {
+
  float4 frce = (float4) (0.,0.,0.,0.);
 
 
@@ -241,9 +264,11 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
   if (rlen <= sphp->smoothing_distance) {
 
 
-   frce = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, gp, fp, sphp , clf, cli);
+
+
+   ForNeighbor(vars_sorted, pt, index_i, index_j, r, rlen, gp, fp, sphp , clf, cli);
 
   }
  }
- return frce;
+
 }

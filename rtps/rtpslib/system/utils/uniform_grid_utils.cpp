@@ -89,6 +89,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 	*/
 	float4 IterateParticlesInCell(
 		__global float4*    vars_sorted,
+		PointData* pt,
 		__constant uint 	numParticles,
 		__constant int4 	cellPos,
 		__constant uint 	index_i,
@@ -123,7 +124,9 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 			for(uint index_j=startIndex; index_j < endIndex; index_j++) {			
 				//cli[index_i].x++;  
 #if 1
-				frce += ForPossibleNeighbor(vars_sorted, numParticles, index_i, index_j, position_i, gp, fp, sphp ARGS);
+				//***** UPDATE pt (sum)
+				//frce += ForPossibleNeighbor(vars_sorted, numParticles, index_i, index_j, position_i, gp, fp, sphp ARGS);
+				ForPossibleNeighbor(vars_sorted, pt, numParticles, index_i, index_j, position_i, gp, fp, sphp ARGS);
 				//clf[index_i] = frce;
 				//cli[index_i].w = 3;
 #endif
@@ -138,6 +141,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 	 */
 	float4 IterateParticlesInNearbyCells(
 		__global float4* vars_sorted,
+		PointData* pt,
 		int		numParticles, // on Linux, remove __constant
 		int 	index_i, 
 		__constant float4   position_i, 
@@ -164,7 +168,9 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 					//cli[index_i].x++;
 	#if 1
 					// I am summing much more than required
-					frce += IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp ARGS);
+					// **** SUMMATION/UPDATE
+					//frce += IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp ARGS);
+					IterateParticlesInCell(vars_sorted, pt, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp ARGS);
 
 				//barrier(CLK_LOCAL_MEM_FENCE); // DEBUG
 				//clf[index_i] = frce;
@@ -207,11 +213,18 @@ __kernel void K_SumStep1(
     // Do calculations on particles in neighboring cells
 
 	#if 1
-    float4 frce = IterateParticlesInNearbyCells(vars_sorted, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
+    //float4 frce = IterateParticlesInNearbyCells(vars_sorted, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
+
+	PointData pt;
+	zeroPoint(&pt);
+
+    IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
 	#endif
 
+
 	if (fp->choice == 0) { // update density
-		density(index) = frce.x;
+		// density(index) = frce.x; 
+		density(index) = pt.density.x;
 		cli[index].w = 4;
 		cli[index].x++;
 		clf[index].x = density(index);
@@ -219,7 +232,8 @@ __kernel void K_SumStep1(
 	}
 	if (fp->choice == 1) { // update pressure
 		//barrier(CLK_LOCAL_MEM_FENCE); // DEBUG
-		force(index) = frce; // Does not seem maintain value into euler.cl
+		//force(index) = frce; // Does not seem maintain value into euler.cl
+		force(index) = pt.force; // Does not seem maintain value into euler.cl
 		cli[index].w = 5;
 		//clf[index] = frce;
 		// SERIOUS PROBLEM: Results different than results with cli = 4 (bottom of this file)

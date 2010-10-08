@@ -25,6 +25,8 @@
 #define FOR 3
 #define SURF_TENS 4
 #define COL 5
+// gradient of color (COL)
+#define NORM 6 
 
 namespace rtps {
 
