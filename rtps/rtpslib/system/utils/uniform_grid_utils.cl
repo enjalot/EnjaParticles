@@ -168,22 +168,8 @@ float4 ForNeighbor(__global float4* vars_sorted,
  if (fp->choice == 1) {
 
 # 1 "pressure_update.cl" 1
-
-
-
-
-
- float h = sphp->smoothing_distance;
-    float h6 = h*h*h * h*h*h;
-    float alpha = 45.f/(sphp->PI * rlen*h6);
- float hr2 = (h - rlen);
- float dWijdr = -alpha * (hr2*hr2);
- clf[index_i].x = h;
- clf[index_i].y = rlen;
- clf[index_i].z = dWijdr;
- clf[index_i].z = hr2;
-
-
+# 16 "pressure_update.cl"
+ float dWijdr = Wspiky_dr(rlen, sphp->smoothing_distance, sphp);
 
 
  float4 di = vars_sorted[index_i+0*num].x;
@@ -192,10 +178,12 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
  float fact = 1.;
 
- float Pi = sphp->K*(di.x - fact * sphp->rest_density);
- float Pj = sphp->K*(dj.x - fact * sphp->rest_density);
 
- float kern = -0.5 * 1. * dWijdr * (Pi + Pj);
+
+ float Pi = sphp->K*(di.x - 1000.f);
+ float Pj = sphp->K*(dj.x - 1000.f);
+
+ float kern = -dWijdr * (Pi + Pj)*0.5;
  float4 stress = kern*r;
 
 
@@ -204,11 +192,21 @@ float4 ForNeighbor(__global float4* vars_sorted,
  float4 veli = vars_sorted[index_i+2*num];
  float4 velj = vars_sorted[index_j+2*num];
 
+
  float vvisc = 0.001f;
  float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
  stress += vvisc * (velj-veli) * dWijlapl;
  stress *= sphp->mass/(di.x*dj.x);
-# 53 "pressure_update.cl"
+
+
+
+
+
+ float Wijpol6 = Wpoly6(rlen, sphp->smoothing_distance, sphp);
+ stress += (2.f * sphp->mass * (velj-veli)/(di.x+dj.x)
+     * Wijpol6);
+
+
  return stress;
 # 38 "neighbors.cpp" 2
  }
@@ -245,7 +243,7 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 
 
   if (rlen <= sphp->smoothing_distance) {
-   cli[index_i].x++;
+
 
    frce = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, gp, fp, sphp , clf, cli);
 
@@ -391,6 +389,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
      int4 ipos = (int4) (x,y,z,1);
 
 
+
      frce += IterateParticlesInCell(vars_sorted, num, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp , clf, cli);
 
 
@@ -440,6 +439,7 @@ __kernel void K_SumStep1(
  if (fp->choice == 0) {
   vars_sorted[index+0*num].x = frce.x;
   cli[index].w = 4;
+  cli[index].x++;
   clf[index].x = vars_sorted[index+0*num].x;
 
  }
@@ -447,7 +447,6 @@ __kernel void K_SumStep1(
 
   vars_sorted[index+3*num] = frce;
   cli[index].w = 5;
-  cli[index].x++;
 
 
  }

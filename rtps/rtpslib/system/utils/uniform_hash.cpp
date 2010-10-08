@@ -102,6 +102,7 @@ __kernel void hash(
 	int num = get_global_size(0);
     if (index >= num) return; 
 
+
 	// initialize to -1 (used in kernel datastructures in build_datastructures_wrap.cpp
 	cell_indices_start = 0xffffffff;
 

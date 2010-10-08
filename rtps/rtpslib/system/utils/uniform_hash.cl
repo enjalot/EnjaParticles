@@ -150,6 +150,7 @@ __kernel void hash(
     if (index >= num) return;
 
 
+
  cell_indices_start = 0xffffffff;
 
 

@@ -71,6 +71,7 @@ void GE_SPH::buildDataStructures()
 
 	int err;
 	//printf("EXECUTE BUILD\n");
+
    	kern.execute(nb_el, workSize); 
 	//printf("AFTER EXECUTE BUILD\n");
 

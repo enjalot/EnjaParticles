@@ -42,6 +42,7 @@ void GE_SPH::hash()
 	//kern.setArg(5, clf_debug->getDevicePtr());
 	//kern.setArg(6, cli_debug->getDevicePtr());
 
+	//printf("nb_el= %d\n", nb_el);
 	kern.execute(nb_el,ctaSize);
 
 	ps->cli->queue.finish();

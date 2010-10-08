@@ -161,6 +161,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 			for(int y=cell.y-1; y<=cell.y+1; ++y) {
 				for(int x=cell.x-1; x<=cell.x+1; ++x) {
 					int4 ipos = (int4) (x,y,z,1);
+					//cli[index_i].x++;
 	#if 1
 					// I am summing much more than required
 					frce += IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp ARGS);
@@ -212,6 +213,7 @@ __kernel void K_SumStep1(
 	if (fp->choice == 0) { // update density
 		density(index) = frce.x;
 		cli[index].w = 4;
+		cli[index].x++;
 		clf[index].x = density(index);
 		// code reaches this point on first call
 	}
@@ -219,7 +221,6 @@ __kernel void K_SumStep1(
 		//barrier(CLK_LOCAL_MEM_FENCE); // DEBUG
 		force(index) = frce; // Does not seem maintain value into euler.cl
 		cli[index].w = 5;
-		cli[index].x++;
 		//clf[index] = frce;
 		// SERIOUS PROBLEM: Results different than results with cli = 4 (bottom of this file)
 	}

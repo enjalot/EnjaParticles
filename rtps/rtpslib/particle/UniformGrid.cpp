@@ -109,9 +109,11 @@ void UniformGrid::makeCube(float4* position, float4 pmin, float4 pmax, float spa
 		}
         position[i] = float4(x,y,z,1.0f);
 		i++;
+//		printf("i= %d\n", i);
     }}}
 
 	offset = i;
+	//printf("makeCube, offset= %d, about to exit\n", offset); exit(0);
 }
 //----------------------------------------------------------------------
 void UniformGrid::makeSphere(float4* position, float4 center, float radius, int& num, int& offset, float spacing)

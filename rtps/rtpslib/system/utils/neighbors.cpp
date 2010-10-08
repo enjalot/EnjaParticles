@@ -69,7 +69,7 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 		// is this particle within cutoff?
 
 		if (rlen <= sphp->smoothing_distance) {
-			cli[index_i].x++;
+			//cli[index_i].x++;
 #if 1
 			frce = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, gp, fp, sphp ARGS);
 #endif

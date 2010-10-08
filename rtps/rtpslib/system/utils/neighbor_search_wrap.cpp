@@ -19,6 +19,8 @@ void GE_SPH::neighborSearch(int which)
 	if (which == 1) ts_cl[TI_PRES]->start();
 	//ts_cl[TI_NEIGH]->start();
 
+	printf("enter neighbor\n");
+
 	if (first_time) {
 		try {
 			string path(CL_SPH_UTIL_SOURCE_DIR);
@@ -100,8 +102,8 @@ if (which == 1) {
 	cli_debug->copyToHost();
 
 	//for (int i=0; i < nb_el; i++) { 
-	//for (int i=0; i < 10; i++) { 
-	for (int i=500; i < 510; i++) { 
+	for (int i=0; i < 500; i++) { 
+	//for (int i=500; i < 510; i++) { 
 		printf("----------------------------\n");
 		printf("clf[%d]= %f, %f, %f, %f\n", i, fclf[i].x, fclf[i].y, fclf[i].z, fclf[i].w);
 		printf("cli[%d]= %d, %d, %d, %d\n", i, icli[i].x, icli[i].y, icli[i].z, icli[i].w);

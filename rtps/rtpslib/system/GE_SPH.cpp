@@ -54,7 +54,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	double particle_radius = pow(particle_volume*3./(4.*pi), 1./3.);
 	double particle_mass = particle_volume * density;
 
-	int nb_particles_in_cell = 1;
+	int nb_particles_in_cell = 4;
 	float cell_mass = nb_particles_in_cell*particle_mass;
 	float cell_volume = cell_mass / density;
 	float cell_sz = pow(cell_volume, 1./3.);
@@ -62,10 +62,10 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	float spacing;
 	if (nb_particles_in_cell == 1) {
 		spacing = cell_sz;
-	} else if (nb_particles_in_cell == 8) {
-		spacing = 0.5*cell_sz;
+	} else if (nb_particles_in_cell > 1) {
+		spacing = pow((float) nb_particles_in_cell, -1./3.) * cell_sz;
 	} else {
-		printf("only consider 1 or 8 particles per cell\n");
+		printf("nb_particles_in_cell must be >= 1\n");
 		exit(0);
 	}
 
@@ -75,7 +75,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	//exit(0);
 
 	// desired number of particles within the smoothing_distance sphere
-	int nb_interact_part = 15;
+	int nb_interact_part = 20;
 	// (h/radius)^3 = nb_interact_part
 	double h = pow(nb_interact_part, 1./3.) * particle_radius;
 
@@ -146,7 +146,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	float y1 = domain_size_y*0.1;
 	float y2 = domain_size_y*.9;
 	float z1 = particle_radius;
-	float z2 = fluid_size_z;
+	float z2 = 1.2*fluid_size_z; // 1.2 to get all the particles
 
 	#if 0
 	x1 = 0.;
@@ -188,6 +188,9 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	}
 	#endif
 
+	num = offset;
+	//printf("new num= %d\n", num); exit(0);
+
     cl_params = new BufferGE<GE_SPHParams>(ps->cli, 1);
 	GE_SPHParams& params = *(cl_params->getHostPtr());
     params.grid_min = grid.getMin();
@@ -199,11 +202,11 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     params.particle_radius = sph_settings.particle_radius;
     params.simulation_scale = sph_settings.simulation_scale;
     params.boundary_stiffness = 10000.;  //10000.0f;
-    params.boundary_dampening = 256.; 
+    params.boundary_dampening = 256.;//256.; 
     params.boundary_distance = sph_settings.boundary_distance;
     params.EPSILON = .00001f;
     params.PI = 3.14159265f;
-    params.K = 1.5f;
+    params.K = 1.5f; //1.5f;
 	params.dt = psfr->settings.dt;
 	//printf("dt= %f\n", params.dt); exit(0);
  
@@ -211,8 +214,16 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	cl_params->copyToHost();
 	GE_SPHParams& pparams = *(cl_params->getHostPtr());
 
+//	printf("new num: %d\n", num); exit(0);
+
 	// Decrease/increase num (nb particles as necessary)
     //*** Initialization, TODO: move out of here to the particle directory
+	if (offset > num) {
+		printf("offset should be <= num\n");
+		exit(0);
+	}
+	num = offset;
+	nb_el = num;
     std::vector<float4> colors(num);
     positions.resize(num);
     forces.resize(num);
@@ -226,12 +237,14 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     std::fill(densities.begin(), densities.end(), 0.0f);
     std::fill(error_check.begin(), error_check.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
 
-    /*
-    for(int i = 0; i < 20; i++)
+	#if 0
+	printf("h= %f\n", h);
+    for(int i = 0; i < nb_el; i++)
     {
         printf("position[%d] = %f %f %f\n", positions[i].x, positions[i].y, positions[i].z);
     }
-    */
+	exit(0);
+    #endif
 
     //*** end Initialization
 
@@ -245,7 +258,6 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     //printf("col vbo: %d\n", col_vbo);
     // end VBO creation
 
-
     //vbo buffers
     cl_position = new BufferVBO<float4>(ps->cli, pos_vbo);
     cl_color    = new BufferVBO<float4>(ps->cli, col_vbo);
@@ -256,9 +268,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     cl_density     = new BufferGE<float>(ps->cli, &densities[0], densities.size());
     cl_error_check = new BufferGE<float4>(ps->cli, &error_check[0], error_check.size());
 
-
 	setupArrays(); // From GE structures
-
 
 	printf("=========================================\n");
 	printf("Spacing =  particle_radius\n");
@@ -388,7 +398,6 @@ void GE_SPH::update()
 
 #ifdef GPU
 	computeOnGPU();
-	exit(0);
 #endif
 
     /*
@@ -541,17 +550,19 @@ void GE_SPH::computeOnGPU()
     cl_position->acquire();
     cl_color->acquire();
     
-    for(int i=0; i < 10; i++)
+    for(int i=0; i < 1; i++)
     {
 		printf("i= %d\n", i);
 		// ***** Create HASH ****
 		hash();
 
 		// **** Sort arrays ****
+		// only power of 2 number of particles
 		//radix_sort();
 		bitonic_sort();
 
 		// **** Reorder pos, vel
+		printf("before build\n");
 		buildDataStructures(); 
 
 		// ***** DENSITY UPDATE *****
@@ -576,6 +587,7 @@ void GE_SPH::computeOnGPU()
 
 		// *** OUTPUT PHYSICAL VARIABLES FROM THE GPU
 		//printGPUDiagnostics();
+	//	exit(0);
 
 	}
 
@@ -592,10 +604,12 @@ void GE_SPH::computeOnCPU()
 //----------------------------------------------------------------------
 void GE_SPH::printGPUDiagnostics()
 {
+		float4* pos;
+
 		#if 0
 		//Update position array (should be done on GPU)
 		cl_vars_unsorted->copyToHost();
-		float4* pos  = cl_vars_unsorted->getHostPtr() + 1*nb_el;
+		pos  = cl_vars_unsorted->getHostPtr() + 1*nb_el;
 		for (int i=0; i < nb_el; i++) {
 			//printf("i= %d\n", i);
 			positions[i] = pos[i];
@@ -603,13 +617,13 @@ void GE_SPH::printGPUDiagnostics()
 		#endif
 
 
-		#if 0
+		#if 1
 		//  print out density
 		cl_vars_unsorted->copyToHost();
 		cl_vars_sorted->copyToHost();
 
 		float4* density = cl_vars_unsorted->getHostPtr() + 0*nb_el;
-		float4* pos     = cl_vars_unsorted->getHostPtr() + 1*nb_el;
+		pos     = cl_vars_unsorted->getHostPtr() + 1*nb_el;
 		float4* vel     = cl_vars_unsorted->getHostPtr() + 2*nb_el;
 		float4* force   = cl_vars_unsorted->getHostPtr() + 3*nb_el;
 
@@ -618,7 +632,7 @@ void GE_SPH::printGPUDiagnostics()
 		float4* vel1     = cl_vars_sorted->getHostPtr() + 2*nb_el;
 		float4* force1   = cl_vars_sorted->getHostPtr() + 3*nb_el;
 
-		for (int i=0; i < 10; i++) {
+		for (int i=0; i < nb_el; i++) {
 			printf("=== i= %d ==========\n", i);
 			//printf("dens[%d]= %f, sorted den: %f\n", i, density[i].x, density1[i].x);
 			pos[i].print("un pos");
