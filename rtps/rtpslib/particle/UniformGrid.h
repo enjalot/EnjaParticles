@@ -10,7 +10,7 @@ class UniformGrid
 public:
     UniformGrid(){};
     UniformGrid(float4 min, float4 max, float cell_size);
-	UniformGrid(float4 min, float4 max, int nb_cells_x);
+	UniformGrid(float4 min, float4 max, int4 nb_cells);
     ~UniformGrid();
 
     void make_cube(float4 *positions, float spacing, int num);

@@ -74,7 +74,7 @@ void Render::drawArrays()
 	for (int i=0; i < num; i++, count+=4) {
 		glPushMatrix();
 		glTranslatef(ptr[count], ptr[count+1], ptr[count+2]);
-		gluSphere(qu, .06, 10, 10);
+		gluSphere(qu, .015, 10, 10);
 		glPopMatrix();
 	}
     glUnmapBufferARB(GL_ARRAY_BUFFER); 
@@ -166,6 +166,7 @@ void Render::render()
 
 }
 
+//----------------------------------------------------------------------
 void Render::render_box(float4 min, float4 max)
 {
 	

@@ -24,11 +24,17 @@ typedef struct int4 {
 	int x, y, z;
 	int w;
 	int4() {}
-	int4(float x, float y, float z) {
+	int4(float x, float y, float z, float w=1.) {
 		this->x = x;
 		this->y = y;
 		this->z = z;
-		this->w = 1;
+		this->w = w;
+	}
+	int4(int x, int y, int z, int w=1) {
+		this->x = x;
+		this->y = y;
+		this->z = z;
+		this->w = w;
 	}
 } int4;
 

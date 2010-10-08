@@ -39,7 +39,7 @@ UniformGrid::UniformGrid(float4 min, float4 max, float cell_size)
 
 }
 //----------------------------------------------------------------------
-UniformGrid::UniformGrid(float4 min, float4 max, int nb_cells_x)
+UniformGrid::UniformGrid(float4 min, float4 max, int4 nb_cells)
 {
     this->min = min;
     this->max = max;
@@ -50,9 +50,9 @@ UniformGrid::UniformGrid(float4 min, float4 max, int nb_cells_x)
                   max.z - min.z, 1.);
 
 	//  how many cells in each direction. 
-    res = float4(nb_cells_x, 
-    			 nb_cells_x, 
-    			 nb_cells_x, 
+    res = float4(nb_cells.x, 
+    			 nb_cells.y, 
+    			 nb_cells.z, 
     			 1);
 
     delta = float4(size.x / res.x, 

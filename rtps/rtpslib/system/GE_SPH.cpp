@@ -20,6 +20,9 @@ namespace rtps {
 //----------------------------------------------------------------------
 GE_SPH::GE_SPH(RTPS *psfr, int n)
 {
+    //for reading back different values from the kernel
+    std::vector<float4> error_check(num);
+
     //store the particle system framework
     ps = psfr;
 
@@ -39,100 +42,107 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 
 
 
-	double domain_size_x = 10.; // ft
-	double domain_volume = pow(domain_size_x, 1.); // ft^3
+	double domain_size_x = 1.; // ft
+	double domain_size_y = 1.; // ft
+	double domain_size_z = 1.; // ft
+	double domain_volume = domain_size_x * domain_size_y * domain_size_z;
+	double fluid_volume = 0.4*domain_volume; // height of fluid = 0.4*zmax
+
+	// Density (mass per unit vol)
+	// density of water: 1000 kg/m^3  (62lb/ft^3)
+	double density = 1000.; // water: 62 lb/ft^3 = 1000 kg/m^3
+
+	double pi = 3.14159;
+	double nb_particles = num;
+	double particle_volume = fluid_volume / num;
+	double particle_radius = pow(particle_volume*3./(4.*pi), 1./3.);
+	double particle_mass = particle_volume * density;
+
+	int nb_interact_part = 20;
+	// (h/radius)^3 = nb_interact_part
+	double h = pow(nb_interact_part, 1./3.) * particle_radius;
+
+	//-------------------------------
 
 	// 1 particle per cell
 	// grid resolution: res
-	int nb_cells_x = 64; // number of cells along x
-	// cell volume
-	double cell_size = domain_size_x/nb_cells_x; // in ft
+	double cell_size;
+	double cell_volume; 
+	int    nb_cells_x; // number of cells along x
+	int    nb_cells_y; 
+	int    nb_cells_z;
 
-	double pi = 3.14;
-	double cell_volume = pow(cell_size, 3.); // m^3
+	// one cell contains 8 particles
+	// cell mass = 8 * particle mass
+	cell_volume = particle_volume * 8;
+	cell_size = pow(cell_volume, 1./3.);
 
-	// Density (mass per unit vol)
-	// mass of water: 1000 kg/m^3  (62lb/ft^3)
-	// mass in single cell
-	//double density = 1000.; // water: 62 lb/ft^3 = 1000 kg/m^3
-	double density = 10.; // water: 62 lb/ft^3 = 1000 kg/m^3
-	double mass_single_cell = density * cell_volume; // lb (force or mass?)
+	nb_cells_x = 64; // number of cells along x
+	nb_cells_y = 64;
+	nb_cells_z = 64;
 
 
-    //for reading back different values from the kernel
-    std::vector<float4> error_check(num);
+	printf("cell_size= %f\n", cell_size);
+	printf("particle_radius= %f\n", particle_radius);
+	//exit(0);
+
+	//-------------------------------
     
     //init sph stuff
-    sph_settings.rest_density = density; //1000;
+    sph_settings.rest_density = density;
     sph_settings.simulation_scale = 1.0;
+    sph_settings.particle_mass = particle_mass;
 
-    sph_settings.particle_mass = mass_single_cell;
-
-	// Do not know why required
+	// Do not know why required  REST DISTANCE
     sph_settings.particle_rest_distance = .87 * pow(sph_settings.particle_mass / sph_settings.rest_density, 1./3.);
 
-    sph_settings.spacing = cell_size;
+	// one cell = 2 particles
+    sph_settings.spacing = cell_size/2.;  // distance between particles
    
-    //sph_settings.smoothing_distance = 2.0f * sph_settings.particle_rest_distance; // *2 decreases grid resolution
-	// from paper by Colagrossi & Landrini (JCP, #191, 2003, pp. 448-475
-    //sph_settings.smoothing_distance = sph_settings.spacing / 1.33; 
-
 	// particle radius is the radius of the W function
-	// one particle fits per cell (PERHAPS CHANGE?)
-    float particle_radius = 0.5*sph_settings.spacing;  
-    //float particle_radius = 1.0*sph_settings.spacing;  
-	double particle_volume = (4.*pi/3.) * pow(particle_radius,3.);
+	// eight particle fits per cell (PERHAPS CHANGE?)
 
-    sph_settings.smoothing_distance = particle_radius*3.0;   // CHECK THIS. Width of W function
+    sph_settings.smoothing_distance = h;   // CHECK THIS. Width of W function
     sph_settings.particle_radius = particle_radius; 
 
     //sph_settings.boundary_distance = .5f * sph_settings.particle_rest_distance;
     sph_settings.boundary_distance = sph_settings.particle_radius;
 
-	// mass of single fluid particle
-	double mass_single_particle = particle_volume * density;
-    sph_settings.particle_mass = mass_single_particle;
+	domain_size_x = cell_size * nb_cells_x;
+	domain_size_y = cell_size * nb_cells_y;
+	domain_size_z = cell_size * nb_cells_z;
 
-	#if 0
-	double sig = 1.3; // Monaghan 2005., p. 21
-	double hh = sig*pow(mass_single_particle/density, 1./3.);
-	printf("hh= %f\n", hh);
-	printf("cell_size= %f\n", cell_size);  
-	exit(0);
-	#endif
-
+	printf("domain size: %f, %f, %f\n", domain_size_x, domain_size_y, domain_size_z);
 
 	float sz = domain_size_x;
+	float4 domain_size(domain_size_x, domain_size_y, domain_size_z, 1.);
+	float4 domain_origin(0., 0., 0., 1.);
+	int4 nb_cells = int4(nb_cells_x, nb_cells_y, nb_cells_z, 1);
 	int num_old = num;
-    grid = UniformGrid(float4(0.,0.,0.,1.), float4(sz, sz, sz, 1.), nb_cells_x); 
-	printf("**** particle covers four cells ****\n");
-
-	grid.delta.print("delta");
-	grid.res.print("res");
-	grid.size.print("size");
+    grid = UniformGrid(domain_origin, domain_size, nb_cells); 
 
 
     //grid.make_cube(&positions[0], sph_settings.spacing, num);
 
-	float4 center(5., 5., 5., 1.);
-	float radius = 0.3;
+	float4 center(5., 5., 8., 1.);
+	float radius = 0.5;
 	int offset = 0;
 	printf("original offset: %d\n", offset);
-	grid.makeSphere(&positions[0], center, radius, num, offset, 
-		sph_settings.spacing);
+	//grid.makeSphere(&positions[0], center, radius, num, offset, 
+	//	sph_settings.spacing);
 	printf("after sphere, offset: %d\n", offset);
 
-	float x1 = domain_size_x*0.20;
-	float x2 = domain_size_x*.80;
-	float z1 = domain_size_x*0.00;
-	float z2 = domain_size_x*0.4;
-	float y1 = domain_size_x*0.2;
-	float y2 = domain_size_x*.8;
+	float x1 = domain_size_x*0.10;
+	float x2 = domain_size_x*.90;
+	float y1 = domain_size_y*0.1;
+	float y2 = domain_size_y*.9;
+	float z1 = particle_radius;
+	float z2 = domain_size_z*0.4;
 	float4 pmin(x1, y1, z1, 1.);
 	float4 pmax(x2, y2, z2, 1.);
 	pmin.print("pmin");
 	pmax.print("pmax");
-	//exit(0);
+
 	grid.makeCube(&positions[0], pmin, pmax, sph_settings.spacing, num, offset);
 	printf("after cube, offset: %d\n", offset);
 	printf("after cube, num: %d\n", num);
@@ -150,10 +160,6 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 		printf("num, num_old= %d, %d\n", num, num_old);
 		exit(1);
 	}
-
-	//for (int i=0; i < num; i++) {
-		//positions[i].print("pos");
-	//}
 
     cl_params = new BufferGE<GE_SPHParams>(ps->cli, 1);
 	GE_SPHParams& params = *(cl_params->getHostPtr());
@@ -226,6 +232,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	cl_GridParams->getHostPtr()->print();
 	cl_FluidParams->getHostPtr()->print();
 	printf("=========================================\n");
+	exit(0);
 
 
 	int print_freq = 20000;
