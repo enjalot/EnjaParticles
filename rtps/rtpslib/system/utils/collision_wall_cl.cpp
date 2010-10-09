@@ -41,7 +41,9 @@ __kernel void collision_wall(
     {
 		// normal points into the domain
         float4 normal = (float4)(0.0f, 0.0f, 1.0f, 0.0f);
+		//if (dot(normal,v) < 0) {
         r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
+		//}
         //r_f += calculateRepulsionForce(normal, v, boundary_stiffness, boundary_dampening, boundary_distance);
     }
 

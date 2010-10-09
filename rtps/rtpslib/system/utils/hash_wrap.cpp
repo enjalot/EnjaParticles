@@ -80,7 +80,7 @@ void GE_SPH::hash()
 
 	//printf("nb_el= %d\n", nb_el);
 	kern.execute(nb_el,ctaSize);
-	exit(0);
+	//exit(0);
 
 	ps->cli->queue.finish();
 	ts_cl[TI_HASH]->end();

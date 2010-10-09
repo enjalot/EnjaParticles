@@ -134,7 +134,7 @@ float Wspiky_dr(float rlen, float h, __constant struct SPHParams* params)
 
 
     float h6 = h*h*h * h*h*h;
-    float alpha = 45.f/(params->PI * rlen*h6);
+    float alpha = 45.f/(params->PI*rlen*h6);
  float hr2 = (h - rlen);
  float Wij = -alpha * (hr2*hr2);
  return Wij;
@@ -229,8 +229,11 @@ void ForNeighbor(__global float4* vars_sorted,
 
 
 
- float Pi = sphp->K*(di.x - 1000.f);
- float Pj = sphp->K*(dj.x - 1000.f);
+
+
+ float rest_density = 450.f;
+ float Pi = sphp->K*(di.x - rest_density);
+ float Pj = sphp->K*(dj.x - rest_density);
 
  float kern = -dWijdr * (Pi + Pj)*0.5;
  float4 stress = kern*r;
@@ -241,8 +244,8 @@ void ForNeighbor(__global float4* vars_sorted,
  float4 veli = vars_sorted[index_i+2*num];
  float4 velj = vars_sorted[index_j+2*num];
 
+ float vvisc = 0.01f;
 
- float vvisc = 1.000f;
  float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
  stress += vvisc * (velj-veli) * dWijlapl;
  stress *= sphp->mass/(di.x*dj.x);
@@ -274,11 +277,11 @@ void ForNeighbor(__global float4* vars_sorted,
 
 
  float4 dj = vars_sorted[index_j+0*num].x;
- pt->color_normal = -r * dWijdr * sphp->mass / dj.x;
+ pt->color_normal += -r * dWijdr * sphp->mass / dj.x;
 
 
  float dWijlapl = Wpoly6_lapl(rlen, sphp->smoothing_distance, sphp);
- pt->color_lapl = -sphp->mass * dWijlapl / dj.x;
+ pt->color_lapl += -sphp->mass * dWijlapl / dj.x;
 # 54 "neighbors.cpp" 2
  }
 
@@ -527,13 +530,14 @@ __kernel void K_SumStep1(
 
 
 
+ cli[index].w = 3;
+
  if (fp->choice == 0) {
      IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
 
   vars_sorted[index+0*num].x = pt.density.x;
-
-
-
+  cli[index].w = 4;
+  clf[index].x = vars_sorted[index+0*num].x;
 
  }
  if (fp->choice == 1) {
@@ -548,8 +552,12 @@ __kernel void K_SumStep1(
  if (fp->choice == 2) {
      IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
   float norml = length(pt.color_normal);
-  if (norml > 0.01) {
+  clf[index].w = norml;
+  if (norml > 4.) {
    float4 stension = -0.3f * pt.color_lapl * pt.color_normal / norml;
+   clf[index] = stension;
+
+
    vars_sorted[index+3*num] += stension;
   }
  }

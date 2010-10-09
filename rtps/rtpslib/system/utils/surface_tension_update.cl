@@ -9,10 +9,10 @@
 	// uses color which is 1 everywhere
 	// mass/rho = estimate of volume element 
 	float4 dj = density(index_j);
-	pt->color_normal = -r * dWijdr * sphp->mass / dj.x;
+	pt->color_normal += -r * dWijdr * sphp->mass / dj.x;
 
 
 	float dWijlapl = Wpoly6_lapl(rlen, sphp->smoothing_distance, sphp);
-	pt->color_lapl = -sphp->mass * dWijlapl / dj.x;
+	pt->color_lapl += -sphp->mass * dWijlapl / dj.x;
 
 #endif

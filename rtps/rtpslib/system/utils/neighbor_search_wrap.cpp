@@ -96,17 +96,13 @@ void GE_SPH::neighborSearch(int which)
 
 
 	#if 0
-if (which == 1) {
-	printf("which == 1 *** \n");
-} else {
-	printf("which == 0 *** \n");
-}
+	printf("which == %d *** \n", which);
 
 	clf_debug->copyToHost();
 	cli_debug->copyToHost();
 
-	//for (int i=0; i < nb_el; i++) { 
-	for (int i=0; i < 500; i++) { 
+	for (int i=0; i < nb_el; i++) { 
+	//for (int i=0; i < 500; i++) { 
 	//for (int i=500; i < 510; i++) { 
 		printf("----------------------------\n");
 		printf("clf[%d]= %f, %f, %f, %f\n", i, fclf[i].x, fclf[i].y, fclf[i].z, fclf[i].w);

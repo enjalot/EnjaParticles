@@ -50,7 +50,7 @@ float Wspiky_dr(float rlen, float h, __constant struct SPHParams* params)
 // Derivative with respect to |r| divided by |r|
 //   W_{|r|}/r = (45/pi*h^6) (h-|r|)^2 (-1) / r
     float h6 = h*h*h * h*h*h;
-    float alpha = 45.f/(params->PI * rlen*h6);
+    float alpha = 45.f/(params->PI*rlen*h6);
 	float hr2 = (h - rlen);
 	float Wij = -alpha * (hr2*hr2);
 	return Wij;

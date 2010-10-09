@@ -87,7 +87,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 // comes from K_Grid_Hash
 // CANNOT USE references to structures/classes as arguments!
 __kernel void hash(
-           //__global float4* dParticlePositions,
            __global float4* vars_unsorted,
            __global uint* sort_hashes,
            __global uint* sort_indexes,
@@ -108,7 +107,6 @@ __kernel void hash(
 	cell_indices_start = 0xffffffff;
 
     // particle position
-    //float4 p = dParticlePositions[index];
     float4 p = unsorted_pos(index); // macro
 
     // get address in grid
@@ -121,7 +119,6 @@ __kernel void hash(
 
     sort_hashes[index] = hash;
     int pp = (int) p.x;
-
 
     sort_indexes[index] = index;
 #endif

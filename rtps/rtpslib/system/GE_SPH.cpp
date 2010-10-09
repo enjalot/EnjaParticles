@@ -55,7 +55,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	double particle_radius = pow(particle_volume*3./(4.*pi), 1./3.);
 	double particle_mass = particle_volume * density;
 
-	int nb_particles_in_cell = 4;
+	int nb_particles_in_cell = 1;
 	float cell_mass = nb_particles_in_cell*particle_mass;
 	float cell_volume = cell_mass / density;
 	float cell_sz = pow(cell_volume, 1./3.);
@@ -72,7 +72,12 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 
 	// Spacing defined as above: hash runs
 	// redefine spacing, hash only runs if spacing is > 2*particle_radius (WHY??)
-	//spacing = 4.*particle_radius;
+	// runs for some spacings, not for others (spacing could be greater or smaller than 
+	//   particle radius. PROBLEM OCCURS WITH HASH KERNEL. HOW IS THIS POSSILBE?
+	// sorting: requires power of 2. Spacing will influence nb of particles. 
+	spacing = 2.0*particle_radius;
+	printf("spacing= %f\n", spacing);
+	//spacing = cell_sz;
 
 	printf("cell_sz= %f\n", cell_sz);
 	printf("particle_radius= %f\n", particle_radius);
@@ -151,7 +156,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	float y1 = domain_size_y*0.1;
 	float y2 = domain_size_y*.9;
 	float z1 = particle_radius;
-	float z2 = 1.2*fluid_size_z; // 1.2 to get all the particles
+	float z2 = 2.2*fluid_size_z; // 1.2 to get all the particles
 
 	#if 0
 	x1 = 0.;
@@ -178,6 +183,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	grid.makeCube(&positions[0], pmin, pmax, sph_settings.spacing, num, offset);
 	printf("after cube, offset: %d\n", offset);
 	printf("after cube, num: %d\n", num);
+	//exit(0);
 
 	#if 0
 	if (num_old != nb_el) {
@@ -207,7 +213,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     params.particle_radius = sph_settings.particle_radius;
     params.simulation_scale = sph_settings.simulation_scale;
 	// does scale_simulation influence stiffness and dampening?
-    params.boundary_stiffness = 400.;  //10000.0f;  (scale from 20000 to 20)
+    params.boundary_stiffness = 10000.;  //10000.0f;  (scale from 20000 to 20)
     params.boundary_dampening = 256.;//256.; 
     params.boundary_distance = sph_settings.boundary_distance;
     params.EPSILON = .00001f;
@@ -566,6 +572,7 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 		//printf("i= %d\n", i);
 		// ***** Create HASH ****
 		hash();
+		//exit(0);
 
 		// **** Sort arrays ****
 		// only power of 2 number of particles
