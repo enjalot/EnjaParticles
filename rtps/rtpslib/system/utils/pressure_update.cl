@@ -13,26 +13,27 @@
 	//float Pi = sphp->K*(di.x - fact * sphp->rest_density); 
 	//float Pj = sphp->K*(dj.x - fact * sphp->rest_density);
 
-	//float rest_density = 1000.f;
-	float rest_density = 450.f;
-	float Pi = sphp->K*(di.x - rest_density);
-	float Pj = sphp->K*(dj.x - rest_density);
+	//float rest_density = 00.f;
+	float rest_density = 800.f;
+	float Pi = 1.*sphp->K*(di.x - rest_density);
+	float Pj = 1.*sphp->K*(dj.x - rest_density);
 
 	float kern = -dWijdr * (Pi + Pj)*0.5;
 	float4 stress = kern*r;
 
-	#if 1
-	// Add viscous forces
-
 	float4 veli = vel(index_i);
 	float4 velj = vel(index_j);
 
-	float vvisc = 0.01f; // SHOULD BE SET IN GE_SPH.cpp
+	#if 1
+	// Add viscous forces
+
+	float vvisc = 0.001f; // SHOULD BE SET IN GE_SPH.cpp
 	//float vvisc = 1.000f; // SHOULD BE SET IN GE_SPH.cpp
 	float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
 	stress += vvisc * (velj-veli) * dWijlapl;
-	stress *=  sphp->mass/(di.x*dj.x);  // original
 	#endif
+
+	stress *=  sphp->mass/(di.x*dj.x);  // original
 
 
 	#if 1

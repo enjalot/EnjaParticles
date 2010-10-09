@@ -14,7 +14,13 @@ float4 calculateRepulsionForce(
 	  float boundary_dampening, 
 	  float boundary_distance)
 {
+// I am convinced something is wrong either with the pressure, or the Boundary 
+// Conditions. Or else something is wrong with the initialization. Not clear about the 
+// cell size in relation to fluid. If there are 8 particles per cell, the cell mass is 
+// slightly less than the fluid mass (if the cell size = 2*particle_radius). 
+
     vel.w = 0.0f;  // Removed influence of 4th component of velocity (does not exist)
+//    float4 repulsion_force = 10.f*(boundary_stiffness * boundary_distance - boundary_dampening * dot(normal, vel))*normal;
     float4 repulsion_force = (boundary_stiffness * boundary_distance - boundary_dampening * dot(normal, vel))*normal;
     return repulsion_force;
 }

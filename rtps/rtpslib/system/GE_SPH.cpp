@@ -55,10 +55,11 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	double particle_radius = pow(particle_volume*3./(4.*pi), 1./3.);
 	double particle_mass = particle_volume * density;
 
-	int nb_particles_in_cell = 1;
+	int nb_particles_in_cell = 8;
 	float cell_mass = nb_particles_in_cell*particle_mass;
 	float cell_volume = cell_mass / density;
 	float cell_sz = pow(cell_volume, 1./3.);
+	cell_sz = 2.*particle_radius;
 
 	float spacing;
 	if (nb_particles_in_cell == 1) {
@@ -213,8 +214,8 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     params.particle_radius = sph_settings.particle_radius;
     params.simulation_scale = sph_settings.simulation_scale;
 	// does scale_simulation influence stiffness and dampening?
-    params.boundary_stiffness = 10000.;  //10000.0f;  (scale from 20000 to 20)
-    params.boundary_dampening = 256.;//256.; 
+    params.boundary_stiffness = 1000.;  //10000.0f;  (scale from 20000 to 20)
+    params.boundary_dampening = 200.;//256.; 
     params.boundary_distance = sph_settings.boundary_distance;
     params.EPSILON = .00001f;
     params.PI = 3.14159265f;
