@@ -181,7 +181,8 @@ public:
 
 	// Timers
 	enum {TI_HASH=0, TI_RADIX_SORT, TI_BITONIC_SORT, TI_BUILD, TI_NEIGH, 
-		  TI_DENS, TI_PRES, TI_EULER, TI_VISC, TI_UPDATE, TI_COLLISION_WALL};
+		  TI_DENS, TI_PRES, TI_EULER, TI_VISC, TI_UPDATE, TI_COLLISION_WALL, 
+		  TI_COL, TI_COL_NORM};
 	GE::Time* ts_cl[20];   // ts_cl  is GE::Time**
 
 	int nb_el;
@@ -287,7 +288,7 @@ private:
 
     void cpuDensity();
 
-	void computeOnGPU();
+	void computeOnGPU(int nb_sub_iter);
 	void computeOnCPU();
 
 	void computeCellStartEndGPU();

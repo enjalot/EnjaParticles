@@ -295,6 +295,8 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	ts_cl[TI_NEIGH]  = new GE::Time("neigh",     time_offset, print_freq);
 	ts_cl[TI_DENS]   = new GE::Time("density",   time_offset, print_freq);
 	ts_cl[TI_PRES]   = new GE::Time("pressure",  time_offset, print_freq);
+	ts_cl[TI_COL]      = new GE::Time("color",  time_offset, print_freq);
+	ts_cl[TI_COL_NORM] = new GE::Time("color_norm", time_offset, print_freq);
 	ts_cl[TI_VISC]   = new GE::Time("viscosity", time_offset, print_freq);
 	ts_cl[TI_EULER]  = new GE::Time("euler",     time_offset, print_freq);
 	ts_cl[TI_UPDATE] = new GE::Time("update",    time_offset, print_freq);
@@ -399,7 +401,8 @@ void GE_SPH::update()
 #endif
 
 #ifdef GPU
-	computeOnGPU();
+	int nb_sub_iter = 5;
+	computeOnGPU(nb_sub_iter);
 #endif
 
     /*
@@ -417,7 +420,9 @@ void GE_SPH::update()
 	count++;
 	//printf("count= %d\n", count);
 	if (count%20 == 0) {
-		count = 0;
+		//count = 0;
+		printf("ITERATION: %d\n", count*nb_sub_iter);
+		printf("count= %d, nb_sub_iter= %d\n", count, nb_sub_iter);
 		GE::Time::printAll();
 	}
 }
@@ -546,15 +551,15 @@ void GE_SPH::checkDensity()
 #endif
 }
 //----------------------------------------------------------------------
-void GE_SPH::computeOnGPU()
+void GE_SPH::computeOnGPU(int nb_sub_iter)
 {
     glFinish();
     cl_position->acquire();
     cl_color->acquire();
     
-    for(int i=0; i < 10; i++)
+    for(int i=0; i < nb_sub_iter; i++)
     {
-		printf("i= %d\n", i);
+		//printf("i= %d\n", i);
 		// ***** Create HASH ****
 		hash();
 
@@ -564,13 +569,18 @@ void GE_SPH::computeOnGPU()
 		bitonic_sort();
 
 		// **** Reorder pos, vel
-		printf("before build\n");
 		buildDataStructures(); 
 
+		#if 1
 		// ***** DENSITY UPDATE *****
 		neighborSearch(0); //density
 
-		#if 1
+		// ***** COLOR GRADIENT *****
+		neighborSearch(2); 
+
+//		// ***** COLOR NORMAL *****
+//		neighborSearch(3); 
+
 		// ***** PRESSURE UPDATE *****
 		neighborSearch(1); //pressure
 		#endif

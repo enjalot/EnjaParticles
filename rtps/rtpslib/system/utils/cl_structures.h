@@ -9,7 +9,8 @@ typedef struct PointData
 {
 	float4 density;
 	float4 color;  // x component
-	float4 normal;
+	float4 color_normal;
+	float4 color_lapl;
 	float4 force;
 	float4 surf_tens;
 } PointData;

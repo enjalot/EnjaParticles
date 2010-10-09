@@ -43,7 +43,7 @@
 #define density(i) 	vars_sorted[i+DENS*numParticles].x
 #define color(i)    vars_sorted[i+COL*numParticles].x
 #define surf_tens(i)    vars_sorted[i+SURF_TENS*numParticles]
-#define normal(i)    vars_sorted[i+NORMAL*numParticles]
+#define color_normal(i)    vars_sorted[i+NORMAL*numParticles]
 
 #define unsorted_pos(i) 	  vars_unsorted[i+POS      *numParticles]
 #define unsorted_vel(i) 	  vars_unsorted[i+VEL      *numParticles]
@@ -51,7 +51,7 @@
 #define unsorted_force(i) 	  vars_unsorted[i+FOR      *numParticles]
 #define unsorted_color(i)     vars_unsorted[i+COL      *numParticles].x
 #define unsorted_surf_tens(i) vars_unsorted[i+SURF_TENS*numParticles]
-#define unsorted_normal(i)    vars_unsorted[i+NORMAL*numParticles]
+#define unsorted_color_normal(i)    vars_unsorted[i+NORMAL*numParticles]
 
 //#define FETCH_NOTEX(a, t, i) a.t[i]
 #define FETCH_NOTEX(t, i) t[i]

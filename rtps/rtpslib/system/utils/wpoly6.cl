@@ -21,9 +21,19 @@ float Wpoly6_dr(float4 r, float h, __constant struct SPHParams* params)
 	float h9 = h*h;
 	float hr2 = (h9-r2); // h9 = h^2
 	h9 = h9*h;   //  h9 = h^3
-    float alpha = -6.f*315.f/64.0f/params->PI/(h9*h9*h9);
+    float alpha = -945.f/(32.0f*params->PI*h9*h9*h9);
     float Wij = alpha * hr2*hr2;
     return Wij;
+}
+//----------------------------------------------------------------------
+float Wpoly6_lapl(float4 r, float h, __constant struct SPHParams* params)
+{
+// Laplacian
+    float r2 = r.x*r.x + r.y*r.y + r.z*r.z;  // dist_squared(r);
+	float h2 = h*h;
+	float h3 = h2*h;
+	float alpha = -945.f/(32.0f*params->PI*h3*h3*h3);
+	float Wij = alpha*(h2-r2)*(2.*h2-7.f*r2);
 }
 //----------------------------------------------------------------------
 float Wspiky(float rlen, float h, __constant struct SPHParams* params)

@@ -17,9 +17,11 @@ void GE_SPH::neighborSearch(int which)
 
 	if (which == 0) ts_cl[TI_DENS]->start();
 	if (which == 1) ts_cl[TI_PRES]->start();
+	if (which == 2) ts_cl[TI_COL]->start();
+	if (which == 3) ts_cl[TI_COL_NORM]->start();
 	//ts_cl[TI_NEIGH]->start();
 
-	printf("enter neighbor\n");
+	//printf("enter neighbor\n");
 
 	if (first_time) {
 		try {
@@ -89,9 +91,11 @@ void GE_SPH::neighborSearch(int which)
 	//ts_cl[TI_NEIGH]->end();
 	if (which == 0) ts_cl[TI_DENS]->end();
 	if (which == 1) ts_cl[TI_PRES]->end();
+	if (which == 2) ts_cl[TI_COL]->end();
+	if (which == 3) ts_cl[TI_COL_NORM]->end();
 
 
-	#if 1
+	#if 0
 if (which == 1) {
 	printf("which == 1 *** \n");
 } else {

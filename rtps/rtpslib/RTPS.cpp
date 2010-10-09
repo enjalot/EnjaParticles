@@ -52,19 +52,26 @@ void RTPS::Init()
     //pass in the position and color vbo ids to the renderer
     //get the number from the system
     renderer = new Render(system->getPosVBO(), system->getColVBO(), system->getNum());
+
+	int print_freq = 20000;
+	int time_offset = 5;
+	ts_cl[TI_SYSTEM_UPDATE] = new GE::Time("(rtps) system update", time_offset, print_freq);
+	ts_cl[TI_RENDER_UPDATE] = new GE::Time("(rtps) render update", time_offset, print_freq);
 }
 
 void RTPS::update()
 {
+	ts_cl[TI_SYSTEM_UPDATE]->start();
     //eventually we will support more systems
     //then we will want to iterate over them
     //or have more complex behavior if they interact
     system->update();
+	ts_cl[TI_SYSTEM_UPDATE]->end();
 }
 
 void RTPS::render()
 {
-
+	ts_cl[TI_RENDER_UPDATE]->start();
     UniformGrid grid = system->getGrid();
     //should check if grid exists
 
@@ -74,6 +81,7 @@ void RTPS::render()
     renderer->render_box(grid.getMin(), grid.getMax());
     renderer->render();
 	glPopMatrix();
+	ts_cl[TI_RENDER_UPDATE]->end();
 }
 
 }

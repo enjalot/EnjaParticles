@@ -10,7 +10,7 @@ void zeroPoint(PointData* pt)
 {
 	pt->density = (float4)(0.,0.,0.,0.);
 	pt->color = (float4)(0.,0.,0.,0.);
-	pt->normal = (float4)(0.,0.,0.,0.);
+	pt->color_normal = (float4)(0.,0.,0.,0.);
 	pt->force = (float4)(0.,0.,0.,0.);
 	pt->surf_tens = (float4)(0.,0.,0.,0.);
 }
@@ -49,13 +49,15 @@ void ForNeighbor(__global float4*  vars_sorted,
 	}
 
 	if (fp->choice == 2) {
-		// update color normal
-		#include "normal_update.cl"
+		// update color normal and color Laplacian
+		#include "surface_tension_update.cl"
 	}
 
+	#if 0
 	if (fp->choice == 3) {
-		// surface tension
-	}
+		;
+	} 
+	#endif
 }
 //--------------------------------------------------
 float4 ForPossibleNeighbor(__global float4* vars_sorted, 

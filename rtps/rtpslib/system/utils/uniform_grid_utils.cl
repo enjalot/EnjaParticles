@@ -17,7 +17,8 @@ typedef struct PointData
 {
  float4 density;
  float4 color;
- float4 normal;
+ float4 color_normal;
+ float4 color_lapl;
  float4 force;
  float4 surf_tens;
 } PointData;
@@ -104,9 +105,19 @@ float Wpoly6_dr(float4 r, float h, __constant struct SPHParams* params)
  float h9 = h*h;
  float hr2 = (h9-r2);
  h9 = h9*h;
-    float alpha = -6.f*315.f/64.0f/params->PI/(h9*h9*h9);
+    float alpha = -945.f/(32.0f*params->PI*h9*h9*h9);
     float Wij = alpha * hr2*hr2;
     return Wij;
+}
+
+float Wpoly6_lapl(float4 r, float h, __constant struct SPHParams* params)
+{
+
+    float r2 = r.x*r.x + r.y*r.y + r.z*r.z;
+ float h2 = h*h;
+ float h3 = h2*h;
+ float alpha = -945.f/(32.0f*params->PI*h3*h3*h3);
+ float Wij = alpha*(h2-r2)*(2.*h2-7.f*r2);
 }
 
 float Wspiky(float rlen, float h, __constant struct SPHParams* params)
@@ -161,7 +172,7 @@ void zeroPoint(PointData* pt)
 {
  pt->density = (float4)(0.,0.,0.,0.);
  pt->color = (float4)(0.,0.,0.,0.);
- pt->normal = (float4)(0.,0.,0.,0.);
+ pt->color_normal = (float4)(0.,0.,0.,0.);
  pt->force = (float4)(0.,0.,0.,0.);
  pt->surf_tens = (float4)(0.,0.,0.,0.);
 }
@@ -192,9 +203,11 @@ void ForNeighbor(__global float4* vars_sorted,
 
 
 # 1 "density_update.cl" 1
-# 21 "density_update.cl"
+
+
+
     float Wij = Wpoly6(r, sphp->smoothing_distance, sphp);
-# 39 "density_update.cl"
+# 21 "density_update.cl"
  pt->density += (float4)(sphp->mass*Wij, 0., 0., 0.);
 # 44 "neighbors.cpp" 2
  }
@@ -202,9 +215,11 @@ void ForNeighbor(__global float4* vars_sorted,
  if (fp->choice == 1) {
 
 # 1 "pressure_update.cl" 1
-# 16 "pressure_update.cl"
- float dWijdr = Wspiky_dr(rlen, sphp->smoothing_distance, sphp);
 
+
+
+
+ float dWijdr = Wspiky_dr(rlen, sphp->smoothing_distance, sphp);
 
  float4 di = vars_sorted[index_i+0*num].x;
  float4 dj = vars_sorted[index_j+0*num].x;
@@ -247,7 +262,7 @@ void ForNeighbor(__global float4* vars_sorted,
 
  if (fp->choice == 2) {
 
-# 1 "normal_update.cl" 1
+# 1 "surface_tension_update.cl" 1
 
 
 
@@ -255,15 +270,23 @@ void ForNeighbor(__global float4* vars_sorted,
  float dWijdr = Wpoly6_dr(rlen, sphp->smoothing_distance, sphp);
 
 
- float4 dj = vars_sorted[index_j+0*num].x;
 
- pt->normal = -r * dWijdr * sphp->mass / dj.x;
+
+
+ float4 dj = vars_sorted[index_j+0*num].x;
+ pt->color_normal = -r * dWijdr * sphp->mass / dj.x;
+
+
+ float dWijlapl = Wpoly6_lapl(rlen, sphp->smoothing_distance, sphp);
+ pt->color_lapl = -sphp->mass * dWijlapl / dj.x;
 # 54 "neighbors.cpp" 2
  }
 
- if (fp->choice == 3) {
 
- }
+
+
+
+
 }
 
 float4 ForPossibleNeighbor(__global float4* vars_sorted,
@@ -502,24 +525,32 @@ __kernel void K_SumStep1(
  PointData pt;
  zeroPoint(&pt);
 
-    IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
-
 
 
  if (fp->choice == 0) {
+     IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
 
   vars_sorted[index+0*num].x = pt.density.x;
-  cli[index].w = 4;
-  cli[index].x++;
-  clf[index].x = vars_sorted[index+0*num].x;
+
+
+
 
  }
  if (fp->choice == 1) {
+     IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
 
 
   vars_sorted[index+3*num] = pt.force;
-  cli[index].w = 5;
 
 
+
+ }
+ if (fp->choice == 2) {
+     IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
+  float norml = length(pt.color_normal);
+  if (norml > 0.01) {
+   float4 stension = -0.3f * pt.color_lapl * pt.color_normal / norml;
+   vars_sorted[index+3*num] += stension;
+  }
  }
 }

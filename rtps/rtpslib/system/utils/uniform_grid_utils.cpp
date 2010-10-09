@@ -218,25 +218,33 @@ __kernel void K_SumStep1(
 	PointData pt;
 	zeroPoint(&pt);
 
-    IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
 	#endif
 
-
 	if (fp->choice == 0) { // update density
+    	IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
 		// density(index) = frce.x; 
 		density(index) = pt.density.x;
-		cli[index].w = 4;
-		cli[index].x++;
-		clf[index].x = density(index);
+		//cli[index].w = 4;
+		//cli[index].x++;
+		//clf[index].x = density(index);
 		// code reaches this point on first call
 	}
 	if (fp->choice == 1) { // update pressure
+    	IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
 		//barrier(CLK_LOCAL_MEM_FENCE); // DEBUG
-		//force(index) = frce; // Does not seem maintain value into euler.cl
-		force(index) = pt.force; // Does not seem maintain value into euler.cl
-		cli[index].w = 5;
+		//force(index) = frce; // Does not seem to maintain value into euler.cl
+		force(index) = pt.force; // Does not seem to maintain value into euler.cl
+		//cli[index].w = 5;
 		//clf[index] = frce;
 		// SERIOUS PROBLEM: Results different than results with cli = 4 (bottom of this file)
+	}
+	if (fp->choice == 2) { // update surface tension (NOT DEBUGGED)
+    	IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
+		float norml = length(pt.color_normal);
+		if (norml > 0.01) {
+			float4 stension = -0.3f * pt.color_lapl * pt.color_normal / norml;
+			force(index) += stension; // 2 memory accesses (NOT GOOD)
+		}
 	}
 }
 
