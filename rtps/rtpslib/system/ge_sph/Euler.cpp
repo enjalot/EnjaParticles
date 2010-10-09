@@ -1,3 +1,4 @@
+#include <math.h>
 #include "../GE_SPH.h"
 #include "timer_macros.h"
 
@@ -38,23 +39,29 @@ void GE_SPH::computeEuler()
 
 //	printf("dt= %f\n", ps->settings.dt);
 
-	#if 0
-	cl_vars_unsorted->copyToHost();
-	float4* vars = cl_vars_unsorted->getHostPtr();
-	printf("==================\n");
-	for (int i=0; i < 5; i++) {
-		int i1 = i + 1*nb_el;
-		int i2 = i + 2*nb_el;
-		printf("pos[%d] = %f, %f, %f, %f, %f\n", i, vars[i1].x, vars[i1].y, vars[i1].z, vars[i1].w);
-		printf("vel[%d] = %f, %f, %f, %f, %f\n", i, vars[i2].x, vars[i2].y, vars[i2].z, vars[i2].w);
-	}
-	#endif
-	
-
    	kern.execute(nb_el, workSize); 
 
     ps->cli->queue.finish();
 	ts_cl[TI_EULER]->end(); // OK
+
+	#if 0
+	cl_vars_unsorted->copyToHost();
+	float4* vars = cl_vars_unsorted->getHostPtr();
+	float vel_max = 0.;
+	printf("==================\n");
+	for (int i=0; i < nb_el; i++) {
+		int i1 = i + 1*nb_el;
+		int i2 = i + 2*nb_el;
+		//printf("pos[%d] = %f, %f, %f, %f, %f\n", i, vars[i1].x, vars[i1].y, vars[i1].z, vars[i1].w);
+		//printf("vel[%d] = %f, %f, %f, %f, %f\n", i, vars[i2].x, vars[i2].y, vars[i2].z, vars[i2].w);
+		float mag2 = vars[i2].x*vars[i2].x + vars[i2].y*vars[i2].y + vars[i2].z*vars[i2].z; 
+		vel_max = (mag2 > vel_max) ? mag2 : vel_max;
+	}
+	vel_max = sqrt(vel_max);
+	printf("vel_max= %f\n", vel_max);
+	#endif
+	
+
 } 
 
 #if 0

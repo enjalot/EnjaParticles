@@ -154,32 +154,5 @@ __kernel void hash(
 
 
 {
-
-    uint index = get_global_id(0);
-
- int num = get_global_size(0);
-    if (index >= num) return;
-
-
-
- cell_indices_start = 0xffffffff;
-
-
-
-    float4 p = vars_unsorted[index+1 *num];
-
-
-    int4 gridPos = calcGridCell(p, gp->grid_min, gp->grid_inv_delta);
-    bool wrap_edges = false;
-    uint hash = (uint) calcGridHash(gridPos, gp->grid_res, wrap_edges);
-
-
-
-
-    sort_hashes[index] = hash;
-    int pp = (int) p.x;
-
-    sort_indexes[index] = index;
-
-
+# 130 "uniform_hash.cpp"
 }

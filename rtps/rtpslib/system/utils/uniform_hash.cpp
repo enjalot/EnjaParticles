@@ -96,6 +96,7 @@ __kernel void hash(
            //, __global float4* fdebug,
            //__global int4* idebug)
 {
+#if 1
     // particle index
     uint index = get_global_id(0);
 	// do not use gp->numParticles (since it numParticles changed via define)
@@ -121,7 +122,9 @@ __kernel void hash(
     sort_hashes[index] = hash;
     int pp = (int) p.x;
 
+
     sort_indexes[index] = index;
+#endif
 
 	//idebug[index] = gridPos;
 }

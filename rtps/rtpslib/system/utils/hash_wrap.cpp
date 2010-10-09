@@ -33,7 +33,43 @@ void GE_SPH::hash()
 	float4* cells = cl_cells->getHostPtr();
 	int ctaSize = 128; // work group size
 
-	//kern.setArg(0, cl_cells->getDevicePtr()); // positions
+	#if 0
+	cl_vars_unsorted->copyToHost();
+	ps->cli->queue.finish();
+	float4* vp = cl_vars_unsorted->getHostPtr();
+	//printf("v= %d\n", v);
+	for (int i=0; i < nb_el; i++) {
+		float4* v = vp;
+		printf("==================\n");
+		printf("0: v[%d]= %f, %f, %f, %f\n", i, v[i].x, v[i].y, v[i].z, v[i].w);
+		v += nb_el;
+		printf("1: v[%d]= %f, %f, %f, %f\n", i, v[i].x, v[i].y, v[i].z, v[i].w);
+		v += nb_el;
+		printf("2: v[%d]= %f, %f, %f, %f\n", i, v[i].x, v[i].y, v[i].z, v[i].w);
+	}
+	exit(0);
+	#endif
+
+	#if 0
+	cl_sort_hashes->copyToHost();
+	cl_sort_indices->copyToHost();
+	cl_cell_indices_start->copyToHost();
+	ps->cli->queue.finish();
+
+	int* v1 = cl_sort_hashes->getHostPtr();
+	int* v2 = cl_sort_indices->getHostPtr();
+	int* v3 = cl_cell_indices_start->getHostPtr();
+	//printf("v= %d\n", v);
+	for (int i=0; i < nb_el; i++) {
+		printf("0: v123[%d]= %d, %d, %d\n", i, v1[i], v2[i], v3[i]);
+	}
+
+	cl_GridParams->copyToHost();
+	GridParams* gp = cl_GridParams->getHostPtr();
+	gp->print();
+	exit(0);
+	#endif
+
 	kern.setArg(0, cl_vars_unsorted->getDevicePtr()); // positions + other variables
 	kern.setArg(1, cl_sort_hashes->getDevicePtr());
 	kern.setArg(2, cl_sort_indices->getDevicePtr());
@@ -44,6 +80,7 @@ void GE_SPH::hash()
 
 	//printf("nb_el= %d\n", nb_el);
 	kern.execute(nb_el,ctaSize);
+	exit(0);
 
 	ps->cli->queue.finish();
 	ts_cl[TI_HASH]->end();

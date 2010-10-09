@@ -70,6 +70,10 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 		exit(0);
 	}
 
+	// Spacing defined as above: hash runs
+	// redefine spacing, hash only runs if spacing is > 2*particle_radius (WHY??)
+	//spacing = 4.*particle_radius;
+
 	printf("cell_sz= %f\n", cell_sz);
 	printf("particle_radius= %f\n", particle_radius);
 	printf("spacing= %f\n", spacing);
@@ -337,7 +341,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	}
 
 	cl_vars_unsorted->copyToDevice();
-	cl_vars_sorted->copyToDevice(); // shoudl not be required
+	cl_vars_sorted->copyToDevice(); // should not be required
 }
 
 //----------------------------------------------------------------------
