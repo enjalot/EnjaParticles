@@ -47,6 +47,15 @@ void ForNeighbor(__global float4*  vars_sorted,
 		// update pressure
 		#include "pressure_update.cl"
 	}
+
+	if (fp->choice == 2) {
+		// update color normal
+		#include "normal_update.cl"
+	}
+
+	if (fp->choice == 3) {
+		// surface tension
+	}
 }
 //--------------------------------------------------
 float4 ForPossibleNeighbor(__global float4* vars_sorted, 

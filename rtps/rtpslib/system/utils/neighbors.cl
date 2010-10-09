@@ -92,6 +92,19 @@ float Wpoly6(float4 r, float h, __constant struct SPHParams* params)
     return Wij;
 }
 
+float Wpoly6_dr(float4 r, float h, __constant struct SPHParams* params)
+{
+
+
+    float r2 = r.x*r.x + r.y*r.y + r.z*r.z;
+ float h9 = h*h;
+ float hr2 = (h9-r2);
+ h9 = h9*h;
+    float alpha = -6.f*315.f/64.0f/params->PI/(h9*h9*h9);
+    float Wij = alpha * hr2*hr2;
+    return Wij;
+}
+
 float Wspiky(float rlen, float h, __constant struct SPHParams* params)
 {
     float h6 = h*h*h * h*h*h;
@@ -226,6 +239,26 @@ void ForNeighbor(__global float4* vars_sorted,
 
  pt->force += stress;
 # 49 "neighbors.cpp" 2
+ }
+
+ if (fp->choice == 2) {
+
+# 1 "normal_update.cl" 1
+
+
+
+
+ float dWijdr = Wpoly6_dr(rlen, sphp->smoothing_distance, sphp);
+
+
+ float4 dj = vars_sorted[index_j+0*num].x;
+
+ pt->normal = -r * dWijdr * sphp->mass / dj.x;
+# 54 "neighbors.cpp" 2
+ }
+
+ if (fp->choice == 3) {
+
  }
 }
 
