@@ -36,7 +36,7 @@
 	//clf[index_i].y = Wij;
 	//cli[index_i].x = -17.;
 
-	pt->density = (float4)(sphp->mass*Wij, 0., 0., 0.);
+	pt->density += (float4)(sphp->mass*Wij, 0., 0., 0.);
 	//return (float4)(sphp->mass*Wij, 0., 0., 0.);
 //----------------------------------------------------------------------
 #endif

@@ -84,7 +84,7 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 		if (rlen <= sphp->smoothing_distance) {
 			//cli[index_i].x++;
 #if 1
-			//ForNeighbor(vars_sorted, index_i, index_j, r, rlen, gp, fp, sphp ARGS);
+			//frce = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, gp, fp, sphp ARGS);
 			// return updated pt
 			ForNeighbor(vars_sorted, pt, index_i, index_j, r, rlen, gp, fp, sphp ARGS);
 #endif

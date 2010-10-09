@@ -182,7 +182,7 @@ void ForNeighbor(__global float4* vars_sorted,
 # 21 "density_update.cl"
     float Wij = Wpoly6(r, sphp->smoothing_distance, sphp);
 # 39 "density_update.cl"
- pt->density = (float4)(sphp->mass*Wij, 0., 0., 0.);
+ pt->density += (float4)(sphp->mass*Wij, 0., 0., 0.);
 # 44 "neighbors.cpp" 2
  }
 
@@ -228,7 +228,7 @@ void ForNeighbor(__global float4* vars_sorted,
      * Wijpol6);
 
 
- pt->force = stress;
+ pt->force += stress;
 # 49 "neighbors.cpp" 2
  }
 }
@@ -484,7 +484,7 @@ __kernel void K_SumStep1(
  if (fp->choice == 1) {
 
 
-
+  vars_sorted[index+3*num] = pt.force;
   cli[index].w = 5;
 
 
