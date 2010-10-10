@@ -590,8 +590,9 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 		// ***** COLOR GRADIENT *****
 		neighborSearch(2); 
 
-//		// ***** COLOR NORMAL *****
-//		neighborSearch(3); 
+		// ***** DENSITY DENOMINATOR *****
+		//   *** DENSITY NORMALIZATION ***
+		neighborSearch(3); 
 
 		// ***** PRESSURE UPDATE *****
 		neighborSearch(1); //pressure

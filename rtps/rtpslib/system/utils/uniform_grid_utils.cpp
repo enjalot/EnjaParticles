@@ -251,6 +251,12 @@ __kernel void K_SumStep1(
 			force(index) += stension; // 2 memory accesses (NOT GOOD)
 		}
 	}
+	if (fp->choice == 3) { // denominator in density normalization
+    	//IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
+
+		// NOT WORKING. NEED DEBUG STATEMENTS
+		//density(index) /= pt.density.y;
+	}
 }
 
 /*-------------------------------------------------------------- */

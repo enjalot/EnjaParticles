@@ -20,6 +20,8 @@
 
 typedef struct PointData
 {
+
+
  float4 density;
  float4 color;
  float4 color_normal;

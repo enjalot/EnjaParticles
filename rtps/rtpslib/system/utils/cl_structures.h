@@ -7,6 +7,8 @@
 // used to output multiple variables per point
 typedef struct PointData
 {
+	// density.x: density
+	// density.y: denominator: sum_i (m_j/rho_j W_j)
 	float4 density;
 	float4 color;  // x component
 	float4 color_normal;

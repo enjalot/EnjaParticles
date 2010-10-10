@@ -17,6 +17,8 @@
 
 typedef struct PointData
 {
+
+
  float4 density;
  float4 color;
  float4 color_normal;
@@ -203,8 +205,10 @@ void ForNeighbor(__global float4* vars_sorted,
 
 
     float Wij = Wpoly6(r, sphp->smoothing_distance, sphp);
-# 21 "density_update.cl"
- pt->density += (float4)(sphp->mass*Wij, 0., 0., 0.);
+
+
+
+ pt->density.x += sphp->mass*Wij;
 # 44 "neighbors.cpp" 2
  }
 
@@ -227,8 +231,8 @@ void ForNeighbor(__global float4* vars_sorted,
 
 
 
- float rest_density = 800.f;
- float K = 10.f;
+ float rest_density = 500.f;
+ float K = 30.f;
  float Pi = K*sphp->K*(di.x - rest_density);
  float Pj = K*sphp->K*(dj.x - rest_density);
 
@@ -284,9 +288,10 @@ void ForNeighbor(__global float4* vars_sorted,
  }
 
 
-
-
-
+ if (fp->choice == 3) {
+# 1 "density_denom_update.cl" 1
+# 59 "neighbors.cpp" 2
+ }
 
 }
 

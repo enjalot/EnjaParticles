@@ -53,9 +53,9 @@ void ForNeighbor(__global float4*  vars_sorted,
 		#include "surface_tension_update.cl"
 	}
 
-	#if 0
+	#if 1
 	if (fp->choice == 3) {
-		;
+		#include "density_denom_update.cl"
 	} 
 	#endif
 }
