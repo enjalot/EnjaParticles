@@ -87,6 +87,7 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 
 		// get the relative distance between the two particles, translate to simulation space
 		float4 r = (position_i - position_j); 
+		r.w = 0.f; // I stored density in 4th component
 		// |r|
 		float rlen = length(r);
 

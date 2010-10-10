@@ -260,8 +260,10 @@ void ForNeighbor(__global float4* vars_sorted,
 
 
  float Wijpol6 = Wpoly6(rlen, sphp->smoothing_distance, sphp);
- stress += (2.f * sphp->mass * (velj-veli)/(di.x+dj.x)
+ float4 surf_tens = (2.f * sphp->mass * (velj-veli)/(di.x+dj.x)
      * Wijpol6);
+
+ stress += surf_tens;
 
 
  pt->force += stress;
@@ -325,6 +327,7 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 
 
   float4 r = (position_i - position_j);
+  r.w = 0.f;
 
   float rlen = length(r);
 

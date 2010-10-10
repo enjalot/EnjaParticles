@@ -39,11 +39,14 @@
 	#if 1
 	// Add XSPH stabilization term
 	float Wijpol6 = Wpoly6(rlen, sphp->smoothing_distance, sphp);
-	stress +=  (2.f * sphp->mass * (velj-veli)/(di.x+dj.x) 
+	float4 surf_tens =  (2.f * sphp->mass * (velj-veli)/(di.x+dj.x) 
 	    * Wijpol6);
+	//surf_tens.w = 0.f;
+	stress += surf_tens;
 	#endif
 
 	pt->force += stress;
+
 
 	//return stress;
 

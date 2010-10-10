@@ -214,7 +214,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     params.particle_radius = sph_settings.particle_radius;
     params.simulation_scale = sph_settings.simulation_scale;
 	// does scale_simulation influence stiffness and dampening?
-    params.boundary_stiffness = 5000.;  //10000.0f;  (scale from 20000 to 20)
+    params.boundary_stiffness = 10000.;  //10000.0f;  (scale from 20000 to 20)
     params.boundary_dampening = 256.;//256.; 
     params.boundary_distance = sph_settings.boundary_distance;
     params.EPSILON = .00001f;

@@ -22,6 +22,7 @@ float4 calculateRepulsionForce(
     vel.w = 0.0f;  // Removed influence of 4th component of velocity (does not exist)
 //    float4 repulsion_force = 10.f*(boundary_stiffness * boundary_distance - boundary_dampening * dot(normal, vel))*normal;
     float4 repulsion_force = (boundary_stiffness * boundary_distance - boundary_dampening * dot(normal, vel))*normal;
+	repulsion_force.w = 0.f;
     return repulsion_force;
 }
 
