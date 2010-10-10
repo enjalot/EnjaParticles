@@ -41,7 +41,6 @@ __kernel void collision_wall(
     float4 v = vel(i); //  vel[i];
     float4 r_f = (float4)(0.f, 0.f, 0.f, 0.f);
 
-
     //bottom wall
     float diff = params->boundary_distance - (p.z - params->grid_min.z);
     if (diff > params->EPSILON)
@@ -51,7 +50,6 @@ __kernel void collision_wall(
 		//if (dot(normal,v) < 0) {
         r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
 		//}
-        //r_f += calculateRepulsionForce(normal, v, boundary_stiffness, boundary_dampening, boundary_distance);
     }
 
     //Y walls

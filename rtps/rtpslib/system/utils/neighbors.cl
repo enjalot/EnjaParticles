@@ -288,12 +288,19 @@ void ForNeighbor(__global float4* vars_sorted,
 # 54 "neighbors.cpp" 2
  }
 
-
  if (fp->choice == 3) {
 # 1 "density_denom_update.cl" 1
-# 59 "neighbors.cpp" 2
- }
 
+
+
+
+
+
+    float Wij = Wpoly6(r, sphp->smoothing_distance, sphp);
+
+ pt->density.y += sphp->mass*Wij / vars_sorted[index_i+0*num].x;
+# 58 "neighbors.cpp" 2
+ }
 }
 
 float4 ForPossibleNeighbor(__global float4* vars_sorted,

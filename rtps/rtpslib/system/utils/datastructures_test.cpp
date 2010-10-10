@@ -75,10 +75,6 @@ __kernel void datastructures(
 	#if 0
 	for (int j=0; j < nb_vars; j++) {
 		vars_sorted[index+j*numParticles]	= vars_unsorted[sorted_index+j*numParticles];
-		//dParticlesSorted[index+j*numParticles].x = 3.; // = (float4) (3.,3.,3.,3.);
-		//dParticlesSorted[index+j*numParticles].y = 4.; // = (float4) (3.,3.,3.,3.);
-		//dParticlesSorted[index+j*numParticles].z = 5.; // = (float4) (3.,3.,3.,3.);
-		//dParticlesSorted[index+j*numParticles].w = 6.; // = (float4) (3.,3.,3.,3.);
 	}
 	#endif
 

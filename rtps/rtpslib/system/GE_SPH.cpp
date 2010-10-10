@@ -55,13 +55,25 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	double particle_radius = pow(particle_volume*3./(4.*pi), 1./3.);
 	double particle_mass = particle_volume * density;
 
-	int nb_particles_in_cell = 8;
+	int nb_particles_in_cell = 1;
+	// mass of fluid in a single cell
 	float cell_mass = nb_particles_in_cell*particle_mass;
 	float cell_volume = cell_mass / density;
+	// Cell contains nb_particles_in_cell of fluid
 	float cell_sz = pow(cell_volume, 1./3.);
-	cell_sz = 2.*particle_radius;
+	printf("** cell_sz= %f\n", cell_sz);
 
 	float spacing;
+	// spacing of particles at t=0
+	// rest distance between particles
+	spacing = cell_sz;
+
+	printf("radius: %f\n", particle_radius);
+	printf("cell_sz= %f\n", cell_sz);
+	//exit(0);
+	//cell_sz = 2.*particle_radius;
+
+	#if 0
 	if (nb_particles_in_cell == 1) {
 		spacing = cell_sz;
 	} else if (nb_particles_in_cell > 1) {
@@ -70,14 +82,15 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 		printf("nb_particles_in_cell must be >= 1\n");
 		exit(0);
 	}
+	#endif
 
 	// Spacing defined as above: hash runs
 	// redefine spacing, hash only runs if spacing is > 2*particle_radius (WHY??)
 	// runs for some spacings, not for others (spacing could be greater or smaller than 
 	//   particle radius. PROBLEM OCCURS WITH HASH KERNEL. HOW IS THIS POSSILBE?
 	// sorting: requires power of 2. Spacing will influence nb of particles. 
-	spacing = 2.0*particle_radius;
-	printf("spacing= %f\n", spacing);
+	//spacing = 2.0*particle_radius;
+	//printf("spacing= %f\n", spacing);
 	//spacing = cell_sz;
 
 	printf("cell_sz= %f\n", cell_sz);
@@ -86,20 +99,24 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	//exit(0);
 
 	// desired number of particles within the smoothing_distance sphere
-	int nb_interact_part = 20;
+	int nb_interact_part = 30;
 	// (h/radius)^3 = nb_interact_part
 	double h = pow(nb_interact_part, 1./3.) * particle_radius;
+	//spacing = 2.*particle_radius;
+	//cell_sz = 2.*h;
+
 
 	//-------------------------------
 
 	double cell_size = cell_sz;
+	//cell_size = h;
 	int    nb_cells_x; // number of cells along x
 	int    nb_cells_y; 
 	int    nb_cells_z;
 
 	double domain_size_x = 1.4 * fluid_size_x; // meters
 	double domain_size_y = 1.4 * fluid_size_y; // 
-	double domain_size_z = 4.0 * fluid_size_z; // 
+	double domain_size_z = 8.0 * fluid_size_z; // 
 
 	nb_cells_x = (int) (domain_size_x / cell_size);
 	nb_cells_y = (int) (domain_size_y / cell_size);
@@ -412,7 +429,7 @@ void GE_SPH::update()
 #endif
 
 #ifdef GPU
-	int nb_sub_iter = 5;
+	int nb_sub_iter = 15;
 	computeOnGPU(nb_sub_iter);
 	if (count % 10 == 0) computeTimeStep();
 #endif
@@ -588,12 +605,12 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 		// ***** DENSITY UPDATE *****
 		neighborSearch(0); //density
 
-		// ***** COLOR GRADIENT *****
-		neighborSearch(2); 
-
 		// ***** DENSITY DENOMINATOR *****
 		//   *** DENSITY NORMALIZATION ***
-		neighborSearch(3); 
+		//neighborSearch(3); 
+
+		// ***** COLOR GRADIENT *****
+		neighborSearch(2); 
 
 		// ***** PRESSURE UPDATE *****
 		neighborSearch(1); //pressure
@@ -615,7 +632,8 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 
 	}
 
-	printGPUDiagnostics();
+	//printGPUDiagnostics();
+	//exit(0);
 
     cl_position->release();
     cl_color->release();
@@ -680,8 +698,8 @@ void GE_SPH::printGPUDiagnostics()
 		float4* vel1     = cl_vars_sorted->getHostPtr() + 2*nb_el;
 		float4* force1   = cl_vars_sorted->getHostPtr() + 3*nb_el;
 
-		//for (int i=1000; i < 1500; i++) {
-		for (int i=0; i < 10; i++) {
+		for (int i=1000; i < 1500; i++) {
+		//for (int i=0; i < 10; i++) {
 			printf("=== i= %d ==========\n", i);
 			//printf("dens[%d]= %f, sorted den: %f\n", i, density[i].x, density1[i].x);
 			pos[i].print("un pos");

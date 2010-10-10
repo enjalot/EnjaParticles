@@ -212,22 +212,18 @@ __kernel void K_SumStep1(
 
     // Do calculations on particles in neighboring cells
 
-	#if 1
-    //float4 frce = IterateParticlesInNearbyCells(vars_sorted, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
 
 	PointData pt;
 	zeroPoint(&pt);
 
-	#endif
-
-	cli[index].w = 3;
+	//cli[index].w = 3;
 
 	if (fp->choice == 0) { // update density
     	IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
 		// density(index) = frce.x; 
 		density(index) = pt.density.x;
-		cli[index].w = 4;
-		clf[index].x = density(index);
+		//cli[index].w = 4;
+		//clf[index].x = density(index);
 		// code reaches this point on first call
 	}
 	if (fp->choice == 1) { // update pressure
@@ -242,20 +238,22 @@ __kernel void K_SumStep1(
 	if (fp->choice == 2) { // update surface tension (NOT DEBUGGED)
     	IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
 		float norml = length(pt.color_normal);
-		clf[index].w = norml;
+		//clf[index].w = norml;
 		if (norml > 4.) {
 			float4 stension = -0.3f * pt.color_lapl * pt.color_normal / norml;
-			clf[index]   = stension;
+			//clf[index]   = stension;
 			//clf[index].w = -70.;
 			//clf[index].z = pt.color_lapl;
 			force(index) += stension; // 2 memory accesses (NOT GOOD)
 		}
 	}
 	if (fp->choice == 3) { // denominator in density normalization
-    	//IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
+    	IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
+		//clf[index].x = pt.density.y;
+		//cli[index].x = -40;
 
 		// NOT WORKING. NEED DEBUG STATEMENTS
-	//	density(index) /= pt.density.y;
+		density(index) /= pt.density.y;
 	}
 }
 
