@@ -255,7 +255,7 @@ __kernel void K_SumStep1(
     	//IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
 
 		// NOT WORKING. NEED DEBUG STATEMENTS
-		//density(index) /= pt.density.y;
+	//	density(index) /= pt.density.y;
 	}
 }
 

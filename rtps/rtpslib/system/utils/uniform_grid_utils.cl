@@ -236,7 +236,7 @@ void ForNeighbor(__global float4* vars_sorted,
 
 
  float rest_density = 500.f;
- float K = 30.f;
+ float K = 80.f;
  float Pi = K*sphp->K*(di.x - rest_density);
  float Pj = K*sphp->K*(dj.x - rest_density);
 

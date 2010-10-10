@@ -152,10 +152,10 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	printf("after sphere, offset: %d\n", offset);
 
 	// CREATE FLUID CUBE
-	float x1 = domain_size_x*0.10;
-	float x2 = domain_size_x*.90;
-	float y1 = domain_size_y*0.1;
-	float y2 = domain_size_y*.9;
+	float x1 = domain_size_x*0.03;
+	float x2 = domain_size_x*.97;
+	float y1 = domain_size_y*0.03;
+	float y2 = domain_size_y*.97;
 	float z1 = domain_size_x*.2; //particle_radius;
 	float z2 = 1.2*domain_size_z; // 1.2 to get all the particles
 
