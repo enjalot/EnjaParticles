@@ -14,10 +14,9 @@
 	//float Pj = sphp->K*(dj.x - fact * sphp->rest_density);
 
 	//float rest_density = 00.f;
-	float rest_density = 500.f;
-	float K = 80.f;
-	float Pi = K*sphp->K*(di.x - rest_density);
-	float Pj = K*sphp->K*(dj.x - rest_density);
+	float rest_density = 1000.f;
+	float Pi = sphp->K*(di.x - rest_density);
+	float Pj = sphp->K*(dj.x - rest_density);
 
 	float kern = -dWijdr * (Pi + Pj)*0.5;
 	float4 stress = kern*r;

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 
 
 #include <GL/glew.h>
@@ -74,7 +75,10 @@ void Render::drawArrays()
 	for (int i=0; i < num; i++, count+=4) {
 		glPushMatrix();
 		glTranslatef(ptr[count], ptr[count+1], ptr[count+2]);
-		gluSphere(qu, .038, 10, 10);
+		float dens = ptr[count+3];
+		float scale = .07*pow(.02*dens, -1./3.);  // could be done on GPU
+		glScalef(scale, scale, scale);
+		gluSphere(qu, 1., 10, 10);
 		glPopMatrix();
 	}
     glUnmapBufferARB(GL_ARRAY_BUFFER); 

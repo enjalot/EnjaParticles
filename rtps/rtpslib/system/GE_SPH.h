@@ -295,6 +295,7 @@ private:
 	void computeCellStartEndCPU();
 
 	void printGPUDiagnostics();
+	float computeTimeStep();
 };
 
 }

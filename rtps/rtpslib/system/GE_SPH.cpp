@@ -214,12 +214,12 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     params.particle_radius = sph_settings.particle_radius;
     params.simulation_scale = sph_settings.simulation_scale;
 	// does scale_simulation influence stiffness and dampening?
-    params.boundary_stiffness = 10000.;  //10000.0f;  (scale from 20000 to 20)
+    params.boundary_stiffness = 5000.;  //10000.0f;  (scale from 20000 to 20)
     params.boundary_dampening = 256.;//256.; 
     params.boundary_distance = sph_settings.boundary_distance;
     params.EPSILON = .00001f;
     params.PI = 3.14159265f;
-    params.K = 1.0f; //1.5f;
+    params.K = 100.0f; //1.5f;
 	params.dt = psfr->settings.dt;
 	//printf("dt= %f\n", params.dt); exit(0);
  
@@ -414,6 +414,7 @@ void GE_SPH::update()
 #ifdef GPU
 	int nb_sub_iter = 5;
 	computeOnGPU(nb_sub_iter);
+	if (count % 10 == 0) computeTimeStep();
 #endif
 
     /*
@@ -610,10 +611,11 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 		computeEuler();
 
 		// *** OUTPUT PHYSICAL VARIABLES FROM THE GPU
-		//printGPUDiagnostics();
 	//	exit(0);
 
 	}
+
+	printGPUDiagnostics();
 
     cl_position->release();
     cl_color->release();
@@ -624,6 +626,28 @@ void GE_SPH::computeOnCPU()
     cpuDensity();
     //cpuPressure();
     //cpuEuler();
+}
+//----------------------------------------------------------------------
+float GE_SPH::computeTimeStep()
+{
+	cl_vars_unsorted->copyToHost();
+	float4* vel = cl_vars_unsorted->getHostPtr() + 2*nb_el;
+	GridParams* gp = cl_GridParams->getHostPtr();
+	GE_SPHParams* params = cl_params->getHostPtr();
+
+	float velmax = 0.;
+	float vel2;
+	for (int i=0; i < nb_el; i++) {
+		vel2 = vel[i].x*vel[i].x+vel[i].y*vel[i].y+vel[i].z*vel[i].z;
+		velmax = vel2 > velmax ? vel2 : velmax;
+	}
+	velmax = sqrt(velmax);
+	float soundSpeed = sqrt(params->K);
+	float dt = 0.5 * gp->grid_delta.x / (velmax+soundSpeed);
+
+	printf("velmax = %f\n", velmax);
+	printf("time step limit: %f\n", dt);
+	return dt;
 }
 //----------------------------------------------------------------------
 void GE_SPH::printGPUDiagnostics()
@@ -656,13 +680,14 @@ void GE_SPH::printGPUDiagnostics()
 		float4* vel1     = cl_vars_sorted->getHostPtr() + 2*nb_el;
 		float4* force1   = cl_vars_sorted->getHostPtr() + 3*nb_el;
 
-		for (int i=1000; i < 1500; i++) {
+		//for (int i=1000; i < 1500; i++) {
+		for (int i=0; i < 10; i++) {
 			printf("=== i= %d ==========\n", i);
 			//printf("dens[%d]= %f, sorted den: %f\n", i, density[i].x, density1[i].x);
 			pos[i].print("un pos");
 			vel[i].print("un vel");
 			force[i].print("un force");
-			density[i].print("un density");
+			//density[i].print("un density");
 			//pos1[i].print("so pos1");
 			//vel1[i].print("so vel1");
 			//force1[i].print("so force1");
