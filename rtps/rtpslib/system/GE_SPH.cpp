@@ -97,9 +97,9 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	int    nb_cells_y; 
 	int    nb_cells_z;
 
-	double domain_size_x = 1.2 * fluid_size_x; // meters
-	double domain_size_y = 1.2 * fluid_size_y; // 
-	double domain_size_z = 2.0 * fluid_size_z; // 
+	double domain_size_x = 1.4 * fluid_size_x; // meters
+	double domain_size_y = 1.4 * fluid_size_y; // 
+	double domain_size_z = 4.0 * fluid_size_z; // 
 
 	nb_cells_x = (int) (domain_size_x / cell_size);
 	nb_cells_y = (int) (domain_size_y / cell_size);
@@ -156,8 +156,8 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	float x2 = domain_size_x*.90;
 	float y1 = domain_size_y*0.1;
 	float y2 = domain_size_y*.9;
-	float z1 = particle_radius;
-	float z2 = 2.2*fluid_size_z; // 1.2 to get all the particles
+	float z1 = domain_size_x*.2; //particle_radius;
+	float z2 = 1.2*domain_size_z; // 1.2 to get all the particles
 
 	#if 0
 	x1 = 0.;
@@ -214,8 +214,8 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     params.particle_radius = sph_settings.particle_radius;
     params.simulation_scale = sph_settings.simulation_scale;
 	// does scale_simulation influence stiffness and dampening?
-    params.boundary_stiffness = 1000.;  //10000.0f;  (scale from 20000 to 20)
-    params.boundary_dampening = 200.;//256.; 
+    params.boundary_stiffness = 10000.;  //10000.0f;  (scale from 20000 to 20)
+    params.boundary_dampening = 256.;//256.; 
     params.boundary_distance = sph_settings.boundary_distance;
     params.EPSILON = .00001f;
     params.PI = 3.14159265f;
@@ -603,7 +603,6 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 		#endif
 
 		// ***** WALL COLLISIONS *****
-		// COLLISIONS makes force ZERO
 		computeCollisionWall();
 
         // ***** EULER UPDATE *****
@@ -656,7 +655,7 @@ void GE_SPH::printGPUDiagnostics()
 		float4* vel1     = cl_vars_sorted->getHostPtr() + 2*nb_el;
 		float4* force1   = cl_vars_sorted->getHostPtr() + 3*nb_el;
 
-		for (int i=0; i < nb_el; i++) {
+		for (int i=1000; i < 1500; i++) {
 			printf("=== i= %d ==========\n", i);
 			//printf("dens[%d]= %f, sorted den: %f\n", i, density[i].x, density1[i].x);
 			pos[i].print("un pos");
