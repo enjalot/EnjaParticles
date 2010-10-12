@@ -229,7 +229,7 @@ void appRender()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	//gluLookAt(-4.,-4., 5., 5.,5.,0., 0., 0., 1.);
-	gluLookAt(-80.,-80., 100., 0.,0.,0., 0., 0., 1.);
+	gluLookAt(-20.,-80., 20., 0.,0.,0., 0., 0., 1.);
 
     ps->update();
 

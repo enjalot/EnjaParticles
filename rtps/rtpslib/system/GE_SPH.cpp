@@ -110,10 +110,10 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 
 	// Dam (repeat case from Fluids v2
 	// Size in world space
-	float4 domain_min = float4(-10., -6., 0., 1.);
-	float4 domain_max = float4(+10., +6., 10., 1.);
-	float4 fluid_min   = float4(-0.5, -5.5,  0., 1.);
-	float4 fluid_max   = float4( 9.5, +5.5,  5., 1.);
+	float4 domain_min = float4(-10., -5., 0., 1.);
+	float4 domain_max = float4(+10., +5., 10., 1.);
+	float4 fluid_min   = float4(-0.5, -4.9,  0.1, 1.);
+	float4 fluid_max   = float4( 9.9, +4.9,  7., 1.);
 
 	double domain_size_x = domain_max.x - domain_min.x; 
 	double domain_size_y = domain_max.y - domain_min.y; 
@@ -237,7 +237,7 @@ printf("num= %d\n", num);
     params.boundary_distance = sph_settings.boundary_distance;
     params.EPSILON = .00001f;
     params.PI = 3.14159265f;
-    params.K = 1.0f; //100.0f; //1.5f;
+    params.K = 1.5f; //100.0f; //1.5f;
 	params.dt = psfr->settings.dt;
 	//printf("dt= %f\n", params.dt); exit(0);
  
@@ -309,9 +309,9 @@ printf("num= %d\n", num);
 	params.print();
 	sph_settings.print();
 	cl_GridParams->getHostPtr()->print();
+	cl_GridParamsScaled->getHostPtr()->print();
 	cl_FluidParams->getHostPtr()->print();
 	printf("=========================================\n");
-	//exit(0);
 
 	int print_freq = 20000;
 	int time_offset = 5;
@@ -508,6 +508,7 @@ void GE_SPH::setupArrays()
 	gp.grid_inv_delta.print("grid inv delta");
 
     float ss = params.simulation_scale;
+	//ss = 1.0; // TEMPORARY UNTIL I KNOW WHAT I AM DOING
 	printf("ss= %f\n", ss);
 //	exit(0);
 

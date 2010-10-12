@@ -41,10 +41,8 @@ __kernel void collision_wall(
     float4 v = vel(i); //  vel[i];
     float4 r_f = (float4)(0.f, 0.f, 0.f, 0.f);
 
-	//float4 si=  .05;
-
     //bottom wall
-    float diff = params->boundary_distance - (p.z - params->grid_min.z);
+    float diff = params->boundary_distance - (p.z - gp->grid_min.z);
     if (diff > params->EPSILON)
     {
 		// normal points into the domain
@@ -55,13 +53,13 @@ __kernel void collision_wall(
     }
 
     //Y walls
-    diff = params->boundary_distance - (p.y - params->grid_min.y);
+    diff = params->boundary_distance - (p.y - gp->grid_min.y);
     if (diff > params->EPSILON)
     {
         float4 normal = (float4)(0.0f, 1.0f, 0.0f, 0.0f);
         r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
     }
-    diff = params->boundary_distance - (params->grid_max.y - p.y);
+    diff = params->boundary_distance - (gp->grid_max.y - p.y);
     if (diff > params->EPSILON)
     {
         float4 normal = (float4)(0.0f, -1.0f, 0.0f, 0.0f);
@@ -69,13 +67,13 @@ __kernel void collision_wall(
     }
 
     //X walls
-    diff = params->boundary_distance - (p.x - params->grid_min.x);
+    diff = params->boundary_distance - (p.x - gp->grid_min.x);
     if (diff > params->EPSILON)
     {
         float4 normal = (float4)(1.0f, 0.0f, 0.0f, 0.0f);
         r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
     }
-    diff = params->boundary_distance - (params->grid_max.x - p.x);
+    diff = params->boundary_distance - (gp->grid_max.x - p.x);
     if (diff > params->EPSILON)
     {
         float4 normal = (float4)(-1.0f, 0.0f, 0.0f, 0.0f);

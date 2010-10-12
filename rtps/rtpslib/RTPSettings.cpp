@@ -17,8 +17,8 @@ RTPSettings::RTPSettings()
 
     //max_particles = n32k;
     max_particles = n4k;
-    dt = .0003f;
-    //dt = .0001f;
+    //dt = .0004f;
+    dt = .0001f;
 }
 
 }
