@@ -27,6 +27,21 @@ typedef struct PointData
  float4 surf_tens;
 } PointData;
 
+struct GridParamsScaled
+
+{
+    float4 grid_size;
+    float4 grid_min;
+    float4 grid_max;
+
+
+    float4 grid_res;
+    float4 grid_delta;
+    float4 grid_inv_delta;
+    int num;
+    int nb_vars;
+};
+
 struct GridParams
 {
     float4 grid_size;

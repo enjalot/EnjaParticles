@@ -42,7 +42,7 @@ typedef struct GE_SPHSettings
     float smoothing_distance;
     float particle_radius;
     float boundary_distance;
-    float spacing;
+    float particle_spacing;
     float grid_cell_size;
 
 	void print() {
@@ -53,7 +53,7 @@ typedef struct GE_SPHSettings
 		printf("smoothing_distance: %f\n", smoothing_distance);
 		printf("particle_radius: %f\n", particle_radius);
 		printf("boundary_distance: %f\n", boundary_distance);
-		printf("spacing: %f\n", spacing);
+		printf("particle_spacing: %f\n", particle_spacing);
 		printf("grid_cell_size: %f\n", grid_cell_size);
 	}
 
@@ -86,7 +86,34 @@ struct GridParams
 		printf("numParticles= %d\n", numParticles);
 	}
 };
+//----------------------------------------------------------------------
+struct GridParamsScaled
+// scale with simulation_scale parameter
+{
+    float4          grid_size;
+    float4          grid_min;
+    float4          grid_max;
 
+    // number of cells in each dimension/side of grid
+    float4          grid_res;
+
+    float4          grid_delta;
+    float4          grid_inv_delta;
+	int				numParticles;
+	int				nb_vars; // for combined array
+
+	void print() {
+		printf("----- GridParmsScaled ----\n");
+		grid_size.print("grid_size"); 
+		grid_min.print("grid_min"); 
+		grid_max.print("grid_max"); 
+		grid_res.print("grid_res"); 
+		grid_delta.print("grid_delta"); 
+		grid_inv_delta.print("grid_inv_delta"); 
+		printf("numParticles= %d\n", numParticles);
+	}
+};
+//----------------------------------------------------------------------
 // GORDON Datastructure for Fluid parameters. To be reconciled with Ian's
 // struct for fluid parameters
 struct FluidParams
@@ -210,6 +237,7 @@ public:
 	BufferGE<int>* 		cl_unsort;
 	BufferGE<int>* 		cl_sort;
 	BufferGE<GridParams>*  cl_GridParams;
+	BufferGE<GridParamsScaled>*  cl_GridParamsScaled;
 	BufferGE<FluidParams>* cl_FluidParams;
 
 	BufferGE<float4>*	clf_debug;  //just for debugging cl files

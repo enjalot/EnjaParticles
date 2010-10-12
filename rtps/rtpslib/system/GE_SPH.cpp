@@ -32,7 +32,6 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	// density, force, pos, vel, surf tension, color
 	nb_vars = 7;  // for array structure in OpenCL
 	nb_el = n;
-	//printf("num_particles= %d\n", num);
 
 	// STRATEGY
 	// mass of single particle based on density and particle radius
@@ -43,115 +42,135 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	// density of water: 1000 kg/m^3  (62lb/ft^3)
 	double density = 1000.; // water: 62 lb/ft^3 = 1000 kg/m^3
 
-	// domain occupied by the fluid
-	double fluid_size_x = 1.; // meters
-	double fluid_size_y = 1.; // 
-	double fluid_size_z = 1.; // 
-	double fluid_volume = fluid_size_x * fluid_size_y * fluid_size_z;
-
 	double pi = 3.14159;
 	double nb_particles = num;
-	double particle_volume = fluid_volume / num;
-	double particle_radius = pow(particle_volume*3./(4.*pi), 1./3.);
+	double particle_radius = 0.004;
+	double particle_volume = (4.*pi/3.) * (particle_radius, 3.);
 	double particle_mass = particle_volume * density;
+	particle_mass = 0.00020543; // from Fluids2
+	particle_volume = particle_mass / density;
+	particle_radius = pow(particle_volume*3./(4.*pi), 1./3.);
+	printf("particle radius= %f\n", particle_radius);
 
 	int nb_particles_in_cell = 1;
 	// mass of fluid in a single cell
 	float cell_mass = nb_particles_in_cell*particle_mass;
-	float cell_volume = cell_mass / density;
+	float cell_volume = cell_mass / density; // = particle_volume
+
 	// Cell contains nb_particles_in_cell of fluid
-	float cell_sz = pow(cell_volume, 1./3.);
-	printf("** cell_sz= %f\n", cell_sz);
+	// size of single fluid element viewed as a cube
 
-	float spacing;
-	// spacing of particles at t=0
+	// particle "cube" with same mass as spherical particle
+	float particle_size = pow(cell_volume, 1./3.);
+
+	float particle_spacing;
+	// particle_spacing of particles at t=0
 	// rest distance between particles
-	spacing = cell_sz;
+	float particle_rest_distance = 0.87*particle_size; // why 0.87? 
+	particle_spacing = particle_rest_distance; 
 
-	printf("radius: %f\n", particle_radius);
-	printf("cell_sz= %f\n", cell_sz);
-	//exit(0);
-	//cell_sz = 2.*particle_radius;
+	printf("particle_spacing= %f\n", particle_spacing);
+	printf("particle_rest_distance= %f\n", particle_rest_distance);
 
 	#if 0
 	if (nb_particles_in_cell == 1) {
-		spacing = cell_sz;
+		particle_spacing = cell_sz;
 	} else if (nb_particles_in_cell > 1) {
-		spacing = pow((float) nb_particles_in_cell, -1./3.) * cell_sz;
+		particle_spacing = pow((float) nb_particles_in_cell, -1./3.) * cell_sz;
 	} else {
 		printf("nb_particles_in_cell must be >= 1\n");
 		exit(0);
 	}
 	#endif
 
-	// Spacing defined as above: hash runs
-	// redefine spacing, hash only runs if spacing is > 2*particle_radius (WHY??)
-	// runs for some spacings, not for others (spacing could be greater or smaller than 
-	//   particle radius. PROBLEM OCCURS WITH HASH KERNEL. HOW IS THIS POSSILBE?
-	// sorting: requires power of 2. Spacing will influence nb of particles. 
-	//spacing = 2.0*particle_radius;
-	//printf("spacing= %f\n", spacing);
-	//spacing = cell_sz;
-
-	printf("cell_sz= %f\n", cell_sz);
-	printf("particle_radius= %f\n", particle_radius);
-	printf("spacing= %f\n", spacing);
-	//exit(0);
-
 	// desired number of particles within the smoothing_distance sphere
-	int nb_interact_part = 30;
+	int nb_interact_part = 50;
 	// (h/radius)^3 = nb_interact_part
 	double h = pow(nb_interact_part, 1./3.) * particle_radius;
-	//spacing = 2.*particle_radius;
-	//cell_sz = 2.*h;
-
+	//h = .02; // larger than I would want it, but same as Fluid v.2
+	//h = .01; // larger than I would want it, but same as Fluid v.2
+	// domain cell size
+	float cell_sz;
+	cell_sz = h;  // 27 neighbor search (only neighbors strictly necessary)
+	printf("cell_size, delta_x= %f\n", cell_sz);
+	printf("h= %f\n", h);
 
 	//-------------------------------
+	//SETUP GRID
+
+    sph_settings.simulation_scale = 0.01; //0.004;
 
 	double cell_size = cell_sz;
+	printf("cell_size= %f\n", cell_size); 
+
 	//cell_size = h;
 	int    nb_cells_x; // number of cells along x
 	int    nb_cells_y; 
 	int    nb_cells_z;
 
-	double domain_size_x = 1.4 * fluid_size_x; // meters
-	double domain_size_y = 1.4 * fluid_size_y; // 
-	double domain_size_z = 8.0 * fluid_size_z; // 
+	// Dam (repeat case from Fluids v2
+	// Size in world space
+	float4 domain_min = float4(-10., -6., 0., 1.);
+	float4 domain_max = float4(+10., +6., 10., 1.);
+	float4 fluid_min   = float4(-0.5, -5.5,  0., 1.);
+	float4 fluid_max   = float4( 9.5, +5.5,  5., 1.);
 
-	nb_cells_x = (int) (domain_size_x / cell_size);
-	nb_cells_y = (int) (domain_size_y / cell_size);
-	nb_cells_z = (int) (domain_size_z / cell_size);
+	double domain_size_x = domain_max.x - domain_min.x; 
+	double domain_size_y = domain_max.y - domain_min.y; 
+	double domain_size_z = domain_max.z - domain_min.z; 
+
+	float world_cell_size = cell_size / sph_settings.simulation_scale;
+	printf("world_cell_size= %f\n", world_cell_size);
+
+	nb_cells_x = (int) (domain_size_x / world_cell_size);
+	nb_cells_y = (int) (domain_size_y / world_cell_size);
+	nb_cells_z = (int) (domain_size_z / world_cell_size);
 
 	printf("nb cells: %d, %d, %d\n", nb_cells_x, nb_cells_y, nb_cells_z);
-	//exit(0);
+	printf("part_rest_world: %f\n", particle_spacing / sph_settings.simulation_scale);
 
 	//-------------------------------
     
     //init sph stuff
     sph_settings.rest_density = density;
-    sph_settings.simulation_scale = 1.0;
     sph_settings.particle_mass = particle_mass;
 
 	// Do not know why required  REST DISTANCE
-    sph_settings.particle_rest_distance = .87 * pow(sph_settings.particle_mass / sph_settings.rest_density, 1./3.);
-
-	// one cell = 2 particles
-    sph_settings.spacing = spacing;  // distance between particles
+    sph_settings.particle_rest_distance = particle_rest_distance; 
+    sph_settings.particle_spacing = particle_spacing;  // distance between particles
     sph_settings.smoothing_distance = h;   // CHECK THIS. Width of W function
     sph_settings.particle_radius = particle_radius; 
 
-    //sph_settings.boundary_distance = .5f * sph_settings.particle_rest_distance;
-    sph_settings.boundary_distance = sph_settings.particle_radius;
+    sph_settings.boundary_distance = sph_settings.particle_spacing / 2.;
 
 	printf("domain size: %f, %f, %f\n", domain_size_x, domain_size_y, domain_size_z);
 	//exit(0);
 
-	float4 domain_size(domain_size_x, domain_size_y, domain_size_z, 1.);
-	float4 domain_origin(0., 0., 0., 1.);
+	//float4 domain_size(domain_size_x, domain_size_y, domain_size_z, 1.);
+	float4 domain_origin = domain_min;
+	float4 domain_size;
+	domain_size.x = domain_size_x;
+	domain_size.y = domain_size_y;
+	domain_size.z = domain_size_z;
+	domain_size.w = 1.0;
+	domain_origin.print("domain origin");
+	domain_size.print("domain size");
+
+
 	nb_cells = int4(nb_cells_x, nb_cells_y, nb_cells_z, 1);
 	int num_old = num;
-    grid = UniformGrid(domain_origin, domain_size, nb_cells); 
+    grid = UniformGrid(domain_min, domain_max, nb_cells, sph_settings.simulation_scale); 
 
+	printf("simu scale: %f\n", sph_settings.simulation_scale);
+	printf("UniformGrid\n");
+	domain_origin.print("origin");
+	domain_size.print("domain size");
+
+	//END SETUP GRID
+	//-------------------------------
+
+
+printf("num= %d\n", num);
 
     //*** Initialization, TODO: move out of here to the particle directory
     positions.resize(num);
@@ -165,43 +184,23 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	int offset = 0;
 	printf("original offset: %d\n", offset);
 	//grid.makeSphere(&positions[0], center, radius, num, offset, 
-	//	sph_settings.spacing);
+	//	sph_settings.particle_spacing);
 	printf("after sphere, offset: %d\n", offset);
 
-	// CREATE FLUID CUBE
-	float x1 = domain_size_x*0.03;
-	float x2 = domain_size_x*.97;
-	float y1 = domain_size_y*0.03;
-	float y2 = domain_size_y*.97;
-	float z1 = domain_size_x*.2; //particle_radius;
-	float z2 = 1.2*domain_size_z; // 1.2 to get all the particles
 
-	#if 0
-	x1 = 0.;
-	y1 = 0.;
-	z1 = 0.;
-	x2 = fluid_size_x;
-	y2 = fluid_size_y;
-	z2 = fluid_size_z;
-
-	float vol = (x2-x1)*(y2-y1)*(z2-z1);
-	float total_mass_dom = vol*density;
-	float total_mass_cells = num*density*cell_volume;
-	float total_mass_par = num*sph_settings.particle_mass;
-	printf("mass and mass: %f, %f\n", total_mass_dom, total_mass_par);
-	printf("mass cells: %f\n", total_mass_cells);
-	//exit(0);
-	#endif
-
-	float4 pmin(x1, y1, z1, 1.);
-	float4 pmax(x2, y2, z2, 1.);
+	float4 pmin = fluid_min;
+	float4 pmax = fluid_max;
 	pmin.print("pmin");
 	pmax.print("pmax");
+	printf("particle_spacing: %f\n", sph_settings.particle_spacing);
 
-	grid.makeCube(&positions[0], pmin, pmax, sph_settings.spacing, num, offset);
+	// INITIATE PARTICLE POSITIONS
+	float spacing = sph_settings.particle_spacing/sph_settings.simulation_scale;
+	printf("spacing= %f\n", spacing);
+
+	grid.makeCube(&positions[0], pmin, pmax, sph_settings.particle_spacing/sph_settings.simulation_scale, num, offset);
 	printf("after cube, offset: %d\n", offset);
 	printf("after cube, num: %d\n", num);
-	//exit(0);
 
 	#if 0
 	if (num_old != nb_el) {
@@ -230,13 +229,15 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     params.smoothing_distance = sph_settings.smoothing_distance;
     params.particle_radius = sph_settings.particle_radius;
     params.simulation_scale = sph_settings.simulation_scale;
+	printf("scale: %f\n", params.simulation_scale);
+
 	// does scale_simulation influence stiffness and dampening?
     params.boundary_stiffness = 10000.;  //10000.0f;  (scale from 20000 to 20)
     params.boundary_dampening = 256.;//256.; 
     params.boundary_distance = sph_settings.boundary_distance;
     params.EPSILON = .00001f;
     params.PI = 3.14159265f;
-    params.K = 100.0f; //1.5f;
+    params.K = 1.0f; //100.0f; //1.5f;
 	params.dt = psfr->settings.dt;
 	//printf("dt= %f\n", params.dt); exit(0);
  
@@ -311,7 +312,6 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	cl_FluidParams->getHostPtr()->print();
 	printf("=========================================\n");
 	//exit(0);
-
 
 	int print_freq = 20000;
 	int time_offset = 5;
@@ -458,6 +458,9 @@ void GE_SPH::update()
 //----------------------------------------------------------------------
 void GE_SPH::setupArrays()
 {
+	printf("params: scale: %f\n", params.simulation_scale);
+	GE_SPHParams& params = *(cl_params->getHostPtr());
+
 	// only for my test routines: sort, hash, datastructures
 	//printf("setupArrays, nb_el= %d\n", nb_el); exit(0);
 
@@ -472,9 +475,12 @@ void GE_SPH::setupArrays()
 	printf("allocate BufferGE<GridParams>\n");
 	printf("sizeof(GridParams): %d\n", sizeof(GridParams));
 	cl_GridParams = new BufferGE<GridParams>(ps->cli, 1); // destroys ...
+	cl_GridParamsScaled = new BufferGE<GridParamsScaled>(ps->cli, 1); // destroys ...
 
 	GridParams& gp = *(cl_GridParams->getHostPtr());
 	printf("gp(host)= %ld\n", (long) &gp);
+
+	GridParamsScaled& gps = *(cl_GridParamsScaled->getHostPtr());
 
 	gp.grid_min = grid.getMin();
 	gp.grid_max = grid.getMax();
@@ -491,7 +497,6 @@ void GE_SPH::setupArrays()
 	gp.grid_inv_delta.print("inv delta");
 	gp.nb_vars = nb_vars;
 
-
 	cl_GridParams->copyToDevice();
 
 	gp.grid_size.print("grid size (domain dimensions)"); // domain dimensions
@@ -502,6 +507,38 @@ void GE_SPH::setupArrays()
 	gp.grid_delta.print("grid delta");
 	gp.grid_inv_delta.print("grid inv delta");
 
+    float ss = params.simulation_scale;
+	printf("ss= %f\n", ss);
+//	exit(0);
+
+	gps.grid_size.x = gp.grid_size.x * ss;
+	gps.grid_size.y = gp.grid_size.y * ss;
+	gps.grid_size.z = gp.grid_size.z * ss;
+	gps.grid_delta.x = gp.grid_delta.x * ss;
+	gps.grid_delta.y = gp.grid_delta.y * ss;
+	gps.grid_delta.z = gp.grid_delta.z * ss;
+	gps.grid_min.x = gp.grid_min.x * ss;
+	gps.grid_min.y = gp.grid_min.y * ss;
+	gps.grid_min.z = gp.grid_min.z * ss;
+	gps.grid_max.x = gp.grid_max.x * ss;
+	gps.grid_max.y = gp.grid_max.y * ss;
+	gps.grid_max.z = gp.grid_max.z * ss;
+	gps.grid_res.x = gp.grid_res.x;
+	gps.grid_res.y = gp.grid_res.y;
+	gps.grid_res.z = gp.grid_res.z;
+	gps.grid_inv_delta.x = gp.grid_inv_delta.x / ss;
+	gps.grid_inv_delta.y = gp.grid_inv_delta.y / ss;
+	gps.grid_inv_delta.z = gp.grid_inv_delta.z / ss;
+	gps.grid_inv_delta.w = 1.0;
+	gps.nb_vars = nb_vars;
+	gps.numParticles = nb_el;
+
+	gp.print();
+	gps.print();
+	//printf("gps.grid_size.x = %f\n", gps.grid_size.x);
+	//exit(0);
+
+	cl_GridParamsScaled->copyToDevice();
 
 	cl_vars_unsorted = new BufferGE<float4>(ps->cli, nb_el*nb_vars);
 	cl_vars_sorted   = new BufferGE<float4>(ps->cli, nb_el*nb_vars);
@@ -511,7 +548,15 @@ void GE_SPH::setupArrays()
 	// ERROR
 	int grid_size = nb_cells.x * nb_cells.y * nb_cells.z;
 	printf("grid_size= %d\n", grid_size);
+	grid_size = 10000;
+	if (grid_size > 10000000) {
+		printf("nb cells: %d, %d, %d\n", nb_cells.x, nb_cells.y, nb_cells.z);
+		printf("grid_size too large (> 10000000)\n");
+		exit(0);
+	}
 
+	// Size is the grid size. That is a problem since the number of
+	// occupied cells could be much less than the number of grid elements. 
 	cl_cell_indices_start = new BufferGE<int>(ps->cli, grid_size);
 	cl_cell_indices_end   = new BufferGE<int>(ps->cli, grid_size);
 
@@ -542,7 +587,7 @@ void GE_SPH::setupArrays()
 	FluidParams& fp = *cl_FluidParams->getHostPtr();;
 	float radius = sph_settings.particle_radius;
 	fp.smoothing_length = sph_settings.smoothing_distance; // SPH radius
-	fp.scale_to_simulation = 1.0; // overall scaling factor
+	fp.scale_to_simulation = params.simulation_scale; // overall scaling factor
 	//fp.mass = 1.0; // mass of single particle (MIGHT HAVE TO BE CHANGED)
 	fp.friction_coef = 0.1;
 	fp.restitution_coef = 0.9;
@@ -586,6 +631,7 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
     cl_position->acquire();
     cl_color->acquire();
     
+	nb_sub_iter = 1;
     for(int i=0; i < nb_sub_iter; i++)
     {
 		//printf("i= %d\n", i);
@@ -614,11 +660,6 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 
 		// ***** PRESSURE UPDATE *****
 		neighborSearch(1); //pressure
-		#endif
-
-		#if 0
-		// ***** VISCOSITY UPDATE *****
-        //computeViscosity();
 		#endif
 
 		// ***** WALL COLLISIONS *****

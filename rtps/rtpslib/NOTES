@@ -19,3 +19,13 @@ c^2 = dp/drho = K
 dt1 = 0.5*max(dx(|vmax|+c)
 ----------------------------------------------------------------------
 Making progress: something wrong in 4th component of the force. 
+
+//----------------------------------------------------------------------
+Oct. 11, 2010
+With scale_to_simulation: Must check values in Fluid v.2 (on Ubuntu, put 
+print statements). What is particle spacing and grid size and simulation_scale?
+My code does not match up, and I make the sim_scale .005 instead of .05, which 
+is most likely wrong. Check creation of grid itself.
+
+Problem is spacing between particles. 
+----------------------------------------------------------------------

@@ -41,6 +41,8 @@ __kernel void collision_wall(
     float4 v = vel(i); //  vel[i];
     float4 r_f = (float4)(0.f, 0.f, 0.f, 0.f);
 
+	//float4 si=  .05;
+
     //bottom wall
     float diff = params->boundary_distance - (p.z - params->grid_min.z);
     if (diff > params->EPSILON)

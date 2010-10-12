@@ -70,11 +70,14 @@ void GE_SPH::hash()
 	exit(0);
 	#endif
 
+	// Hash based on unscaled data
+
 	kern.setArg(0, cl_vars_unsorted->getDevicePtr()); // positions + other variables
 	kern.setArg(1, cl_sort_hashes->getDevicePtr());
 	kern.setArg(2, cl_sort_indices->getDevicePtr());
 	kern.setArg(3, cl_cell_indices_start->getDevicePtr());
 	kern.setArg(4, cl_GridParams->getDevicePtr());
+	//kern.setArg(4, cl_GridParamsScaled->getDevicePtr());
 	//kern.setArg(5, clf_debug->getDevicePtr());
 	//kern.setArg(6, cli_debug->getDevicePtr());
 

@@ -59,7 +59,8 @@ void GE_SPH::buildDataStructures()
 	kern.setArg(iarg++, cl_sort_indices->getDevicePtr());
 	kern.setArg(iarg++, cl_cell_indices_start->getDevicePtr());
 	kern.setArg(iarg++, cl_cell_indices_end->getDevicePtr());
-	kern.setArg(iarg++, cl_GridParams->getDevicePtr());
+	kern.setArg(iarg++, cl_params->getDevicePtr());
+	kern.setArg(iarg++, cl_GridParamsScaled->getDevicePtr());
 
 
 	// local memory

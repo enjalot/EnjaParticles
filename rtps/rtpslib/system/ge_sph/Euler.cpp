@@ -86,9 +86,9 @@ void GE_SPH::cpuEuler()
         }
 
         float scale = params.simulation_scale;
-        v.x += h*f.x / scale;
-        v.y += h*f.y / scale;
-        v.z += h*f.z / scale;
+        v.x += h*f.x;
+        v.y += h*f.y;
+        v.z += h*f.z;
         
         p.x += h*v.x;
         p.y += h*v.y;

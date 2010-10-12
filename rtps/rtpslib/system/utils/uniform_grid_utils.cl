@@ -25,6 +25,21 @@ typedef struct PointData
  float4 surf_tens;
 } PointData;
 
+struct GridParamsScaled
+
+{
+    float4 grid_size;
+    float4 grid_min;
+    float4 grid_max;
+
+
+    float4 grid_res;
+    float4 grid_delta;
+    float4 grid_inv_delta;
+    int num;
+    int nb_vars;
+};
+
 struct GridParams
 {
     float4 grid_size;
@@ -539,21 +554,17 @@ __kernel void K_SumStep1(
 
 
 
-
-
  PointData pt;
  zeroPoint(&pt);
 
 
 
- cli[index].w = 3;
-
  if (fp->choice == 0) {
      IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
 
   vars_sorted[index+0*num].x = pt.density.x;
-  cli[index].w = 4;
-  clf[index].x = vars_sorted[index+0*num].x;
+
+
 
  }
  if (fp->choice == 1) {
@@ -568,10 +579,10 @@ __kernel void K_SumStep1(
  if (fp->choice == 2) {
      IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
   float norml = length(pt.color_normal);
-  clf[index].w = norml;
+
   if (norml > 4.) {
    float4 stension = -0.3f * pt.color_lapl * pt.color_normal / norml;
-   clf[index] = stension;
+
 
 
    vars_sorted[index+3*num] += stension;

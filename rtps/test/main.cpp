@@ -191,7 +191,7 @@ void init_gl()
     glLoadIdentity();
     //gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 100.0);
     //glOrtho(0., window_width, 0., window_height, -100., 100.);
-    gluPerspective(40.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 100.0); //for lorentz
+    gluPerspective(40.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 300.0); //for lorentz
 
     // set view matrix
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -228,7 +228,8 @@ void appRender()
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(-4.,-4., 5., 5.,5.,0., 0., 0., 1.);
+	//gluLookAt(-4.,-4., 5., 5.,5.,0., 0., 0., 1.);
+	gluLookAt(-80.,-80., 100., 0.,0.,0., 0., 0., 1.);
 
     ps->update();
 

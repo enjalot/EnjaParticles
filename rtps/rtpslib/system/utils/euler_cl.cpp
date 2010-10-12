@@ -33,8 +33,11 @@ __kernel void ge_euler(
         f *= 600.0f/speed;
     }
 
-    v += dt*f;  //    / params->simulation_scale;
-    p += dt*v;
+	//float dtt = dt / params->simulation_scale;
+	float dtt = dt;
+
+    v += dtt*f;  //    / params->simulation_scale;
+    p += dtt*v / params->simulation_scale;
     p.w = 1.0f; //just in case
 
 	// REMOVE AFTER DEBUGGED
@@ -48,6 +51,7 @@ __kernel void ge_euler(
 
         // writeback to unsorted buffer
 		float dens = density(i);
+		p /= params->simulation_scale;
 		unsorted_pos(originalIndex) = (float4)(p.xyz, dens);
 		unsorted_vel(originalIndex) = v;
 		unsorted_density(originalIndex) = density(i); // FOR DEBUGGING ONLY

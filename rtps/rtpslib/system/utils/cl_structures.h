@@ -17,6 +17,21 @@ typedef struct PointData
 	float4 surf_tens;
 } PointData;
 //----------------------------------------------------------------------
+struct GridParamsScaled
+// scaled with simulation_scale
+{
+    float4          grid_size;
+    float4          grid_min;
+    float4          grid_max;
+
+    // number of cells in each dimension/side of grid
+    float4          grid_res;
+    float4          grid_delta;
+    float4          grid_inv_delta;
+    int             numParticles; // nb fluid particles: wrong spot for this variable
+    int             nb_vars; // for combined variables (vars_sorted, etc.)
+};
+//----------------------------------------------------------------------
 struct GridParams
 {
     float4          grid_size;
