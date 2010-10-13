@@ -53,8 +53,11 @@ ADD_EXECUTABLE(test_simple.x ${test_simple_SOURCES})
 message("current build dir:\n")
 message("${BASE_DIR}/rtps/build")
 
+LINK_DIRECTORIES(${BASE_DIR}/rtps/build/rtpslib)
+
 SET(LINK_LIBS
-     ${BASE_DIR}/rtps/build/rtpslib/librtps.so
+    #${BASE_DIR}/rtps/build/rtpslib/librtps.so
+    rtps
     ${GLUT_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${OPENCL_LIBRARIES}
