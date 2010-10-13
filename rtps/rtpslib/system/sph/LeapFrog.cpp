@@ -11,8 +11,10 @@ void SPH::loadLeapFrog()
     //TODO: fix the way we are wrapping buffers
     k_leapfrog.setArg(0, cl_position.cl_buffer[0]);
     k_leapfrog.setArg(1, cl_velocity.cl_buffer[0]);
-    k_leapfrog.setArg(2, cl_force.cl_buffer[0]);
-    k_leapfrog.setArg(3, ps->settings.dt); //time step
+    k_leapfrog.setArg(2, cl_veleval.cl_buffer[0]);
+    k_leapfrog.setArg(3, cl_force.cl_buffer[0]);
+    k_leapfrog.setArg(4, ps->settings.dt); //time step
+    k_leapfrog.setArg(5, cl_params.cl_buffer[0]);
 
 } 
 

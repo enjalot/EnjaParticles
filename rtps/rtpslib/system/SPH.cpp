@@ -135,6 +135,7 @@ typedef struct SPHParams
     //pure opencl buffers
     cl_force = Buffer<float4>(ps->cli, forces);
     cl_velocity = Buffer<float4>(ps->cli, velocities);
+    cl_veleval = Buffer<float4>(ps->cli, veleval);
 
     cl_density = Buffer<float>(ps->cli, densities);
 
@@ -158,6 +159,11 @@ typedef struct SPHParams
     printf("create euler kernel\n");
     loadEuler();
     printf("euler kernel created\n");
+
+    printf("create leapfrog kernel\n");
+    loadLeapFrog();
+    printf("leapfrog kernel created\n");
+
 
 
     //check the params
@@ -234,12 +240,13 @@ void SPH::update()
         }
         */
         k_pressure.execute(num);
-        //k_viscosity.execute(num);
+        k_viscosity.execute(num);
 
         k_collision_wall.execute(num);
 
         //euler integration
-        k_euler.execute(num);
+        //k_euler.execute(num);
+        k_leapfrog.execute(num);
     }
 
     /*
