@@ -54,7 +54,7 @@ message("current build dir:\n")
 message("${BASE_DIR}/rtps/build")
 
 SET(LINK_LIBS
-     ${BASE_DIR}/rtps/build/rtpslib/librtps.a
+     ${BASE_DIR}/rtps/build/rtpslib/librtps.so
     ${GLUT_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${OPENCL_LIBRARIES}
