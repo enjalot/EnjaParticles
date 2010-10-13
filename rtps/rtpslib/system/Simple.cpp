@@ -107,6 +107,7 @@ void Simple::update()
 #endif
 #ifdef GPU
 
+/*
     //call kernels
     //add timings
     glFinish();
@@ -125,6 +126,7 @@ void Simple::update()
     cl_position.release();
     cl_color.release();
     //printf("release gl: %s\n", oclErrorString(err));
+*/
 #endif
 }
 
