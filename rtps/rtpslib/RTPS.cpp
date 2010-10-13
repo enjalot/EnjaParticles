@@ -29,9 +29,20 @@ void RTPS::Init()
 
     cli = new CL();
 
+    printf("init: settings.system: %d\n", settings.system);
     //TODO choose based on settings
     //system = new Simple(this, settings.max_particles);
-    system = new SPH(this, settings.max_particles);
+    if (settings.system == RTPSettings::Simple)
+    {
+        printf("simple system\n");
+        system = new Simple(this, settings.max_particles);
+    }
+    else if (settings.system == RTPSettings::SPH)
+    {
+        printf("sph system\n");
+        system = new SPH(this, settings.max_particles);
+    }
+    
 
     //pass in the position and color vbo ids to the renderer
     //get the number from the system
@@ -49,9 +60,14 @@ void RTPS::update()
 void RTPS::render()
 {
 
-    UniformGrid grid = system->getGrid();
-    //should check if grid exists
-    renderer->render_box(grid.getMin(), grid.getMax());
+    //this functionality should be inside the system's render() function
+    //so System should own the renderer object
+    if(settings.system == RTPSettings::SPH)
+    {
+        UniformGrid grid = system->getGrid();
+        //should check if grid exists
+        renderer->render_box(grid.getMin(), grid.getMax());
+    }
 
     renderer->render();
 }

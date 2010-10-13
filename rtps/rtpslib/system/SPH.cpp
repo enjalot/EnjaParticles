@@ -209,9 +209,9 @@ void SPH::update()
     //printf("execute!\n");
 //    for(int i=0; i < 10; i++)
     {
-        printf("about to execute density\n");
+        //printf("about to execute density\n");
         k_density.execute(num);
-        printf("executed density\n");
+        //printf("executed density\n");
         //test density
         /*
         std::vector<float> dens = cl_density.copyToHost(num);

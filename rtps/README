@@ -1,0 +1,43 @@
+RTPS: Real-Time Particle Systems
+A framework library for developing particle systems.
+We currently working on support for 
+    Simple particle systems
+    SPH Fluid simulation
+    Boid simulation
+
+
+
+Build:
+We use CMake to build the library and compile a standalone test application
+Check CMake for library dependencies (OpenCL, OpenGL, GLEW)
+
+We encourage an out-of-source build, so in the base directory of the repo do:
+    mkdir build
+    cd build
+    cmake ..
+    make
+
+the library will be in rtpslib/
+
+if you have Doxygen you can generate docs:
+    make doc
+
+the docs will be in rtpslib/html
+
+
+
+Usage:
+
+You can execute the test program like:
+./test/test.x
+
+The test program has simple mouse interaction:
+Left-Click and drag to rotate the view
+Right-Click and drag to zoom in and out
+
+hit Q or ESC to exit (right now clicking the x on the window will not properly clean up GPU memory...)
+
+
+
+
+

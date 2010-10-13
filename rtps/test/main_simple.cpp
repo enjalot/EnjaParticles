@@ -23,9 +23,9 @@
 int window_width = 800;
 int window_height = 600;
 int glutWindowHandle = 0;
-float translate_x = -400.f;
-float translate_y = 300.f;
-float translate_z = 350.f;
+float translate_x = -10.0f;
+float translate_y = -10.0f;
+float translate_z = 20.0f;
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -61,6 +61,7 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 8192
 #define NUM_PARTICLES 1024
+#define DT .001f
 
 
 //timers
@@ -112,7 +113,10 @@ int main(int argc, char** argv)
 
         
     //default constructor
-    rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, .001f);
+    printf("num particles: %d\n", NUM_PARTICLES);
+    printf("dt: %f\n", DT);
+
+    rtps::RTPSettings settings(rtps::RTPSettings::Simple, NUM_PARTICLES, DT);
     ps = new rtps::RTPS(settings);
 
     glutMainLoop();
@@ -141,8 +145,8 @@ void init_gl()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glRotatef(-90, 1.0, 0.0, 0.0);
-    //glTranslatef(translate_x, translate_z, translate_y);
-    glTranslatef(0, translate_z, translate_y);
+    glTranslatef(translate_x, translate_z, translate_y);
+    //glTranslatef(0, translate_z, translate_y);
     //glRotatef(-90, 1.0, 0.0, 0.0);
 
     return;
@@ -233,8 +237,8 @@ void appMotion(int x, int y)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glRotatef(-90, 1.0, 0.0, 0.0);
-    //glTranslatef(translate_x, translate_z, translate_y);
-    glTranslatef(0, translate_z, translate_y);
+    glTranslatef(translate_x, translate_z, translate_y);
+    //glTranslatef(0, translate_z, translate_y);
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
     glutPostRedisplay();

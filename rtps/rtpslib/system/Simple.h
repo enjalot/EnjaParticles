@@ -22,13 +22,23 @@ public:
     //the particle system framework
     RTPS *ps;
 
-    Kernel k_euler;
+    std::vector<float4> positions;
+    std::vector<float4> colors;
+    std::vector<float4> velocities;
+    std::vector<float4> forces;
+
+
+    //Kernel k_euler;
 
     Buffer<float4> cl_position;
     Buffer<float4> cl_color;
-    Buffer<float4> cl_force;
-    Buffer<float4> cl_velocity;
+    //Buffer<float4> cl_force;
+    //Buffer<float4> cl_velocity;
+    
 
+    void cpuEuler();
+
+    
 };
 
 }
