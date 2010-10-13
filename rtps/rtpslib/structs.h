@@ -59,7 +59,7 @@ typedef struct float4
 		z = zz;
 		w = ww;
 	}
-	void print(const char* msg) {
+	void print(const char* msg=0) {
 		printf("%s: %f, %f, %f, %f\n", x, y, z, w);
 	}
 } float4;

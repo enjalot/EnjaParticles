@@ -259,7 +259,7 @@ void ForNeighbor(__global float4* vars_sorted,
 
 
 
- float vvisc = 0.0001f;
+ float vvisc = 0.001f;
 
  float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
  stress += vvisc * (velj-veli) * dWijlapl;

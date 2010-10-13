@@ -27,8 +27,10 @@ __kernel void ge_euler(
     f.z += -9.8f;
 
 	// REMOVE FOR DEBUGGING
+	// THIS IS REALLY A FORCE, NO?
     float speed = length(f);
     if(speed > 600.0f) //velocity limit, need to pass in as struct
+    //if(speed > 4.f) //velocity limit, need to pass in as struct
     {
         f *= 600.0f/speed;
     }

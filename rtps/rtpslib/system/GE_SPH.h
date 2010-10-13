@@ -75,7 +75,8 @@ struct GridParams
 	int				numParticles;
 	int				nb_vars; // for combined array
 
-	void print() {
+	void print()
+	{
 		printf("----- GridParms ----\n");
 		grid_size.print("grid_size"); 
 		grid_min.print("grid_min"); 

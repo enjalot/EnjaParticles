@@ -40,14 +40,16 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 
 	// Density (mass per unit vol)
 	// density of water: 1000 kg/m^3  (62lb/ft^3)
-	double density = 1000.; // water: 62 lb/ft^3 = 1000 kg/m^3
+	double density; // water: 62 lb/ft^3 = 1000 kg/m^3
+	double particle_radius;
+	double particle_volume;
 
+	density = 1000.; 
 	double pi = 3.14159;
 	double nb_particles = num;
-	double particle_radius = 0.004;
-	double particle_volume = (4.*pi/3.) * (particle_radius, 3.);
+	double rat = num/4096;
 	double particle_mass = particle_volume * density;
-	particle_mass = 0.00020543; // from Fluids2
+	particle_mass = 0.00020543 / rat; // from Fluids2
 	particle_volume = particle_mass / density;
 	particle_radius = pow(particle_volume*3./(4.*pi), 1./3.);
 	printf("particle radius= %f\n", particle_radius);
@@ -98,7 +100,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	//-------------------------------
 	//SETUP GRID
 
-    sph_settings.simulation_scale = 0.01; //0.004;
+    sph_settings.simulation_scale = 0.010; //0.004;
 
 	double cell_size = cell_sz;
 	printf("cell_size= %f\n", cell_size); 
@@ -111,9 +113,9 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	// Dam (repeat case from Fluids v2
 	// Size in world space
 	float4 domain_min = float4(-10., -5., 0., 1.);
-	float4 domain_max = float4(+10., +5., 10., 1.);
-	float4 fluid_min   = float4(-0.5, -4.9,  0.1, 1.);
-	float4 fluid_max   = float4( 9.9, +4.9,  7., 1.);
+	float4 domain_max = float4(+10., +5., 15., 1.);
+	float4 fluid_min   = float4( 4.5, -4.8,  0.03, 1.);
+	float4 fluid_max   = float4( 9.9, +4.8,  12., 1.);
 
 	double domain_size_x = domain_max.x - domain_min.x; 
 	double domain_size_y = domain_max.y - domain_min.y; 
@@ -141,7 +143,9 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     sph_settings.smoothing_distance = h;   // CHECK THIS. Width of W function
     sph_settings.particle_radius = particle_radius; 
 
-    sph_settings.boundary_distance = sph_settings.particle_spacing / 2.;
+	// factor of 2 is TEMPORARY (should be 1)
+    sph_settings.boundary_distance =  2.0 * sph_settings.particle_spacing / 2.;
+    sph_settings.boundary_distance =  particle_radius;
 
 	printf("domain size: %f, %f, %f\n", domain_size_x, domain_size_y, domain_size_z);
 	//exit(0);
@@ -233,7 +237,7 @@ printf("num= %d\n", num);
 
 	// does scale_simulation influence stiffness and dampening?
     params.boundary_stiffness = 10000.;  //10000.0f;  (scale from 20000 to 20)
-    params.boundary_dampening = 256.;//256.; 
+    params.boundary_dampening = 1256.;//256.; 
     params.boundary_distance = sph_settings.boundary_distance;
     params.EPSILON = .00001f;
     params.PI = 3.14159265f;
@@ -419,6 +423,7 @@ GE_SPH::~GE_SPH()
 void GE_SPH::update()
 {
 	static int count=0;
+	printf("==== count= %d\n", count);
 
 	ts_cl[TI_UPDATE]->start(); // OK
 
@@ -427,6 +432,10 @@ void GE_SPH::update()
 #ifdef CPU
 	computeOnCPU();
 #endif
+
+	if (count == 0) {
+		printGPUDiagnostics();
+	}
 
 #ifdef GPU
 	int nb_sub_iter = 15;
@@ -632,13 +641,11 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
     cl_position->acquire();
     cl_color->acquire();
     
-	nb_sub_iter = 1;
+	nb_sub_iter = 5;
     for(int i=0; i < nb_sub_iter; i++)
     {
-		//printf("i= %d\n", i);
 		// ***** Create HASH ****
 		hash();
-		//exit(0);
 
 		// **** Sort arrays ****
 		// only power of 2 number of particles
@@ -657,7 +664,7 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 		//neighborSearch(3); 
 
 		// ***** COLOR GRADIENT *****
-		neighborSearch(2); 
+		//neighborSearch(2); 
 
 		// ***** PRESSURE UPDATE *****
 		neighborSearch(1); //pressure
@@ -668,12 +675,9 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 
         // ***** EULER UPDATE *****
 		computeEuler();
-
-		// *** OUTPUT PHYSICAL VARIABLES FROM THE GPU
-	//	exit(0);
-
 	}
 
+	// *** OUTPUT PHYSICAL VARIABLES FROM THE GPU
 	//printGPUDiagnostics();
 	//exit(0);
 
@@ -724,7 +728,6 @@ void GE_SPH::printGPUDiagnostics()
 		}
 		#endif
 
-
 		#if 1
 		//  print out density
 		cl_vars_unsorted->copyToHost();
@@ -740,6 +743,34 @@ void GE_SPH::printGPUDiagnostics()
 		float4* vel1     = cl_vars_sorted->getHostPtr() + 2*nb_el;
 		float4* force1   = cl_vars_sorted->getHostPtr() + 3*nb_el;
 
+		// identify particles that exited the domain
+	    GridParams& gp = *(cl_GridParams->getHostPtr());
+		float4 mn = gp.grid_min;
+		float4 mx = gp.grid_max;
+		mn.print("**** grid min");
+		mx.print("**** grid max");
+
+    	float bd = sph_settings.boundary_distance;
+
+		for (int i=0; i < nb_el; i++) {
+			float4 p = pos[i];
+			float4 f = force[i];
+			if ((p.x-bd) < mn.x || (p.x+bd) > mx.x) {
+				printf("particle i= %d, ", i);
+				printf("outside x: %f, force: %f\n", p.x, f.x);
+			}
+			if ((p.y-bd) < mn.y || (p.y+bd) > mx.y) {
+				printf("particle i= %d, ", i);
+				printf("outside y: %f, force: %f\n", p.y, f.y);
+			}
+			if ((p.z-bd) < mn.z || (p.z+bd) > mx.z) {
+				printf("particle i= %d, ", i);
+				printf("outside z: %f, force: %f\n", p.z, f.z);
+			}
+		}
+		return;
+
+		#if 0
 		for (int i=1000; i < 1500; i++) {
 		//for (int i=0; i < 10; i++) {
 			printf("=== i= %d ==========\n", i);
@@ -752,6 +783,9 @@ void GE_SPH::printGPUDiagnostics()
 			//vel1[i].print("so vel1");
 			//force1[i].print("so force1");
 		} 
+		#endif
+
+
 		//exit(0);
 		#endif
 }
