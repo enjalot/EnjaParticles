@@ -197,7 +197,7 @@ void zeroPoint(PointData* pt)
 
 void ForNeighbor(__global float4* vars_sorted,
     PointData* pt,
-    __constant uint index_i,
+    uint index_i,
     uint index_j,
     float4 r,
     float rlen,
@@ -308,24 +308,14 @@ void ForNeighbor(__global float4* vars_sorted,
  }
 
  if (fp->choice == 3) {
-# 1 "density_denom_update.cl" 1
 
-
-
-
-
-
-    float Wij = Wpoly6(r, sphp->smoothing_distance, sphp);
-
- pt->density.y += sphp->mass*Wij / vars_sorted[index_i+0*num].x;
-# 58 "neighbors.cpp" 2
  }
 }
 
 float4 ForPossibleNeighbor(__global float4* vars_sorted,
       PointData* pt,
-      __constant uint num,
-      __constant uint index_i,
+      uint num,
+      uint index_i,
       uint index_j,
       __constant float4 position_i,
         __constant struct GridParams* gp,
@@ -392,7 +382,7 @@ int4 calcGridCell(float4 p, float4 grid_min, float4 grid_delta)
 }
 
 
-uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
+uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 {
 
  int gx;
@@ -431,10 +421,10 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
  float4 IterateParticlesInCell(
   __global float4* vars_sorted,
   PointData* pt,
-  __constant uint num,
-  __constant int4 cellPos,
-  __constant uint index_i,
-  __constant float4 position_i,
+  uint num,
+  int4 cellPos,
+  uint index_i,
+  float4 position_i,
   __global int* cell_indexes_start,
   __global int* cell_indexes_end,
   __constant struct GridParams* gp,
@@ -560,6 +550,7 @@ __kernel void K_SumStep1(
 
 
  if (fp->choice == 0) {
+
      IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
 
   vars_sorted[index+0*num].x = pt.density.x;

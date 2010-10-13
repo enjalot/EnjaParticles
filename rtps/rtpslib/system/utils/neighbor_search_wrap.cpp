@@ -86,8 +86,8 @@ void GE_SPH::neighborSearch(int which)
 	int local = 128;
 
 	kern.execute(nb_el, local);
-
 	ps->cli->queue.finish();
+
 	//ts_cl[TI_NEIGH]->end();
 	if (which == 0) ts_cl[TI_DENS]->end();
 	if (which == 1) ts_cl[TI_PRES]->end();

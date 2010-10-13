@@ -193,7 +193,7 @@ void zeroPoint(PointData* pt)
 
 void ForNeighbor(__global float4* vars_sorted,
     PointData* pt,
-    __constant uint index_i,
+    uint index_i,
     uint index_j,
     float4 r,
     float rlen,
@@ -304,24 +304,14 @@ void ForNeighbor(__global float4* vars_sorted,
  }
 
  if (fp->choice == 3) {
-# 1 "density_denom_update.cl" 1
 
-
-
-
-
-
-    float Wij = Wpoly6(r, sphp->smoothing_distance, sphp);
-
- pt->density.y += sphp->mass*Wij / vars_sorted[index_i+0*num].x;
-# 58 "neighbors.cpp" 2
  }
 }
 
 float4 ForPossibleNeighbor(__global float4* vars_sorted,
       PointData* pt,
-      __constant uint num,
-      __constant uint index_i,
+      uint num,
+      uint index_i,
       uint index_j,
       __constant float4 position_i,
         __constant struct GridParams* gp,

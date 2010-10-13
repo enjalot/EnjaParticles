@@ -20,6 +20,8 @@ namespace rtps {
 //----------------------------------------------------------------------
 GE_SPH::GE_SPH(RTPS *psfr, int n)
 {
+    num = n;
+
     //for reading back different values from the kernel
     std::vector<float4> error_check(num);
 
@@ -28,7 +30,6 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 
 	radixSort = 0;
 
-    num = n;
 	// density, force, pos, vel, surf tension, color
 	nb_vars = 7;  // for array structure in OpenCL
 	nb_el = n;
@@ -467,8 +468,8 @@ void GE_SPH::update()
 //----------------------------------------------------------------------
 void GE_SPH::setupArrays()
 {
-	printf("params: scale: %f\n", params.simulation_scale);
 	GE_SPHParams& params = *(cl_params->getHostPtr());
+	printf("params: scale: %f\n", params.simulation_scale);
 
 	// only for my test routines: sort, hash, datastructures
 	//printf("setupArrays, nb_el= %d\n", nb_el); exit(0);

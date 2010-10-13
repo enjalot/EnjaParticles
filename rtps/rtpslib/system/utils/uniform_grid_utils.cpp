@@ -44,7 +44,7 @@ int4 calcGridCell(float4 p, float4 grid_min, float4 grid_delta)
 }
 
 /*--------------------------------------------------------------*/
-uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
+uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 {
 	// each variable on single line or else STRINGIFY DOES NOT WORK
 	int gx;
@@ -90,10 +90,10 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 	float4 IterateParticlesInCell(
 		__global float4*    vars_sorted,
 		PointData* pt,
-		__constant uint 	numParticles,
-		__constant int4 	cellPos,
-		__constant uint 	index_i,
-		__constant float4 	position_i,
+		uint 	numParticles,
+		int4 	cellPos,
+		uint 	index_i,
+		float4 	position_i,
 		__global int* 		cell_indexes_start,
 		__global int* 		cell_indexes_end,
 		__constant struct GridParams* gp,
@@ -219,6 +219,7 @@ __kernel void K_SumStep1(
 	//cli[index].w = 3;
 
 	if (fp->choice == 0) { // update density
+	//return;
     	IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
 		// density(index) = frce.x; 
 		density(index) = pt.density.x;

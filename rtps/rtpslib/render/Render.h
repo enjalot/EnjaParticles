@@ -8,6 +8,7 @@
 #else
     //OpenGL stuff
     #include <GL/gl.h>
+    #include <GL/glu.h>
 #endif
 
 #include "../structs.h"
