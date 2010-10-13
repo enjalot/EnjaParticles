@@ -29,7 +29,9 @@ namespace rtps {
 class RTPS
 {
 public:
-	GE::Time** ts_cl; // CL timers
+	// Timers
+	enum {TI_SYSTEM_UPDATE=0, TI_RENDER_UPDATE};
+	GE::Time* ts_cl[20];   // ts_cl  is GE::Time**
 
 public:
     //default constructor
@@ -41,9 +43,9 @@ public:
 
 	//--------------------
 	// Gordon additions
-	void setTimers(GE::Time** timers) {
-		this->ts_cl = timers;
-	}
+	//void setTimers(GE::Time** timers) {
+		//this->ts_cl = timers;
+	//}
 	//--------------------
 
     void Init();

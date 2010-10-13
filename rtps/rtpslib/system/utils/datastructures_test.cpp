@@ -17,6 +17,7 @@ __kernel void datastructures(
 		   			__global uint* sort_indices,
 		   			__global uint* cell_indices_start,
 		   			__global uint* cell_indices_end,
+		   			__constant struct SPHParams* sphp,
 		   			__constant struct GridParams* gp,
 					__local  uint* sharedHash   // blockSize+1 elements
 			  )
@@ -24,6 +25,7 @@ __kernel void datastructures(
 	uint index = get_global_id(0);
 	int nb_vars = gp->nb_vars;
 	int numParticles = get_global_size(0);
+
 
 	// particle index	
 	if (index >= numParticles) return;
@@ -74,15 +76,12 @@ __kernel void datastructures(
 	#if 0
 	for (int j=0; j < nb_vars; j++) {
 		vars_sorted[index+j*numParticles]	= vars_unsorted[sorted_index+j*numParticles];
-		//dParticlesSorted[index+j*numParticles].x = 3.; // = (float4) (3.,3.,3.,3.);
-		//dParticlesSorted[index+j*numParticles].y = 4.; // = (float4) (3.,3.,3.,3.);
-		//dParticlesSorted[index+j*numParticles].z = 5.; // = (float4) (3.,3.,3.,3.);
-		//dParticlesSorted[index+j*numParticles].w = 6.; // = (float4) (3.,3.,3.,3.);
 	}
 	#endif
 
 	// Variables to sort could change for different types of simulations 
-	pos(index) = unsorted_pos(sorted_index);
+	// SHOULD I divide by simulation scale upon return? do not think so
+	pos(index) = unsorted_pos(sorted_index) * sphp->simulation_scale;
 	vel(index) = unsorted_vel(sorted_index);
 	//density(index) = unsorted_density(sorted_index); // only for debugging
 #endif

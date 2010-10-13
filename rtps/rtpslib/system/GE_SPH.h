@@ -23,6 +23,10 @@
 #define POS 1
 #define VEL 2
 #define FOR 3
+#define SURF_TENS 4
+#define COL 5
+// gradient of color (COL)
+#define NORM 6 
 
 namespace rtps {
 
@@ -38,7 +42,7 @@ typedef struct GE_SPHSettings
     float smoothing_distance;
     float particle_radius;
     float boundary_distance;
-    float spacing;
+    float particle_spacing;
     float grid_cell_size;
 
 	void print() {
@@ -49,7 +53,7 @@ typedef struct GE_SPHSettings
 		printf("smoothing_distance: %f\n", smoothing_distance);
 		printf("particle_radius: %f\n", particle_radius);
 		printf("boundary_distance: %f\n", boundary_distance);
-		printf("spacing: %f\n", spacing);
+		printf("particle_spacing: %f\n", particle_spacing);
 		printf("grid_cell_size: %f\n", grid_cell_size);
 	}
 
@@ -71,7 +75,8 @@ struct GridParams
 	int				numParticles;
 	int				nb_vars; // for combined array
 
-	void print() {
+	void print()
+	{
 		printf("----- GridParms ----\n");
 		grid_size.print("grid_size"); 
 		grid_min.print("grid_min"); 
@@ -82,7 +87,34 @@ struct GridParams
 		printf("numParticles= %d\n", numParticles);
 	}
 };
+//----------------------------------------------------------------------
+struct GridParamsScaled
+// scale with simulation_scale parameter
+{
+    float4          grid_size;
+    float4          grid_min;
+    float4          grid_max;
 
+    // number of cells in each dimension/side of grid
+    float4          grid_res;
+
+    float4          grid_delta;
+    float4          grid_inv_delta;
+	int				numParticles;
+	int				nb_vars; // for combined array
+
+	void print() {
+		printf("----- GridParmsScaled ----\n");
+		grid_size.print("grid_size"); 
+		grid_min.print("grid_min"); 
+		grid_max.print("grid_max"); 
+		grid_res.print("grid_res"); 
+		grid_delta.print("grid_delta"); 
+		grid_inv_delta.print("grid_inv_delta"); 
+		printf("numParticles= %d\n", numParticles);
+	}
+};
+//----------------------------------------------------------------------
 // GORDON Datastructure for Fluid parameters. To be reconciled with Ian's
 // struct for fluid parameters
 struct FluidParams
@@ -177,12 +209,14 @@ public:
 
 	// Timers
 	enum {TI_HASH=0, TI_RADIX_SORT, TI_BITONIC_SORT, TI_BUILD, TI_NEIGH, 
-		  TI_DENS, TI_PRES, TI_EULER, TI_VISC, TI_UPDATE, TI_COLLISION_WALL};
+		  TI_DENS, TI_PRES, TI_EULER, TI_VISC, TI_UPDATE, TI_COLLISION_WALL, 
+		  TI_COL, TI_COL_NORM};
 	GE::Time* ts_cl[20];   // ts_cl  is GE::Time**
 
 	int nb_el;
 	int nb_vars;
 	int grid_size;
+	int4 nb_cells;
 
 	//BufferGE<int>		cl_unsort_int;
 	//BufferGE<int>		cl_sort_int;
@@ -204,6 +238,7 @@ public:
 	BufferGE<int>* 		cl_unsort;
 	BufferGE<int>* 		cl_sort;
 	BufferGE<GridParams>*  cl_GridParams;
+	BufferGE<GridParamsScaled>*  cl_GridParamsScaled;
 	BufferGE<FluidParams>* cl_FluidParams;
 
 	BufferGE<float4>*	clf_debug;  //just for debugging cl files
@@ -229,6 +264,7 @@ private:
 	void prepareSortData();
 	void printBuildDiagnostics();
 	void printHashDiagnostics();
+	GE_SPHParams& getParams() {return params;}
 
 private:
     //the particle system framework
@@ -281,13 +317,14 @@ private:
 
     void cpuDensity();
 
-	void computeOnGPU();
+	void computeOnGPU(int nb_sub_iter);
 	void computeOnCPU();
 
 	void computeCellStartEndGPU();
 	void computeCellStartEndCPU();
 
 	void printGPUDiagnostics();
+	float computeTimeStep();
 };
 
 }

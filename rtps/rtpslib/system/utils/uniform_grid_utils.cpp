@@ -89,6 +89,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 	*/
 	float4 IterateParticlesInCell(
 		__global float4*    vars_sorted,
+		PointData* pt,
 		__constant uint 	numParticles,
 		__constant int4 	cellPos,
 		__constant uint 	index_i,
@@ -123,7 +124,9 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 			for(uint index_j=startIndex; index_j < endIndex; index_j++) {			
 				//cli[index_i].x++;  
 #if 1
-				frce += ForPossibleNeighbor(vars_sorted, numParticles, index_i, index_j, position_i, gp, fp, sphp ARGS);
+				//***** UPDATE pt (sum)
+				//frce += ForPossibleNeighbor(vars_sorted, numParticles, index_i, index_j, position_i, gp, fp, sphp ARGS);
+				ForPossibleNeighbor(vars_sorted, pt, numParticles, index_i, index_j, position_i, gp, fp, sphp ARGS);
 				//clf[index_i] = frce;
 				//cli[index_i].w = 3;
 #endif
@@ -138,6 +141,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 	 */
 	float4 IterateParticlesInNearbyCells(
 		__global float4* vars_sorted,
+		PointData* pt,
 		int		numParticles, // on Linux, remove __constant
 		int 	index_i, 
 		__constant float4   position_i, 
@@ -161,9 +165,12 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 			for(int y=cell.y-1; y<=cell.y+1; ++y) {
 				for(int x=cell.x-1; x<=cell.x+1; ++x) {
 					int4 ipos = (int4) (x,y,z,1);
+					//cli[index_i].x++;
 	#if 1
 					// I am summing much more than required
-					frce += IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp ARGS);
+					// **** SUMMATION/UPDATE
+					//frce += IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp ARGS);
+					IterateParticlesInCell(vars_sorted, pt, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp ARGS);
 
 				//barrier(CLK_LOCAL_MEM_FENCE); // DEBUG
 				//clf[index_i] = frce;
@@ -205,22 +212,48 @@ __kernel void K_SumStep1(
 
     // Do calculations on particles in neighboring cells
 
-	#if 1
-    float4 frce = IterateParticlesInNearbyCells(vars_sorted, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
-	#endif
+
+	PointData pt;
+	zeroPoint(&pt);
+
+	//cli[index].w = 3;
 
 	if (fp->choice == 0) { // update density
-		density(index) = frce.x;
+    	IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
+		// density(index) = frce.x; 
+		density(index) = pt.density.x;
 		//cli[index].w = 4;
 		//clf[index].x = density(index);
 		// code reaches this point on first call
 	}
 	if (fp->choice == 1) { // update pressure
+    	IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
 		//barrier(CLK_LOCAL_MEM_FENCE); // DEBUG
-		force(index) = frce; // Does not seem maintain value into euler.cl
+		//force(index) = frce; // Does not seem to maintain value into euler.cl
+		force(index) = pt.force; // Does not seem to maintain value into euler.cl
 		//cli[index].w = 5;
 		//clf[index] = frce;
 		// SERIOUS PROBLEM: Results different than results with cli = 4 (bottom of this file)
+	}
+	if (fp->choice == 2) { // update surface tension (NOT DEBUGGED)
+    	IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
+		float norml = length(pt.color_normal);
+		//clf[index].w = norml;
+		if (norml > 4.) {
+			float4 stension = -0.3f * pt.color_lapl * pt.color_normal / norml;
+			//clf[index]   = stension;
+			//clf[index].w = -70.;
+			//clf[index].z = pt.color_lapl;
+			force(index) += stension; // 2 memory accesses (NOT GOOD)
+		}
+	}
+	if (fp->choice == 3) { // denominator in density normalization
+    	IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
+		//clf[index].x = pt.density.y;
+		//cli[index].x = -40;
+
+		// NOT WORKING. NEED DEBUG STATEMENTS
+		density(index) /= pt.density.y;
 	}
 }
 

@@ -17,6 +17,34 @@
 
 
 
+
+typedef struct PointData
+{
+
+
+ float4 density;
+ float4 color;
+ float4 color_normal;
+ float4 color_lapl;
+ float4 force;
+ float4 surf_tens;
+} PointData;
+
+struct GridParamsScaled
+
+{
+    float4 grid_size;
+    float4 grid_min;
+    float4 grid_max;
+
+
+    float4 grid_res;
+    float4 grid_delta;
+    float4 grid_inv_delta;
+    int num;
+    int nb_vars;
+};
+
 struct GridParams
 {
     float4 grid_size;
@@ -80,6 +108,7 @@ __kernel void datastructures(
         __global uint* sort_indices,
         __global uint* cell_indices_start,
         __global uint* cell_indices_end,
+        __constant struct SPHParams* sphp,
         __constant struct GridParams* gp,
      __local uint* sharedHash
      )
@@ -87,6 +116,7 @@ __kernel void datastructures(
  uint index = get_global_id(0);
  int nb_vars = gp->nb_vars;
  int num = get_global_size(0);
+
 
 
  if (index >= num) return;
@@ -109,7 +139,7 @@ __kernel void datastructures(
 
 
  barrier(CLK_LOCAL_MEM_FENCE);
-# 57 "datastructures_test.cpp"
+# 59 "datastructures_test.cpp"
  if ((index == 0 || hash != sharedHash[tid]) )
  {
   cell_indices_start[hash] = index;
@@ -124,9 +154,9 @@ __kernel void datastructures(
  }
 
  uint sorted_index = sort_indices[index];
-# 85 "datastructures_test.cpp"
- vars_sorted[index+1*num] = vars_unsorted[sorted_index+1*num];
- vars_sorted[index+2*num] = vars_unsorted[sorted_index+2*num];
+# 84 "datastructures_test.cpp"
+ vars_sorted[index+1*num] = vars_unsorted[sorted_index+1 *num] * sphp->simulation_scale;
+ vars_sorted[index+2*num] = vars_unsorted[sorted_index+2 *num];
 
 
 }

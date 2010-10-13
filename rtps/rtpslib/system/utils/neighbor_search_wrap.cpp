@@ -17,7 +17,11 @@ void GE_SPH::neighborSearch(int which)
 
 	if (which == 0) ts_cl[TI_DENS]->start();
 	if (which == 1) ts_cl[TI_PRES]->start();
+	if (which == 2) ts_cl[TI_COL]->start();
+	if (which == 3) ts_cl[TI_COL_NORM]->start();
 	//ts_cl[TI_NEIGH]->start();
+
+	//printf("enter neighbor\n");
 
 	if (first_time) {
 		try {
@@ -69,7 +73,7 @@ void GE_SPH::neighborSearch(int which)
 	kern.setArg(iarg++, cl_vars_sorted->getDevicePtr());
 	kern.setArg(iarg++, cl_cell_indices_start->getDevicePtr());
 	kern.setArg(iarg++, cl_cell_indices_end->getDevicePtr());
-	kern.setArg(iarg++, cl_GridParams->getDevicePtr());
+	kern.setArg(iarg++, cl_GridParamsScaled->getDevicePtr());
 	kern.setArg(iarg++, cl_FluidParams->getDevicePtr());
 	kern.setArg(iarg++, cl_params->getDevicePtr());
 
@@ -87,22 +91,24 @@ void GE_SPH::neighborSearch(int which)
 	//ts_cl[TI_NEIGH]->end();
 	if (which == 0) ts_cl[TI_DENS]->end();
 	if (which == 1) ts_cl[TI_PRES]->end();
+	if (which == 2) ts_cl[TI_COL]->end();
+	if (which == 3) ts_cl[TI_COL_NORM]->end();
 
 
 	#if 0
-if (which == 1) {
-	printf("which == 1 *** \n");
+	printf("which == %d *** \n", which);
+
 	clf_debug->copyToHost();
 	cli_debug->copyToHost();
 
 	for (int i=0; i < nb_el; i++) { 
-	//for (int i=0; i < 10; i++) { 
+	//for (int i=0; i < 500; i++) { 
+	//for (int i=500; i < 510; i++) { 
 		printf("----------------------------\n");
 		printf("clf[%d]= %f, %f, %f, %f\n", i, fclf[i].x, fclf[i].y, fclf[i].z, fclf[i].w);
 		printf("cli[%d]= %d, %d, %d, %d\n", i, icli[i].x, icli[i].y, icli[i].z, icli[i].w);
 	}
 	//exit(0);
-}
 	#endif
 	//if (which ==1) exit(0);
 }

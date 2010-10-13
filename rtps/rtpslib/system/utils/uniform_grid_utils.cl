@@ -12,6 +12,34 @@
 
 
 
+
+typedef struct PointData
+{
+
+
+ float4 density;
+ float4 color;
+ float4 color_normal;
+ float4 color_lapl;
+ float4 force;
+ float4 surf_tens;
+} PointData;
+
+struct GridParamsScaled
+
+{
+    float4 grid_size;
+    float4 grid_min;
+    float4 grid_max;
+
+
+    float4 grid_res;
+    float4 grid_delta;
+    float4 grid_inv_delta;
+    int num;
+    int nb_vars;
+};
+
 struct GridParams
 {
     float4 grid_size;
@@ -86,10 +114,33 @@ float Wpoly6(float4 r, float h, __constant struct SPHParams* params)
     return Wij;
 }
 
+float Wpoly6_dr(float4 r, float h, __constant struct SPHParams* params)
+{
+
+
+    float r2 = r.x*r.x + r.y*r.y + r.z*r.z;
+ float h9 = h*h;
+ float hr2 = (h9-r2);
+ h9 = h9*h;
+    float alpha = -945.f/(32.0f*params->PI*h9*h9*h9);
+    float Wij = alpha * hr2*hr2;
+    return Wij;
+}
+
+float Wpoly6_lapl(float4 r, float h, __constant struct SPHParams* params)
+{
+
+    float r2 = r.x*r.x + r.y*r.y + r.z*r.z;
+ float h2 = h*h;
+ float h3 = h2*h;
+ float alpha = -945.f/(32.0f*params->PI*h3*h3*h3);
+ float Wij = alpha*(h2-r2)*(2.*h2-7.f*r2);
+}
+
 float Wspiky(float rlen, float h, __constant struct SPHParams* params)
 {
     float h6 = h*h*h * h*h*h;
-    float alpha = 45.f/params->PI/h6;
+    float alpha = 15.f/params->PI/h6;
  float hr2 = (h - rlen);
  float Wij = alpha * hr2*hr2*hr2;
  return Wij;
@@ -100,7 +151,7 @@ float Wspiky_dr(float rlen, float h, __constant struct SPHParams* params)
 
 
     float h6 = h*h*h * h*h*h;
-    float alpha = 45.f/(params->PI * rlen*h6);
+    float alpha = 45.f/(params->PI*rlen*h6);
  float hr2 = (h - rlen);
  float Wij = -alpha * (hr2*hr2);
  return Wij;
@@ -118,7 +169,7 @@ float Wvisc_dr(float rlen, float h, __constant struct SPHParams* params)
 
 
 {
- float alpha = 15./(2.*params->PI * h*h*h * rlen);
+ float alpha = 15./(2.*params->PI * h*h*h);
  float rh = rlen / h;
  float Wij = (-1.5*rh + 2.)/(h*h) - 0.5/(rh*rlen*rlen);
  return Wij;
@@ -134,7 +185,18 @@ float Wvisc_lapl(float rlen, float h, __constant struct SPHParams* params)
 # 7 "neighbors.cpp" 2
 
 
-float4 ForNeighbor(__global float4* vars_sorted,
+void zeroPoint(PointData* pt)
+{
+ pt->density = (float4)(0.,0.,0.,0.);
+ pt->color = (float4)(0.,0.,0.,0.);
+ pt->color_normal = (float4)(0.,0.,0.,0.);
+ pt->force = (float4)(0.,0.,0.,0.);
+ pt->surf_tens = (float4)(0.,0.,0.,0.);
+}
+
+
+void ForNeighbor(__global float4* vars_sorted,
+    PointData* pt,
     __constant uint index_i,
     uint index_j,
     float4 r,
@@ -158,11 +220,15 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
 
 # 1 "density_update.cl" 1
-# 21 "density_update.cl"
+
+
+
     float Wij = Wpoly6(r, sphp->smoothing_distance, sphp);
-# 38 "density_update.cl"
- return (float4)(sphp->mass*Wij, 0., 0., 0.);
-# 33 "neighbors.cpp" 2
+
+
+
+ pt->density.x += sphp->mass*Wij;
+# 44 "neighbors.cpp" 2
  }
 
  if (fp->choice == 1) {
@@ -172,47 +238,92 @@ float4 ForNeighbor(__global float4* vars_sorted,
 
 
 
-
- float h = sphp->smoothing_distance;
-    float h6 = h*h*h * h*h*h;
-    float alpha = 45.f/(sphp->PI * rlen*h6);
- float hr2 = (h - rlen);
- float dWijdr = -alpha * (hr2*hr2);
- clf[index_i].x = h;
- clf[index_i].y = rlen;
- clf[index_i].z = dWijdr;
- clf[index_i].z = hr2;
-
-
-
+ float dWijdr = Wspiky_dr(rlen, sphp->smoothing_distance, sphp);
 
  float4 di = vars_sorted[index_i+0*num].x;
  float4 dj = vars_sorted[index_j+0*num].x;
 
 
- float Pi = sphp->K*(di.x - sphp->rest_density);
- float Pj = sphp->K*(dj.x - sphp->rest_density);
+ float fact = 1.;
 
- float kern = -0.5 * 1. * dWijdr * (Pi + Pj);
+
+
+
+
+ float rest_density = 1000.f;
+ float Pi = sphp->K*(di.x - rest_density);
+ float Pj = sphp->K*(dj.x - rest_density);
+
+ float kern = -dWijdr * (Pi + Pj)*0.5;
  float4 stress = kern*r;
-
-
-
 
  float4 veli = vars_sorted[index_i+2*num];
  float4 velj = vars_sorted[index_j+2*num];
 
+
+
+
  float vvisc = 0.001f;
+
  float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
  stress += vvisc * (velj-veli) * dWijlapl;
+
+
  stress *= sphp->mass/(di.x*dj.x);
-# 51 "pressure_update.cl"
- return stress;
-# 38 "neighbors.cpp" 2
+
+
+
+
+ float Wijpol6 = Wpoly6(rlen, sphp->smoothing_distance, sphp);
+ float4 surf_tens = (2.f * sphp->mass * (velj-veli)/(di.x+dj.x)
+     * Wijpol6);
+
+ stress += surf_tens;
+
+
+ pt->force += stress;
+# 49 "neighbors.cpp" 2
+ }
+
+ if (fp->choice == 2) {
+
+# 1 "surface_tension_update.cl" 1
+
+
+
+
+ float dWijdr = Wpoly6_dr(rlen, sphp->smoothing_distance, sphp);
+
+
+
+
+
+ float4 dj = vars_sorted[index_j+0*num].x;
+ pt->color_normal += -r * dWijdr * sphp->mass / dj.x;
+
+
+ float dWijlapl = Wpoly6_lapl(rlen, sphp->smoothing_distance, sphp);
+ pt->color_lapl += -sphp->mass * dWijlapl / dj.x;
+# 54 "neighbors.cpp" 2
+ }
+
+ if (fp->choice == 3) {
+# 1 "density_denom_update.cl" 1
+
+
+
+
+
+
+    float Wij = Wpoly6(r, sphp->smoothing_distance, sphp);
+
+ pt->density.y += sphp->mass*Wij / vars_sorted[index_i+0*num].x;
+# 58 "neighbors.cpp" 2
  }
 }
 
 float4 ForPossibleNeighbor(__global float4* vars_sorted,
+      PointData* pt,
       __constant uint num,
       __constant uint index_i,
       uint index_j,
@@ -223,6 +334,7 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
         , __global float4* clf, __global int4* cli
       )
 {
+
  float4 frce = (float4) (0.,0.,0.,0.);
 
 
@@ -237,19 +349,22 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 
 
   float4 r = (position_i - position_j);
+  r.w = 0.f;
 
   float rlen = length(r);
 
 
 
   if (rlen <= sphp->smoothing_distance) {
-   cli[index_i].x++;
 
-   frce = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, gp, fp, sphp , clf, cli);
+
+
+
+   ForNeighbor(vars_sorted, pt, index_i, index_j, r, rlen, gp, fp, sphp , clf, cli);
 
   }
  }
- return frce;
+
 }
 # 22 "uniform_grid_utils.cpp" 2
 
@@ -315,6 +430,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 
  float4 IterateParticlesInCell(
   __global float4* vars_sorted,
+  PointData* pt,
   __constant uint num,
   __constant int4 cellPos,
   __constant uint index_i,
@@ -349,7 +465,9 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
    for(uint index_j=startIndex; index_j < endIndex; index_j++) {
 
 
-    frce += ForPossibleNeighbor(vars_sorted, num, index_i, index_j, position_i, gp, fp, sphp , clf, cli);
+
+
+    ForPossibleNeighbor(vars_sorted, pt, num, index_i, index_j, position_i, gp, fp, sphp , clf, cli);
 
 
 
@@ -364,6 +482,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 
  float4 IterateParticlesInNearbyCells(
   __global float4* vars_sorted,
+  PointData* pt,
   int num,
   int index_i,
   __constant float4 position_i,
@@ -389,7 +508,10 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
      int4 ipos = (int4) (x,y,z,1);
 
 
-     frce += IterateParticlesInCell(vars_sorted, num, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp , clf, cli);
+
+
+
+     IterateParticlesInCell(vars_sorted, pt, num, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp , clf, cli);
 
 
 
@@ -432,20 +554,46 @@ __kernel void K_SumStep1(
 
 
 
-    float4 frce = IterateParticlesInNearbyCells(vars_sorted, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
+ PointData pt;
+ zeroPoint(&pt);
+
 
 
  if (fp->choice == 0) {
-  vars_sorted[index+0*num].x = frce.x;
+     IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
+
+  vars_sorted[index+0*num].x = pt.density.x;
 
 
 
  }
  if (fp->choice == 1) {
-
-  vars_sorted[index+3*num] = frce;
-
+     IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
 
 
+  vars_sorted[index+3*num] = pt.force;
+
+
+
+ }
+ if (fp->choice == 2) {
+     IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
+  float norml = length(pt.color_normal);
+
+  if (norml > 4.) {
+   float4 stension = -0.3f * pt.color_lapl * pt.color_normal / norml;
+
+
+
+   vars_sorted[index+3*num] += stension;
+  }
+ }
+ if (fp->choice == 3) {
+     IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
+
+
+
+
+  vars_sorted[index+0*num].x /= pt.density.y;
  }
 }

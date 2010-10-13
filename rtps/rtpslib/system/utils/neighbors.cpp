@@ -6,7 +6,18 @@
 #include "wpoly6.cl"
 
 //----------------------------------------------------------------------
-float4 ForNeighbor(__global float4*  vars_sorted,
+void zeroPoint(PointData* pt)
+{
+	pt->density = (float4)(0.,0.,0.,0.);
+	pt->color = (float4)(0.,0.,0.,0.);
+	pt->color_normal = (float4)(0.,0.,0.,0.);
+	pt->force = (float4)(0.,0.,0.,0.);
+	pt->surf_tens = (float4)(0.,0.,0.,0.);
+}
+//----------------------------------------------------------------------
+//float4 ForNeighbor(__global float4*  vars_sorted,
+void ForNeighbor(__global float4*  vars_sorted,
+				PointData* pt,
 				__constant uint index_i,
 				uint index_j,
 				float4 r,
@@ -36,9 +47,19 @@ float4 ForNeighbor(__global float4*  vars_sorted,
 		// update pressure
 		#include "pressure_update.cl"
 	}
+
+	if (fp->choice == 2) {
+		// update color normal and color Laplacian
+		#include "surface_tension_update.cl"
+	}
+
+	if (fp->choice == 3) {
+		#include "density_denom_update.cl"
+	} 
 }
 //--------------------------------------------------
 float4 ForPossibleNeighbor(__global float4* vars_sorted, 
+						PointData* pt,
 						__constant uint numParticles, 
 						__constant uint index_i, 
 						uint index_j, 
@@ -49,6 +70,7 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 	  					DUMMY_ARGS
 						)
 {
+	// not really needed if pt approach works
 	float4 frce = (float4) (0.,0.,0.,0.);
 
 	// check not colliding with self
@@ -63,19 +85,22 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 
 		// get the relative distance between the two particles, translate to simulation space
 		float4 r = (position_i - position_j); 
+		r.w = 0.f; // I stored density in 4th component
 		// |r|
 		float rlen = length(r);
 
 		// is this particle within cutoff?
 
 		if (rlen <= sphp->smoothing_distance) {
-			cli[index_i].x++;
+			//cli[index_i].x++;
 #if 1
-			frce = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, gp, fp, sphp ARGS);
+			//frce = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, gp, fp, sphp ARGS);
+			// return updated pt
+			ForNeighbor(vars_sorted, pt, index_i, index_j, r, rlen, gp, fp, sphp ARGS);
 #endif
 		}
 	}
-	return frce;
+	//return frce;
 }
 //--------------------------------------------------
 #endif

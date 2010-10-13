@@ -27,14 +27,19 @@ __kernel void ge_euler(
     f.z += -9.8f;
 
 	// REMOVE FOR DEBUGGING
+	// THIS IS REALLY A FORCE, NO?
     float speed = length(f);
     if(speed > 600.0f) //velocity limit, need to pass in as struct
+    //if(speed > 4.f) //velocity limit, need to pass in as struct
     {
         f *= 600.0f/speed;
     }
 
-    v += dt*f;  //    / params->simulation_scale;
-    p += dt*v;
+	//float dtt = dt / params->simulation_scale;
+	float dtt = dt;
+
+    v += dtt*f;  //    / params->simulation_scale;
+    p += dtt*v / params->simulation_scale;
     p.w = 1.0f; //just in case
 
 	// REMOVE AFTER DEBUGGED
@@ -47,10 +52,13 @@ __kernel void ge_euler(
         uint originalIndex = sort_indices[i];
 
         // writeback to unsorted buffer
-		unsorted_pos(originalIndex) = p;
+		float dens = density(i);
+		p /= params->simulation_scale;
+		unsorted_pos(originalIndex) = (float4)(p.xyz, dens);
 		unsorted_vel(originalIndex) = v;
 		unsorted_density(originalIndex) = density(i); // FOR DEBUGGING ONLY
 		unsorted_force(originalIndex) = f; // FOR DEBUGGING ONLY
-		positions[originalIndex] = p; 
+		positions[originalIndex] = (float4)(p.xyz, dens);  // for plotting
 }
+
 

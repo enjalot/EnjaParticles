@@ -123,7 +123,7 @@ void GE_SPH::bitonic_sort()
     ps->cli->queue.finish();
 	ts_cl[TI_BITONIC_SORT]->end();
 
-	//printBiSortDiagnostics(cl_sort_output_hashes, cl_sort_output_indices);
+	//printBiSortDiagnostics(*cl_sort_output_hashes, *cl_sort_output_indices);
 	//computeCellStartEndCPU(); // diagnostic check
 
 	//printf("EXIT BISORT \n");
@@ -186,6 +186,7 @@ void GE_SPH::computeCellStartEndCPU()
 	int* ohashi = cl_sort_hashes->getHostPtr();
 	int* osorti = cl_sort_indices->getHostPtr();
 
+
 	printf("\n\n PRINT cl_cell_indices_start/end on CPU\n");
 	int* start = new int [grid_size];
 	int* end   = new int [grid_size];
@@ -203,6 +204,9 @@ void GE_SPH::computeCellStartEndCPU()
 			ix = i;
 		}
 	}
+
+	exit(0);
+
 	if (ohashi[nb_el-1] == hash) {
 		start[hash] = ix;
 		end[hash] = nb_el;
@@ -215,6 +219,8 @@ void GE_SPH::computeCellStartEndCPU()
 			//printf("(CPU) [%d], start: %d, end: %d, count: %d\n", i, start[i], end[i], end[i]-start[i]);
 		//}
 	}
+
+
 	if (count != nb_el) {
 		printf("total nb particles: %d\n", count);
 		printf("nb_el: %d\n", nb_el);

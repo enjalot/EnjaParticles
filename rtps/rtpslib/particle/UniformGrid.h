@@ -9,8 +9,8 @@ class UniformGrid
 {
 public:
     UniformGrid(){};
-    UniformGrid(float4 min, float4 max, float cell_size);
-	UniformGrid(float4 min, float4 max, int nb_cells_x);
+    UniformGrid(float4 min, float4 max, float cell_size, float sim_scale=1.);
+	UniformGrid(float4 min, float4 max, int4 nb_cells, float sim_scale=1.);
     ~UniformGrid();
 
     void make_cube(float4 *positions, float spacing, int num);
@@ -25,12 +25,13 @@ public:
 	float4 getSize() { return size; };
 
 public:
+	float sim_scale;
     float4 min;
     float4 max; 
 
     float4 size;
     float4 res;
-    float4 delta;
+	float4 delta;
 };
    
 }

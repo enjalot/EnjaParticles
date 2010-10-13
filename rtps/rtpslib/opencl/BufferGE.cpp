@@ -12,6 +12,7 @@ BufferGE<T>::BufferGE(CL *cli, T* data, int sz)
 	this->nb_el = sz;
 
 	if (data) {
+		printf("data BufferGE, externalPtr == true\n");
 		externalPtr = true;
 
 		// create buffer on GPU
@@ -49,8 +50,8 @@ BufferGE<T>::BufferGE(CL *cli, int sz)
 template <class T>
 BufferGE<T>::~BufferGE()
 {
-	if (externalPtr && data) {
-		printf("BufferGE DESTRUCTOR: delete data\n");
+	if (!externalPtr && data) {
+		//printf("BufferGE DESTRUCTOR: delete data\n");
 		delete [] data;
 		data = 0;
 	}

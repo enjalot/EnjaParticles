@@ -1,29 +1,33 @@
 #include <math.h>
+#include <stdlib.h>
 
 #include "UniformGrid.h"
 
 namespace rtps {
 
 //----------------------------------------------------------------------
-UniformGrid::UniformGrid(float4 min, float4 max, float cell_size)
+UniformGrid::UniformGrid(float4 min, float4 max, float cell_size, float sim_scale)
 {
+	this->sim_scale = sim_scale;
     this->min = min;
     this->max = max;
 
-	// domain dimensions
+	float world_cell_size = cell_size / sim_scale;
+
+	// domain dimensions in world coordinates (that are plotted)
     size = float4(max.x - min.x,
                   max.y - min.y,
                   max.z - min.z, 1.);
 
 	//  how many cells in each direction. 
-    res = float4(ceil(size.x / cell_size),
-                 ceil(size.y / cell_size),
-                 ceil(size.z / cell_size), 1.);
+    res = float4(ceil(size.x / world_cell_size),
+                 ceil(size.y / world_cell_size),
+                 ceil(size.z / world_cell_size), 1.);
 
 	// Modified dimensions
-    size = float4(res.x * cell_size,
-                  res.y * cell_size,
-                  res.z * cell_size,
+    size = float4(res.x * world_cell_size,
+                  res.y * world_cell_size,
+                  res.z * world_cell_size,
 				  1.);
 
 	// width, height, depth of a single cell
@@ -39,20 +43,23 @@ UniformGrid::UniformGrid(float4 min, float4 max, float cell_size)
 
 }
 //----------------------------------------------------------------------
-UniformGrid::UniformGrid(float4 min, float4 max, int nb_cells_x)
+UniformGrid::UniformGrid(float4 min, float4 max, int4 nb_cells, float sim_scale)
 {
+	this->sim_scale = sim_scale;
     this->min = min;
-    this->max = max;
+    this->max = max; 
 
 	// domain dimensions
     size = float4(max.x - min.x,
                   max.y - min.y,
                   max.z - min.z, 1.);
+	printf("UniformGrid: grid_size= %f, %f, %f\n", size.x, size.y, size.z);
+	//exit(0);
 
 	//  how many cells in each direction. 
-    res = float4(nb_cells_x, 
-    			 nb_cells_x, 
-    			 nb_cells_x, 
+    res = float4(nb_cells.x, 
+    			 nb_cells.y, 
+    			 nb_cells.z, 
     			 1);
 
     delta = float4(size.x / res.x, 
@@ -102,13 +109,16 @@ void UniformGrid::makeCube(float4* position, float4 pmin, float4 pmax, float spa
     for (float x = pmin.x; x <= pmax.x; x+=spacing) {
         if (i >= num) {
 			offset = num;
+	printf("spacing (makeCube)= %f\n", spacing);
 			return;
 		}
         position[i] = float4(x,y,z,1.0f);
 		i++;
+		printf("i= %d, pos= %f, %f, %f\n", x, y, z);
     }}}
 
 	offset = i;
+	//printf("makeCube, offset= %d, about to exit\n", offset); exit(0);
 }
 //----------------------------------------------------------------------
 void UniformGrid::makeSphere(float4* position, float4 center, float radius, int& num, int& offset, float spacing)

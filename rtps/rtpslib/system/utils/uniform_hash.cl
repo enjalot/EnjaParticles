@@ -14,6 +14,34 @@
 
 
 
+
+typedef struct PointData
+{
+
+
+ float4 density;
+ float4 color;
+ float4 color_normal;
+ float4 color_lapl;
+ float4 force;
+ float4 surf_tens;
+} PointData;
+
+struct GridParamsScaled
+
+{
+    float4 grid_size;
+    float4 grid_min;
+    float4 grid_max;
+
+
+    float4 grid_res;
+    float4 grid_delta;
+    float4 grid_inv_delta;
+    int numParticles;
+    int nb_vars;
+};
+
 struct GridParams
 {
     float4 grid_size;
@@ -134,7 +162,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 }
 # 89 "uniform_hash.cpp"
 __kernel void hash(
-
            __global float4* vars_unsorted,
            __global uint* sort_hashes,
            __global uint* sort_indexes,
@@ -144,17 +171,18 @@ __kernel void hash(
 
 {
 
+
     uint index = get_global_id(0);
 
  int num = get_global_size(0);
     if (index >= num) return;
 
 
+
  cell_indices_start = 0xffffffff;
 
 
-
-    float4 p = vars_unsorted[index+1*num];
+    float4 p = vars_unsorted[index+1 *num];
 
 
     int4 gridPos = calcGridCell(p, gp->grid_min, gp->grid_inv_delta);
@@ -168,6 +196,7 @@ __kernel void hash(
     int pp = (int) p.x;
 
     sort_indexes[index] = index;
+
 
 
 }
