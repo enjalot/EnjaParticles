@@ -61,7 +61,7 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 8192
 #define NUM_PARTICLES 1024
-
+#define DT .001f
 
 //timers
 //GE::Time *ts[3];
@@ -112,7 +112,7 @@ int main(int argc, char** argv)
 
         
     //default constructor
-    rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, .001f);
+    rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT);
     ps = new rtps::RTPS(settings);
 
     glutMainLoop();

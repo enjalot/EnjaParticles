@@ -65,7 +65,7 @@ private:
 
     Kernel k_density, k_pressure, k_viscosity;
     Kernel k_collision_wall;
-    Kernel k_euler;
+    Kernel k_euler, k_leapfrog;
 
     Buffer<SPHParams> cl_params;
 
@@ -74,12 +74,14 @@ private:
     std::vector<float> densities;
     std::vector<float4> forces;
     std::vector<float4> velocities;
+    std::vector<float4> veleval;
 
     Buffer<float4> cl_position;
     Buffer<float4> cl_color;
     Buffer<float> cl_density;
     Buffer<float4> cl_force;
     Buffer<float4> cl_velocity;
+    Buffer<float4> cl_veleval;
     
     Buffer<float4> cl_error_check;
 
@@ -90,14 +92,17 @@ private:
     void loadXSPH();
     void loadCollision_wall();
     void loadEuler();
+    void loadLeapFrog();
 
     //CPU functions
     void cpuDensity();
     void cpuPressure();
     void cpuViscosity();
     void cpuXSPH();
-    void cpuEuler();
     void cpuCollision_wall();
+    void cpuEuler();
+    void cpuLeapFrog();
+
 
     float Wpoly6(float4 r, float h);
     float Wspiky(float4 r, float h);

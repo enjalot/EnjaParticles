@@ -28,6 +28,7 @@ SPH::SPH(RTPS *psfr, int n)
     positions.resize(num);
     forces.resize(num);
     velocities.resize(num);
+    veleval.resize(num);
     densities.resize(num);
 
     //for reading back different values from the kernel
@@ -101,6 +102,7 @@ typedef struct SPHParams
     std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));
     std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 1.0f, 0.0f));
     std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
+    std::fill(veleval.begin(), veleval.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
 
     std::fill(densities.begin(), densities.end(), 0.0f);
     std::fill(error_check.begin(), error_check.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -189,10 +191,12 @@ void SPH::update()
 
     cpuDensity();
     cpuPressure();
-    //cpuViscosity();
+    cpuViscosity();
     //cpuXSPH();
     cpuCollision_wall();
-    cpuEuler();
+
+    //cpuEuler();
+    cpuLeapFrog();
     //printf("positions[0].z %f\n", positions[0].z);
 
     glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);

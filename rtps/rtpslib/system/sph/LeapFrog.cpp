@@ -2,23 +2,21 @@
 
 namespace rtps {
 
-/*
-void SPH::loadEuler()
+void SPH::loadLeapFrog()
 {
-    #include "euler.cl"
+    #include "leapfrog.cl"
     //printf("%s\n", euler_program_source.c_str());
-    k_euler = Kernel(ps->cli, euler_program_source, "euler");
+    k_leapfrog = Kernel(ps->cli, leapfrog_program_source, "leapfrog");
   
     //TODO: fix the way we are wrapping buffers
-    k_euler.setArg(0, cl_position.cl_buffer[0]);
-    k_euler.setArg(1, cl_velocity.cl_buffer[0]);
-    k_euler.setArg(2, cl_force.cl_buffer[0]);
-    k_euler.setArg(3, ps->settings.dt); //time step
+    k_leapfrog.setArg(0, cl_position.cl_buffer[0]);
+    k_leapfrog.setArg(1, cl_velocity.cl_buffer[0]);
+    k_leapfrog.setArg(2, cl_force.cl_buffer[0]);
+    k_leapfrog.setArg(3, ps->settings.dt); //time step
 
 } 
-*/
 
-void SPH::cpuLeapFrogStep1()
+void SPH::cpuLeapFrog()
 {
     float h = ps->settings.dt;
     for(int i = 0; i < num; i++)
@@ -38,24 +36,26 @@ void SPH::cpuLeapFrogStep1()
             f.z *= 600.0f/speed;
         }
 
+        float scale = params.simulation_scale;
         float4 vnext = v;
-        v.x += h*f.x/2.0f;
-        v.y += h*f.y/2.0f;
-        v.z += h*f.z/2.0f;
-        
-        p.x += h*v.x;
-        p.y += h*v.y;
-        p.z += h*v.z;
+        vnext.x += h*f.x / scale;
+        vnext.y += h*f.y / scale;
+        vnext.z += h*f.z / scale;
+       
+        p.x += h*vnext.x;
+        p.y += h*vnext.y;
+        p.z += h*vnext.z;
         p.w = 1.0f; //just in case
 
-        velocities[i] = v;
+        velocities[i] = vnext;
         positions[i] = p;
+         
+        veleval[i].x = (v.x + vnext.x) *.5f;
+        veleval[i].y = (v.y + vnext.y) *.5f;
+        veleval[i].z = (v.z + vnext.z) *.5f;
+
     }
     //printf("v.z %f p.z %f \n", velocities[0].z, positions[0].z);
-}
-void SPH::cpuLeapFrogStep2()
-{
-    //v.x += xpsh[i] * xpsh_factor;
 }
 
 }

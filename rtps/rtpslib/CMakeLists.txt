@@ -49,6 +49,7 @@ set (rtpslib_SOURCES
     
     ${rtpslib_SOURCE_DIR}/system/SPH.cpp
     ${rtpslib_SOURCE_DIR}/system/sph/Euler.cpp
+    ${rtpslib_SOURCE_DIR}/system/sph/LeapFrog.cpp
     ${rtpslib_SOURCE_DIR}/system/sph/Density.cpp
     ${rtpslib_SOURCE_DIR}/system/sph/Pressure.cpp
     ${rtpslib_SOURCE_DIR}/system/sph/Viscosity.cpp

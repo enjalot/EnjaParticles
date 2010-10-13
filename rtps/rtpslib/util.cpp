@@ -54,7 +54,7 @@ GLuint createVBO(const void* data, int dataSize, GLenum target, GLenum usage)
         glDeleteBuffers(1, &id);
         id = 0;
         //cout << "[createVBO()] Data size is mismatch with input array\n";
-        printf("[createVBO90] Data size is mismatch with input array\n");
+        printf("[createVB()] Data size is mismatch with input array\n");
     }
     //this was important for working inside blender!
     glBindBuffer(target, 0);

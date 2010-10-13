@@ -25,6 +25,7 @@ Simple::Simple(RTPS *psfr, int n)
     colors.resize(num);
     forces.resize(num);
     velocities.resize(num);
+
     
     int j = 0;
     for(int i = 0; i < num; i++)
@@ -40,7 +41,6 @@ Simple::Simple(RTPS *psfr, int n)
     //std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));
     std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
-    
     
     managed = true;
     pos_vbo = createVBO(&positions[0], positions.size()*sizeof(float4), GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);

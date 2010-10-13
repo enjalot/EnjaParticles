@@ -40,7 +40,7 @@ void SPH::cpuViscosity()
     {
 
         float4 p = positions[i];
-        float4 v = velocities[i];
+        float4 v = veleval[i];
         p = float4(p.x * scale, p.y * scale, p.z * scale, p.w * scale);
         v = float4(v.x * scale, v.y * scale, v.z * scale, v.w * scale);
 
@@ -53,7 +53,7 @@ void SPH::cpuViscosity()
         {
             if(j == i) continue;
             float4 pj = positions[j];
-            float4 vj = velocities[j];
+            float4 vj = veleval[j];
             pj = float4(pj.x * scale, pj.y * scale, pj.z * scale, pj.w * scale);
             vj = float4(vj.x * scale, vj.y * scale, vj.z * scale, vj.w * scale);
             float4 r = float4(p.x - pj.x, p.y - pj.y, p.z - pj.z, p.w - pj.w);
@@ -69,9 +69,9 @@ void SPH::cpuViscosity()
                     //float Wij = alpha*(-2.25f + 2.375f*R - .625f*R*R);
                     float Wij = Wviscosity(r, h);
                     float fcoeff = mu * params.mass * Wij / (densities[j] * densities[i]);
-                    f.x += fcoeff * (velocities[j].x - v.x); 
-                    f.y += fcoeff * (velocities[j].y - v.y); 
-                    f.z += fcoeff * (velocities[j].z - v.z); 
+                    f.x += fcoeff * (vj.x - v.x); 
+                    f.y += fcoeff * (vj.y - v.y); 
+                    f.z += fcoeff * (vj.z - v.z); 
                 }
 
             }

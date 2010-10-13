@@ -1,3 +1,4 @@
+#include "GL/glew.h"
 #include "RTPS.h"
 #include "system/Simple.h"
 #include "system/SPH.h"
@@ -26,6 +27,10 @@ RTPS::~RTPS()
 
 void RTPS::Init()
 {
+    //this should already be done, but in blender its not
+    //whats best way to check if stuff like glGenBuffers has been inited?
+    glewInit();
+
 
     cli = new CL();
 
