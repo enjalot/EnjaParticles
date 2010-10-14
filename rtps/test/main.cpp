@@ -59,9 +59,9 @@ void *font = GLUT_BITMAP_8_BY_13;
 
 rtps::RTPS* ps;
 //#define NUM_PARTICLES 16384
-//#define NUM_PARTICLES 8192
-#define NUM_PARTICLES 1024
-#define DT .001f
+#define NUM_PARTICLES 4096
+//#define NUM_PARTICLES 1024
+#define DT .0001f
 
 //timers
 //GE::Time *ts[3];

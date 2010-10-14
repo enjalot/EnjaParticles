@@ -86,8 +86,8 @@ typedef struct SPHParams
     params.rest_distance = sph_settings.particle_rest_distance;
     params.smoothing_distance = sph_settings.smoothing_distance;
     params.simulation_scale = sph_settings.simulation_scale;
-    params.boundary_stiffness = 10000.0f;
-    params.boundary_dampening = 256.0f;
+    params.boundary_stiffness = 20000.0f;
+    params.boundary_dampening = 1024;//256.0f;
     params.boundary_distance = sph_settings.particle_rest_distance * .5f;
     params.EPSILON = .00001f;
     params.PI = 3.14159265f;
@@ -165,6 +165,12 @@ typedef struct SPHParams
     printf("leapfrog kernel created\n");
 
 
+#ifdef CPU
+    printf("RUNNING ON THE CPU\n");
+#endif
+#ifdef GPU
+    printf("RUNNING ON THE GPU\n");
+#endif
 
     //check the params
     //std::vector<SPHParams> test = cl_params.copyToHost(1);
@@ -217,7 +223,7 @@ void SPH::update()
     cl_color.acquire();
     
     //printf("execute!\n");
-//    for(int i=0; i < 10; i++)
+    for(int i=0; i < 10; i++)
     {
         //printf("about to execute density\n");
         k_density.execute(num);
@@ -240,7 +246,7 @@ void SPH::update()
         }
         */
         k_pressure.execute(num);
-        k_viscosity.execute(num);
+        //k_viscosity.execute(num);
 
         k_collision_wall.execute(num);
 
@@ -258,7 +264,6 @@ void SPH::update()
     }
     printf("execute!\n");
     */
-
 
     cl_position.release();
     cl_color.release();

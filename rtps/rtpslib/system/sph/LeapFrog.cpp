@@ -49,13 +49,13 @@ void SPH::cpuLeapFrog()
         p.z += h*vnext.z;
         p.w = 1.0f; //just in case
 
-        velocities[i] = vnext;
-        positions[i] = p;
-         
         veleval[i].x = (v.x + vnext.x) *.5f;
         veleval[i].y = (v.y + vnext.y) *.5f;
         veleval[i].z = (v.z + vnext.z) *.5f;
 
+        velocities[i] = vnext;
+        positions[i] = p;
+         
     }
     //printf("v.z %f p.z %f \n", velocities[0].z, positions[0].z);
 }
