@@ -66,6 +66,7 @@ private:
     Kernel k_density, k_pressure, k_viscosity;
     Kernel k_collision_wall;
     Kernel k_euler, k_leapfrog;
+    Kernel k_xsph;
 
     Buffer<SPHParams> cl_params;
 
@@ -75,6 +76,7 @@ private:
     std::vector<float4> forces;
     std::vector<float4> velocities;
     std::vector<float4> veleval;
+    std::vector<float4> xsphs;
 
     Buffer<float4> cl_position;
     Buffer<float4> cl_color;
@@ -82,6 +84,7 @@ private:
     Buffer<float4> cl_force;
     Buffer<float4> cl_velocity;
     Buffer<float4> cl_veleval;
+    Buffer<float4> cl_xsph;
     
     Buffer<float4> cl_error_check;
 

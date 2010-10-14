@@ -4,16 +4,17 @@ namespace rtps {
 
 void SPH::loadXSPH()
 {
-    #include "viscosity.cl"
+    #include "xsph.cl"
     //printf("%s\n", euler_program_source.c_str());
-    k_viscosity = Kernel(ps->cli, viscosity_program_source, "viscosity");
+    k_xsph = Kernel(ps->cli, xsph_program_source, "xsph");
   
     //TODO: fix the way we are wrapping buffers
-    k_viscosity.setArg(0, cl_position.cl_buffer[0]);
-    k_viscosity.setArg(1, cl_velocity.cl_buffer[0]);
-    k_viscosity.setArg(2, cl_density.cl_buffer[0]);
-    k_viscosity.setArg(3, cl_force.cl_buffer[0]);
-    k_viscosity.setArg(4, cl_params.cl_buffer[0]);
+    k_xsph.setArg(0, cl_position.cl_buffer[0]);
+    k_xsph.setArg(1, cl_veleval.cl_buffer[0]);
+    k_xsph.setArg(2, cl_density.cl_buffer[0]);
+    k_xsph.setArg(3, cl_force.cl_buffer[0]);
+    k_xsph.setArg(4, cl_xsph.cl_buffer[0]);
+    k_xsph.setArg(5, cl_params.cl_buffer[0]);
 
 } 
 
@@ -24,13 +25,17 @@ void SPH::cpuXSPH()
     float scale = params.simulation_scale;
     float h = params.smoothing_distance;
 
+    float h9 = h*h*h * h*h*h * h*h*h;
+    float alpha = 315.f / 64.0f / params.PI / h9;
+
+
     for(int i = 0; i < num; i++)
     {
 
         float4 p = positions[i];
-        float4 v = velocities[i];
+        float4 v = veleval[i];
         p = float4(p.x * scale, p.y * scale, p.z * scale, p.w * scale);
-        v = float4(v.x * scale, v.y * scale, v.z * scale, v.w * scale);
+        //v = float4(v.x * scale, v.y * scale, v.z * scale, v.w * scale);
 
         float4 f = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -41,9 +46,9 @@ void SPH::cpuXSPH()
         {
             if(j == i) continue;
             float4 pj = positions[j];
-            float4 vj = velocities[j];
+            float4 vj = veleval[j];
             pj = float4(pj.x * scale, pj.y * scale, pj.z * scale, pj.w * scale);
-            vj = float4(vj.x * scale, vj.y * scale, vj.z * scale, vj.w * scale);
+            //vj = float4(vj.x * scale, vj.y * scale, vj.z * scale, vj.w * scale);
             float4 r = float4(p.x - pj.x, p.y - pj.y, p.z - pj.z, p.w - pj.w);
  
             float rlen = magnitude(r);
@@ -55,21 +60,20 @@ void SPH::cpuXSPH()
                 {
                     //float R = sqrt(r2/re2);
                     //float Wij = alpha*(-2.25f + 2.375f*R - .625f*R*R);
-                    float Wij = Wpoly6(r, h);
-                    float fcoeff = 2.0f * params.mass * Wij / (densities[j] + densities[i]);
-                    f.x += fcoeff * (velocities[j].x - v.x); 
-                    f.y += fcoeff * (velocities[j].y - v.y); 
-                    f.z += fcoeff * (velocities[j].z - v.z); 
+                    //float Wij = Wpoly6(r, h);
+                    float hr2 = (h*h - dist_squared(r));
+                    float Wij = alpha * hr2*hr2*hr2;
+                    float fcoeff = 2.0 * params.mass * Wij  / (densities[j] + densities[i]);
+                    f.x += fcoeff * (vj.x - v.x); 
+                    f.y += fcoeff * (vj.y - v.y); 
+                    f.z += fcoeff * (vj.z - v.z); 
                 }
 
             }
         }
-        //modifies velocity 
-        /*
-        forces[i].x += f.x;
-        forces[i].y += f.y;
-        forces[i].z += f.z;
-        */
+        xsphs[i].x = f.x;
+        xsphs[i].y = f.y;
+        xsphs[i].z = f.z;
     }
 
 }

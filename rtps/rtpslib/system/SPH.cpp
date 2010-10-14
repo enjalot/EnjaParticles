@@ -30,6 +30,7 @@ SPH::SPH(RTPS *psfr, int n)
     velocities.resize(num);
     veleval.resize(num);
     densities.resize(num);
+    xsphs.resize(num);
 
     //for reading back different values from the kernel
     std::vector<float4> error_check(num);
@@ -91,6 +92,7 @@ typedef struct SPHParams
     params.boundary_distance = sph_settings.particle_rest_distance * .5f;
     params.EPSILON = .00001f;
     params.PI = 3.14159265f;
+    //params.K = 331.0f;
     params.K = 1.5f;
  
     //TODO make a helper constructor for buffer to make a cl_mem from a struct
@@ -105,6 +107,7 @@ typedef struct SPHParams
     std::fill(veleval.begin(), veleval.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
 
     std::fill(densities.begin(), densities.end(), 0.0f);
+    std::fill(xsphs.begin(), xsphs.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     std::fill(error_check.begin(), error_check.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
 
     /*
@@ -138,6 +141,7 @@ typedef struct SPHParams
     cl_veleval = Buffer<float4>(ps->cli, veleval);
 
     cl_density = Buffer<float>(ps->cli, densities);
+    cl_xsph = Buffer<float4>(ps->cli, xsphs);
 
     cl_error_check= Buffer<float4>(ps->cli, error_check);
 
@@ -163,6 +167,11 @@ typedef struct SPHParams
     printf("create leapfrog kernel\n");
     loadLeapFrog();
     printf("leapfrog kernel created\n");
+
+    printf("create xsph kernel\n");
+    loadXSPH();
+    printf("xsph kernel created\n");
+
 
 
 #ifdef CPU
@@ -204,12 +213,23 @@ void SPH::update()
     cpuDensity();
     cpuPressure();
     cpuViscosity();
-    //cpuXSPH();
+    cpuXSPH();
     cpuCollision_wall();
 
     //cpuEuler();
     cpuLeapFrog();
     //printf("positions[0].z %f\n", positions[0].z);
+    /*
+    for(int i = 0; i < 100; i++)
+    {
+ //       if(xsphs[i].z != 0.0)
+            //printf("force: %f %f %f  \n", veleval[i].x, veleval[i].y, veleval[i].z);
+            printf("force: %f %f %f  \n", xsphs[i].x, xsphs[i].y, xsphs[i].z);
+            //printf("force: %f %f %f  \n", velocities[i].x, velocities[i].y, velocities[i].z);
+    }
+    */
+    printf("cpu execute!\n");
+
 
     glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
     glBufferData(GL_ARRAY_BUFFER, num * sizeof(float4), &positions[0], GL_DYNAMIC_DRAW);
@@ -223,7 +243,7 @@ void SPH::update()
     cl_color.acquire();
     
     //printf("execute!\n");
-    for(int i=0; i < 10; i++)
+    //for(int i=0; i < 10; i++)
     {
         //printf("about to execute density\n");
         k_density.execute(num);
@@ -246,7 +266,8 @@ void SPH::update()
         }
         */
         k_pressure.execute(num);
-        //k_viscosity.execute(num);
+        k_viscosity.execute(num);
+        k_xsph.execute(num);
 
         k_collision_wall.execute(num);
 
@@ -254,16 +275,15 @@ void SPH::update()
         //k_euler.execute(num);
         k_leapfrog.execute(num);
     }
-
     /*
-    std::vector<float4> ftest = cl_force.copyToHost(100);
+    std::vector<float4> ftest = cl_xsph.copyToHost(100);
     for(int i = 0; i < 100; i++)
     {
-        if(ftest[i].z != 0.0)
+//        if(ftest[i].z != 0.0)
             printf("force: %f %f %f  \n", ftest[i].x, ftest[i].y, ftest[i].z);
     }
-    printf("execute!\n");
     */
+    printf("gpu execute!\n");
 
     cl_position.release();
     cl_color.release();

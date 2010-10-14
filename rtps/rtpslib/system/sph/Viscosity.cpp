@@ -10,11 +10,10 @@ void SPH::loadViscosity()
   
     //TODO: fix the way we are wrapping buffers
     k_viscosity.setArg(0, cl_position.cl_buffer[0]);
-    k_viscosity.setArg(1, cl_velocity.cl_buffer[0]);
-    k_viscosity.setArg(2, cl_veleval.cl_buffer[0]);
-    k_viscosity.setArg(3, cl_density.cl_buffer[0]);
-    k_viscosity.setArg(4, cl_force.cl_buffer[0]);
-    k_viscosity.setArg(5, cl_params.cl_buffer[0]);
+    k_viscosity.setArg(1, cl_veleval.cl_buffer[0]);
+    k_viscosity.setArg(2, cl_density.cl_buffer[0]);
+    k_viscosity.setArg(3, cl_force.cl_buffer[0]);
+    k_viscosity.setArg(4, cl_params.cl_buffer[0]);
 
 } 
 
@@ -35,7 +34,7 @@ void SPH::cpuViscosity()
 
     float scale = params.simulation_scale;
     float h = params.smoothing_distance;
-    float mu = 1.0f; //viscosity coefficient (how to select?)
+    float mu = 1.001f; //viscosity coefficient (how to select?)
 
     for(int i = 0; i < num; i++)
     {
@@ -43,7 +42,7 @@ void SPH::cpuViscosity()
         float4 p = positions[i];
         float4 v = veleval[i];
         p = float4(p.x * scale, p.y * scale, p.z * scale, p.w * scale);
-        v = float4(v.x * scale, v.y * scale, v.z * scale, v.w * scale);
+        //v = float4(v.x * scale, v.y * scale, v.z * scale, v.w * scale);
 
         float4 f = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -56,7 +55,7 @@ void SPH::cpuViscosity()
             float4 pj = positions[j];
             float4 vj = veleval[j];
             pj = float4(pj.x * scale, pj.y * scale, pj.z * scale, pj.w * scale);
-            vj = float4(vj.x * scale, vj.y * scale, vj.z * scale, vj.w * scale);
+            //vj = float4(vj.x * scale, vj.y * scale, vj.z * scale, vj.w * scale);
             float4 r = float4(p.x - pj.x, p.y - pj.y, p.z - pj.z, p.w - pj.w);
  
             float rlen = magnitude(r);

@@ -19,7 +19,7 @@ namespace rtps {
 void SPH::loadDensity()
 {
     #include "density.cl"
-    //printf("%s\n", euler_program_source.c_str());
+    //printf("%s\n", density_program_source.c_str());
     k_density = Kernel(ps->cli, density_program_source, "density");
   
     //TODO: fix the way we are wrapping buffers

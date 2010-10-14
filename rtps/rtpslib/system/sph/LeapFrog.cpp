@@ -13,8 +13,9 @@ void SPH::loadLeapFrog()
     k_leapfrog.setArg(1, cl_velocity.cl_buffer[0]);
     k_leapfrog.setArg(2, cl_veleval.cl_buffer[0]);
     k_leapfrog.setArg(3, cl_force.cl_buffer[0]);
-    k_leapfrog.setArg(4, ps->settings.dt); //time step
-    k_leapfrog.setArg(5, cl_params.cl_buffer[0]);
+    k_leapfrog.setArg(4, cl_xsph.cl_buffer[0]);
+    k_leapfrog.setArg(5, ps->settings.dt); //time step
+    k_leapfrog.setArg(6, cl_params.cl_buffer[0]);
 
 } 
 
@@ -38,15 +39,19 @@ void SPH::cpuLeapFrog()
             f.z *= 600.0f/speed;
         }
 
-        float scale = params.simulation_scale;
         float4 vnext = v;
-        vnext.x += h*f.x / scale;
-        vnext.y += h*f.y / scale;
-        vnext.z += h*f.z / scale;
+        vnext.x += h*f.x;
+        vnext.y += h*f.y;
+        vnext.z += h*f.z;
+
+        vnext.x += .5f * xsphs[i].x;
+        vnext.y += .5f * xsphs[i].y;
+        vnext.z += .5f * xsphs[i].z;
        
-        p.x += h*vnext.x;
-        p.y += h*vnext.y;
-        p.z += h*vnext.z;
+        float scale = params.simulation_scale;
+        p.x += h*vnext.x / scale;
+        p.y += h*vnext.y / scale;
+        p.z += h*vnext.z / scale;
         p.w = 1.0f; //just in case
 
         veleval[i].x = (v.x + vnext.x) *.5f;

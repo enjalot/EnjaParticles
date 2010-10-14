@@ -29,13 +29,12 @@ float magnitude(float4 vec)
     return sqrt(vec.x*vec.x + vec.y*vec.y + vec.z*vec.z);
 }       
         
-__kernel void leapfrog(__global float4* pos, __global float4* vel, __global float4* veleval, __global float4* force, float h, __constant struct SPHParams* params )
+__kernel void leapfrog(__global float4* pos, __global float4* vel, __global float4* veleval, __global float4* force, __global float4* xsph, float h, __constant struct SPHParams* params )
 {
     unsigned int i = get_global_id(0);
 
     float4 p = pos[i];
     float4 v = vel[i];
-    float4 vnext = v;
     float4 f = force[i];
 
     //external force is gravity
@@ -47,14 +46,16 @@ __kernel void leapfrog(__global float4* pos, __global float4* vel, __global floa
         f *= 600.0f/speed;
     }
 
-    vnext += h*f / params->simulation_scale;
-    p += h*v;
+    float4 vnext = v + h*f;
+    vnext += .1f * xsph[i];//should be param XSPH factor
+    p += h * vnext / params->simulation_scale;
     p.w = 1.0f; //just in case
+
+    veleval[i] = (v + vnext) * .5f;
 
     vel[i] = vnext;
     pos[i] = p;
 
-    veleval[i] = (v + vnext) * .5f;
 }
 );
 

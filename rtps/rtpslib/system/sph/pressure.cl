@@ -69,18 +69,17 @@ __kernel void pressure(__global float4* pos, __global float* density, __global f
                 float hr2 = (h - rlen);
                 float Wij = alpha * hr2*hr2/rlen;
                 //from tim's code
-                /*
-                float Pi = 1.013E5*(pow(density[i]/1000.0f, 7.0f) - 1.0f);
-                float Pj = 1.013E5*(pow(density[j]/1000.0f, 7.0f) - 1.0f);
-                float kern = params->mass * Wij * (Pi + Pj) / (density[i] * density[j]);
-                */
+                //float Pi = 1.013E5*(pow(density[i]/1000.0f, 7.0f) - 1.0f);
+                //float Pj = 1.013E5*(pow(density[j]/1000.0f, 7.0f) - 1.0f);
+                //float kern = params->mass * Wij * (Pi + Pj) / (density[i] * density[j]);
+                
                 float dj = density[j];
                 //form simple SPH in Krog's thesis
                 float Pi = params->K*(di - 1000.0f); //rest density
                 float Pj = params->K*(dj - 1000.0f); //rest density
                 //float kern = params->mass * -1.0f * Wij * (Pi + Pj) / (2.0f * density[j]);
                 //float kern = params->mass * -1.0f * Wij * (Pi + Pj) / (density[i] * density[j]);
-                float kern = params->mass * -1.0f * Wij * (Pi + Pj) / (di * dj);
+                float kern = params->mass * -.5f * Wij * (Pi + Pj) / (di * dj);
                 //float kern = params->mass * -1.0f * Wij * (Pi/(di*di) + Pj/(dj*dj));
                 f += kern * r;
             }

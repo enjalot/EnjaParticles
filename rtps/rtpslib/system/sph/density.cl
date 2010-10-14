@@ -33,7 +33,8 @@ float dist_squared(float4 vec)
 }
 
 
-__kernel void density(__global float4* pos, __global float* density, __constant struct SPHParams* params)//, __global float4* error)
+__kernel void density(__global float4* pos, __global float* density, __constant struct SPHParams* params)
+//, __global float4* error)
 {
     unsigned int i = get_global_id(0);
     int num = get_global_size(0);
@@ -42,7 +43,7 @@ __kernel void density(__global float4* pos, __global float* density, __constant 
     //stuff from Tim's code (need to match #s to papers)
     //float alpha = 315.f/208.f/params->PI/h/h/h;
     float h9 = h*h*h * h*h*h * h*h*h;
-    float alpha = 315.f/64.0f/params->PI/h9;
+    float alpha = 315.f / (64.0f*params->PI*h9);
 
     float4 p = pos[i] * params->simulation_scale;
     density[i] = 0.0f;
