@@ -110,12 +110,55 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	int    nb_cells_y; 
 	int    nb_cells_z;
 
+	#if 0
 	// Dam (repeat case from Fluids v2
 	// Size in world space
 	float4 domain_min = float4(-10., -5., 0., 1.);
 	float4 domain_max = float4(+10., +5., 15., 1.);
 	float4 fluid_min   = float4( 4.5, -4.8,  0.03, 1.);
 	float4 fluid_max   = float4( 9.9, +4.8,  12., 1.);
+	#endif
+
+	#if 1
+	// box of fluid at rest
+	float4 domain_min = float4(4.5, -5., 0., 1.);
+	float4 domain_max = float4(+10., +5., 15., 1.);
+	float4 fluid_min   = float4( 4.5, -4.8,  0.03, 1.);
+	float4 fluid_max   = float4( 9.9, +4.8,  12., 1.);
+	#endif
+
+
+	double domain_size_x = domain_max.x - domain_min.x; 
+	double domain_size_y = domain_max.y - domain_min.y; 
+	double domain_size_z = domain_max.z - domain_min.z; 
+
+	float world_cell_size = cell_size / sph_settings.simulation_scale;
+	printf("world_cell_size= %f\n", world_cell_size);
+
+	nb_cells_x = (int) (domain_size_x / world_cell_size);
+	nb_cells_y = (int) (domain_size_y / world_cell_size);
+	nb_cells_z = (int) (domain_size_z / world_cell_size);
+
+	printf("nb cells: %d, %d, %d\n", nb_cells_x, nb_cells_y, nb_cells_z);
+	printf("part_rest_world: %f\n", particle_spacing / sph_settings.simulation_scale);
+
+	//-------------------------------
+    
+    //init sph stuff
+    sph_settings.rest_density = density;
+    sph_settings.particle_mass = particle_mass;
+
+	// Do not know why required  REST DISTANCE
+    sph_settings.particle_rest_distance = particle_rest_distance; 
+    sph_settings.particle_spacing = particle_spacing;  // distance between particles
+    sph_settings.smoothing_distance = h;   // CHECK THIS. Width of W function
+    sph_settings.particle_radius = particle_radius; 
+
+	// factor of 2 is TEMPORARY (should be 1)
+    sph_settings.boundary_distance =  2.0 * sph_settings.particle_spacing / 2.;
+    sph_settings.boundary_distance =  particle_radius;
+
+	printf("domain size: %f, %f, %f\n", domain_size_x, domain_size_y, domain_size_z);
 
 	double domain_size_x = domain_max.x - domain_min.x; 
 	double domain_size_y = domain_max.y - domain_min.y; 
