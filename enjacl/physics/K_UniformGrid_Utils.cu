@@ -112,6 +112,7 @@ namespace UniformGridUtils
 
 		O::PostCalc(data, index_i);
 	}
+	//--------------------------------------------------
 	// Iterate over particles found in the neighbor list
 	template<class O, class D>
 	static __device__ void IterateParticlesInNearbyCells(
@@ -126,8 +127,8 @@ namespace UniformGridUtils
 		// iterate over particles in neighbor list
 		for(uint counter=0; counter < dNeighborList.MAX_NEIGHBORS; counter++) 
 		{
-			//const uint index_j = FETCH(dNeighborList,neighbors, index_i*dNeighborList.neighbors_pitch+counter);
-			const uint index_j = FETCH_NOTEX(dNeighborList,neighbors, index_i*dNeighborList.MAX_NEIGHBORS+counter);			
+			//const uint index_j = FETCH(dNeighborList, neighbors, index_i*dNeighborList.neighbors_pitch+counter);
+			const uint index_j = FETCH_NOTEX(dNeighborList, neighbors, index_i*dNeighborList.MAX_NEIGHBORS+counter);			
 
 			// no more neighbors for this particle
 			if(index_j == 0xffffffff)
@@ -136,10 +137,8 @@ namespace UniformGridUtils
 			O::ForPossibleNeighbor(data, index_i, index_j, position_i);
 
 		}
-
 		O::PostCalc(data, index_i);
 	}
-
 };
 
 #endif

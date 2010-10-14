@@ -1,6 +1,5 @@
 
 
-export BASE_DIR=${HOME}/grav/branch_grav/branch3/graphics_libs
 #this should be updated to where you have this code
 export ENJA_DIR=${HOME}/Documents/src/blender-particles/enjacl
 
@@ -9,10 +8,8 @@ export GPU_SDK=/Developer/GPU_aug10_Computing
 export CUDA_HOME=${GPU_SDK}
 export CUDA_LOCAL=${GPU_SDK}/C
 export OPENCL_HOME=${GPU_SDK}/OpenCL
-#export GRAPHIC_LIBS_HOME=${BASE_DIR}/graphics_libs
-#export GRAPHICS_LIBS=${GRAPHIC_LIBS_HOME}/builds/enjmac
-export GRAPHICS_LIBS=/Users/erlebach/grav/branch_grav/branch3/builds/pure_opencl/graphics_libs
-export GRAPHICS_LIBS_SRC=/Users/erlebach/grav/branch_grav/branch3/graphics_libs
+export GRAPHICS_LIBS=${ENJA_DIR}/graphics_libs
+export GRAPHICS_LIBS_SRC=${GRAPHICS_LIBS}
 
 #export CUDA_PROFILE_CONFIG=./profile_config
 

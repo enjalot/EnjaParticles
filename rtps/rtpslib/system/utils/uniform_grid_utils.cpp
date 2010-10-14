@@ -44,7 +44,7 @@ int4 calcGridCell(float4 p, float4 grid_min, float4 grid_delta)
 }
 
 /*--------------------------------------------------------------*/
-uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
+uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 {
 	// each variable on single line or else STRINGIFY DOES NOT WORK
 	int gx;
@@ -90,10 +90,10 @@ uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
 	float4 IterateParticlesInCell(
 		__global float4*    vars_sorted,
 		PointData* pt,
-		__constant uint 	numParticles,
-		__constant int4 	cellPos,
-		__constant uint 	index_i,
-		__constant float4 	position_i,
+		uint 	numParticles,
+		int4 	cellPos,
+		uint 	index_i,
+		float4 	position_i,
 		__global int* 		cell_indexes_start,
 		__global int* 		cell_indexes_end,
 		__constant struct GridParams* gp,
@@ -219,11 +219,13 @@ __kernel void K_SumStep1(
 	//cli[index].w = 3;
 
 	if (fp->choice == 0) { // update density
+	//return;
     	IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
 		// density(index) = frce.x; 
 		density(index) = pt.density.x;
 		//cli[index].w = 4;
-		//clf[index].x = density(index);
+		clf[index].x = pt.density.x;
+		clf[index].y = sphp->smoothing_distance;
 		// code reaches this point on first call
 	}
 	if (fp->choice == 1) { // update pressure
@@ -232,7 +234,7 @@ __kernel void K_SumStep1(
 		//force(index) = frce; // Does not seem to maintain value into euler.cl
 		force(index) = pt.force; // Does not seem to maintain value into euler.cl
 		//cli[index].w = 5;
-		//clf[index] = frce;
+		clf[index] = pt.force;
 		// SERIOUS PROBLEM: Results different than results with cli = 4 (bottom of this file)
 	}
 	if (fp->choice == 2) { // update surface tension (NOT DEBUGGED)

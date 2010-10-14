@@ -20,7 +20,8 @@
 #include "physics/vfield.cl"
 #include "physics/sph.cl"
 #include "physics/sort.cl"
-#include "physics/uniform_hash.cl"
+//#include "physics/uniform_hash.cl"
+//#include "physics/datastructures_test.cl"
 
 #ifdef OPENCL_SHARED
 //#include "physics/collision_ge.cl"
@@ -43,7 +44,8 @@ const std::string EnjaParticles::sources[] = {
         collision_program_source,
         position_program_source,
         sort_program_source,
-		hash_program_source
+		//hash_program_source,
+		//datastructures_program_source
     };
 
 
@@ -213,7 +215,7 @@ EnjaParticles::EnjaParticles(int s, int n)
     //init opencl
     int success = init_cl();
     
-    m_system = new SPH::SPH(this);
+    //m_system = new SPH::SPH(this);
 }
 
 //Take in vertex vert_gen as well as velocity vert_gen that are len elements long
@@ -331,17 +333,21 @@ int EnjaParticles::getNum()
 
 float EnjaParticles::getFPS()
 {
-    return 1000.f / ts[2]->getAverage();    //1 second divided by total render time 
+    //return 1000.f / ts[2]->getAverage();    //1 second divided by total render time 
+	return -1.;
 }
 
 std::string EnjaParticles::printReport()
 {
     //print timings with all library options
     //helper function for printing timings for graphing
-    std::stringstream ss;
+
+    std::stringstream ss("");
+	#if 0
     //ts[0] is total time for all update calls, ts[2] is total rendering time
     // num, render ms, cl ms, /*updates*/, glsl, alpha blending
     ss << num << " & " << ts[2]->getAverage() << " & " << ts[0]->getAverage() << " & " /*<< updates << " & "*/ << glsl << " & " << blending << " \\" << std::ends;
+	#endif
     return ss.str();
 }
 
@@ -353,10 +359,10 @@ std::string* EnjaParticles::getReport()
     std::stringstream ss2;
     std::string* s = new std::string[2];
     ss1 << std::fixed << std::setprecision(6);
-    ss1 << "Average Render Time (per frame): " << ts[2]->getAverage() << std::ends;
+    //ss1 << "Average Render Time (per frame): " << ts[2]->getAverage() << std::ends;
     s[0] = ss1.str();
     ss2 << std::fixed << std::setprecision(6);
-    ss2 << "Average OpenCL Time (per frame): " << ts_cl[0]->getAverage()  << std::ends;
+    //ss2 << "Average OpenCL Time (per frame): " << ts_cl[0]->getAverage()  << std::ends;
     s[1] = ss2.str();
     return s;
 }

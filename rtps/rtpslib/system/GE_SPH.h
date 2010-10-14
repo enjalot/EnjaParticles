@@ -323,8 +323,20 @@ private:
 	void computeCellStartEndGPU();
 	void computeCellStartEndCPU();
 
-	void printGPUDiagnostics();
+	void printGPUDiagnostics(int count=-1);
 	float computeTimeStep();
+	float computeMax(float* arr, int nb);
+	float computeMin(float* arr, int nb);
+
+	float boundaryOnCPU();
+	float4 calculateRepulsionForce(
+      float4 normal, 
+	  float4 vel, 
+	  float boundary_stiffness, 
+	  float boundary_dampening, 
+	  float boundary_distance);
+	void collisionWall();
+	float4 eulerOnCPU();
 };
 
 }

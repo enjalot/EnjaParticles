@@ -86,8 +86,8 @@ void GE_SPH::neighborSearch(int which)
 	int local = 128;
 
 	kern.execute(nb_el, local);
-
 	ps->cli->queue.finish();
+
 	//ts_cl[TI_NEIGH]->end();
 	if (which == 0) ts_cl[TI_DENS]->end();
 	if (which == 1) ts_cl[TI_PRES]->end();
@@ -95,7 +95,8 @@ void GE_SPH::neighborSearch(int which)
 	if (which == 3) ts_cl[TI_COL_NORM]->end();
 
 
-	#if 0
+	#if 1
+	printf("============================================\n");
 	printf("which == %d *** \n", which);
 
 	clf_debug->copyToHost();

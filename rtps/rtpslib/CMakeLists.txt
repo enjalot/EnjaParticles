@@ -79,7 +79,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/ge_sph/Pressure.cpp
     ${rtpslib_SOURCE_DIR}/system/ge_sph/Viscosity.cpp
 
-
+    //${rtpslib_SOURCE_DIR}/system/utils/wpoly6_cpu.cpp
 
 
     #${rtpslib_SOURCE_DIR}/system/SPH.cpp
@@ -94,7 +94,8 @@ set (rtpslib_SOURCES
 
 
 ADD_DEFINITIONS(-g )
-ADD_DEFINITIONS(-DGPU)
+#ADD_DEFINITIONS(-DGPU)
+ADD_DEFINITIONS(-DCPU)
 ADD_DEFINITIONS(-DCL_SORT_SOURCE_DIR="${rtpslib_SOURCE_DIR}/oclRadixSortKeysValues/")
 ADD_DEFINITIONS(-DCL_BITONIC_SORT_SOURCE_DIR="${rtpslib_SOURCE_DIR}/bitonic_sort/")
 ADD_DEFINITIONS(-DCL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/system/sph/")

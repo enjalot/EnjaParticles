@@ -2,6 +2,7 @@
 #define RTPS_STRUCTS_H_INCLUDED
 
 #include <stdio.h>
+#include <math.h>
 
 
 // GE: Sept. 8, 2010
@@ -61,6 +62,42 @@ typedef struct float4
 	}
 	void print(const char* msg=0) {
 		printf("%s: %f, %f, %f, %f\n", x, y, z, w);
+	}
+
+	friend float4 operator-(float4& a, float4& b) {
+		float4 c = float4(b.x-a.x, b.y-a.y, b.z-a.z, b.w-a.w);
+		return c;
+	}
+
+	friend float4& operator+(float4& a, float4& b) {
+		float4 c = float4(b.x+a.x, b.y+a.y, b.z+a.z, b.w+a.w);
+		return c;
+	}
+
+	//friend float4& operator+(const float4& a, const float4& b) const {
+		//float4 c = float4(b.x+a.x, b.y+a.y, b.z+a.z, b.w+a.w);
+		//return c;
+	//}
+
+	//friend float4 operator*(const float r, const float4& b) const {
+		//return float4(r*b.x, r*b.y, r*b.z, r*b.w);
+	//}
+	//friend float4& operator*(const float4& b, const float r) const {
+		//return float4(r*b.x, r*b.y, r*b.z, r*b.w);
+	//}
+
+	friend float4 operator*(float r, float4& b) {
+		float4 m = float4(r*b.x, r*b.y, r*b.z, r*b.w);
+		return m;
+	}
+	friend float4 operator*(float4& b, float r) {
+		float4 m = float4(r*b.x, r*b.y, r*b.z, r*b.w);
+		return m;
+	}
+
+	float length() {
+		float4& f = *this;
+		return sqrt(f.x*f.x + f.y*f.y + f.z*f.z);
 	}
 } float4;
 

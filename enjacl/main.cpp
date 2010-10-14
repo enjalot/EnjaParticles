@@ -1,4 +1,5 @@
 //
+//
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -297,6 +298,9 @@ int main(int argc, char** argv)
     */
 
 
+	// only done once
+	enjas->setupArrays(); 
+
     glutMainLoop();
     
     printf("doesn't happen does it\n");
@@ -347,6 +351,7 @@ void appKeyboard(unsigned char key, int x, int y)
     }
 }
 
+//----------------------------------------------------------------------
 void appRender()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -438,6 +443,7 @@ void appRender()
 	glDisable(GL_DEPTH_TEST);
 }
 
+//----------------------------------------------------------------------
 void appDestroy()
 {
 
@@ -544,7 +550,7 @@ void showFPS(float fps, std::string* report)
     ss << std::fixed << std::setprecision(1);
     ss << fps << " FPS" << std::ends; // update fps string
     ss << std::resetiosflags(std::ios_base::fixed | std::ios_base::floatfield);
-    drawString(ss.str().c_str(), 15, 286, color, font);
+    drawString(ss.str().c_str(),  15, 286, color, font);
     drawString(report[0].c_str(), 15, 273, color, font);
     drawString(report[1].c_str(), 15, 260, color, font);
 

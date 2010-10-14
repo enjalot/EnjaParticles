@@ -7,6 +7,7 @@
 #include <vector>
 #include <stdio.h>
 
+//#include "cl.h"
 #include <CL/cl.hpp>
 
 #include "system.h"
@@ -17,15 +18,16 @@
 
 
 // GE: Sept. 8, 2010
-typedef struct float3 {
-	float x, y, z;
-	float3() {}
-	float3(float x, float y, float z) {
+typedef struct float4 {
+	float x, y, z, w;
+	float4() {}
+	float4(float x, float y, float z, float w=1.) {
 		this->x = x;
 		this->y = y;
 		this->z = z;
+		this->w = w;
 	}
-} float3;
+} float4;
 
 // GE: Sept. 8, 2010
 typedef struct int3 {
@@ -38,21 +40,40 @@ typedef struct int3 {
 	}
 } int3;
 
+//-------------------------------------------
 // GE: Sept8, 2010
 // From Krog's SPH code
 struct GridParams
 {
-    float3          grid_size;
-    float3          grid_min;
-    float3          grid_max;
+    float4          grid_size;
+    float4          grid_min;
+    float4          grid_max;
 
     // number of cells in each dimension/side of grid
-    float3          grid_res;
+    float4          grid_res;
 
-    float3          grid_delta;
+    float4          grid_delta;
+	int				numParticles;
+};
+
+//-------------------------------------------
+struct FluidParams
+{
+	float smoothing_length; // SPH radius
+	float scale_to_simulation;
+	float mass;
+	float dt;
+	float friction_coef;
+	float restitution_coef;
+	float damping;
+	float shear;
+	float attraction;
+	float spring;
+	float gravity; // -9.8 m/sec^2
 };
 
 
+//-------------------------------------------
 typedef struct Vec4
 {
     float x;
@@ -109,13 +130,68 @@ typedef struct SPHSettings
 
 class EnjaParticles
 {
+private:
+// BEGIN
+// ADDED BY GORDON FOR TESTING of hash, sort, datastructures
+	//CL cl;  // GE CL library
+	int nb_el, nb_vars, grid_size;
+	cl::Buffer cl_vars_sorted;
+	cl::Buffer cl_vars_unsorted;
+	cl::Buffer cl_cell_indices_start;
+	cl::Buffer cl_cell_indices_end;
+	cl::Buffer cl_sort_hashes;
+	cl::Buffer cl_sort_indices;
+	cl::Buffer cl_GridParams;
+	cl::Buffer cl_FluidParams;
+	cl::Buffer cl_cells;
+	cl::Buffer cl_unsort;
+	cl::Buffer cl_sort;
+	std::vector<cl_uint> sort_indices;
+	std::vector<cl_uint> sort_hashes;
+	std::vector<cl_float4> vars_sorted; 
+	std::vector<cl_float4> vars_unsorted; 
+	std::vector<cl_uint> cell_indices_start;
+	std::vector<cl_uint> cell_indices_end;
+	std::vector<cl_float4> cells;
+	std::vector<int> sort_int;
+	std::vector<int> unsort_int;
+	GridParams gp;
+	FluidParams fp;
+
+    cl::Program step1_program;
+    cl::Kernel step1_kernel;
+
+public:
+	void setupArrays();
+
+public:
+	int getNbVars() { return nb_vars; }
+	int getNbEl() { return nb_el; }
+
+	enum {POS=0, VEL, FOR, ACC, DENS};
+// END
+
 public:
 
 	/// Radix sort of integer array
-	void sort(std::vector<int> sort_int, std::vector<int> unsort_int);
+	//void sort(std::vector<int> sort_int, std::vector<int> unsort_int);
+	//void sort();
+	//void sort(cl::Buffer cl_unsort, cl::Buffer cl_sort);
+	// Sort the list cl_list (stored on the GPU)
+	// The sort is done in place
+	void sort(cl::Buffer cl_list, cl::Buffer cl_values);
+
+	/// a specific kernel
+	void buildDataStructures();
+
+	//void computeStep1();
 
 	// cl_float3 does not appear to exist. I'd have to extend cl_platform.h
-	void hash(std::vector<cl_float4> list, GridParams& gp);
+	//void hash(std::vector<cl_float4> list, GridParams& gp);
+	void hash();
+
+	char* getSourceString(const char* path_to_source_file);
+	void neighbor_search(); // in neighbor_search.cpp via include
 
     int update();   //update the particle system
     int cpu_update();   //update the particle system using cpu code
@@ -152,8 +228,10 @@ public:
 
     ~EnjaParticles();
 
-    enum {LORENZ, GRAVITY, VFIELD, SPH, COLLISION, POSITION, SORT, HASH};
+    enum {LORENZ, GRAVITY, VFIELD, SPH, COLLISION, POSITION, SORT, HASH, DATASTRUCTURES};
     static const std::string sources[];
+
+	void reorder_particles(); // experiment with particle sorting
 
     //keep track of transformation from blender
     /*
@@ -204,13 +282,15 @@ public:
     cl::Program pos_update_program;     //update the positions
     cl::Program sort_program;     //sorting of integer array
     cl::Program hash_program;     //hashing of grid cells
+    cl::Program datastructures_program;     //
 
     cl::Kernel transform_kernel; //kernel for updating with blender transformations
     cl::Kernel vel_update_kernel;
     cl::Kernel collision_kernel;
     cl::Kernel pos_update_kernel;
     cl::Kernel sort_kernel;     //sorting of integer array
-	cl::Kernel hash_kernel;
+    cl::Kernel hash_kernel;
+    cl::Kernel datastructures_kernel;
 
 	// true if all objects have been loaded to the GPU
 	bool are_objects_loaded;
@@ -242,7 +322,8 @@ public:
 
     //timers
     GE::Time *ts[3];    //library timers (update, render, total)
-    GE::Time *ts_cl[2]; //opencl timers (cl update routine, execute kernel)
+    GE::Time *ts_cl[10];    //library timers (update, render, total)
+	enum {TI_HASH=2, TI_SORT, TI_NEIGH, TI_BUILD};
 
     int init_cl();
     int setup_cl(); //helper function that initializes the devices and the context

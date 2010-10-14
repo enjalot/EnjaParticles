@@ -28,3 +28,40 @@ Projection of v onto the plane:
  New velocity = (vp, -vn) = v - (v.n)n - v.n n
                           = v - 2n v.n
 ----------------------------------------------------------------------
+9/14/2010
+- Given sort and datastructures (start_cell_indices, end_cell_indices), and hash, what experiments to perform? 
+1) Given collection of particles, compute collision forces of particles within a radius R
+   - assume forces given by Leonnard Jones force: -(24*eps/a)*[2*(a/r)^{13}-(a/r)^{7}]
+     = -(24*eps/a)*(a/r)^7 * [ 2*(a/r)^6 - 1. ]
+	 r << a ==> F = -(24*eps)/a  2 * (a/r)^{13}
+	 r >> a ==> F = +(24*eps)/a (a/r)^7
+
+2) for each particle, search neighbors (I would rather not store them since there can be infinite number of neighbors). 
+Compute the forces on each particle (sum of all neighboring particles)o
+
+3) figure out how to restrict number of particles per cell to 8. 
+----------------------------------------------------------------------
+Fri. Sept. 17, 2010
+Implement simple collisions detection: 
+Let particles fall due to gravity. Collision: given centers p1,p2, check that |p1-p2| < 2R. 
+(one could also make the force act BEFORE they collide)
+If so, update the force on the particles: (which is initially gravity)
+    Let rhat = (p2-p1)/|p2-p1| (points from 1 to 2)
+    F1 += 2*(relative momentum) / dt 
+	F1 += 2*m*(v2-v1) / dt
+	F2 -= 2*m*(v2-v1) / dt
+	relative momentum: (v2-v1)*m (m is mass: m1=m2)
+
+Euler (I should implement Verlet)
+v(n+1) = v(n) + dt * [F(n) / m]
+x(n+1) = x(n) + dt * v(n)
+F(n+1) = -g + collisions = -g +- 2*m*(v2-v1) / dt * C
+ (C=1 if collision, C=0 if no collision)
+
+Update x,v in one kernel
+Update force in collision kernel
+
+Time step dt < grid_size.x / vel_max (Courant conditions). So need grid_size iterations for 
+the fastest particles to go from one side of the cell to the other. So, for 50^3 grid, 
+one need 50 iterations = 1 sec of real time (reasonable). 
+----------------------------------------------------------------------

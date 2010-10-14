@@ -1,0 +1,12 @@
+June 10, 2010
+
+- convert CudaArray classes to OpenCLArray classes
+----------------------------------------------------------------------
+I should be able to compile the program only once and execute multiple times. 
+----------------------------------------------------------------------
+I need the ability to have multiple programs, each with a single kernel
+(for now). Then we'll do multiple programs (each with multiple kernels)
+----------------------------------------------------------------------
+Sept. 14, 2010
+- need a way to initialize the cl:: class (created by Nvidia) with an existing kernel object. 
+----------------------------------------------------------------------

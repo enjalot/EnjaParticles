@@ -24,7 +24,7 @@
 	float4 veli = vel(index_i);
 	float4 velj = vel(index_j);
 
-	#if 1
+	#if 0
 	// Add viscous forces
 
 	float vvisc = 0.001f; // SHOULD BE SET IN GE_SPH.cpp
@@ -36,7 +36,7 @@
 	stress *=  sphp->mass/(di.x*dj.x);  // original
 
 
-	#if 1
+	#if 0
 	// Add XSPH stabilization term
 	float Wijpol6 = Wpoly6(rlen, sphp->smoothing_distance, sphp);
 	float4 surf_tens =  (2.f * sphp->mass * (velj-veli)/(di.x+dj.x) 

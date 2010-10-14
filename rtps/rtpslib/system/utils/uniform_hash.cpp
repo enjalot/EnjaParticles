@@ -31,7 +31,7 @@ int4 calcGridCell(float4 p, float4 grid_min, float4 grid_inv_delta)
 }
 
 //----------------------------------------------------------------------
-uint calcGridHash(int4 gridPos, float4 grid_res, __constant bool wrapEdges)
+uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 {
     // each variable on single line or else STRINGIFY DOES NOT WORK
     int gx;

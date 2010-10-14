@@ -193,7 +193,7 @@ void zeroPoint(PointData* pt)
 
 void ForNeighbor(__global float4* vars_sorted,
     PointData* pt,
-    __constant uint index_i,
+    uint index_i,
     uint index_j,
     float4 r,
     float rlen,
@@ -255,28 +255,9 @@ void ForNeighbor(__global float4* vars_sorted,
 
  float4 veli = vars_sorted[index_i+2*num];
  float4 velj = vars_sorted[index_j+2*num];
-
-
-
-
- float vvisc = 0.001f;
-
- float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
- stress += vvisc * (velj-veli) * dWijlapl;
-
-
+# 36 "pressure_update.cl"
  stress *= sphp->mass/(di.x*dj.x);
-
-
-
-
- float Wijpol6 = Wpoly6(rlen, sphp->smoothing_distance, sphp);
- float4 surf_tens = (2.f * sphp->mass * (velj-veli)/(di.x+dj.x)
-     * Wijpol6);
-
- stress += surf_tens;
-
-
+# 48 "pressure_update.cl"
  pt->force += stress;
 # 49 "neighbors.cpp" 2
  }
@@ -320,8 +301,8 @@ void ForNeighbor(__global float4* vars_sorted,
 
 float4 ForPossibleNeighbor(__global float4* vars_sorted,
       PointData* pt,
-      __constant uint num,
-      __constant uint index_i,
+      uint num,
+      uint index_i,
       uint index_j,
       __constant float4 position_i,
         __constant struct GridParams* gp,

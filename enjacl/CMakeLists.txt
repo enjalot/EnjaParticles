@@ -12,9 +12,11 @@ message("${CMAKE_MODULE_PATH}\n")
 # appears in RadixSort.cl
 IF(APPLE)
 	ADD_DEFINITIONS(-DMAC)
+ELSE(APPLE)
+   ADD_DEFINITIONS(-DLINUX)
 ENDIF()
 ADD_DEFINITIONS(-DCL_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/physics")
-#ADD_DEFINITIONS(-DCL_SOURCE_DIR="${CMAKE_CURRENT_BINARY_DIR}")
+ADD_DEFINITIONS(-DCL_SORT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/oclRadixSortKeysValues")
 
 
 FIND_PACKAGE (GLUT)
@@ -23,14 +25,19 @@ FIND_PACKAGE (OPENCL)
 FIND_PACKAGE (GLEW)
 
 INCLUDE_DIRECTORIES( 
-	oclRadixSort/inc
+	physics/
+	#oclRadixSort/inc
+	oclRadixSortKeysValues/inc
 	${GLUT_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
     ${GLEW_INCLUDE_PATH}
-	$ENV{OPENCL_HOME}/common/inc
-	$ENV{OPENCL_HOME}/../shared/inc
-    #${OPENCL_INCLUDE_DIR}
-    ${enjacl_SOURCE_DIR}/../opencl10
+    #$ENV{OPENCL_HOME}/common/inc
+    #$ENV{OPENCL_HOME}/../shared/inc
+    ${OPENCL_INCLUDE_DIR}
+    ${enjacl_SOURCE_DIR}/../opencl11
+	$ENV{GRAPHICS_LIBS}/utilities
+	$ENV{GRAPHICS_LIBS}/opencl_utilities
+    #${enjacl_SOURCE_DIR}/oclRadixSortKeysValues
 )
 
 message("Opencl Home: $ENV{OPENCL_HOME}")
@@ -42,8 +49,10 @@ ADD_DEFINITIONS(-g )
 
 #particles opencl library
 set (CLCXXFILES  
-	oclRadixSort/src/RadixSort.cpp
-	oclRadixSort/src/Scan.cpp
+	oclRadixSortKeysValues/src/RadixSort.cpp
+	oclRadixSortKeysValues/src/Scan.cpp
+	#oclRadixSort/src/RadixSort.cpp
+	#oclRadixSort/src/Scan.cpp
     enja.cpp 
     opencl.cpp 
     physics/collision.cpp 
@@ -62,18 +71,24 @@ SET(EXEC_CL sph.x)
 ADD_EXECUTABLE(${EXEC_CL} main.cpp util.cpp)
 
 TARGET_LINK_LIBRARIES (${ocllib}
-   $ENV{OPENCL_HOME}/../shared/lib/libshrutil_x86_64.a
-   $ENV{OPENCL_HOME}/common/lib/liboclUtil_x86_64.a
+    #$ENV{OPENCL_HOME}/../shared/lib/libshrutil_x86_64.a
+    #$ENV{OPENCL_HOME}/common/lib/liboclUtil_x86_64.a
 )
 
 TARGET_LINK_LIBRARIES (${EXEC_CL}
-   $ENV{OPENCL_HOME}/../shared/lib/libshrutil_x86_64.a
-   $ENV{OPENCL_HOME}/common/lib/liboclUtil_x86_64.a
+    #$ENV{OPENCL_HOME}/../shared/lib/libshrutil_x86_64.a
+    #$ENV{OPENCL_HOME}/common/lib/liboclUtil_x86_64.a
    ${ocllib}
+   utilities
+   #cl_utilities_cpp
+   #${CMAKE_CURRENT_BINARY_DIR}/graphics_libs/opencl_utilities/libcl_utilities_cpp.a
+   #${CMAKE_CURRENT_BINARY_DIR}/graphics_libs/utilities/libutilities.a
+   #${CMAKE_CURRENT_BINARY_DIR}/graphics_libs/opencl_utilities/libcl_utilities_cpp.a
    ${GLUT_LIBRARIES}
    ${OPENGL_LIBRARIES}
    ${OPENCL_LIBRARIES}
    ${GLEW_LIBRARY}
 )
 
-
+ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/graphics_libs)
+ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/physics)
