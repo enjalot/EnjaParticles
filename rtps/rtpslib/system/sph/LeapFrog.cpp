@@ -44,9 +44,10 @@ void SPH::cpuLeapFrog()
         vnext.y += h*f.y;
         vnext.z += h*f.z;
 
-        vnext.x += .5f * xsphs[i].x;
-        vnext.y += .5f * xsphs[i].y;
-        vnext.z += .5f * xsphs[i].z;
+        float xsphfactor = .1f;
+        vnext.x += xsphfactor * xsphs[i].x;
+        vnext.y += xsphfactor * xsphs[i].y;
+        vnext.z += xsphfactor * xsphs[i].z;
        
         float scale = params.simulation_scale;
         p.x += h*vnext.x / scale;
