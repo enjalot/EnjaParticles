@@ -60,7 +60,6 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 
 	setupTimers();
 	initializeData();
-
 }
 
 //----------------------------------------------------------------------
