@@ -54,6 +54,52 @@ void UniformGrid::make_cube(float4* position, float spacing, int num)
 
 }
 
+
+void UniformGrid::make_column(float4* position, float spacing, int num)
+{
+    //float xmin = min.x/2.5f;
+    float xmin = min.x;
+    float xmax = min.x + max.x;
+    //float ymin = min.y;
+    float ymin = min.y;
+    float ymax = min.y + max.y;
+    //float zmin = min.z/2.0f;
+    float zmin = min.z;// + max.z/2.0f;
+    float zmax = min.z + max.z;
+
+    int i=0;
+    for (float z = zmin; z <= zmax; z+=spacing) {
+    for (float y = ymin; y <= ymax; y+=spacing) {
+    for (float x = xmin; x <= xmax; x+=spacing) {
+        if (i >= num) break;				
+        position[i] = float4(x,y,z,1.0f);
+        i++;
+    }}}
+
+}
+void UniformGrid::make_dam(float4* position, float spacing, int num)
+{
+    //float xmin = min.x/2.5f;
+    float xmin = min.x;
+    float xmax = min.x + max.x/2.0f;
+    //float ymin = min.y;
+    float ymin = min.y;
+    float ymax = min.y + max.y;
+    //float zmin = min.z/2.0f;
+    float zmin = min.z;// + max.z/2.0f;
+    float zmax = min.z + max.z;
+
+    int i=0;
+    for (float x = xmin; x <= xmax; x+=spacing) {
+    for (float z = zmin; z <= zmax; z+=spacing) {
+    for (float y = ymin; y <= ymax; y+=spacing) {
+        if (i >= num) break;				
+        position[i] = float4(x,y,z,1.0f);
+        i++;
+    }}}
+
+}
+
 int UniformGrid::make_line(float4* position, float spacing, int num)
 {
     float xmin = min.x;

@@ -23,9 +23,9 @@
 int window_width = 800;
 int window_height = 600;
 int glutWindowHandle = 0;
-float translate_x = -400.f;
-float translate_y = 300.f;
-float translate_z = 350.f;
+float translate_x = 0.0f;
+float translate_y = -200.0f;//300.f;
+float translate_z = 200.f;
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -59,7 +59,7 @@ void *font = GLUT_BITMAP_8_BY_13;
 
 rtps::RTPS* ps;
 //#define NUM_PARTICLES 16384
-#define NUM_PARTICLES 8192
+#define NUM_PARTICLES 4096
 //#define NUM_PARTICLES 1024
 #define DT .001f
 
