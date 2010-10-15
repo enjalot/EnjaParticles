@@ -19,13 +19,17 @@ namespace rtps {
 //{
 	//this->ds = ds;
 //}
+
+//----------------------------------------------------------------------
+
+#include "new_parameters.cpp"
+
 //----------------------------------------------------------------------
 GE_SPH::GE_SPH(RTPS *psfr, int n)
 {
     num = n;
 
     //for reading back different values from the kernel
-    std::vector<float4> error_check(num);
 
     //store the particle system framework
     ps = psfr;
@@ -37,323 +41,8 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	nb_el = n;
 	printf("1 nb_el= %d\n", nb_el);
 
-	// STRATEGY
-	// mass of single particle based on density and particle radius
-	// mass of single cell of the grid, assuming np particles per cell
-	//   (np is 1 or 8 in 3D)
-
-	// Density (mass per unit vol)
-	// density of water: 1000 kg/m^3  (62lb/ft^3)
-	double density; // water: 62 lb/ft^3 = 1000 kg/m^3
-	double particle_radius;
-	double particle_volume;
-
-	density = 1000.; 
-	double pi = acos(-1.);
-	double nb_particles = num;
-	double rat = (float) (num/4096.);
-	double particle_mass = particle_volume * density;
-	particle_mass = 0.00020543 / rat; // from Fluids2
-	particle_volume = particle_mass / density;
-	particle_radius = pow(particle_volume*3./(4.*pi), 1./3.);
-	printf("particle radius= %f\n", particle_radius);
-
-	int nb_particles_in_cell = 1;
-	// mass of fluid in a single cell
-	float cell_mass = nb_particles_in_cell*particle_mass;
-	float cell_volume = cell_mass / density; // = particle_volume
-
-	// Cell contains nb_particles_in_cell of fluid
-	// size of single fluid element viewed as a cube
-
-	// particle "cube" with same mass as spherical particle
-	float particle_size = pow(cell_volume, 1./3.);
-
-	float particle_spacing;
-	// particle_spacing of particles at t=0
-	// rest distance between particles
-	float particle_rest_distance = 1.00 * 0.87*particle_size; // why 0.87? 
-	particle_spacing = particle_rest_distance; 
-
-	printf("particle_spacing= %f\n", particle_spacing);
-	printf("particle_rest_distance= %f\n", particle_rest_distance);
-
-	#if 0
-	if (nb_particles_in_cell == 1) {
-		particle_spacing = cell_sz;
-	} else if (nb_particles_in_cell > 1) {
-		particle_spacing = pow((float) nb_particles_in_cell, -1./3.) * cell_sz;
-	} else {
-		printf("nb_particles_in_cell must be >= 1\n");
-		exit(0);
-	}
-	#endif
-
-	// desired number of particles within the smoothing_distance sphere
-	int nb_interact_part = 50;
-	// (4/3*pi*h^3)/ particle_spacing^3 = nb_interact_part
-	double coef = 3.14159*4./3.;
-	//double h = pow(nb_interact_part/coef, 1./3.) * particle_radius;
-	double h = pow(nb_interact_part/coef, 1./3.) * particle_spacing;
-	double hvol = (4.*pi/3.)*pow(h,3.);
-	double particle_cell_vol = pow(particle_spacing,3.);
-	printf("particle_spacing= %f\n", particle_spacing);
-	printf("h= %f\n", h);
-	printf("nb_part= %d\n", (int) (4.*pi/3. * pow(h/particle_spacing,3.)));
-	printf("nb_part= %d\n", (int) (hvol/particle_cell_vol));
-	//exit(0);
-
-	//h = .02; // larger than I would want it, but same as Fluid v.2
-	//h = .01; // larger than I would want it, but same as Fluid v.2
-	// domain cell size
-	float cell_sz;
-	cell_sz = h;  // 27 neighbor search (only neighbors strictly necessary)
-	printf("cell_size, delta_x= %f\n", cell_sz);
-	printf("smoothing_length h= %f\n", h);
-
-	//-------------------------------
-	//SETUP GRID
-
-    sph_settings.simulation_scale = 0.010; //0.004;
-
-	double cell_size = cell_sz;
-	printf("cell_size= %f\n", cell_size); 
-
-	//cell_size = h;
-	int    nb_cells_x; // number of cells along x
-	int    nb_cells_y; 
-	int    nb_cells_z;
-
-	#if 0
-	// Dam (repeat case from Fluids v2
-	// Size in world space
-	float4 domain_min = float4(-10., -5., 0., 1.);
-	float4 domain_max = float4(+10., +5., 15., 1.);
-	float4 fluid_min   = float4( 4.5, -4.8,  0.03, 1.);
-	float4 fluid_max   = float4( 9.9, +4.8,  12., 1.);
-	#endif
-
-	#if 1
-	// box of fluid at rest
-	float4 domain_min = float4(4.5, -5., 0., 1.);
-	float4 domain_max = float4(+10., +5., 25., 1.);
-	float4 fluid_min   = float4( 4.5, -4.9,  0.03, 1.);
-	float4 fluid_max   = float4( 9.9, +4.9,  25., 1.);
-	#endif
-
-
-	double domain_size_x = domain_max.x - domain_min.x; 
-	double domain_size_y = domain_max.y - domain_min.y; 
-	double domain_size_z = domain_max.z - domain_min.z; 
-
-	float world_cell_size = cell_size / sph_settings.simulation_scale;
-	printf("world_cell_size= %f\n", world_cell_size);
-
-	nb_cells_x = (int) (domain_size_x / world_cell_size);
-	nb_cells_y = (int) (domain_size_y / world_cell_size);
-	nb_cells_z = (int) (domain_size_z / world_cell_size);
-
-	printf("nb cells: %d, %d, %d\n", nb_cells_x, nb_cells_y, nb_cells_z);
-	printf("part_rest_world: %f\n", particle_spacing / sph_settings.simulation_scale);
-
-	//---------------------------------------------------------
-    //init sph stuff
-    sph_settings.rest_density = density;
-    sph_settings.particle_mass = particle_mass;
-
-	// Do not know why required  REST DISTANCE
-    sph_settings.particle_rest_distance = particle_rest_distance; 
-    sph_settings.particle_spacing = particle_spacing;  // distance between particles
-    sph_settings.smoothing_distance = h;   // CHECK THIS. Width of W function
-    sph_settings.particle_radius = particle_radius; 
-
-	// factor of 2 is TEMPORARY (should be 1)
-    sph_settings.boundary_distance =  2.0 * sph_settings.particle_spacing / 2.;
-    sph_settings.boundary_distance =  particle_radius;
-
-	printf("domain size: %f, %f, %f\n", domain_size_x, domain_size_y, domain_size_z);
-
-
-	//-------------------------------
-    
-    //init sph stuff
-    sph_settings.rest_density = density;
-    sph_settings.particle_mass = particle_mass;
-
-	// Do not know why required  REST DISTANCE
-    sph_settings.particle_rest_distance = particle_rest_distance; 
-    sph_settings.particle_spacing = particle_spacing;  // distance between particles
-    sph_settings.smoothing_distance = h;   // CHECK THIS. Width of W function
-    sph_settings.particle_radius = particle_radius; 
-
-	// factor of 2 is TEMPORARY (should be 1)
-    sph_settings.boundary_distance =  2.0 * sph_settings.particle_spacing / 2.;
-    sph_settings.boundary_distance =  particle_radius;
-
-	printf("domain size: %f, %f, %f\n", domain_size_x, domain_size_y, domain_size_z);
-	//exit(0);
-
-	//float4 domain_size(domain_size_x, domain_size_y, domain_size_z, 1.);
-	float4 domain_origin = domain_min;
-	float4 domain_size;
-	domain_size.x = domain_size_x;
-	domain_size.y = domain_size_y;
-	domain_size.z = domain_size_z;
-	domain_size.w = 1.0;
-	domain_origin.print("domain origin");
-	domain_size.print("domain size");
-
-
-	nb_cells = int4(nb_cells_x, nb_cells_y, nb_cells_z, 1);
-	int num_old = num;
-    grid = UniformGrid(domain_min, domain_max, nb_cells, sph_settings.simulation_scale); 
-
-	printf("simu scale: %f\n", sph_settings.simulation_scale);
-	printf("UniformGrid\n");
-	domain_origin.print("origin");
-	domain_size.print("domain size");
-
-	//END SETUP GRID
-	//-------------------------------
-
-
-printf("num= %d\n", num);
-
-    //*** Initialization, TODO: move out of here to the particle directory
-    positions.resize(num);
-    forces.resize(num);
-    velocities.resize(num);
-    densities.resize(num);
-
-	// CREATE FLUID SPHERE
-	float4 center(5., 5., 8., 1.);
-	float radius = 0.5;
-	int offset = 0;
-	printf("original offset: %d\n", offset);
-	//grid.makeSphere(&positions[0], center, radius, num, offset, 
-	//	sph_settings.particle_spacing);
-	printf("after sphere, offset: %d\n", offset);
-
-
-	float4 pmin = fluid_min;
-	float4 pmax = fluid_max;
-	pmin.print("pmin");
-	pmax.print("pmax");
-	printf("particle_spacing: %f\n", sph_settings.particle_spacing);
-
-	// INITIATE PARTICLE POSITIONS
-	float spacing = sph_settings.particle_spacing/sph_settings.simulation_scale;
-	printf("world spacing= %f\n", spacing);
-
-	grid.makeCube(&positions[0], pmin, pmax, spacing, num, offset);
-	printf("after cube, offset: %d\n", offset);
-	printf("after cube, num: %d\n", num);
-
-	printf("2 nb_el= %d\n", nb_el);
-
-	#if 0
-	if (num_old != nb_el) {
-		printf("nb_el should equal num_old\n");
-		exit(0);
-	}
-
-	if (num != num_old) {
-		printf("Less than the full number of particles are used\n");
-		printf("mismatch of num. Deal with it\n");
-		printf("num, num_old= %d, %d\n", num, num_old);
-		exit(1);
-	}
-	#endif
-
-	printf("36 nb_el= %d\n", nb_el);
-
-	num = offset;
-	//printf("new num= %d\n", num); exit(0);
-
-    cl_params = new BufferGE<GE_SPHParams>(ps->cli, 1);
-	GE_SPHParams& params = *(cl_params->getHostPtr());
-    params.grid_min = grid.getMin();
-    params.grid_max = grid.getMax();
-    params.mass = sph_settings.particle_mass;
-    params.rest_distance = sph_settings.particle_rest_distance;
-    params.rest_density = sph_settings.rest_density;
-    params.smoothing_distance = sph_settings.smoothing_distance;
-    params.particle_radius = sph_settings.particle_radius;
-    params.simulation_scale = sph_settings.simulation_scale;
-	printf("scale: %f\n", params.simulation_scale);
-
-	printf("37 nb_el= %d\n", nb_el);
-
-	// does scale_simulation influence stiffness and dampening?
-    params.boundary_stiffness = 10000.;  //10000.0f;  (scale from 20000 to 20)
-    params.boundary_dampening = 1256.;//256.; 
-    params.boundary_distance = sph_settings.boundary_distance;
-    params.EPSILON = .00001f;
-    params.PI = 3.14159265f;
-    params.K = 1.5f; //100.0f; //1.5f;
-	params.dt = psfr->settings.dt;
-	//printf("dt= %f\n", params.dt); exit(0);
- 
-	cl_params->copyToDevice();
-	cl_params->copyToHost();
-	GE_SPHParams& pparams = *(cl_params->getHostPtr());
-	printf("35 nb_el= %d\n", nb_el);
-
-//	printf("new num: %d\n", num); exit(0);
-
-	// Decrease/increase num (nb particles as necessary)
-    //*** Initialization, TODO: move out of here to the particle directory
-	if (offset > num) {
-		printf("offset should be <= num\n");
-		exit(0);
-	}
-	num = offset;
-	nb_el = num;
-    std::vector<float4> colors(num);
-    positions.resize(num);
-    forces.resize(num);
-    velocities.resize(num);
-    densities.resize(num);
-
-    std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));
-    std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 1.0f, 0.0f));
-    std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
-
-    std::fill(densities.begin(), densities.end(), 0.0f);
-    std::fill(error_check.begin(), error_check.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
-
-	#if 0
-	printf("h= %f\n", h);
-    for(int i = 0; i < nb_el; i++)
-    {
-        printf("position[%d] = %f %f %f\n", positions[i].x, positions[i].y, positions[i].z);
-    }
-	exit(0);
-    #endif
-
-	printf("3 nb_el= %d\n", nb_el);
-
-    //*** end Initialization
-
-	// Put in setup Arrays
-    // VBO creation, TODO: should be abstracted to another class
-    managed = true;
-    //printf("positions: %d, %d, %d\n", positions.size(), sizeof(float4), positions.size()*sizeof(float4));
-    pos_vbo = createVBO(&positions[0], positions.size()*sizeof(float4), GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
-    //printf("pos vbo: %d\n", pos_vbo);
-    col_vbo = createVBO(&colors[0], colors.size()*sizeof(float4), GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
-    //printf("col vbo: %d\n", col_vbo);
-    // end VBO creation
-
-    //vbo buffers
-    cl_position = new BufferVBO<float4>(ps->cli, pos_vbo);
-    cl_color    = new BufferVBO<float4>(ps->cli, col_vbo);
-
-    //pure opencl buffers
-    cl_force       = new BufferGE<float4>(ps->cli, &forces[0], forces.size());
-    cl_velocity    = new BufferGE<float4>(ps->cli, &velocities[0], velocities.size());
-    cl_density     = new BufferGE<float>(ps->cli, &densities[0], densities.size());
-    cl_error_check = new BufferGE<float4>(ps->cli, &error_check[0], error_check.size());
+	gordon_parameters(); // code does not work
+	//ian_parameters(); // Ian's code does work (in branch rtps)
 
 	setupArrays(); // From GE structures
 
@@ -369,61 +58,9 @@ printf("num= %d\n", num);
 	cl_FluidParams->getHostPtr()->print();
 	printf("=========================================\n");
 
-	int print_freq = 20000;
-	int time_offset = 5;
+	setupTimers();
+	initializeData();
 
-	ts_cl[TI_HASH]   = new GE::Time("hash",      time_offset, print_freq);
-	ts_cl[TI_RADIX_SORT]   = new GE::Time("radix sort",   time_offset, print_freq);
-	ts_cl[TI_BITONIC_SORT] = new GE::Time("bitonic sort", time_offset, print_freq);
-	ts_cl[TI_BUILD]  = new GE::Time("build",     time_offset, print_freq);
-	ts_cl[TI_NEIGH]  = new GE::Time("neigh",     time_offset, print_freq);
-	ts_cl[TI_DENS]   = new GE::Time("density",   time_offset, print_freq);
-	ts_cl[TI_PRES]   = new GE::Time("pressure",  time_offset, print_freq);
-	ts_cl[TI_COL]      = new GE::Time("color",  time_offset, print_freq);
-	ts_cl[TI_COL_NORM] = new GE::Time("color_norm", time_offset, print_freq);
-	ts_cl[TI_VISC]   = new GE::Time("viscosity", time_offset, print_freq);
-	ts_cl[TI_EULER]  = new GE::Time("euler",     time_offset, print_freq);
-	ts_cl[TI_UPDATE] = new GE::Time("update",    time_offset, print_freq);
-	ts_cl[TI_COLLISION_WALL] 
-	                 = new GE::Time("collision wall",    time_offset, print_freq);
-	//ps->setTimers(ts_cl);
-
-	printf("4 nb_el= %d\n", nb_el);
-
-	// copy pos, vel, dens into vars_unsorted()
-	// COULD DO THIS ON GPU
-	float4* vars = cl_vars_unsorted->getHostPtr();
-	BufferGE<float4>& un = *cl_vars_unsorted;
-	BufferGE<float4>& so = *cl_vars_sorted;
-
-	for (int i=0; i < nb_el; i++) {
-		//vars[i+DENS*num] = densities[i];
-		// PROBLEM: density is float, but vars_unsorted is float4
-		// HOW TO DEAL WITH THIS WITHOUT DOUBLING MEMORY ACCESS in 
-		// buildDataStructures. 
-
-		//printf("%d, %d, %d, %d\n", DENS, POS, VEL, FOR); exit(0);
-
-		un(i+DENS*nb_el).x = densities[i];
-		un(i+DENS*nb_el).y = 1.0; // for surface tension (always 1)
-		un(i+DENS*nb_el).z = 0.0;
-		un(i+DENS*nb_el).w = 0.0;
-		un(i+POS*nb_el) = positions[i];
-		un(i+VEL*nb_el) = velocities[i];
-		un(i+FOR*nb_el) = forces[i];
-
-		// SHOULD NOT BE REQUIRED
-		so(i+DENS*nb_el).x = densities[i];
-		so(i+DENS*nb_el).y = 1.0;  // for surface tension (always 1)
-		so(i+DENS*nb_el).z = 0.0;
-		so(i+DENS*nb_el).w = 0.0;
-		so(i+POS*nb_el) = positions[i];
-		so(i+VEL*nb_el) = velocities[i];
-		so(i+FOR*nb_el) = forces[i];
-	}
-
-	cl_vars_unsorted->copyToDevice();
-	cl_vars_sorted->copyToDevice(); // should not be required
 }
 
 //----------------------------------------------------------------------
@@ -689,13 +326,6 @@ void GE_SPH::checkDensity()
             dens_sum += dens[j];
         }
         printf("summed density: %f\n", dens_sum);
-        /*
-        std::vector<float4> er = cl_error_check->copyToHost(10);
-        for(int j = 0; j < 10; j++)
-        {
-            printf("rrrr[%d]: %f %f %f %f\n", j, er[j].x, er[j].y, er[j].z, er[j].w);
-        }
-        */
 #endif
 }
 //----------------------------------------------------------------------
@@ -1325,5 +955,65 @@ int GE_SPH::countPoints(double radius, int box_size)
 	return cnt;
 }
 //----------------------------------------------------------------------
+int GE_SPH::setupTimers()
+{
+	int print_freq = 20000;
+	int time_offset = 5;
 
+	ts_cl[TI_HASH]   = new GE::Time("hash",      time_offset, print_freq);
+	ts_cl[TI_RADIX_SORT]   = new GE::Time("radix sort",   time_offset, print_freq);
+	ts_cl[TI_BITONIC_SORT] = new GE::Time("bitonic sort", time_offset, print_freq);
+	ts_cl[TI_BUILD]  = new GE::Time("build",     time_offset, print_freq);
+	ts_cl[TI_NEIGH]  = new GE::Time("neigh",     time_offset, print_freq);
+	ts_cl[TI_DENS]   = new GE::Time("density",   time_offset, print_freq);
+	ts_cl[TI_PRES]   = new GE::Time("pressure",  time_offset, print_freq);
+	ts_cl[TI_COL]      = new GE::Time("color",  time_offset, print_freq);
+	ts_cl[TI_COL_NORM] = new GE::Time("color_norm", time_offset, print_freq);
+	ts_cl[TI_VISC]   = new GE::Time("viscosity", time_offset, print_freq);
+	ts_cl[TI_EULER]  = new GE::Time("euler",     time_offset, print_freq);
+	ts_cl[TI_UPDATE] = new GE::Time("update",    time_offset, print_freq);
+	ts_cl[TI_COLLISION_WALL] 
+			 = new GE::Time("collision wall",    time_offset, print_freq);
+}
+//----------------------------------------------------------------------
+void GE_SPH::initializeData()
+{
+	printf("4 nb_el= %d\n", nb_el);
+
+	// copy pos, vel, dens into vars_unsorted()
+	// COULD DO THIS ON GPU
+	float4* vars = cl_vars_unsorted->getHostPtr();
+	BufferGE<float4>& un = *cl_vars_unsorted;
+	BufferGE<float4>& so = *cl_vars_sorted;
+
+	for (int i=0; i < nb_el; i++) {
+		//vars[i+DENS*num] = densities[i];
+		// PROBLEM: density is float, but vars_unsorted is float4
+		// HOW TO DEAL WITH THIS WITHOUT DOUBLING MEMORY ACCESS in 
+		// buildDataStructures. 
+
+		//printf("%d, %d, %d, %d\n", DENS, POS, VEL, FOR); exit(0);
+
+		un(i+DENS*nb_el).x = densities[i];
+		un(i+DENS*nb_el).y = 1.0; // for surface tension (always 1)
+		un(i+DENS*nb_el).z = 0.0;
+		un(i+DENS*nb_el).w = 0.0;
+		un(i+POS*nb_el) = positions[i];
+		un(i+VEL*nb_el) = velocities[i];
+		un(i+FOR*nb_el) = forces[i];
+
+		// SHOULD NOT BE REQUIRED
+		so(i+DENS*nb_el).x = densities[i];
+		so(i+DENS*nb_el).y = 1.0;  // for surface tension (always 1)
+		so(i+DENS*nb_el).z = 0.0;
+		so(i+DENS*nb_el).w = 0.0;
+		so(i+POS*nb_el) = positions[i];
+		so(i+VEL*nb_el) = velocities[i];
+		so(i+FOR*nb_el) = forces[i];
+	}
+
+	cl_vars_unsorted->copyToDevice();
+	cl_vars_sorted->copyToDevice(); // should not be required
+}
+//----------------------------------------------------------------------
 }

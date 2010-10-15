@@ -338,9 +338,14 @@ private:
 	float4 eulerOnCPU();
 	float setSmoothingDist(int nb_part, float rest_dist);
 
+	void gordon_parameters(); // code does not work
+	void ian_parameters(); // Ian's code does work (in branch rtps)
+
 private:
 	int countPoints(double radius, int box_size);
 	void fixedSphere(int nx);
+	int setupTimers();
+	void initializeData();
 };
 
 }
