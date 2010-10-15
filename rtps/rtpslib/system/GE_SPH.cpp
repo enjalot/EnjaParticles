@@ -758,8 +758,6 @@ void GE_SPH::computeOnCPU()
 	GridParamsScaled* gp = (cl_GridParamsScaled->getHostPtr());
 	GE_SPHParams* sphp = (cl_params->getHostPtr());
 
-    cl_position->acquire();
-
 	float4* density = cl_vars_unsorted->getHostPtr() + 0*nb_el;
 	float4* pos     = cl_vars_unsorted->getHostPtr() + 1*nb_el;
 	float4* vel     = cl_vars_unsorted->getHostPtr() + 2*nb_el;
@@ -909,9 +907,9 @@ void GE_SPH::computeOnCPU()
 	collisionWallCPU();
 	eulerOnCPU();
 
-	cl_position->copyToDevice();
+    glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
+    glBufferData(GL_ARRAY_BUFFER, num * sizeof(float4), &positions[0], GL_DYNAMIC_DRAW);
 
-    cl_position->release();
 }
 //----------------------------------------------------------------------
 float4 GE_SPH::eulerOnCPU()
