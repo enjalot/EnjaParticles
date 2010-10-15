@@ -13,6 +13,8 @@ public:
     ~UniformGrid();
 
     void make_cube(float4 *positions, float spacing, int num);
+    void make_column(float4 *positions, float spacing, int num);
+    void make_dam(float4 *positions, float spacing, int num);
     int make_line(float4 *positions, float spacing, int num);
 
     float3 getMin(){ return min; };
