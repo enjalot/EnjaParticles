@@ -59,8 +59,8 @@ SPH::SPH(RTPS *psfr, int n)
     //grid = UniformGrid(float3(0,0,0), float3(1024, 1024, 1024), sph_settings.smoothing_distance / sph_settings.simulation_scale);
     grid = UniformGrid(float3(0,0,0), float3(256, 256, 512), sph_settings.smoothing_distance / sph_settings.simulation_scale);
     //grid.make_cube(&positions[0], sph_settings.spacing, num);
-    //grid.make_column(&positions[0], sph_settings.spacing, num);
-    grid.make_dam(&positions[0], sph_settings.spacing, num);
+    grid.make_column(&positions[0], sph_settings.spacing, num);
+    //grid.make_dam(&positions[0], sph_settings.spacing, num);
     //int new_num = grid.make_line(&positions[0], sph_settings.spacing, num);
     //less particles will be in play
     //not sure this is 100% right
@@ -94,8 +94,8 @@ typedef struct SPHParams
     params.boundary_distance = sph_settings.particle_rest_distance * .5f;
     params.EPSILON = .00001f;
     params.PI = 3.14159265f;
-    //params.K = 331.0f;
-    params.K = 1.5f;
+    params.K = 15.0f;
+    //params.K = 1.5f;
  
     //TODO make a helper constructor for buffer to make a cl_mem from a struct
     std::vector<SPHParams> vparams(0);
