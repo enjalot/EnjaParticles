@@ -328,15 +328,19 @@ private:
 	float computeMax(float* arr, int nb);
 	float computeMin(float* arr, int nb);
 
-	float boundaryOnCPU();
 	float4 calculateRepulsionForce(
       float4 normal, 
 	  float4 vel, 
 	  float boundary_stiffness, 
 	  float boundary_dampening, 
 	  float boundary_distance);
-	void collisionWall();
+	void collisionWallCPU();
 	float4 eulerOnCPU();
+	float setSmoothingDist(int nb_part, float rest_dist);
+
+private:
+	int countPoints(double radius, int box_size);
+	void fixedSphere(int nx);
 };
 
 }

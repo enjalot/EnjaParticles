@@ -49,7 +49,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	double particle_volume;
 
 	density = 1000.; 
-	double pi = 3.14159;
+	double pi = acos(-1.);
 	double nb_particles = num;
 	double rat = (float) (num/4096.);
 	double particle_mass = particle_volume * density;
@@ -72,7 +72,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	float particle_spacing;
 	// particle_spacing of particles at t=0
 	// rest distance between particles
-	float particle_rest_distance = 1.10 * 0.87*particle_size; // why 0.87? 
+	float particle_rest_distance = 1.00 * 0.87*particle_size; // why 0.87? 
 	particle_spacing = particle_rest_distance; 
 
 	printf("particle_spacing= %f\n", particle_spacing);
@@ -90,10 +90,19 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	#endif
 
 	// desired number of particles within the smoothing_distance sphere
-	int nb_interact_part = 40;
-	// (h/radius)^3 = nb_interact_part
-	//double h = pow(nb_interact_part, 1./3.) * particle_radius;
-	double h = pow(nb_interact_part, 1./3.) * particle_spacing;
+	int nb_interact_part = 50;
+	// (4/3*pi*h^3)/ particle_spacing^3 = nb_interact_part
+	double coef = 3.14159*4./3.;
+	//double h = pow(nb_interact_part/coef, 1./3.) * particle_radius;
+	double h = pow(nb_interact_part/coef, 1./3.) * particle_spacing;
+	double hvol = (4.*pi/3.)*pow(h,3.);
+	double particle_cell_vol = pow(particle_spacing,3.);
+	printf("particle_spacing= %f\n", particle_spacing);
+	printf("h= %f\n", h);
+	printf("nb_part= %d\n", (int) (4.*pi/3. * pow(h/particle_spacing,3.)));
+	printf("nb_part= %d\n", (int) (hvol/particle_cell_vol));
+	//exit(0);
+
 	//h = .02; // larger than I would want it, but same as Fluid v.2
 	//h = .01; // larger than I would want it, but same as Fluid v.2
 	// domain cell size
@@ -517,7 +526,7 @@ void GE_SPH::update()
 	}
 #endif
 
-	exit(0);
+	//exit(0);
 }
 //----------------------------------------------------------------------
 void GE_SPH::setupArrays()
@@ -746,79 +755,163 @@ void GE_SPH::computeOnCPU()
     //cpuEuler();
 
 	FluidParams* fp = cl_FluidParams->getHostPtr();;
-	GridParams* gp = (cl_GridParams->getHostPtr());
+	GridParamsScaled* gp = (cl_GridParamsScaled->getHostPtr());
 	GE_SPHParams* sphp = (cl_params->getHostPtr());
+
+    cl_position->acquire();
 
 	float4* density = cl_vars_unsorted->getHostPtr() + 0*nb_el;
 	float4* pos     = cl_vars_unsorted->getHostPtr() + 1*nb_el;
 	float4* vel     = cl_vars_unsorted->getHostPtr() + 2*nb_el;
 	float4* force   = cl_vars_unsorted->getHostPtr() + 3*nb_el;
 
-	fp->print();
-	gp->print();
-	sphp->print();
+	//fp->print();
+	//gp->print();
+	//sphp->print();
 
 	float4 stress;
 
-
-	float h = 10.;
+	float h = sphp->smoothing_distance;
+	float drest = sphp->rest_distance;
+	float scale = sphp->simulation_scale;
+	double pi = acos(-1.);
+	printf("h= %f, drest= %f\n", h, drest);
+	//printf("particle_spacing= %f\n", particle_spacing);
+	//printf("nb_part= %d\n", (int) (4.*3.14*pow(h/drest,3.)));
+	//printf("nb_part= %d\n", (int) (4.*pi/3. * pow(h/drest,3.)));
+	//printf("nb_part= %d\n", (int) (hvol/particle_cell_vol));
+	//sphp->print();
+	//exit(0);
 
 	for (int i=0; i < nb_el; i++) {
 		float rho = 0.; 
-		stress = float4(0.,0.,0.,0.);
 		float4 xi = pos[i];
+
+		int cnt = 0;
+
+		#if 0
+		//float sd = setSmoothingDist(50, drest);
+		//for (int n=1; n < 20; n++) {
+		for (int n=2; n < 5; n++) {
+			fixedSphere(n);
+		}
+		exit(0);
+		#endif
+
 		for (int j=0; j < nb_el; j++) {
 			float4 xj = pos[j];
 	
 			float4 r = xj-xi;
-			r.w = 0.0;
-			float rlen = r.length();
+			float4 rs = r*scale;
+			rs.w = 0.0;
+			float rlen = rs.length();
 
 			if (rlen > h) continue;
+			//printf("rlen= %f\n", rlen);
+			cnt++;
 	
 			// DENSITY
-    		float Wij = Wpoly6(r, sphp->smoothing_distance, sphp);
+    		float Wij = Wpoly6(rs, sphp->smoothing_distance, sphp);
+
+			#if 0
+			float4 drs = float4(h/29., 0., 0., 0.);
+			float vol = drest*drest*drest;
+			for (int i=0; i < 30; i++) {
+				float w = Wpoly6(i*drs, sphp->smoothing_distance, sphp);
+				printf("w= %f, w*vol= %e\n", w, w*vol);
+				printf("vol= %e\n", vol);
+			}
+			//----------------
+			exit(0);
+			#endif
+
+			#if 0
+			float4 drs = float4(h/29., 0., 0., 0.);
+			float vol = drest*drest*drest;
+			for (int i=0; i < 30; i++) {
+				float w = Wpoly6(i*drs, sphp->smoothing_distance, sphp);
+				printf("w= %f, w*vol= %e\n", w, w*vol);
+				printf("vol= %e\n", vol);
+			}
+			//----------------
+			exit(0);
+			#endif
+
+			//printf("Wij*mass= %f, h= %f, mass= %f\n", Wij*sphp->mass, sphp->smoothing_distance, sphp->mass);
 			rho += sphp->mass*Wij;
 		}
+		//printf("dens(%d) cnt= %d, rho= %f\n", i, cnt, rho);
 		density[i].x = rho;
+		//printf("=================================\n");
 	}
+
+	//exit(0);
 
 	//--------------
 	for (int i=0; i < nb_el; i++) {
-			float4 xi = pos[i];
-		for (int j=0; j < nb_el; j++) {
+		int cnt = 0;
+		float4 xi = pos[i];
+		stress = float4(0.,0.,0.,0.);
+		float di = density[i].x;  // should not repeat di=
 
+		for (int j=0; j < nb_el; j++) {
+			if (j == i) continue;
 			float4 xj = pos[j];
 			float4 r = xj-xi;
-			r.w = 0.0;
-			float rlen = r.length();
+			float4 rs = r*scale;
+			rs.w = 0.0;
+			float rlen = rs.length();
+
 
 			if (rlen > h) continue;
+			//printf("rlen,h= %f, %f\n", rlen,h);
+			cnt++;
 
-			// VISCOSITY
-			float dWijdr = Wspiky_dr(rlen, sphp->smoothing_distance, sphp);
 
-			float4 di = density[i];  // should not repeat di=
-			float4 dj = density[j];
+			float dWijdr = Wspiky_dr(rlen, h, sphp);
+
+			float dj = density[j].x;
+			//printf("di,dj= %f, %f\n", di, dj);
+			//printf("rlen= %f, h= %f\n", rlen, h);
+			//printf("fact= %f\n", (h-rlen)*(h-rlen)/rlen);
 
 			//form simple SPH in Krog's thesis
 
-			//float rest_density = 00.f;
 			float rest_density = 1000.f;
-			float Pi = sphp->K*(di.x - rest_density);
-			float Pj = sphp->K*(dj.x - rest_density);
+			float Pi = sphp->K*(di - rest_density);
+			float Pj = sphp->K*(dj - rest_density);
 
-			float kern = -dWijdr * (Pi + Pj)*0.5;
-			float4 ss = kern*r;
+			//printf("dWijdr= %f\n", dWijdr);
+
+			float kern = -dWijdr * (Pi + Pj)*0.5 / (di*dj);
+			//float kern = - (Pi + Pj)*0.5 / (di*dj);
+
+			//printf("Pi,Pj= %f, %f\n", Pi, Pj);
+			//rs.print("rs");
+			//printf("kern= %f\n", kern);
+
+			float4 ss = kern*rs;
+			ss.w = 0.0;
+			//ss.print("ss");
+
 			stress = stress + ss;
+			//stress.print("stress");
+			//printf("-----\n");
 		}
-		force[i] = stress;
+		force[i] = stress*sphp->mass;
+		//force[i].print("force");
+		//printf("visc(%d), cnt= %d\n", i, cnt);
+		//printf("======\n");
 	}
 
-	boundaryOnCPU();
+	int pt = 200;
+	printf("pos[pt] = %f, %f, %f\n", pos[pt].x, pos[pt].y, pos[pt].z);
+	collisionWallCPU();
+	eulerOnCPU();
 
-	exit(0);
+	cl_position->copyToDevice();
 
+    cl_position->release();
 }
 //----------------------------------------------------------------------
 float4 GE_SPH::eulerOnCPU()
@@ -839,64 +932,60 @@ void ge_euler(
 	GridParams* gp = (cl_GridParams->getHostPtr());
 	GE_SPHParams* sphp = (cl_params->getHostPtr());
 
+	float scale = sphp->simulation_scale;
+	float h = sphp->smoothing_distance;
+	float scale_inv = 1. / scale;
+	printf("scal_inv= %f\nn", scale_inv);
+
 	float4* density = cl_vars_unsorted->getHostPtr() + 0*nb_el;
 	float4* pos     = cl_vars_unsorted->getHostPtr() + 1*nb_el;
 	float4* vel     = cl_vars_unsorted->getHostPtr() + 2*nb_el;
 	float4* force   = cl_vars_unsorted->getHostPtr() + 3*nb_el;
 
+	int pt = 200;
+
 	for (int i=0; i < nb_el; i++) {
-    //unsigned int i = get_global_id(0);
-	//int num = get_global_size(0); // for access functions in cl_macros.h
+    	float4 p = pos[i]*scale;
+    	float4 v = vel[i];
+    	float4 f = force[i];
 
-    float4 p = pos[i];
-    float4 v = vel[i];
-    float4 f = force[i];
+		if (i == pt) {
+			p.print("p");
+			v.print("v");
+			f.print("f");
+		}
 
-    //external force is gravity
-    //f.z += -9.8f * 0.707;
-	//f.x += -9.8f * 0.707;
+    	//external force is gravity
+    	//f.z += -9.8f * 0.707;
+		//f.x += -9.8f * 0.707;
 
-    f.z += -9.8f;
+    	f.z += -9.8f;
 
-	// REMOVE FOR DEBUGGING
-	// THIS IS REALLY A FORCE, NO?
-	f.w = 0.0f;
-    float speed = f.length();
-    if(speed > 600.0f) //velocity limit, need to pass in as struct
-    //if(speed > 4.f) //velocity limit, need to pass in as struct
-    {
-        f = f * (600.0f/speed);
-    }
+		// REMOVE FOR DEBUGGING
+		// THIS IS REALLY A FORCE, NO?
+		f.w = 0.0f;
+    	float speed = f.length();
+    	if(speed > 600.0f) //velocity limit, need to pass in as struct
+    	//if(speed > 4.f) //velocity limit, need to pass in as struct
+    	{
+        	f = f * (600.0f/speed);
+    	}
 
-	//float dtt = dt / params->simulation_scale;
-	float dtt = sphp->dt;
+		//float dtt = dt / params->simulation_scale;
+		float dtt = sphp->dt;
 
-	float4 dtf= dtt*f;
-    v = v + dtf;  //    / params->simulation_scale;
-	float4 dtv = dtt*v;
-    p = p + dtv; // params->simulation_scale;
-    p.w = 1.0f; //just in case
+		float4 dtf= dtt*f;
+    	v = v + dtf;  //    / params->simulation_scale;
+		float4 dtv = dtt*v;
+    	p = p + dtv; // params->simulation_scale;
+    	p.w = 1.0f; //just in case
 
-	// REMOVE AFTER DEBUGGED
-	#if 0
-    vel(i) = v;
-    pos(i) = p;
-	force(i) = f; // ONLY FOR DEBUGGING
-	#endif
-
-		#if 0
-        //unsigned int  originalIndex = sort_indices[i];
-
-        // writeback to unsorted buffer
-		float dens = density(i);
-		p /= params->simulation_scale;
-		unsorted_pos(originalIndex) = (float4)(p.xyz, dens);
-		unsorted_vel(originalIndex) = v;
-		unsorted_density(originalIndex) = density(i); // FOR DEBUGGING ONLY
-		unsorted_force(originalIndex) = f; // FOR DEBUGGING ONLY
-		positions[originalIndex] = (float4)(p.xyz, dens);  // for plotting
-		#endif
+		pos[i] = p * scale_inv;
+		vel[i] = v;
+		positions[i] = pos[i];
 	}
+	printf("pos[pt] = %f, %f, %f\n", pos[pt].x, pos[pt].y, pos[pt].z);
+	//exit(0);
 }
 //----------------------------------------------------------------------
 float4 GE_SPH::calculateRepulsionForce(
@@ -915,10 +1004,10 @@ float4 GE_SPH::calculateRepulsionForce(
 }
 
 //----------------------------------------------------------------------
-void GE_SPH::collisionWall()
+void GE_SPH::collisionWallCPU()
 {
 	FluidParams* fp = cl_FluidParams->getHostPtr();;
-	GridParams* gp = (cl_GridParams->getHostPtr());
+	GridParamsScaled* gp = (cl_GridParamsScaled->getHostPtr());
 	GE_SPHParams* sphp = (cl_params->getHostPtr());
 
 	float4* density = cl_vars_unsorted->getHostPtr() + 0*nb_el;
@@ -926,57 +1015,62 @@ void GE_SPH::collisionWall()
 	float4* vel     = cl_vars_unsorted->getHostPtr() + 2*nb_el;
 	float4* force   = cl_vars_unsorted->getHostPtr() + 3*nb_el;
 
+	float h = sphp->smoothing_distance;
+	float scale = sphp->simulation_scale;
+
     //unsigned int i = get_global_id(0);
 	//int num = get_global_size(0);
 	//int nb_vars = gp->nb_vars;
 
-    float4 p = pos(i); //  pos[i];
-    float4 v = vel(i); //  vel[i];
-    float4 r_f = (float4)(0.f, 0.f, 0.f, 0.f);
+	for (int i=0; i < nb_el; i++) {
+
+    float4 p = scale*pos[i]; //  pos[i];
+    float4 v = vel[i]; //  vel[i];
+    float4 r_f = float4(0.f, 0.f, 0.f, 0.f);
 
     //bottom wall
-    float diff = params->boundary_distance - (p.z - gp->grid_min.z);
-    if (diff > params->EPSILON)
+    float diff = sphp->boundary_distance - (p.z - gp->grid_min.z);
+    if (diff > sphp->EPSILON)
     {
 		// normal points into the domain
-        float4 normal = (float4)(0.0f, 0.0f, 1.0f, 0.0f);
+        float4 normal = float4(0.0f, 0.0f, 1.0f, 0.0f);
 		//if (dot(normal,v) < 0) {
-        r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
+        r_f += calculateRepulsionForce(normal, v, sphp->boundary_stiffness, sphp->boundary_dampening, diff);
 		//}
     }
 
     //Y walls
-    diff = params->boundary_distance - (p.y - gp->grid_min.y);
-    if (diff > params->EPSILON)
+    diff = sphp->boundary_distance - (p.y - gp->grid_min.y);
+    if (diff > sphp->EPSILON)
     {
-        float4 normal = (float4)(0.0f, 1.0f, 0.0f, 0.0f);
-        r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
+        float4 normal = float4(0.0f, 1.0f, 0.0f, 0.0f);
+        r_f += calculateRepulsionForce(normal, v, sphp->boundary_stiffness, sphp->boundary_dampening, diff);
     }
-    diff = params->boundary_distance - (gp->grid_max.y - p.y);
-    if (diff > params->EPSILON)
+    diff = sphp->boundary_distance - (gp->grid_max.y - p.y);
+    if (diff > sphp->EPSILON)
     {
-        float4 normal = (float4)(0.0f, -1.0f, 0.0f, 0.0f);
-        r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
+        float4 normal = float4(0.0f, -1.0f, 0.0f, 0.0f);
+        r_f += calculateRepulsionForce(normal, v, sphp->boundary_stiffness, sphp->boundary_dampening, diff);
     }
 
     //X walls
-    diff = params->boundary_distance - (p.x - gp->grid_min.x);
-    if (diff > params->EPSILON)
+    diff = sphp->boundary_distance - (p.x - gp->grid_min.x);
+    if (diff > sphp->EPSILON)
     {
-        float4 normal = (float4)(1.0f, 0.0f, 0.0f, 0.0f);
-        r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
+        float4 normal = float4(1.0f, 0.0f, 0.0f, 0.0f);
+        r_f += calculateRepulsionForce(normal, v, sphp->boundary_stiffness, sphp->boundary_dampening, diff);
     }
-    diff = params->boundary_distance - (gp->grid_max.x - p.x);
-    if (diff > params->EPSILON)
+    diff = sphp->boundary_distance - (gp->grid_max.x - p.x);
+    if (diff > sphp->EPSILON)
     {
-        float4 normal = (float4)(-1.0f, 0.0f, 0.0f, 0.0f);
-        r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
+        float4 normal = float4(-1.0f, 0.0f, 0.0f, 0.0f);
+        r_f += calculateRepulsionForce(normal, v, sphp->boundary_stiffness, sphp->boundary_dampening, diff);
     }
 
     //TODO add friction forces
 
-	force(i) += r_f;   //sorted force
-}
+	force[i] += r_f;   //sorted force
+	}
 }
 //----------------------------------------------------------------------
 float GE_SPH::computeTimeStep()
@@ -1112,7 +1206,126 @@ float GE_SPH::computeMin(float* arr, int nb)
 	return mn;
 }
 //----------------------------------------------------------------------
+float GE_SPH::setSmoothingDist(int nb_part, float rest_dist)
+{
+	// given nb particles in a sphere, what is the radius of the 
+	// sphere that includes at least that number of particles? Do this heuristically
+	// Center the sphere at (0,0,0)
+	// Assume first, a unit rest distance. I'll scale the radius at the end
+
+	printf("---\n");
+	nb_part = 40;
+	int nb_part_side = ceil(pow((double) nb_part, 1./3.));
+	int ns = 2*nb_part_side; // much more than required
+
+	rest_dist = 1.0; // rescale later
+
+	double pi = acos(-1.);
+	double coef = 4.*pi/3.;
+	double cell_volume = pow(rest_dist, 3.);
+	double sphere_vol = cell_volume * nb_part;
+	double radius = pow(sphere_vol/coef, 1./3.);
+	printf("radius= %f\n", radius);
+
+	double radius2 = radius*radius;
+	int cnt;
+
+	for (int i=0; i < 10; i++) {
+		radius *= 1.1;
+		cnt = countPoints(radius, ns);
+		printf("cnt= %d\n", cnt);
+	}
+
+	printf("desired nb part: %d\n", nb_part);
+	sphere_vol = (float) coef*ns*ns*ns;
+	float discrete_vol = (float) cnt;
+	printf("sphere_vol= %f\n", sphere_vol);
+	printf("discrete_vol= %f\n", discrete_vol);
+	exit(0);
+}
 //----------------------------------------------------------------------
+// Alternatively, consider a box of size [-1,1]^3 and a sphere of radius 1.
+// As the discretization is refined, how many points lie in the sphere, 
+// and how accurately is sum_i dx^3 represent the sphere, and the same
+// for the various W functions. 
+
+void GE_SPH::fixedSphere(int nxh)
+{
+	int nx = 2.*nxh+1;  // nx: nb of points on a side of circumscribed cube
+	printf("===== enter fixedSphere, nx= %d\n", nx);
+
+
+	GE_SPHParams* sphp = (cl_params->getHostPtr());
+	float dx = 2./(nx-1);
+	// sphere radius = 1.;
+	double pi = acos(-1.);
+	double coef = 4.*pi/3.;
+	double exact_sphere_vol = coef; // unit radius
+
+
+	int cnt = 0;
+	float h = 1.;
+	float volPoly6 = 0.;
+	float volSpike = 0.;
+	float volVisc = 0.;
+
+	for (int k=0; k < nx; k++) {
+		double z = -1.+k*dx;
+	for (int j=0; j < nx; j++) {
+		double y = -1.+j*dx;
+	for (int i=0; i < nx; i++) {
+		double x = -1.+i*dx;
+		double r2 = x*x+y*y+z*z;
+		double len = sqrt(r2);
+		if (r2 > 1.) {
+			continue;
+		} else {
+		float4 ff = float4(x,y,z,1.);
+		//ff.print("ff");
+		//float vv = Wpoly6(ff, h, sphp);
+		//printf("vv= %f\n", vv);
+		volPoly6 += Wpoly6(ff, h, sphp);
+		volSpike += Wspiky(len, h, sphp);
+		if (len > 1.e-8) {
+			volVisc += Wvisc(len, h, sphp);
+		}
+		cnt++;
+		}
+	}}}
+	printf("cnt= %d\n", cnt);
+
+	volPoly6 *= coef*dx*dx*dx;
+	volSpike *= coef*dx*dx*dx;
+	volVisc  *= coef*dx*dx*dx;
+
+	//printf("vol= %f, vol ratio: %f\n", vol, exact_sphere_vol/vol);
+
+	float WvolPoly6_rel_error= (exact_sphere_vol-volPoly6)/exact_sphere_vol;
+	float WvolSpike_rel_error= (exact_sphere_vol-volSpike)/exact_sphere_vol;
+	float WvolVisc_rel_error=  (exact_sphere_vol-volVisc) /exact_sphere_vol;
+
+	double computed_sphere_vol = dx*dx*dx*cnt;
+	printf("volPoly6 error: %f\n", WvolPoly6_rel_error);
+	printf("volSpike error: %f\n", WvolSpike_rel_error);
+	printf("volVisc  error: %f\n", WvolVisc_rel_error);
+
+	// compute error based on wpoly functions. 
+}
+//----------------------------------------------------------------------
+int GE_SPH::countPoints(double radius, int box_size)
+{
+	double radius2 = radius*radius;
+	int cnt = 0;
+	int ns = box_size;
+
+	for (int k=-ns-1; k <= ns+1; k++) {
+	for (int j=-ns-1; j <= ns+1; j++) {
+	for (int i=-ns-1; i <= ns+1; i++) {
+		double rad2 = i*i+j*j+k*k;
+		if (rad2 < radius2) cnt++;
+	}}}
+	return cnt;
+}
 //----------------------------------------------------------------------
 
 }

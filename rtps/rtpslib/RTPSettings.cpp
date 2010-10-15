@@ -16,10 +16,10 @@ RTPSettings::RTPSettings()
 	int n256k = 1024 * 256;
 
     //max_particles = n4k;
-    max_particles = 256;
-    //max_particles = n8k;
+    //max_particles = 256;
+    max_particles = n4k;
     //dt = .0004f;
-    dt = .0001f;
+    dt = .005f;
 }
 
 }

@@ -74,6 +74,13 @@ typedef struct float4
 		return c;
 	}
 
+	float4 operator+=(float4 a) {
+		(*this).x += a.x;
+		(*this).y += a.w;
+		(*this).z += a.z;
+		(*this).w += a.w;
+	}
+
 	//friend float4& operator+(const float4& a, const float4& b) const {
 		//float4 c = float4(b.x+a.x, b.y+a.y, b.z+a.z, b.w+a.w);
 		//return c;
