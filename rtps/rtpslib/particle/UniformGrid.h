@@ -25,6 +25,8 @@ public:
 	float4 getRes() { return res; };
 	float4 getSize() { return size; };
 
+	void print();
+
 public:
 	float sim_scale;
     float4 min;

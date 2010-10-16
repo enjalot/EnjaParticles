@@ -184,6 +184,7 @@ void GE_SPH::gordon_parameters()
 	int num_old = num;
     grid = UniformGrid(domain_min, domain_max, nb_cells, sph_settings.simulation_scale); 
 
+	grid.print();
 	printf("simu scale: %f\n", sph_settings.simulation_scale);
 	printf("UniformGrid\n");
 	domain_origin.print("origin");
@@ -377,10 +378,31 @@ void GE_SPH::ian_parameters()
 	double boundary_distance = 0.5*particle_rest_distance;
 	// world coordinates
 	double particle_spacing_w = particle_rest_distance / simulation_scale;
-	double particle_radius = particle_spacing_w;
+	double particle_radius_w = particle_spacing_w;
 
-	//sphp_settings.rest_density = rest_density;
-	//sphp_settings.particle_mass = particle_mass;
+	//--------------------------------
+
+
+    cl_params = new BufferGE<GE_SPHParams>(ps->cli, 1);
+	GE_SPHParams& params = *(cl_params->getHostPtr());
+
+	params.rest_distance = particle_rest_distance;
+	params.rest_density = rest_density;
+	params.smoothing_distance = h;
+	params.particle_radius = particle_radius_w;
+    params.boundary_stiffness = 10000.;  
+    params.boundary_dampening = 256.;
+    params.simulation_scale = simulation_scale;
+	params.boundary_distance = boundary_distance;
+    params.EPSILON = .00001f;
+	params.mass = particle_mass;
+    params.PI = acos(-1.);
+    params.dt = ps->settings.dt;
+    params.K = 15.;
+
+printf("****** REST 1 *****\n");
+params.print();
+	
 
 	//-------------------------------
 	//SETUP GRID
@@ -434,7 +456,6 @@ void GE_SPH::ian_parameters()
 
 	//.......
 
-
 	nb_cells = int4(nb_cells_x, nb_cells_y, nb_cells_z, 1);
 	int num_old = num;
     grid = UniformGrid(domain_min, domain_max, cell_size_w);
@@ -443,23 +464,27 @@ void GE_SPH::ian_parameters()
 	int offset = 0;
 	grid.makeCube(&positions[0], fluid_min, fluid_max, particle_spacing_w, num, offset);
 
-
 	grid.res.print("grid res");
 	printf("offset= %d\n", offset);
 	printf("cell_size_w= %f\n", cell_size_w);
-	exit(0);
+	grid.print();
+	//exit(0);
 
 	//END SETUP GRID
+
+	params.grid_min = domain_min;
+	params.grid_max = domain_max;
 	//-------------------------------
 	//-------------------------------
 
+printf("****** REST 2 *****\n");
+params.print();
 
 
 
 
 
-    cl_params = new BufferGE<GE_SPHParams>(ps->cli, 1);
-	GE_SPHParams& params = *(cl_params->getHostPtr());
+#if 0
     params.grid_min = grid.getMin();
     params.grid_max = grid.getMax();
     params.mass = sph_settings.particle_mass;
@@ -483,7 +508,7 @@ void GE_SPH::ian_parameters()
 	//printf("dt= %f\n", params.dt); exit(0);
  
 
-
+#endif
 
 
 
@@ -491,7 +516,7 @@ void GE_SPH::ian_parameters()
 	particle_mass = particle_volume * rest_density;
 	particle_mass = 0.00020543 / rat; // from Fluids2
 	particle_volume = particle_mass / rest_density;
-	particle_radius = pow(particle_volume*3./(4.*pi), 1./3.);
+	double particle_radius = pow(particle_volume*3./(4.*pi), 1./3.);
 	printf("particle radius= %f\n", particle_radius);
 
 	int nb_particles_in_cell = 1;
@@ -627,32 +652,6 @@ printf("num= %d\n", num);
 	num = offset;
 	//printf("new num= %d\n", num); exit(0);
 
-	#if 0
-    cl_params = new BufferGE<GE_SPHParams>(ps->cli, 1);
-	GE_SPHParams& params = *(cl_params->getHostPtr());
-    params.grid_min = grid.getMin();
-    params.grid_max = grid.getMax();
-    params.mass = sph_settings.particle_mass;
-    params.rest_distance = sph_settings.particle_rest_distance;
-    params.rest_density = sph_settings.rest_density;
-    params.smoothing_distance = sph_settings.smoothing_distance;
-    params.particle_radius = sph_settings.particle_radius;
-    params.simulation_scale = sph_settings.simulation_scale;
-	printf("scale: %f\n", params.simulation_scale);
-
-	printf("37 nb_el= %d\n", nb_el);
-
-	// does scale_simulation influence stiffness and dampening?
-    params.boundary_stiffness = 10000.;  //10000.0f;  (scale from 20000 to 20)
-    params.boundary_dampening = 1256.;//256.; 
-    params.boundary_distance = sph_settings.boundary_distance;
-    params.EPSILON = .00001f;
-    params.PI = 3.14159265f;
-    params.K = 1.5f; //100.0f; //1.5f;
-	params.dt = ps->settings.dt;
-	//printf("dt= %f\n", params.dt); exit(0);
-	#endif
- 
 	cl_params->copyToDevice();
 	cl_params->copyToHost();
 
@@ -669,6 +668,7 @@ printf("num= %d\n", num);
     forces.resize(num);
     velocities.resize(num);
     densities.resize(num);
+
 
     std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));
     std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 1.0f, 0.0f));

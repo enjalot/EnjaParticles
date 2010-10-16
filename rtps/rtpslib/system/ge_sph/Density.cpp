@@ -74,6 +74,7 @@ float dist_squared(float4 vec)
 //----------------------------------------------------------------------
 void GE_SPH::cpuDensity()
 {
+	GE_SPHParams& params = *(cl_params->getHostPtr());
     float h = params.smoothing_distance;
     //stuff from Tim's code (need to match #s to papers)
     //float alpha = 315.f/208.f/params.PI/h/h/h;

@@ -76,7 +76,7 @@ void RTPS::render()
     //should check if grid exists
 
 	glPushMatrix();
-	float scale = 2;
+	float scale = 1.0;
 	glScalef(scale,scale,scale);
     renderer->render_box(grid.getMin(), grid.getMax());
     renderer->render();

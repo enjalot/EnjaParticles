@@ -46,6 +46,8 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 
 	setupArrays(); // From GE structures
 
+	GE_SPHParams& params = *(cl_params->getHostPtr());
+
 	printf("=========================================\n");
 	printf("Spacing =  particle_radius\n");
 	printf("Smoothing distance = 2 * particle_radius to make sure we have particle-particle influence\n");
@@ -57,6 +59,8 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	cl_GridParamsScaled->getHostPtr()->print();
 	cl_FluidParams->getHostPtr()->print();
 	printf("=========================================\n");
+
+	//exit(0);
 
 	setupTimers();
 	initializeData();
@@ -123,6 +127,15 @@ void GE_SPH::update()
     //TODO: add timings
 #ifdef CPU
 	computeOnCPU();
+	#if 0
+	for (int i=0; i < 10; i++) {
+		float4 p = positions[i];
+		printf("pos[%d] = %f, %f, %f\n", p.x, p.y, p.z);
+	}
+	exit(0);
+	#endif
+    glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
+    glBufferData(GL_ARRAY_BUFFER, num * sizeof(float4), &positions[0], GL_DYNAMIC_DRAW);
 #endif
 
 	if (count == 0) {
@@ -536,8 +549,6 @@ void GE_SPH::computeOnCPU()
 	collisionWallCPU();
 	eulerOnCPU();
 
-    glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
-    glBufferData(GL_ARRAY_BUFFER, num * sizeof(float4), &positions[0], GL_DYNAMIC_DRAW);
 
 }
 //----------------------------------------------------------------------

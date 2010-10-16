@@ -191,7 +191,7 @@ void init_gl()
     glLoadIdentity();
     //gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 100.0);
     //glOrtho(0., window_width, 0., window_height, -100., 100.);
-    gluPerspective(40.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 300.0); //for lorentz
+    gluPerspective(40.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 100000.0); //for lorentz
 
     // set view matrix
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -229,7 +229,8 @@ void appRender()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	//gluLookAt(-4.,-4., 5., 5.,5.,0., 0., 0., 1.);
-	gluLookAt(-20.,-80., 20., 0.,0.,0., 0., 0., 1.);
+	//gluLookAt(-20.,-80., 20., 0.,0.,0., 0., 0., 1.);
+	gluLookAt(-300.,-500., 500., 100.,100.,100., 0., 0., 1.);
 
     ps->update();
 
@@ -349,7 +350,8 @@ void showFPS(float fps, std::string* report)
     glMatrixMode(GL_PROJECTION);        // switch to projection matrix
     glPushMatrix();                     // save current projection matrix
     glLoadIdentity();                   // reset projection matrix
-    gluOrtho2D(0, 400, 0, 300);         // set to orthogonal projection
+    //gluOrtho2D(-200, 600, -200, 600);         // set to orthogonal projection
+    gluOrtho2D(0, 100, 0, 100);         // set to orthogonal projection
 
     float color[4] = {1, 1, 0, 1};
 

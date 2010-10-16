@@ -176,4 +176,16 @@ void UniformGrid::makeSphere(float4* position, float4 center, float radius, int&
 
 }
 //----------------------------------------------------------------------
+void UniformGrid::print()
+{
+	printf("\n--- Uniform Grid ---\n");
+	printf("sim_scale= %f\n", sim_scale);
+	min.print("min");
+	max.print("max");
+	size.print("size");
+	res.print("res");
+	delta.print("delta");
+}
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
 } // namespace

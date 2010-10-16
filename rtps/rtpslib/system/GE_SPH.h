@@ -46,7 +46,7 @@ typedef struct GE_SPHSettings
     float grid_cell_size;
 
 	void print() {
-		printf("----- GE_SPHSettings ----\n");
+		printf("\n----- GE_SPHSettings ----\n");
 		printf("rest_density: %f\n", rest_density);
 		printf("simulation_scale: %f\n", simulation_scale);
 		printf("particle_mass: %f\n", particle_mass);
@@ -56,7 +56,6 @@ typedef struct GE_SPHSettings
 		printf("particle_spacing: %f\n", particle_spacing);
 		printf("grid_cell_size: %f\n", grid_cell_size);
 	}
-
 } GE_SPHSettings;
 
 //-------------------------
@@ -77,7 +76,7 @@ struct GridParams
 
 	void print()
 	{
-		printf("----- GridParms ----\n");
+		printf("\n----- GridParms ----\n");
 		grid_size.print("grid_size"); 
 		grid_min.print("grid_min"); 
 		grid_max.print("grid_max"); 
@@ -172,7 +171,7 @@ typedef struct GE_SPHParams
 
 	void print()
 	{
-		printf("----- GE_SPHParams ----\n");
+		printf("\n----- GE_SPHParams ----\n");
 		grid_min.print("grid_min");
 		grid_max.print("grid_max");
 		printf("grid_min_padding= %f\n", grid_min_padding);
@@ -264,14 +263,14 @@ private:
 	void prepareSortData();
 	void printBuildDiagnostics();
 	void printHashDiagnostics();
-	GE_SPHParams& getParams() {return params;}
+	//GE_SPHParams& getParams() {return params;}
 
 private:
     //the particle system framework
     RTPS *ps;
 
     GE_SPHSettings sph_settings;
-    GE_SPHParams params;
+    //GE_SPHParams params;
 
     Kernel k_density, k_pressure, k_viscosity;
     Kernel k_collision_wall;
