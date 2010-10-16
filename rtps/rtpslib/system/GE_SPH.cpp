@@ -41,8 +41,8 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	nb_el = n;
 	printf("1 nb_el= %d\n", nb_el);
 
-	gordon_parameters(); // code does not work
-	//ian_parameters(); // Ian's code does work (in branch rtps)
+	//gordon_parameters(); // code does not work
+	ian_parameters(); // Ian's code does work (in branch rtps)
 
 	setupArrays(); // From GE structures
 

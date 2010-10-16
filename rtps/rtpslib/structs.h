@@ -48,7 +48,7 @@ typedef struct float4
     float w;
 
     float4(){};
-    float4(float xx, float yy, float zz, float ww):
+    float4(float xx, float yy, float zz, float ww=1.):
         x(xx),
         y(yy),
         z(zz),
