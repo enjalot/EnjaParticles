@@ -58,7 +58,8 @@ __kernel void ge_euler(
 		unsorted_vel(originalIndex) = v;
 		unsorted_density(originalIndex) = density(i); // FOR DEBUGGING ONLY
 		unsorted_force(originalIndex) = f; // FOR DEBUGGING ONLY
-		positions[originalIndex] = (float4)(p.xyz, dens);  // for plotting
+		//positions[originalIndex] = (float4)(p.xyz, dens);  // for plotting
+		positions[originalIndex] = (float4)(p.xyz, 1.);  // for plotting
 }
 
 

@@ -7,13 +7,7 @@
 //---------------------------------------------------------------------- 
 // Offsets into var_sorted array
 
-//enum {DENS=0, POS, VEL, FOR};
-#define DENS 0
-#define POS 1
-#define VEL 2
-#define FOR 3
-#define SURF_TENS 4
-#define COL 5
+#include "../variable_labels.h"
 
 #define numParticles num
 
@@ -35,25 +29,29 @@
 #define FETCH_ACC(t, i) t[i+ACC*numParticles]
 #define FETCH_POS(t, i) t[i+POS*numParticles]
 
+#define density(i) 	vars_sorted[i+DENS*numParticles].x
 #define pos(i) 		vars_sorted[i+POS*numParticles]
 #define vel(i) 		vars_sorted[i+VEL*numParticles]
 #define force(i) 	vars_sorted[i+FOR*numParticles]
 // accessing density and color requires two memory access. 
 // Could be more efficient if stored in local point-based array
-#define density(i) 	vars_sorted[i+DENS*numParticles].x
-#define density_denom(i)   vars_unsorted[i+DENS *numParticles].y
 #define color(i)    vars_sorted[i+COL*numParticles].x
+#define density_denom(i)   vars_unsorted[i+DENS_DENOM*numParticles].y
 #define surf_tens(i)    vars_sorted[i+SURF_TENS*numParticles]
 #define color_normal(i)    vars_sorted[i+NORMAL*numParticles]
+#define veleval(i)    vars_sorted[i+VELEVAL*numParticles]
+#define xsph(i)    vars_sorted[i+XSPH*numParticles]
 
+#define unsorted_density(i)   vars_unsorted[i+DENS     *numParticles].x
 #define unsorted_pos(i) 	  vars_unsorted[i+POS      *numParticles]
 #define unsorted_vel(i) 	  vars_unsorted[i+VEL      *numParticles]
-#define unsorted_density(i)   vars_unsorted[i+DENS     *numParticles].x
-#define unsorted_density_denom(i)   vars_unsorted[i+DENS *numParticles].y
 #define unsorted_force(i) 	  vars_unsorted[i+FOR      *numParticles]
 #define unsorted_color(i)     vars_unsorted[i+COL      *numParticles].x
+#define unsorted_density_denom(i)   vars_unsorted[i+DENS_DENOM*numParticles].y
 #define unsorted_surf_tens(i) vars_unsorted[i+SURF_TENS*numParticles]
 #define unsorted_color_normal(i)    vars_unsorted[i+NORMAL*numParticles]
+#define unsorted_veleval(i)    vars_sorted[i+VELEVAL*numParticles]
+#define unsorted_xsph(i)    vars_sorted[i+XSPH*numParticles]
 
 //#define FETCH_NOTEX(a, t, i) a.t[i]
 #define FETCH_NOTEX(t, i) t[i]

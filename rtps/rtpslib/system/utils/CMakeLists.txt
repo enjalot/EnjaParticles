@@ -9,6 +9,7 @@ SET(FILES
    uniform_hash
    datastructures_test
    euler_cl
+   leapfrog_cl
    collision_wall_cl
 )  # ignore cpp extension
 

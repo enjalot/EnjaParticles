@@ -4,7 +4,7 @@
 
 namespace rtps {
 
-void GE_SPH::computeEuler()
+void GE_SPH::computeLeapfrog()
 {
 	static bool first_time = true;
 
@@ -14,20 +14,20 @@ void GE_SPH::computeEuler()
 		try {
 			std::string path(CL_SPH_UTIL_SOURCE_DIR);
 			printf("path= %s\n", path.c_str());
-			path = path + "/euler_cl.cl";
+			path = path + "/leapfrog_cl.cl";
 			printf("path= %s\n", path.c_str());
 			int length;
 			const char* src = file_contents(path.c_str(), &length);
 			std::string strg(src);
-        	k_euler = Kernel(ps->cli, strg, "ge_euler");
+        	k_leapfrog = Kernel(ps->cli, strg, "ge_leapfrog");
 			first_time = false;
 		} catch(cl::Error er) {
-        	printf("ERROR(computeEuler): %s(%s)\n", er.what(), oclErrorString(er.err()));
+        	printf("ERROR(computeLeapfrog): %s(%s)\n", er.what(), oclErrorString(er.err()));
 			exit(1);
 		}
 	}
 
-	Kernel kern = k_euler;
+	Kernel kern = k_leapfrog;
 	int workSize = 128;
 
     kern.setArg(0, cl_sort_indices->getDevicePtr());

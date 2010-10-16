@@ -37,7 +37,7 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	radixSort = 0;
 
 	// density, force, pos, vel, surf tension, color
-	nb_vars = 7;  // for array structure in OpenCL
+	nb_vars = 10;  // for array structure in OpenCL
 	nb_el = n;
 	printf("1 nb_el= %d\n", nb_el);
 
@@ -139,7 +139,7 @@ void GE_SPH::update()
 #endif
 
 	if (count == 0) {
-		printGPUDiagnostics(count);
+		;//printGPUDiagnostics(count);
 	}
 
 #ifdef GPU
@@ -365,12 +365,13 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 		// ***** DENSITY UPDATE *****
 		neighborSearch(0); //density
 
+
 		// ***** DENSITY DENOMINATOR *****
 		//   *** DENSITY NORMALIZATION ***
 		//neighborSearch(3); 
 
 		// ***** COLOR GRADIENT *****
-		neighborSearch(2); 
+		//neighborSearch(2); 
 
 		// ***** PRESSURE UPDATE *****
 		neighborSearch(1); //pressure
@@ -379,8 +380,9 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 		// ***** WALL COLLISIONS *****
 		computeCollisionWall();
 
-        // ***** EULER UPDATE *****
+        // ***** TIME UPDATE *****
 		computeEuler();
+		computeLeapfrog();
 	}
 
 	// *** OUTPUT PHYSICAL VARIABLES FROM THE GPU
@@ -970,20 +972,23 @@ int GE_SPH::setupTimers()
 	int print_freq = 20000;
 	int time_offset = 5;
 
-	ts_cl[TI_HASH]   = new GE::Time("hash",      time_offset, print_freq);
-	ts_cl[TI_RADIX_SORT]   = new GE::Time("radix sort",   time_offset, print_freq);
-	ts_cl[TI_BITONIC_SORT] = new GE::Time("bitonic sort", time_offset, print_freq);
-	ts_cl[TI_BUILD]  = new GE::Time("build",     time_offset, print_freq);
-	ts_cl[TI_NEIGH]  = new GE::Time("neigh",     time_offset, print_freq);
-	ts_cl[TI_DENS]   = new GE::Time("density",   time_offset, print_freq);
-	ts_cl[TI_PRES]   = new GE::Time("pressure",  time_offset, print_freq);
-	ts_cl[TI_COL]      = new GE::Time("color",  time_offset, print_freq);
+	ts_cl[TI_HASH]     = new GE::Time("hash",       time_offset, print_freq);
+	ts_cl[TI_BUILD]    = new GE::Time("build",      time_offset, print_freq);
+	ts_cl[TI_NEIGH]    = new GE::Time("neigh",      time_offset, print_freq);
+	ts_cl[TI_DENS]     = new GE::Time("density",    time_offset, print_freq);
+	ts_cl[TI_PRES]     = new GE::Time("pressure",   time_offset, print_freq);
+	ts_cl[TI_COL]      = new GE::Time("color",      time_offset, print_freq);
 	ts_cl[TI_COL_NORM] = new GE::Time("color_norm", time_offset, print_freq);
-	ts_cl[TI_VISC]   = new GE::Time("viscosity", time_offset, print_freq);
-	ts_cl[TI_EULER]  = new GE::Time("euler",     time_offset, print_freq);
-	ts_cl[TI_UPDATE] = new GE::Time("update",    time_offset, print_freq);
+	ts_cl[TI_VISC]     = new GE::Time("viscosity",  time_offset, print_freq);
+	ts_cl[TI_EULER]    = new GE::Time("euler",      time_offset, print_freq);
+	ts_cl[TI_LEAPFROG] = new GE::Time("leapfrog",   time_offset, print_freq);
+	ts_cl[TI_UPDATE]   = new GE::Time("update",     time_offset, print_freq);
 	ts_cl[TI_COLLISION_WALL] 
-			 = new GE::Time("collision wall",    time_offset, print_freq);
+			       = new GE::Time("collision wall", time_offset, print_freq);
+	ts_cl[TI_RADIX_SORT]   
+	               = new GE::Time("radix sort",     time_offset, print_freq);
+	ts_cl[TI_BITONIC_SORT] 
+				   = new GE::Time("bitonic sort",   time_offset, print_freq);
 }
 //----------------------------------------------------------------------
 void GE_SPH::initializeData()

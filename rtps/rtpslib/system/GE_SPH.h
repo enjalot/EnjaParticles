@@ -17,16 +17,10 @@
 #include "../particle/UniformGrid.h"
 
 #include "RadixSort.h"
-
+#include "variable_labels.h"
 // Make sure it is same as in density.cl
-#define DENS 0
-#define POS 1
-#define VEL 2
-#define FOR 3
-#define SURF_TENS 4
-#define COL 5
-// gradient of color (COL)
-#define NORM 6 
+
+
 
 namespace rtps {
 
@@ -208,8 +202,8 @@ public:
 
 	// Timers
 	enum {TI_HASH=0, TI_RADIX_SORT, TI_BITONIC_SORT, TI_BUILD, TI_NEIGH, 
-		  TI_DENS, TI_PRES, TI_EULER, TI_VISC, TI_UPDATE, TI_COLLISION_WALL, 
-		  TI_COL, TI_COL_NORM};
+		  TI_DENS, TI_PRES, TI_EULER, TI_LEAPFROG, TI_VISC, TI_UPDATE, TI_COLLISION_WALL, 
+		  TI_COL, TI_COL_NORM}; //14
 	GE::Time* ts_cl[20];   // ts_cl  is GE::Time**
 
 	int nb_el;
@@ -275,6 +269,7 @@ private:
     Kernel k_density, k_pressure, k_viscosity;
     Kernel k_collision_wall;
     Kernel k_euler;
+    Kernel k_leapfrog;
 
 	Kernel datastructures_kernel;
 	Kernel hash_kernel;
