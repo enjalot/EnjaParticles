@@ -4,6 +4,9 @@
 # 1 "uniform_grid_utils.cpp"
 # 19 "uniform_grid_utils.cpp"
 # 1 "cl_macros.h" 1
+# 10 "cl_macros.h"
+# 1 "../variable_labels.h" 1
+# 11 "cl_macros.h" 2
 # 20 "uniform_grid_utils.cpp" 2
 # 1 "cl_structures.h" 1
 
@@ -23,6 +26,7 @@ typedef struct PointData
  float4 color_lapl;
  float4 force;
  float4 surf_tens;
+ float4 xsph;
 } PointData;
 
 struct GridParamsScaled
@@ -31,6 +35,8 @@ struct GridParamsScaled
     float4 grid_size;
     float4 grid_min;
     float4 grid_max;
+    float4 bnd_min;
+    float4 bnd_max;
 
 
     float4 grid_res;
@@ -45,6 +51,8 @@ struct GridParams
     float4 grid_size;
     float4 grid_min;
     float4 grid_max;
+    float4 bnd_min;
+    float4 bnd_max;
 
 
     float4 grid_res;
@@ -192,6 +200,8 @@ void zeroPoint(PointData* pt)
  pt->color_normal = (float4)(0.,0.,0.,0.);
  pt->force = (float4)(0.,0.,0.,0.);
  pt->surf_tens = (float4)(0.,0.,0.,0.);
+ pt->color_lapl = 0.;
+ pt->xsph = (float4)(0.,0.,0.,0.);
 }
 
 
@@ -228,7 +238,7 @@ void ForNeighbor(__global float4* vars_sorted,
 
 
  pt->density.x += sphp->mass*Wij;
-# 44 "neighbors.cpp" 2
+# 46 "neighbors.cpp" 2
  }
 
  if (fp->choice == 1) {
@@ -244,35 +254,33 @@ void ForNeighbor(__global float4* vars_sorted,
  float4 dj = vars_sorted[index_j+0*num].x;
 
 
- float fact = 1.;
-
-
-
 
 
  float rest_density = 1000.f;
  float Pi = sphp->K*(di.x - rest_density);
  float Pj = sphp->K*(dj.x - rest_density);
 
+ clf[index_i].x = 45.;
+
  float kern = -dWijdr * (Pi + Pj)*0.5;
  float4 stress = kern*r;
 
- float4 veli = vars_sorted[index_i+2*num];
- float4 velj = vars_sorted[index_j+2*num];
 
 
-
-
- float vvisc = 0.001f;
-
- float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
- stress += vvisc * (velj-veli) * dWijlapl;
-
-
+ float4 veli = vars_sorted[index_i+8*num];
+ float4 velj = vars_sorted[index_j+8*num];
+# 36 "pressure_update.cl"
  stress *= sphp->mass/(di.x*dj.x);
-# 48 "pressure_update.cl"
+
+
+
+ float Wijpol6 = Wpoly6(rlen, sphp->smoothing_distance, sphp);
+ pt->xsph += (2.f * sphp->mass * (velj-veli)/(di.x+dj.x) * Wijpol6);
+ pt->xsph.w = 0.f;
+
+
  pt->force += stress;
-# 49 "neighbors.cpp" 2
+# 51 "neighbors.cpp" 2
  }
 
  if (fp->choice == 2) {
@@ -294,7 +302,7 @@ void ForNeighbor(__global float4* vars_sorted,
 
  float dWijlapl = Wpoly6_lapl(rlen, sphp->smoothing_distance, sphp);
  pt->color_lapl += -sphp->mass * dWijlapl / dj.x;
-# 54 "neighbors.cpp" 2
+# 56 "neighbors.cpp" 2
  }
 
  if (fp->choice == 3) {
@@ -308,7 +316,7 @@ void ForNeighbor(__global float4* vars_sorted,
     float Wij = Wpoly6(r, sphp->smoothing_distance, sphp);
 
  pt->density.y += sphp->mass*Wij / vars_sorted[index_i+0*num].x;
-# 58 "neighbors.cpp" 2
+# 60 "neighbors.cpp" 2
  }
 }
 
@@ -446,14 +454,11 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 
 
 
-
   if (startIndex != 0xffffffff) {
    uint endIndex = cell_indexes_end[cellHash];
 
 
-
    for(uint index_j=startIndex; index_j < endIndex; index_j++) {
-
 
 
 
@@ -489,14 +494,11 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 
 
   int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_inv_delta);
-
-
-
+# 172 "uniform_grid_utils.cpp"
   for(int z=cell.z-1; z<=cell.z+1; ++z) {
    for(int y=cell.y-1; y<=cell.y+1; ++y) {
     for(int x=cell.x-1; x<=cell.x+1; ++x) {
      int4 ipos = (int4) (x,y,z,1);
-
 
 
 
@@ -555,8 +557,7 @@ __kernel void K_SumStep1(
 
   vars_sorted[index+0*num].x = pt.density.x;
 
-  clf[index].x = pt.density.x;
-  clf[index].y = sphp->smoothing_distance;
+
 
  }
  if (fp->choice == 1) {
@@ -565,7 +566,10 @@ __kernel void K_SumStep1(
 
   vars_sorted[index+3*num] = pt.force;
 
-  clf[index] = pt.force;
+
+  vars_sorted[index+9*num] = pt.xsph;
+
+
 
  }
  if (fp->choice == 2) {

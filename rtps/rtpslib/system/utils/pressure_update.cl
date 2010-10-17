@@ -8,23 +8,23 @@
 	float4 dj = density(index_j);
 
 	//form simple SPH in Krog's thesis
-	float fact = 1.; // 5.812
-	// rest density does not appear to be correct. 
-	//float Pi = sphp->K*(di.x - fact * sphp->rest_density); 
-	//float Pj = sphp->K*(dj.x - fact * sphp->rest_density);
 
 	//float rest_density = 00.f;
 	float rest_density = 1000.f;
 	float Pi = sphp->K*(di.x - rest_density);
 	float Pj = sphp->K*(dj.x - rest_density);
 
+	clf[index_i].x = 45.;
+
 	float kern = -dWijdr * (Pi + Pj)*0.5;
 	float4 stress = kern*r;
 
-	float4 veli = vel(index_i);
-	float4 velj = vel(index_j);
+	//float4 veli = vel(index_i);
+	//float4 velj = vel(index_j);
+	float4 veli = veleval(index_i);
+	float4 velj = veleval(index_j);
 
-	#if 1
+	#if 0
 	// Add viscous forces
 
 	float vvisc = 0.001f; // SHOULD BE SET IN GE_SPH.cpp
@@ -35,18 +35,14 @@
 
 	stress *=  sphp->mass/(di.x*dj.x);  // original
 
-
-	#if 0
+	#if 1
 	// Add XSPH stabilization term
 	float Wijpol6 = Wpoly6(rlen, sphp->smoothing_distance, sphp);
-	float4 surf_tens =  (2.f * sphp->mass * (velj-veli)/(di.x+dj.x) 
-	    * Wijpol6);
-	//surf_tens.w = 0.f;
-	stress += surf_tens;
+	pt->xsph +=  (2.f * sphp->mass * (velj-veli)/(di.x+dj.x) * Wijpol6);
+	pt->xsph.w = 0.f;
 	#endif
 
 	pt->force += stress;
-
 
 	//return stress;
 

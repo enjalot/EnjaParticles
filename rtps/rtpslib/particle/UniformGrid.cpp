@@ -28,9 +28,17 @@ UniformGrid::UniformGrid(float4 min, float4 max, float cell_size)
 //----------------------------------------------------------------------
 UniformGrid::UniformGrid(float4 min, float4 max, float cell_size, float sim_scale)
 {
+	this->bnd_min = min;
+	this->bnd_max = max;
+
+	double s2 = cell_size;
+	min = min - float4(s2, s2, s2, 0.);
+	max = max + float4(s2, s2, s2, 0.);
+
 	this->sim_scale = sim_scale;
     this->min = min;
     this->max = max;
+
 
 	float world_cell_size = cell_size / sim_scale;
 
@@ -56,7 +64,7 @@ UniformGrid::UniformGrid(float4 min, float4 max, float cell_size, float sim_scal
                    //res.z / size.z, 
 				   //1.);
 
-    delta = float4(size.x / res.x, 
+    delta = float4(size.x / res.x,    // res = nb cells
                    size.y / res.y,
                    size.z / res.z, 
 				   1.);
@@ -134,7 +142,7 @@ void UniformGrid::makeCube(float4* position, float4 pmin, float4 pmax, float spa
 		}
         position[i] = float4(x,y,z,1.0f);
 		i++;
-		printf("i= %d, pos= %f, %f, %f\n", x, y, z);
+		//printf("i= %d, pos= %f, %f, %f\n", x, y, z);
     }}}
 
 	offset = i;

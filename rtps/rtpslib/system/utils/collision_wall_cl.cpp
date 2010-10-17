@@ -20,7 +20,6 @@ float4 calculateRepulsionForce(
 // slightly less than the fluid mass (if the cell size = 2*particle_radius). 
 
     vel.w = 0.0f;  // Removed influence of 4th component of velocity (does not exist)
-//    float4 repulsion_force = 10.f*(boundary_stiffness * boundary_distance - boundary_dampening * dot(normal, vel))*normal;
     float4 repulsion_force = (boundary_stiffness * boundary_distance - boundary_dampening * dot(normal, vel))*normal;
 	repulsion_force.w = 0.f;
     return repulsion_force;
@@ -38,28 +37,26 @@ __kernel void collision_wall(
 	int nb_vars = gp->nb_vars;
 
     float4 p = pos(i); //  pos[i];
-    float4 v = vel(i); //  vel[i];
+    float4 v = veleval(i); //  vel[i];
     float4 r_f = (float4)(0.f, 0.f, 0.f, 0.f);
 
     //bottom wall
-    float diff = params->boundary_distance - (p.z - gp->grid_min.z);
+    float diff = params->boundary_distance - (p.z - gp->bnd_min.z);
     if (diff > params->EPSILON)
     {
 		// normal points into the domain
         float4 normal = (float4)(0.0f, 0.0f, 1.0f, 0.0f);
-		//if (dot(normal,v) < 0) {
         r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
-		//}
     }
 
     //Y walls
-    diff = params->boundary_distance - (p.y - gp->grid_min.y);
+    diff = params->boundary_distance - (p.y - gp->bnd_min.y);
     if (diff > params->EPSILON)
     {
         float4 normal = (float4)(0.0f, 1.0f, 0.0f, 0.0f);
         r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
     }
-    diff = params->boundary_distance - (gp->grid_max.y - p.y);
+    diff = params->boundary_distance - (gp->bnd_max.y - p.y);
     if (diff > params->EPSILON)
     {
         float4 normal = (float4)(0.0f, -1.0f, 0.0f, 0.0f);
@@ -67,13 +64,13 @@ __kernel void collision_wall(
     }
 
     //X walls
-    diff = params->boundary_distance - (p.x - gp->grid_min.x);
+    diff = params->boundary_distance - (p.x - gp->bnd_min.x);
     if (diff > params->EPSILON)
     {
         float4 normal = (float4)(1.0f, 0.0f, 0.0f, 0.0f);
         r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
     }
-    diff = params->boundary_distance - (gp->grid_max.x - p.x);
+    diff = params->boundary_distance - (gp->bnd_max.x - p.x);
     if (diff > params->EPSILON)
     {
         float4 normal = (float4)(-1.0f, 0.0f, 0.0f, 0.0f);

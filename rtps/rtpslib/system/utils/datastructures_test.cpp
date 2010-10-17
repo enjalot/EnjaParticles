@@ -83,6 +83,7 @@ __kernel void datastructures(
 	// SHOULD I divide by simulation scale upon return? do not think so
 	pos(index) = unsorted_pos(sorted_index) * sphp->simulation_scale;
 	vel(index) = unsorted_vel(sorted_index);
+	veleval(index) = unsorted_veleval(sorted_index); // not sure if needed
 	//density(index) = unsorted_density(sorted_index); // only for debugging
 #endif
 }

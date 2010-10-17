@@ -31,7 +31,10 @@ int4 calcGridCell(float4 p, float4 grid_min, float4 grid_inv_delta)
 }
 
 //----------------------------------------------------------------------
-uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
+uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges
+           , __global float4* fdebug,
+           __global int4* idebug
+		 )
 {
     // each variable on single line or else STRINGIFY DOES NOT WORK
     int gx;
@@ -67,6 +70,17 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
     //This means that we process the grid structure in "depth slice" order, and
     //each such slice is processed in row-column order.
 
+	int index = get_global_id(0);
+	//fdebug[index] = grid_res;
+	//idebug[index] = (int4)(gx,gy,gz,1.);
+    //idebug[index] = (gz*grid_res.y + gy) * grid_res.x + gx; 
+
+	// uint(-3) = 0   (so hash is never less than zero)
+	// But if particle leaves boundary to the right of the grid, the hash
+	// table can go out of bounds and the code might crash. This can happen
+	// either if the boundary does not catch the particles or if the courant
+	// condition is violated and the code goes unstable. 
+
     return (gz*grid_res.y + gy) * grid_res.x + gx; 
 }
 
@@ -91,9 +105,10 @@ __kernel void hash(
            __global uint* sort_hashes,
            __global uint* sort_indexes,
            __global uint* cell_indices_start,
-           __constant struct GridParams* gp) 
-           //, __global float4* fdebug,
-           //__global int4* idebug)
+           __constant struct GridParams* gp
+           , __global float4* fdebug,
+           __global int4* idebug
+		   )
 {
 #if 1
     // particle index
@@ -104,7 +119,10 @@ __kernel void hash(
 
 
 	// initialize to -1 (used in kernel datastructures in build_datastructures_wrap.cpp
-	cell_indices_start = 0xffffffff;
+	int grid_size = (int) (gp->grid_res.x*gp->grid_res.y*gp->grid_res.z);
+	if (index < grid_size) {
+		cell_indices_start[index] = 0xffffffff;
+	}
 
     // particle position
     float4 p = unsorted_pos(index); // macro
@@ -112,7 +130,10 @@ __kernel void hash(
     // get address in grid
     int4 gridPos = calcGridCell(p, gp->grid_min, gp->grid_inv_delta);
     bool wrap_edges = false;
-    uint hash = (uint) calcGridHash(gridPos, gp->grid_res, wrap_edges);
+    uint hash = (uint) calcGridHash(gridPos, gp->grid_res, wrap_edges, fdebug, idebug);
+
+	//idebug[index] = hash;
+	//fdebug[index] = p;
 
 
     // store grid hash and particle index

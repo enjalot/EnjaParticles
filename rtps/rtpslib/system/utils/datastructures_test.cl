@@ -9,6 +9,9 @@
 
 
 # 1 "cl_macros.h" 1
+# 10 "cl_macros.h"
+# 1 "../variable_labels.h" 1
+# 11 "cl_macros.h" 2
 # 8 "datastructures_test.cpp" 2
 # 1 "cl_structures.h" 1
 
@@ -28,6 +31,7 @@ typedef struct PointData
  float4 color_lapl;
  float4 force;
  float4 surf_tens;
+ float4 xsph;
 } PointData;
 
 struct GridParamsScaled
@@ -36,6 +40,8 @@ struct GridParamsScaled
     float4 grid_size;
     float4 grid_min;
     float4 grid_max;
+    float4 bnd_min;
+    float4 bnd_max;
 
 
     float4 grid_res;
@@ -50,6 +56,8 @@ struct GridParams
     float4 grid_size;
     float4 grid_min;
     float4 grid_max;
+    float4 bnd_min;
+    float4 bnd_max;
 
 
     float4 grid_res;
@@ -157,6 +165,7 @@ __kernel void datastructures(
 # 84 "datastructures_test.cpp"
  vars_sorted[index+1*num] = vars_unsorted[sorted_index+1 *num] * sphp->simulation_scale;
  vars_sorted[index+2*num] = vars_unsorted[sorted_index+2 *num];
+ vars_sorted[index+8*num] = vars_sorted[sorted_index+8*num];
 
 
 }

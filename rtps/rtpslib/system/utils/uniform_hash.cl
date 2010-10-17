@@ -25,6 +25,7 @@ typedef struct PointData
  float4 color_lapl;
  float4 force;
  float4 surf_tens;
+ float4 xsph;
 } PointData;
 
 struct GridParamsScaled
@@ -33,6 +34,8 @@ struct GridParamsScaled
     float4 grid_size;
     float4 grid_min;
     float4 grid_max;
+    float4 bnd_min;
+    float4 bnd_max;
 
 
     float4 grid_res;
@@ -47,6 +50,8 @@ struct GridParams
     float4 grid_size;
     float4 grid_min;
     float4 grid_max;
+    float4 bnd_min;
+    float4 bnd_max;
 
 
     float4 grid_res;
@@ -95,6 +100,9 @@ struct SPHParams
 };
 # 7 "uniform_hash.cpp" 2
 # 1 "cl_macros.h" 1
+# 10 "cl_macros.h"
+# 1 "../variable_labels.h" 1
+# 11 "cl_macros.h" 2
 # 8 "uniform_hash.cpp" 2
 
 
@@ -122,7 +130,10 @@ int4 calcGridCell(float4 p, float4 grid_min, float4 grid_inv_delta)
 }
 
 
-uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
+uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges
+           , __global float4* fdebug,
+           __global int4* idebug
+   )
 {
 
     int gx;
@@ -158,17 +169,20 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 
 
 
+ int index = get_global_id(0);
+# 84 "uniform_hash.cpp"
     return (gz*grid_res.y + gy) * grid_res.x + gx;
 }
-# 89 "uniform_hash.cpp"
+# 103 "uniform_hash.cpp"
 __kernel void hash(
            __global float4* vars_unsorted,
            __global uint* sort_hashes,
            __global uint* sort_indexes,
            __global uint* cell_indices_start,
-           __constant struct GridParams* gp)
-
-
+           __constant struct GridParams* gp
+           , __global float4* fdebug,
+           __global int4* idebug
+     )
 {
 
 
@@ -179,7 +193,10 @@ __kernel void hash(
 
 
 
- cell_indices_start = 0xffffffff;
+ int grid_size = (int) (gp->grid_res.x*gp->grid_res.y*gp->grid_res.z);
+ if (index < grid_size) {
+  cell_indices_start[index] = 0xffffffff;
+ }
 
 
     float4 p = vars_unsorted[index+1 *num];
@@ -187,7 +204,10 @@ __kernel void hash(
 
     int4 gridPos = calcGridCell(p, gp->grid_min, gp->grid_inv_delta);
     bool wrap_edges = false;
-    uint hash = (uint) calcGridHash(gridPos, gp->grid_res, wrap_edges);
+    uint hash = (uint) calcGridHash(gridPos, gp->grid_res, wrap_edges, fdebug, idebug);
+
+
+
 
 
 

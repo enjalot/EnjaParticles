@@ -21,6 +21,8 @@ public:
 
     float4 getMin(){ return min; };
     float4 getMax(){ return max; };
+    float4 getBndMin(){ return bnd_min; };
+    float4 getBndMax(){ return bnd_max; };
 	float4 getDelta() { return delta; };
 	float4 getRes() { return res; };
 	float4 getSize() { return size; };
@@ -31,6 +33,8 @@ public:
 	float sim_scale;
     float4 min;
     float4 max; 
+	float4 bnd_min;
+	float4 bnd_max;
 
     float4 size;
     float4 res;

@@ -78,8 +78,8 @@ void GE_SPH::hash()
 	kern.setArg(3, cl_cell_indices_start->getDevicePtr());
 	kern.setArg(4, cl_GridParams->getDevicePtr());
 	//kern.setArg(4, cl_GridParamsScaled->getDevicePtr());
-	//kern.setArg(5, clf_debug->getDevicePtr());
-	//kern.setArg(6, cli_debug->getDevicePtr());
+	kern.setArg(5, clf_debug->getDevicePtr());
+	kern.setArg(6, cli_debug->getDevicePtr());
 
 	//printf("nb_el= %d\n", nb_el);
 	kern.execute(nb_el,ctaSize);
@@ -88,7 +88,7 @@ void GE_SPH::hash()
 	ps->cli->queue.finish();
 	ts_cl[TI_HASH]->end();
 
-	//printHashDiagnostics();
+	printHashDiagnostics();
 }
 //----------------------------------------------------------------------
 void GE_SPH::printHashDiagnostics()
@@ -98,20 +98,20 @@ void GE_SPH::printHashDiagnostics()
 	cl_sort_hashes->copyToHost();
 	cl_sort_indices->copyToHost();
 	cl_cells->copyToHost();
+	cli_debug->copyToHost();
+	clf_debug->copyToHost();
 	cl_GridParams->copyToHost();
+
 	GridParams& gp = *cl_GridParams->getHostPtr();
-	gp.grid_size.print("grid size (domain dimensions)"); // domain dimensions
-	gp.grid_delta.print("grid delta (cell size)"); // cell size
-	gp.grid_min.print("grid min");
-	gp.grid_max.print("grid max");
-	gp.grid_res.print("grid res (nb points)"); // number of points
-	gp.grid_delta.print("grid delta");
-	gp.grid_inv_delta.print("grid inv delta");
+	gp.print();
 
 	//cli_debug->copyToHost();
 
 	for (int i=0; i < nb_el; i++) {  // only first 4096 are ok. WHY? 
 		printf(" cl_sort_hash[%d] %u, cl_sort_indices[%d]: %u\n", i, (*cl_sort_hashes)[i], i, (*cl_sort_indices)[i]);
+		printf("cli_debug: %d, %d, %d\n", (*cli_debug)[i].x, (*cli_debug)[i].y, (*cli_debug)[i].z);
+		printf("clf_debug: %f, %f, %f\n", (*clf_debug)[i].x, (*clf_debug)[i].y, (*clf_debug)[i].z);
+		printf("-----\n");
 
 		#if 0
 		int gx = (cl_cells[i].x - gp.grid_min.x) * gp.grid_inv_delta.x ;
@@ -124,7 +124,7 @@ void GE_SPH::printHashDiagnostics()
 		if (idx != cl_sort_hashes[i]) {
 			printf("hash indices (exact vs GPU do not match)\n");
 		}
-		//printf("cli_debug: %d, %d, %d\n", cli_debug[i].x, cli_debug[i].y, cli_debug[i].z);
+		printf("cli_debug: %d, %d, %d\n", cli_debug[i].x, cli_debug[i].y, cli_debug[i].z);
 		//printf("---------------------------\n");
 		#endif
 	}

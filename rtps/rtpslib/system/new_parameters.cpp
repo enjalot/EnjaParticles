@@ -414,7 +414,8 @@ params.print();
 
 	double cell_size = h;
 	double cell_size_w = h / simulation_scale;
-	printf("cell_size= %f\n", cell_size); 
+	printf("cell_size_w= %f, cell_size= %f\n", cell_size_w, cell_size); 
+	//exit(0);
 
 	//cell_size = h;
 	int    nb_cells_x; // number of cells along x
@@ -432,27 +433,24 @@ params.print();
 
 	#if 1
 	// box of fluid at rest
+	// domain minimimum is extended inside UniformGrid
+	// domain_min become wall boundaries
 	float4 domain_min  = float4(0, 0, 0, 1);
 	float4 domain_max  = float4(256, 256, 512, 1);
-	float4 fluid_min   = float4(0, 0, 0, 1);
-	float4 fluid_max   = float4(256, 256, 512, 1);
+
+	// displace by 1/2 particle spacing in world coordinates
+	float4 fluid_min   = float4(0., 0., 0., 1.);
+	float4 fluid_max   = float4(256., 256., 512., 1);
 	#endif
 
 	double domain_size_x = domain_max.x - domain_min.x; 
 	double domain_size_y = domain_max.y - domain_min.y; 
 	double domain_size_z = domain_max.z - domain_min.z; 
 
-    sph_settings.simulation_scale = 0.010; //0.004;
+    sph_settings.simulation_scale = simulation_scale;
 	float world_cell_size = cell_size / sph_settings.simulation_scale;
 	printf("world_cell_size= %f\n", world_cell_size);
 
-	#if 0
-	nb_cells_x = (int) (domain_size_x / world_cell_size);
-	nb_cells_y = (int) (domain_size_y / world_cell_size);
-	nb_cells_z = (int) (domain_size_z / world_cell_size);
-
-	printf("nb cells: %d, %d, %d\n", nb_cells_x, nb_cells_y, nb_cells_z);
-	#endif
 
 	//.......
 
@@ -467,6 +465,7 @@ params.print();
 	grid.res.print("grid res");
 	printf("offset= %d\n", offset);
 	printf("cell_size_w= %f\n", cell_size_w);
+	printf("particle_spacing_w= %f\n", particle_spacing_w);
 	grid.print();
 	//exit(0);
 
@@ -507,7 +506,6 @@ params.print();
 	params.dt = ps->settings.dt;
 	//printf("dt= %f\n", params.dt); exit(0);
  
-
 #endif
 
 

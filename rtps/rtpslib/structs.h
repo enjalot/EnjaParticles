@@ -65,11 +65,22 @@ typedef struct float4
 	}
 
 	friend float4 operator-(float4& a, float4& b) {
-		float4 c = float4(b.x-a.x, b.y-a.y, b.z-a.z, b.w-a.w);
+		float4 c = float4(a.x-b.x, a.y-b.y, a.z-b.z, a.w-b.w);
+		return c;
+	}
+
+	// to do: float4 aa = min - float4(5.,5.,5.,5.); // min is float4
+	friend const float4& operator-(const float4& a, const float4& b) {
+		float4 c = float4(a.x-b.x, a.y-b.y, a.z-b.z, a.w-b.w);
 		return c;
 	}
 
 	friend float4& operator+(float4& a, float4& b) {
+		float4 c = float4(b.x+a.x, b.y+a.y, b.z+a.z, b.w+a.w);
+		return c;
+	}
+
+	friend const float4& operator+(const float4& a, const float4& b) {
 		float4 c = float4(b.x+a.x, b.y+a.y, b.z+a.z, b.w+a.w);
 		return c;
 	}
@@ -99,6 +110,12 @@ typedef struct float4
 	}
 	friend float4 operator*(float4& b, float r) {
 		float4 m = float4(r*b.x, r*b.y, r*b.z, r*b.w);
+		return m;
+	}
+
+	friend float4 operator/(float4& b, float r) {
+		float d = 1./r;
+		float4 m = float4(d*b.x, d*b.y, d*b.z, d*b.w);
 		return m;
 	}
 

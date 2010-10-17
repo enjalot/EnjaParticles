@@ -31,22 +31,25 @@ __kernel void ge_leapfrog(
         f *= 600.0f/speed;
     }
 
-	float4 vnext = v + h*f;
-	//vnext += 0.5f * xsph[i]; // should be param XSPH factor
+	float4 vnext = v + dt*f;
+	// WHY IS MY CORRECTION NEGATIVE and IAN's POSITIVE? 
+	vnext -= 0.005f * xsph(i); // should be param XSPH factor
     p += dt * vnext;
     p.w = 1.0f; //just in case
-	veleval(i) = 0.5f*(v+vnext);
+	float4 veval = 0.5f*(v+vnext);
+	v = vnext;
 
 
 	uint originalIndex = sort_indices[i];
 
 	// writeback to unsorted buffer
 	float dens = density(i);
-	p /= params->simulation_scale;
+	p.xyz /= params->simulation_scale;
 	unsorted_pos(originalIndex) = (float4)(p.xyz, dens);
 	unsorted_vel(originalIndex) = v;
 	unsorted_density(originalIndex) = density(i); // FOR DEBUGGING ONLY
 	unsorted_force(originalIndex) = f; // FOR DEBUGGING ONLY
+	unsorted_veleval(originalIndex) = veval; 
 	//positions[originalIndex] = (float4)(p.xyz, dens);  // for plotting
 	positions[originalIndex] = (float4)(p.xyz, 1.);  // for plotting
 }

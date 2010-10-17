@@ -68,8 +68,6 @@ void GE_SPH::neighborSearch(int which)
 	}
 	#endif
 	
-	//kern.setArg(iarg++, nb_el);
-	//kern.setArg(iarg++, nb_vars);
 	kern.setArg(iarg++, cl_vars_sorted->getDevicePtr());
 	kern.setArg(iarg++, cl_cell_indices_start->getDevicePtr());
 	kern.setArg(iarg++, cl_cell_indices_end->getDevicePtr());

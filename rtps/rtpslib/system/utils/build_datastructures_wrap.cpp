@@ -94,6 +94,7 @@ void GE_SPH::printBuildDiagnostics()
 		cl_vars_unsorted->copyToHost();
 		cl_vars_sorted->copyToHost();
 		cl_sort_indices->copyToHost();
+		cl_cell_indices_start->copyToHost();
 		//cl_vars_sort_indices->copyToDevice(); // not defineed
 		//exit(0);
 	} catch(cl::Error er) {
@@ -140,20 +141,24 @@ void GE_SPH::printBuildDiagnostics()
 //----------------------------------------------------------------------
 void GE_SPH::computeCellStartEndGPU()
 {
+	printf("****\n");
 	int* is = cl_cell_indices_start->getHostPtr();
 	int* ie = cl_cell_indices_end->getHostPtr();
+	GridParams& gp = *(cl_GridParams->getHostPtr());
+	int grid_size = (int) (gp.grid_res.x * gp.grid_res.y * gp.grid_res.z);
 
 		printf("cell_indices_start, end (GPU)\n");
 		int nb_particles = 0;
 		for (int i=0; i < grid_size; i++) {
+			printf("is,ie[%d]= %d, %d\n", i, is[i], ie[i]);
 			int nb = ie[i] - is[i];
 			if (nb > 0 && is[i] != -1) {
 				nb_particles += nb;
 				//printf("nb= %d\n", nb);
 			}
-			//if (is[i] != -1) {
-				//printf("(GPU) [%d]: indices_start: %d, indices_end: %d, nb pts: %d\n", i, is[i], ie[i], nb);
-			//}
+			if (is[i] != -1) {
+				printf("(GPU) [%d]: indices_start: %d, indices_end: %d, nb pts: %d\n", i, is[i], ie[i], nb);
+			}
 		}
 		if (nb_particles != nb_el) {
 			printf("nb particles: %d\n", nb_particles);
@@ -161,6 +166,8 @@ void GE_SPH::computeCellStartEndGPU()
 			printf("(computeCellStartEndGPU) (count != nb_el)\n");
 			exit(1);
 		}
+
+	//	exit(0);
 }
 //----------------------------------------------------------------------
 #endif

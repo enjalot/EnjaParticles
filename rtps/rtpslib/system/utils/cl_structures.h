@@ -15,6 +15,7 @@ typedef struct PointData
 	float4 color_lapl;
 	float4 force;
 	float4 surf_tens;
+	float4 xsph;
 } PointData;
 //----------------------------------------------------------------------
 struct GridParamsScaled
@@ -23,6 +24,8 @@ struct GridParamsScaled
     float4          grid_size;
     float4          grid_min;
     float4          grid_max;
+    float4          bnd_min;
+    float4          bnd_max;
 
     // number of cells in each dimension/side of grid
     float4          grid_res;
@@ -37,6 +40,8 @@ struct GridParams
     float4          grid_size;
     float4          grid_min;
     float4          grid_max;
+    float4          bnd_min;
+    float4          bnd_max;
 
     // number of cells in each dimension/side of grid
     float4          grid_res;

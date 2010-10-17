@@ -206,6 +206,8 @@ void GE_SPH::setupArrays()
 
 	gp.grid_min = grid.getMin();
 	gp.grid_max = grid.getMax();
+	gp.bnd_min  = grid.getBndMin();
+	gp.bnd_max  = grid.getBndMax();
 	gp.grid_res = grid.getRes();
 	gp.grid_size = grid.getSize();
 	printf("*** grid_size= %d\n", grid_size);
@@ -234,24 +236,14 @@ void GE_SPH::setupArrays()
 	printf("ss= %f\n", ss);
 //	exit(0);
 
-	gps.grid_size.x = gp.grid_size.x * ss;
-	gps.grid_size.y = gp.grid_size.y * ss;
-	gps.grid_size.z = gp.grid_size.z * ss;
-	gps.grid_delta.x = gp.grid_delta.x * ss;
-	gps.grid_delta.y = gp.grid_delta.y * ss;
-	gps.grid_delta.z = gp.grid_delta.z * ss;
-	gps.grid_min.x = gp.grid_min.x * ss;
-	gps.grid_min.y = gp.grid_min.y * ss;
-	gps.grid_min.z = gp.grid_min.z * ss;
-	gps.grid_max.x = gp.grid_max.x * ss;
-	gps.grid_max.y = gp.grid_max.y * ss;
-	gps.grid_max.z = gp.grid_max.z * ss;
-	gps.grid_res.x = gp.grid_res.x;
-	gps.grid_res.y = gp.grid_res.y;
-	gps.grid_res.z = gp.grid_res.z;
-	gps.grid_inv_delta.x = gp.grid_inv_delta.x / ss;
-	gps.grid_inv_delta.y = gp.grid_inv_delta.y / ss;
-	gps.grid_inv_delta.z = gp.grid_inv_delta.z / ss;
+	gps.bnd_min  = gp.bnd_min * ss;
+	gps.bnd_max  = gp.bnd_max * ss;
+	gps.grid_size = gp.grid_size * ss;
+	gps.grid_delta = gp.grid_delta * ss;
+	gps.grid_min = gp.grid_min * ss;
+	gps.grid_max = gp.grid_max * ss;
+	gps.grid_res = gp.grid_res;
+	gps.grid_inv_delta = gp.grid_inv_delta / ss;
 	gps.grid_inv_delta.w = 1.0;
 	gps.nb_vars = nb_vars;
 	gps.numParticles = nb_el;
@@ -347,11 +339,12 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
     cl_position->acquire();
     cl_color->acquire();
     
-	nb_sub_iter = 5;
+	nb_sub_iter = 1;
     for(int i=0; i < nb_sub_iter; i++)
     {
 		// ***** Create HASH ****
 		hash();
+		//exit(0);
 
 		// **** Sort arrays ****
 		// only power of 2 number of particles
@@ -364,6 +357,7 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 		#if 1
 		// ***** DENSITY UPDATE *****
 		neighborSearch(0); //density
+		//exit(0);
 
 
 		// ***** DENSITY DENOMINATOR *****
@@ -381,7 +375,7 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 		computeCollisionWall();
 
         // ***** TIME UPDATE *****
-		computeEuler();
+		//computeEuler();
 		computeLeapfrog();
 	}
 
@@ -1001,6 +995,14 @@ void GE_SPH::initializeData()
 	BufferGE<float4>& un = *cl_vars_unsorted;
 	BufferGE<float4>& so = *cl_vars_sorted;
 
+	float* unf = (float*) un.getHostPtr();
+	float* sof = (float*) so.getHostPtr();
+
+	for (int i=0; i < nb_el*nb_vars; i++) {
+		unf[i] = 0.0;
+		sof[i] = 0.0;
+	}
+
 	for (int i=0; i < nb_el; i++) {
 		//vars[i+DENS*num] = densities[i];
 		// PROBLEM: density is float, but vars_unsorted is float4
@@ -1011,8 +1013,6 @@ void GE_SPH::initializeData()
 
 		un(i+DENS*nb_el).x = densities[i];
 		un(i+DENS*nb_el).y = 1.0; // for surface tension (always 1)
-		un(i+DENS*nb_el).z = 0.0;
-		un(i+DENS*nb_el).w = 0.0;
 		un(i+POS*nb_el) = positions[i];
 		un(i+VEL*nb_el) = velocities[i];
 		un(i+FOR*nb_el) = forces[i];
@@ -1020,8 +1020,6 @@ void GE_SPH::initializeData()
 		// SHOULD NOT BE REQUIRED
 		so(i+DENS*nb_el).x = densities[i];
 		so(i+DENS*nb_el).y = 1.0;  // for surface tension (always 1)
-		so(i+DENS*nb_el).z = 0.0;
-		so(i+DENS*nb_el).w = 0.0;
 		so(i+POS*nb_el) = positions[i];
 		so(i+VEL*nb_el) = velocities[i];
 		so(i+FOR*nb_el) = forces[i];

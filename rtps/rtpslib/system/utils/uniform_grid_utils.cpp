@@ -112,7 +112,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 
 		/* get start/end positions for this cell/bucket */
 		uint startIndex = FETCH(cell_indexes_start,cellHash);
-
 		/* check cell is not empty
 		 * WHERE IS 0xffffffff SET?  NO IDEA ************************
 		 */
@@ -120,9 +119,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 			uint endIndex = FETCH(cell_indexes_end, cellHash);
 
 			/* iterate over particles in this cell */
-//clf[index_i].w = -17.;
 			for(uint index_j=startIndex; index_j < endIndex; index_j++) {			
-				//cli[index_i].x++;  
 #if 1
 				//***** UPDATE pt (sum)
 				//frce += ForPossibleNeighbor(vars_sorted, numParticles, index_i, index_j, position_i, gp, fp, sphp ARGS);
@@ -159,6 +156,17 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 		// get cell in grid for the given position
 		int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_inv_delta);
 
+			//clf[index_i].w = -17.;
+			//cli[index_i].y = startIndex;
+			//cli[index_i].x = cellHash;
+			//cli[index_i].z = -39;
+			// hash is wrong!!!
+			//cli[index_i].z = endIndex;
+			//cli[index_i] = cell;
+			//clf[index_i] = gp->grid_inv_delta;
+
+
+
 		// iterate through the 3^3 cells in and around the given position
 		// can't unroll these loops, they are not innermost 
 		for(int z=cell.z-1; z<=cell.z+1; ++z) {
@@ -169,7 +177,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 	#if 1
 					// I am summing much more than required
 					// **** SUMMATION/UPDATE
-					//frce += IterateParticlesInCell(vars_sorted, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp ARGS);
 					IterateParticlesInCell(vars_sorted, pt, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp ARGS);
 
 				//barrier(CLK_LOCAL_MEM_FENCE); // DEBUG
@@ -223,9 +230,8 @@ __kernel void K_SumStep1(
     	IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
 		// density(index) = frce.x; 
 		density(index) = pt.density.x;
-		//cli[index].w = 4;
-		clf[index].x = pt.density.x;
-		clf[index].y = sphp->smoothing_distance;
+		//clf[index] = pt.density.x;
+		//cli[index].w = -3;
 		// code reaches this point on first call
 	}
 	if (fp->choice == 1) { // update pressure
@@ -233,8 +239,11 @@ __kernel void K_SumStep1(
 		//barrier(CLK_LOCAL_MEM_FENCE); // DEBUG
 		//force(index) = frce; // Does not seem to maintain value into euler.cl
 		force(index) = pt.force; // Does not seem to maintain value into euler.cl
+		//clf[index] = pt.force;
+		//cli[index].x = -37;
+		xsph(index) = pt.xsph;
 		//cli[index].w = 5;
-		clf[index] = pt.force;
+		//clf[index] = pt.force;
 		// SERIOUS PROBLEM: Results different than results with cli = 4 (bottom of this file)
 	}
 	if (fp->choice == 2) { // update surface tension (NOT DEBUGGED)

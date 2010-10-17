@@ -59,6 +59,8 @@ struct GridParams
     float4          grid_size;
     float4          grid_min;
     float4          grid_max;
+    float4          bnd_min; // particles stay within bnd
+    float4          bnd_max;
 
     // number of cells in each dimension/side of grid
     float4          grid_res;
@@ -74,6 +76,8 @@ struct GridParams
 		grid_size.print("grid_size"); 
 		grid_min.print("grid_min"); 
 		grid_max.print("grid_max"); 
+		bnd_min.print("bnd_min"); 
+		bnd_max.print("bnd_max"); 
 		grid_res.print("grid_res"); 
 		grid_delta.print("grid_delta"); 
 		grid_inv_delta.print("grid_inv_delta"); 
@@ -87,6 +91,8 @@ struct GridParamsScaled
     float4          grid_size;
     float4          grid_min;
     float4          grid_max;
+    float4          bnd_min; // particles stay within bnd
+    float4          bnd_max;
 
     // number of cells in each dimension/side of grid
     float4          grid_res;
@@ -101,6 +107,8 @@ struct GridParamsScaled
 		grid_size.print("grid_size"); 
 		grid_min.print("grid_min"); 
 		grid_max.print("grid_max"); 
+		bnd_min.print("bnd_min"); 
+		bnd_max.print("bnd_max"); 
 		grid_res.print("grid_res"); 
 		grid_delta.print("grid_delta"); 
 		grid_inv_delta.print("grid_inv_delta"); 
@@ -302,6 +310,7 @@ private:
 	// loads kernel the first time, executes kernel every time
 	void computeCollisionWall(); //GE
 	void computeEuler(); //GE
+	void computeLeapfrog(); //GE
 	void computeDensity(); //GE
 	void computePressure(); //GE
 	void computeViscosity(); //GE

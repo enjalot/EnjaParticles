@@ -13,6 +13,8 @@ void zeroPoint(PointData* pt)
 	pt->color_normal = (float4)(0.,0.,0.,0.);
 	pt->force = (float4)(0.,0.,0.,0.);
 	pt->surf_tens = (float4)(0.,0.,0.,0.);
+	pt->color_lapl = 0.;
+	pt->xsph = (float4)(0.,0.,0.,0.);
 }
 //----------------------------------------------------------------------
 //float4 ForNeighbor(__global float4*  vars_sorted,
