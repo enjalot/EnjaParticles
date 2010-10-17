@@ -22,6 +22,9 @@ private:
 	//GLuint vbo_id;
 	bool externalPtr;
 	int nb_el;
+	/// Total storage allocated (GPU + CPU)
+	static int total_bytes_GPU;
+	static int total_bytes_CPU;
 
 public:
     BufferGE(){ cli=NULL; data = 0;}
@@ -75,6 +78,9 @@ public:
 	// return a cl_mem object
 	//cl::Memory getDevicePtr() { return cl_buffer[0](); }
 	cl_mem getDevicePtr() { return cl_buffer[0](); }
+
+	static int getNbBytesGPU() { return total_bytes_GPU; } 
+	static int getNbBytesCPU() { return total_bytes_CPU; } 
 
 private:
 	BufferGE(const BufferGE&); // copy constructor

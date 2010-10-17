@@ -1,6 +1,11 @@
 //#include "BufferGE.h"
 
 //namespace rtps {
+template <class T>
+int BufferGE<T>::total_bytes_GPU = 0;
+
+template <class T>
+int BufferGE<T>::total_bytes_CPU = 0;
 
 template <class T>
 BufferGE<T>::BufferGE(CL *cli, T* data, int sz)
@@ -19,7 +24,12 @@ BufferGE<T>::BufferGE(CL *cli, T* data, int sz)
     	cl_buffer.push_back(cl::Buffer(cli->context, CL_MEM_READ_WRITE, sz*sizeof(T), NULL, &cli->err));
 		printf("BufferGE constructor: err= %d, sz= %d\n", cli->err, sz);
     	//copyToDevice();
+		total_bytes_GPU += sz*sizeof(T);
+	} else {
+		printf("Do not allow creation of BufferGE with zero data\n");
+		exit(0);
 	}
+
 	//printf("exit constructor 1\n");
 }
 
@@ -38,6 +48,10 @@ BufferGE<T>::BufferGE(CL *cli, int sz)
 
 	// create buffer on GPU
    	cl_buffer.push_back(cl::Buffer(cli->context, CL_MEM_READ_WRITE, sz*sizeof(T), NULL, &cli->err));
+
+	total_bytes_GPU += sz*sizeof(T);
+	total_bytes_CPU += sz*sizeof(T);
+
     //printf("after data\n");
 	//printf("buffer size: %d\n", sizeof(cl_buffer[0]));
 
@@ -53,7 +67,9 @@ BufferGE<T>::~BufferGE()
 	if (!externalPtr && data) {
 		//printf("BufferGE DESTRUCTOR: delete data\n");
 		delete [] data;
+		// TODOI should destroy data on the GPU as well. 
 		data = 0;
+		total_bytes_GPU -= nb_el*sizeof(T);
 	}
 	//printf("INSIDE DESTRUCTOR OF BUFFERGE\n");
 }

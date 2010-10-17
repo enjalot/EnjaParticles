@@ -457,6 +457,8 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 
   float4 frce = (float4) (0.,0.,0.,0.);
   uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
+  cli[index_i] = cellPos;
+  cli[index_i].w = cellHash;
 
 
   uint startIndex = cell_indexes_start[cellHash];
@@ -503,7 +505,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 
 
   int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_inv_delta);
-# 172 "uniform_grid_utils.cpp"
+# 174 "uniform_grid_utils.cpp"
   for(int z=cell.z-1; z<=cell.z+1; ++z) {
    for(int y=cell.y-1; y<=cell.y+1; ++y) {
     for(int x=cell.x-1; x<=cell.x+1; ++x) {

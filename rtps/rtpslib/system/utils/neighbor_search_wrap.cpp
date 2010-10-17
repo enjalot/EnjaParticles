@@ -94,6 +94,7 @@ void GE_SPH::neighborSearch(int which)
 
 
 	#if 0
+	if (which != 0) return;
 	printf("============================================\n");
 	printf("which == %d *** \n", which);
 

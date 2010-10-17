@@ -83,12 +83,25 @@ void GE_SPH::hash()
 
 	//printf("nb_el= %d\n", nb_el);
 	kern.execute(nb_el,ctaSize);
-	//exit(0);
 
 	ps->cli->queue.finish();
 	ts_cl[TI_HASH]->end();
 
 	//printHashDiagnostics();
+
+	#if 0
+	GridParams& gp = *cl_GridParams->getHostPtr();
+	cl_sort_hashes->copyToHost();
+	int* h = cl_sort_hashes->getHostPtr();
+	int sz = (int) (gp.grid_res.x * gp.grid_res.y * gp.grid_res.z);
+	int mx = -1;
+	for (int i=0; i < nb_el; i++) {
+		//printf("h[%d]= %d\n", i, h[i]);
+		if (h[i] > mx) mx = h[i];
+	}
+	printf("sz= %d, max hash: %d\n", sz, mx);
+	//exit(0);
+	#endif
 }
 //----------------------------------------------------------------------
 void GE_SPH::printHashDiagnostics()

@@ -49,6 +49,15 @@ __kernel void collision_wall(
         r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
     }
 
+	// top wall (ideally a particle should be removed if it hits the top boundary (hash tables present problems
+    diff = params->boundary_distance - (gp->bnd_max.z - p.z);
+    if (diff > params->EPSILON)
+    {
+		// normal points into the domain
+        float4 normal = (float4)(0.0f, 0.0f, -1.0f, 0.0f);
+        r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
+    }
+
     //Y walls
     diff = params->boundary_distance - (p.y - gp->bnd_min.y);
     if (diff > params->EPSILON)

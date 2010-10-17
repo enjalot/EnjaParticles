@@ -26,6 +26,7 @@ public:
 	float4 getDelta() { return delta; };
 	float4 getRes() { return res; };
 	float4 getSize() { return size; };
+	int getNbPoints() { return (int) (res.x*res.y*res.z); }
 
 	void print();
 

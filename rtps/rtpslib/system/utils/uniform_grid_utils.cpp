@@ -109,6 +109,8 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 
 		float4 frce = (float4) (0.,0.,0.,0.); // = convert_float4(0.0);  (CREATES PROBLEMS)
 		uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
+		cli[index_i] = cellPos;
+		cli[index_i].w = cellHash;
 
 		/* get start/end positions for this cell/bucket */
 		uint startIndex = FETCH(cell_indexes_start,cellHash);

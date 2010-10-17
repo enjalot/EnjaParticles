@@ -69,6 +69,7 @@ struct GridParams
     float4          grid_inv_delta;
 	int				numParticles;
 	int				nb_vars; // for combined array
+	int 			nb_points; // nb grid points
 
 	void print()
 	{
@@ -82,6 +83,8 @@ struct GridParams
 		grid_delta.print("grid_delta"); 
 		grid_inv_delta.print("grid_inv_delta"); 
 		printf("numParticles= %d\n", numParticles);
+		printf("nb grid points: %d\n", nb_points);
+		printf("nb_vars: %d\n", nb_vars);
 	}
 };
 //----------------------------------------------------------------------
@@ -100,6 +103,7 @@ struct GridParamsScaled
     float4          grid_delta;
     float4          grid_inv_delta;
 	int				numParticles;
+	int				nb_points;
 	int				nb_vars; // for combined array
 
 	void print() {
@@ -113,6 +117,8 @@ struct GridParamsScaled
 		grid_delta.print("grid_delta"); 
 		grid_inv_delta.print("grid_inv_delta"); 
 		printf("numParticles= %d\n", numParticles);
+		printf("nb grid points: %d\n", nb_points);
+		printf("nb_vars: %d\n", nb_vars);
 	}
 };
 //----------------------------------------------------------------------

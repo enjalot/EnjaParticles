@@ -46,6 +46,9 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 
 	setupArrays(); // From GE structures
 
+	printf("nb bytes on GPU: %d\n", BufferGE<float4>::getNbBytesGPU());
+	printf("nb bytes on CPU: %d\n", BufferGE<float4>::getNbBytesCPU());
+
 	GE_SPHParams& params = *(cl_params->getHostPtr());
 
 	printf("=========================================\n");
@@ -210,7 +213,6 @@ void GE_SPH::setupArrays()
 	gp.bnd_max  = grid.getBndMax();
 	gp.grid_res = grid.getRes();
 	gp.grid_size = grid.getSize();
-	printf("*** grid_size= %d\n", grid_size);
 	gp.grid_delta = grid.getDelta();
 	gp.numParticles = nb_el;
 
@@ -220,21 +222,11 @@ void GE_SPH::setupArrays()
 	gp.grid_inv_delta.w = 1.;
 	gp.grid_inv_delta.print("inv delta");
 	gp.nb_vars = nb_vars;
+	gp.nb_points = (int) (gp.grid_res.x*gp.grid_res.y*gp.grid_res.z);
 
 	cl_GridParams->copyToDevice();
 
-	gp.grid_size.print("grid size (domain dimensions)"); // domain dimensions
-	gp.grid_delta.print("grid delta (cell size)"); // cell size
-	gp.grid_min.print("grid min");
-	gp.grid_max.print("grid max");
-	gp.grid_res.print("grid res (nb points)"); // number of points
-	gp.grid_delta.print("grid delta");
-	gp.grid_inv_delta.print("grid inv delta");
-
     float ss = params.simulation_scale;
-	//ss = 1.0; // TEMPORARY UNTIL I KNOW WHAT I AM DOING
-	printf("ss= %f\n", ss);
-//	exit(0);
 
 	gps.bnd_min  = gp.bnd_min * ss;
 	gps.bnd_max  = gp.bnd_max * ss;
@@ -247,11 +239,10 @@ void GE_SPH::setupArrays()
 	gps.grid_inv_delta.w = 1.0;
 	gps.nb_vars = nb_vars;
 	gps.numParticles = nb_el;
+	gps.nb_points = (int) (gps.grid_res.x*gps.grid_res.y*gps.grid_res.z);
 
 	gp.print();
 	gps.print();
-	//printf("gps.grid_size.x = %f\n", gps.grid_size.x);
-	//exit(0);
 
 	cl_GridParamsScaled->copyToDevice();
 
@@ -260,6 +251,7 @@ void GE_SPH::setupArrays()
 	cl_sort_indices  = new BufferGE<int>(ps->cli, nb_el);
 	cl_sort_hashes   = new BufferGE<int>(ps->cli, nb_el);
 
+	#if 0
 	// ERROR
 	int grid_size = nb_cells.x * nb_cells.y * nb_cells.z;
 	printf("grid_size= %d\n", grid_size);
@@ -269,11 +261,12 @@ void GE_SPH::setupArrays()
 		printf("grid_size too large (> 10000000)\n");
 		exit(0);
 	}
+	#endif
 
 	// Size is the grid size. That is a problem since the number of
 	// occupied cells could be much less than the number of grid elements. 
-	cl_cell_indices_start = new BufferGE<int>(ps->cli, grid_size);
-	cl_cell_indices_end   = new BufferGE<int>(ps->cli, grid_size);
+	cl_cell_indices_start = new BufferGE<int>(ps->cli, gp.nb_points);
+	cl_cell_indices_end   = new BufferGE<int>(ps->cli, gp.nb_points);
 
 	// For bitonic sort. Remove when bitonic sort no longer used
 	// Currently, there is an error in the Radix Sort (just run both
@@ -356,6 +349,7 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 
 		#if 1
 		// ***** DENSITY UPDATE *****
+		printf("density\n");
 		neighborSearch(0); //density
 		//exit(0);
 
@@ -368,14 +362,17 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 		//neighborSearch(2); 
 
 		// ***** PRESSURE UPDATE *****
+		printf("pressure\n");
 		neighborSearch(1); //pressure
 		#endif
 
 		// ***** WALL COLLISIONS *****
+		printf("collisions\n");
 		computeCollisionWall();
 
         // ***** TIME UPDATE *****
 		//computeEuler();
+		printf("leapfrog\n");
 		computeLeapfrog();
 	}
 
