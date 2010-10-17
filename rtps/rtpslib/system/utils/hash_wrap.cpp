@@ -88,7 +88,7 @@ void GE_SPH::hash()
 	ps->cli->queue.finish();
 	ts_cl[TI_HASH]->end();
 
-	printHashDiagnostics();
+	//printHashDiagnostics();
 }
 //----------------------------------------------------------------------
 void GE_SPH::printHashDiagnostics()

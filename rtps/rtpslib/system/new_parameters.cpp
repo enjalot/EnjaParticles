@@ -422,16 +422,19 @@ params.print();
 	int    nb_cells_y; 
 	int    nb_cells_z;
 
-	#if 0
+	#if 1
 	// Dam (repeat case from Fluids v2
 	// Size in world space
-	float4 domain_min = float4(-10., -5., 0., 1.);
-	float4 domain_max = float4(+10., +5., 15., 1.);
-	float4 fluid_min   = float4( 4.5, -4.8,  0.03, 1.);
-	float4 fluid_max   = float4( 9.9, +4.8,  12., 1.);
+
+	float4 domain_min  = float4(-500, 0, 0, 1);
+	float4 domain_max  = float4(256, 256, 512, 1);
+
+	// displace by 1/2 particle spacing in world coordinates
+	float4 fluid_min   = float4(0., 0., 0., 1.);
+	float4 fluid_max   = float4(256., 256., 512., 1);
 	#endif
 
-	#if 1
+	#if 0
 	// box of fluid at rest
 	// domain minimimum is extended inside UniformGrid
 	// domain_min become wall boundaries

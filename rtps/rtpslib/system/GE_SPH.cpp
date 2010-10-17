@@ -121,7 +121,7 @@ void GE_SPH::update()
 
 	ts_cl[TI_UPDATE]->start(); // OK
 
-	printf("update: nb_el= %d\n", nb_el);
+	//printf("update: nb_el= %d\n", nb_el);
 
     //call kernels
     //TODO: add timings
@@ -143,7 +143,7 @@ void GE_SPH::update()
 	}
 
 #ifdef GPU
-	int nb_sub_iter = 1;
+	int nb_sub_iter = 5;
 	computeOnGPU(nb_sub_iter);
 	if (count % 10 == 0) computeTimeStep();
 #endif
@@ -339,7 +339,6 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
     cl_position->acquire();
     cl_color->acquire();
     
-	nb_sub_iter = 1;
     for(int i=0; i < nb_sub_iter; i++)
     {
 		// ***** Create HASH ****
@@ -348,6 +347,7 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 
 		// **** Sort arrays ****
 		// only power of 2 number of particles
+		// RADIX DOES NOT WORK. Bitonic works. 
 		//radix_sort();
 		bitonic_sort();
 
