@@ -31,7 +31,7 @@ UniformGrid::UniformGrid(float4 min, float4 max, float cell_size, float sim_scal
 	this->bnd_min = min;
 	this->bnd_max = max;
 
-	double s2 = cell_size;
+	double s2 = 2.*cell_size;
 	min = min - float4(s2, s2, s2, 0.);
 	max = max + float4(s2, s2, s2, 0.);
 
