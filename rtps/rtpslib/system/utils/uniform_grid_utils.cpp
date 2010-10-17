@@ -252,7 +252,7 @@ __kernel void K_SumStep1(
     	IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
 		float norml = length(pt.color_normal);
 		//clf[index].w = norml;
-		if (norml > 4.) {
+		if (norml > 1.) {
 			float4 stension = -0.3f * pt.color_lapl * pt.color_normal / norml;
 			//clf[index]   = stension;
 			//clf[index].w = -70.;

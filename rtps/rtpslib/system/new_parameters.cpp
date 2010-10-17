@@ -398,7 +398,7 @@ void GE_SPH::ian_parameters()
 	params.mass = particle_mass;
     params.PI = acos(-1.);
     params.dt = ps->settings.dt;
-    params.K = 15.;
+    params.K = 20.;
 
 printf("****** REST 1 *****\n");
 params.print();
@@ -426,8 +426,10 @@ params.print();
 	// Dam (repeat case from Fluids v2
 	// Size in world space
 
-	float4 domain_min  = float4(-500, 0, 0, 1);
-	float4 domain_max  = float4(256, 256, 512, 1);
+	//float4 domain_min  = float4(-500, 0, 0, 1);
+	//float4 domain_max  = float4(256, 256, 512, 1);
+	float4 domain_min  = float4(-256, 0, 0, 1);
+	float4 domain_max  = float4(256, 256, 1276, 1);
 
 	// displace by 1/2 particle spacing in world coordinates
 	float4 fluid_min   = float4(0., 0., 0., 1.);

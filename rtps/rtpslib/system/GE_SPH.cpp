@@ -358,8 +358,8 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 		//   *** DENSITY NORMALIZATION ***
 		//neighborSearch(3); 
 
-		// ***** COLOR GRADIENT *****
-		//neighborSearch(2); 
+		// ***** COLOR GRADIENT (surface tension) *****
+		neighborSearch(2); 
 
 		// ***** PRESSURE UPDATE *****
 		printf("pressure\n");

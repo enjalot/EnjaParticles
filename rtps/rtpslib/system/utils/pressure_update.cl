@@ -24,7 +24,7 @@
 	float4 veli = veleval(index_i);
 	float4 velj = veleval(index_j);
 
-	#if 1
+	#if 0
 	// Add viscous forces
 
 	float vvisc = 0.001f; // SHOULD BE SET IN GE_SPH.cpp

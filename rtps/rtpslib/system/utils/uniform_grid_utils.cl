@@ -269,16 +269,7 @@ void ForNeighbor(__global float4* vars_sorted,
 
  float4 veli = vars_sorted[index_i+8*num];
  float4 velj = vars_sorted[index_j+8*num];
-
-
-
-
- float vvisc = 0.001f;
-
- float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
- stress += vvisc * (velj-veli) * dWijlapl;
-
-
+# 36 "pressure_update.cl"
  stress *= sphp->mass/(di.x*dj.x);
 
 
@@ -587,7 +578,7 @@ __kernel void K_SumStep1(
      IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
   float norml = length(pt.color_normal);
 
-  if (norml > 4.) {
+  if (norml > 1.) {
    float4 stension = -0.3f * pt.color_lapl * pt.color_normal / norml;
 
 
