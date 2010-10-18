@@ -83,4 +83,5 @@ float Wvisc_lapl(float rlen, float h, __constant struct SPHParams* params)
 }
 //----------------------------------------------------------------------
 
-#endif _WPOLY6_CL_
+//_WPOLY6_CL_
+#endif 

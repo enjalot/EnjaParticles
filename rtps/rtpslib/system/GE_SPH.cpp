@@ -146,7 +146,7 @@ void GE_SPH::update()
 	}
 
 #ifdef GPU
-	int nb_sub_iter = 5;
+	int nb_sub_iter = 40;
 	computeOnGPU(nb_sub_iter);
 	if (count % 10 == 0) computeTimeStep();
 #endif
@@ -309,6 +309,9 @@ void GE_SPH::setupArrays()
 	#endif
 
     printf("done with setup arrays\n");
+
+	cl_params->copyToDevice();
+	cl_FluidParams->copyToDevice();
 }
 //----------------------------------------------------------------------
 void GE_SPH::checkDensity()
