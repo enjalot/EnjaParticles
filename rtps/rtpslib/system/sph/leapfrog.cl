@@ -47,7 +47,7 @@ __kernel void leapfrog(__global float4* pos, __global float4* vel, __global floa
     }
 
     float4 vnext = v + h*f;
-    vnext += .1f * xsph[i];//should be param XSPH factor
+    vnext += .05f * xsph[i];//should be param XSPH factor
     p += h * vnext / params->simulation_scale;
     p.w = 1.0f; //just in case
 
