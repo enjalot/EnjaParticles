@@ -20,12 +20,10 @@
 	//kern = 0.;
 	float4 stress = kern*r;
 
+	float4 veli = veleval(index_i);
+	float4 velj = veleval(index_j);
 	//float4 veli = vel(index_i);
 	//float4 velj = vel(index_j);
-	//float4 veli = veleval(index_i);
-	//float4 velj = veleval(index_j);
-	float4 veli = vel(index_i);
-	float4 velj = vel(index_j);
 
 	#if 1
 	// Add viscous forces

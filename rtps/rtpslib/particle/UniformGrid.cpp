@@ -138,14 +138,19 @@ void UniformGrid::makeCube(float4* position, float4 pmin, float4 pmax, float spa
         if (i >= num) {
 			offset = num;
 	printf("spacing (makeCube)= %f\n", spacing);
-			return;
+			goto breakout;
+			//return;
 		}
+        //position[num-i-1] = float4(x,y,z,1.0f);
         position[i] = float4(x,y,z,1.0f);
 		i++;
 		//printf("i= %d, pos= %f, %f, %f\n", x, y, z);
     }}}
 
+breakout:
 	offset = i;
+	printf("offset= %d\n", offset);
+	//exit(0);
 	//printf("makeCube, offset= %d, about to exit\n", offset); exit(0);
 }
 //----------------------------------------------------------------------

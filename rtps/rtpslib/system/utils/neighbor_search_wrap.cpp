@@ -19,7 +19,6 @@ void GE_SPH::neighborSearch(int which)
 	if (which == 1) ts_cl[TI_PRES]->start();
 	if (which == 2) ts_cl[TI_COL]->start();
 	if (which == 3) ts_cl[TI_COL_NORM]->start();
-	//ts_cl[TI_NEIGH]->start();
 
 	//printf("enter neighbor\n");
 
@@ -56,7 +55,6 @@ void GE_SPH::neighborSearch(int which)
 	FluidParams* fp = cl_FluidParams->getHostPtr();
 	fp->choice = which;
 	cl_FluidParams->copyToDevice();
-	int iarg = 0;
 
 	#if 0
 	// print sorted density prior to routine
@@ -68,6 +66,7 @@ void GE_SPH::neighborSearch(int which)
 	}
 	#endif
 	
+	int iarg = 0;
 	kern.setArg(iarg++, cl_vars_sorted->getDevicePtr());
 	kern.setArg(iarg++, cl_cell_indices_start->getDevicePtr());
 	kern.setArg(iarg++, cl_cell_indices_end->getDevicePtr());
@@ -86,7 +85,6 @@ void GE_SPH::neighborSearch(int which)
 	kern.execute(nb_el, local);
 	ps->cli->queue.finish();
 
-	//ts_cl[TI_NEIGH]->end();
 	if (which == 0) ts_cl[TI_DENS]->end();
 	if (which == 1) ts_cl[TI_PRES]->end();
 	if (which == 2) ts_cl[TI_COL]->end();
@@ -110,7 +108,6 @@ void GE_SPH::neighborSearch(int which)
 	}
 	//exit(0);
 	#endif
-	//if (which ==1) exit(0);
 }
 //----------------------------------------------------------------------
 

@@ -81,7 +81,11 @@ void GE_SPH::buildDataStructures()
 	//exit(0);
 
     ps->cli->queue.finish();
+
+	computeCellStartEndGPU();
+
 	ts_cl[TI_BUILD]->end();
+
 	//exit(0);
 }
 //----------------------------------------------------------------------
@@ -126,6 +130,7 @@ void GE_SPH::printBuildDiagnostics()
 	#endif
 
 
+	#if 1
 	try {
 		// PRINT OUT START and END CELL INDICES
 		cl_cell_indices_start->copyToHost();
@@ -136,12 +141,15 @@ void GE_SPH::printBuildDiagnostics()
 	}
 
 	computeCellStartEndGPU();
+	#endif
 	//printf("return from BuildDataStructures\n");
 }
 //----------------------------------------------------------------------
 void GE_SPH::computeCellStartEndGPU()
 {
 	printf("****\n");
+	cl_cell_indices_start->copyToHost();
+	cl_cell_indices_end->copyToHost();
 	int* is = cl_cell_indices_start->getHostPtr();
 	int* ie = cl_cell_indices_end->getHostPtr();
 	GridParams& gp = *(cl_GridParams->getHostPtr());
@@ -150,21 +158,23 @@ void GE_SPH::computeCellStartEndGPU()
 		printf("cell_indices_start, end (GPU)\n");
 		int nb_particles = 0;
 		for (int i=0; i < grid_size; i++) {
-			printf("is,ie[%d]= %d, %d\n", i, is[i], ie[i]);
+			//printf("is,ie[%d]= %d, %d\n", i, is[i], ie[i]);
 			int nb = ie[i] - is[i];
 			if (nb > 0 && is[i] != -1) {
 				nb_particles += nb;
 				//printf("nb= %d\n", nb);
 			}
 			if (is[i] != -1) {
-				printf("(GPU) [%d]: indices_start: %d, indices_end: %d, nb pts: %d\n", i, is[i], ie[i], nb);
+				;
+				//printf("(GPU) [%d]: indices_start: %d, indices_end: %d, nb pts: %d\n", i, is[i], ie[i], nb);
 			}
 		}
 		if (nb_particles != nb_el) {
 			printf("nb particles: %d\n", nb_particles);
 			printf("nb_el: %d\n", nb_el);
 			printf("(computeCellStartEndGPU) (count != nb_el)\n");
-			exit(1);
+			for (;;) {}
+			//exit(1);
 		}
 
 	//	exit(0);

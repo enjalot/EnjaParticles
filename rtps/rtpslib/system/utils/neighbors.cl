@@ -220,7 +220,7 @@ void ForNeighbor(__global float4* vars_sorted,
 
 
  if (fp->choice == 0) {
-  cli[index_i].y++;
+
 
 
 
@@ -261,12 +261,10 @@ void ForNeighbor(__global float4* vars_sorted,
 
  float4 stress = kern*r;
 
+ float4 veli = vars_sorted[index_i+8*num];
+ float4 velj = vars_sorted[index_j+8*num];
 
 
-
-
- float4 veli = vars_sorted[index_i+2*num];
- float4 velj = vars_sorted[index_j+2*num];
 
 
 

@@ -30,7 +30,7 @@ void GE_SPH::hash()
 	}
 
 	Kernel kern = hash_kernel;
-	float4* cells = cl_cells->getHostPtr();
+	//float4* cells = cl_cells->getHostPtr();
 	int ctaSize = 128; // work group size
 
 	#if 0
@@ -110,7 +110,7 @@ void GE_SPH::printHashDiagnostics()
 	printf("***** PRINT hash diagnostics ******\n");
 	cl_sort_hashes->copyToHost();
 	cl_sort_indices->copyToHost();
-	cl_cells->copyToHost();
+	//cl_cells->copyToHost();
 	cli_debug->copyToHost();
 	clf_debug->copyToHost();
 	cl_GridParams->copyToHost();

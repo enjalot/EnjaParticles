@@ -433,7 +433,7 @@ params.print();
 	//float4 domain_max  = float4(256, 256, 1276, 1);
 
 	// displace by 1/2 particle spacing in world coordinates
-	float4 fluid_min   = float4(0., 30., 30., 1.);
+	float4 fluid_min   = float4(0., 30., 5., 1.);
 	float4 fluid_max   = float4(220., 220., 450., 1);
 	#endif
 

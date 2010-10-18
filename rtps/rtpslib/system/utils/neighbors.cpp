@@ -37,7 +37,7 @@ void ForNeighbor(__global float4*  vars_sorted,
 	//cli[index_i].x = fp->choice;
 
 	if (fp->choice == 0) {
-		cli[index_i].y++;
+		//cli[index_i].y++;
 		//cli[index_i].w = -999.;
 		// update density
 		// return density.x for single neighbor

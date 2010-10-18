@@ -90,7 +90,7 @@ GE_SPH::~GE_SPH()
 	#if 1
 	delete 	cl_vars_sorted;
 	delete 	cl_vars_unsorted;
-	delete 	cl_cells; // positions in Ian code
+	//delete 	cl_cells; // positions in Ian code
 	delete 	cl_cell_indices_start;
 	delete 	cl_cell_indices_end;
 	delete 	cl_vars_sort_indices;
@@ -146,7 +146,7 @@ void GE_SPH::update()
 	}
 
 #ifdef GPU
-	int nb_sub_iter = 40;
+	int nb_sub_iter = 5;
 	computeOnGPU(nb_sub_iter);
 	if (count % 10 == 0) computeTimeStep();
 #endif
@@ -189,11 +189,11 @@ void GE_SPH::setupArrays()
 	// only for my test routines: sort, hash, datastructures
 	//printf("setupArrays, nb_el= %d\n", nb_el); exit(0);
 
-	cl_cells = new BufferGE<float4>(ps->cli, nb_el);
-	for (int i=0; i < nb_el; i++) {
-		(*cl_cells)[i] = positions[i];
-	}
-	cl_cells->copyToDevice();
+	//cl_cells = new BufferGE<float4>(ps->cli, nb_el);
+	//for (int i=0; i < nb_el; i++) {
+		//(*cl_cells)[i] = positions[i];
+	//}
+	//cl_cells->copyToDevice();
 
 // Need an assign operator (no memory allocation)
 
@@ -267,6 +267,7 @@ void GE_SPH::setupArrays()
 	// occupied cells could be much less than the number of grid elements. 
 	cl_cell_indices_start = new BufferGE<int>(ps->cli, gp.nb_points);
 	cl_cell_indices_end   = new BufferGE<int>(ps->cli, gp.nb_points);
+	//printf("gp.nb_points= %d\n", gp.nb_points); exit(0);
 
 	// For bitonic sort. Remove when bitonic sort no longer used
 	// Currently, there is an error in the Radix Sort (just run both
@@ -277,15 +278,6 @@ void GE_SPH::setupArrays()
 
 	clf_debug = new BufferGE<float4>(ps->cli, nb_el);
 	cli_debug = new BufferGE<int4>(ps->cli, nb_el);
-
-
-	int nb_floats = nb_vars*nb_el;
-	// WHY NOT cl_float4 (in CL/cl_platform.h)
-	float4 f;
-	float4 zero;
-
-	zero.x = zero.y = zero.z = 0.0;
-	zero.w = 1.;
 
 
 	// SETUP FLUID PARAMETERS
@@ -352,7 +344,7 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 
 		#if 1
 		// ***** DENSITY UPDATE *****
-		printf("density\n");
+		//printf("density\n");
 		neighborSearch(0); //density
 		//exit(0);
 
@@ -365,17 +357,17 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 		//neighborSearch(2); 
 
 		// ***** PRESSURE UPDATE *****
-		printf("pressure\n");
+		//printf("pressure\n");
 		neighborSearch(1); //pressure
 		#endif
 
 		// ***** WALL COLLISIONS *****
-		printf("collisions\n");
+		//printf("collisions\n");
 		computeCollisionWall();
 
         // ***** TIME UPDATE *****
 		//computeEuler();
-		printf("leapfrog\n");
+		//printf("leapfrog\n");
 		computeLeapfrog();
 	}
 

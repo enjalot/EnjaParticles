@@ -109,8 +109,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 
 		uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
 
-		cli[index_i].y = fp;
-
 		/* get start/end positions for this cell/bucket */
 		uint startIndex = FETCH(cell_indexes_start,cellHash);
 		/* check cell is not empty
@@ -147,7 +145,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 		)
 	{
 		// initialize force on particle (collisions)
-		cli[index_i].x = fp;
 
 		// get cell in grid for the given position
 		int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_inv_delta);

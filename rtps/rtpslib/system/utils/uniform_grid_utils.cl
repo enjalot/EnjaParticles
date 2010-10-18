@@ -224,7 +224,7 @@ void ForNeighbor(__global float4* vars_sorted,
 
 
  if (fp->choice == 0) {
-  cli[index_i].y++;
+
 
 
 
@@ -265,12 +265,10 @@ void ForNeighbor(__global float4* vars_sorted,
 
  float4 stress = kern*r;
 
+ float4 veli = vars_sorted[index_i+8*num];
+ float4 velj = vars_sorted[index_j+8*num];
 
 
-
-
- float4 veli = vars_sorted[index_i+2*num];
- float4 velj = vars_sorted[index_j+2*num];
 
 
 
@@ -440,8 +438,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 
   uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
 
-  cli[index_i].y = fp;
-
 
   uint startIndex = cell_indexes_start[cellHash];
 
@@ -478,7 +474,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
   )
  {
 
-  cli[index_i].x = fp;
 
 
   int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_inv_delta);
