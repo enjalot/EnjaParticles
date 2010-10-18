@@ -56,10 +56,12 @@ __kernel void leapfrog(__global float4* pos, __global float4* vel, __global floa
     vel[i] = vnext;
     pos[i] = p;
 
-    //float factor = (p.z - params->grid_min.z)/(params->grid_max.z - params->grid_min.z);
-    //color[i].x = factor;
-    //color[i].z = 1.0f - factor;
-    color[i] = (float4)(0.0f, 1.0f, 0.0f, 0.0f);
+    /*
+    float factor = (p.z - params->grid_min.z)/(params->grid_max.z - params->grid_min.z);
+    color[i].x = factor;
+    color[i].z = 1.0f - factor;
+    */
+    //color[i] = (float4)(0.0f, 1.0f, 0.0f, 0.0f);
 }
 );
 
