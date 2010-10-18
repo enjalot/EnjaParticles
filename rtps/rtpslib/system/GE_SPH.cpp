@@ -359,7 +359,7 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 		//neighborSearch(3); 
 
 		// ***** COLOR GRADIENT (surface tension) *****
-		neighborSearch(2); 
+		//neighborSearch(2); 
 
 		// ***** PRESSURE UPDATE *****
 		printf("pressure\n");

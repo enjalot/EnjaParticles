@@ -26,7 +26,7 @@ RTPSettings::RTPSettings()
 	dt = .0011f;
 
 	// appears to be ok
-	dt = .0001f;
+	//dt = .0001f;
 }
 
 }

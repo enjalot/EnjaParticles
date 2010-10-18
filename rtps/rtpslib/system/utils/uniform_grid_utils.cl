@@ -263,12 +263,15 @@ void ForNeighbor(__global float4* vars_sorted,
  clf[index_i].x = 45.;
 
  float kern = -dWijdr * (Pi + Pj)*0.5;
+
  float4 stress = kern*r;
 
 
 
- float4 veli = vars_sorted[index_i+8*num];
- float4 velj = vars_sorted[index_j+8*num];
+
+
+ float4 veli = vars_sorted[index_i+2*num];
+ float4 velj = vars_sorted[index_j+2*num];
 
 
 

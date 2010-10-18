@@ -66,4 +66,9 @@ Higher K, smaller time step, more incompressible.
 BUG? 8k particles, dt=0.0005, particles exit on top boundary and code crashes. 
 dt=0.0001, particles exit on left boundary (they are moving slowly, yet
 seem to exit the boundary. Must be boundary instability. Or error in the code. 
+
+Rotating the domain, I find that particles are moving among the positive
+y axis (near max y) more rapidly than those for min y. WHY?
+
+The asymmetry goes away when I use vel instead veleval in the evaluation of viscosity, pressure and xsph. I have no idea why. 
 ----------------------------------------------------------------------

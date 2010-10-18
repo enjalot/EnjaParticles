@@ -228,12 +228,23 @@ void appRender()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	//glLoadIdentity();
+
+
+
 	//gluLookAt(-4.,-4., 5., 5.,5.,0., 0., 0., 1.);
 	//gluLookAt(-20.,-80., 20., 0.,0.,0., 0., 0., 1.);
 
 	//gluLookAt(-300.,-1000., 300., -100.,100.,100., 0., 0., 1.);
-	gluLookAt(-64.,-2000., 100., -64.,100.,100., 0., 0., 1.);
+
+	// Look from the edge (along the y direction)
+	//gluLookAt(-64.,-2000., 100., -64.,100.,100., 0., 0., 1.);
+
+	// Look from the top (along the y direction)
+	//gluLookAt(128.,128., 2000., 128.,128.,100., 0., 1., 0.);
+
+	// Look at right corner from 45 degress (along x and y)
+	//gluLookAt(812.,-2000., 100., -64.,100.,100., 0., 0., 1.);
 
 
 //	gluLookAt(-1800.,128., 300., -100.,100.,100., 0., 0., 1.);

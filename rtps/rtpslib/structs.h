@@ -87,7 +87,7 @@ typedef struct float4
 
 	float4 operator+=(float4 a) {
 		(*this).x += a.x;
-		(*this).y += a.w;
+		(*this).y += a.y;
 		(*this).z += a.z;
 		(*this).w += a.w;
 	}
