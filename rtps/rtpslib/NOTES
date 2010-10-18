@@ -29,3 +29,41 @@ is most likely wrong. Check creation of grid itself.
 
 Problem is spacing between particles. 
 ----------------------------------------------------------------------
+Oct. 17, 2010
+----- GE_SPHParams ----
+grid_min: -256.000000, 0.000000, 0.000000, 1.000000
+grid_max: 256.000000, 256.000000, 1276.000000, 1.000000
+grid_min_padding= 0.000000
+grid_max_padding= 0.000000
+mass= 0.006400
+rest_distance= 0.016153
+rest_density= 1000.000000
+smoothing_distance= 0.032305
+particle_radius= 16.152729
+simulation_scale= 0.001000
+boundary_stiffness= 10000.000000
+boundary_dampening= 256.000000
+boundary_distance= 0.008076
+EPSILON= 0.000010
+PI= 3.141593
+K= 20.000000
+dt= 0.001500
+
+----- GE_SPHSettings ----
+rest_density: 1000.000000
+simulation_scale: 0.001000
+particle_mass: 0.000205
+smoothing_distance: 0.036915
+particle_radius: 0.003660
+boundary_distance: 0.003660
+particle_spacing: 0.016153
+grid_cell_size: 0.000000
+
+Beautiful with xsph (fact=0.005) and K=20
+
+Higher K, smaller time step, more incompressible. 
+----------------------------------------------------------------------
+BUG? 8k particles, dt=0.0005, particles exit on top boundary and code crashes. 
+dt=0.0001, particles exit on left boundary (they are moving slowly, yet
+seem to exit the boundary. Must be boundary instability. Or error in the code. 
+----------------------------------------------------------------------

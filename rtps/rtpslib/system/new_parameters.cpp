@@ -398,7 +398,7 @@ void GE_SPH::ian_parameters()
 	params.mass = particle_mass;
     params.PI = acos(-1.);
     params.dt = ps->settings.dt;
-    params.K = 20.;
+    params.K = 20;
 
 printf("****** REST 1 *****\n");
 params.print();
@@ -428,12 +428,13 @@ params.print();
 
 	//float4 domain_min  = float4(-500, 0, 0, 1);
 	//float4 domain_max  = float4(256, 256, 512, 1);
-	float4 domain_min  = float4(-256, 0, 0, 1);
-	float4 domain_max  = float4(256, 256, 1276, 1);
+	float4 domain_min  = float4(-264, 0, 0, 1);
+	float4 domain_max  = float4(256, 256, 512, 1);
+	//float4 domain_max  = float4(256, 256, 1276, 1);
 
 	// displace by 1/2 particle spacing in world coordinates
-	float4 fluid_min   = float4(0., 0., 0., 1.);
-	float4 fluid_max   = float4(256., 256., 512., 1);
+	float4 fluid_min   = float4(0., 0., 30., 1.);
+	float4 fluid_max   = float4(230., 230., 480., 1);
 	#endif
 
 	#if 0

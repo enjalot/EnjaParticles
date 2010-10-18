@@ -78,6 +78,7 @@ void RTPS::render()
 	glPushMatrix();
 	float scale = 1.0;
 	glScalef(scale,scale,scale);
+    renderer->render_box(grid.getBndMin(), grid.getBndMax());
     renderer->render_box(grid.getMin(), grid.getMax());
     renderer->render();
 	glPopMatrix();
