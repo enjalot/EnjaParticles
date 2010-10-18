@@ -14,8 +14,9 @@ void SPH::loadLeapFrog()
     k_leapfrog.setArg(2, cl_veleval.cl_buffer[0]);
     k_leapfrog.setArg(3, cl_force.cl_buffer[0]);
     k_leapfrog.setArg(4, cl_xsph.cl_buffer[0]);
-    k_leapfrog.setArg(5, ps->settings.dt); //time step
-    k_leapfrog.setArg(6, cl_params.cl_buffer[0]);
+    k_leapfrog.setArg(5, cl_color.cl_buffer[0]);
+    k_leapfrog.setArg(6, ps->settings.dt); //time step
+    k_leapfrog.setArg(7, cl_params.cl_buffer[0]);
 
 } 
 

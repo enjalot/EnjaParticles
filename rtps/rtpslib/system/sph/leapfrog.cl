@@ -29,7 +29,7 @@ float magnitude(float4 vec)
     return sqrt(vec.x*vec.x + vec.y*vec.y + vec.z*vec.z);
 }       
         
-__kernel void leapfrog(__global float4* pos, __global float4* vel, __global float4* veleval, __global float4* force, __global float4* xsph, float h, __constant struct SPHParams* params )
+__kernel void leapfrog(__global float4* pos, __global float4* vel, __global float4* veleval, __global float4* force, __global float4* xsph, __global float4* color, float h, __constant struct SPHParams* params )
 {
     unsigned int i = get_global_id(0);
 
@@ -56,6 +56,10 @@ __kernel void leapfrog(__global float4* pos, __global float4* vel, __global floa
     vel[i] = vnext;
     pos[i] = p;
 
+    //float factor = (p.z - params->grid_min.z)/(params->grid_max.z - params->grid_min.z);
+    //color[i].x = factor;
+    //color[i].z = 1.0f - factor;
+    color[i] = (float4)(0.0f, 1.0f, 0.0f, 0.0f);
 }
 );
 
