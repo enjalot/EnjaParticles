@@ -40,7 +40,7 @@ void GE_SPH::neighborSearch(int which)
 
 	Kernel kern = step1_kernel;
 
-	#if 1
+	#if 0
 	float4* fclf = clf_debug->getHostPtr();
 	int4*   icli = cli_debug->getHostPtr();
 

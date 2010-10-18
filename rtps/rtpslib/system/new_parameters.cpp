@@ -271,8 +271,8 @@ printf("num= %d\n", num);
 	params.dt = ps->settings.dt;
 	//printf("dt= %f\n", params.dt); exit(0);
  
-	cl_params->copyToDevice();
-	cl_params->copyToHost();
+	//cl_params->copyToDevice();
+	//cl_params->copyToHost();
 
 	// Decrease/increase num (nb particles as necessary)
     //*** Initialization, TODO: move out of here to the particle directory
@@ -656,8 +656,8 @@ printf("num= %d\n", num);
 	num = offset;
 	//printf("new num= %d\n", num); exit(0);
 
-	cl_params->copyToDevice();
-	cl_params->copyToHost();
+	//cl_params->copyToDevice();
+	//cl_params->copyToHost();
 
 	// Decrease/increase num (nb particles as necessary)
     //*** Initialization, TODO: move out of here to the particle directory

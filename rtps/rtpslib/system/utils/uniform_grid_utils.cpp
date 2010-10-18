@@ -87,7 +87,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 	/*--------------------------------------------------------------*/
 	/* Iterate over particles found in the nearby cells (including cell of position_i)
 	*/
-	float4 IterateParticlesInCell(
+	void IterateParticlesInCell(
 		__global float4*    vars_sorted,
 		PointData* pt,
 		uint 	numParticles,
@@ -107,10 +107,9 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 		//volatile uint cellHash = UniformGridUtils::calcGridHash<true>(cellPos, cGridParams.grid_res);
 		// wrap edges (false)
 
-		float4 frce = (float4) (0.,0.,0.,0.); // = convert_float4(0.0);  (CREATES PROBLEMS)
 		uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
-		cli[index_i] = cellPos;
-		cli[index_i].w = cellHash;
+
+		cli[index_i].y = fp;
 
 		/* get start/end positions for this cell/bucket */
 		uint startIndex = FETCH(cell_indexes_start,cellHash);
@@ -124,26 +123,21 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 			for(uint index_j=startIndex; index_j < endIndex; index_j++) {			
 #if 1
 				//***** UPDATE pt (sum)
-				//frce += ForPossibleNeighbor(vars_sorted, numParticles, index_i, index_j, position_i, gp, fp, sphp ARGS);
 				ForPossibleNeighbor(vars_sorted, pt, numParticles, index_i, index_j, position_i, gp, fp, sphp ARGS);
-				//clf[index_i] = frce;
-				//cli[index_i].w = 3;
 #endif
 			}
 		}
-		//clf[index_i] = frce;
-		return frce;
 	}
 
 	/*--------------------------------------------------------------*/
 	/* Iterate over particles found in the nearby cells (including cell of position_i) 
 	 */
-	float4 IterateParticlesInNearbyCells(
+	void IterateParticlesInNearbyCells(
 		__global float4* vars_sorted,
 		PointData* pt,
 		int		numParticles, // on Linux, remove __constant
 		int 	index_i, 
-		__constant float4   position_i, 
+		float4   position_i, 
 		__global int* 		cell_indices_start,
 		__global int* 		cell_indices_end,
 		__constant struct GridParams* gp,
@@ -153,21 +147,10 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 		)
 	{
 		// initialize force on particle (collisions)
-		float4 frce = (float4) (0.,0.,0.,0.);
-#if 1
+		cli[index_i].x = fp;
+
 		// get cell in grid for the given position
 		int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_inv_delta);
-
-			//clf[index_i].w = -17.;
-			//cli[index_i].y = startIndex;
-			//cli[index_i].x = cellHash;
-			//cli[index_i].z = -39;
-			// hash is wrong!!!
-			//cli[index_i].z = endIndex;
-			//cli[index_i] = cell;
-			//clf[index_i] = gp->grid_inv_delta;
-
-
 
 		// iterate through the 3^3 cells in and around the given position
 		// can't unroll these loops, they are not innermost 
@@ -175,22 +158,15 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 			for(int y=cell.y-1; y<=cell.y+1; ++y) {
 				for(int x=cell.x-1; x<=cell.x+1; ++x) {
 					int4 ipos = (int4) (x,y,z,1);
-					//cli[index_i].x++;
-	#if 1
-					// I am summing much more than required
+
 					// **** SUMMATION/UPDATE
 					IterateParticlesInCell(vars_sorted, pt, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp ARGS);
 
 				//barrier(CLK_LOCAL_MEM_FENCE); // DEBUG
-				//clf[index_i] = frce;
-				//cli[index_i].w = 4;
 				// SERIOUS PROBLEM: Results different than results with cli = 5 (bottom of this file)
-	#endif
 				}
 			}
 		}
-#endif
-		return frce;
 	}
 
 	//----------------------------------------------------------------------
@@ -198,8 +174,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 // compute forces on particles
 
 __kernel void K_SumStep1(
-				//uint    numParticles,
-				//uint	nb_vars, 
 				__global float4* vars_sorted,
         		__global int*    cell_indexes_start,
         		__global int*    cell_indexes_end,
@@ -213,9 +187,9 @@ __kernel void K_SumStep1(
 	int nb_vars = gp->nb_vars;
 	int numParticles = gp->numParticles;
 
+
 	int index = get_global_id(0);
     if (index >= numParticles) return;
-
 
     float4 position_i = pos(index);
 
@@ -225,45 +199,28 @@ __kernel void K_SumStep1(
 	PointData pt;
 	zeroPoint(&pt);
 
-	//cli[index].w = 3;
-
 	if (fp->choice == 0) { // update density
-	//return;
     	IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
-		// density(index) = frce.x; 
 		density(index) = pt.density.x;
-		//clf[index] = pt.density.x;
-		//cli[index].w = -3;
 		// code reaches this point on first call
 	}
 	if (fp->choice == 1) { // update pressure
     	IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
 		//barrier(CLK_LOCAL_MEM_FENCE); // DEBUG
-		//force(index) = frce; // Does not seem to maintain value into euler.cl
 		force(index) = pt.force; // Does not seem to maintain value into euler.cl
-		//clf[index] = pt.force;
-		//cli[index].x = -37;
 		xsph(index) = pt.xsph;
-		//cli[index].w = 5;
-		//clf[index] = pt.force;
 		// SERIOUS PROBLEM: Results different than results with cli = 4 (bottom of this file)
 	}
 	if (fp->choice == 2) { // update surface tension (NOT DEBUGGED)
     	IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
 		float norml = length(pt.color_normal);
-		//clf[index].w = norml;
 		if (norml > 1.) {
 			float4 stension = -0.3f * pt.color_lapl * pt.color_normal / norml;
-			//clf[index]   = stension;
-			//clf[index].w = -70.;
-			//clf[index].z = pt.color_lapl;
 			force(index) += stension; // 2 memory accesses (NOT GOOD)
 		}
 	}
 	if (fp->choice == 3) { // denominator in density normalization
     	IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
-		//clf[index].x = pt.density.y;
-		//cli[index].x = -40;
 
 		// NOT WORKING. NEED DEBUG STATEMENTS
 		density(index) /= pt.density.y;

@@ -17,7 +17,6 @@ void zeroPoint(PointData* pt)
 	pt->xsph = (float4)(0.,0.,0.,0.);
 }
 //----------------------------------------------------------------------
-//float4 ForNeighbor(__global float4*  vars_sorted,
 void ForNeighbor(__global float4*  vars_sorted,
 				PointData* pt,
 				uint index_i,
@@ -56,16 +55,16 @@ void ForNeighbor(__global float4*  vars_sorted,
 	}
 
 	if (fp->choice == 3) {
-		#include "density_denom_update.cl"
+		//#include "density_denom_update.cl"
 	} 
 }
 //--------------------------------------------------
-float4 ForPossibleNeighbor(__global float4* vars_sorted, 
+void ForPossibleNeighbor(__global float4* vars_sorted, 
 						PointData* pt,
 						uint numParticles, 
 						uint index_i, 
 						uint index_j, 
-						__constant float4 position_i,
+						float4 position_i,
 	  					__constant struct GridParams* gp,
 	  					__constant struct FluidParams* fp,
 	  					__constant struct SPHParams* sphp
@@ -73,14 +72,21 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 						)
 {
 	// not really needed if pt approach works
-	float4 frce = (float4) (0.,0.,0.,0.);
 
 	// check not colliding with self
 	//if (index_j != index_i) {  // RESTORE WHEN DEBUGGED
 
 	// self-collisions ok when computing density
 	// no self-collisions in the case of pressure
-	if (fp->choice == 0 || index_j != index_i) {  // RESTORE WHEN DEBUGGED
+
+// No error before 1st call to this method, error after 1st call
+// with both lines, error on execution (line 89 in nei*wrap*cpp)
+// with only return (2nd line), error on kernel (line 33 in nei*wrap*cpp)
+//cli[index_i].z = fp;
+//return;
+
+
+	if (fp->choice == 0 || (index_j != index_i)) {  // RESTORE WHEN DEBUGGED
 	//{
 		// get the particle info (in the current grid) to test against
 		float4 position_j = pos(index_j); 
@@ -96,13 +102,11 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 		if (rlen <= sphp->smoothing_distance) {
 			//cli[index_i].x++;
 #if 1
-			//frce = ForNeighbor(vars_sorted, index_i, index_j, r, rlen, gp, fp, sphp ARGS);
 			// return updated pt
 			ForNeighbor(vars_sorted, pt, index_i, index_j, r, rlen, gp, fp, sphp ARGS);
 #endif
 		}
 	}
-	//return frce;
 }
 //--------------------------------------------------
 #endif

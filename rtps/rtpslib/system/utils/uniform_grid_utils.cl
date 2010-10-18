@@ -204,7 +204,6 @@ void zeroPoint(PointData* pt)
  pt->xsph = (float4)(0.,0.,0.,0.);
 }
 
-
 void ForNeighbor(__global float4* vars_sorted,
     PointData* pt,
     uint index_i,
@@ -238,7 +237,7 @@ void ForNeighbor(__global float4* vars_sorted,
 
 
  pt->density.x += sphp->mass*Wij;
-# 46 "neighbors.cpp" 2
+# 45 "neighbors.cpp" 2
  }
 
  if (fp->choice == 1) {
@@ -292,7 +291,7 @@ void ForNeighbor(__global float4* vars_sorted,
 
 
  pt->force += stress;
-# 51 "neighbors.cpp" 2
+# 50 "neighbors.cpp" 2
  }
 
  if (fp->choice == 2) {
@@ -314,45 +313,28 @@ void ForNeighbor(__global float4* vars_sorted,
 
  float dWijlapl = Wpoly6_lapl(rlen, sphp->smoothing_distance, sphp);
  pt->color_lapl += -sphp->mass * dWijlapl / dj.x;
-# 56 "neighbors.cpp" 2
+# 55 "neighbors.cpp" 2
  }
 
  if (fp->choice == 3) {
-# 1 "density_denom_update.cl" 1
 
-
-
-
-
-
-    float Wij = Wpoly6(r, sphp->smoothing_distance, sphp);
-
- pt->density.y += sphp->mass*Wij / vars_sorted[index_i+0*num].x;
-# 60 "neighbors.cpp" 2
  }
 }
 
-float4 ForPossibleNeighbor(__global float4* vars_sorted,
+void ForPossibleNeighbor(__global float4* vars_sorted,
       PointData* pt,
       uint num,
       uint index_i,
       uint index_j,
-      __constant float4 position_i,
+      float4 position_i,
         __constant struct GridParams* gp,
         __constant struct FluidParams* fp,
         __constant struct SPHParams* sphp
         , __global float4* clf, __global int4* cli
       )
 {
-
- float4 frce = (float4) (0.,0.,0.,0.);
-
-
-
-
-
-
- if (fp->choice == 0 || index_j != index_i) {
+# 89 "neighbors.cpp"
+ if (fp->choice == 0 || (index_j != index_i)) {
 
 
   float4 position_j = vars_sorted[index_j+1*num];
@@ -369,12 +351,10 @@ float4 ForPossibleNeighbor(__global float4* vars_sorted,
 
 
 
-
    ForNeighbor(vars_sorted, pt, index_i, index_j, r, rlen, gp, fp, sphp , clf, cli);
 
   }
  }
-
 }
 # 22 "uniform_grid_utils.cpp" 2
 
@@ -438,7 +418,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 
 
 
- float4 IterateParticlesInCell(
+ void IterateParticlesInCell(
   __global float4* vars_sorted,
   PointData* pt,
   uint num,
@@ -458,10 +438,9 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 
 
 
-  float4 frce = (float4) (0.,0.,0.,0.);
   uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
-  cli[index_i] = cellPos;
-  cli[index_i].w = cellHash;
+
+  cli[index_i].y = fp;
 
 
   uint startIndex = cell_indexes_start[cellHash];
@@ -475,26 +454,21 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
    for(uint index_j=startIndex; index_j < endIndex; index_j++) {
 
 
-
     ForPossibleNeighbor(vars_sorted, pt, num, index_i, index_j, position_i, gp, fp, sphp , clf, cli);
-
-
 
    }
   }
-
-  return frce;
  }
 
 
 
 
- float4 IterateParticlesInNearbyCells(
+ void IterateParticlesInNearbyCells(
   __global float4* vars_sorted,
   PointData* pt,
   int num,
   int index_i,
-  __constant float4 position_i,
+  float4 position_i,
   __global int* cell_indices_start,
   __global int* cell_indices_end,
   __constant struct GridParams* gp,
@@ -504,31 +478,26 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
   )
  {
 
-  float4 frce = (float4) (0.,0.,0.,0.);
+  cli[index_i].x = fp;
 
 
   int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_inv_delta);
-# 174 "uniform_grid_utils.cpp"
+
+
+
   for(int z=cell.z-1; z<=cell.z+1; ++z) {
    for(int y=cell.y-1; y<=cell.y+1; ++y) {
     for(int x=cell.x-1; x<=cell.x+1; ++x) {
      int4 ipos = (int4) (x,y,z,1);
 
 
-
-
      IterateParticlesInCell(vars_sorted, pt, num, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp , clf, cli);
-
-
-
 
 
 
     }
    }
   }
-
-  return frce;
  }
 
 
@@ -536,8 +505,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 
 
 __kernel void K_SumStep1(
-
-
     __global float4* vars_sorted,
           __global int* cell_indexes_start,
           __global int* cell_indexes_end,
@@ -551,9 +518,9 @@ __kernel void K_SumStep1(
  int nb_vars = gp->nb_vars;
  int num = gp->num;
 
+
  int index = get_global_id(0);
     if (index >= num) return;
-
 
     float4 position_i = vars_sorted[index+1*num];
 
@@ -563,45 +530,28 @@ __kernel void K_SumStep1(
  PointData pt;
  zeroPoint(&pt);
 
-
-
  if (fp->choice == 0) {
-
      IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
-
   vars_sorted[index+0*num].x = pt.density.x;
-
-
 
  }
  if (fp->choice == 1) {
      IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
 
-
   vars_sorted[index+3*num] = pt.force;
-
-
   vars_sorted[index+9*num] = pt.xsph;
-
-
 
  }
  if (fp->choice == 2) {
      IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
   float norml = length(pt.color_normal);
-
   if (norml > 1.) {
    float4 stension = -0.3f * pt.color_lapl * pt.color_normal / norml;
-
-
-
    vars_sorted[index+3*num] += stension;
   }
  }
  if (fp->choice == 3) {
      IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
-
-
 
 
   vars_sorted[index+0*num].x /= pt.density.y;
