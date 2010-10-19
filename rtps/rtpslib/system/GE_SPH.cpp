@@ -150,7 +150,7 @@ void GE_SPH::update()
 	}
 
 #ifdef GPU
-	int nb_sub_iter = 1;
+	int nb_sub_iter = 5;
 	computeOnGPU(nb_sub_iter);
 	if (count % 10 == 0) computeTimeStep();
 #endif
@@ -170,8 +170,8 @@ void GE_SPH::update()
 	ts_cl[TI_UPDATE]->end(); // OK
 
 	count++;
-	printGPUDiagnostics(count);
-	exit(0);
+	//printGPUDiagnostics(count);
+	//exit(0);
 	//printf("count= %d\n", count);
 
 #ifdef GPU
@@ -372,7 +372,7 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 
 		// ***** WALL COLLISIONS *****
 		//printf("collisions\n");
-		//computeCollisionWall(); // REINSTATE LATER
+		computeCollisionWall(); // REINSTATE LATER
 
         // ***** TIME UPDATE *****
 		//computeEuler();

@@ -373,8 +373,8 @@ void GE_SPH::ian_parameters()
 	printf("ian: num= %d\n", nb_particles);
 	double particle_mass = (128*1024.0)/nb_particles * .0002;
 	double particle_rest_distance = 0.87*pow(particle_mass/rest_density, 1./3.); 
-	//double smoothing_distance = 2.0*particle_rest_distance; // ORIGINAL
-	double smoothing_distance = 1.*particle_rest_distance;
+	double smoothing_distance = 2.0*particle_rest_distance; // ORIGINAL
+	//double smoothing_distance = 1.*particle_rest_distance;
 	double h = smoothing_distance;
 	double boundary_distance = 0.5*particle_rest_distance;
 	// world coordinates

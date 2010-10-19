@@ -20,12 +20,12 @@ __kernel void ge_leapfrog(
     float4 f = force(i);
 
     //external force is gravity
-    //f.z += -9.8f;
+    f.z += -9.8f;
 	f.w = 0.f;
 
 	// REMOVE FOR DEBUGGING
 	// THIS IS REALLY A FORCE, NO?
-	#if 0
+	#if 1
     float speed = length(f);
     if(speed > 600.0f) //velocity limit, need to pass in as struct
     {
@@ -34,18 +34,16 @@ __kernel void ge_leapfrog(
 	#endif
 
 	float4 vnext = v + dt*f;
-	//float4 vnext = f;
 	// WHY IS MY CORRECTION NEGATIVE and IAN's POSITIVE? 
-	//vnext -= 0.005f * xsph(i); // should be param XSPH factor
+	vnext -= 0.005f * xsph(i); // should be param XSPH factor
 
     p += dt * vnext;
     p.w = 1.0f; //just in case
 	float4 veval = 0.5f*(v+vnext);
 	v = vnext;
 
-
-	/ only for debuggin
-	veval = f; // SEE IF FORCE IS SYMMETRIC
+	// only for debugging
+	//veval = f; // SEE IF FORCE IS SYMMETRIC
 
 	// Should not be required, but it is for debugging if I wish to 
 	// access the sorted arrays

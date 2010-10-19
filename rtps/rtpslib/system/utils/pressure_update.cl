@@ -18,11 +18,11 @@
 
 	float kern = -dWijdr * (Pi + Pj)*0.5;
 	//kern = 0.;
-	//float4 stress = kern*r; // correct version
+	float4 stress = kern*r; // correct version
 	//float4 stress = r;   //Debugging
-	float4 stress = (float4)(-1.,2.,-3.,0.);   //Debugging
+	//float4 stress = (float4)(-1.,2.,-3.,0.);   //Debugging
 
-	float4 veli = veleval(index_i);
+	float4 veli = veleval(index_i); // sorted
 	float4 velj = veleval(index_j);
 	//float4 veli = vel(index_i);
 	//float4 velj = vel(index_j);
@@ -36,9 +36,9 @@
 	stress += vvisc * (velj-veli) * dWijlapl;
 	#endif
 
-	//stress *=  sphp->mass/(di.x*dj.x);  // original
+	stress *=  sphp->mass/(di.x*dj.x);  // original
 
-	#if 0
+	#if 1
 	// Add XSPH stabilization term
 	float Wijpol6 = Wpoly6(rlen, sphp->smoothing_distance, sphp);
 	pt->xsph +=  (2.f * sphp->mass * (velj-veli)/(di.x+dj.x) * Wijpol6);

@@ -82,7 +82,7 @@ void GE_SPH::buildDataStructures()
 
     ps->cli->queue.finish();
 
-	computeCellStartEndGPU();
+	//computeCellStartEndGPU();
 
 	ts_cl[TI_BUILD]->end();
 

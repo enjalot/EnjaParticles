@@ -92,7 +92,7 @@ void GE_SPH::neighborSearch(int which)
 	if (which == 3) ts_cl[TI_COL_NORM]->end();
 
 
-	#if 1
+	#if 0
 	if (which != 0) return;
 	printf("============================================\n");
 	printf("which == %d *** \n", which);

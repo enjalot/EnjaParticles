@@ -132,7 +132,7 @@ void GE_SPH::bitonic_sort()
 	ts_cl[TI_BITONIC_SORT]->end();
 
 	//sorting is fine
-	printBiSortDiagnostics(*cl_sort_output_hashes, *cl_sort_output_indices);
+	//printBiSortDiagnostics(*cl_sort_output_hashes, *cl_sort_output_indices);
 	//computeCellStartEndCPU(); // diagnostic check
 
 	//printf("EXIT BISORT \n");

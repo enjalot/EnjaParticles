@@ -38,23 +38,23 @@
 #define force(i) 			vars_sorted[i+FOR*numParticles]
 // accessing density and color requires two memory access. 
 // Could be more efficient if stored in local point-based array
-#define density_denom(i)   	vars_unsorted[i+DENS_DENOM*numParticles].y
+#define density_denom(i)   	vars_sorted[i+DENS_DENOM*numParticles].y
 #define color(i)    		vars_sorted[i+COL*numParticles].x
 #define surf_tens(i)    	vars_sorted[i+SURF_TENS*numParticles]
 #define color_normal(i)    	vars_sorted[i+NORMAL*numParticles]
 #define veleval(i)    		vars_sorted[i+VELEVAL*numParticles]
 #define xsph(i)    			vars_sorted[i+XSPH*numParticles]
 
-#define unsorted_density(i)   vars_unsorted[i+DENS     *numParticles].x
-#define unsorted_pos(i) 	  vars_unsorted[i+POS      *numParticles]
-#define unsorted_vel(i) 	  vars_unsorted[i+VEL      *numParticles]
-#define unsorted_force(i) 	  vars_unsorted[i+FOR      *numParticles]
+#define unsorted_density(i)   		vars_unsorted[i+DENS     *numParticles].x
+#define unsorted_pos(i) 	  		vars_unsorted[i+POS      *numParticles]
+#define unsorted_vel(i) 	  		vars_unsorted[i+VEL      *numParticles]
+#define unsorted_force(i) 	  		vars_unsorted[i+FOR      *numParticles]
 #define unsorted_density_denom(i)   vars_unsorted[i+DENS_DENOM*numParticles].y
-#define unsorted_color(i)     vars_unsorted[i+COL      *numParticles].x
-#define unsorted_surf_tens(i) vars_unsorted[i+SURF_TENS*numParticles]
+#define unsorted_color(i)     		vars_unsorted[i+COL      *numParticles].x
+#define unsorted_surf_tens(i) 		vars_unsorted[i+SURF_TENS*numParticles]
 #define unsorted_color_normal(i)    vars_unsorted[i+NORMAL*numParticles]
-#define unsorted_veleval(i)    vars_sorted[i+VELEVAL*numParticles]
-#define unsorted_xsph(i)    	vars_sorted[i+XSPH*numParticles]
+#define unsorted_veleval(i)    		vars_unsorted[i+VELEVAL*numParticles]
+#define unsorted_xsph(i)    		vars_unsorted[i+XSPH*numParticles]
 
 //#define FETCH_NOTEX(a, t, i) a.t[i]
 #define FETCH_NOTEX(t, i) t[i]

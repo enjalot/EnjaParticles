@@ -268,13 +268,22 @@ void ForNeighbor(__global float4* vars_sorted,
 
  float kern = -dWijdr * (Pi + Pj)*0.5;
 
+ float4 stress = kern*r;
 
 
- float4 stress = (float4)(-1.,2.,-3.,0.);
 
  float4 veli = vars_sorted[index_i+8*num];
  float4 velj = vars_sorted[index_j+8*num];
-# 48 "pressure_update.cl"
+# 39 "pressure_update.cl"
+ stress *= sphp->mass/(di.x*dj.x);
+
+
+
+ float Wijpol6 = Wpoly6(rlen, sphp->smoothing_distance, sphp);
+ pt->xsph += (2.f * sphp->mass * (velj-veli)/(di.x+dj.x) * Wijpol6);
+ pt->xsph.w = 0.f;
+
+
  pt->force += stress;
 # 55 "neighbors.cpp" 2
  }
