@@ -75,17 +75,38 @@ void GE_SPH::hash()
 	kern.setArg(0, cl_vars_unsorted->getDevicePtr()); // positions + other variables
 	kern.setArg(1, cl_sort_hashes->getDevicePtr());
 	kern.setArg(2, cl_sort_indices->getDevicePtr());
-	kern.setArg(3, cl_cell_indices_start->getDevicePtr());
-	kern.setArg(4, cl_GridParams->getDevicePtr());
-	//kern.setArg(4, cl_GridParamsScaled->getDevicePtr());
-	kern.setArg(5, clf_debug->getDevicePtr());
-	kern.setArg(6, cli_debug->getDevicePtr());
+	kern.setArg(3, cl_GridParams->getDevicePtr());
+	kern.setArg(4, clf_debug->getDevicePtr());
+	kern.setArg(5, cli_debug->getDevicePtr());
 
 	//printf("nb_el= %d\n", nb_el);
 	kern.execute(nb_el,ctaSize);
 
+	// set cell_indicies_start to -1
+	GridParams* gp = cl_GridParams->getHostPtr();
+	//printf("nb_points: %d\n", gp->nb_points); exit(0);
+
+	int minus = 0xffffffff;
+
 	ps->cli->queue.finish();
 	ts_cl[TI_HASH]->end();
+
+	//-------------------
+	// Set cl_cell indices to -1
+	cl_cell_indices_start->copyToHost();
+	int* cc = cl_cell_indices_start->getHostPtr();
+	for (int i=0; i < gp->nb_points; i++) {
+		cc[i] = minus;
+		//printf("index(%d) = %d\n", i, cc[i]);
+	}
+	cl_cell_indices_start->copyToDevice();
+	//-------------------
+
+
+	//sset(gp->nb_points, minus, cl_cell_indices_start->getDevicePtr());
+	//exit(0);   // SOMETHING WRONG with sset!!! WHY? 
+
+
 
 	//printHashDiagnostics();
 

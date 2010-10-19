@@ -99,26 +99,34 @@ void GE_SPH::bitonic_sort()
 		exit(0);
 	}
 
-	#if 1
-	// accounts for 75% of sort with 4k particles
-	// accounts for 50% of sort with 16k particles
-	// SHOULD EXECUTE the following on the GPU or not use bitonic
-	cl_sort_output_hashes->copyToHost();
-	cl_sort_output_indices->copyToHost();
+    ps->cli->queue.finish();
 
+#if 0
+	cl_sort_hashes->copyToHost();
+	cl_sort_output_hashes->copyToHost();
 	int* sh = cl_sort_hashes->getHostPtr();
 	int* si = cl_sort_indices->getHostPtr();
 	int* soh = cl_sort_output_hashes->getHostPtr();
 	int* soi = cl_sort_output_indices->getHostPtr();
-
-	for (int i=0; i < nb_el; i++) {
-		sh[i] = soh[i];
-		si[i] = soi[i];
+	for (int i=0; i < 30; i++) {
+		printf("(%d) before sort: soh, sh= %d, %d\n", i, soh[i], sh[i]);
 	}
+#endif
 
-	cl_sort_hashes->copyToDevice();
-	cl_sort_indices->copyToDevice();
-	#endif
+	scopy(nb_el, cl_sort_output_hashes->getDevicePtr(), 
+	             cl_sort_hashes->getDevicePtr());
+	scopy(nb_el, cl_sort_output_indices->getDevicePtr(), 
+	             cl_sort_indices->getDevicePtr());
+
+#if 0
+    ps->cli->queue.finish();
+	cl_sort_hashes->copyToHost();
+	cl_sort_output_hashes->copyToHost();
+	for (int i=0; i < 30; i++) {
+		printf("(%d) before sort: soh, sh= %d, %d\n", i, soh[i], sh[i]);
+	}
+	exit(0);
+#endif
 
     ps->cli->queue.finish();
 	ts_cl[TI_BITONIC_SORT]->end();

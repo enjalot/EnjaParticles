@@ -178,9 +178,9 @@ __kernel void hash(
            __global float4* vars_unsorted,
            __global uint* sort_hashes,
            __global uint* sort_indexes,
-           __global uint* cell_indices_start,
-           __constant struct GridParams* gp
-           , __global float4* fdebug,
+
+           __constant struct GridParams* gp,
+           __global float4* fdebug,
            __global int4* idebug
      )
 {
@@ -190,25 +190,13 @@ __kernel void hash(
 
  int num = get_global_size(0);
     if (index >= num) return;
-
-
-
- int grid_size = (int) (gp->grid_res.x*gp->grid_res.y*gp->grid_res.z);
- if (index < grid_size) {
-  cell_indices_start[index] = 0xffffffff;
- }
-
-
+# 127 "uniform_hash.cpp"
     float4 p = vars_unsorted[index+1 *num];
 
 
     int4 gridPos = calcGridCell(p, gp->grid_min, gp->grid_inv_delta);
     bool wrap_edges = false;
     uint hash = (uint) calcGridHash(gridPos, gp->grid_res, wrap_edges, fdebug, idebug);
-
-
-
-
 
 
 

@@ -1,9 +1,11 @@
 
 
-__kernel void scopy(int n, 
-				  __global float* sxorig, 
-				  __global float* sydest)
+__kernel void sset_int(int n, int val, 
+				  __global int* sxdest)
 {
+	return;
+
+	#if 0
     int i, tid, totalThreads, ctaStart;
 
     tid = get_local_id(0);
@@ -15,7 +17,8 @@ __kernel void scopy(int n,
     ctaStart = locsiz*gid; 
 
 	for (i = ctaStart + tid; i < n; i += totalThreads) {
-		sydest[i] = sxorig[i];
+		sxdest[i] = *val;
 	}
+	#endif
 }
 //----------------------------------------------------------------------

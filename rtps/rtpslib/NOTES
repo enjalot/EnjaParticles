@@ -72,3 +72,6 @@ y axis (near max y) more rapidly than those for min y. WHY?
 
 The asymmetry goes away when I use vel instead veleval in the evaluation of viscosity, pressure and xsph. I have no idea why. 
 ----------------------------------------------------------------------
+Oct. 18, 2010
+- Problem: sset does not work. Set the value of a constant. 
+----------------------------------------------------------------------

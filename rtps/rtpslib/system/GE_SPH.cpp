@@ -146,7 +146,7 @@ void GE_SPH::update()
 	}
 
 #ifdef GPU
-	int nb_sub_iter = 1;
+	int nb_sub_iter = 5;
 	computeOnGPU(nb_sub_iter);
 	if (count % 10 == 0) computeTimeStep();
 #endif

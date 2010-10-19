@@ -289,6 +289,8 @@ private:
 	Kernel hash_kernel;
 	Kernel sort_kernel;
 	Kernel step1_kernel;
+	Kernel scopy_kernel;
+	Kernel sset_int_kernel;
 
     BufferGE<GE_SPHParams>* cl_params;
 
@@ -349,6 +351,10 @@ private:
 
 	void gordon_parameters(); // code does not work
 	void ian_parameters(); // Ian's code does work (in branch rtps)
+
+	// ydst <-- xsrc
+	void scopy(int n, cl_mem xsrc, cl_mem ydst); 
+	void sset(int n, int val, cl_mem xdst);
 
 private:
 	int countPoints(double radius, int box_size);

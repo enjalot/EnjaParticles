@@ -61,6 +61,8 @@ set (rtpslib_SOURCES
 	${rtpslib_SOURCE_DIR}/system/utils/radix_sort_wrap.cpp
 	${rtpslib_SOURCE_DIR}/system/utils/bitonic_sort_wrap.cpp
 	${rtpslib_SOURCE_DIR}/system/utils/collision_wall_wrap.cpp
+	${rtpslib_SOURCE_DIR}/system/utils/scopy_wrap.cpp
+	${rtpslib_SOURCE_DIR}/system/utils/sset_int_wrap.cpp
 
     ${rtpslib_SOURCE_DIR}/RTPS.cpp
     ${rtpslib_SOURCE_DIR}/RTPSettings.cpp
