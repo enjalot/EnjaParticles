@@ -123,6 +123,7 @@ void GE_SPH::bitonic_sort()
     ps->cli->queue.finish();
 	ts_cl[TI_BITONIC_SORT]->end();
 
+	//sorting is fine
 	//printBiSortDiagnostics(*cl_sort_output_hashes, *cl_sort_output_indices);
 	//computeCellStartEndCPU(); // diagnostic check
 
@@ -144,14 +145,24 @@ void GE_SPH::printBiSortDiagnostics(BufferGE<int>& cl_sort_output_hashes, Buffer
 	int* ohashi = cl_sort_output_hashes.getHostPtr();
 	int* osorti = cl_sort_output_indices.getHostPtr();
 
+	// check whether sort is correct
+
+	int min_hash = hashi[0];
+
+	for (int i=1; i < nb_el; i++) {
+		if (hashi[i] >= hashi[i-1]) {
+			printf("i=%d, hash out of order\n", i);
+		}
+	}
+
+	#if 0
 	for (int i=0; i < nb_el; i++) {
 	//for (int i=0; i < 200; i++) {
 		//printf("=========================================\n");
 		printf("sorted hash[%d]: %d, sorted index[%d]: %d\n", i, hashi[i], i, sorti[i]);
 		//printf("osorted hash[%d]: %d, osorted indx[%d]: %d\n", i, ohashi[i], i, osorti[i]);
 	}
-
-	//printf("EXIT: 000\n"); exit(0);
+	#endif
 
 #endif
 }

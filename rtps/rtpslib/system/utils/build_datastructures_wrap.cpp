@@ -157,24 +157,24 @@ void GE_SPH::computeCellStartEndGPU()
 
 		printf("cell_indices_start, end (GPU)\n");
 		int nb_particles = 0;
+		int nb;
 		for (int i=0; i < grid_size; i++) {
 			//printf("is,ie[%d]= %d, %d\n", i, is[i], ie[i]);
-			int nb = ie[i] - is[i];
-			if (nb > 0 && is[i] != -1) {
+			// ie[i] SHOULD NEVER BE ZERO 
+			if (is[i] != -1 && ie[i] != 0) {
+				nb = ie[i] - is[i];
 				nb_particles += nb;
-				//printf("nb= %d\n", nb);
 			}
-			if (is[i] != -1) {
-				;
-				//printf("(GPU) [%d]: indices_start: %d, indices_end: %d, nb pts: %d\n", i, is[i], ie[i], nb);
+			if (is[i] != -1 && ie[i] != 0) { ;
+				printf("(GPU) [%d]: indices_start: %d, indices_end: %d, nb pts: %d\n", i, is[i], ie[i], nb);
 			}
 		}
 		if (nb_particles != nb_el) {
 			printf("nb particles: %d\n", nb_particles);
 			printf("nb_el: %d\n", nb_el);
 			printf("(computeCellStartEndGPU) (count != nb_el)\n");
-			for (;;) {}
-			//exit(1);
+			//for (;;) {}
+			exit(1);
 		}
 
 	//	exit(0);

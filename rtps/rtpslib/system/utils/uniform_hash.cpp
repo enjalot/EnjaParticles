@@ -115,13 +115,12 @@ __kernel void hash(
     uint index = get_global_id(0);
 	// do not use gp->numParticles (since it numParticles changed via define)
 	int num = get_global_size(0);
-    if (index >= num) return; 
-
+    if (index >= num) return;  // num: 512
 
 	// initialize to -1 (used in kernel datastructures in build_datastructures_wrap.cpp
 	int grid_size = (int) (gp->grid_res.x*gp->grid_res.y*gp->grid_res.z);
-	if (index < grid_size) {
-		cell_indices_start[index] = 0xffffffff;
+	if (index < grid_size) {   // grid_size: 1400
+		cell_indices_start[index] = 0xffffffff; 
 	}
 
     // particle position
@@ -131,10 +130,6 @@ __kernel void hash(
     int4 gridPos = calcGridCell(p, gp->grid_min, gp->grid_inv_delta);
     bool wrap_edges = false;
     uint hash = (uint) calcGridHash(gridPos, gp->grid_res, wrap_edges, fdebug, idebug);
-
-	//idebug[index] = hash;
-	//fdebug[index] = p;
-
 
     // store grid hash and particle index
 
