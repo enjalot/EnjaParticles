@@ -1,0 +1,47 @@
+RTPSlib code overview
+
+This is the library code for running OpenCL accelerated Real-Time Particle Systems
+
+Files:
+
+rtpslib/
+    RTPS.h + cpp
+        The main class of the framework, this is what the user of the library will interact with
+    RTPSettings.h + cpp
+        The settings class, they systems and their parameters will be configured using this
+    structs.h + cpp
+        Definitions of some data structures and their helping functions, mostly for interacting with OpenCL
+    util.h + cpp
+        Utility functions, including some helper functions for VBOs
+
+rtpslib/system/
+    System.h + cpp
+        The base class for particle systems, defines common functions that the child classes will have to implement.
+
+    Simple.h + cpp
+        currently not implemented
+
+    SPH.h + cpp
+        The SPH class, initiates all the OpenCL memory, sets up the fluid simulation and provides the update() routine
+    sph/
+        the .cl files that implement the various routines, as well as corresponding .cpp files that load them
+        the .cpp files also have CPU implementations of the routines
+
+
+rtpslib/particle/
+    UniformGrid.h + cpp
+        Helper class to setup initial conditions of the system
+    In the future more helper classes will be implemented here to allow for dynamically adding particles for example
+
+
+rtpslib/opencl/
+    OpenCL helper classes that wrap the Khronos C++ bindings. 
+
+rtpslib/render/
+    OpenGL based classes that provide different rendering functionality. A system will have a renderer assigned to it.
+
+
+
+
+
+

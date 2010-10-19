@@ -51,7 +51,7 @@ _getTime(void)
 
 /* Call to initialize the graphics state */
 void
-Java_com_enja_particles_EnjRenderer_nativeInit( JNIEnv*  env )
+Java_com_enja_particles_RTPSRenderer_nativeInit( JNIEnv*  env )
 {
     importGLInit();
     appInit();
@@ -59,20 +59,20 @@ Java_com_enja_particles_EnjRenderer_nativeInit( JNIEnv*  env )
     sDemoStopped = 0;
     sTimeOffsetInit = 0;
     float b = 1.f;
-    appTest(1, &b);
+    //appTest(1, &b);
 }
 
 void
-Java_com_enja_particles_EnjRenderer_nativeResize( JNIEnv*  env, jobject  thiz, jint w, jint h )
+Java_com_enja_particles_RTPSRenderer_nativeResize( JNIEnv*  env, jobject  thiz, jint w, jint h )
 {
     sWindowWidth  = w;
     sWindowHeight = h;
-    __android_log_print(ANDROID_LOG_INFO, "EnjaParticles", "resize w=%d h=%d", w, h);
+    __android_log_print(ANDROID_LOG_INFO, "RTPS", "resize w=%d h=%d", w, h);
 }
 
 /* Call to finalize the graphics state */
 void
-Java_com_enja_particles_EnjRenderer_nativeDone( JNIEnv*  env )
+Java_com_enja_particles_RTPSRenderer_nativeDone( JNIEnv*  env )
 {
     appDeinit();
     importGLDeinit();
@@ -94,12 +94,12 @@ Java_com_enja_particles_EnjGLSurfaceView_nativePause( JNIEnv*  env )
          * to take care of the pause interval. */
         sTimeOffset -= _getTime() - sTimeStopped;
     }
-    __android_log_print(ANDROID_LOG_INFO, "EnjaParticles", "native pause called sDemoStoppe =%d", sDemoStopped);
+    __android_log_print(ANDROID_LOG_INFO, "RTPS", "native pause called sDemoStoppe =%d", sDemoStopped);
 }
 
 /* Call to render the next GL frame */
 void
-Java_com_enja_particles_EnjRenderer_nativeRender( JNIEnv*  env )
+Java_com_enja_particles_RTPSRenderer_nativeRender( JNIEnv*  env )
 {
     long   curTime;
 
@@ -124,9 +124,9 @@ Java_com_enja_particles_EnjRenderer_nativeRender( JNIEnv*  env )
 
 /* call to set new spawn point from a touch */
 void
-Java_com_enja_particles_EnjGLSurfaceView_nativeTouch( JNIEnv*  env, jobject thiz, jfloat x, jfloat y )
+Java_com_enja_particles_RTPSGLSurfaceView_nativeTouch( JNIEnv*  env, jobject thiz, jfloat x, jfloat y )
 {
-    __android_log_print(ANDROID_LOG_INFO, "EnjaParticles", "native touch x=%f y=%f", x, y);
+    __android_log_print(ANDROID_LOG_INFO, "RTPS", "native touch x=%f y=%f", x, y);
     tx = (float)x;
     ty = (float)y;
     appTouch(&tx,&ty);
@@ -134,9 +134,9 @@ Java_com_enja_particles_EnjGLSurfaceView_nativeTouch( JNIEnv*  env, jobject thiz
 
 /* call to set finger position from touch */
 void
-Java_com_enja_particles_EnjGLSurfaceView_nativeDown( JNIEnv*  env, jobject thiz, jfloat x, jfloat y )
+Java_com_enja_particles_RTPSGLSurfaceView_nativeDown( JNIEnv*  env, jobject thiz, jfloat x, jfloat y )
 {
-    //__android_log_print(ANDROID_LOG_INFO, "EnjaParticles", "touch x=%f y=%f", x, y);
+    //__android_log_print(ANDROID_LOG_INFO, "RTPS", "touch x=%f y=%f", x, y);
     //appDown(x, y);
     dx = (float)x;
     dy = (float)y;
@@ -146,9 +146,9 @@ Java_com_enja_particles_EnjGLSurfaceView_nativeDown( JNIEnv*  env, jobject thiz,
 
 /* call to rotate from a touch move */
 void
-Java_com_enja_particles_EnjGLSurfaceView_nativeMove( JNIEnv*  env, jobject thiz, jfloat x, jfloat y )
+Java_com_enja_particles_RTPSGLSurfaceView_nativeMove( JNIEnv*  env, jobject thiz, jfloat x, jfloat y )
 {
-    //__android_log_print(ANDROID_LOG_INFO, "EnjaParticles", "move x=%f y=%f", x, y);
+    //__android_log_print(ANDROID_LOG_INFO, "RTPS", "move x=%f y=%f", x, y);
     //appMove(x, y);
     mx = (float)x;
     my = (float)y;
