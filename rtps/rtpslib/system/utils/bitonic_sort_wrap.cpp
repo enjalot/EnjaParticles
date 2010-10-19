@@ -157,7 +157,7 @@ void GE_SPH::printBiSortDiagnostics(BufferGE<int>& cl_sort_output_hashes, Buffer
 
 	printf("*** enter printBiSortDiagnostics ****\n");
 
-	#if 0
+	#if 1
 	for (int i=0; i < nb_el; i++) {
 	//for (int i=0; i < 200; i++) {
 		//printf("=========================================\n");
@@ -165,7 +165,6 @@ void GE_SPH::printBiSortDiagnostics(BufferGE<int>& cl_sort_output_hashes, Buffer
 		//printf("osorted hash[%d]: %d, osorted indx[%d]: %d\n", i, ohashi[i], i, osorti[i]);
 	}
 	#endif
-
 
 
 	for (int i=1; i < nb_el; i++) {

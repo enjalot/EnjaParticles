@@ -48,7 +48,7 @@ typedef struct GE_SPHSettings
 		printf("particle_radius: %f\n", particle_radius);
 		printf("boundary_distance: %f\n", boundary_distance);
 		printf("particle_spacing: %f\n", particle_spacing);
-		printf("grid_cell_size: %f\n", grid_cell_size);
+		//printf("grid_cell_size: %f\n", grid_cell_size);
 	}
 } GE_SPHSettings;
 
@@ -247,6 +247,9 @@ public:
 	BufferGE<GridParams>*  cl_GridParams;
 	BufferGE<GridParamsScaled>*  cl_GridParamsScaled;
 	BufferGE<FluidParams>* cl_FluidParams;
+
+	// index neighbors. Maximum of 50
+	BufferGE<int>* 		cl_index_neigh;
 
 	BufferGE<float4>*	clf_debug;  //just for debugging cl files
 	BufferGE<int4>*		cli_debug;  //just for debugging cl files

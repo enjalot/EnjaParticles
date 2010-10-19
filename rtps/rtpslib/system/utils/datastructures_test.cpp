@@ -9,8 +9,6 @@
 
 //----------------------------------------------------------------------
 __kernel void datastructures(
-					//int	    numParticles,
-					//int      nb_vars,
 					__global float4*   vars_unsorted,
 					__global float4*   vars_sorted, 
 		   			__global uint* sort_hashes,
@@ -23,7 +21,6 @@ __kernel void datastructures(
 			  )
 {
 	uint index = get_global_id(0);
-	int nb_vars = gp->nb_vars;
 	int numParticles = get_global_size(0);
 
 
@@ -74,6 +71,7 @@ __kernel void datastructures(
 	// Copy data from old unsorted buffer to sorted buffer
 
 	#if 0
+	int nb_vars = gp->nb_vars;
 	for (int j=0; j < nb_vars; j++) {
 		vars_sorted[index+j*numParticles]	= vars_unsorted[sorted_index+j*numParticles];
 	}
@@ -81,8 +79,8 @@ __kernel void datastructures(
 
 	// Variables to sort could change for different types of simulations 
 	// SHOULD I divide by simulation scale upon return? do not think so
-	pos(index) = unsorted_pos(sorted_index) * sphp->simulation_scale;
-	vel(index) = unsorted_vel(sorted_index);
+	pos(index)     = unsorted_pos(sorted_index) * sphp->simulation_scale;
+	vel(index)     = unsorted_vel(sorted_index);
 	veleval(index) = unsorted_veleval(sorted_index); // not sure if needed
 	//density(index) = unsorted_density(sorted_index); // only for debugging
 #endif

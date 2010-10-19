@@ -14,18 +14,20 @@
 	float Pi = sphp->K*(di.x - rest_density);
 	float Pj = sphp->K*(dj.x - rest_density);
 
-	clf[index_i].x = 45.;
+	//clf[index_i].x = 45.;
 
 	float kern = -dWijdr * (Pi + Pj)*0.5;
 	//kern = 0.;
-	float4 stress = kern*r;
+	//float4 stress = kern*r; // correct version
+	//float4 stress = r;   //Debugging
+	float4 stress = (float4)(-1.,2.,-3.,0.);   //Debugging
 
 	float4 veli = veleval(index_i);
 	float4 velj = veleval(index_j);
 	//float4 veli = vel(index_i);
 	//float4 velj = vel(index_j);
 
-	#if 1
+	#if 0
 	// Add viscous forces
 
 	float vvisc = 0.001f; // SHOULD BE SET IN GE_SPH.cpp
@@ -34,9 +36,9 @@
 	stress += vvisc * (velj-veli) * dWijlapl;
 	#endif
 
-	stress *=  sphp->mass/(di.x*dj.x);  // original
+	//stress *=  sphp->mass/(di.x*dj.x);  // original
 
-	#if 1
+	#if 0
 	// Add XSPH stabilization term
 	float Wijpol6 = Wpoly6(rlen, sphp->smoothing_distance, sphp);
 	pt->xsph +=  (2.f * sphp->mass * (velj-veli)/(di.x+dj.x) * Wijpol6);
@@ -44,7 +46,5 @@
 	#endif
 
 	pt->force += stress;
-
-	//return stress;
 
 #endif

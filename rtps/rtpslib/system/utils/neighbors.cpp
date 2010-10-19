@@ -31,7 +31,12 @@ void ForNeighbor(__global float4*  vars_sorted,
 {
 	int num = get_global_size(0);
 
-	//cli[index_i].x++;
+	int ii = cli[index_i].x;
+	if (ii < 50) {     // max nb neighbors
+		neigh(index_i, ii) = index_j;
+	}
+	cli[index_i].x++;
+
 	//cli[index_i].y = fp->choice;
 	//clf[index_i].x = fp->choice;
 	//cli[index_i].x = fp->choice;

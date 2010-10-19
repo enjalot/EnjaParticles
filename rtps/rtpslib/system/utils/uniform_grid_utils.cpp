@@ -102,11 +102,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 		DUMMY_ARGS
     )
 	{
-
 		// get hash (of position) of current cell
-		//volatile uint cellHash = UniformGridUtils::calcGridHash<true>(cellPos, cGridParams.grid_res);
-		// wrap edges (false)
-
 		uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
 
 		/* get start/end positions for this cell/bucket */

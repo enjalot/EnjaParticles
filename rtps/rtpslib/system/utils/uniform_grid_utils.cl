@@ -213,11 +213,16 @@ void ForNeighbor(__global float4* vars_sorted,
       __constant struct GridParams* gp,
       __constant struct FluidParams* fp,
       __constant struct SPHParams* sphp
-      , __global float4* clf, __global int4* cli
+      , __global float4* clf, __global int4* cli, __global int* index_neigh
     )
 {
  int num = get_global_size(0);
 
+ int ii = cli[index_i].x;
+ if (ii < 50) {
+  index_neigh[ii+50*index_i] = index_j;
+ }
+ cli[index_i].x++;
 
 
 
@@ -237,7 +242,7 @@ void ForNeighbor(__global float4* vars_sorted,
 
 
  pt->density.x += sphp->mass*Wij;
-# 45 "neighbors.cpp" 2
+# 50 "neighbors.cpp" 2
  }
 
  if (fp->choice == 1) {
@@ -259,37 +264,19 @@ void ForNeighbor(__global float4* vars_sorted,
  float Pi = sphp->K*(di.x - rest_density);
  float Pj = sphp->K*(dj.x - rest_density);
 
- clf[index_i].x = 45.;
+
 
  float kern = -dWijdr * (Pi + Pj)*0.5;
 
- float4 stress = kern*r;
+
+
+ float4 stress = (float4)(-1.,2.,-3.,0.);
 
  float4 veli = vars_sorted[index_i+8*num];
  float4 velj = vars_sorted[index_j+8*num];
-
-
-
-
-
-
- float vvisc = 0.001f;
-
- float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
- stress += vvisc * (velj-veli) * dWijlapl;
-
-
- stress *= sphp->mass/(di.x*dj.x);
-
-
-
- float Wijpol6 = Wpoly6(rlen, sphp->smoothing_distance, sphp);
- pt->xsph += (2.f * sphp->mass * (velj-veli)/(di.x+dj.x) * Wijpol6);
- pt->xsph.w = 0.f;
-
-
+# 48 "pressure_update.cl"
  pt->force += stress;
-# 50 "neighbors.cpp" 2
+# 55 "neighbors.cpp" 2
  }
 
  if (fp->choice == 2) {
@@ -311,7 +298,7 @@ void ForNeighbor(__global float4* vars_sorted,
 
  float dWijlapl = Wpoly6_lapl(rlen, sphp->smoothing_distance, sphp);
  pt->color_lapl += -sphp->mass * dWijlapl / dj.x;
-# 55 "neighbors.cpp" 2
+# 60 "neighbors.cpp" 2
  }
 
  if (fp->choice == 3) {
@@ -328,10 +315,10 @@ void ForPossibleNeighbor(__global float4* vars_sorted,
         __constant struct GridParams* gp,
         __constant struct FluidParams* fp,
         __constant struct SPHParams* sphp
-        , __global float4* clf, __global int4* cli
+        , __global float4* clf, __global int4* cli, __global int* index_neigh
       )
 {
-# 89 "neighbors.cpp"
+# 94 "neighbors.cpp"
  if (fp->choice == 0 || (index_j != index_i)) {
 
 
@@ -349,7 +336,7 @@ void ForPossibleNeighbor(__global float4* vars_sorted,
 
 
 
-   ForNeighbor(vars_sorted, pt, index_i, index_j, r, rlen, gp, fp, sphp , clf, cli);
+   ForNeighbor(vars_sorted, pt, index_i, index_j, r, rlen, gp, fp, sphp , clf, cli, index_neigh);
 
   }
  }
@@ -428,13 +415,9 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
   __constant struct GridParams* gp,
   __constant struct FluidParams* fp,
   __constant struct SPHParams* sphp
-  , __global float4* clf, __global int4* cli
+  , __global float4* clf, __global int4* cli, __global int* index_neigh
     )
  {
-
-
-
-
 
   uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
 
@@ -450,7 +433,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
    for(uint index_j=startIndex; index_j < endIndex; index_j++) {
 
 
-    ForPossibleNeighbor(vars_sorted, pt, num, index_i, index_j, position_i, gp, fp, sphp , clf, cli);
+    ForPossibleNeighbor(vars_sorted, pt, num, index_i, index_j, position_i, gp, fp, sphp , clf, cli, index_neigh);
 
    }
   }
@@ -470,7 +453,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
   __constant struct GridParams* gp,
   __constant struct FluidParams* fp,
   __constant struct SPHParams* sphp
-  , __global float4* clf, __global int4* cli
+  , __global float4* clf, __global int4* cli, __global int* index_neigh
   )
  {
 
@@ -486,7 +469,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
      int4 ipos = (int4) (x,y,z,1);
 
 
-     IterateParticlesInCell(vars_sorted, pt, num, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp , clf, cli);
+     IterateParticlesInCell(vars_sorted, pt, num, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp, fp, sphp , clf, cli, index_neigh);
 
 
 
@@ -506,7 +489,7 @@ __kernel void K_SumStep1(
     __constant struct GridParams* gp,
     __constant struct FluidParams* fp,
     __constant struct SPHParams* sphp
-    , __global float4* clf, __global int4* cli
+    , __global float4* clf, __global int4* cli, __global int* index_neigh
     )
 {
 
@@ -526,19 +509,19 @@ __kernel void K_SumStep1(
  zeroPoint(&pt);
 
  if (fp->choice == 0) {
-     IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
+     IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli, index_neigh);
   vars_sorted[index+0*num].x = pt.density.x;
 
  }
  if (fp->choice == 1) {
-     IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
+     IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli, index_neigh);
 
   vars_sorted[index+3*num] = pt.force;
   vars_sorted[index+9*num] = pt.xsph;
 
  }
  if (fp->choice == 2) {
-     IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
+     IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli, index_neigh);
   float norml = length(pt.color_normal);
   if (norml > 1.) {
    float4 stension = -0.3f * pt.color_lapl * pt.color_normal / norml;
@@ -546,7 +529,7 @@ __kernel void K_SumStep1(
   }
  }
  if (fp->choice == 3) {
-     IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli);
+     IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli, index_neigh);
 
 
   vars_sorted[index+0*num].x /= pt.density.y;

@@ -61,7 +61,7 @@ typedef struct float4
 		w = ww;
 	}
 	void print(const char* msg=0) {
-		printf("%s: %f, %f, %f, %f\n", x, y, z, w);
+		printf("%s: %e, %e, %e, %f\n", x, y, z, w);
 	}
 
 	friend float4 operator-(float4& a, float4& b) {

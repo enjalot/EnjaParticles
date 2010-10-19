@@ -108,8 +108,6 @@ struct SPHParams
 
 
 __kernel void datastructures(
-
-
      __global float4* vars_unsorted,
      __global float4* vars_sorted,
         __global uint* sort_hashes,
@@ -122,7 +120,6 @@ __kernel void datastructures(
      )
 {
  uint index = get_global_id(0);
- int nb_vars = gp->nb_vars;
  int num = get_global_size(0);
 
 
@@ -147,7 +144,7 @@ __kernel void datastructures(
 
 
  barrier(CLK_LOCAL_MEM_FENCE);
-# 59 "datastructures_test.cpp"
+# 56 "datastructures_test.cpp"
  if ((index == 0 || hash != sharedHash[tid]) )
  {
   cell_indices_start[hash] = index;
@@ -162,7 +159,7 @@ __kernel void datastructures(
  }
 
  uint sorted_index = sort_indices[index];
-# 84 "datastructures_test.cpp"
+# 82 "datastructures_test.cpp"
  vars_sorted[index+1*num] = vars_unsorted[sorted_index+1 *num] * sphp->simulation_scale;
  vars_sorted[index+2*num] = vars_unsorted[sorted_index+2 *num];
  vars_sorted[index+8*num] = vars_sorted[sorted_index+8*num];

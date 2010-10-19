@@ -11,6 +11,8 @@
 // eventually. 
 //#include "datastructures.h"
 
+#include "variable_labels.h"
+
 namespace rtps {
 
 
@@ -46,8 +48,10 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 
 	setupArrays(); // From GE structures
 
-	printf("nb bytes on GPU: %d\n", BufferGE<float4>::getNbBytesGPU());
-	printf("nb bytes on CPU: %d\n", BufferGE<float4>::getNbBytesCPU());
+	printf("nb (float4) bytes on GPU: %d\n", BufferGE<float4>::getNbBytesGPU());
+	printf("nb (float4) bytes on CPU: %d\n", BufferGE<float4>::getNbBytesCPU());
+	printf("nb (int) bytes on GPU: %d\n", BufferGE<int>::getNbBytesGPU());
+	printf("nb (int) bytes on CPU: %d\n", BufferGE<int>::getNbBytesCPU());
 
 	GE_SPHParams& params = *(cl_params->getHostPtr());
 
@@ -146,7 +150,7 @@ void GE_SPH::update()
 	}
 
 #ifdef GPU
-	int nb_sub_iter = 5;
+	int nb_sub_iter = 1;
 	computeOnGPU(nb_sub_iter);
 	if (count % 10 == 0) computeTimeStep();
 #endif
@@ -166,7 +170,8 @@ void GE_SPH::update()
 	ts_cl[TI_UPDATE]->end(); // OK
 
 	count++;
-	//printGPUDiagnostics(count);
+	printGPUDiagnostics(count);
+	exit(0);
 	//printf("count= %d\n", count);
 
 #ifdef GPU
@@ -250,6 +255,10 @@ void GE_SPH::setupArrays()
 	cl_vars_sorted   = new BufferGE<float4>(ps->cli, nb_el*nb_vars);
 	cl_sort_indices  = new BufferGE<int>(ps->cli, nb_el);
 	cl_sort_hashes   = new BufferGE<int>(ps->cli, nb_el);
+
+	// for debugging. Store neighbors of indices
+	// change nb of neighbors in cl_macro.h as well
+	cl_index_neigh = new BufferGE<int>(ps->cli, nb_el*50);
 
 	#if 0
 	// ERROR
@@ -363,7 +372,7 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 
 		// ***** WALL COLLISIONS *****
 		//printf("collisions\n");
-		computeCollisionWall();
+		//computeCollisionWall(); // REINSTATE LATER
 
         // ***** TIME UPDATE *****
 		//computeEuler();
@@ -740,15 +749,16 @@ void GE_SPH::printGPUDiagnostics(int count)
 		cl_vars_unsorted->copyToHost();
 		cl_vars_sorted->copyToHost();
 
-		float4* density = cl_vars_unsorted->getHostPtr() + 0*nb_el;
-		pos     = cl_vars_unsorted->getHostPtr() + 1*nb_el;
-		float4* vel     = cl_vars_unsorted->getHostPtr() + 2*nb_el;
-		float4* force   = cl_vars_unsorted->getHostPtr() + 3*nb_el;
+		float4* density = cl_vars_unsorted->getHostPtr() + DENS*nb_el;
+		pos     = cl_vars_unsorted->getHostPtr() + POS*nb_el;
+		float4* vel     = cl_vars_unsorted->getHostPtr() + VEL*nb_el;
+		float4* force   = cl_vars_unsorted->getHostPtr() + FOR*nb_el;
 
-		float4* density1 = cl_vars_sorted->getHostPtr() + 0*nb_el;
-		float4* pos1     = cl_vars_sorted->getHostPtr() + 1*nb_el;
-		float4* vel1     = cl_vars_sorted->getHostPtr() + 2*nb_el;
-		float4* force1   = cl_vars_sorted->getHostPtr() + 3*nb_el;
+		float4* density1 = cl_vars_sorted->getHostPtr() + DENS*nb_el;
+		float4* pos1     = cl_vars_sorted->getHostPtr() + POS*nb_el;
+		float4* vell1    = cl_vars_sorted->getHostPtr() + VEL*nb_el;
+		float4* vel1     = cl_vars_sorted->getHostPtr() + VELEVAL*nb_el;
+		float4* force1   = cl_vars_sorted->getHostPtr() + FOR*nb_el;
 
 		// identify particles that exited the domain
 	    GridParams& gp = *(cl_GridParams->getHostPtr());
@@ -763,16 +773,36 @@ void GE_SPH::printGPUDiagnostics(int count)
 
     	float bd = sph_settings.boundary_distance;
 
+		cl_index_neigh->copyToHost();
+		int* n = cl_index_neigh->getHostPtr();
+		float4* fclf = clf_debug->getHostPtr();
+		int4*   icli = cli_debug->getHostPtr();
+
 		for (int i=0; i < nb_el; i++) {
-			float4 p = pos[i];
-			float4 f = force[i];
-			if (p.z > 6. && force[i].z > 0) {
+			//float4 p = pos[i];
+			//float4 f = force[i];
+			float4 p = pos1[i];    // sorted values (will correspond to indices)
+			float4 veval = vel1[i]; // veleval
+			float4 vel = vell1[i]; 
+			float4 f = force1[i];
+			float rho = density1[i].x;
+
+			//if (p.z > 6. && force[i].z > 0) {
 				printf("----------------\n");
-				printf("(%d) pos: %f, %f, %f, rho= %f\n", count, p.x, p.y, p.z, p.w);
-				printf("(%d) force: %f, %f, %f\n", count, f.x, f.y, f.z);
-				//printf("p.z > 5\n");
-			//	exit(0);
+				printf("(%d) pos: %f, %f, %f, rho= %f\n", count, p.x, p.y, p.z, rho);
+				printf("(%d) vel: %g, %g, %g\n", count, vel.x, vel.y, vel.z);
+				printf("(%d) veleval: %g, %g, %g\n", count, veval.x, veval.y, veval.z);
+			//}
+	
+			int max = icli[i].x < 50 ? icli[i].x : 50;
+			for (int j=0; j < max; j++) {
+				float4 pj = pos1[n[j+50*i]];
+				float4 sep = pj-p;
+				float lg = sep.length();
+				printf("index[%d] lg(%d,%d)= %f, neigh: (%f, %f, %f)\n", n[j+50*i], i, j, lg, pj.x, pj.y, pj.z);
+
 			}
+
 			#if 0
 			if ((p.x-bd) < mn.x || (p.x+bd) > mx.x) {
 				printf("particle i= %d, ", i);
