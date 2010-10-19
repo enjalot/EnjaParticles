@@ -132,7 +132,7 @@ void GE_SPH::bitonic_sort()
 	ts_cl[TI_BITONIC_SORT]->end();
 
 	//sorting is fine
-	//printBiSortDiagnostics(*cl_sort_output_hashes, *cl_sort_output_indices);
+	printBiSortDiagnostics(*cl_sort_output_hashes, *cl_sort_output_indices);
 	//computeCellStartEndCPU(); // diagnostic check
 
 	//printf("EXIT BISORT \n");
@@ -155,13 +155,7 @@ void GE_SPH::printBiSortDiagnostics(BufferGE<int>& cl_sort_output_hashes, Buffer
 
 	// check whether sort is correct
 
-	int min_hash = hashi[0];
-
-	for (int i=1; i < nb_el; i++) {
-		if (hashi[i] >= hashi[i-1]) {
-			printf("i=%d, hash out of order\n", i);
-		}
-	}
+	printf("*** enter printBiSortDiagnostics ****\n");
 
 	#if 0
 	for (int i=0; i < nb_el; i++) {
@@ -171,6 +165,16 @@ void GE_SPH::printBiSortDiagnostics(BufferGE<int>& cl_sort_output_hashes, Buffer
 		//printf("osorted hash[%d]: %d, osorted indx[%d]: %d\n", i, ohashi[i], i, osorti[i]);
 	}
 	#endif
+
+
+
+	for (int i=1; i < nb_el; i++) {
+		if (ohashi[i] < ohashi[i-1]) {
+			printf("i=%d, hash out of order\n", i);
+			exit(0);
+		}
+	}
+
 
 #endif
 }

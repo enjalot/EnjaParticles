@@ -87,5 +87,15 @@ They give different results.
 PRINT out sorted positions and indices for both cases. Store in two output files.  Compare the output files.  Something must be different between the two cases. 
 INVESTIGATE why there are so few particles in a sphere. 
 
+- Hashes are always in order (regardless of position[] order)
+- I must check the order of position array. In sorted form, they should 
+be identical. So why is there divergence eventually? 
+
+Hypothesis: search for neighbors is incorrect. WHY ARE THERE SO FEW? 
+Smoothing distance = 2*rest_distance. So there are very few particles per
+sphere. I should probably make smoothing distance SLIGHTLY larger than 
+twice rest_distance. 
+----------------------------------------------------------------------
+
 Get sset() to work, which will speed up hashing. 
 ----------------------------------------------------------------------
