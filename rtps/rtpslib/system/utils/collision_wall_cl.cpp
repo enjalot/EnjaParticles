@@ -75,6 +75,11 @@ __kernel void collision_wall(
     float4 r_f = (float4)(0.f, 0.f, 0.f, 0.f);
     float4 f_f = (float4)(0.f, 0.f, 0.f, 0.f);
 
+    //these should be moved to the params struct
+    //but set to 0 in both of Krog's simulations...
+    float friction_kinetic = 0.0f;
+    float friction_static_limit = 0.0f;
+
     //bottom wall
     float diff = params->boundary_distance - (p.z - gp->bnd_min.z);
     if (diff > params->EPSILON)
