@@ -209,7 +209,7 @@ void ForNeighbor(__global float4* vars_sorted,
       __constant struct GridParams* gp,
       __constant struct FluidParams* fp,
       __constant struct SPHParams* sphp
-      , __global float4* clf, __global int4* cli, __global int* index_neigh
+      , __global float4* clf, __global int4* cli
     )
 {
  int num = get_global_size(0);
@@ -222,7 +222,8 @@ void ForNeighbor(__global float4* vars_sorted,
 
 
 
-    float Wij = Wpoly6(r, sphp->smoothing_distance, sphp);
+
+ float Wij = 100.f;
 
 
 
@@ -309,7 +310,7 @@ void ForPossibleNeighbor(__global float4* vars_sorted,
         __constant struct GridParams* gp,
         __constant struct FluidParams* fp,
         __constant struct SPHParams* sphp
-        , __global float4* clf, __global int4* cli, __global int* index_neigh
+        , __global float4* clf, __global int4* cli
       )
 {
 # 77 "neighbors.cpp"
@@ -329,7 +330,7 @@ void ForPossibleNeighbor(__global float4* vars_sorted,
   if (rlen <= sphp->smoothing_distance) {
 
 
-   ForNeighbor(vars_sorted, pt, index_i, index_j, r, rlen, gp, fp, sphp , clf, cli, index_neigh);
+   ForNeighbor(vars_sorted, pt, index_i, index_j, r, rlen, gp, fp, sphp , clf, cli);
 
   }
  }

@@ -67,8 +67,11 @@
 
 
 // FOR DEBUGGING
-#define DUMMY_ARGS  , __global float4* clf, __global int4* cli, __global int* index_neigh
-#define       ARGS  , clf, cli, index_neigh
+#define DUMMY_ARGS  , __global float4* clf, __global int4* cli
+#define       ARGS  , clf, cli
+
+// , __global int* index_neigh
+// , index_neigh
 
 
 

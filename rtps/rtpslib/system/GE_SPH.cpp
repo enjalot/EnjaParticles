@@ -17,12 +17,6 @@ namespace rtps {
 
 
 //----------------------------------------------------------------------
-//void GE_SPH::setGEDataStructures(DataStructures* ds)
-//{
-	//this->ds = ds;
-//}
-
-//----------------------------------------------------------------------
 
 #include "new_parameters.cpp"
 
@@ -134,13 +128,7 @@ void GE_SPH::update()
     //TODO: add timings
 #ifdef CPU
 	computeOnCPU();
-	#if 0
-	for (int i=0; i < 10; i++) {
-		float4 p = positions[i];
-		printf("pos[%d] = %f, %f, %f\n", p.x, p.y, p.z);
-	}
-	exit(0);
-	#endif
+
     glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
     glBufferData(GL_ARRAY_BUFFER, num * sizeof(float4), &positions[0], GL_DYNAMIC_DRAW);
 #endif
@@ -191,19 +179,8 @@ void GE_SPH::setupArrays()
 	GE_SPHParams& params = *(cl_params->getHostPtr());
 	printf("params: scale: %f\n", params.simulation_scale);
 
-	// only for my test routines: sort, hash, datastructures
-	//printf("setupArrays, nb_el= %d\n", nb_el); exit(0);
-
-	//cl_cells = new BufferGE<float4>(ps->cli, nb_el);
-	//for (int i=0; i < nb_el; i++) {
-		//(*cl_cells)[i] = positions[i];
-	//}
-	//cl_cells->copyToDevice();
-
 // Need an assign operator (no memory allocation)
 
-	printf("allocate BufferGE<GridParams>\n");
-	printf("sizeof(GridParams): %d\n", sizeof(GridParams));
 	cl_GridParams = new BufferGE<GridParams>(ps->cli, 1); // destroys ...
 	cl_GridParamsScaled = new BufferGE<GridParamsScaled>(ps->cli, 1); // destroys ...
 

@@ -15,7 +15,9 @@ float Wpoly6(float4 r, float h,  struct GE_SPHParams* params)
 	//printf("hr2= %f\n", hr2);
 	h3 = h3*h;   //  h3 = h^3
     float alpha = 315.f/64.0f/params->PI/(h3*h3*h3);
+	//float alpha = 0.f;
     float Wij = alpha * hr2*hr2*hr2;
+	//Wij = 0.f;
 	//printf("Wij,hr2,alpha= %f, %f, %f, h^3= %f, h= %\n", Wij, hr2, alpha, h3, h);
     return Wij;
 }

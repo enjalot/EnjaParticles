@@ -56,15 +56,6 @@ void GE_SPH::neighborSearch(int which)
 	fp->choice = which;
 	cl_FluidParams->copyToDevice();
 
-	#if 0
-	// print sorted density prior to routine
-	printf("SORTED DENSITY BEFORE\n");
-	cl_vars_sorted->copyToHost();
-	float4* d = cl_vars_sorted->getHostPtr();
-	for (int i=0; i < 5; i++) {
-		printf("dens[%d]= %f\n", d[i].x);
-	}
-	#endif
 	
 	int iarg = 0;
 	kern.setArg(iarg++, cl_vars_sorted->getDevicePtr());
@@ -77,7 +68,7 @@ void GE_SPH::neighborSearch(int which)
 	// ONLY IF DEBUGGING
 	kern.setArg(iarg++, clf_debug->getDevicePtr());
 	kern.setArg(iarg++, cli_debug->getDevicePtr());
-	kern.setArg(iarg++, cl_index_neigh->getDevicePtr());
+	//kern.setArg(iarg++, cl_index_neigh->getDevicePtr());
 
 
 	size_t global = (size_t) nb_el;
