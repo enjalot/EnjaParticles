@@ -17,7 +17,7 @@ void zeroPoint(PointData* pt)
 	pt->xsph = (float4)(0.,0.,0.,0.);
 }
 //----------------------------------------------------------------------
-void ForNeighbor(__global float4*  vars_sorted,
+inline void ForNeighbor(__global float4*  vars_sorted,
 				PointData* pt,
 				uint index_i,
 				uint index_j,
@@ -53,7 +53,7 @@ void ForNeighbor(__global float4*  vars_sorted,
 	} 
 }
 //--------------------------------------------------
-void ForPossibleNeighbor(__global float4* vars_sorted, 
+inline void ForPossibleNeighbor(__global float4* vars_sorted, 
 						PointData* pt,
 						uint numParticles, 
 						uint index_i, 
