@@ -82,7 +82,7 @@ void Render::drawArrays()
 		//scale /= 2.0;
 		//printf("dens= %f, scale= %f\n", dens, scale);
 		glScalef(scale, scale, scale);
-		gluSphere(qu, 1., 10, 10);
+		gluSphere(qu, 1., 5, 5);
 		glPopMatrix();
 	}
     glUnmapBufferARB(GL_ARRAY_BUFFER); 
@@ -147,12 +147,13 @@ void Render::render()
     else   // do not use glsl
     {
 */
-        glEnable(GL_LIGHTING);
+        glEnable(GL_LIGHTING);  // seems to work
         //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    	glEnable(GL_BLEND);
 
 		// draws circles instead of squares
-        glEnable(GL_POINT_SMOOTH); 
+        //glEnable(GL_POINT_SMOOTH); 
         //TODO make the point size a setting
         //glPointSize(5.0f);
 

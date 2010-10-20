@@ -47,8 +47,8 @@ void define_lights_and_materials()
 
 		// Blending is only active when blending mode is ON
 	// Page 129 in GLUT course
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 //------------------------------------------------------
 
