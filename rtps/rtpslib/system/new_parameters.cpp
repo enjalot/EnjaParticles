@@ -430,13 +430,13 @@ params.print();
 
 	//float4 domain_min  = float4(-500, 0, 0, 1);
 	//float4 domain_max  = float4(256, 256, 512, 1);
-	float4 domain_min  = float4(-564, -30, 0, 1);
+	float4 domain_min  = float4(-560, -30, 0, 1);
 	//float4 domain_max  = float4(256, 286, 512, 1);
 	float4 domain_max  = float4(256, 256, 1276, 1);
 
 	// displace by 1/2 particle spacing in world coordinates
-	float4 fluid_min   = float4(0., 30., .5, 1.);
-	float4 fluid_max   = float4(220., 220., 450., 1);
+	float4 fluid_min   = float4(-559., -15, .5, 1.);
+	float4 fluid_max   = float4(220., 225., 450., 1);
 	#endif
 
 	#if 0
@@ -468,6 +468,11 @@ params.print();
     //grid = UniformGrid(domain_min, domain_max, nb_cells, sph_settings.simulation_scale); 
 
 	int offset = 0;
+	float4 center(-100., 100., 500., 1.);
+	float radius = 50.;
+	grid.makeSphere(&positions[0], center, radius, num, offset, 
+		particle_spacing_w);
+
 	grid.makeCube(&positions[0], fluid_min, fluid_max, particle_spacing_w, num, offset);
 
 	grid.res.print("grid res");

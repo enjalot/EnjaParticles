@@ -21,9 +21,11 @@
 
 	// Add viscous forces
 
+	#if 0
 	float vvisc = 0.001f; // SHOULD BE SET IN GE_SPH.cpp
 	float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
 	stress += vvisc * (velj-veli) * dWijlapl;
+	#endif
 
 	stress *=  sphp->mass/(di.x*dj.x);  // original
 

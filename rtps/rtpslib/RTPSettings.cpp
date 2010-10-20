@@ -19,7 +19,7 @@ RTPSettings::RTPSettings()
     //max_particles = 256;
     //max_particles = n2k;
     //max_particles = n32k;
-    max_particles = n16k;
+    max_particles = n4k;
     //max_particles = 512;
     //dt = .0004f;
     //dt = .001f;
@@ -39,7 +39,11 @@ RTPSettings::RTPSettings()
 	//dt = .0003f;
 
 	//dt = .001;
+
+	// works with dam and 16k
 	dt = .0006;
+
+	dt = 0.0003;
 
 	// for 4k
 	//dt = .0011f;

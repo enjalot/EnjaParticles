@@ -79,10 +79,10 @@ void Render::drawArrays()
 		//float dens = ptr[count+3];
 		//float scale = 1.5*pow(dens, -1./3.);  // could be done on GPU
 		float scale = 05.;
-		//scale /= 2.0;
+		scale *= 1.5;
 		//printf("dens= %f, scale= %f\n", dens, scale);
 		glScalef(scale, scale, scale);
-		gluSphere(qu, 1., 5, 5);
+		gluSphere(qu, 1., 10, 10);
 		glPopMatrix();
 	}
     glUnmapBufferARB(GL_ARRAY_BUFFER); 
