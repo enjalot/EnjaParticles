@@ -46,17 +46,26 @@ cl::Program CL::loadProgram(std::string kernel_source)
 
     try
     {
-        //err = program.build(devices, "-cl-nv-verbose");
+        printf("build program\n");
+#ifdef DEBUG
+        srand(time(NULL));
+        int rnd = rand() % 200 + 100;
+        char options[50];
+        sprintf(options, "-cl-nv-verbose -cl-nv-maxrregcount=%d", rnd);
+        err = program.build(devices, options);
+#else
         err = program.build(devices);
+#endif
     }
     catch (cl::Error er) {
 		printf("loadProgram::program.build\n");
 		printf("source= %s\n", kernel_source.c_str());
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
-        std::cout << "Build Status: " << program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(devices.front()) << std::endl;
-        std::cout << "Build Options:\t" << program.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(devices.front()) << std::endl;
-        std::cout << "Build Log:\t " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices.front()) << std::endl;
     } 
+    std::cout << "Build Status: " << program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(devices.front()) << std::endl;
+    std::cout << "Build Options:\t" << program.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(devices.front()) << std::endl;
+    std::cout << "Build Log:\t " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices.front()) << std::endl;
+
     return program;
 }
 

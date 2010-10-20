@@ -35,6 +35,7 @@ __kernel void xsph(__global float4* pos, __global float4* veleval, __global floa
 {
     unsigned int i = get_global_id(0);
 
+    float sadf = 5;
     float4 p = pos[i] * params->simulation_scale;
     float4 v = veleval[i];
     float di = density[i];
