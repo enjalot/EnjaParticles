@@ -226,8 +226,8 @@ void ForNeighbor(__global float4* vars_sorted,
 
 
 
+    float Wij = Wpoly6(r, sphp->smoothing_distance, sphp);
 
- float Wij = 100.f;
 
 
 

@@ -1,8 +1,8 @@
 #ifndef _DENSITY_UPDATE_CL_
 #define _DENSITY_UPDATE_CL_
 
-    //float Wij = Wpoly6(r, sphp->smoothing_distance, sphp);
-	float Wij = 100.f;
+    float Wij = Wpoly6(r, sphp->smoothing_distance, sphp);
+	//float Wij = 100.f;
 
 	//pt->density += (float4)(sphp->mass*Wij, 0., 0., 0.);
 
