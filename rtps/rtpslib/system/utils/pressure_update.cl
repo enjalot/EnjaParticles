@@ -9,32 +9,21 @@
 
 	//form simple SPH in Krog's thesis
 
-	//float rest_density = 00.f;
 	float rest_density = 1000.f;
 	float Pi = sphp->K*(di.x - rest_density);
 	float Pj = sphp->K*(dj.x - rest_density);
 
-	//clf[index_i].x = 45.;
-
 	float kern = -dWijdr * (Pi + Pj)*0.5;
-	//kern = 0.;
 	float4 stress = kern*r; // correct version
-	//float4 stress = r;   //Debugging
-	//float4 stress = (float4)(-1.,2.,-3.,0.);   //Debugging
 
 	float4 veli = veleval(index_i); // sorted
 	float4 velj = veleval(index_j);
-	//float4 veli = vel(index_i);
-	//float4 velj = vel(index_j);
 
-	#if 0
 	// Add viscous forces
 
 	float vvisc = 0.001f; // SHOULD BE SET IN GE_SPH.cpp
-	//float vvisc = 1.000f; // SHOULD BE SET IN GE_SPH.cpp
 	float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
 	stress += vvisc * (velj-veli) * dWijlapl;
-	#endif
 
 	stress *=  sphp->mass/(di.x*dj.x);  // original
 

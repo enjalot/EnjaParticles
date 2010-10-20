@@ -47,9 +47,9 @@ __kernel void ge_leapfrog(
 
 	// Should not be required, but it is for debugging if I wish to 
 	// access the sorted arrays
-	vel(i) = v;
-	pos(i) = p;
-	veleval(i) = veval;
+	//vel(i) = v;
+	//pos(i) = p;
+	//veleval(i) = veval;
 
 
 	uint originalIndex = sort_indices[i];
@@ -59,10 +59,12 @@ __kernel void ge_leapfrog(
 	p.xyz /= params->simulation_scale;
 	unsorted_pos(originalIndex) 	= (float4)(p.xyz, dens);
 	unsorted_vel(originalIndex) 	= v;
-	unsorted_density(originalIndex) = dens; // FOR DEBUGGING ONLY
-	unsorted_force(originalIndex) 	= f; // FOR DEBUGGING ONLY
 	unsorted_veleval(originalIndex) = veval; 
 	positions[originalIndex] 		= (float4)(p.xyz, 1.);  // for plotting
+
+// FOR DEBUGGING
+	//unsorted_force(originalIndex) 	= f; // FOR DEBUGGING ONLY
+	//unsorted_density(originalIndex) = dens; // FOR DEBUGGING ONLY
 	//positions[originalIndex] 		= (float4)(p.xyz, dens);  // for plotting
 }
 

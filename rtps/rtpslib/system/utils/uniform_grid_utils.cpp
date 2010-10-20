@@ -199,7 +199,6 @@ __kernel void K_SumStep1(
 	}
 	if (fp->choice == 1) { // update pressure
     	IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
-		//barrier(CLK_LOCAL_MEM_FENCE); // DEBUG
 		force(index) = pt.force; // Does not seem to maintain value into euler.cl
 		xsph(index) = pt.xsph;
 		// SERIOUS PROBLEM: Results different than results with cli = 4 (bottom of this file)

@@ -31,12 +31,6 @@ void ForNeighbor(__global float4*  vars_sorted,
 {
 	int num = get_global_size(0);
 
-	//int ii = cli[index_i].x;
-	//if (ii < 50) {     // max nb neighbors
-		//neigh(index_i, ii) = index_j;
-	//}
-	//cli[index_i].x++;
-
 
 	if (fp->choice == 0) {
 		// update density
@@ -79,12 +73,6 @@ void ForPossibleNeighbor(__global float4* vars_sorted,
 	// self-collisions ok when computing density
 	// no self-collisions in the case of pressure
 
-// No error before 1st call to this method, error after 1st call
-// with both lines, error on execution (line 89 in nei*wrap*cpp)
-// with only return (2nd line), error on kernel (line 33 in nei*wrap*cpp)
-//cli[index_i].z = fp;
-//return;
-
 
 	if (fp->choice == 0 || (index_j != index_i)) {  // RESTORE WHEN DEBUGGED
 	//{
@@ -100,7 +88,6 @@ void ForPossibleNeighbor(__global float4* vars_sorted,
 		// is this particle within cutoff?
 
 		if (rlen <= sphp->smoothing_distance) {
-			//cli[index_i].x++;
 #if 1
 			// return updated pt
 			ForNeighbor(vars_sorted, pt, index_i, index_j, r, rlen, gp, fp, sphp ARGS);

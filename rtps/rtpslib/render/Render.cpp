@@ -76,10 +76,10 @@ void Render::drawArrays()
 	for (int i=0; i < num; i++, count+=4) {
 		glPushMatrix();
 		glTranslatef(ptr[count], ptr[count+1], ptr[count+2]);
-		float dens = ptr[count+3];
+		//float dens = ptr[count+3];
 		//float scale = 1.5*pow(dens, -1./3.);  // could be done on GPU
-		float scale = 07.;
-		scale /= 2.0;
+		float scale = 05.;
+		//scale /= 2.0;
 		//printf("dens= %f, scale= %f\n", dens, scale);
 		glScalef(scale, scale, scale);
 		gluSphere(qu, 1., 10, 10);

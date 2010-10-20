@@ -218,19 +218,8 @@ void ForNeighbor(__global float4* vars_sorted,
 {
  int num = get_global_size(0);
 
- int ii = cli[index_i].x;
- if (ii < 50) {
-  index_neigh[ii+50*index_i] = index_j;
- }
- cli[index_i].x++;
-
-
-
-
 
  if (fp->choice == 0) {
-
-
 
 
 # 1 "density_update.cl" 1
@@ -242,7 +231,7 @@ void ForNeighbor(__global float4* vars_sorted,
 
 
  pt->density.x += sphp->mass*Wij;
-# 50 "neighbors.cpp" 2
+# 39 "neighbors.cpp" 2
  }
 
  if (fp->choice == 1) {
@@ -259,22 +248,22 @@ void ForNeighbor(__global float4* vars_sorted,
 
 
 
-
  float rest_density = 1000.f;
  float Pi = sphp->K*(di.x - rest_density);
  float Pj = sphp->K*(dj.x - rest_density);
 
-
-
  float kern = -dWijdr * (Pi + Pj)*0.5;
-
  float4 stress = kern*r;
-
-
 
  float4 veli = vars_sorted[index_i+8*num];
  float4 velj = vars_sorted[index_j+8*num];
-# 39 "pressure_update.cl"
+
+
+
+ float vvisc = 0.001f;
+ float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
+ stress += vvisc * (velj-veli) * dWijlapl;
+
  stress *= sphp->mass/(di.x*dj.x);
 
 
@@ -285,7 +274,7 @@ void ForNeighbor(__global float4* vars_sorted,
 
 
  pt->force += stress;
-# 55 "neighbors.cpp" 2
+# 44 "neighbors.cpp" 2
  }
 
  if (fp->choice == 2) {
@@ -307,7 +296,7 @@ void ForNeighbor(__global float4* vars_sorted,
 
  float dWijlapl = Wpoly6_lapl(rlen, sphp->smoothing_distance, sphp);
  pt->color_lapl += -sphp->mass * dWijlapl / dj.x;
-# 60 "neighbors.cpp" 2
+# 49 "neighbors.cpp" 2
  }
 
  if (fp->choice == 3) {
@@ -327,7 +316,7 @@ void ForPossibleNeighbor(__global float4* vars_sorted,
         , __global float4* clf, __global int4* cli, __global int* index_neigh
       )
 {
-# 94 "neighbors.cpp"
+# 77 "neighbors.cpp"
  if (fp->choice == 0 || (index_j != index_i)) {
 
 
@@ -342,7 +331,6 @@ void ForPossibleNeighbor(__global float4* vars_sorted,
 
 
   if (rlen <= sphp->smoothing_distance) {
-
 
 
    ForNeighbor(vars_sorted, pt, index_i, index_j, r, rlen, gp, fp, sphp , clf, cli, index_neigh);
@@ -524,7 +512,6 @@ __kernel void K_SumStep1(
  }
  if (fp->choice == 1) {
      IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp , clf, cli, index_neigh);
-
   vars_sorted[index+3*num] = pt.force;
   vars_sorted[index+9*num] = pt.xsph;
 
