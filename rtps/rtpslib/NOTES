@@ -115,6 +115,7 @@ sorted veleval list in the two runs are in opposite orders. SHOULD NOT HAPPEN!
 Oct. 20, 2010
 - there was a bug in the sorting macros in cl_macros.h . Fixed. 
 Speed on Fermi is only 8x the speed on the mac. WHY? There must be inefficiencies somewhere!! This difference is true for leapfrog, pressure, density. 
+10 subiterations between renders. Render all particles as 10x10 spheres. 
 
 MacOSX: Nvidia 330
 16k particles, render every 10 iterations. 
@@ -128,5 +129,17 @@ collision wall: tot (ms): 272.901, avg: 0.690889, (count=395)
 bitonic sort: tot (ms): 1320.89, avg: 3.34403, (count=395)
 (rtps) system update: tot (ms): 7537.41, avg: 215.355, (count=35)
 (rtps) render update: tot (ms): 3191.89, avg: 93.8791, (count=34)
+
+Fermi on Laforge
+hash: tot (ms): 34.121, avg: 0.0863822, (count=395)
+build: tot (ms): 37.183, avg: 0.0941342, (count=395)
+density: tot (ms): 343.58, avg: 0.869823, (count=395)
+pressure: tot (ms): 492.615, avg: 1.24713, (count=395)
+leapfrog: tot (ms): 42.738, avg: 0.108198, (count=395)
+update: tot (ms): 1311.84, avg: 37.4811, (count=35)
+collision wall: tot (ms): 42.977, avg: 0.108803, (count=395)
+bitonic sort: tot (ms): 192.224, avg: 0.486643, (count=395)
+(rtps) system update: tot (ms): 1271.95, avg: 36.3414, (count=35)
+(rtps) render update: tot (ms): 5040.11, avg: 148.238, (count=34)
 
 ----------------------------------------------------------------------
