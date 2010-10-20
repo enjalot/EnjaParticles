@@ -194,8 +194,6 @@ void GE_SPH::gordon_parameters()
 	//-------------------------------
 
 
-printf("num= %d\n", num);
-
     //*** Initialization, TODO: move out of here to the particle directory
     positions.resize(num);
     forces.resize(num);
@@ -290,7 +288,6 @@ printf("num= %d\n", num);
 
     std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));
     std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 1.0f, 0.0f));
-    std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
 
     std::fill(densities.begin(), densities.end(), 0.0f);
     //std::fill(error_check.begin(), error_check.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -399,7 +396,7 @@ void GE_SPH::ian_parameters()
 	params.mass = particle_mass;
     params.PI = acos(-1.);
     params.dt = ps->settings.dt;
-    params.K = 20;
+    params.K = 20.;
 
 printf("****** REST 1 *****\n");
 params.print();
@@ -409,6 +406,10 @@ params.print();
 	//SETUP GRID
 
     positions.resize(num);
+    velocities.resize(num);
+	float4 zero(0.f,0.f,0.f,0.f);
+    std::fill(positions.begin(), positions.end(),zero);
+    std::fill(velocities.begin(), velocities.end(),zero);
 
 	//float cell_sz;
 	//cell_sz = h;  // 27 neighbor search (only neighbors strictly necessary)
@@ -470,7 +471,7 @@ params.print();
 	int offset = 0;
 	float4 center(-100., 100., 500., 1.);
 	float radius = 50.;
-	grid.makeSphere(&positions[0], center, radius, num, offset, 
+	grid.makeSphere(&positions[0], &velocities[0], center, radius, num, offset, 
 		particle_spacing_w);
 
 	grid.makeCube(&positions[0], fluid_min, fluid_max, particle_spacing_w, num, offset);
@@ -495,31 +496,6 @@ params.print();
 
 
 
-
-#if 0
-    params.grid_min = grid.getMin();
-    params.grid_max = grid.getMax();
-    params.mass = sph_settings.particle_mass;
-    params.rest_distance = sph_settings.particle_rest_distance;
-    params.rest_density = sph_settings.rest_density;
-    params.smoothing_distance = sph_settings.smoothing_distance;
-    params.particle_radius = sph_settings.particle_radius;
-    params.simulation_scale = sph_settings.simulation_scale;
-	printf("scale: %f\n", params.simulation_scale);
-
-	printf("37 nb_el= %d\n", nb_el);
-
-	// does scale_simulation influence stiffness and dampening?
-    params.boundary_stiffness = 10000.;  //10000.0f;  (scale from 20000 to 20)
-    params.boundary_dampening = 1256.;//256.; 
-    params.boundary_distance = sph_settings.boundary_distance;
-    params.EPSILON = .00001f;
-    params.PI = 3.14159265f;
-    params.K = 1.5f; //100.0f; //1.5f;
-	params.dt = ps->settings.dt;
-	//printf("dt= %f\n", params.dt); exit(0);
- 
-#endif
 
 
 
@@ -683,19 +659,10 @@ printf("num= %d\n", num);
 
     std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));
     std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 1.0f, 0.0f));
-    std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
 
     std::fill(densities.begin(), densities.end(), 0.0f);
     //std::fill(error_check.begin(), error_check.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
 
-	#if 0
-	printf("h= %f\n", h);
-    for(int i = 0; i < nb_el; i++)
-    {
-        printf("position[%d] = %f %f %f\n", positions[i].x, positions[i].y, positions[i].z);
-    }
-	exit(0);
-    #endif
 
 	printf("3 nb_el= %d\n", nb_el);
 
@@ -704,12 +671,11 @@ printf("num= %d\n", num);
 	// Put in setup Arrays
     // VBO creation, TODO: should be abstracted to another class
     managed = true;
-    //printf("positions: %d, %d, %d\n", positions.size(), sizeof(float4), positions.size()*sizeof(float4));
     pos_vbo = createVBO(&positions[0], positions.size()*sizeof(float4), GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
-    //printf("pos vbo: %d\n", pos_vbo);
     col_vbo = createVBO(&colors[0], colors.size()*sizeof(float4), GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
-    //printf("col vbo: %d\n", col_vbo);
     // end VBO creation
+
+
 
     //vbo buffers
     cl_position = new BufferVBO<float4>(ps->cli, pos_vbo);

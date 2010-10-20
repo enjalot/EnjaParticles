@@ -137,14 +137,12 @@ void UniformGrid::makeCube(float4* position, float4 pmin, float4 pmax, float spa
     for (float x = pmin.x; x <= pmax.x; x+=spacing) {
         if (i >= num) {
 			offset = num;
-	printf("spacing (makeCube)= %f\n", spacing);
 			goto breakout;
 			//return;
 		}
         //position[num-i-1] = float4(x,y,z,1.0f);
         position[i] = float4(x,y,z,1.0f);
 		i++;
-		//printf("i= %d, pos= %f, %f, %f\n", x, y, z);
     }}}
 
 breakout:
@@ -154,7 +152,7 @@ breakout:
 	//printf("makeCube, offset= %d, about to exit\n", offset); exit(0);
 }
 //----------------------------------------------------------------------
-void UniformGrid::makeSphere(float4* position, float4 center, float radius, int& num, int& offset, float spacing)
+void UniformGrid::makeSphere(float4* position, float4* velocity, float4 center, float radius, int& num, int& offset, float spacing)
 {
 // offset: start counting particles from offset. Do not go beyond num
 	
@@ -181,7 +179,8 @@ void UniformGrid::makeSphere(float4* position, float4 center, float radius, int&
 		         + (y-center.y)*(y-center.y) + 
 		         + (z-center.z)*(z-center.z);
 		if (r2 > (radius*radius)) continue;
-		position[i] = float4(x,y,z,1.0);
+		position[i] = float4(x,y,z,1.);
+		velocity[i] = float4(0.,0.0,-15.5,1.);
 		i++;
 	}}}
 

@@ -19,7 +19,7 @@ RTPSettings::RTPSettings()
     //max_particles = 256;
     //max_particles = n2k;
     //max_particles = n32k;
-    max_particles = n4k;
+    max_particles = n16k;
     //max_particles = 512;
     //dt = .0004f;
     //dt = .001f;
@@ -43,6 +43,7 @@ RTPSettings::RTPSettings()
 	// works with dam and 16k
 	dt = .0006;
 
+	// good for 4k, 8k, 16k, drop falling with v=(0,0,-15)
 	dt = 0.0003;
 
 	// for 4k

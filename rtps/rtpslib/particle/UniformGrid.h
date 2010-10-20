@@ -17,7 +17,7 @@ public:
     void make_cube(float4 *positions, float spacing, int num);
 	void makeCube(float4* position, float4 pmin, float4 pmax, float spacing, int& num, int& offset);
 
-	void makeSphere(float4* position, float4 center, float radius, int& num, int& offset, float spacing);
+	void makeSphere(float4* position, float4* velocity, float4 center, float radius, int& num, int& offset, float spacing);
 
     float4 getMin(){ return min; };
     float4 getMax(){ return max; };
