@@ -59,8 +59,8 @@ SPH::SPH(RTPS *psfr, int n)
     //grid = UniformGrid(float3(0,0,0), float3(1024, 1024, 1024), sph_settings.smoothing_distance / sph_settings.simulation_scale);
     grid = UniformGrid(float3(0,0,0), float3(256, 256, 512), sph_settings.smoothing_distance / sph_settings.simulation_scale);
     //grid.make_cube(&positions[0], sph_settings.spacing, num);
-    grid.make_column(&positions[0], sph_settings.spacing, num);
-    //grid.make_dam(&positions[0], sph_settings.spacing, num);
+    //grid.make_column(&positions[0], sph_settings.spacing, num);
+    grid.make_dam(&positions[0], sph_settings.spacing, num);
     //int new_num = grid.make_line(&positions[0], sph_settings.spacing, num);
     //less particles will be in play
     //not sure this is 100% right
@@ -103,7 +103,13 @@ typedef struct SPHParams
     cl_params = Buffer<SPHParams>(ps->cli, vparams);
 
 
-    std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));
+    float factor;
+    //std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));
+    for(int i = 0; i < num; i++)
+    {
+        factor = (positions[i].z - params.grid_min.z)/(params.grid_max.z - params.grid_min.z);
+        colors[i] = float4(factor, 0.0f, 1.0f - factor, 0.0f);
+    }
     std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 1.0f, 0.0f));
     std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     std::fill(veleval.begin(), veleval.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
