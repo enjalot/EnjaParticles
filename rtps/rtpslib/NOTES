@@ -112,3 +112,21 @@ Problem my be in cell_indexes_start
 ----------------------------------------------------------------------
 sorted veleval list in the two runs are in opposite orders. SHOULD NOT HAPPEN!
 ----------------------------------------------------------------------
+Oct. 20, 2010
+- there was a bug in the sorting macros in cl_macros.h . Fixed. 
+Speed on Fermi is only 8x the speed on the mac. WHY? There must be inefficiencies somewhere!! This difference is true for leapfrog, pressure, density. 
+
+MacOSX: Nvidia 330
+16k particles, render every 10 iterations. 
+hash: tot (ms): 149.745, avg: 0.379101, (count=395)
+build: tot (ms): 175.34, avg: 0.443899, (count=395)
+density: tot (ms): 2230.02, avg: 5.64562, (count=395)
+pressure: tot (ms): 3752.95, avg: 9.50113, (count=395)
+leapfrog: tot (ms): 287.238, avg: 0.727185, (count=395)
+update: tot (ms): 7765.37, avg: 221.868, (count=35)
+collision wall: tot (ms): 272.901, avg: 0.690889, (count=395)
+bitonic sort: tot (ms): 1320.89, avg: 3.34403, (count=395)
+(rtps) system update: tot (ms): 7537.41, avg: 215.355, (count=35)
+(rtps) render update: tot (ms): 3191.89, avg: 93.8791, (count=34)
+
+----------------------------------------------------------------------
