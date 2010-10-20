@@ -194,13 +194,13 @@ __kernel void K_SumStep1(
 
 	if (fp->choice == 0) { // update density
     	IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
-		density(index) = pt.density.x;
+		density(index) = sphp->wpoly6_coef * pt.density.x;
 		// code reaches this point on first call
 	}
 	if (fp->choice == 1) { // update pressure
     	IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, fp, sphp ARGS);
 		force(index) = pt.force; // Does not seem to maintain value into euler.cl
-		xsph(index) = pt.xsph;
+		xsph(index) = sphp->wpoly6_coef * pt.xsph;
 		// SERIOUS PROBLEM: Results different than results with cli = 4 (bottom of this file)
 	}
 	if (fp->choice == 2) { // update surface tension (NOT DEBUGGED)

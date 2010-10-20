@@ -13,7 +13,7 @@
 	float Pi = sphp->K*(di.x - rest_density);
 	float Pj = sphp->K*(dj.x - rest_density);
 
-	float kern = -dWijdr * (Pi + Pj)*0.5;
+	float kern = -dWijdr * (Pi + Pj)*0.5 * sphp->wspike_d_coef;
 	float4 stress = kern*r; // correct version
 
 	float4 veli = veleval(index_i); // sorted
@@ -32,6 +32,7 @@
 	#if 1
 	// Add XSPH stabilization term
 	float Wijpol6 = Wpoly6(rlen, sphp->smoothing_distance, sphp);
+	//float Wijpol6 = sphp->wpoly6_coef * Wpoly6(rlen, sphp->smoothing_distance, sphp);
 	pt->xsph +=  (2.f * sphp->mass * (velj-veli)/(di.x+dj.x) * Wijpol6);
 	pt->xsph.w = 0.f;
 	#endif

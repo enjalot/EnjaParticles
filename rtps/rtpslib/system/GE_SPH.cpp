@@ -1026,6 +1026,24 @@ void GE_SPH::initializeData()
 
 	cl_vars_unsorted->copyToDevice();
 	cl_vars_sorted->copyToDevice(); // should not be required
+
+	GE_SPHParams* params = cl_params->getHostPtr();
+	float h = params->smoothing_distance;
+	float pi = acos(-1.0);
+	float h9 = pow(h,9.);
+	float h6 = pow(h,6.);
+	float h3 = pow(h,3.);
+    params->wpoly6_coef = 315.f/64.0f/pi/h9;
+	params->wpoly6_d_coef = -945.f/(32.0f*pi*h9);
+	params->wpoly6_dd_coef = -945.f/(32.0f*pi*h9);
+	params->wspike_coef = 15.f/pi/h6;
+    params->wspike_d_coef = 45.f/(pi*h6);
+	params->wvisc_coef = 15./(2.*pi*h3);
+	params->wvisc_d_coef = 15./(2.*pi*h3);
+	params->wvisc_dd_coef = 15./(pi*h6);
+	params->print();
+	cl_params->copyToDevice();
+	//exit(0);
 }
 //----------------------------------------------------------------------
 }

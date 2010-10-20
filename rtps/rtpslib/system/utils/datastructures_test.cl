@@ -103,6 +103,18 @@ struct SPHParams
     float PI;
     float K;
  float dt;
+
+
+ float wpoly6_coef;
+ float wpoly6_d_coef;
+ float wpoly6_dd_coef;
+ float wspike_coef;
+ float wspike_d_coef;
+ float wspike_dd_coef;
+ float wvisc_coef;
+ float wvisc_d_coef;
+ float wvisc_dd_coef;
+
 };
 # 9 "datastructures_test.cpp" 2
 

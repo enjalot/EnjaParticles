@@ -177,6 +177,18 @@ typedef struct GE_SPHParams
     float K;        //speed of sound (what units?)
 	float dt;
 
+	#if 1
+	float wpoly6_coef;
+	float wpoly6_d_coef;
+	float wpoly6_dd_coef; // laplacian
+	float wspike_coef;
+	float wspike_d_coef;
+	float wspike_dd_coef;
+	float wvisc_coef;
+	float wvisc_dd_coef;
+	float wvisc_d_coef;
+	#endif
+
 	void print()
 	{
 		printf("\n----- GE_SPHParams ----\n");
@@ -197,6 +209,11 @@ typedef struct GE_SPHParams
 		printf("PI= %f\n", PI);
 		printf("K= %f\n", K);
 		printf("dt= %f\n", dt);
+		#if 1
+		printf("poly6 coef: %g, %g, %g\n", wpoly6_coef, wpoly6_d_coef, wpoly6_dd_coef);
+		printf("spike coef: %g, %g, %g\n", wspike_coef, wspike_d_coef, wspike_dd_coef);
+		printf("visc coef: %g, %g, %g\n", wvisc_coef, wvisc_d_coef, wvisc_dd_coef);
+		#endif
 	}
 } GE_SPHParams __attribute__((aligned(16)));
 
