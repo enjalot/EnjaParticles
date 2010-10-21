@@ -108,7 +108,7 @@ Velocities of corresponding particles are not identical!!!!
 
 HURRAY! There is a bug, but now must be found. 
 ----------------------------------------------------------------------
-Problem my be in cell_indexes_start
+Problem may be in cell_indexes_start
 ----------------------------------------------------------------------
 sorted veleval list in the two runs are in opposite orders. SHOULD NOT HAPPEN!
 ----------------------------------------------------------------------
