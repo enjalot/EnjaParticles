@@ -49,9 +49,10 @@ ADD_EXECUTABLE(test.x ${test_SOURCES})
 message("current build dir:\n")
 message("${BASE_DIR}/rtps/build")
 
+LINK_DIRECTORIES(${BASE_DIR}/rtps/build/rtpslib)
+
 TARGET_LINK_LIBRARIES (test.x
-    #rtps
-    ${BASE_DIR}/rtps/build/rtpslib/librtps.so
+    rtps
     ${GLUT_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${OPENCL_LIBRARIES}
