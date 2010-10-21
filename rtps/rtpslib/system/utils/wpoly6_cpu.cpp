@@ -94,5 +94,5 @@ float Wvisc_lapl(float rlen, float h,  struct GE_SPHParams* params)
 
 } // namespace
 
-#endif _WPOLY6_CL_
+#endif // _WPOLY6_CL_
 
