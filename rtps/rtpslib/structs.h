@@ -4,7 +4,8 @@
 #include <stdio.h>
 #include <math.h>
 
-
+namespace rtps
+{
 // GE: Sept. 8, 2010
 // Coded as float4 since OpenCL does not have float3
 typedef struct float3 {
@@ -126,6 +127,6 @@ typedef struct float4
 } float4;
 
 
-
+}
 
 #endif

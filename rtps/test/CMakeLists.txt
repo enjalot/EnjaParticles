@@ -51,7 +51,7 @@ message("${BASE_DIR}/rtps/build")
 
 TARGET_LINK_LIBRARIES (test.x
     #rtps
-    ${BASE_DIR}/rtps/build/rtpslib/librtps.a
+    ${BASE_DIR}/rtps/build/rtpslib/librtps.so
     ${GLUT_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${OPENCL_LIBRARIES}

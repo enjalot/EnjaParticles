@@ -5,7 +5,8 @@
 #include "GE_SPH.h"
 #include "../particle/UniformGrid.h"
 
-#include "utils/wpoly6_cpu.cpp"
+//IJ: this creates problems when compiling shared library
+//#include "utils/wpoly6_cpu.cpp"
 
 // GE: need it have access to my datastructure (GE). Will remove 
 // eventually. 
@@ -364,6 +365,7 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
     cl_color->release();
 }
 //----------------------------------------------------------------------
+#if 0 //IJ: commenting out CPU code for now
 void GE_SPH::computeOnCPU()
 {
     //cpuDensity();
@@ -525,6 +527,7 @@ void GE_SPH::computeOnCPU()
 
 
 }
+#endif
 //----------------------------------------------------------------------
 float4 GE_SPH::eulerOnCPU()
 {
@@ -876,12 +879,12 @@ float GE_SPH::setSmoothingDist(int nb_part, float rest_dist)
 	printf("discrete_vol= %f\n", discrete_vol);
 	exit(0);
 }
+#if 0 //IJ: commenting out cpu stuff that depends on W functions
 //----------------------------------------------------------------------
 // Alternatively, consider a box of size [-1,1]^3 and a sphere of radius 1.
 // As the discretization is refined, how many points lie in the sphere, 
 // and how accurately is sum_i dx^3 represent the sphere, and the same
 // for the various W functions. 
-
 void GE_SPH::fixedSphere(int nxh)
 {
 	int nx = 2.*nxh+1;  // nx: nb of points on a side of circumscribed cube
@@ -944,6 +947,7 @@ void GE_SPH::fixedSphere(int nxh)
 
 	// compute error based on wpoly functions. 
 }
+#endif
 //----------------------------------------------------------------------
 int GE_SPH::countPoints(double radius, int box_size)
 {

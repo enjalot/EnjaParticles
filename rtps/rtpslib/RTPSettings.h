@@ -8,11 +8,13 @@ namespace rtps{
 class RTPSettings
 {
 public:
-    RTPSettings();
 
     //decide which system to use
     enum SysType {Simple, SPH, BOIDS};
     SysType system;
+
+    RTPSettings();
+    RTPSettings(SysType system, int max_particles, float dt);
 
     //maximum number of particles a system can hold
     int max_particles;
