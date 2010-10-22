@@ -56,6 +56,10 @@ SPH::SPH(RTPS *psfr, int n)
     float particle_radius = sph_settings.spacing;
     printf("particle radius: %f\n", particle_radius);
 
+    sph_settings.integrator = LEAPFROG;
+    //sph_settings.integrator = EULER;
+
+
     //grid = UniformGrid(float3(0,0,0), float3(1024, 1024, 1024), sph_settings.smoothing_distance / sph_settings.simulation_scale);
     grid = UniformGrid(float3(0,0,0), float3(256, 256, 512), sph_settings.smoothing_distance / sph_settings.simulation_scale);
     //grid.make_cube(&positions[0], sph_settings.spacing, num);
@@ -224,8 +228,14 @@ void SPH::update()
     cpuXSPH();
     cpuCollision_wall();
 
-    //cpuEuler();
-    cpuLeapFrog();
+    if(sph_settings.integrator == EULER)
+    {
+        cpuEuler();
+    }
+    else if(sph_settings.integrator == LEAPFROG)
+    {
+        cpuLeapFrog();
+    }
     //printf("positions[0].z %f\n", positions[0].z);
     /*
     for(int i = 0; i < 100; i++)
@@ -276,12 +286,16 @@ void SPH::update()
         k_pressure.execute(num);
         k_viscosity.execute(num);
         k_xsph.execute(num);
-
         k_collision_wall.execute(num);
 
-        //euler integration
-        //k_euler.execute(num);
-        k_leapfrog.execute(num);
+        if(sph_settings.integrator == EULER)
+        {
+            k_euler.execute(num);
+        }
+        else if(sph_settings.integrator == LEAPFROG)
+        {
+           k_leapfrog.execute(num);
+        }
     }
     /*
     std::vector<float4> ftest = cl_xsph.copyToHost(100);

@@ -46,8 +46,8 @@ __kernel void euler(__global float4* pos, __global float4* vel, __global float4*
         f *= 600.0f/speed;
     }
 
-    v += h*f / params->simulation_scale;
-    p += h*v;
+    v += h*f;
+    p += h*v / params->simulation_scale;
     p.w = 1.0f; //just in case
 
     vel[i] = v;

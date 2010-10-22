@@ -16,7 +16,21 @@ SET( CMAKE_MODULE_PATH
 
 message("${CMAKE_MODULE_PATH}\n")
 
-#FIND_PACKAGE (GLUT)
+
+###### SETTING RELATED TO GPU VS CPU IMPLEMENTATIONS ##########################
+SET(WITH_OPENCL TRUE)
+
+ADD_DEFINITIONS(-g )
+#ADD_DEFINITIONS(-DDEBUG)
+IF(WITH_OPENCL)
+    ADD_DEFINITIONS(-DGPU)
+ENDIF(WITH_OPENCL)
+#might want to have CPU even if we have OpenCL available
+#ADD_DEFINITIONS(-DCPU)
+
+################################################################
+
+
 FIND_PACKAGE (OpenGL)
 FIND_PACKAGE (OPENCL)
 FIND_PACKAGE (GLEW)
@@ -29,43 +43,42 @@ set (rtpslib_INCLUDES
 )
 
 
-#library
+#library source files (don't explicitly give file extension, inferred from source type)
 set (rtpslib_SOURCES
-    ${rtpslib_SOURCE_DIR}/RTPS.cpp
-    ${rtpslib_SOURCE_DIR}/RTPSettings.cpp
-    ${rtpslib_SOURCE_DIR}/util.cpp
-    ${rtpslib_SOURCE_DIR}/structs.cpp
+    ${rtpslib_SOURCE_DIR}/RTPS
+    ${rtpslib_SOURCE_DIR}/RTPSettings
+    ${rtpslib_SOURCE_DIR}/util
+    ${rtpslib_SOURCE_DIR}/structs
 
-    ${rtpslib_SOURCE_DIR}/opencl/CLL.cpp
-    ${rtpslib_SOURCE_DIR}/opencl/Kernel.cpp
-    #${rtpslib_SOURCE_DIR}/opencl/Buffer.cpp
+    ${rtpslib_SOURCE_DIR}/render/Render
 
-    ${rtpslib_SOURCE_DIR}/render/Render.cpp
-
-    ${rtpslib_SOURCE_DIR}/particle/UniformGrid.cpp
+    ${rtpslib_SOURCE_DIR}/particle/UniformGrid
     
     ${rtpslib_SOURCE_DIR}/system/Simple.cpp
-    ${rtpslib_SOURCE_DIR}/system/simple/Euler.cpp
+    ${rtpslib_SOURCE_DIR}/system/simple/Euler
     
     ${rtpslib_SOURCE_DIR}/system/SPH.cpp
-    ${rtpslib_SOURCE_DIR}/system/sph/Euler.cpp
-    ${rtpslib_SOURCE_DIR}/system/sph/LeapFrog.cpp
-    ${rtpslib_SOURCE_DIR}/system/sph/Density.cpp
-    ${rtpslib_SOURCE_DIR}/system/sph/Pressure.cpp
-    ${rtpslib_SOURCE_DIR}/system/sph/Viscosity.cpp
-    ${rtpslib_SOURCE_DIR}/system/sph/XSPH.cpp
-    ${rtpslib_SOURCE_DIR}/system/sph/Collision_wall.cpp
-
+    ${rtpslib_SOURCE_DIR}/system/sph/Euler
+    ${rtpslib_SOURCE_DIR}/system/sph/LeapFrog
+    ${rtpslib_SOURCE_DIR}/system/sph/Density
+    ${rtpslib_SOURCE_DIR}/system/sph/Pressure
+    ${rtpslib_SOURCE_DIR}/system/sph/Viscosity
+    ${rtpslib_SOURCE_DIR}/system/sph/XSPH
+    ${rtpslib_SOURCE_DIR}/system/sph/Collision_wall
 
     #${rtpslib_SOURCE_DIR}/particle
     )
 
+IF(WITH_OPENCL)
+SET(rtpslib_SOURCES ${rtpslib_SOURCES}
+    ${rtpslib_SOURCE_DIR}/opencl/CLL.cpp
+    ${rtpslib_SOURCE_DIR}/opencl/Kernel.cpp
+    #${rtpslib_SOURCE_DIR}/opencl/Buffer.cpp
+    )
+ENDIF(WITH_OPENCL)
 
 
-ADD_DEFINITIONS(-g )
-ADD_DEFINITIONS(-DDEBUG)
-ADD_DEFINITIONS(-DGPU)
-#ADD_DEFINITIONS(-DCPU)
+
 
 INCLUDE_DIRECTORIES(${rtpslib_INCLUDES})
 ADD_LIBRARY(rtps SHARED ${rtpslib_SOURCES})

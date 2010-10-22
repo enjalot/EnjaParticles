@@ -12,7 +12,14 @@ void SPH::loadCollision_wall()
     k_collision_wall.setArg(0, cl_position.cl_buffer[0]);
     //k_collision_wall.setArg(1, cl_velocity.cl_buffer[0]);
     //should check for leapfrog, then want to use veleval
-    k_collision_wall.setArg(1, cl_veleval.cl_buffer[0]);
+     if(sph_settings.integrator == LEAPFROG)
+    {
+        k_collision_wall.setArg(1, cl_veleval.cl_buffer[0]);
+    }
+    else if(sph_settings.integrator == EULER)
+    {
+        k_collision_wall.setArg(1, cl_velocity.cl_buffer[0]);
+    }
     k_collision_wall.setArg(2, cl_force.cl_buffer[0]);
     k_collision_wall.setArg(3, cl_params.cl_buffer[0]);
 
@@ -90,12 +97,21 @@ float4 calculateFrictionForce(float4 vel, float4 force, float4 normal, float fri
 void SPH::cpuCollision_wall()
 {
 
+    float4* vel;
+    if(sph_settings.integrator == EULER)
+    {
+        vel = &velocities[0];
+    }
+    else if(sph_settings.integrator == LEAPFROG)
+    {
+        vel = &veleval[0];
+    }
     for(int i = 0; i < num; i++)
     {
         
         float scale = params.simulation_scale;
         float4 p = positions[i];
-        float4 v = velocities[i];
+        float4 v = vel[i];
         float4 f = forces[i];
         /*
         v.x *= scale;

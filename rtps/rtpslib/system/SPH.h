@@ -13,6 +13,8 @@
 
 namespace rtps {
 
+typedef enum Integrator {EULER, LEAPFROG};
+
 //keep track of the fluid settings
 typedef struct SPHSettings
 {
@@ -24,6 +26,7 @@ typedef struct SPHSettings
     float boundary_distance;
     float spacing;
     float grid_cell_size;
+    Integrator integrator;
 
 } SPHSettings;
 
