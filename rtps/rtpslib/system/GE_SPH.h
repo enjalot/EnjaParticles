@@ -270,6 +270,13 @@ public:
 	BufferGE<int>* cl_yindex;
 	BufferGE<int>* cl_zindex;
 
+	// given a hash, return (i,j,k) of cell
+	// to implement in current non-zindex code
+	BufferGE<int4>* cl_hash_to_grid_index;
+
+	// fast access to 27 nearest cells
+	BufferGE<int4>* cl_cell_offset;
+
 	// index neighbors. Maximum of 50
 	BufferGE<int>* 		cl_index_neigh;
 
@@ -382,6 +389,7 @@ private:
 	void sset(int n, int val, cl_mem xdst);
 
 	void zindices();
+	unsigned int zhash_cpu(int i, int j, int k);
 	void bitshifts(int* mask, int d, 
    		unsigned int& bx, unsigned int& by, unsigned int& bz);
 

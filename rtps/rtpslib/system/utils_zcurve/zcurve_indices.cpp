@@ -3,6 +3,16 @@
 namespace rtps {
 
 //----------------------------------------------------------------------
+unsigned int GE_SPH::zhash_cpu(int i, int j, int k)
+{
+	int* ix = cl_xindex->getHostPtr();
+	int* iy = cl_yindex->getHostPtr();
+	int* iz = cl_zindex->getHostPtr();
+
+	printf("ixyz= %d, %d, %d\n", ix[i], iy[j], iz[k]);
+	return (ix[i] | iy[j] | iz[k]);
+}
+//----------------------------------------------------------------------
 // based on 1024^3 grid
 void GE_SPH::zindices()
 {
@@ -49,7 +59,6 @@ void GE_SPH::zindices()
 		printf("bits[%d]: %d, %d, %d\n", val, x, y, z);
 		//printf("bits[%d]: %d, %d, %d\n", val, ix[val], iy[val], iz[val]);
 	}
-	exit(0);
 
 	/*  // WORKS
 	for (int i=0; i < 10; i++) {
@@ -64,7 +73,6 @@ void GE_SPH::zindices()
 		printf("bit<<(2*i) = %d\n", bz);
 	}
 	*/
-	exit(0);
 
 	delete [] mask;
 }

@@ -33,8 +33,27 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
     ps = psfr;
 
 
+	#if 0
+	// RESULTS APPEAR TO BE CORRECT
 	printf("CALL ZINDICES\n");
 	zindices();
+	unsigned int u1 = zhash_cpu(2,3,4);
+	printf("hash= %d (2,3,4)\n", u1);
+	printf("hash= %o_8 (2,3,4)\n", u1);
+	u1 = zhash_cpu(4,5,7);
+	printf("hash= %o_8 (4,5,7)\n", u1);
+	#endif
+
+	#if 0
+	ixyz= 32, 18, 64 = 100 000, 010 010, 1 000 000
+	   (2,3,4) = 010,  011, 100
+	hash= 114 (2,3,4)  (162_8) = 001 110 010
+	hash= 72 (2,3,4)   (0111 0010) = (010, 011, 100) => (
+	ixyz= 256, 130, 73  (713_8) = 111 001 011 (hash)
+	hash= 1cb (4,5,7) = 100, 101, 111 (correct)
+	#endif
+
+	//exit(0);
 
 	radixSort = 0;
 
@@ -247,6 +266,11 @@ void GE_SPH::setupArrays()
 	// change nb of neighbors in cl_macro.h as well
 	cl_index_neigh = new BufferGE<int>(ps->cli, nb_el*50);
 
+	// size: total number of grid points
+	cl_hash_to_grid_index = new BufferGE<int4>(ps->cli, gp.nb_points);
+
+	cl_cell_offset = new BufferGE<int4>(ps->cli, 27);
+
 	#if 0
 	// ERROR
 	int grid_size = nb_cells.x * nb_cells.y * nb_cells.z;
@@ -270,7 +294,6 @@ void GE_SPH::setupArrays()
 	// sorts and compare outputs visually
 	cl_sort_output_hashes = new BufferGE<int>(ps->cli, nb_el);
 	cl_sort_output_indices = new BufferGE<int>(ps->cli, nb_el);
-
 
 	clf_debug = new BufferGE<float4>(ps->cli, nb_el);
 	cli_debug = new BufferGE<int4>(ps->cli, nb_el);
@@ -300,6 +323,7 @@ void GE_SPH::setupArrays()
 
 	cl_params->copyToDevice();
 	cl_FluidParams->copyToDevice();
+
 }
 //----------------------------------------------------------------------
 void GE_SPH::checkDensity()
@@ -1056,7 +1080,45 @@ void GE_SPH::initializeData()
 	params->wvisc_dd_coef = 15./(pi*h6);
 	params->print();
 	cl_params->copyToDevice();
-	//exit(0);
+
+	// size: total number of grid points
+	GridParamsScaled* gp = (cl_GridParamsScaled->getHostPtr());
+	cl_hash_to_grid_index = new BufferGE<int4>(ps->cli, gp->nb_points);
+	int4* gi = cl_hash_to_grid_index->getHostPtr();
+
+	// grid_res should really be integers or else I might have the 
+	// problem that (int) (4.999) = 4 (when I expect 5. One never knows
+	// if floats that represent integers are not in reality slightly lower than 
+	// integers by epsilon.
+
+	int nx = (int) gp->grid_res.x;
+	int ny = (int) gp->grid_res.y;
+	int nz = (int) gp->grid_res.z;
+	printf("nx,ny,nz= %d, %d, %d\n", nx, ny, nz);
+	for (int k=0; k < nz; k++) {
+	for (int j=0; j < ny; j++) {
+	for (int i=0; i < nx; i++) {
+			int hash = i + nx * (j + k*ny);
+			gi[hash] = int4(i,j,k,1); // correct
+	}}}
+
+	// This list will avoid triple for loop, which might be expensive when 
+	// searching adjacent neighbors and will enable each thread to work 
+	// with a different cell
+	int4* cell_offset = cl_cell_offset->getHostPtr();
+	int count27 = 0;
+	for (int k=-1; k <= 1; k++) {
+	for (int j=-1; j <= 1; j++) {
+	for (int i=-1; i <= 1; i++) {
+		cell_offset[count27++] = int4(i, j, k, 1);
+	}}}
+
+	#if 0
+	for (int h=0; h < nx*ny*nz; h++) {
+		printf("gi[%d]= %d, %d, %d\n", h, gi[h].x, gi[h].y, gi[h].z);
+	}
+	exit(0);
+	#endif
 }
 //----------------------------------------------------------------------
 }

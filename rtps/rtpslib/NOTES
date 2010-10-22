@@ -143,3 +143,51 @@ bitonic sort: tot (ms): 192.224, avg: 0.486643, (count=395)
 (rtps) render update: tot (ms): 5040.11, avg: 148.238, (count=34)
 
 ----------------------------------------------------------------------
+Oct. 21, 2010
+z-indexing done. Given (i,j,k on a grid of 1024 x 1024), and return 
+the z index. Based on index tables. Done on the CPU. 
+Sort particle indices: 
+
+int* zindex;
+int* pindex;
+for (int i=0; i < nb_el; i++) {
+	float4 pos = positions[i]
+	int4 cell = calcGrid(pos);
+	int z_hash = zhash(cell);
+	pindex[i] = i;
+	hindex[i] = z_hash;
+}
+// sort particles with bitonic sort
+// computing start and end locations
+
+For each hash, compute start and end locations. 
+If I do this on a 1024^1024 grid, I won't have enough memory to store
+start and end indices. For now, do the zindexing on a grid of 128^128^128. 
+For this, simply make domain go from 0 to 128 in all directions (change grid_res appropriately, and change domain_max in particles/Uniform.cpp.  Still wasteful of memory, but first concentrate on speed. 
+
+So now, I have start/end or start/nb_part for each block, with particles sorted in z-index fashion. 
+
+Next, sort (vel, pos, veleval) (particle attributes). 
+
+Now, how to use shared memory and blocks efficiently. Threads should NOT be 
+allocated on a per particle basis. 
+----------------------------------------------------------------------
+Oct. 22, 2010
+- need triplets (start, end, (i,j,k,w=cell), 
+which determine the particles that lie in a single block (cell=(i,j,k)). 
+I could use the hash, but then I need to extract (i,j,k) from the has, which 
+is not that simple, especially with z-indexing. 
+Assume 10 particles per block + 27 surrounding blocks (1 particle each). How much shared memory do I require?  Assume 10 variables (floats) per particle. 
+Shared: = (32+26)*10*4 = 580*4 = 2320 bytes. The mac has 16k shared memory 
+which allows for 6 blocks. Assume each block has 64 threads. That amounts 
+to 640 total threads (on the mac).  If each block has 32 threads, then 320 
+threads. 
+
+Build this idea into our current code without z-indexing at first. 
+Once this is done, consider z-indexing. Pre-compute an array of int4 that 
+stores (i,j,k,w) indices for each hash. 
+----------------------------------------------------------------------
+Create new routines. 
+Create constant structure of int4 offsets to quickly scan 27 neighbors. 
+----------------------------------------------------------------------
+----------------------------------------------------------------------

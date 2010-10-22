@@ -1,0 +1,12 @@
+Error with sort: must be related somehow to memory problem. 
+Do not know where though? Perhaps premature deallocation of memory?
+----------------------------------------------------------------------
+Oct. 10, 2010
+ts_cl[TI_SYSTEM_UPDATE] = new Timer("(rtps) system update", time_offset, print_freq);
+----------------------------------------------------------------------
+Oct. Got it. Number of particles must be a power of two. So MUST IMPlement early 
+termination. However, that is true for bitonic (and perhaps) radix sort. 
+It should not affect hashing in any way!
+
+In GridParam: store actual number of particles.
+In Settings: store max number of particles (power of two). 
