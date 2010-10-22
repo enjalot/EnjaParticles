@@ -265,6 +265,11 @@ public:
 	BufferGE<GridParamsScaled>*  cl_GridParamsScaled;
 	BufferGE<FluidParams>* cl_FluidParams;
 
+	// indices for Z-curve indexing
+	BufferGE<int>* cl_xindex;
+	BufferGE<int>* cl_yindex;
+	BufferGE<int>* cl_zindex;
+
 	// index neighbors. Maximum of 50
 	BufferGE<int>* 		cl_index_neigh;
 
@@ -376,11 +381,16 @@ private:
 	void scopy(int n, cl_mem xsrc, cl_mem ydst); 
 	void sset(int n, int val, cl_mem xdst);
 
+	void zindices();
+	void bitshifts(int* mask, int d, 
+   		unsigned int& bx, unsigned int& by, unsigned int& bz);
+
 private:
 	int countPoints(double radius, int box_size);
 	void fixedSphere(int nx);
 	int setupTimers();
 	void initializeData();
+
 };
 
 }

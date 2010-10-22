@@ -26,10 +26,15 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 {
     num = n;
 
+
     //for reading back different values from the kernel
 
     //store the particle system framework
     ps = psfr;
+
+
+	printf("CALL ZINDICES\n");
+	zindices();
 
 	radixSort = 0;
 
@@ -109,6 +114,10 @@ GE_SPH::~GE_SPH()
 	delete cl_color;
 	delete cl_force;
 	#endif
+
+	delete cl_xindex;
+	delete cl_yindex;
+	delete cl_zindex;
 
 	if (radixSort) delete radixSort;
 

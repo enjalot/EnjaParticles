@@ -46,6 +46,11 @@ set (rtpslib_INCLUDES
 )
 message("rtpslib_SOURCE_DIR: ${rtpslib_SOURCE_DIR}")
 
+# original version in branch rtps_ge
+#set(UTILS utils)
+# version in branch rtps_zcurve
+set(UTILS utils_zcurve)
+
 
 #library
 set (rtpslib_SOURCES
@@ -57,14 +62,16 @@ set (rtpslib_SOURCES
 
     # "wrap" makes it clear we are talking about c++ code
 	# each file wraps a single device kernel and calls it
-	${rtpslib_SOURCE_DIR}/system/utils/build_datastructures_wrap.cpp
-	${rtpslib_SOURCE_DIR}/system/utils/neighbor_search_wrap.cpp
-	${rtpslib_SOURCE_DIR}/system/utils/hash_wrap.cpp
-	${rtpslib_SOURCE_DIR}/system/utils/radix_sort_wrap.cpp
-	${rtpslib_SOURCE_DIR}/system/utils/bitonic_sort_wrap.cpp
-	${rtpslib_SOURCE_DIR}/system/utils/collision_wall_wrap.cpp
-	${rtpslib_SOURCE_DIR}/system/utils/scopy_wrap.cpp
-	${rtpslib_SOURCE_DIR}/system/utils/sset_int_wrap.cpp
+	${rtpslib_SOURCE_DIR}/system/${UTILS}/build_datastructures_wrap.cpp
+	${rtpslib_SOURCE_DIR}/system/${UTILS}/neighbor_search_wrap.cpp
+	${rtpslib_SOURCE_DIR}/system/${UTILS}/hash_wrap.cpp
+	${rtpslib_SOURCE_DIR}/system/${UTILS}/radix_sort_wrap.cpp
+	${rtpslib_SOURCE_DIR}/system/${UTILS}/bitonic_sort_wrap.cpp
+	${rtpslib_SOURCE_DIR}/system/${UTILS}/collision_wall_wrap.cpp
+	${rtpslib_SOURCE_DIR}/system/${UTILS}/scopy_wrap.cpp
+	${rtpslib_SOURCE_DIR}/system/${UTILS}/sset_int_wrap.cpp
+
+	${rtpslib_SOURCE_DIR}/system/${UTILS}/zcurve_indices.cpp;
 
     ${rtpslib_SOURCE_DIR}/RTPS.cpp
     ${rtpslib_SOURCE_DIR}/RTPSettings.cpp
@@ -84,7 +91,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/ge_sph/Pressure.cpp
     ${rtpslib_SOURCE_DIR}/system/ge_sph/Viscosity.cpp
 
-    //${rtpslib_SOURCE_DIR}/system/utils/wpoly6_cpu.cpp
+    #${rtpslib_SOURCE_DIR}/system/$[UTILS}/wpoly6_cpu.cpp
 
 
     #${rtpslib_SOURCE_DIR}/system/SPH.cpp
@@ -106,7 +113,7 @@ ADD_DEFINITIONS(-DCL_BITONIC_SORT_SOURCE_DIR="${rtpslib_SOURCE_DIR}/bitonic_sort
 ADD_DEFINITIONS(-DCL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/system/sph/")
 #ADD_DEFINITIONS(-DCL_UTIL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/gordon_erle/datastructures_cl")
 ADD_DEFINITIONS(-DCL_SPH_SOURCE_DIR="${rtpslib_SOURCE_DIR}/system/ge_sph")
-ADD_DEFINITIONS(-DCL_SPH_UTIL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/system/utils")
+ADD_DEFINITIONS(-DCL_SPH_UTIL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/system/${UTILS}")
 
 INCLUDE_DIRECTORIES(${rtpslib_INCLUDES})
 ADD_LIBRARY(rtps SHARED ${rtpslib_SOURCES})
@@ -120,4 +127,4 @@ TARGET_LINK_LIBRARIES (rtps
 )
 
 #ADD_SUBDIRECTORY(gordon_erle/datastructures_cl)
-ADD_SUBDIRECTORY(system/utils)
+ADD_SUBDIRECTORY(system/${UTILS})
