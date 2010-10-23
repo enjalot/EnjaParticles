@@ -256,6 +256,7 @@ public:
 	BufferGE<float4>* 	cl_cells; // positions in Ian code
 	BufferGE<int>* 		cl_cell_indices_start;
 	BufferGE<int>* 		cl_cell_indices_end;
+	BufferGE<int>* 		cl_cell_indices_nb;
 	BufferGE<int>* 		cl_vars_sort_indices;
 	BufferGE<int>* 		cl_sort_hashes;
 	BufferGE<int>* 		cl_sort_indices;
@@ -318,14 +319,15 @@ private:
     Kernel k_leapfrog;
 
 	Kernel datastructures_kernel;
+    Kernel subtract_kernel;
 	Kernel hash_kernel;
 	Kernel sort_kernel;
 	Kernel step1_kernel;
 	Kernel scopy_kernel;
 	Kernel sset_int_kernel;
+    Kernel block_scan_kernel;
 
     BufferGE<GE_SPHParams>* cl_params;
-
 
     std::vector<float4> positions;
     std::vector<float> densities;
@@ -392,6 +394,8 @@ private:
 	unsigned int zhash_cpu(int i, int j, int k);
 	void bitshifts(int* mask, int d, 
    		unsigned int& bx, unsigned int& by, unsigned int& bz);
+	void blockScan(int which);
+	void subtract();
 
 private:
 	int countPoints(double radius, int box_size);

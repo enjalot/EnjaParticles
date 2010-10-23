@@ -11,6 +11,7 @@ SET(FILES
    euler_cl
    leapfrog_cl
    collision_wall_cl
+   block_scan_cl
 )  # ignore cpp extension
 
 # Only executes when I do "cmake"

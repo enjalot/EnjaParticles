@@ -8,13 +8,6 @@
 
 /*----------------------------------------------------------------------*/
 
-// Template parameters
-//#define D Step1::Data
-
-#define D float
-#define O SPHNeighborCalc<Step1::Calc, Step1::Data>
-
-#undef USE_TEX
 
 #include "cl_macros.h"
 #include "cl_structures.h"
@@ -73,7 +66,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 		gy = gridPos.y;
 		gz = gridPos.z;
 	}
-
 
 	//We choose to simply traverse the grid cells along the x, y, and z axes, in that order. The inverse of
 	//this space filling curve is then simply:

@@ -116,6 +116,7 @@ GE_SPH::~GE_SPH()
 	//delete 	cl_cells; // positions in Ian code
 	delete 	cl_cell_indices_start;
 	delete 	cl_cell_indices_end;
+	delete 	cl_cell_indices_nb;
 	delete 	cl_vars_sort_indices;
 	delete 	cl_sort_hashes;
 	delete 	cl_sort_indices;
@@ -287,6 +288,7 @@ void GE_SPH::setupArrays()
 	// occupied cells could be much less than the number of grid elements. 
 	cl_cell_indices_start = new BufferGE<int>(ps->cli, gp.nb_points);
 	cl_cell_indices_end   = new BufferGE<int>(ps->cli, gp.nb_points);
+	cl_cell_indices_nb    = new BufferGE<int>(ps->cli, gp.nb_points);
 	//printf("gp.nb_points= %d\n", gp.nb_points); exit(0);
 
 	// For bitonic sort. Remove when bitonic sort no longer used
@@ -295,8 +297,9 @@ void GE_SPH::setupArrays()
 	cl_sort_output_hashes = new BufferGE<int>(ps->cli, nb_el);
 	cl_sort_output_indices = new BufferGE<int>(ps->cli, nb_el);
 
-	clf_debug = new BufferGE<float4>(ps->cli, nb_el);
-	cli_debug = new BufferGE<int4>(ps->cli, nb_el);
+	int mx = nb_el > gp.nb_points ? nb_el : gp.nb_points;
+	clf_debug = new BufferGE<float4>(ps->cli, mx);
+	cli_debug = new BufferGE<int4>(ps->cli, mx);
 
 
 	// SETUP FLUID PARAMETERS
@@ -361,6 +364,11 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 
 		// **** Reorder pos, vel
 		buildDataStructures(); 
+
+		// must call sort and build first. 
+		// DEBUGGING
+		blockScan(0);
+		exit(0);
 
 		#if 1
 		// ***** DENSITY UPDATE *****
@@ -1083,7 +1091,6 @@ void GE_SPH::initializeData()
 
 	// size: total number of grid points
 	GridParamsScaled* gp = (cl_GridParamsScaled->getHostPtr());
-	cl_hash_to_grid_index = new BufferGE<int4>(ps->cli, gp->nb_points);
 	int4* gi = cl_hash_to_grid_index->getHostPtr();
 
 	// grid_res should really be integers or else I might have the 
@@ -1102,6 +1109,8 @@ void GE_SPH::initializeData()
 			gi[hash] = int4(i,j,k,1); // correct
 	}}}
 
+	cl_hash_to_grid_index->copyToDevice();
+
 	// This list will avoid triple for loop, which might be expensive when 
 	// searching adjacent neighbors and will enable each thread to work 
 	// with a different cell
@@ -1112,6 +1121,8 @@ void GE_SPH::initializeData()
 	for (int i=-1; i <= 1; i++) {
 		cell_offset[count27++] = int4(i, j, k, 1);
 	}}}
+
+	cl_cell_offset->copyToDevice();
 
 	#if 0
 	for (int h=0; h < nx*ny*nz; h++) {

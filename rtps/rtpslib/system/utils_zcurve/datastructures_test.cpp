@@ -15,6 +15,7 @@ __kernel void datastructures(
 		   			__global uint* sort_indices,
 		   			__global uint* cell_indices_start,
 		   			__global uint* cell_indices_end,
+		   			__global uint* cell_indices_nb, // NOT USED
 		   			__constant struct SPHParams* sphp,
 		   			__constant struct GridParams* gp,
 					__local  uint* sharedHash   // blockSize+1 elements
@@ -76,6 +77,7 @@ __kernel void datastructures(
 		vars_sorted[index+j*numParticles]	= vars_unsorted[sorted_index+j*numParticles];
 	}
 	#endif
+
 
 	// Variables to sort could change for different types of simulations 
 	// SHOULD I divide by simulation scale upon return? do not think so

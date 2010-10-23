@@ -59,6 +59,7 @@ void GE_SPH::buildDataStructures()
 	kern.setArg(iarg++, cl_sort_indices->getDevicePtr());
 	kern.setArg(iarg++, cl_cell_indices_start->getDevicePtr());
 	kern.setArg(iarg++, cl_cell_indices_end->getDevicePtr());
+	kern.setArg(iarg++, cl_cell_indices_nb->getDevicePtr());
 	kern.setArg(iarg++, cl_params->getDevicePtr());
 	kern.setArg(iarg++, cl_GridParamsScaled->getDevicePtr());
 
@@ -84,9 +85,12 @@ void GE_SPH::buildDataStructures()
 
 	//computeCellStartEndGPU();
 
-	ts_cl[TI_BUILD]->end();
+	subtract();  // NEED ARGUMENTS
 
-	//exit(0);
+
+	computeCellStartEndGPU();
+
+	ts_cl[TI_BUILD]->end();
 }
 //----------------------------------------------------------------------
 void GE_SPH::printBuildDiagnostics()
@@ -169,15 +173,15 @@ void GE_SPH::computeCellStartEndGPU()
 				printf("(GPU) [%d]: indices_start: %d, indices_end: %d, nb pts: %d\n", i, is[i], ie[i], nb);
 			}
 		}
+
+		printf("nb particles: %d\n", nb_particles);
+		printf("nb_el: %d\n", nb_el);
+
 		if (nb_particles != nb_el) {
-			printf("nb particles: %d\n", nb_particles);
-			printf("nb_el: %d\n", nb_el);
 			printf("(computeCellStartEndGPU) (count != nb_el)\n");
 			//for (;;) {}
 			exit(1);
 		}
-
-	//	exit(0);
 }
 //----------------------------------------------------------------------
 #endif

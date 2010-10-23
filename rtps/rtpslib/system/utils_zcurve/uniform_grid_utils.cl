@@ -2,12 +2,12 @@
 # 1 "<built-in>"
 # 1 "<command-line>"
 # 1 "uniform_grid_utils.cpp"
-# 19 "uniform_grid_utils.cpp"
+# 12 "uniform_grid_utils.cpp"
 # 1 "cl_macros.h" 1
 # 10 "cl_macros.h"
 # 1 "../variable_labels.h" 1
 # 11 "cl_macros.h" 2
-# 20 "uniform_grid_utils.cpp" 2
+# 13 "uniform_grid_utils.cpp" 2
 # 1 "cl_structures.h" 1
 
 
@@ -111,7 +111,7 @@ struct SPHParams
  float wvisc_dd_coef;
 
 };
-# 21 "uniform_grid_utils.cpp" 2
+# 14 "uniform_grid_utils.cpp" 2
 # 1 "neighbors.cpp" 1
 
 
@@ -341,7 +341,7 @@ inline void ForPossibleNeighbor(__global float4* vars_sorted,
   }
  }
 }
-# 22 "uniform_grid_utils.cpp" 2
+# 15 "uniform_grid_utils.cpp" 2
 
 
 
@@ -396,7 +396,13 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
   gy = gridPos.y;
   gz = gridPos.z;
  }
-# 84 "uniform_grid_utils.cpp"
+
+
+
+
+
+
+
  return (gz*grid_res.y + gy) * grid_res.x + gx;
 }
 
