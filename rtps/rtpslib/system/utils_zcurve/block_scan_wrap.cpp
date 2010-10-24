@@ -55,10 +55,13 @@ void GE_SPH::blockScan(int which)
 
 	cl_cell_offset->copyToDevice();
 
+	// probably inefficient. Increase to 64 in the future perhaps
+	int work_size = 32;  
 
 	// local memory
 	// space for 4 variables of 4 bytes (float) for (27+32) particles
-	int nb_bytes = 1024 * sizeof(float);
+	// need enough space for all threads in the block
+	int nb_bytes = (32+32)* work_size * sizeof(float);
     kern.setArgShared(iarg++, nb_bytes);
 
 	// ONLY IF DEBUGGING
@@ -68,7 +71,6 @@ void GE_SPH::blockScan(int which)
 	// would be much less if the arrays were compactified
 	// nb blocks = nb grid cells
 	size_t nb_blocks = (size_t) gps->nb_points;
-	int work_size = 32;  // probably inefficient. Increase to 64 in the future perhaps
 	// global must be an integer multiple of work_size
 	int global = nb_blocks * work_size;
 
@@ -91,7 +93,7 @@ void GE_SPH::blockScan(int which)
 	for (int i=0; i < nb_el; i++) {
 		printf("(%d), st, en, nb= %d, %d, %d\n", i, st[i], en[i], nb[i]);
 	}
-	exit(0);
+	//exit(0);
 	#endif
 
 
@@ -128,7 +130,7 @@ void GE_SPH::blockScan(int which)
 	printf("nb grid points: %d\n", gps->nb_points);
 
 	gps->print();
-	exit(0);
+	//exit(0);
 	#endif
 }
 //----------------------------------------------------------------------

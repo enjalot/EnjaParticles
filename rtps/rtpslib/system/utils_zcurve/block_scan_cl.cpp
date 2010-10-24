@@ -60,8 +60,8 @@ __kernel void block_scan(
 		   			//__constant int4* cell_offset,  // DOES NOT WORK OK
 		   			__global int4* cell_offset, 
 		   			__constant struct SPHParams* sphp,
-		   			__constant struct GridParams* gp,
-					__local  float4* loc   
+		   			__global struct GridParams* gp,
+					__local  float4* locc   
 					DUMMY_ARGS
 			  )
 {
@@ -93,14 +93,21 @@ __kernel void block_scan(
 	// this leads to errors
 	if (nb > 32) nb = 32;  
 
+	// nb is nb particles in cell
+
 	int start = cell_indices_start[hash];
+
+	// nb threads = nb cells * 32
+	// all points should get updated
+	if (lid < nb) pos(start+lid) = (float4)(0.,0.,0.,0.); // initialization
 
 	if (lid < nb) {
 		// bring particle data into local memory
 		// (pos, density): 16 bytes per particle
 
-		loc[lid]   = pos(start+lid);
-		loc[lid].w = 0.0f;     // to store density
+		locc[lid]   = pos(start+lid);
+		locc[lid].w = 0.0f;     // to store density
+		//pos(start+lid).w = 123.f; // all 4096 positions are set. Good
 	}
 
 	barrier(CLK_LOCAL_MEM_FENCE); // should not be required
@@ -108,77 +115,74 @@ __kernel void block_scan(
 	// same value for 32 threads
 	int4 c = hash_to_grid_index[hash];
 
-	if (lid < 27) {
-		c = c + cell_offset[lid];  //ORIG
-	} else { 
-		;
-	}
-
-	#if 0
-	if (lid == 1) {
-		cli[hash] = c;
-		cli[hash].w = lid;
-		uint cellHash = calcGridHash(c, gp->grid_res, false);
-		return;
-	} else { 
-		return; 
-	}
-	#endif
-
-
-	int cc;
 	uint cellHash;
 	uint cstart;
 
+	//locc[lid].w = 123.;  // works
+
 	if (lid < 27) { // FOR DEBUGGING
+		c = c + cell_offset[lid];  //ORIG
 		cellHash = calcGridHash(c, gp->grid_res, false);
 		cstart = cell_indices_start[cellHash];
 	}
 
 	for (int i=0; i < 32; i++) {   	// max of 32 particles per cell
+		barrier(CLK_LOCAL_MEM_FENCE);
 		if (lid >= 27) continue; 	// limit to 27 neighbor cells (ORIG)
 
-		#if 0
-		if ((cellHash >= gp->nb_points) || (cellHash < 0)) {
-			cli[hash].w =  -47;
-			//cli[hash].x = hash;
-			return;
-		}
-		#endif
 
-
+		// each thread takes care of one neighboring block
 		if (cell_indices_nb[cellHash] > i) {   // global access (called 32x)
-			loc[nb+lid] = pos(cstart+i); // ith particle in cell
+			locc[nb+lid] = pos(cstart+i); // ith particle in cell
 		} else {
 			// outside smoothing radius
-			loc[nb+lid] = (float4)(900., 900., 900., 1.);
+			locc[nb+lid] = (float4)(900., 900., 900., 1.);
 		}
 
-		barrier(CLK_LOCAL_MEM_FENCE);
 		
 		// UPDATE THE DENSITIES
-		float4 ri = (float4)(loc[lid].xyz, 0.);
+		float4 ri = (float4)(locc[lid].xyz, 0.);
+
 		for (int j=0; j < 27; j++) {   	// cell 13 is the center
-			float4 rj = (float4)(loc[nb+lid].xyz, 0.);
+			float4 rj = (float4)(locc[nb+lid].xyz, 0.);
 			float4 r = rj-ri;
 			float rad = length(r);
-			cli[hash].x -= 1;
+
 			if (rad < sphp->smoothing_distance) {
-				loc[lid].w += sphp->mass * Wpoly6(r, sphp->smoothing_distance, sphp);
+				locc[lid].z += sphp->wpoly6_coef * sphp->mass * Wpoly6(r, sphp->smoothing_distance, sphp);
+				locc[lid].y++;
+				//locc[lid].z += sphp->mass;
 			}
 		}
-
-		// update density for particles within smoothing sphere
 	}
 
 	barrier(CLK_LOCAL_MEM_FENCE);
+
+	// The values in local memory appear to be lost!!! HOW!
 	
 	if (lid < nb) {
-		density(start+lid) = loc[lid].w; 
-		//clf[hash].x = -7.;//sphp->mass;
-		//clf[start+lid].x = loc[lid].w;
-		clf[hash].x = sphp->mass; //loc[lid].w;
+	//{
+		pos(start+lid).w = locc[start+lid].z; 
+		pos(start+lid).z = nb;
+		pos(start+lid).y = locc[start+lid].y;
+		pos(start+lid).x = (float) start;
+
+		// only 1st 8 positions (within first block) have densities with 
+		// two values: 1100 and 8100. Do not know where 8100 comes from!
 	}
+
+	#if 0
+	// all positions are touched. 
+	if (lid < nb) {
+		pos(start+lid).x = -30.; 
+	}  else {
+		pos(start+lid).x = -40.; 
+	}
+	// ok: pos.x is either -30 or -40
+	return;
+	#endif
+
+	return;
 }
 //----------------------------------------------------------------------
 
