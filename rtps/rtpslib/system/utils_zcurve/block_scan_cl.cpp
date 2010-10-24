@@ -121,38 +121,15 @@ __kernel void block_scan(
 	int cellHash=-1;
 	int cstart=0;
 
-	#if 0
-	if (lid < 27) {
-	int cellHash = 421;
-	int cstart = cell_indices_start[cellHash];
-	int cc = (int) cstart;
-	vel(start+lid).z = (float) cc; //cstart;
-	vel(start+lid).w = (float) cellHash;
-	return;
-	} else {
-		;
-	}
-	return;
-	#endif
-
 
 	if (lid < 27) { // FOR DEBUGGING
 		// index of neighbor cell (including center)
-		//c = c + cell_offset[lid]; 
+		c = c + cell_offset[lid]; 
 		cellHash = calcGridHash(c, gp->grid_res, false);
-		//cellHash = 421;
 		// cstart not always correct
 		cstart = cell_indices_start[cellHash];
-		//vel(start+lid).z = (float) cstart; 		//cstart; 
-		//vel(start+lid).w = (float) cellHash; 	//cstart; 
-		//pos(start+lid).x = (float) c.x;
-		//pos(start+lid).y = (float) c.y;
-		// memory problem 
-		//pos(start+lid).z = (float) c.z;
-		//return;
 	} else {
 		;
-		//vel(start+lid).z = -3.;
 	}
 	//return;
 
