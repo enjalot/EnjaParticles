@@ -64,7 +64,6 @@ struct GridParams
 
     // number of cells in each dimension/side of grid
     float4          grid_res;
-
     float4          grid_delta;
     float4          grid_inv_delta;
 	int				numParticles;
@@ -103,8 +102,8 @@ struct GridParamsScaled
     float4          grid_delta;
     float4          grid_inv_delta;
 	int				numParticles;
-	int				nb_points;
 	int				nb_vars; // for combined array
+	int				nb_points;
 
 	void print() {
 		printf("----- GridParmsScaled ----\n");

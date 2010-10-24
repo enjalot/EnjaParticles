@@ -33,6 +33,7 @@ struct GridParamsScaled
     float4          grid_inv_delta;
     int             numParticles; // nb fluid particles: wrong spot for this variable
     int             nb_vars; // for combined variables (vars_sorted, etc.)
+    int             nb_points; // total number of grid points
 };
 //----------------------------------------------------------------------
 struct GridParams
@@ -49,6 +50,7 @@ struct GridParams
     float4          grid_inv_delta;
     int             numParticles; // nb fluid particles: wrong spot for this variable
     int             nb_vars; // for combined variables (vars_sorted, etc.)
+    int             nb_points; // total number of grid points
 };
 //----------------------------------------------------------------------
 struct FluidParams

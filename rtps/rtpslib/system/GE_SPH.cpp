@@ -298,6 +298,7 @@ void GE_SPH::setupArrays()
 	cl_sort_output_indices = new BufferGE<int>(ps->cli, nb_el);
 
 	int mx = nb_el > gp.nb_points ? nb_el : gp.nb_points;
+	printf("mx= %d\n", mx); 
 	clf_debug = new BufferGE<float4>(ps->cli, mx);
 	cli_debug = new BufferGE<int4>(ps->cli, mx);
 

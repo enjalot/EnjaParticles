@@ -44,6 +44,17 @@ void GE_SPH::blockScan(int which)
 	kern.setArg(iarg++, cl_params->getDevicePtr());
 	kern.setArg(iarg++, cl_GridParamsScaled->getDevicePtr());
 
+	#if 1
+	cl_cell_offset->copyToHost();
+	int4* cc = cl_cell_offset->getHostPtr();
+	for (int i=0; i < 27; i++) {
+		cc[i].print("offset");
+	}
+	//exit(0);
+	#endif
+
+	cl_cell_offset->copyToDevice();
+
 
 	// local memory
 	// space for 4 variables of 4 bytes (float) for (27+32) particles
@@ -60,6 +71,10 @@ void GE_SPH::blockScan(int which)
 	int work_size = 32;  // probably inefficient. Increase to 64 in the future perhaps
 	// global must be an integer multiple of work_size
 	int global = nb_blocks * work_size;
+
+	//cl_GridParamsScaled->copyToHost();
+	//printf("nb points in grid: %d\n", gps->nb_points);
+	//exit(0);
 
 	kern.execute(global, work_size);
 
@@ -111,6 +126,8 @@ void GE_SPH::blockScan(int which)
 	}
 	printf("count= %d, tot nb particles: %d\n", count, nb_el);
 	printf("nb grid points: %d\n", gps->nb_points);
+
+	gps->print();
 	exit(0);
 	#endif
 }

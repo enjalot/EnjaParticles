@@ -38,6 +38,9 @@ typedef struct int4 {
 		this->z = z;
 		this->w = w;
 	}
+	void print(const char* msg="") {
+		printf("%s: %d, %d, %d, %d\n", msg, x, y, z, w);
+	}
 } int4;
 
 // IJ
@@ -61,8 +64,8 @@ typedef struct float4
 		z = zz;
 		w = ww;
 	}
-	void print(const char* msg=0) {
-		printf("%s: %e, %e, %e, %f\n", x, y, z, w);
+	void print(const char* msg="") {
+		printf("%s: %e, %e, %e, %f\n", msg, x, y, z, w);
 	}
 
 	friend float4 operator-(float4& a, float4& b) {
