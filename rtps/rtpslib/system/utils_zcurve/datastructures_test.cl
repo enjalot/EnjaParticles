@@ -124,30 +124,30 @@ struct SPHParams
 __kernel void datastructures(
      __global float4* vars_unsorted,
      __global float4* vars_sorted,
-        __global uint* sort_hashes,
-        __global uint* sort_indices,
-        __global uint* cell_indices_start,
-        __global uint* cell_indices_end,
-        __global uint* cell_indices_nb,
+        __global int* sort_hashes,
+        __global int* sort_indices,
+        __global int* cell_indices_start,
+        __global int* cell_indices_end,
+        __global int* cell_indices_nb,
         __constant struct SPHParams* sphp,
         __constant struct GridParams* gp,
-     __local uint* sharedHash
+     __local int* sharedHash
      )
 {
- uint index = get_global_id(0);
+ int index = get_global_id(0);
  int num = get_global_size(0);
 
 
 
  if (index >= num) return;
 
- uint hash = sort_hashes[index];
+ int hash = sort_hashes[index];
 
 
 
 
 
- uint tid = get_local_id(0);
+ int tid = get_local_id(0);
 
 
  sharedHash[tid+1] = hash;
@@ -173,7 +173,7 @@ __kernel void datastructures(
   cell_indices_end[hash] = index + 1;
  }
 
- uint sorted_index = sort_indices[index];
+ int sorted_index = sort_indices[index];
 # 84 "datastructures_test.cpp"
  vars_sorted[index+1*num] = vars_unsorted[sorted_index+1 *num] * sphp->simulation_scale;
  vars_sorted[index+2*num] = vars_unsorted[sorted_index+2 *num];

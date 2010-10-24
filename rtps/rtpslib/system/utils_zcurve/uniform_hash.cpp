@@ -31,7 +31,7 @@ int4 calcGridCell(float4 p, float4 grid_min, float4 grid_inv_delta)
 }
 
 //----------------------------------------------------------------------
-uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges
+int calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges
            , __global float4* fdebug,
            __global int4* idebug
 		 )
@@ -102,8 +102,8 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges
 // CANNOT USE references to structures/classes as arguments!
 __kernel void hash(
            __global float4* vars_unsorted,
-           __global uint* sort_hashes,
-           __global uint* sort_indexes,
+           __global int* sort_hashes,
+           __global int* sort_indexes,
            //__global uint* cell_indices_start,
            __constant struct GridParams* gp, 
            __global float4* fdebug,
@@ -112,7 +112,7 @@ __kernel void hash(
 {
 #if 1
     // particle index
-    uint index = get_global_id(0);
+    int index = get_global_id(0);
 	// do not use gp->numParticles (since it numParticles changed via define)
 	int num = get_global_size(0);
     if (index >= num) return;  // num: 512
@@ -129,7 +129,7 @@ __kernel void hash(
     // get address in grid
     int4 gridPos = calcGridCell(p, gp->grid_min, gp->grid_inv_delta);
     bool wrap_edges = false;
-    uint hash = (uint) calcGridHash(gridPos, gp->grid_res, wrap_edges, fdebug, idebug);
+    int hash = (int) calcGridHash(gridPos, gp->grid_res, wrap_edges, fdebug, idebug);
 
     // store grid hash and particle index
 

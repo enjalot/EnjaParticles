@@ -11,30 +11,30 @@
 __kernel void datastructures(
 					__global float4*   vars_unsorted,
 					__global float4*   vars_sorted, 
-		   			__global uint* sort_hashes,
-		   			__global uint* sort_indices,
-		   			__global uint* cell_indices_start,
-		   			__global uint* cell_indices_end,
-		   			__global uint* cell_indices_nb, // NOT USED
+		   			__global int* sort_hashes,
+		   			__global int* sort_indices,
+		   			__global int* cell_indices_start,
+		   			__global int* cell_indices_end,
+		   			__global int* cell_indices_nb, // NOT USED
 		   			__constant struct SPHParams* sphp,
 		   			__constant struct GridParams* gp,
-					__local  uint* sharedHash   // blockSize+1 elements
+					__local  int* sharedHash   // blockSize+1 elements
 			  )
 {
-	uint index = get_global_id(0);
+	int index = get_global_id(0);
 	int numParticles = get_global_size(0);
 
 
 	// particle index	
 	if (index >= numParticles) return;
 
-	uint hash = sort_hashes[index];
+	int hash = sort_hashes[index];
 
 	// Load hash data into shared memory so that we can look 
 	// at neighboring particle's hash value without loading
 	// two hash values per thread	
 
-	uint tid = get_local_id(0);
+	int tid = get_local_id(0);
 
 #if 1
 	sharedHash[tid+1] = hash;  // SOMETHING WRONG WITH hash on Fermi
@@ -67,7 +67,7 @@ __kernel void datastructures(
 		cell_indices_end[hash] = index + 1;
 	}
 
-	uint sorted_index = sort_indices[index];
+	int sorted_index = sort_indices[index];
 
 	// Copy data from old unsorted buffer to sorted buffer
 

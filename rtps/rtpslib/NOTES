@@ -193,3 +193,7 @@ Create constant structure of int4 offsets to quickly scan 27 neighbors.
 Oct. 23, 2010
 - Consider making constant structures and arrays READ ONLY.
 ----------------------------------------------------------------------
+Oct. 24, 2010
+- got rid of all uint. 
+ casting a uint to a float gives incorrect results. 
+----------------------------------------------------------------------

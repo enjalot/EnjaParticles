@@ -144,7 +144,7 @@ int4 calcGridCell(float4 p, float4 grid_min, float4 grid_inv_delta)
 }
 
 
-uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges
+int calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges
            , __global float4* fdebug,
            __global int4* idebug
    )
@@ -190,8 +190,8 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges
 # 103 "uniform_hash.cpp"
 __kernel void hash(
            __global float4* vars_unsorted,
-           __global uint* sort_hashes,
-           __global uint* sort_indexes,
+           __global int* sort_hashes,
+           __global int* sort_indexes,
 
            __constant struct GridParams* gp,
            __global float4* fdebug,
@@ -200,7 +200,7 @@ __kernel void hash(
 {
 
 
-    uint index = get_global_id(0);
+    int index = get_global_id(0);
 
  int num = get_global_size(0);
     if (index >= num) return;
@@ -210,7 +210,7 @@ __kernel void hash(
 
     int4 gridPos = calcGridCell(p, gp->grid_min, gp->grid_inv_delta);
     bool wrap_edges = false;
-    uint hash = (uint) calcGridHash(gridPos, gp->grid_res, wrap_edges, fdebug, idebug);
+    int hash = (int) calcGridHash(gridPos, gp->grid_res, wrap_edges, fdebug, idebug);
 
 
 

@@ -76,7 +76,6 @@ __kernel void block_scan(
 
 	// not related to particles. 32 threads per cell (there are often less
 	// than 32 particles per cell
-	//int gid  = get_global_id(0);
 
 	// workgrup: lid in [0,31]
 	int lid  = get_local_id(0);
@@ -126,13 +125,11 @@ __kernel void block_scan(
 	if (lid < 27) { // FOR DEBUGGING
 		// index of neighbor cell (including center)
 		c = c + cell_offset[lid]; 
-		//pos(start+lid).x = (float) c.x;
-		//pos(start+lid).y = (float) c.y;
-		//pos(start+lid).z = (float) c.z;
 
 		// check whether cellHash is valid? It is in principle
 		// if fluid is always off by 2-3 cells from the boundary. 
 		cellHash = calcGridHash(c, gp->grid_res, false);
+
 		// cstart not always correct
 		cstart = cell_indices_start[cellHash];
 		cnb = cell_indices_nb[cellHash];
@@ -152,7 +149,7 @@ __kernel void block_scan(
 		// Bring in single particle from neighboring blocks, one per thread
 
 		// each thread takes care of one neighboring block
-		// densitis are 1000 and 5000. WHY? WHY? 
+		// densities are 1000 and 5000. WHY? WHY? 
 		if (lid < 27) {  // only 27 neighbors
 			if (cnb > i) {   // global access (called 32x)
 				locc[nb+lid] = pos(cstart+i); // ith particle in cell
@@ -166,11 +163,13 @@ __kernel void block_scan(
 		
 		// UPDATE THE DENSITIES for particles in center cell
 
-
 		for (int j=0; j < 27; j++) {   	// cell 13 is the center
-			float4 rj = (float4)(locc[nb+lid].xyz, 0.);
+			if (cnb <= i) continue;
+			float4 rj = (float4)(locc[nb+lid].xyz, 0.); // CORRECT LINE????
 			float4 r = rj-ri;
 			float rad = length(r);
+
+			if (cnb > i) rho++; // 27*8 hits. Sounds right. 
 
 			if (rad < sphp->smoothing_distance && lid < nb) {
 				// cannot use x,y,z from loc (position and is required)
@@ -184,13 +183,12 @@ __kernel void block_scan(
 	// The values in local memory appear to be lost!!! HOW!
 	
 	if (lid < nb) {
-	//{
-		// position cannot be used (since used for distances)
-		// using vel for debugging
 		vel(start+lid).y = locc[lid].w;
+		vel(start+lid).z = rho;
 
 		// only 1st 8 positions (within first block) have densities with 
-		// two values: 1100 and 8100. Do not know where 8100 comes from!
+		// two values: 1100 and 5500. Do not know where 5100 comes from!
+		// There are 27, 50 or 100 neighbors of a given cell. NO IDEA WHY. 
 	}
 
 	return;
