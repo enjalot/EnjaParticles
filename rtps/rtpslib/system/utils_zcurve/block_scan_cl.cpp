@@ -9,7 +9,7 @@
 #include "neighbors.cpp"
 
 //----------------------------------------------------------------------
-uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
+int calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 {
 	// each variable on single line or else STRINGIFY DOES NOT WORK
 	int gx;
@@ -51,11 +51,9 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 
 //----------------------------------------------------------------------
 __kernel void block_scan(
-					//int nb_grid_points, // nb blocks
 					__global float4*   vars_sorted, 
-		   			__global uint* cell_indices_start,
-		   			__global uint* cell_indices_end,
-		   			__global uint* cell_indices_nb,
+		   			__global int* cell_indices_start,
+		   			__global int* cell_indices_nb,
 		   			__global int4* hash_to_grid_index,
 		   			//__constant int4* cell_offset,  // DOES NOT WORK OK
 		   			__global int4* cell_offset, 
@@ -76,15 +74,22 @@ __kernel void block_scan(
 	// tot nb threads = number of particles
 	// tot nb blocks = to number of grid cells
 
-	int gid  = get_global_id(0);
+	// not related to particles. 32 threads per cell (there are often less
+	// than 32 particles per cell
+	//int gid  = get_global_id(0);
 
-	// block id
+	// workgrup: lid in [0,31]
 	int lid  = get_local_id(0);
+
+	// block id (one block per cell with particles)
+	// save value of all threads in this group
 	int hash = get_group_id(0);
 
 	// next four lines would not be necessary once blocks are concatenated
-	int nb = cell_indices_nb[hash]; // for each grid cell
+	// nb particles in cell with hash
+	int nb = cell_indices_nb[hash]; 
 
+	// the cell is empty
 	if (nb <= 0) return;
 
 	// First assume blocks of size 32
@@ -93,43 +98,74 @@ __kernel void block_scan(
 	// this leads to errors
 	if (nb > 32) nb = 32;  
 
+
 	// nb is nb particles in cell
 
 	int start = cell_indices_start[hash];
 
 	// nb threads = nb cells * 32
-	// all points should get updated
-	if (lid < nb) pos(start+lid) = (float4)(0.,0.,0.,0.); // initialization
+	// Initialize all particles [start, start+1, ..., start+nb-1]
+	// start+lid refers to a particular particle
 
 	if (lid < nb) {
-		// bring particle data into local memory
-		// (pos, density): 16 bytes per particle
-
+		// bring particle data from central cell into local memory
 		locc[lid]   = pos(start+lid);
 		locc[lid].w = 0.0f;     // to store density
-		//pos(start+lid).w = 123.f; // all 4096 positions are set. Good
 	}
 
 	barrier(CLK_LOCAL_MEM_FENCE); // should not be required
 
 	// same value for 32 threads
+	// index of central cell
 	int4 c = hash_to_grid_index[hash];
+	int cellHash=-1;
+	int cstart=0;
 
-	uint cellHash;
-	uint cstart;
+	#if 0
+	if (lid < 27) {
+	int cellHash = 421;
+	int cstart = cell_indices_start[cellHash];
+	int cc = (int) cstart;
+	vel(start+lid).z = (float) cc; //cstart;
+	vel(start+lid).w = (float) cellHash;
+	return;
+	} else {
+		;
+	}
+	return;
+	#endif
 
-	//locc[lid].w = 123.;  // works
 
 	if (lid < 27) { // FOR DEBUGGING
-		c = c + cell_offset[lid];  //ORIG
+		// index of neighbor cell (including center)
+		//c = c + cell_offset[lid]; 
 		cellHash = calcGridHash(c, gp->grid_res, false);
+		//cellHash = 421;
+		// cstart not always correct
 		cstart = cell_indices_start[cellHash];
+		//vel(start+lid).z = (float) cstart; 		//cstart; 
+		//vel(start+lid).w = (float) cellHash; 	//cstart; 
+		//pos(start+lid).x = (float) c.x;
+		//pos(start+lid).y = (float) c.y;
+		// memory problem 
+		//pos(start+lid).z = (float) c.z;
+		//return;
+	} else {
+		;
+		//vel(start+lid).z = -3.;
 	}
+	//return;
+
+	barrier(CLK_LOCAL_MEM_FENCE);
+
+	float rho = 0;
 
 	for (int i=0; i < 32; i++) {   	// max of 32 particles per cell
 		barrier(CLK_LOCAL_MEM_FENCE);
-		if (lid >= 27) continue; 	// limit to 27 neighbor cells (ORIG)
+		if (cellHash < 0) continue; // limit to 27 neighbor cells
+		//if (lid >= 27) continue; 	// limit to 27 neighbor cells (ORIG)
 
+		// Bring in single particle from neighboring blocks, one per thread
 
 		// each thread takes care of one neighboring block
 		if (cell_indices_nb[cellHash] > i) {   // global access (called 32x)
@@ -139,9 +175,11 @@ __kernel void block_scan(
 			locc[nb+lid] = (float4)(900., 900., 900., 1.);
 		}
 
+		barrier(CLK_LOCAL_MEM_FENCE);
 		
 		// UPDATE THE DENSITIES
 		float4 ri = (float4)(locc[lid].xyz, 0.);
+
 
 		for (int j=0; j < 27; j++) {   	// cell 13 is the center
 			float4 rj = (float4)(locc[nb+lid].xyz, 0.);
@@ -149,9 +187,8 @@ __kernel void block_scan(
 			float rad = length(r);
 
 			if (rad < sphp->smoothing_distance) {
-				locc[lid].z += sphp->wpoly6_coef * sphp->mass * Wpoly6(r, sphp->smoothing_distance, sphp);
-				locc[lid].y++;
-				//locc[lid].z += sphp->mass;
+				// cannot use x,y,z from loc (position and is required)
+				locc[lid].w += sphp->wpoly6_coef * sphp->mass * Wpoly6(r, sphp->smoothing_distance, sphp);
 			}
 		}
 	}
@@ -162,25 +199,13 @@ __kernel void block_scan(
 	
 	if (lid < nb) {
 	//{
-		pos(start+lid).w = locc[start+lid].z; 
-		pos(start+lid).z = nb;
-		pos(start+lid).y = locc[start+lid].y;
-		pos(start+lid).x = (float) start;
+		// position cannot be used (since used for distances)
+		// using vel for debugging
+		vel(start+lid).y = locc[lid].w;
 
 		// only 1st 8 positions (within first block) have densities with 
 		// two values: 1100 and 8100. Do not know where 8100 comes from!
 	}
-
-	#if 0
-	// all positions are touched. 
-	if (lid < nb) {
-		pos(start+lid).x = -30.; 
-	}  else {
-		pos(start+lid).x = -40.; 
-	}
-	// ok: pos.x is either -30 or -40
-	return;
-	#endif
 
 	return;
 }

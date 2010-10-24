@@ -37,7 +37,6 @@ void GE_SPH::blockScan(int which)
 	//kern.setArg(iarg++, gps->nb_points);
 	kern.setArg(iarg++, cl_vars_sorted->getDevicePtr());
 	kern.setArg(iarg++, cl_cell_indices_start->getDevicePtr());
-	kern.setArg(iarg++, cl_cell_indices_end->getDevicePtr());
 	kern.setArg(iarg++, cl_cell_indices_nb->getDevicePtr());
 	kern.setArg(iarg++, cl_hash_to_grid_index->getDevicePtr());
 	kern.setArg(iarg++, cl_cell_offset->getDevicePtr());
@@ -61,7 +60,7 @@ void GE_SPH::blockScan(int which)
 	// local memory
 	// space for 4 variables of 4 bytes (float) for (27+32) particles
 	// need enough space for all threads in the block
-	int nb_bytes = (32+32)* work_size * sizeof(float);
+	int nb_bytes = (32+work_size)* 4 * sizeof(float);
     kern.setArgShared(iarg++, nb_bytes);
 
 	// ONLY IF DEBUGGING

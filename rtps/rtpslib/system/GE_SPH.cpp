@@ -814,7 +814,7 @@ void GE_SPH::printGPUDiagnostics(int count)
 				printf("-------- i = %d --------\n", i);
 				//printf("(%d) pos: %f, %f, %f, rho= %f\n", count, p.x, p.y, p.z, rho);
 				printf("(%d) pos: %g, %g, %g, %g, rho=%g\n", count, p.x, p.y, p.z, p.w, rho);
-				printf("(%d) vel: %g, %g, %g\n", count, vel.x, vel.y, vel.z);
+				printf("(%d) vel: %g, %g, %g, %g\n", count, vel.x, vel.y, vel.z, vel.w);
 				printf("(%d) veleval: %g, %g, %g\n", count, veval.x, veval.y, veval.z);
 			//}
 	
