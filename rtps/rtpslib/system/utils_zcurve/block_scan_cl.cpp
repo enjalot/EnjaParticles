@@ -120,42 +120,51 @@ __kernel void block_scan(
 	int4 c = hash_to_grid_index[hash];
 	int cellHash=-1;
 	int cstart=0;
+	int cnb=0;
 
 
 	if (lid < 27) { // FOR DEBUGGING
 		// index of neighbor cell (including center)
 		c = c + cell_offset[lid]; 
+		//pos(start+lid).x = (float) c.x;
+		//pos(start+lid).y = (float) c.y;
+		//pos(start+lid).z = (float) c.z;
+
+		// check whether cellHash is valid? It is in principle
+		// if fluid is always off by 2-3 cells from the boundary. 
 		cellHash = calcGridHash(c, gp->grid_res, false);
 		// cstart not always correct
 		cstart = cell_indices_start[cellHash];
+		cnb = cell_indices_nb[cellHash];
 	} else {
 		;
 	}
-	//return;
 
 	barrier(CLK_LOCAL_MEM_FENCE);
 
 	float rho = 0;
+	float4 ri = (float4)(locc[lid].xyz, 0.);
 
 	for (int i=0; i < 32; i++) {   	// max of 32 particles per cell
 		barrier(CLK_LOCAL_MEM_FENCE);
-		if (cellHash < 0) continue; // limit to 27 neighbor cells
-		//if (lid >= 27) continue; 	// limit to 27 neighbor cells (ORIG)
+		locc[nb+lid] = (float4) (0., 0., 0., 0.);
 
 		// Bring in single particle from neighboring blocks, one per thread
 
 		// each thread takes care of one neighboring block
-		if (cell_indices_nb[cellHash] > i) {   // global access (called 32x)
-			locc[nb+lid] = pos(cstart+i); // ith particle in cell
-		} else {
-			// outside smoothing radius
-			locc[nb+lid] = (float4)(900., 900., 900., 1.);
+		// densitis are 1000 and 5000. WHY? WHY? 
+		if (lid < 27) {  // only 27 neighbors
+			if (cnb > i) {   // global access (called 32x)
+				locc[nb+lid] = pos(cstart+i); // ith particle in cell
+			} else {
+				// outside smoothing radius (for automatic rejection)
+				locc[nb+lid] = (float4)(900., 900., 900., 1.);
+			}
 		}
 
 		barrier(CLK_LOCAL_MEM_FENCE);
 		
-		// UPDATE THE DENSITIES
-		float4 ri = (float4)(locc[lid].xyz, 0.);
+		// UPDATE THE DENSITIES for particles in center cell
 
 
 		for (int j=0; j < 27; j++) {   	// cell 13 is the center
@@ -163,7 +172,7 @@ __kernel void block_scan(
 			float4 r = rj-ri;
 			float rad = length(r);
 
-			if (rad < sphp->smoothing_distance) {
+			if (rad < sphp->smoothing_distance && lid < nb) {
 				// cannot use x,y,z from loc (position and is required)
 				locc[lid].w += sphp->wpoly6_coef * sphp->mass * Wpoly6(r, sphp->smoothing_distance, sphp);
 			}
