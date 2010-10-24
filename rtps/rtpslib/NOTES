@@ -190,4 +190,6 @@ stores (i,j,k,w) indices for each hash.
 Create new routines. 
 Create constant structure of int4 offsets to quickly scan 27 neighbors. 
 ----------------------------------------------------------------------
+Oct. 23, 2010
+- Consider making constant structures and arrays READ ONLY.
 ----------------------------------------------------------------------
