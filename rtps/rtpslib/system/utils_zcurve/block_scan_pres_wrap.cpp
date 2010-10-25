@@ -6,18 +6,18 @@ using namespace std;
 namespace rtps {
 
 //----------------------------------------------------------------------
-void GE_SPH::blockScan(int which)
+void GE_SPH::blockScanPres(int which)
 {
 	static bool first_time = true;
 
 	if (first_time) {
 		try {
 			string path(CL_SPH_UTIL_SOURCE_DIR);
-			path = path + "/block_scan_cl.cl";
+			path = path + "/block_scan_pres_cl.cl";
 			int length;
 			char* src = file_contents(path.c_str(), &length);
 			std::string strg(src);
-        	block_scan_kernel = Kernel(ps->cli, strg, "block_scan");
+        	block_scan_pres_kernel = Kernel(ps->cli, strg, "block_scan_pres");
 			first_time = false;
 		} catch(cl::Error er) {
         	printf("ERROR(neighborSearch): %s(%s)\n", er.what(), oclErrorString(er.err()));
@@ -25,9 +25,10 @@ void GE_SPH::blockScan(int which)
 		}
 	}
 
-	ts_cl[TI_DENS]->start();
+	ts_cl[TI_PRES]->start();
 
-	Kernel kern = block_scan_kernel;
+
+	Kernel kern = block_scan_pres_kernel;
 
 	FluidParams* fp = cl_FluidParams->getHostPtr();
 	fp->choice = which;
@@ -45,7 +46,7 @@ void GE_SPH::blockScan(int which)
 	kern.setArg(iarg++, cl_params->getDevicePtr());
 	kern.setArg(iarg++, cl_GridParamsScaled->getDevicePtr());
 
-	#if 1
+	#if 0
 	cl_cell_offset->copyToHost();
 	int4* cc = cl_cell_offset->getHostPtr();
 	for (int i=0; i < 27; i++) {
@@ -61,6 +62,7 @@ void GE_SPH::blockScan(int which)
 
 	// local memory
 	// space for 4 variables of 4 bytes (float) for (27+32) particles
+	// Need position and density (+ velocity if viscosity computed)
 	// need enough space for all threads in the block
 	int nb_bytes = (32+work_size)* 4 * sizeof(float);
     kern.setArgShared(iarg++, nb_bytes);
@@ -82,7 +84,7 @@ void GE_SPH::blockScan(int which)
 	kern.execute(global, work_size);
 
 	ps->cli->queue.finish();
-	ts_cl[TI_DENS]->end();
+	ts_cl[TI_PRES]->end();
 
 	#if 0
 	// subtract works ok
@@ -134,6 +136,7 @@ void GE_SPH::blockScan(int which)
 	gps->print();
 	//exit(0);
 	#endif
+
 }
 //----------------------------------------------------------------------
 

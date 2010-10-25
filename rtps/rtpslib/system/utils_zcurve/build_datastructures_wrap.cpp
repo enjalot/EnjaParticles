@@ -88,7 +88,7 @@ void GE_SPH::buildDataStructures()
 	subtract();  // NEED ARGUMENTS
 
 
-	computeCellStartEndGPU();
+	//computeCellStartEndGPU();
 
 	ts_cl[TI_BUILD]->end();
 }
@@ -144,7 +144,7 @@ void GE_SPH::printBuildDiagnostics()
 		exit(0);
 	}
 
-	computeCellStartEndGPU();
+	//computeCellStartEndGPU();
 	#endif
 	//printf("return from BuildDataStructures\n");
 }

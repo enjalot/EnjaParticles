@@ -71,6 +71,7 @@ set (rtpslib_SOURCES
 	${rtpslib_SOURCE_DIR}/system/${UTILS}/scopy_wrap.cpp
 	${rtpslib_SOURCE_DIR}/system/${UTILS}/sset_int_wrap.cpp
 	${rtpslib_SOURCE_DIR}/system/${UTILS}/block_scan_wrap.cpp
+	${rtpslib_SOURCE_DIR}/system/${UTILS}/block_scan_pres_wrap.cpp
 	${rtpslib_SOURCE_DIR}/system/${UTILS}/subtract_wrap.cpp
 
 	${rtpslib_SOURCE_DIR}/system/${UTILS}/zcurve_indices.cpp;

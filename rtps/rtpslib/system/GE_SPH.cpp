@@ -168,7 +168,7 @@ void GE_SPH::update()
 	}
 
 #ifdef GPU
-	int nb_sub_iter = 10;
+	int nb_sub_iter = 1;
 	computeOnGPU(nb_sub_iter);
 	if (count % 10 == 0) computeTimeStep();
 #endif
@@ -369,8 +369,9 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 		// must call sort and build first. 
 		// DEBUGGING
 		blockScan(0);
-		printGPUDiagnostics(1);
-		exit(0);
+		blockScanPres(0);
+		//printGPUDiagnostics(1);
+		//exit(0);
 
 		#if 1
 		// ***** DENSITY UPDATE *****

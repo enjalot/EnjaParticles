@@ -50,7 +50,7 @@ int calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 }
 
 //----------------------------------------------------------------------
-__kernel void block_scan(
+__kernel void block_scan_pres(
 					__global float4*   vars_sorted, 
 		   			__global int* cell_indices_start,
 		   			__global int* cell_indices_nb,
@@ -109,7 +109,7 @@ __kernel void block_scan(
 	if (lid < nb) {
 		// bring particle data from central cell into local memory
 		locc[lid]   = pos(start+lid);
-		locc[lid].w = 0.0f;     // to store density
+		locc[lid].w = density(start+lid);   // gets a float4: inefficient
 	}
 
 	barrier(CLK_LOCAL_MEM_FENCE); // should not be required
@@ -139,11 +139,13 @@ __kernel void block_scan(
 
 	barrier(CLK_LOCAL_MEM_FENCE);
 
-	float rho = 0;
 	float4 ri = (float4)(locc[lid].xyz, 0.);
+	float di = locc[lid].w; // density
+	float4 pres_grad;
 
 	for (int i=0; i < 32; i++) {   	// max of 32 particles per cell
 		barrier(CLK_LOCAL_MEM_FENCE);
+		// store density in 4th component
 		locc[nb+lid] = (float4) (0., 0., 0., 0.);
 
 		// Bring in single particle from neighboring blocks, one per thread
@@ -153,6 +155,7 @@ __kernel void block_scan(
 		if (lid < 27) {  // only 27 neighbors
 			if (cnb > i) {   // global access (called 32x)
 				locc[nb+lid] = pos(cstart+i); // ith particle in cell
+				locc[nb+lid].w = 1. / density(cstart+i);
 			} else {
 				// outside smoothing radius (for automatic rejection)
 				locc[nb+lid] = (float4)(900., 900., 900., 1.);
@@ -160,6 +163,8 @@ __kernel void block_scan(
 		}
 
 		barrier(CLK_LOCAL_MEM_FENCE);
+
+		const float rest_density = 1000.0; // HARDCODED
 		
 		// UPDATE THE DENSITIES for particles in center cell
 
@@ -171,8 +176,6 @@ __kernel void block_scan(
 			float4 rj = (float4)(locc[nb+lid].xyz, 0.); // CORRECT LINE????
 			float4 r = rj-ri;
 			float rad = length(r);
-
-			//if (cnb > i) rho++; // 27*8 hits. Sounds right. 
 
 			if (rad < sphp->smoothing_distance) {
 				// cannot use x,y,z from loc (position and is required)
@@ -189,11 +192,14 @@ __kernel void block_scan(
 			float4 r = rj-ri;
 			float rad = length(r);
 
-			if (cnb > i) rho++; // 27*8 hits. Sounds right. 
-
 			if (rad < sphp->smoothing_distance && lid < nb) {
 				// cannot use x,y,z from loc (position and is required)
-				locc[lid].w += sphp->wpoly6_coef * sphp->mass * Wpoly6(r, sphp->smoothing_distance, sphp);
+				float dj = locc[nb+lid].w; // density
+				float Pi = sphp->K*(di - rest_density);
+				float Pj = sphp->K*(dj - rest_density);
+				float dWijdr = Wspiky_dr(rad, sphp->smoothing_distance, sphp);
+				float kern = -dWijdr * (Pi + Pj)*0.5 * sphp->wspike_d_coef;
+				pres_grad += sphp->mass*kern*r/(di*dj); 
 			}
 		}
 		#endif
@@ -204,8 +210,8 @@ __kernel void block_scan(
 	// The values in local memory appear to be lost!!! HOW!
 	
 	if (lid < nb) {
-		vel(start+lid).y = locc[lid].w;
-		vel(start+lid).z = rho;
+		//vel(start+lid).y = locc[lid].w;
+		force(start+lid) = pres_grad;
 
 		// only 1st 8 positions (within first block) have densities with 
 		// two values: 1100 and 5500. Do not know where 5100 comes from!

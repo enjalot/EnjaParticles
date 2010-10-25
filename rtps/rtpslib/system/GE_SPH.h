@@ -325,6 +325,7 @@ private:
 	Kernel scopy_kernel;
 	Kernel sset_int_kernel;
     Kernel block_scan_kernel;
+    Kernel block_scan_pres_kernel;
 
     BufferGE<GE_SPHParams>* cl_params;
 
@@ -394,6 +395,7 @@ private:
 	void bitshifts(int* mask, int d, 
    		unsigned int& bx, unsigned int& by, unsigned int& bz);
 	void blockScan(int which);
+	void blockScanPres(int which);
 	void subtract();
 
 private:
