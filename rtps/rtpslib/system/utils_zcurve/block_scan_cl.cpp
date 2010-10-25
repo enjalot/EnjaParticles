@@ -189,7 +189,7 @@ __kernel void block_scan(
 			float4 r = rj-ri;
 			float rad = length(r);
 
-			if (cnb > i) rho++; // 27*8 hits. Sounds right. 
+			//if (cnb > i) rho++; // 27*8 hits. Sounds right. 
 
 			if (rad < sphp->smoothing_distance && lid < nb) {
 				// cannot use x,y,z from loc (position and is required)
@@ -204,8 +204,9 @@ __kernel void block_scan(
 	// The values in local memory appear to be lost!!! HOW!
 	
 	if (lid < nb) {
-		vel(start+lid).y = locc[lid].w;
-		vel(start+lid).z = rho;
+		density(start+lid) = locc[lid].w;
+		//vel(start+lid).y = locc[lid].w;
+		//vel(start+lid).z = rho;
 
 		// only 1st 8 positions (within first block) have densities with 
 		// two values: 1100 and 5500. Do not know where 5100 comes from!

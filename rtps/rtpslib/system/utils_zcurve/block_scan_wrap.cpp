@@ -45,7 +45,7 @@ void GE_SPH::blockScan(int which)
 	kern.setArg(iarg++, cl_params->getDevicePtr());
 	kern.setArg(iarg++, cl_GridParamsScaled->getDevicePtr());
 
-	#if 1
+	#if 0
 	cl_cell_offset->copyToHost();
 	int4* cc = cl_cell_offset->getHostPtr();
 	for (int i=0; i < 27; i++) {
