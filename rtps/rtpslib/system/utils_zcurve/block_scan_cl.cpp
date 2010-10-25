@@ -58,7 +58,7 @@ __kernel void block_scan(
 		   			//__constant int4* cell_offset,  // DOES NOT WORK OK
 		   			__global int4* cell_offset, 
 		   			__constant struct SPHParams* sphp,
-		   			__global struct GridParams* gp,
+		   			__constant struct GridParams* gp,
 					__local  float4* locc   
 					DUMMY_ARGS
 			  )
