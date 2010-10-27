@@ -39,7 +39,8 @@ SPH::SPH(RTPS *psfr, int n)
     //std::fill(positions.begin(), positions.end(),(float4) {0.0f, 0.0f, 0.0f, 1.0f});
     //init sph stuff
     sph_settings.rest_density = 1000;
-    sph_settings.simulation_scale = .001;
+    //sph_settings.simulation_scale = .001;
+    sph_settings.simulation_scale = .1;
 
     //function of total mass and number of particles
     sph_settings.particle_mass = (128*1024.0)/num * .0002;
@@ -59,9 +60,10 @@ SPH::SPH(RTPS *psfr, int n)
     sph_settings.integrator = LEAPFROG;
     //sph_settings.integrator = EULER;
 
-
+    float scale = sph_settings.simulation_scale;
     //grid = UniformGrid(float3(0,0,0), float3(1024, 1024, 1024), sph_settings.smoothing_distance / sph_settings.simulation_scale);
-    grid = UniformGrid(float3(0,0,0), float3(256, 256, 512), sph_settings.smoothing_distance / sph_settings.simulation_scale);
+    grid = UniformGrid(float3(0,0,0), float3(.25/scale, .5/scale, .5/scale), sph_settings.smoothing_distance / sph_settings.simulation_scale);
+    //grid = UniformGrid(float3(0,0,0), float3(256, 256, 512), sph_settings.smoothing_distance / sph_settings.simulation_scale);
     //grid.make_cube(&positions[0], sph_settings.spacing, num);
     //grid.make_column(&positions[0], sph_settings.spacing, num);
     grid.make_dam(&positions[0], sph_settings.spacing, num);
