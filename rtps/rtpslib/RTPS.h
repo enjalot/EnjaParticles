@@ -13,7 +13,7 @@
 #include "system/System.h"
 
 //initial value API
-#include "particle/IV.h"
+#include "domain/IV.h"
 
 //settings class to configure the framework
 #include "RTPSettings.h"

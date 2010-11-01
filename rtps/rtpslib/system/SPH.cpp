@@ -4,7 +4,11 @@
 
 #include "System.h"
 #include "SPH.h"
-#include "../particle/UniformGrid.h"
+#include "../domain/UniformGrid.h"
+#include "../domain/IV.h"
+
+//for random
+#include<time.h>
 
 namespace rtps {
 
@@ -14,10 +18,11 @@ SPH::SPH(RTPS *psfr, int n)
     //store the particle system framework
     ps = psfr;
 
-    num = n;
+    max_num = n;
+    num = 0;
 
     //*** Initialization, TODO: move out of here to the particle directory
-    std::vector<float4> colors(num);
+    //std::vector<float4> colors(max_num);
     /*
     std::vector<float4> positions(num);
     std::vector<float4> colors(num);
@@ -25,15 +30,21 @@ SPH::SPH(RTPS *psfr, int n)
     std::vector<float4> velocities(num);
     std::vector<float> densities(num);
     */
-    positions.resize(num);
-    forces.resize(num);
-    velocities.resize(num);
-    veleval.resize(num);
-    densities.resize(num);
-    xsphs.resize(num);
+    positions.resize(max_num);
+    colors.resize(max_num);
+    forces.resize(max_num);
+    velocities.resize(max_num);
+    veleval.resize(max_num);
+    densities.resize(max_num);
+    xsphs.resize(max_num);
+
+    //seed random
+    srand ( time(NULL) );
+
+
 
     //for reading back different values from the kernel
-    std::vector<float4> error_check(num);
+    std::vector<float4> error_check(max_num);
     
     
     //std::fill(positions.begin(), positions.end(),(float4) {0.0f, 0.0f, 0.0f, 1.0f});
@@ -42,18 +53,13 @@ SPH::SPH(RTPS *psfr, int n)
     //sph_settings.simulation_scale = .001;
     sph_settings.simulation_scale = .1;
 
-    //function of total mass and number of particles
-    sph_settings.particle_mass = (128*1024.0)/num * .0002;
-    printf("particle mass: %f\n", sph_settings.particle_mass);
-    //constant .87 is magic
-    sph_settings.particle_rest_distance = .87 * pow(sph_settings.particle_mass / sph_settings.rest_density, 1./3.);
-    printf("particle rest distance: %f\n", sph_settings.particle_rest_distance);
-    
-    //messing with smoothing distance, making it really small to remove interaction still results in weird force values
-    sph_settings.smoothing_distance = 2.0f * sph_settings.particle_rest_distance;
-    sph_settings.boundary_distance = .5f * sph_settings.particle_rest_distance;
 
-    sph_settings.spacing = sph_settings.particle_rest_distance / sph_settings.simulation_scale;
+    //first need number of particles we will be using
+
+
+    //SPH settings depend on number of particles used
+    calculateSPHSettings();
+
     float particle_radius = sph_settings.spacing;
     printf("particle radius: %f\n", particle_radius);
 
@@ -66,13 +72,26 @@ SPH::SPH(RTPS *psfr, int n)
     //grid = UniformGrid(float3(0,0,0), float3(256, 256, 512), sph_settings.smoothing_distance / sph_settings.simulation_scale);
     //grid.make_cube(&positions[0], sph_settings.spacing, num);
     //grid.make_column(&positions[0], sph_settings.spacing, num);
-    grid.make_dam(&positions[0], sph_settings.spacing, num);
-    //int new_num = grid.make_line(&positions[0], sph_settings.spacing, num);
-    //less particles will be in play
-    //not sure this is 100% right
-    //num = new_num;
+    //grid.make_dam(&positions[0], sph_settings.spacing, num);
+    
+    int nn = 512;
+    float4 min = float4(.05/scale, .05/scale, .05/scale, 0.0f);
+    float4 max = float4(.24/scale, .24/scale, .15/scale, 0.0f);
+    addBox(nn, min, max);
+    
+    min = float4(.05/scale, .05/scale, .3/scale, 0.0f);
+    max = float4(.2/scale, .2/scale, .45/scale, 0.0f);
+    addBox(nn, min, max);
+    
+
+    float4 center = float4(.1/scale, .15/scale, .3/scale, 0.0f);
+    //addBall(nn, center, .06/scale);
+    //addBall(nn, center, .1/scale);
 
 
+
+
+    
 /*
 typedef struct SPHParams
 {
@@ -101,6 +120,7 @@ typedef struct SPHParams
     params.EPSILON = .00001f;
     params.PI = 3.14159265f;
     params.K = 15.0f;
+    params.num = num;
     //params.K = 1.5f;
  
     //TODO make a helper constructor for buffer to make a cl_mem from a struct
@@ -109,6 +129,7 @@ typedef struct SPHParams
     cl_params = Buffer<SPHParams>(ps->cli, vparams);
 
 
+    /*
     float factor;
     //std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));
     for(int i = 0; i < num; i++)
@@ -116,6 +137,7 @@ typedef struct SPHParams
         factor = (positions[i].z - params.grid_min.z)/(params.grid_max.z - params.grid_min.z);
         colors[i] = float4(factor, 0.0f, 1.0f - factor, 0.0f);
     }
+    */
     std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 1.0f, 0.0f));
     std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     std::fill(veleval.begin(), veleval.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -248,7 +270,7 @@ void SPH::update()
             //printf("force: %f %f %f  \n", velocities[i].x, velocities[i].y, velocities[i].z);
     }
     */
-    printf("cpu execute!\n");
+    //printf("cpu execute!\n");
 
 
     glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
@@ -307,7 +329,7 @@ void SPH::update()
             printf("force: %f %f %f  \n", ftest[i].x, ftest[i].y, ftest[i].z);
     }
     */
-    printf("gpu execute!\n");
+    //printf("gpu execute!\n");
 
     cl_position.release();
     cl_color.release();
@@ -315,6 +337,64 @@ void SPH::update()
 
 #endif
 }
+
+void SPH::calculateSPHSettings()
+{
+    /*!
+    * The Particle Mass (and hence everything following) depends on the MAXIMUM number of particles in the system
+    */
+
+    sph_settings.particle_mass = (128*1024.0)/max_num * .0002;
+    printf("particle mass: %f\n", sph_settings.particle_mass);
+    //constant .87 is magic
+    sph_settings.particle_rest_distance = .87 * pow(sph_settings.particle_mass / sph_settings.rest_density, 1./3.);
+    printf("particle rest distance: %f\n", sph_settings.particle_rest_distance);
+    
+    //messing with smoothing distance, making it really small to remove interaction still results in weird force values
+    sph_settings.smoothing_distance = 2.0f * sph_settings.particle_rest_distance;
+    sph_settings.boundary_distance = .5f * sph_settings.particle_rest_distance;
+
+    sph_settings.spacing = sph_settings.particle_rest_distance/ sph_settings.simulation_scale;
+
+}
+
+void SPH::addBox(int nn, float4 min, float4 max)
+{
+    vector<float4> rect = addRect(nn, min, max, sph_settings.spacing);
+    nn = rect.size();
+    printf("rectangle size: %d\n", nn);
+
+    float rr = (rand() % 255)/255.0f;
+    float4 color(rr, 0.0f, 1.0f - rr, 0.0f);
+    printf("random: %f\n", rr);
+
+    //there should be a better/faster way to do this with vector iterator or something?
+    //according to docs the assign function drops previous values which is no good
+    for(int i = 0; i < nn; i++)
+    {
+        //printf("i: %d", i);
+        positions[num+i] = rect[i];
+        colors[num+i] = color;
+    }
+    num += nn;  //keep track of number of particles we use
+}
+
+void SPH::addBall(int nn, float4 center, float radius)
+{
+    vector<float4> sphere = addSphere(nn, center, radius, sph_settings.spacing);
+    nn = sphere.size();
+    printf("sphere size: %d\n", nn);
+
+    //there should be a better/faster way to do this with vector iterator or something?
+    //according to docs the assign function drops previous values which is no good
+    for(int i = 0; i < nn; i++)
+    {
+        //printf("i: %d", i);
+        positions[num+i] = sphere[i];
+    }
+    num += nn;  //keep track of number of particles we use
+}
+
 
 
 } //end namespace

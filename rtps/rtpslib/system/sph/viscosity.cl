@@ -17,6 +17,7 @@ typedef struct SPHParams
     float EPSILON;
     float PI;       //delicious
     float K;        //speed of sound
+    int num;
  
 } SPHParams;
 
@@ -34,6 +35,9 @@ float dist_squared(float4 vec)
 __kernel void viscosity(__global float4* pos, __global float4* veleval, __global float* density, __global float4* force, __constant struct SPHParams* params)
 {
     unsigned int i = get_global_id(0);
+    int num = params->num;
+    if(i > num) return;
+
 
     float4 p = pos[i] * params->simulation_scale;
     float4 v = veleval[i];// * params->simulation_scale;
@@ -42,8 +46,6 @@ __kernel void viscosity(__global float4* pos, __global float4* veleval, __global
     //float mu = 1.0f;
     float mu = 1.001f;
 
-    //obviously this is going to be passed in as a parameter (rather we will use neighbor search)
-    int num = get_global_size(0);
     float h = params->smoothing_distance;
 
     //stuff from Tim's code (need to match #s to papers)

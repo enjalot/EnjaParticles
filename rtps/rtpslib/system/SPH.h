@@ -8,7 +8,7 @@
 #include "../opencl/Kernel.h"
 #include "../opencl/Buffer.h"
 //#include "../util.h"
-#include "../particle/UniformGrid.h"
+#include "../domain/UniformGrid.h"
 
 
 namespace rtps {
@@ -48,6 +48,7 @@ typedef struct SPHParams
     float EPSILON;
     float PI;       //delicious
     float K;        //gas constant
+    int num;
  
 } SPHParams __attribute__((aligned(16)));
 
@@ -58,13 +59,20 @@ public:
     ~SPH();
 
     void update();
-
+    //wrapper around IV.h addRect
+    void addBox(int nn, float4 min, float4 max);
+    //wrapper around IV.h addSphere
+    void addBall(int nn, float4 center, float radius);
+    
 private:
     //the particle system framework
     RTPS *ps;
 
     SPHSettings sph_settings;
     SPHParams params;
+
+    //needs to be called when particles are added
+    void calculateSPHSettings();
 
     Kernel k_density, k_pressure, k_viscosity;
     Kernel k_collision_wall;
@@ -75,6 +83,7 @@ private:
 
 
     std::vector<float4> positions;
+    std::vector<float4> colors;
     std::vector<float> densities;
     std::vector<float4> forces;
     std::vector<float4> velocities;

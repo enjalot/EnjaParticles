@@ -23,9 +23,9 @@
 int window_width = 800;
 int window_height = 600;
 int glutWindowHandle = 0;
-float translate_x = 0.0f;
-float translate_y = -200.0f;//300.f;
-float translate_z = 200.f;
+float translate_x = -1.5f;
+float translate_y = -2.f;//-200.0f;//300.f;
+float translate_z = 2.0f;//200.f;
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -142,8 +142,8 @@ void init_gl()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glRotatef(-90, 1.0, 0.0, 0.0);
-    //glTranslatef(translate_x, translate_z, translate_y);
-    glTranslatef(0, translate_z, translate_y);
+    glTranslatef(translate_x, translate_z, translate_y);
+    //glTranslatef(0, translate_z, translate_y);
     //glRotatef(-90, 1.0, 0.0, 0.0);
 
     return;
@@ -234,8 +234,8 @@ void appMotion(int x, int y)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glRotatef(-90, 1.0, 0.0, 0.0);
-    //glTranslatef(translate_x, translate_z, translate_y);
-    glTranslatef(0, translate_z, translate_y);
+    glTranslatef(translate_x, translate_z, translate_y);
+    //glTranslatef(0, translate_z, translate_y);
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
     glutPostRedisplay();

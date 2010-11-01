@@ -17,6 +17,7 @@ typedef struct SPHParams
     float EPSILON;
     float PI;       //delicious
     float K;        //speed of sound
+    int num;
  
 } SPHParams;
 
@@ -66,6 +67,9 @@ float4 calculateFrictionForce(float4 vel, float4 force, float4 normal, float fri
 __kernel void collision_wall(__global float4* pos, __global float4* vel,  __global float4* force, __constant struct SPHParams* params)
 {
     unsigned int i = get_global_id(0);
+    int num = params->num;
+    if(i > num) return;
+
 
     float4 p = pos[i];
     float4 v = vel[i];// * params->simulation_scale;

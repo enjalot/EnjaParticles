@@ -9,7 +9,7 @@
     #include <GL/gl.h>
 #endif
 
-#include "../particle/UniformGrid.h"
+#include "../domain/UniformGrid.h"
 
 namespace rtps {
 
@@ -28,6 +28,8 @@ public:
 protected:
     //number of particles
     int num; 
+    //maximum number of particles (for array allocation)
+    int max_num;
 
     GLuint pos_vbo;
     GLuint col_vbo;

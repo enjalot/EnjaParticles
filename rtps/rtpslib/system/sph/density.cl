@@ -18,6 +18,7 @@ typedef struct SPHParams
     float EPSILON;
     float PI;       //delicious
     float K;        //speed of sound
+    int num;
 
  
 } SPHParams;
@@ -37,7 +38,9 @@ __kernel void density(__global float4* pos, __global float* density, __constant 
 //, __global float4* error)
 {
     unsigned int i = get_global_id(0);
-    int num = get_global_size(0);
+    //int num = get_global_size(0);
+    int num = params->num;
+    if(i > num) return;
 
     float h = params->smoothing_distance;
     //stuff from Tim's code (need to match #s to papers)

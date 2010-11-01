@@ -17,6 +17,7 @@ typedef struct SPHParams
     float EPSILON;
     float PI;       //delicious
     float K;        //speed of sound
+    int num;
  
 } SPHParams;
 
@@ -34,14 +35,14 @@ float dist_squared(float4 vec)
 __kernel void xsph(__global float4* pos, __global float4* veleval, __global float* density, __global float4* force, __global float4* xsph, __constant struct SPHParams* params)
 {
     unsigned int i = get_global_id(0);
+    int num = params->num;
+    if(i > num) return;
 
     float sadf = 5;
     float4 p = pos[i] * params->simulation_scale;
     float4 v = veleval[i];
     float di = density[i];
  
-    //obviously this is going to be passed in as a parameter (rather we will use neighbor search)
-    int num = get_global_size(0);
     float h = params->smoothing_distance;
 
     //stuff from Tim's code (need to match #s to papers)

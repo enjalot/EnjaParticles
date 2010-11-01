@@ -18,6 +18,7 @@ typedef struct SPHParams
     float EPSILON;
     float PI;       //delicious
     float K;        //speed of sound
+    int num;
 
  
 } SPHParams;
@@ -32,6 +33,9 @@ float magnitude(float4 vec)
 __kernel void leapfrog(__global float4* pos, __global float4* vel, __global float4* veleval, __global float4* force, __global float4* xsph, __global float4* color, float h, __constant struct SPHParams* params )
 {
     unsigned int i = get_global_id(0);
+    int num = params->num;
+    if(i > num) return;
+
 
     float4 p = pos[i];
     float4 v = vel[i];
@@ -47,7 +51,8 @@ __kernel void leapfrog(__global float4* pos, __global float4* vel, __global floa
     }
 
     float4 vnext = v + h*f;
-    vnext += .05f * xsph[i];//should be param XSPH factor
+    float xsphfactor = .1f;
+    vnext += xsphfactor * xsph[i];//should be param XSPH factor
     p += h * vnext / params->simulation_scale;
     p.w = 1.0f; //just in case
 
