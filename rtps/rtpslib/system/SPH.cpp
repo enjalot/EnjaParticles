@@ -74,21 +74,7 @@ SPH::SPH(RTPS *psfr, int n)
     //grid.make_column(&positions[0], sph_settings.spacing, num);
     //grid.make_dam(&positions[0], sph_settings.spacing, num);
     
-    int nn = 512;
-    float4 min = float4(.05/scale, .05/scale, .05/scale, 0.0f);
-    float4 max = float4(.24/scale, .24/scale, .15/scale, 0.0f);
-    addBox(nn, min, max);
     
-    min = float4(.05/scale, .05/scale, .3/scale, 0.0f);
-    max = float4(.2/scale, .2/scale, .45/scale, 0.0f);
-    addBox(nn, min, max);
-    
-
-    float4 center = float4(.1/scale, .15/scale, .3/scale, 0.0f);
-    //addBall(nn, center, .06/scale);
-    //addBall(nn, center, .1/scale);
-
-
 
 
     
@@ -129,9 +115,9 @@ typedef struct SPHParams
     cl_params = Buffer<SPHParams>(ps->cli, vparams);
 
 
+    //std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));
     /*
     float factor;
-    //std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));
     for(int i = 0; i < num; i++)
     {
         factor = (positions[i].z - params.grid_min.z)/(params.grid_max.z - params.grid_min.z);
@@ -207,6 +193,26 @@ typedef struct SPHParams
     printf("create xsph kernel\n");
     loadXSPH();
     printf("xsph kernel created\n");
+
+
+    int nn = 512;
+    float4 min = float4(.05, .05, .05, 0.0f);
+    float4 max = float4(.24, .24, .2, 0.0f);
+    addBox(nn, min, max);
+ 
+    min = float4(.05, .05, .3, 0.0f);
+    max = float4(.2, .2, .45, 0.0f);
+    //addBox(nn, min, max);
+    
+    /*
+    min = float4(.05/scale, .05/scale, .3/scale, 0.0f);
+    max = float4(.2/scale, .2/scale, .45/scale, 0.0f);
+    addBox(nn, min, max);
+    */
+
+    float4 center = float4(.1/scale, .15/scale, .3/scale, 0.0f);
+    //addBall(nn, center, .06/scale);
+    //addBall(nn, center, .1/scale);
 
 
 
@@ -288,6 +294,7 @@ void SPH::update()
     //for(int i=0; i < 10; i++)
     {
         //printf("about to execute density\n");
+        //k_density.execute(max_num);
         k_density.execute(num);
         //printf("executed density\n");
         //test density
@@ -307,18 +314,28 @@ void SPH::update()
             printf("rrrr[%d]: %f %f %f %f\n", j, er[j].x, er[j].y, er[j].z, er[j].w);
         }
         */
+        /*
+        k_pressure.execute(max_num);
+        k_viscosity.execute(max_num);
+        k_xsph.execute(max_num);
+        k_collision_wall.execute(max_num);
+        */
         k_pressure.execute(num);
         k_viscosity.execute(num);
         k_xsph.execute(num);
         k_collision_wall.execute(num);
 
+
+
         if(sph_settings.integrator == EULER)
         {
+            //k_euler.execute(max_num);
             k_euler.execute(num);
         }
         else if(sph_settings.integrator == LEAPFROG)
         {
-           k_leapfrog.execute(num);
+           //k_leapfrog.execute(max_num);
+           k_leapfrog.execute(max_num);
         }
     }
     /*
@@ -360,28 +377,50 @@ void SPH::calculateSPHSettings()
 
 void SPH::addBox(int nn, float4 min, float4 max)
 {
-    vector<float4> rect = addRect(nn, min, max, sph_settings.spacing);
+    vector<float4> rect = addRect(nn, min, max, sph_settings.spacing, sph_settings.simulation_scale);
     nn = rect.size();
     printf("rectangle size: %d\n", nn);
 
     float rr = (rand() % 255)/255.0f;
-    float4 color(rr, 0.0f, 1.0f - rr, 0.0f);
+    float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
     printf("random: %f\n", rr);
 
+    std::vector<float4> cols(nn);
     //there should be a better/faster way to do this with vector iterator or something?
     //according to docs the assign function drops previous values which is no good
     for(int i = 0; i < nn; i++)
     {
         //printf("i: %d", i);
         positions[num+i] = rect[i];
-        colors[num+i] = color;
+        //colors[num+i] = color;
+        cols[i] = color;
     }
+#ifdef GPU
+    glFinish();
+    cl_position.acquire();
+    cl_color.acquire();
+    
+    cl_position.copyToDevice(rect, num);
+    cl_color.copyToDevice(cols, num);
+
+    params.num = num+nn;
+    std::vector<SPHParams> vparams(0);
+    vparams.push_back(params);
+    cl_params.copyToDevice(vparams);
+
+    cl_color.release();
+    cl_position.release();
+
+    printf("about to updateNum\n");
+    ps->updateNum(params.num);
+
+#endif
     num += nn;  //keep track of number of particles we use
 }
 
 void SPH::addBall(int nn, float4 center, float radius)
 {
-    vector<float4> sphere = addSphere(nn, center, radius, sph_settings.spacing);
+    vector<float4> sphere = addSphere(nn, center, radius, sph_settings.spacing, sph_settings.simulation_scale);
     nn = sphere.size();
     printf("sphere size: %d\n", nn);
 

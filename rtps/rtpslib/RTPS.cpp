@@ -33,6 +33,8 @@ void RTPS::Init()
 
 
     cli = new CL();
+    system = NULL;
+    renderer = NULL;
 
     printf("init: settings.system: %d\n", settings.system);
     //TODO choose based on settings
@@ -75,6 +77,17 @@ void RTPS::render()
     }
 
     renderer->render();
+}
+
+void RTPS::updateNum(int num)
+{
+    printf("about to test for renderer\n");
+    if(renderer)
+    {
+        renderer->setNum(num);
+    }
+    //this segfaults for some reason
+    //system->setNum(num);
 }
 
 }

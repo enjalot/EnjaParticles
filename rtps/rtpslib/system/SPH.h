@@ -64,6 +64,7 @@ public:
     //wrapper around IV.h addSphere
     void addBall(int nn, float4 center, float radius);
     
+    
 private:
     //the particle system framework
     RTPS *ps;

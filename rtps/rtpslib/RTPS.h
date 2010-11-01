@@ -49,9 +49,14 @@ public:
     //initial value helper
     //IV iv;
 
-
     void update();
     void render();
+    
+    //should this be private?
+    void updateNum(int num);
+    
+
+
 };
 
 }

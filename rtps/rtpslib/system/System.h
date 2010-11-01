@@ -11,6 +11,7 @@
 
 #include "../domain/UniformGrid.h"
 
+#include<stdio.h>
 namespace rtps {
 
 class System
@@ -21,8 +22,12 @@ public:
     
     virtual UniformGrid getGrid(){ return grid; };
     virtual int getNum(){ return num; };
+    virtual void setNum(int nn){num = nn;};//should this be public
     virtual GLuint getPosVBO() { return pos_vbo; };
     virtual GLuint getColVBO() { return col_vbo; };
+
+    virtual void addBox(int nn, float4 min, float4 max){};
+    virtual void addBall(int nn, float4 center, float radius){};
     
 
 protected:

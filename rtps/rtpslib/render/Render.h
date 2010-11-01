@@ -25,6 +25,7 @@ public:
 
     //number of particles
     int num;
+    void setNum(int nn){num = nn;};
 
     GLuint pos_vbo;
     GLuint col_vbo;
@@ -37,6 +38,7 @@ public:
     //void compileShaders();
 
 };
+
 
 }
 
