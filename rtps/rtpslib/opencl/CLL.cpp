@@ -54,8 +54,9 @@ cl::Program CL::loadProgram(std::string path)
         srand(time(NULL));
         int rnd = rand() % 200 + 100;
         char options[50];
-        //sprintf(options, "-cl-nv-verbose -cl-nv-maxrregcount=%d", rnd);
-        sprintf(options, "-cl-nv-verbose -D rand=%d -D DEBUG", rnd);
+        //should really check for NVIDIA platform before doing this
+        sprintf(options, "-cl-nv-verbose -cl-nv-maxrregcount=%d", rnd);
+        //sprintf(options, "-D rand=%d -D DEBUG", rnd);
         err = program.build(devices, options);
 #else
         err = program.build(devices);
