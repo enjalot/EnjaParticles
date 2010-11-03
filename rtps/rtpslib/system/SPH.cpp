@@ -167,7 +167,15 @@ void SPH::update()
     //call kernels
     //TODO: add timings
 #ifdef CPU
+    updateCPU();
+#endif
+#ifdef GPU
+    updateGPU();
+#endif
+}
 
+void SPH::updateCPU()
+{
     cpuDensity();
     cpuPressure();
     cpuViscosity();
@@ -186,90 +194,74 @@ void SPH::update()
     /*
     for(int i = 0; i < 100; i++)
     {
- //       if(xsphs[i].z != 0.0)
-            //printf("force: %f %f %f  \n", veleval[i].x, veleval[i].y, veleval[i].z);
-            printf("force: %f %f %f  \n", xsphs[i].x, xsphs[i].y, xsphs[i].z);
-            //printf("force: %f %f %f  \n", velocities[i].x, velocities[i].y, velocities[i].z);
+        //if(xsphs[i].z != 0.0)
+        //printf("force: %f %f %f  \n", veleval[i].x, veleval[i].y, veleval[i].z);
+        printf("force: %f %f %f  \n", xsphs[i].x, xsphs[i].y, xsphs[i].z);
+        //printf("force: %f %f %f  \n", velocities[i].x, velocities[i].y, velocities[i].z);
     }
     */
     //printf("cpu execute!\n");
-
 
     glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
     glBufferData(GL_ARRAY_BUFFER, num * sizeof(float4), &positions[0], GL_DYNAMIC_DRAW);
 
 
+}
 
-#endif
-#ifdef GPU
+void SPH::updateGPU()
+{
     glFinish();
     cl_position.acquire();
     cl_color.acquire();
     
-    //printf("execute!\n");
+    //sub-intervals
     //for(int i=0; i < 10; i++)
     {
-        //printf("about to execute density\n");
-        //k_density.execute(max_num);
+        /*
         k_density.execute(num);
-        //printf("executed density\n");
-        //test density
-        /*
-        std::vector<float> dens = cl_density.copyToHost(num);
-        float dens_sum = 0.0f;
-        for(int j = 0; j < num; j++)
-        {
-            dens_sum += dens[j];
-        }
-        printf("summed density: %f\n", dens_sum);
-        */
-        /*
-        std::vector<float4> er = cl_error_check.copyToHost(10);
-        for(int j = 0; j < 10; j++)
-        {
-            printf("rrrr[%d]: %f %f %f %f\n", j, er[j].x, er[j].y, er[j].z, er[j].w);
-        }
-        */
-        /*
-        k_pressure.execute(max_num);
-        k_viscosity.execute(max_num);
-        k_xsph.execute(max_num);
-        k_collision_wall.execute(max_num);
-        */
         k_pressure.execute(num);
         k_viscosity.execute(num);
         k_xsph.execute(num);
-        k_collision_wall.execute(num);
 
+        */
 
-
-        if(sph_settings.integrator == EULER)
-        {
-            //k_euler.execute(max_num);
-            k_euler.execute(num);
-        }
-        else if(sph_settings.integrator == LEAPFROG)
-        {
-           //k_leapfrog.execute(max_num);
-           k_leapfrog.execute(max_num);
-        }
+        hash();
+        bitonic_sort();
+        buildDataStructures(); //reorder
+        
+        neighborSearch(0);  //density
+        neighborSearch(1);  //forces
+        
+        collision();
+        integrate();
     }
-    /*
-    std::vector<float4> ftest = cl_xsph.copyToHost(100);
-    for(int i = 0; i < 100; i++)
-    {
-//        if(ftest[i].z != 0.0)
-            printf("force: %f %f %f  \n", ftest[i].x, ftest[i].y, ftest[i].z);
-    }
-    */
-    //printf("gpu execute!\n");
 
     cl_position.release();
     cl_color.release();
 
 
-#endif
 }
+
+void SPH::collision()
+{
+    //when implemented other collision routines can be chosen here
+    k_collision_wall.execute(num);
+}
+
+void SPH::integrate()
+{
+    if(sph_settings.integrator == EULER)
+    {
+        //k_euler.execute(max_num);
+        k_euler.execute(num);
+    }
+    else if(sph_settings.integrator == LEAPFROG)
+    {
+       //k_leapfrog.execute(max_num);
+       k_leapfrog.execute(max_num);
+    }
+}
+
 
 void SPH::calculateSPHSettings()
 {
@@ -357,8 +349,6 @@ void SPH::prepareSorted()
 	}
     cl_vars_unsorted = Buffer<float4>(ps->cli, unsorted);
     cl_vars_sorted = Buffer<float4>(ps->cli, sorted);
-	
-
 
     std::vector<int> keys(max_num);
     std::fill(keys.begin(), keys.end(), 0);
