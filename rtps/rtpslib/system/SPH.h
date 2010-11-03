@@ -230,6 +230,11 @@ private:
     void cpuEuler();
     void cpuLeapFrog();
 
+    void updateCPU();
+    void updateGPU();
+
+    void collision();
+    void integrate();
 
     float Wpoly6(float4 r, float h);
     float Wspiky(float4 r, float h);

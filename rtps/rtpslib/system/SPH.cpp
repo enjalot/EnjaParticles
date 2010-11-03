@@ -217,14 +217,13 @@ void SPH::updateGPU()
     //sub-intervals
     //for(int i=0; i < 10; i++)
     {
-        /*
         k_density.execute(num);
         k_pressure.execute(num);
         k_viscosity.execute(num);
         k_xsph.execute(num);
 
-        */
 
+        /*
         hash();
         bitonic_sort();
         buildDataStructures(); //reorder
@@ -232,6 +231,7 @@ void SPH::updateGPU()
         neighborSearch(0);  //density
         neighborSearch(1);  //forces
         
+        */
         collision();
         integrate();
     }
