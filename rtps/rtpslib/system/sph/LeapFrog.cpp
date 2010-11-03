@@ -4,6 +4,8 @@ namespace rtps {
 
 void SPH::loadLeapFrog()
 {
+    printf("create leapfrog kernel\n");
+
     std::string path(SPH_CL_SOURCE_DIR);
     path += "/leapfrog_cl.cl";
     k_leapfrog = Kernel(ps->cli, path, "leapfrog");
@@ -16,7 +18,7 @@ void SPH::loadLeapFrog()
     k_leapfrog.setArg(4, cl_xsph.cl_buffer[0]);
     k_leapfrog.setArg(5, cl_color.cl_buffer[0]);
     k_leapfrog.setArg(6, ps->settings.dt); //time step
-    k_leapfrog.setArg(7, cl_params.cl_buffer[0]);
+    k_leapfrog.setArg(7, cl_SPHParams.cl_buffer[0]);
 
 } 
 

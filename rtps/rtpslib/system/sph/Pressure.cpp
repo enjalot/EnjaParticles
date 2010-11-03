@@ -7,6 +7,8 @@ namespace rtps {
 
 void SPH::loadPressure()
 {
+    printf("create pressure kernel\n");
+
     std::string path(SPH_CL_SOURCE_DIR);
     path += "/pressure_cl.cl";
     k_pressure = Kernel(ps->cli, path, "pressure");
@@ -15,7 +17,7 @@ void SPH::loadPressure()
     k_pressure.setArg(0, cl_position.cl_buffer[0]);
     k_pressure.setArg(1, cl_density.cl_buffer[0]);
     k_pressure.setArg(2, cl_force.cl_buffer[0]);
-    k_pressure.setArg(3, cl_params.cl_buffer[0]);
+    k_pressure.setArg(3, cl_SPHParams.cl_buffer[0]);
 
 } 
 

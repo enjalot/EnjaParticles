@@ -20,16 +20,8 @@ SPH::SPH(RTPS *psfr, int n)
 
     max_num = n;
     num = 0;
+    nb_var = 10;
 
-    //*** Initialization, TODO: move out of here to the particle directory
-    //std::vector<float4> colors(max_num);
-    /*
-    std::vector<float4> positions(num);
-    std::vector<float4> colors(num);
-    std::vector<float4> forces(num);
-    std::vector<float4> velocities(num);
-    std::vector<float> densities(num);
-    */
     positions.resize(max_num);
     colors.resize(max_num);
     forces.resize(max_num);
@@ -41,89 +33,22 @@ SPH::SPH(RTPS *psfr, int n)
     //seed random
     srand ( time(NULL) );
 
-
-
     //for reading back different values from the kernel
     std::vector<float4> error_check(max_num);
     
-    
-    //std::fill(positions.begin(), positions.end(),(float4) {0.0f, 0.0f, 0.0f, 1.0f});
     //init sph stuff
-    sph_settings.rest_density = 1000;
     //sph_settings.simulation_scale = .001;
     sph_settings.simulation_scale = .1;
+    float scale = sph_settings.simulation_scale;
 
-
-    //first need number of particles we will be using
-
+    grid = UniformGrid(float4(0,0,0,0), float4(.25/scale, .5/scale, .5/scale, 0), sph_settings.smoothing_distance / scale);
 
     //SPH settings depend on number of particles used
     calculateSPHSettings();
 
-    float particle_radius = sph_settings.spacing;
-    printf("particle radius: %f\n", particle_radius);
-
     sph_settings.integrator = LEAPFROG;
     //sph_settings.integrator = EULER;
 
-    float scale = sph_settings.simulation_scale;
-    //grid = UniformGrid(float3(0,0,0), float3(1024, 1024, 1024), sph_settings.smoothing_distance / sph_settings.simulation_scale);
-    grid = UniformGrid(float3(0,0,0), float3(.25/scale, .5/scale, .5/scale), sph_settings.smoothing_distance / sph_settings.simulation_scale);
-    //grid = UniformGrid(float3(0,0,0), float3(256, 256, 512), sph_settings.smoothing_distance / sph_settings.simulation_scale);
-    //grid.make_cube(&positions[0], sph_settings.spacing, num);
-    //grid.make_column(&positions[0], sph_settings.spacing, num);
-    //grid.make_dam(&positions[0], sph_settings.spacing, num);
-    
-    
-
-
-    
-/*
-typedef struct SPHParams
-{
-    float4 grid_min;
-    float4 grid_max;
-    float mass;
-    float rest_distance;
-    float simulation_scale;
-    float boundary_stiffness;
-    float boundary_dampening;
-    float boundary_distance;
-    float EPSILON;
- 
-} SPHParams;
-*/
-
-    params.grid_min = grid.getMin();
-    params.grid_max = grid.getMax();
-    params.mass = sph_settings.particle_mass;
-    params.rest_distance = sph_settings.particle_rest_distance;
-    params.smoothing_distance = sph_settings.smoothing_distance;
-    params.simulation_scale = sph_settings.simulation_scale;
-    params.boundary_stiffness = 10000.0f;
-    params.boundary_dampening = 256.0f;
-    params.boundary_distance = sph_settings.particle_rest_distance * .5f;
-    params.EPSILON = .00001f;
-    params.PI = 3.14159265f;
-    params.K = 15.0f;
-    params.num = num;
-    //params.K = 1.5f;
- 
-    //TODO make a helper constructor for buffer to make a cl_mem from a struct
-    std::vector<SPHParams> vparams(0);
-    vparams.push_back(params);
-    cl_params = Buffer<SPHParams>(ps->cli, vparams);
-
-
-    //std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));
-    /*
-    float factor;
-    for(int i = 0; i < num; i++)
-    {
-        factor = (positions[i].z - params.grid_min.z)/(params.grid_max.z - params.grid_min.z);
-        colors[i] = float4(factor, 0.0f, 1.0f - factor, 0.0f);
-    }
-    */
     std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 1.0f, 0.0f));
     std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     std::fill(veleval.begin(), veleval.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -132,17 +57,14 @@ typedef struct SPHParams
     std::fill(xsphs.begin(), xsphs.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     std::fill(error_check.begin(), error_check.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
 
-    /*
-    for(int i = 0; i < 20; i++)
-    {
-        printf("position[%d] = %f %f %f\n", positions[i].x, positions[i].y, positions[i].z);
-    }
-    */
-
     //*** end Initialization
-   
 
 
+#ifdef CPU
+    printf("RUNNING ON THE CPU\n");
+#endif
+#ifdef GPU
+    printf("RUNNING ON THE GPU\n");
 
     // VBO creation, TODO: should be abstracted to another class
     managed = true;
@@ -165,37 +87,19 @@ typedef struct SPHParams
     cl_density = Buffer<float>(ps->cli, densities);
     cl_xsph = Buffer<float4>(ps->cli, xsphs);
 
-    cl_error_check= Buffer<float4>(ps->cli, error_check);
+    //cl_error_check= Buffer<float4>(ps->cli, error_check);
 
+    //TODO make a helper constructor for buffer to make a cl_mem from a struct
+    std::vector<SPHParams> vparams(0);
+    vparams.push_back(params);
+    cl_SPHParams = Buffer<SPHParams>(ps->cli, vparams);
 
-    printf("create density kernel\n");
-    loadDensity();
+    //setup the sorted and unsorted arrays
+    prepareSorted();
 
-    printf("create pressure kernel\n");
-    loadPressure();
-
-    printf("create viscosity kernel\n");
-    loadViscosity();
-
-
-    printf("create collision wall kernel\n");
-    loadCollision_wall();
-
-    //could generalize this to other integration methods later (leap frog, RK4)
-    printf("create euler kernel\n");
-    loadEuler();
-    printf("euler kernel created\n");
-
-    printf("create leapfrog kernel\n");
-    loadLeapFrog();
-    printf("leapfrog kernel created\n");
-
-    printf("create xsph kernel\n");
-    loadXSPH();
-    printf("xsph kernel created\n");
-
-
-    int nn = 512;
+    ////////////////// Setup some initial particles
+    //// really this should be setup by the user
+    int nn = 1024;
     float4 min = float4(.05, .05, .05, 0.0f);
     float4 max = float4(.24, .24, .2, 0.0f);
     addBox(nn, min, max);
@@ -210,23 +114,35 @@ typedef struct SPHParams
     addBox(nn, min, max);
     */
 
-    float4 center = float4(.1/scale, .15/scale, .3/scale, 0.0f);
+    //float4 center = float4(.1/scale, .15/scale, .3/scale, 0.0f);
     //addBall(nn, center, .06/scale);
     //addBall(nn, center, .1/scale);
+    ////////////////// Done with setup particles
 
 
+    //replace these with the 2 steps
+    loadDensity();
+    loadPressure();
+    loadViscosity();
+    loadXSPH();
 
-#ifdef CPU
-    printf("RUNNING ON THE CPU\n");
+    //loadStep1();
+    //loadStep2();
+
+    loadCollision_wall();
+
+    //could generalize this to other integration methods later (leap frog, RK4)
+    if(sph_settings.integrator == LEAPFROG)
+    {
+        loadLeapFrog();
+    }
+    else if(sph_settings.integrator == EULER)
+    {
+        loadEuler();
+    }
+
+
 #endif
-#ifdef GPU
-    printf("RUNNING ON THE GPU\n");
-#endif
-
-    //check the params
-    //std::vector<SPHParams> test = cl_params.copyToHost(1);
-    //printf("mass: %f, EPSILON %f \n", test[0].mass, test[0].EPSILON);    
-
 
 }
 
@@ -360,6 +276,7 @@ void SPH::calculateSPHSettings()
     /*!
     * The Particle Mass (and hence everything following) depends on the MAXIMUM number of particles in the system
     */
+    sph_settings.rest_density = 1000;
 
     sph_settings.particle_mass = (128*1024.0)/max_num * .0002;
     printf("particle mass: %f\n", sph_settings.particle_mass);
@@ -373,14 +290,116 @@ void SPH::calculateSPHSettings()
 
     sph_settings.spacing = sph_settings.particle_rest_distance/ sph_settings.simulation_scale;
 
+    float particle_radius = sph_settings.spacing;
+    printf("particle radius: %f\n", particle_radius);
+ 
+    params.grid_min = grid.getMin();
+    params.grid_max = grid.getMax();
+    params.mass = sph_settings.particle_mass;
+    params.rest_distance = sph_settings.particle_rest_distance;
+    params.smoothing_distance = sph_settings.smoothing_distance;
+    params.simulation_scale = sph_settings.simulation_scale;
+    params.boundary_stiffness = 10000.0f;
+    params.boundary_dampening = 256.0f;
+    params.boundary_distance = sph_settings.particle_rest_distance * .5f;
+    params.EPSILON = .00001f;
+    params.PI = 3.14159265f;
+    params.K = 15.0f;
+    params.num = num;
+
+	float h = params.smoothing_distance;
+	float pi = acos(-1.0);
+	float h9 = pow(h,9.);
+	float h6 = pow(h,6.);
+	float h3 = pow(h,3.);
+    params.wpoly6_coef = 315.f/64.0f/pi/h9;
+	params.wpoly6_d_coef = -945.f/(32.0f*pi*h9);
+	params.wpoly6_dd_coef = -945.f/(32.0f*pi*h9);
+	params.wspiky_coef = 15.f/pi/h6;
+    params.wspiky_d_coef = 45.f/(pi*h6);
+	params.wvisc_coef = 15./(2.*pi*h3);
+	params.wvisc_d_coef = 15./(2.*pi*h3);
+	params.wvisc_dd_coef = 45./(pi*h6);
+
+}
+
+void SPH::prepareSorted()
+{
+    #include "sph/cl_macros.h"
+
+    std::vector<float4> unsorted(max_num*nb_var);
+    std::vector<float4> sorted(max_num*nb_var);
+
+    std::fill(unsorted.begin(), unsorted.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
+    std::fill(sorted.begin(), sorted.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
+
+    //This really should be done on the GPU
+    //we probably need to recopy if dynamically adding/removing particles
+	for (int i=0; i < max_num; i++) 
+    {
+		//vars[i+DENS*num] = densities[i];
+		// PROBLEM: density is float, but vars_unsorted is float4
+		// HOW TO DEAL WITH THIS WITHOUT DOUBLING MEMORY ACCESS in 
+		// buildDataStructures. 
+
+		unsorted[i+DENS*max_num].x = densities[i];
+		unsorted[i+DENS*max_num].y = 1.0; // for surface tension (always 1)
+		unsorted[i+POS*max_num] = positions[i];
+		unsorted[i+VEL*max_num] = velocities[i];
+		unsorted[i+FOR*max_num] = forces[i];
+
+		// SHOULD NOT BE REQUIRED
+		sorted[i+DENS*max_num].x = densities[i];
+		sorted[i+DENS*max_num].y = 1.0;  // for surface tension (always 1)
+		sorted[i+POS*max_num] = positions[i];
+		sorted[i+VEL*max_num] = velocities[i];
+		sorted[i+FOR*max_num] = forces[i];
+	}
+    cl_vars_unsorted = Buffer<float4>(ps->cli, unsorted);
+    cl_vars_sorted = Buffer<float4>(ps->cli, sorted);
+	
+
+
+    std::vector<int> keys(max_num);
+    std::fill(keys.begin(), keys.end(), 0);
+	cl_sort_indices  = Buffer<int>(ps->cli, keys);
+	cl_sort_hashes   = Buffer<int>(ps->cli, keys);
+
+	// for debugging. Store neighbors of indices
+	// change nb of neighbors in cl_macro.h as well
+	//cl_index_neigh = Buffer<int>(ps->cli, max_num*50);
+
+	// Size is the grid size. That is a problem since the number of
+	// occupied cells could be much less than the number of grid elements. 
+	//cl_cell_indices_start = Buffer<int>(ps->cli, gp.nb_points);
+	//cl_cell_indices_end   = Buffer<int>(ps->cli, gp.nb_points);
+	//printf("gp.nb_points= %d\n", gp.nb_points); exit(0);
+
+	// For bitonic sort. Remove when bitonic sort no longer used
+	// Currently, there is an error in the Radix Sort (just run both
+	// sorts and compare outputs visually
+	cl_sort_output_hashes = Buffer<int>(ps->cli, keys);
+	cl_sort_output_indices = Buffer<int>(ps->cli, keys);
+
+
+
 }
 
 void SPH::addBox(int nn, float4 min, float4 max)
 {
     vector<float4> rect = addRect(nn, min, max, sph_settings.spacing, sph_settings.simulation_scale);
-    nn = rect.size();
-    printf("rectangle size: %d\n", nn);
+    pushParticles(rect);
+}
 
+void SPH::addBall(int nn, float4 center, float radius)
+{
+    vector<float4> sphere = addSphere(nn, center, radius, sph_settings.spacing, sph_settings.simulation_scale);
+    pushParticles(sphere);
+}
+
+void SPH::pushParticles(vector<float4> pos)
+{
+    int nn = pos.size();
     float rr = (rand() % 255)/255.0f;
     float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
     printf("random: %f\n", rr);
@@ -390,9 +409,7 @@ void SPH::addBox(int nn, float4 min, float4 max)
     //according to docs the assign function drops previous values which is no good
     for(int i = 0; i < nn; i++)
     {
-        //printf("i: %d", i);
-        positions[num+i] = rect[i];
-        //colors[num+i] = color;
+        positions[num+i] = pos[i];
         cols[i] = color;
     }
 #ifdef GPU
@@ -400,13 +417,13 @@ void SPH::addBox(int nn, float4 min, float4 max)
     cl_position.acquire();
     cl_color.acquire();
     
-    cl_position.copyToDevice(rect, num);
+    cl_position.copyToDevice(pos, num);
     cl_color.copyToDevice(cols, num);
 
     params.num = num+nn;
     std::vector<SPHParams> vparams(0);
     vparams.push_back(params);
-    cl_params.copyToDevice(vparams);
+    cl_SPHParams.copyToDevice(vparams);
 
     cl_color.release();
     cl_position.release();
@@ -415,22 +432,6 @@ void SPH::addBox(int nn, float4 min, float4 max)
     ps->updateNum(params.num);
 
 #endif
-    num += nn;  //keep track of number of particles we use
-}
-
-void SPH::addBall(int nn, float4 center, float radius)
-{
-    vector<float4> sphere = addSphere(nn, center, radius, sph_settings.spacing, sph_settings.simulation_scale);
-    nn = sphere.size();
-    printf("sphere size: %d\n", nn);
-
-    //there should be a better/faster way to do this with vector iterator or something?
-    //according to docs the assign function drops previous values which is no good
-    for(int i = 0; i < nn; i++)
-    {
-        //printf("i: %d", i);
-        positions[num+i] = sphere[i];
-    }
     num += nn;  //keep track of number of particles we use
 }
 

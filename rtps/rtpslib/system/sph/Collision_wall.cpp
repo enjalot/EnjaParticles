@@ -4,6 +4,8 @@ namespace rtps {
 
 void SPH::loadCollision_wall()
 {
+    printf("create collision wall kernel\n");
+
     std::string path(SPH_CL_SOURCE_DIR);
     path += "/collision_wall_cl.cl";
     k_collision_wall = Kernel(ps->cli, path, "collision_wall");
@@ -21,7 +23,7 @@ void SPH::loadCollision_wall()
         k_collision_wall.setArg(1, cl_velocity.cl_buffer[0]);
     }
     k_collision_wall.setArg(2, cl_force.cl_buffer[0]);
-    k_collision_wall.setArg(3, cl_params.cl_buffer[0]);
+    k_collision_wall.setArg(3, cl_SPHParams.cl_buffer[0]);
 
 } 
 

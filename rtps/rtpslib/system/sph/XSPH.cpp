@@ -4,6 +4,8 @@ namespace rtps {
 
 void SPH::loadXSPH()
 {
+    printf("create xsph kernel\n");
+
     std::string path(SPH_CL_SOURCE_DIR);
     path += "/xsph_cl.cl";
     k_xsph = Kernel(ps->cli, path, "xsph");
@@ -21,7 +23,7 @@ void SPH::loadXSPH()
     k_xsph.setArg(2, cl_density.cl_buffer[0]);
     k_xsph.setArg(3, cl_force.cl_buffer[0]);
     k_xsph.setArg(4, cl_xsph.cl_buffer[0]);
-    k_xsph.setArg(5, cl_params.cl_buffer[0]);
+    k_xsph.setArg(5, cl_SPHParams.cl_buffer[0]);
 
 } 
 

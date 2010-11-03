@@ -33,11 +33,8 @@ typedef struct SPHSettings
 //pass parameters to OpenCL routines
 typedef struct SPHParams
 {
-    float3 grid_min;
-    //float grid_min_padding;     //float3s take up a float4 of space in OpenCL 1.0 and 1.1
-    float3 grid_max;
-    //float grid_max_padding;
-//    int num;
+    float4 grid_min;
+    float4 grid_max;
     float mass;
     float rest_distance;
     float smoothing_distance;
@@ -48,9 +45,97 @@ typedef struct SPHParams
     float EPSILON;
     float PI;       //delicious
     float K;        //gas constant
+
+    float friction_coef;
+	float restitution_coef;
+	float shear;
+	float attraction;
+	float spring;
+	float gravity; // -9.8 m/sec^2
+
+    //Kernel Coefficients
+    float wpoly6_coef;
+	float wpoly6_d_coef;
+	float wpoly6_dd_coef; // laplacian
+	float wspiky_coef;
+	float wspiky_d_coef;
+	float wspiky_dd_coef;
+	float wvisc_coef;
+	float wvisc_d_coef;
+	float wvisc_dd_coef;
+
     int num;
+    int nb_vars; // for combined variables (vars_sorted, etc.)
+	int choice; // which kind of calculation to invoke
  
+    
+    void print() {
+		printf("----- SPHParams ----\n");
+		printf("simulation_scale: %f\n", simulation_scale);
+		printf("friction_coef: %f\n", friction_coef);
+		printf("restitution_coef: %f\n", restitution_coef);
+		printf("damping: %f\n", boundary_dampening);
+		printf("shear: %f\n", shear);
+		printf("attraction: %f\n", attraction);
+		printf("spring: %f\n", spring);
+		printf("gravity: %f\n", gravity);
+		printf("choice: %d\n", choice);
+	}
 } SPHParams __attribute__((aligned(16)));
+
+//-------------------------
+// GORDON Datastructure for Grids. To be reconciled with Ian's
+struct GridParams
+{
+    float4          grid_size;
+    float4          grid_min;
+    float4          grid_max;
+    // particles stay within bnd
+    float4          bnd_min; 
+    float4          bnd_max;
+    // number of cells in each dimension/side of grid
+    float4          grid_res;
+    float4          grid_delta;
+    float4          grid_inv_delta;
+    // nb grid points
+	int 			nb_points; 
+
+	void print()
+	{
+		printf("\n----- GridParams ----\n");
+		grid_size.print("grid_size"); 
+		grid_min.print("grid_min"); 
+		grid_max.print("grid_max"); 
+		bnd_min.print("bnd_min"); 
+		bnd_max.print("bnd_max"); 
+		grid_res.print("grid_res"); 
+		grid_delta.print("grid_delta"); 
+		grid_inv_delta.print("grid_inv_delta"); 
+		printf("nb grid points: %d\n", nb_points);
+	}
+};
+
+//----------------------------------------------------------------------
+// GORDON Datastructure for Fluid parameters.
+// struct for fluid parameters
+struct FluidParams
+{
+	float smoothing_length; // SPH radius
+	float scale_to_simulation;
+	//float mass;
+	//float dt;
+	float friction_coef;
+	float restitution_coef;
+	float damping;
+	float shear;
+	float attraction;
+	float spring;
+	float gravity; // -9.8 m/sec^2
+	int   choice; // which kind of calculation to invoke
+
+};
+
+
 
 class SPH : public System
 {
@@ -72,6 +157,8 @@ private:
     SPHSettings sph_settings;
     SPHParams params;
 
+    int nb_var;
+
     //needs to be called when particles are added
     void calculateSPHSettings();
 
@@ -80,25 +167,47 @@ private:
     Kernel k_euler, k_leapfrog;
     Kernel k_xsph;
 
-    Buffer<SPHParams> cl_params;
-
-
     std::vector<float4> positions;
     std::vector<float4> colors;
-    std::vector<float> densities;
+    std::vector<float>  densities;
     std::vector<float4> forces;
     std::vector<float4> velocities;
     std::vector<float4> veleval;
     std::vector<float4> xsphs;
 
-    Buffer<float4> cl_position;
-    Buffer<float4> cl_color;
-    Buffer<float> cl_density;
-    Buffer<float4> cl_force;
-    Buffer<float4> cl_velocity;
-    Buffer<float4> cl_veleval;
-    Buffer<float4> cl_xsph;
+    Buffer<float4>      cl_position;
+    Buffer<float4>      cl_color;
+    Buffer<float>       cl_density;
+    Buffer<float4>      cl_force;
+    Buffer<float4>      cl_velocity;
+    Buffer<float4>      cl_veleval;
+    Buffer<float4>      cl_xsph;
+
+    //Neighbor Search related arrays
+	Buffer<float4> 	    cl_vars_sorted;
+	Buffer<float4> 	    cl_vars_unsorted;
+	Buffer<float4>   	cl_cells; // positions in Ian code
+	Buffer<int> 		cl_cell_indices_start;
+	Buffer<int> 		cl_cell_indices_end;
+	Buffer<int> 		cl_vars_sort_indices;
+	Buffer<int> 		cl_sort_hashes;
+	Buffer<int> 		cl_sort_indices;
+	Buffer<int> 		cl_unsort;
+	Buffer<int> 		cl_sort;
+	
+    //Two arrays for bitonic sort (sort not done in place)
+	Buffer<int>         cl_sort_output_hashes;
+	Buffer<int>         cl_sort_output_indices;
     
+    //Parameter structs
+    Buffer<SPHParams>   cl_SPHParams;
+	Buffer<GridParams>  cl_GridParams;
+   
+    //index neighbors. Maximum of 50
+	Buffer<int> 		cl_index_neigh;
+    
+    
+    //still in use?
     Buffer<float4> cl_error_check;
 
     //these are defined in sph/ folder next to the kernels
@@ -109,6 +218,8 @@ private:
     void loadCollision_wall();
     void loadEuler();
     void loadLeapFrog();
+
+    //void loadNeighbors();
 
     //CPU functions
     void cpuDensity();
@@ -123,6 +234,9 @@ private:
     float Wpoly6(float4 r, float h);
     float Wspiky(float4 r, float h);
     float Wviscosity(float4 r, float h);
+
+    void prepareSorted();
+    void pushParticles(vector<float4> pos);
 
 };
 

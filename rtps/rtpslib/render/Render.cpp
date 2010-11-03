@@ -150,7 +150,7 @@ void Render::render()
 
 }
 
-void Render::render_box(float3 min, float3 max)
+void Render::render_box(float4 min, float4 max)
 {
 	
     glEnable(GL_DEPTH_TEST);

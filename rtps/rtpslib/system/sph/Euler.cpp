@@ -4,6 +4,8 @@ namespace rtps {
 
 void SPH::loadEuler()
 {
+    printf("create euler kernel\n");
+
     std::string path(SPH_CL_SOURCE_DIR);
     path += "/euler_cl.cl";
     k_euler = Kernel(ps->cli, path, "euler");
@@ -13,7 +15,7 @@ void SPH::loadEuler()
     k_euler.setArg(1, cl_velocity.cl_buffer[0]);
     k_euler.setArg(2, cl_force.cl_buffer[0]);
     k_euler.setArg(3, ps->settings.dt); //time step
-    k_euler.setArg(4, cl_params.cl_buffer[0]);
+    k_euler.setArg(4, cl_SPHParams.cl_buffer[0]);
 
 } 
 
@@ -28,7 +30,7 @@ void SPH::cpuEuler()
 
 		if (i == 0) {
 			printf("==================================\n");
-			printf("Euler: p[%d]= %d, %f, %f, %f\n", i, p.x, p.y, p.z, p.w);
+			printf("Euler: p[%d]= %f, %f, %f, %f\n", i, p.x, p.y, p.z, p.w);
 			printf("       v[%d]= %f, %f, %f, %f\n", i, v.x, v.y, v.z, v.w);
 		}
 

@@ -4,6 +4,8 @@ namespace rtps {
 
 void SPH::loadViscosity()
 {
+    printf("create viscosity kernel\n");
+
     std::string path(SPH_CL_SOURCE_DIR);
     path += "/viscosity_cl.cl";
     k_viscosity = Kernel(ps->cli, path, "viscosity");
@@ -20,7 +22,7 @@ void SPH::loadViscosity()
     }
     k_viscosity.setArg(2, cl_density.cl_buffer[0]);
     k_viscosity.setArg(3, cl_force.cl_buffer[0]);
-    k_viscosity.setArg(4, cl_params.cl_buffer[0]);
+    k_viscosity.setArg(4, cl_SPHParams.cl_buffer[0]);
 
 } 
 

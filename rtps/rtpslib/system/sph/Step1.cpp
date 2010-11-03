@@ -18,14 +18,16 @@ namespace rtps {
 
 void SPH::loadDensity()
 {
-    #include "density.cl"
-    //printf("%s\n", density_program_source.c_str());
-    k_density = Kernel(ps->cli, density_program_source, "density");
+    printf("create step1 kernel\n");
+
+    std::string path(SPH_CL_SOURCE_DIR);
+    path += "/step1_cl.cl";
+    k_step1 = Kernel(ps->cli, path, "step1");
   
     //TODO: fix the way we are wrapping buffers
-    k_density.setArg(0, cl_position.cl_buffer[0]);
-    k_density.setArg(1, cl_density.cl_buffer[0]);
-    k_density.setArg(2, cl_params.cl_buffer[0]);
+    k_step1.setArg(0, cl_position.cl_buffer[0]);
+    k_step1.setArg(1, cl_density.cl_buffer[0]);
+    k_step1.setArg(2, cl_params.cl_buffer[0]);
     //k_density.setArg(3, cl_error_check.cl_buffer[0]);
 
 } 
