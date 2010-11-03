@@ -13,7 +13,7 @@
 
 namespace rtps {
 
-typedef enum Integrator {EULER, LEAPFROG};
+enum Integrator {EULER, LEAPFROG};
 
 //keep track of the fluid settings
 typedef struct SPHSettings

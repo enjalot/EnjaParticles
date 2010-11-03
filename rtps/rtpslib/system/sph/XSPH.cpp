@@ -4,9 +4,9 @@ namespace rtps {
 
 void SPH::loadXSPH()
 {
-    #include "xsph.cl"
-    //printf("%s\n", euler_program_source.c_str());
-    k_xsph = Kernel(ps->cli, xsph_program_source, "xsph");
+    std::string path(SPH_CL_SOURCE_DIR);
+    path += "/xsph_cl.cl";
+    k_xsph = Kernel(ps->cli, path, "xsph");
   
     //TODO: fix the way we are wrapping buffers
     k_xsph.setArg(0, cl_position.cl_buffer[0]);

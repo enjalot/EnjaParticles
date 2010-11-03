@@ -4,9 +4,9 @@ namespace rtps {
 
 void SPH::loadViscosity()
 {
-    #include "viscosity.cl"
-    //printf("%s\n", euler_program_source.c_str());
-    k_viscosity = Kernel(ps->cli, viscosity_program_source, "viscosity");
+    std::string path(SPH_CL_SOURCE_DIR);
+    path += "/viscosity_cl.cl";
+    k_viscosity = Kernel(ps->cli, path, "viscosity");
   
     //TODO: fix the way we are wrapping buffers
     k_viscosity.setArg(0, cl_position.cl_buffer[0]);

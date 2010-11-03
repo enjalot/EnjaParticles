@@ -4,9 +4,9 @@ namespace rtps {
 
 void SPH::loadEuler()
 {
-    #include "euler.cl"
-    //printf("%s\n", euler_program_source.c_str());
-    k_euler = Kernel(ps->cli, euler_program_source, "euler");
+    std::string path(SPH_CL_SOURCE_DIR);
+    path += "/euler_cl.cl";
+    k_euler = Kernel(ps->cli, path, "euler");
   
     //TODO: fix the way we are wrapping buffers
     k_euler.setArg(0, cl_position.cl_buffer[0]);

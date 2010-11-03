@@ -4,9 +4,9 @@ namespace rtps {
 
 void SPH::loadLeapFrog()
 {
-    #include "leapfrog.cl"
-    //printf("%s\n", euler_program_source.c_str());
-    k_leapfrog = Kernel(ps->cli, leapfrog_program_source, "leapfrog");
+    std::string path(SPH_CL_SOURCE_DIR);
+    path += "/leapfrog_cl.cl";
+    k_leapfrog = Kernel(ps->cli, path, "leapfrog");
   
     //TODO: fix the way we are wrapping buffers
     k_leapfrog.setArg(0, cl_position.cl_buffer[0]);

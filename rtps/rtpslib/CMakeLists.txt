@@ -21,14 +21,21 @@ message("${CMAKE_MODULE_PATH}\n")
 SET(WITH_OPENCL TRUE)
 
 ADD_DEFINITIONS(-g )
-#ADD_DEFINITIONS(-DDEBUG)
+ADD_DEFINITIONS(-DDEBUG)
 IF(WITH_OPENCL)
     ADD_DEFINITIONS(-DGPU)
 ENDIF(WITH_OPENCL)
 #might want to have CPU even if we have OpenCL available
 #ADD_DEFINITIONS(-DCPU)
 
-################################################################
+##############################################################################
+
+##### Source Paths ############################################################
+ADD_DEFINITIONS(-DSIMPLE_CL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/system/simple")
+ADD_DEFINITIONS(-DSPH_CL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/system/sph")
+
+
+##############################################################################
 
 
 FIND_PACKAGE (OpenGL)
@@ -113,3 +120,8 @@ add_custom_command(
 )
 
 add_custom_target(doc DEPENDS ${DOXYGEN_OUTPUT})
+
+
+
+ADD_SUBDIRECTORY(system/simple)
+ADD_SUBDIRECTORY(system/sph)

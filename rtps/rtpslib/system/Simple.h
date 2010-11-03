@@ -28,13 +28,15 @@ public:
     std::vector<float4> forces;
 
 
-    //Kernel k_euler;
+    Kernel k_euler;
 
     Buffer<float4> cl_position;
     Buffer<float4> cl_color;
-    //Buffer<float4> cl_force;
-    //Buffer<float4> cl_velocity;
+    Buffer<float4> cl_force;
+    Buffer<float4> cl_velocity;
     
+
+    void loadEuler();
 
     void cpuEuler();
 
