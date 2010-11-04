@@ -24,10 +24,9 @@ void SPH::loadDensity()
     path += "/density_cl.cl";
     k_density = Kernel(ps->cli, path, "density");
   
-    //TODO: fix the way we are wrapping buffers
-    k_density.setArg(0, cl_position.cl_buffer[0]);
-    k_density.setArg(1, cl_density.cl_buffer[0]);
-    k_density.setArg(2, cl_SPHParams.cl_buffer[0]);
+    k_density.setArg(0, cl_position.getDevicePtr());
+    k_density.setArg(1, cl_density.getDevicePtr());
+    k_density.setArg(2, cl_SPHParams.getDevicePtr());
     //k_density.setArg(3, cl_error_check.cl_buffer[0]);
 
 } 

@@ -4,8 +4,12 @@
 
 #include "System.h"
 #include "SPH.h"
-#include "../domain/UniformGrid.h"
-#include "../domain/IV.h"
+//#include "../domain/UniformGrid.h"
+#include "Domain.h"
+#include "IV.h"
+
+#include "oclSortingNetworks_common.h"
+extern "C" void closeBitonicSort(void);
 
 //for random
 #include<time.h>
@@ -41,10 +45,13 @@ SPH::SPH(RTPS *psfr, int n)
     sph_settings.simulation_scale = .1;
     float scale = sph_settings.simulation_scale;
 
-    grid = UniformGrid(float4(0,0,0,0), float4(.25/scale, .5/scale, .5/scale, 0), sph_settings.smoothing_distance / scale);
+    //grid = Domain(float4(0,0,0,0), float4(.25/scale, .5/scale, .5/scale, 0));
+    grid = Domain(float4(0,0,0,0), float4(1/scale, 1/scale, 1/scale, 0));
 
     //SPH settings depend on number of particles used
     calculateSPHSettings();
+    //set up the grid
+    setupDomain();
 
     sph_settings.integrator = LEAPFROG;
     //sph_settings.integrator = EULER;
@@ -94,14 +101,26 @@ SPH::SPH(RTPS *psfr, int n)
     vparams.push_back(params);
     cl_SPHParams = Buffer<SPHParams>(ps->cli, vparams);
 
+    std::vector<GridParams> gparams(0);
+    gparams.push_back(grid_params);
+    cl_GridParams = Buffer<GridParams>(ps->cli, gparams);
+
+    //setup debug arrays
+    std::vector<float4> clfv(max_num);
+    std::fill(clfv.begin(), clfv.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
+    std::vector<int4> cliv(max_num);
+    std::fill(cliv.begin(), cliv.end(),int4(0.0f, 0.0f, 0.0f, 0.0f));
+    clf_debug = Buffer<float4>(ps->cli, clfv);
+    cli_debug = Buffer<int4>(ps->cli, cliv);
+
     //setup the sorted and unsorted arrays
     prepareSorted();
 
     ////////////////// Setup some initial particles
     //// really this should be setup by the user
     int nn = 1024;
-    float4 min = float4(.05, .05, .05, 0.0f);
-    float4 max = float4(.24, .24, .2, 0.0f);
+    float4 min = float4(.4, .4, .1, 0.0f);
+    float4 max = float4(.6, .6, .4, 0.0f);
     addBox(nn, min, max);
  
     min = float4(.05, .05, .3, 0.0f);
@@ -141,6 +160,11 @@ SPH::SPH(RTPS *psfr, int n)
         loadEuler();
     }
 
+    loadScopy();
+
+    loadHash();
+    loadBitonicSort();
+
 
 #endif
 
@@ -160,6 +184,9 @@ SPH::~SPH()
         glDeleteBuffers(1, (GLuint*)&col_vbo);
         col_vbo = 0;
     }
+
+    //Needed while bitonic sort is still C interface
+    closeBitonicSort();
 }
 
 void SPH::update()
@@ -222,15 +249,14 @@ void SPH::updateGPU()
         k_viscosity.execute(num);
         k_xsph.execute(num);
 
-
-        /*
         hash();
         bitonic_sort();
+        /*
         buildDataStructures(); //reorder
         
         neighborSearch(0);  //density
         neighborSearch(1);  //forces
-        
+
         */
         collision();
         integrate();
@@ -359,11 +385,16 @@ void SPH::prepareSorted()
 	// change nb of neighbors in cl_macro.h as well
 	//cl_index_neigh = Buffer<int>(ps->cli, max_num*50);
 
-	// Size is the grid size. That is a problem since the number of
+    // Size is the grid size. That is a problem since the number of
 	// occupied cells could be much less than the number of grid elements. 
-	//cl_cell_indices_start = Buffer<int>(ps->cli, gp.nb_points);
-	//cl_cell_indices_end   = Buffer<int>(ps->cli, gp.nb_points);
+    std::vector<int> gcells(grid_params.nb_cells);
+    std::fill(gcells.begin(), gcells.end(), 0);
+
+	cl_cell_indices_start = Buffer<int>(ps->cli, gcells);
+	cl_cell_indices_end   = Buffer<int>(ps->cli, gcells);
 	//printf("gp.nb_points= %d\n", gp.nb_points); exit(0);
+
+
 
 	// For bitonic sort. Remove when bitonic sort no longer used
 	// Currently, there is an error in the Radix Sort (just run both
@@ -371,8 +402,29 @@ void SPH::prepareSorted()
 	cl_sort_output_hashes = Buffer<int>(ps->cli, keys);
 	cl_sort_output_indices = Buffer<int>(ps->cli, keys);
 
+}
+
+void SPH::setupDomain()
+{
+    grid.calculateCells(sph_settings.smoothing_distance / sph_settings.simulation_scale);
 
 
+	grid_params.grid_min = grid.getMin();
+	grid_params.grid_max = grid.getMax();
+	grid_params.bnd_min  = grid.getBndMin();
+	grid_params.bnd_max  = grid.getBndMax();
+	grid_params.grid_res = grid.getRes();
+	grid_params.grid_size = grid.getSize();
+	grid_params.grid_delta = grid.getDelta();
+	grid_params.nb_cells = (int) (grid_params.grid_res.x*grid_params.grid_res.y*grid_params.grid_res.z);
+
+
+	grid_params.grid_inv_delta.x = 1. / grid_params.grid_delta.x;
+	grid_params.grid_inv_delta.y = 1. / grid_params.grid_delta.y;
+	grid_params.grid_inv_delta.z = 1. / grid_params.grid_delta.z;
+	grid_params.grid_inv_delta.w = 1.;
+
+    
 }
 
 void SPH::addBox(int nn, float4 min, float4 max)

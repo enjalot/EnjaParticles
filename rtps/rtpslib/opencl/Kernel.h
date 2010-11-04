@@ -41,6 +41,7 @@ public:
     //assumes null range for worksize offset and local worksize
     void execute(int ndrange);
     //later we will make more execute routines to give more options
+    void execute(int ndrange, int workgroup_size);
     
 };
 

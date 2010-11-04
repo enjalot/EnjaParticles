@@ -28,6 +28,27 @@ typedef struct int3 {
 	}
 } int3;
 
+// GE: Sept. 8, 2010
+// Coded as int4 since OpenCL does not have int3
+typedef struct int4 {
+	int x, y, z;
+	int w;
+	int4() {}
+	int4(float x, float y, float z, float w=1.) {
+		this->x = x;
+		this->y = y;
+		this->z = z;
+		this->w = w;
+	}
+	int4(int x, int y, int z, int w=1) {
+		this->x = x;
+		this->y = y;
+		this->z = z;
+		this->w = w;
+	}
+} int4;
+
+
 // IJ
 typedef struct float4
 {

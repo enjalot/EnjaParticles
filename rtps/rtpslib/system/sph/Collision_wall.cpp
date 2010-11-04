@@ -11,19 +11,19 @@ void SPH::loadCollision_wall()
     k_collision_wall = Kernel(ps->cli, path, "collision_wall");
   
     //TODO: fix the way we are wrapping buffers
-    k_collision_wall.setArg(0, cl_position.cl_buffer[0]);
+    k_collision_wall.setArg(0, cl_position.getDevicePtr());
     //k_collision_wall.setArg(1, cl_velocity.cl_buffer[0]);
     //should check for leapfrog, then want to use veleval
      if(sph_settings.integrator == LEAPFROG)
     {
-        k_collision_wall.setArg(1, cl_veleval.cl_buffer[0]);
+        k_collision_wall.setArg(1, cl_veleval.getDevicePtr());
     }
     else if(sph_settings.integrator == EULER)
     {
-        k_collision_wall.setArg(1, cl_velocity.cl_buffer[0]);
+        k_collision_wall.setArg(1, cl_velocity.getDevicePtr());
     }
-    k_collision_wall.setArg(2, cl_force.cl_buffer[0]);
-    k_collision_wall.setArg(3, cl_SPHParams.cl_buffer[0]);
+    k_collision_wall.setArg(2, cl_force.getDevicePtr());
+    k_collision_wall.setArg(3, cl_SPHParams.getDevicePtr());
 
 } 
 

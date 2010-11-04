@@ -8,7 +8,7 @@
 #include "../opencl/Kernel.h"
 #include "../opencl/Buffer.h"
 //#include "../util.h"
-#include "../domain/UniformGrid.h"
+#include "../domain/Domain.h"
 
 
 namespace rtps {
@@ -83,38 +83,6 @@ typedef struct SPHParams
 	}
 } SPHParams __attribute__((aligned(16)));
 
-//-------------------------
-// GORDON Datastructure for Grids. To be reconciled with Ian's
-struct GridParams
-{
-    float4          grid_size;
-    float4          grid_min;
-    float4          grid_max;
-    // particles stay within bnd
-    float4          bnd_min; 
-    float4          bnd_max;
-    // number of cells in each dimension/side of grid
-    float4          grid_res;
-    float4          grid_delta;
-    float4          grid_inv_delta;
-    // nb grid points
-	int 			nb_points; 
-
-	void print()
-	{
-		printf("\n----- GridParams ----\n");
-		grid_size.print("grid_size"); 
-		grid_min.print("grid_min"); 
-		grid_max.print("grid_max"); 
-		bnd_min.print("bnd_min"); 
-		bnd_max.print("bnd_max"); 
-		grid_res.print("grid_res"); 
-		grid_delta.print("grid_delta"); 
-		grid_inv_delta.print("grid_inv_delta"); 
-		printf("nb grid points: %d\n", nb_points);
-	}
-};
-
 //----------------------------------------------------------------------
 // GORDON Datastructure for Fluid parameters.
 // struct for fluid parameters
@@ -156,16 +124,26 @@ private:
 
     SPHSettings sph_settings;
     SPHParams params;
+    GridParams grid_params;
 
     int nb_var;
 
     //needs to be called when particles are added
     void calculateSPHSettings();
+    void setupDomain();
+    void prepareSorted();
+    void pushParticles(vector<float4> pos);
+    //void popParticles();
 
     Kernel k_density, k_pressure, k_viscosity;
     Kernel k_collision_wall;
     Kernel k_euler, k_leapfrog;
     Kernel k_xsph;
+
+    Kernel k_hash;
+
+    //This should be in OpenCL classes
+    Kernel k_scopy;
 
     std::vector<float4> positions;
     std::vector<float4> colors;
@@ -205,6 +183,9 @@ private:
    
     //index neighbors. Maximum of 50
 	Buffer<int> 		cl_index_neigh;
+	
+    Buffer<float4>  	clf_debug;  //just for debugging cl files
+	Buffer<int4>		cli_debug;  //just for debugging cl files
     
     
     //still in use?
@@ -219,6 +200,9 @@ private:
     void loadEuler();
     void loadLeapFrog();
 
+    //Nearest Neighbors search related kernels
+    void loadHash();
+    void loadBitonicSort();
     //void loadNeighbors();
 
     //CPU functions
@@ -233,6 +217,11 @@ private:
     void updateCPU();
     void updateGPU();
 
+    //Nearest Neighbors search related functions
+    void hash();
+    void bitonic_sort();
+    void buildDataStructures();
+    void neighborSearch(int choice);
     void collision();
     void integrate();
 
@@ -240,9 +229,11 @@ private:
     float Wspiky(float4 r, float h);
     float Wviscosity(float4 r, float h);
 
-    void prepareSorted();
-    void pushParticles(vector<float4> pos);
-
+    //OpenCL helper functions, should probably be part of the OpenCL classes
+    void loadScopy();
+	void scopy(int n, cl_mem xsrc, cl_mem ydst); 
+	//void sset_int(int n, int val, cl_mem xdst);
+   
 };
 
 

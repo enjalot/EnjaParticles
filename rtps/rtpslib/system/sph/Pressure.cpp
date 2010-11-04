@@ -14,10 +14,10 @@ void SPH::loadPressure()
     k_pressure = Kernel(ps->cli, path, "pressure");
   
     //TODO: fix the way we are wrapping buffers
-    k_pressure.setArg(0, cl_position.cl_buffer[0]);
-    k_pressure.setArg(1, cl_density.cl_buffer[0]);
-    k_pressure.setArg(2, cl_force.cl_buffer[0]);
-    k_pressure.setArg(3, cl_SPHParams.cl_buffer[0]);
+    k_pressure.setArg(0, cl_position.getDevicePtr());
+    k_pressure.setArg(1, cl_density.getDevicePtr());
+    k_pressure.setArg(2, cl_force.getDevicePtr());
+    k_pressure.setArg(3, cl_SPHParams.getDevicePtr());
 
 } 
 

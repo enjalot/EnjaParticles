@@ -10,19 +10,18 @@ void SPH::loadViscosity()
     path += "/viscosity_cl.cl";
     k_viscosity = Kernel(ps->cli, path, "viscosity");
   
-    //TODO: fix the way we are wrapping buffers
-    k_viscosity.setArg(0, cl_position.cl_buffer[0]);
+    k_viscosity.setArg(0, cl_position.getDevicePtr());
     if(sph_settings.integrator == LEAPFROG)
     {
-        k_viscosity.setArg(1, cl_veleval.cl_buffer[0]);
+        k_viscosity.setArg(1, cl_veleval.getDevicePtr());
     }
     else if(sph_settings.integrator == EULER)
     {
-        k_viscosity.setArg(1, cl_velocity.cl_buffer[0]);
+        k_viscosity.setArg(1, cl_velocity.getDevicePtr());
     }
-    k_viscosity.setArg(2, cl_density.cl_buffer[0]);
-    k_viscosity.setArg(3, cl_force.cl_buffer[0]);
-    k_viscosity.setArg(4, cl_SPHParams.cl_buffer[0]);
+    k_viscosity.setArg(2, cl_density.getDevicePtr());
+    k_viscosity.setArg(3, cl_force.getDevicePtr());
+    k_viscosity.setArg(4, cl_SPHParams.getDevicePtr());
 
 } 
 

@@ -33,6 +33,8 @@ ENDIF(WITH_OPENCL)
 ##### Source Paths ############################################################
 ADD_DEFINITIONS(-DSIMPLE_CL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/system/simple")
 ADD_DEFINITIONS(-DSPH_CL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/system/sph")
+ADD_DEFINITIONS(-DBITONIC_CL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/")
+
 
 
 ##############################################################################
@@ -47,6 +49,13 @@ set (rtpslib_INCLUDES
     ${OPENGL_INCLUDE_DIR}
     ${GLEW_INCLUDE_PATH}
     ${BASE_DIR}/opencl10
+    ${rtpslib_SOURCE_DIR}
+    ${rtpslib_SOURCE_DIR}/system
+    ${rtpslib_SOURCE_DIR}/render
+    ${rtpslib_SOURCE_DIR}/domain
+    ${rtpslib_SOURCE_DIR}/opencl
+    ${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src
+
 )
 
 
@@ -59,7 +68,7 @@ set (rtpslib_SOURCES
 
     ${rtpslib_SOURCE_DIR}/render/Render
 
-    ${rtpslib_SOURCE_DIR}/domain/UniformGrid
+    ${rtpslib_SOURCE_DIR}/domain/Domain
     ${rtpslib_SOURCE_DIR}/domain/IV
 
     
@@ -74,6 +83,14 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/sph/Viscosity
     ${rtpslib_SOURCE_DIR}/system/sph/XSPH
     ${rtpslib_SOURCE_DIR}/system/sph/Collision_wall
+    
+    ${rtpslib_SOURCE_DIR}/system/sph/Hash
+    ${rtpslib_SOURCE_DIR}/system/sph/BitonicSort
+	
+    ${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src/oclBitonicSort_launcher.cpp
+    #these should probably be in the OpenCL classes
+    ${rtpslib_SOURCE_DIR}/system/sph/Scopy
+    #${rtpslib_SOURCE_DIR}/system/sph/SetInt
 
     #${rtpslib_SOURCE_DIR}/particle
     )

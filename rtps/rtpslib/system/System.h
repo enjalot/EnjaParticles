@@ -9,7 +9,7 @@
     #include <GL/gl.h>
 #endif
 
-#include "../domain/UniformGrid.h"
+#include "../domain/Domain.h"
 
 #include<stdio.h>
 namespace rtps {
@@ -20,7 +20,7 @@ public:
     virtual void update() = 0;
     
     
-    virtual UniformGrid getGrid(){ return grid; };
+    virtual Domain getGrid(){ return grid; };
     virtual int getNum(){ return num; };
     virtual void setNum(int nn){num = nn;};//should this be public
     virtual GLuint getPosVBO() { return pos_vbo; };
@@ -41,7 +41,7 @@ protected:
     //flag is true if the system's constructor creates the VBOs for the system
     bool managed;
 
-    UniformGrid grid;
+    Domain grid;
 
 };
 

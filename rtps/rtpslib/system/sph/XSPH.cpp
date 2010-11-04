@@ -10,20 +10,19 @@ void SPH::loadXSPH()
     path += "/xsph_cl.cl";
     k_xsph = Kernel(ps->cli, path, "xsph");
   
-    //TODO: fix the way we are wrapping buffers
-    k_xsph.setArg(0, cl_position.cl_buffer[0]);
+    k_xsph.setArg(0, cl_position.getDevicePtr());
     if(sph_settings.integrator == LEAPFROG)
     {
-        k_xsph.setArg(1, cl_veleval.cl_buffer[0]);
+        k_xsph.setArg(1, cl_veleval.getDevicePtr());
     }
     else if(sph_settings.integrator == EULER)
     {
-        k_xsph.setArg(1, cl_velocity.cl_buffer[0]);
+        k_xsph.setArg(1, cl_velocity.getDevicePtr());
     }
-    k_xsph.setArg(2, cl_density.cl_buffer[0]);
-    k_xsph.setArg(3, cl_force.cl_buffer[0]);
-    k_xsph.setArg(4, cl_xsph.cl_buffer[0]);
-    k_xsph.setArg(5, cl_SPHParams.cl_buffer[0]);
+    k_xsph.setArg(2, cl_density.getDevicePtr());
+    k_xsph.setArg(3, cl_force.getDevicePtr());
+    k_xsph.setArg(4, cl_xsph.getDevicePtr());
+    k_xsph.setArg(5, cl_SPHParams.getDevicePtr());
 
 } 
 

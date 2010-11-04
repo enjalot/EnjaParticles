@@ -71,7 +71,7 @@ void RTPS::render()
     //so System should own the renderer object
     if(settings.system == RTPSettings::SPH)
     {
-        UniformGrid grid = system->getGrid();
+        Domain grid = system->getGrid();
         //should check if grid exists
         renderer->render_box(grid.getMin(), grid.getMax());
     }

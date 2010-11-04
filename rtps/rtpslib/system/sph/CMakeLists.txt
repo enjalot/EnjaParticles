@@ -9,6 +9,8 @@ SET(FILES
     leapfrog_cl
     euler_cl
     collision_wall_cl
+    hash_cl
+    scopy_cl
 )  # ignore cpp extension
 
 # Only executes when I do "cmake"
