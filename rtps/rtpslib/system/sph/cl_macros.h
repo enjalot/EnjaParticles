@@ -34,7 +34,9 @@
 #define density(i) 			vars_sorted[i+DENS*numParticles].x
 #define pos(i) 				vars_sorted[i+POS*numParticles]
 #define vel(i) 				vars_sorted[i+VEL*numParticles]
+#define veleval(i)    		vars_sorted[i+VELEVAL*numParticles]
 #define force(i) 			vars_sorted[i+FOR*numParticles]
+#define xsph(i)    			vars_sorted[i+XSPH*numParticles]
 // accessing density and color requires two memory access. 
 // Could be more efficient if stored in local point-based array
 /*
@@ -42,8 +44,6 @@
 #define color(i)    		vars_sorted[i+COL*numParticles].x
 #define surf_tens(i)    	vars_sorted[i+SURF_TENS*numParticles]
 #define color_normal(i)    	vars_sorted[i+NORMAL*numParticles]
-#define veleval(i)    		vars_sorted[i+VELEVAL*numParticles]
-#define xsph(i)    			vars_sorted[i+XSPH*numParticles]
 */
 
 #define unsorted_density(i)   		vars_unsorted[i+DENS     *numParticles].x

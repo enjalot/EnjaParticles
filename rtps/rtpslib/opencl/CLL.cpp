@@ -59,7 +59,9 @@ cl::Program CL::loadProgram(std::string path)
         //sprintf(options, "-D rand=%d -D DEBUG", rnd);
         err = program.build(devices, options);
 #else
+        printf("about to build\n");
         err = program.build(devices);
+        printf("time to build\n");
 #endif
     }
     catch (cl::Error er) {

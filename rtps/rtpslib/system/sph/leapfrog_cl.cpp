@@ -1,45 +1,71 @@
+
+#include "cl_macros.h"
 #include "cl_structs.h"
+
  
-float magnitude(float4 vec)
-{
-    return sqrt(vec.x*vec.x + vec.y*vec.y + vec.z*vec.z);
-}       
-        
-__kernel void leapfrog(__global float4* pos, __global float4* vel, __global float4* veleval, __global float4* force, __global float4* xsph, __global float4* color, float h, __constant struct SPHParams* params )
+__kernel void leapfrog(
+		__global int* sort_indices,  
+		__global float4* vars_unsorted, 
+		__global float4* vars_sorted, 
+		// should not be required since part of vars_unsorted
+		__global float4* positions,  // for VBO 
+		__constant struct SPHParams* params, 
+		float dt)
 {
     unsigned int i = get_global_id(0);
-    int num = params->num;
-    if(i > num) return;
+	int num = get_global_size(0); // for access functions in cl_macros.h
 
-
-    float4 p = pos[i];
-    float4 v = vel[i];
-    float4 f = force[i];
+    float4 p = pos(i);
+    float4 v = vel(i);
+    float4 f = force(i);
 
     //external force is gravity
     f.z += -9.8f;
+	f.w = 0.f;
 
-    float speed = magnitude(f);
+	// REMOVE FOR DEBUGGING
+	// THIS IS REALLY A FORCE, NO?
+	#if 1
+    float speed = length(f);
     if(speed > 600.0f) //velocity limit, need to pass in as struct
     {
         f *= 600.0f/speed;
     }
+	#endif
 
-    float4 vnext = v + h*f;
-    float xsphfactor = .1f;
-    vnext += xsphfactor * xsph[i];//should be param XSPH factor
-    p += h * vnext / params->simulation_scale;
+	float4 vnext = v + dt*f;
+	// WHY IS MY CORRECTION NEGATIVE and IAN's POSITIVE? 
+	vnext -= 0.005f * xsph(i); // should be param XSPH factor
+
+    p += dt * vnext;
     p.w = 1.0f; //just in case
+	float4 veval = 0.5f*(v+vnext);
+	v = vnext;
 
-    veleval[i] = (v + vnext) * .5f;
+	// only for debugging
+	//veval = f; // SEE IF FORCE IS SYMMETRIC
 
-    vel[i] = vnext;
-    pos[i] = p;
+	// Should not be required, but it is for debugging if I wish to 
+	// access the sorted arrays
+	//vel(i) = v;
+	//pos(i) = p;
+	//veleval(i) = veval;
 
-    /*
-    float factor = (p.z - params->grid_min.z)/(params->grid_max.z - params->grid_min.z);
-    color[i].x = factor;
-    color[i].z = 1.0f - factor;
-    */
-    //color[i] = (float4)(0.0f, 1.0f, 0.0f, 0.0f);
+
+	uint originalIndex = sort_indices[i];
+
+	// writeback to unsorted buffer
+	float dens = density(i);
+	p.xyz /= params->simulation_scale;
+	unsorted_pos(originalIndex) 	= (float4)(p.xyz, dens);
+	unsorted_vel(originalIndex) 	= v;
+	unsorted_veleval(originalIndex) = veval; 
+	positions[originalIndex] 		= (float4)(p.xyz, 1.);  // for plotting
+
+// FOR DEBUGGING
+	//unsorted_force(originalIndex) 	= f; // FOR DEBUGGING ONLY
+	//unsorted_density(originalIndex) = dens; // FOR DEBUGGING ONLY
+	//positions[originalIndex] 		= (float4)(p.xyz, dens);  // for plotting
 }
+
+

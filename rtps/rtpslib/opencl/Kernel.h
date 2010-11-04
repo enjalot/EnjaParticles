@@ -37,6 +37,8 @@ public:
     cl::Kernel kernel;
 
     template <class T> void setArg(int arg, T val);
+    void setArgShared(int arg, int nb_bytes);
+    
 
     //assumes null range for worksize offset and local worksize
     void execute(int ndrange);

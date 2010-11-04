@@ -10,6 +10,8 @@ SET(FILES
     euler_cl
     collision_wall_cl
     hash_cl
+    datastructures_cl
+    neighbors_cl
     scopy_cl
 )  # ignore cpp extension
 

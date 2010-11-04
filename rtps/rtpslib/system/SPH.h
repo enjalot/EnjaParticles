@@ -125,6 +125,7 @@ private:
     SPHSettings sph_settings;
     SPHParams params;
     GridParams grid_params;
+    GridParams grid_params_scaled;
 
     int nb_var;
 
@@ -141,6 +142,8 @@ private:
     Kernel k_xsph;
 
     Kernel k_hash;
+    Kernel k_datastructures;
+    Kernel k_neighbors;
 
     //This should be in OpenCL classes
     Kernel k_scopy;
@@ -180,6 +183,7 @@ private:
     //Parameter structs
     Buffer<SPHParams>   cl_SPHParams;
 	Buffer<GridParams>  cl_GridParams;
+	Buffer<GridParams>  cl_GridParamsScaled;
    
     //index neighbors. Maximum of 50
 	Buffer<int> 		cl_index_neigh;
@@ -203,7 +207,8 @@ private:
     //Nearest Neighbors search related kernels
     void loadHash();
     void loadBitonicSort();
-    //void loadNeighbors();
+    void loadDataStructures();
+    void loadNeighbors();
 
     //CPU functions
     void cpuDensity();

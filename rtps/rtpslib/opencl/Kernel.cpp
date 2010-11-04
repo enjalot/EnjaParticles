@@ -25,5 +25,16 @@ void Kernel::execute(int ndrange, int worksize)
     cli->queue.finish();
 }
 
+void Kernel::setArgShared(int arg, int nb_bytes)
+{
+    try
+    {
+        kernel.setArg(arg, nb_bytes, 0);
+    }
+    catch (cl::Error er) {
+        printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+    }
+}
+
  
 }

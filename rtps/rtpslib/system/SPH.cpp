@@ -101,9 +101,15 @@ SPH::SPH(RTPS *psfr, int n)
     vparams.push_back(params);
     cl_SPHParams = Buffer<SPHParams>(ps->cli, vparams);
 
+    //Setup Grid Parameter structs
     std::vector<GridParams> gparams(0);
     gparams.push_back(grid_params);
     cl_GridParams = Buffer<GridParams>(ps->cli, gparams);
+    //scaled Grid Parameters
+    std::vector<GridParams> sgparams(0);
+    sgparams.push_back(grid_params_scaled);
+    cl_GridParamsScaled = Buffer<GridParams>(ps->cli, sgparams);
+
 
     //setup debug arrays
     std::vector<float4> clfv(max_num);
@@ -164,6 +170,8 @@ SPH::SPH(RTPS *psfr, int n)
 
     loadHash();
     loadBitonicSort();
+    loadDataStructures();
+    loadNeighbors();
 
 
 #endif
@@ -244,21 +252,20 @@ void SPH::updateGPU()
     //sub-intervals
     //for(int i=0; i < 10; i++)
     {
+        /*
         k_density.execute(num);
         k_pressure.execute(num);
         k_viscosity.execute(num);
         k_xsph.execute(num);
-
+        */
         hash();
         bitonic_sort();
-        /*
         buildDataStructures(); //reorder
         
         neighborSearch(0);  //density
         neighborSearch(1);  //forces
 
-        */
-        collision();
+        //collision();
         integrate();
     }
 
@@ -423,6 +430,19 @@ void SPH::setupDomain()
 	grid_params.grid_inv_delta.y = 1. / grid_params.grid_delta.y;
 	grid_params.grid_inv_delta.z = 1. / grid_params.grid_delta.z;
 	grid_params.grid_inv_delta.w = 1.;
+
+    float ss = sph_settings.simulation_scale;
+
+	grid_params_scaled.grid_min = grid_params.grid_min * ss;
+	grid_params_scaled.grid_max = grid_params.grid_max * ss;
+	grid_params_scaled.bnd_min  = grid_params.bnd_min * ss;
+	grid_params_scaled.bnd_max  = grid_params.bnd_max * ss;
+	grid_params_scaled.grid_res = grid_params.grid_res;
+	grid_params_scaled.grid_size = grid_params.grid_size * ss;
+	grid_params_scaled.grid_delta = grid_params.grid_size * ss;
+	grid_params.nb_cells = (int) (grid_params_scaled.grid_res.x*grid_params_scaled.grid_res.y*grid_params_scaled.grid_res.z);
+    grid_params_scaled.grid_inv_delta = grid_params.grid_inv_delta / ss;
+    grid_params_scaled.grid_inv_delta.w = 1.0f;
 
     
 }
