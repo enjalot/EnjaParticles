@@ -31,8 +31,8 @@ ENDIF(WITH_OPENCL)
 ##############################################################################
 
 ##### Source Paths ############################################################
-ADD_DEFINITIONS(-DSIMPLE_CL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/system/simple")
-ADD_DEFINITIONS(-DSPH_CL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/system/sph")
+ADD_DEFINITIONS(-DSIMPLE_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_simple")
+ADD_DEFINITIONS(-DSPH_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_sph")
 ADD_DEFINITIONS(-DBITONIC_CL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/")
 
 
