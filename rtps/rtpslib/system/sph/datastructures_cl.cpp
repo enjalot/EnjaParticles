@@ -21,7 +21,6 @@ __kernel void datastructures(
 			  )
 {
 	uint index = get_global_id(0);
-    //shouldn't we use the num particles? hmm
 	int num = get_global_size(0);
 
 

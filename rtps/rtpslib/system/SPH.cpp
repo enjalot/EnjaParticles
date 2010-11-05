@@ -42,10 +42,11 @@ SPH::SPH(RTPS *psfr, int n)
     
     //init sph stuff
     //sph_settings.simulation_scale = .001;
-    sph_settings.simulation_scale = .1;
+    sph_settings.simulation_scale = .1f;
     float scale = sph_settings.simulation_scale;
 
     //grid = Domain(float4(0,0,0,0), float4(.25/scale, .5/scale, .5/scale, 0));
+    //grid = Domain(float4(0,0,0,0), float4(1/scale, 1/scale, 1/scale, 0));
     grid = Domain(float4(0,0,0,0), float4(1/scale, 1/scale, 1/scale, 0));
 
     //SPH settings depend on number of particles used
@@ -258,16 +259,23 @@ void SPH::updateGPU()
         k_viscosity.execute(num);
         k_xsph.execute(num);
         */
-
+        printf("hash\n");
         hash();
+        printf("bitonic_sort\n");
         bitonic_sort();
+        printf("data structures\n");
         buildDataStructures(); //reorder
         
+        printf("density\n");
         neighborSearch(0);  //density
+        printf("forces\n");
         neighborSearch(1);  //forces
 
+        printf("collision\n");
         collision();
+        printf("integrate\n");
         integrate();
+        //exit(0);
     }
 
     cl_position.release();
@@ -330,7 +338,7 @@ void SPH::calculateSPHSettings()
     params.boundary_distance = sph_settings.particle_rest_distance * .5f;
     params.EPSILON = .00001f;
     params.PI = 3.14159265f;
-    params.K = 15.0f;
+    params.K = 20.0f;
     params.num = num;
 
 	float h = params.smoothing_distance;
@@ -428,6 +436,8 @@ void SPH::setupDomain()
 	grid_params.grid_delta = grid.getDelta();
 	grid_params.nb_cells = (int) (grid_params.grid_res.x*grid_params.grid_res.y*grid_params.grid_res.z);
 
+    printf("gp nb_cells: %d\n", grid_params.nb_cells);
+
 
 	grid_params.grid_inv_delta.x = 1. / grid_params.grid_delta.x;
 	grid_params.grid_inv_delta.y = 1. / grid_params.grid_delta.y;
@@ -443,10 +453,13 @@ void SPH::setupDomain()
 	grid_params_scaled.grid_res = grid_params.grid_res;
 	grid_params_scaled.grid_size = grid_params.grid_size * ss;
 	grid_params_scaled.grid_delta = grid_params.grid_size * ss;
-	grid_params.nb_cells = (int) (grid_params_scaled.grid_res.x*grid_params_scaled.grid_res.y*grid_params_scaled.grid_res.z);
+	//grid_params_scaled.nb_cells = (int) (grid_params_scaled.grid_res.x*grid_params_scaled.grid_res.y*grid_params_scaled.grid_res.z);
+    grid_params_scaled.nb_cells = grid_params.nb_cells;
     grid_params_scaled.grid_inv_delta = grid_params.grid_inv_delta / ss;
     grid_params_scaled.grid_inv_delta.w = 1.0f;
 
+    grid_params.print();
+    grid_params_scaled.print();
     
 }
 

@@ -37,7 +37,7 @@ void SPH::hash()
 
 	//-------------------
 	// Set cl_cell indices to -1
-    std::vector<int> cells_indices_start(num);
+    std::vector<int> cells_indices_start(grid_params.nb_cells);
     std::fill(cells_indices_start.begin(), cells_indices_start.end(), minus);
 	cl_cell_indices_start.copyToDevice(cells_indices_start);
 
@@ -64,27 +64,27 @@ void SPH::hash()
 }
 
 //----------------------------------------------------------------------
-/*
+
 void SPH::printHashDiagnostics()
 {
 #if 1
 	printf("***** PRINT hash diagnostics ******\n");
-	cl_sort_hashes->copyToHost();
-	cl_sort_indices->copyToHost();
+    std::vector<int> sh = cl_sort_hashes.copyToHost(num);
+    std::vector<int> si = cl_sort_indices.copyToHost(num);
 	//cl_cells->copyToHost();
-	cli_debug->copyToHost();
-	clf_debug->copyToHost();
-	cl_GridParams->copyToHost();
+    std::vector<int4> cli = cli_debug.copyToHost(num);
+    std::vector<float4> clf = clf_debug.copyToHost(num);
+	//cl_GridParams.copyToHost();
 
-	GridParams& gp = *cl_GridParams->getHostPtr();
-	gp.print();
+	//GridParams& gp = *cl_GridParams->getHostPtr();
+	//gp.print();
 
 	//cli_debug->copyToHost();
 
-	for (int i=0; i < nb_el; i++) {  // only first 4096 are ok. WHY? 
-		printf(" cl_sort_hash[%d] %u, cl_sort_indices[%d]: %u\n", i, (*cl_sort_hashes)[i], i, (*cl_sort_indices)[i]);
-		printf("cli_debug: %d, %d, %d\n", (*cli_debug)[i].x, (*cli_debug)[i].y, (*cli_debug)[i].z);
-		printf("clf_debug: %f, %f, %f\n", (*clf_debug)[i].x, (*clf_debug)[i].y, (*clf_debug)[i].z);
+	for (int i=0; i < num; i++) {  
+		printf(" cl_sort_hash[%d] %u, cl_sort_indices[%d]: %u\n", i, sh[i], i, si[i]);
+		printf("cli_debug: %d, %d, %d\n", cli[i].x, cli[i].y, cli[i].z);
+		printf("clf_debug: %f, %f, %f\n", clf[i].x, clf[i].y, clf[i].z);
 		printf("-----\n");
 
 		#if 0
@@ -104,7 +104,7 @@ void SPH::printHashDiagnostics()
 	}
 #endif
 }
-*/
+
 //----------------------------------------------------------------------
 
 }

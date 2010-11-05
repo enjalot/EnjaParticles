@@ -65,6 +65,7 @@ void SPH::bitonic_sort()
 				batch,
                 dir
             );
+    
 	} catch (cl::Error er) {
         printf("ERROR(bitonic sort): %s(%s)\n", er.what(), oclErrorString(er.err()));
 		exit(0);

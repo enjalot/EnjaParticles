@@ -227,6 +227,7 @@ private:
     //Nearest Neighbors search related functions
     void prep();
     void hash();
+    void printHashDiagnostics();
     void bitonic_sort();
     void buildDataStructures();
     void neighborSearch(int choice);

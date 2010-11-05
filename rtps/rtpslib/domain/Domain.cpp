@@ -19,6 +19,8 @@ void Domain::calculateCells(float cell_size)
     this->min = min;
     this->max = max;
 
+    printf("cell size: %f\n ASDFASDFSDF\n", cell_size);
+
     size = float4(max.x - min.x,
                   max.y - min.y,
                   max.z - min.z,

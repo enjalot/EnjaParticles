@@ -31,10 +31,20 @@ void SPH::buildDataStructures()
 // Generate hash list: stored in cl_sort_hashes
 {
 
+    printf("about to data structures\n");
 	int workSize = 64; // work group size
-	k_datastructures.execute(num, workSize);
+    try
+    {
+	    k_datastructures.execute(num, workSize);
+    }
+    catch (cl::Error er) {
+        printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+    }
+	
+    ps->cli->queue.finish();
 
-	ps->cli->queue.finish();
+    printf("done with data structures\n");
+
 
 }
 
