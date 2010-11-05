@@ -36,16 +36,16 @@ void Domain::calculateCells(float cell_size)
                   res.z * cell_size,
                   1.0f);
 
-    /*
     delta = float4(res.x / size.x,
                    res.y / size.y,
                    res.z / size.z,
                    1.0f);
-    */
+    /*
     delta = float4(size.x / res.x,
                    size.y / res.y,
                    size.z / res.z,
                    1.0f);
+    */
     
 }
 

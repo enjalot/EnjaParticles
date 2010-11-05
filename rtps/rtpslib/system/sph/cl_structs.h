@@ -68,7 +68,7 @@ struct GridParams
     // number of cells in each dimension/side of grid
     float4          grid_res;
     float4          grid_delta;
-    float4          grid_inv_delta;
+    //float4          grid_inv_delta;
 
     int nb_cells;
 };

@@ -132,7 +132,8 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 		// initialize force on particle (collisions)
 
 		// get cell in grid for the given position
-		int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_inv_delta);
+		//int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_inv_delta);
+		int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_delta);
 
 		// iterate through the 3^3 cells in and around the given position
 		// can't unroll these loops, they are not innermost 

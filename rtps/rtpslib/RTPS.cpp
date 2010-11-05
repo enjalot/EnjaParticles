@@ -73,7 +73,7 @@ void RTPS::render()
     {
         Domain grid = system->getGrid();
         //should check if grid exists
-        renderer->render_box(grid.getMin(), grid.getMax());
+        renderer->render_box(grid.getBndMin(), grid.getBndMax());
     }
 
     renderer->render();

@@ -160,7 +160,8 @@ SPH::SPH(RTPS *psfr, int n)
 
     ////////////////// Setup some initial particles
     //// really this should be setup by the user
-    int nn = 1024;
+    //int nn = 1024;
+    int nn = 4096;
     //float4 min = float4(.4, .4, .1, 0.0f);
     //float4 max = float4(.6, .6, .4, 0.0f);
 
@@ -456,10 +457,12 @@ void SPH::setupDomain()
     printf("gp nb_cells: %d\n", grid_params.nb_cells);
 
 
+    /*
 	grid_params.grid_inv_delta.x = 1. / grid_params.grid_delta.x;
 	grid_params.grid_inv_delta.y = 1. / grid_params.grid_delta.y;
 	grid_params.grid_inv_delta.z = 1. / grid_params.grid_delta.z;
 	grid_params.grid_inv_delta.w = 1.;
+    */
 
     float ss = sph_settings.simulation_scale;
 
@@ -469,11 +472,11 @@ void SPH::setupDomain()
 	grid_params_scaled.bnd_max  = grid_params.bnd_max * ss;
 	grid_params_scaled.grid_res = grid_params.grid_res;
 	grid_params_scaled.grid_size = grid_params.grid_size * ss;
-	grid_params_scaled.grid_delta = grid_params.grid_size * ss;
+	grid_params_scaled.grid_delta = grid_params.grid_delta / ss;
 	//grid_params_scaled.nb_cells = (int) (grid_params_scaled.grid_res.x*grid_params_scaled.grid_res.y*grid_params_scaled.grid_res.z);
     grid_params_scaled.nb_cells = grid_params.nb_cells;
-    grid_params_scaled.grid_inv_delta = grid_params.grid_inv_delta / ss;
-    grid_params_scaled.grid_inv_delta.w = 1.0f;
+    //grid_params_scaled.grid_inv_delta = grid_params.grid_inv_delta / ss;
+    //grid_params_scaled.grid_inv_delta.w = 1.0f;
 
     grid_params.print();
     grid_params_scaled.print();

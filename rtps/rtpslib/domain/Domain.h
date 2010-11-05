@@ -48,7 +48,7 @@ struct GridParams
     // number of cells in each dimension/side of grid
     float4          grid_res;
     float4          grid_delta;
-    float4          grid_inv_delta;
+    //float4          grid_inv_delta;
     // nb grid cells
 	int 			nb_cells; 
 
@@ -62,7 +62,7 @@ struct GridParams
 		bnd_max.print("bnd_max"); 
 		grid_res.print("grid_res"); 
 		grid_delta.print("grid_delta"); 
-		grid_inv_delta.print("grid_inv_delta"); 
+		//grid_inv_delta.print("grid_inv_delta"); 
 		printf("nb grid cells: %d\n", nb_cells);
 	}
 };

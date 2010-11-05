@@ -10,17 +10,17 @@
 //----------------------------------------------------------------------
 // find the grid cell from a position in world space
 // WHY static?
-int4 calcGridCell(float4 p, float4 grid_min, float4 grid_inv_delta)
+int4 calcGridCell(float4 p, float4 grid_min, float4 grid_delta)
 {
     // subtract grid_min (cell position) and multiply by delta
     //return make_int4((p-grid_min) * grid_delta);
 
     //float4 pp = (p-grid_min)*grid_delta;
     float4 pp;
-    pp.x = (p.x-grid_min.x)*grid_inv_delta.x;
-    pp.y = (p.y-grid_min.y)*grid_inv_delta.y;
-    pp.z = (p.z-grid_min.z)*grid_inv_delta.z;
-    pp.w = (p.w-grid_min.w)*grid_inv_delta.w;
+    pp.x = (p.x-grid_min.x)*grid_delta.x;
+    pp.y = (p.y-grid_min.y)*grid_delta.y;
+    pp.z = (p.z-grid_min.z)*grid_delta.z;
+    pp.w = (p.w-grid_min.w)*grid_delta.w;
 
 
 
@@ -128,7 +128,8 @@ __kernel void hash(
     float4 p = unsorted_pos(index); // macro
 
     // get address in grid
-    int4 gridPos = calcGridCell(p, gp->grid_min, gp->grid_inv_delta);
+    //int4 gridPos = calcGridCell(p, gp->grid_min, gp->grid_inv_delta);
+    int4 gridPos = calcGridCell(p, gp->grid_min, gp->grid_delta);
     bool wrap_edges = false;
     uint hash = (uint) calcGridHash(gridPos, gp->grid_res, wrap_edges, fdebug, idebug);
 
@@ -140,7 +141,8 @@ __kernel void hash(
     sort_indexes[index] = index;
 
     //fdebug[index] = gp->grid_inv_delta;
-    fdebug[index] = (float4)((p.x - gp->grid_min.x) * gp->grid_inv_delta.x, p.x, 0,0);
+    //fdebug[index] = (float4)((p.x - gp->grid_min.x) * gp->grid_inv_delta.x, p.x, 0,0);
+    fdebug[index] = (float4)((p.x - gp->grid_min.x) * gp->grid_delta.x, p.x, 0,0);
 	idebug[index] = gridPos;
 }
 //----------------------------------------------------------------------
