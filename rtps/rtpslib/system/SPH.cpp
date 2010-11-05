@@ -42,17 +42,20 @@ SPH::SPH(RTPS *psfr, int n)
     
     //init sph stuff
     //sph_settings.simulation_scale = .001;
-    sph_settings.simulation_scale = .1f;
+    sph_settings.simulation_scale = .01f;
     float scale = sph_settings.simulation_scale;
 
     //grid = Domain(float4(0,0,0,0), float4(.25/scale, .5/scale, .5/scale, 0));
     //grid = Domain(float4(0,0,0,0), float4(1/scale, 1/scale, 1/scale, 0));
-    grid = Domain(float4(0,0,0,0), float4(1/scale, 1/scale, 1/scale, 0));
+    //grid = Domain(float4(0,0,0,0), float4(1/scale, 1/scale, 1/scale, 0));
+    grid = Domain(float4(0,0,0,0), float4(30, 30, 30, 0));
 
     //SPH settings depend on number of particles used
     calculateSPHSettings();
     //set up the grid
     setupDomain();
+
+
 
     sph_settings.integrator = LEAPFROG;
     //sph_settings.integrator = EULER;
@@ -157,8 +160,12 @@ SPH::SPH(RTPS *psfr, int n)
     ////////////////// Setup some initial particles
     //// really this should be setup by the user
     int nn = 1024;
-    float4 min = float4(.4, .4, .1, 0.0f);
-    float4 max = float4(.6, .6, .4, 0.0f);
+    //float4 min = float4(.4, .4, .1, 0.0f);
+    //float4 max = float4(.6, .6, .4, 0.0f);
+
+    float4 min = float4(.1, .1, .1, 0.0f);
+    float4 max = float4(.3, .3, .4, 0.0f);
+
     addBox(nn, min, max);
     
     /*
@@ -171,6 +178,12 @@ SPH::SPH(RTPS *psfr, int n)
     //addBall(nn, center, .06/scale);
     //addBall(nn, center, .1/scale);
     ////////////////// Done with setup particles
+
+    ////DEBUG STUFF
+    printf("positions 0: \n");
+    positions[0].print();
+    
+    //////////////
 
 
     

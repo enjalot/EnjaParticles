@@ -22,6 +22,9 @@ int4 calcGridCell(float4 p, float4 grid_min, float4 grid_inv_delta)
     pp.z = (p.z-grid_min.z)*grid_inv_delta.z;
     pp.w = (p.w-grid_min.w)*grid_inv_delta.w;
 
+
+
+
     int4 ii;
     ii.x = (int) pp.x;
     ii.y = (int) pp.y;
@@ -112,9 +115,8 @@ __kernel void hash(
 {
     // particle index
     uint index = get_global_id(0);
-	// do not use gp->numParticles (since it numParticles changed via define)
 	int num = get_global_size(0);
-    if (index >= num) return;  // num: 512
+    if (index >= num) return;
 
 	// initialize to -1 (used in kernel datastructures in build_datastructures_wrap.cpp
 	//int grid_size = (int) (gp->grid_res.x*gp->grid_res.y*gp->grid_res.z);
@@ -133,11 +135,13 @@ __kernel void hash(
     // store grid hash and particle index
 
     sort_hashes[index] = hash;
-    int pp = (int) p.x;
+    //int pp = (int) p.x;
 
     sort_indexes[index] = index;
 
-	//idebug[index] = gridPos;
+    //fdebug[index] = gp->grid_inv_delta;
+    fdebug[index] = (float4)((p.x - gp->grid_min.x) * gp->grid_inv_delta.x, p.x, 0,0);
+	idebug[index] = gridPos;
 }
 //----------------------------------------------------------------------
 

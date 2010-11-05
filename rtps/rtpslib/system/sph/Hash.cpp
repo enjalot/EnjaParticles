@@ -46,7 +46,7 @@ void SPH::hash()
 	//sset(gp->nb_points, minus, cl_cell_indices_start->getDevicePtr());
 	//exit(0);   // SOMETHING WRONG with sset!!! WHY? 
 
-	//printHashDiagnostics();
+	printHashDiagnostics();
 
 	#if 0
 	GridParams& gp = *cl_GridParams->getHostPtr();
@@ -81,7 +81,8 @@ void SPH::printHashDiagnostics()
 
 	//cli_debug->copyToHost();
 
-	for (int i=0; i < num; i++) {  
+	//for (int i=0; i < num; i++) {  
+	for (int i=0; i < 2; i++) {  
 		printf(" cl_sort_hash[%d] %u, cl_sort_indices[%d]: %u\n", i, sh[i], i, si[i]);
 		printf("cli_debug: %d, %d, %d\n", cli[i].x, cli[i].y, cli[i].z);
 		printf("clf_debug: %f, %f, %f\n", clf[i].x, clf[i].y, clf[i].z);

@@ -13,8 +13,8 @@ Domain::Domain(float4 min, float4 max)
 void Domain::calculateCells(float cell_size)
 {
     double s2 = 2.*cell_size;
-	min = this->bnd_min - float4(s2, s2, s2, 0.);
-	max = this->bnd_max + float4(s2, s2, s2, 0.);
+	min = this->bnd_min;// - float4(s2, s2, s2, 0.);
+	max = this->bnd_max;// + float4(s2, s2, s2, 0.);
 
     this->min = min;
     this->max = max;
