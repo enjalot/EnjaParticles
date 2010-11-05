@@ -72,7 +72,8 @@ cl::Program CL::loadProgram(std::string kernel_source)
         sprintf(options, "-cl-nv-verbose -cl-nv-maxrregcount=%d", rnd);
         err = program.build(devices, options);
 #else
-        err = program.build(devices);
+        //err = program.build(devices);
+        err = program.build(devices, "-cl-fast-relaxed-math");
 #endif
 
 

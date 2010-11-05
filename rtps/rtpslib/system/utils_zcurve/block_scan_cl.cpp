@@ -63,14 +63,15 @@ __kernel void block_scan(
 		   			//__constant int4* hash_to_grid_index,
 		   			__global int4* hash_to_grid_index,
 
+					// __constant is not working
 		   			//__constant int4* cell_offset,  // DOES NOT WORK OK
 		   			__global int4* cell_offset, 
 
-		   			__global struct SPHParams* sphp,
-		   			//__constant struct SPHParams* sphp,
+		   			//__global struct SPHParams* sphp,
+		   			__constant struct SPHParams* sphp,
 
-		   			__global struct GridParams* gp,
-		   			//__constant struct GridParams* gp,
+		   			//__global struct GridParams* gp,
+		   			__constant struct GridParams* gp,
 					__local  float4* locc   
 					DUMMY_ARGS
 			  )
@@ -119,9 +120,9 @@ __kernel void block_scan(
 	int start = cell_indices_start[hash];
 
 	// TEMPORARY
-	if (lid < nb) {
-		density(start+lid) = locc[lid].w;
-	}
+	//if (lid < nb) {
+		//density(start+lid) = locc[lid].w;
+	//}
 
 	// nb threads = nb cells * 32
 	// Initialize all particles [start, start+1, ..., start+nb-1]
@@ -148,6 +149,7 @@ __kernel void block_scan(
 
 	barrier(CLK_LOCAL_MEM_FENCE);
 
+
 	if (lid < 27) { // FOR DEBUGGING
 		// index of neighbor cell (including center)
 		// perhaps I could define cell_offset[28,29,30,31] 
@@ -171,7 +173,6 @@ __kernel void block_scan(
 
 	barrier(CLK_LOCAL_MEM_FENCE);
 
-	float rho = 0;
 	// ri only makes sense for particles 0 through nb-1
 	//   only if lid < nb
 	float4 ri = (float4)(locc[lid].xyz, 0.);
@@ -179,6 +180,7 @@ __kernel void block_scan(
 	// accumulate data from neighboring cells (lid in [0,26])
 	//locc[nb+lid] = (float4) (0., 0., 0., 0.);
 
+	float rho = 0.;
 
 	for (int i=0; i < 32; i++) {   	// max of 32 particles per cell
 	// since cnb < 32, how can density be higher when using cnb? 
@@ -206,11 +208,15 @@ __kernel void block_scan(
 
 		barrier(CLK_LOCAL_MEM_FENCE);
 		
-		#if 1
 		// go over single particle read in from  neighboring cells
 		// loop over neighboring cell, consider single particle in each cell
 		// including the center cell
+
+		// This loop is very expensive! Even if empty!
+		//float acoef = sphp->wpoly6_coef;
+
 		for (int j=0; j < 27; j++) {   	// cell 13 is the center
+		#if 1
 			if (lid >= nb) continue;
 			float4 rj = (float4)(locc[nb+j].xyz, 0.); // CORRECT LINE????
 			float4 r = rj-ri;
@@ -218,18 +224,24 @@ __kernel void block_scan(
 
 			if (rad < sphp->smoothing_distance) {
 				// cannot use x,y,z from loc (position and is required)
-				locc[lid].w += sphp->wpoly6_coef * sphp->mass * Wpoly6_glob(r, sphp->smoothing_distance);
+				// This line accounts for 70 ms!!! Without it, time is 15 ms
+				//locc[lid].w += 1.;
+				rho += Wpoly6_glob(r, sphp->smoothing_distance);
+				//locc[lid].w += Wpoly6_glob(r, sphp->smoothing_distance);
 			}
-		}
 		#endif
+		}
 	}
 
 	barrier(CLK_LOCAL_MEM_FENCE);
 
 	// The values in local memory appear to be lost!!! HOW!
+	//return;
+
 	
 	if (lid < nb) {
-		density(start+lid) = locc[lid].w;
+		density(start+lid) = rho * sphp->wpoly6_coef * sphp->mass;
+		//density(start+lid) = locc[lid].w * sphp->wpoly6_coef * sphp->mass;
 	}
 
 	return;
