@@ -23,14 +23,14 @@
 int window_width = 800;
 int window_height = 600;
 int glutWindowHandle = 0;
+/*
 float translate_x = -.5f;
 float translate_y = 0.f;//-200.0f;//300.f;
 float translate_z = 1.5f;//200.f;
-/*
+*/
 float translate_x = -100;
 float translate_y = -200.0f;//300.f;
 float translate_z = 200.f;
-*/
 
 // mouse controls
 int mouse_old_x, mouse_old_y;

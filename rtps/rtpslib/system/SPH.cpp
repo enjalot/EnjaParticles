@@ -42,13 +42,14 @@ SPH::SPH(RTPS *psfr, int n)
     
     //init sph stuff
     //sph_settings.simulation_scale = .001;
-    sph_settings.simulation_scale = .01f;
+    sph_settings.simulation_scale = .001f;
     float scale = sph_settings.simulation_scale;
 
     //grid = Domain(float4(0,0,0,0), float4(.25/scale, .5/scale, .5/scale, 0));
     //grid = Domain(float4(0,0,0,0), float4(1/scale, 1/scale, 1/scale, 0));
     //grid = Domain(float4(0,0,0,0), float4(1/scale, 1/scale, 1/scale, 0));
-    grid = Domain(float4(0,0,0,0), float4(30, 30, 30, 0));
+    //grid = Domain(float4(0,0,0,0), float4(30, 30, 30, 0));
+    grid = Domain(float4(-560,-30,0,0), float4(256, 256, 1276, 0));
 
     //SPH settings depend on number of particles used
     calculateSPHSettings();
@@ -163,8 +164,11 @@ SPH::SPH(RTPS *psfr, int n)
     //float4 min = float4(.4, .4, .1, 0.0f);
     //float4 max = float4(.6, .6, .4, 0.0f);
 
-    float4 min = float4(.1, .1, .1, 0.0f);
-    float4 max = float4(.3, .3, .4, 0.0f);
+	float4 min   = float4(-559.*scale, -15*scale, .5*scale, 1.);
+	float4 max   = float4(220.*scale, 225.*scale, 450.*scale, 1);
+
+    //float4 min = float4(.1, .1, .1, 0.0f);
+    //float4 max = float4(.3, .3, .4, 0.0f);
 
     addBox(nn, min, max);
     
