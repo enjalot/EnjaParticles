@@ -141,6 +141,7 @@ private:
     Kernel k_euler, k_leapfrog;
     Kernel k_xsph;
 
+    Kernel k_prep;
     Kernel k_hash;
     Kernel k_datastructures;
     Kernel k_neighbors;
@@ -205,6 +206,7 @@ private:
     void loadLeapFrog();
 
     //Nearest Neighbors search related kernels
+    void loadPrep();
     void loadHash();
     void loadBitonicSort();
     void loadDataStructures();
@@ -223,6 +225,7 @@ private:
     void updateGPU();
 
     //Nearest Neighbors search related functions
+    void prep();
     void hash();
     void bitonic_sort();
     void buildDataStructures();

@@ -9,6 +9,7 @@ SET(FILES
     leapfrog_cl
     euler_cl
     collision_wall_cl
+    prep_cl
     hash_cl
     datastructures_cl
     neighbors_cl

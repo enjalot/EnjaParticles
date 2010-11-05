@@ -40,6 +40,7 @@ void SPH::hash()
     std::vector<int> cells_indices_start(num);
     std::fill(cells_indices_start.begin(), cells_indices_start.end(), minus);
 	cl_cell_indices_start.copyToDevice(cells_indices_start);
+
 	//-------------------
 
 	//sset(gp->nb_points, minus, cl_cell_indices_start->getDevicePtr());

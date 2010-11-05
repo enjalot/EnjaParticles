@@ -62,7 +62,7 @@ rtps::RTPS* ps;
 #define NUM_PARTICLES 4096
 //#define NUM_PARTICLES 2048
 //#define NUM_PARTICLES 1024
-#define DT .001f
+#define DT .0003f
 
 //timers
 //GE::Time *ts[3];
@@ -163,7 +163,7 @@ void appKeyboard(unsigned char key, int x, int y)
             break;
         case 'r': //drop a rectangle
             int nn = 512;
-            float4 min = float4(.2, .2, .5, 0.0f);
+            float4 min = float4(.4, .4, .5, 0.0f);
             float4 max = float4(.6, .6, .8, 0.0f);
             ps->system->addBox(nn, min, max);
                 

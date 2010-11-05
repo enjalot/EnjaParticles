@@ -122,27 +122,6 @@ SPH::SPH(RTPS *psfr, int n)
     //setup the sorted and unsorted arrays
     prepareSorted();
 
-    ////////////////// Setup some initial particles
-    //// really this should be setup by the user
-    int nn = 1024;
-    float4 min = float4(.4, .4, .1, 0.0f);
-    float4 max = float4(.6, .6, .4, 0.0f);
-    addBox(nn, min, max);
- 
-    min = float4(.05, .05, .3, 0.0f);
-    max = float4(.2, .2, .45, 0.0f);
-    //addBox(nn, min, max);
-    
-    /*
-    min = float4(.05/scale, .05/scale, .3/scale, 0.0f);
-    max = float4(.2/scale, .2/scale, .45/scale, 0.0f);
-    addBox(nn, min, max);
-    */
-
-    //float4 center = float4(.1/scale, .15/scale, .3/scale, 0.0f);
-    //addBall(nn, center, .06/scale);
-    //addBall(nn, center, .1/scale);
-    ////////////////// Done with setup particles
 
 
     //replace these with the 2 steps
@@ -168,12 +147,33 @@ SPH::SPH(RTPS *psfr, int n)
 
     loadScopy();
 
+    loadPrep();
     loadHash();
     loadBitonicSort();
     loadDataStructures();
     loadNeighbors();
 
+    ////////////////// Setup some initial particles
+    //// really this should be setup by the user
+    int nn = 1024;
+    float4 min = float4(.4, .4, .1, 0.0f);
+    float4 max = float4(.6, .6, .4, 0.0f);
+    addBox(nn, min, max);
+    
+    /*
+    min = float4(.05/scale, .05/scale, .3/scale, 0.0f);
+    max = float4(.2/scale, .2/scale, .45/scale, 0.0f);
+    addBox(nn, min, max);
+    */
 
+    //float4 center = float4(.1/scale, .15/scale, .3/scale, 0.0f);
+    //addBall(nn, center, .06/scale);
+    //addBall(nn, center, .1/scale);
+    ////////////////// Done with setup particles
+
+
+    
+    
 #endif
 
 }
@@ -258,6 +258,7 @@ void SPH::updateGPU()
         k_viscosity.execute(num);
         k_xsph.execute(num);
         */
+
         hash();
         bitonic_sort();
         buildDataStructures(); //reorder
@@ -265,7 +266,7 @@ void SPH::updateGPU()
         neighborSearch(0);  //density
         neighborSearch(1);  //forces
 
-        //collision();
+        collision();
         integrate();
     }
 
@@ -291,7 +292,7 @@ void SPH::integrate()
     else if(sph_settings.integrator == LEAPFROG)
     {
        //k_leapfrog.execute(max_num);
-       k_leapfrog.execute(max_num);
+       k_leapfrog.execute(num);
     }
 }
 
@@ -355,11 +356,12 @@ void SPH::prepareSorted()
     std::vector<float4> unsorted(max_num*nb_var);
     std::vector<float4> sorted(max_num*nb_var);
 
-    std::fill(unsorted.begin(), unsorted.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
-    std::fill(sorted.begin(), sorted.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
+    std::fill(unsorted.begin(), unsorted.end(),float4(0.0f, 0.2f, 0.0f, 1.0f));
+    std::fill(sorted.begin(), sorted.end(),float4(0.0f, 0.0f, 0.2f, 1.0f));
 
     //This really should be done on the GPU
     //we probably need to recopy if dynamically adding/removing particles
+    /*
 	for (int i=0; i < max_num; i++) 
     {
 		//vars[i+DENS*num] = densities[i];
@@ -380,6 +382,7 @@ void SPH::prepareSorted()
 		sorted[i+VEL*max_num] = velocities[i];
 		sorted[i+FOR*max_num] = forces[i];
 	}
+    */
     cl_vars_unsorted = Buffer<float4>(ps->cli, unsorted);
     cl_vars_sorted = Buffer<float4>(ps->cli, sorted);
 
@@ -493,8 +496,17 @@ void SPH::pushParticles(vector<float4> pos)
     printf("about to updateNum\n");
     ps->updateNum(params.num);
 
-#endif
     num += nn;  //keep track of number of particles we use
+
+    cl_position.acquire();
+    //reprep the unsorted (packed) array to account for new particles
+    //might need to do it conditionally if particles are added or subtracted
+    prep();
+    cl_position.release();
+
+#else
+    num += nn;  //keep track of number of particles we use
+#endif
 }
 
 

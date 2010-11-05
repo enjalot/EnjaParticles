@@ -52,7 +52,6 @@ inline void ForNeighbor(__global float4*  vars_sorted,
 //--------------------------------------------------
 inline void ForPossibleNeighbor(__global float4* vars_sorted, 
 						PointData* pt,
-						uint numParticles, 
 						uint index_i, 
 						uint index_j, 
 						float4 position_i,
@@ -62,17 +61,12 @@ inline void ForPossibleNeighbor(__global float4* vars_sorted,
 	  					//DUMMY_ARGS
 						)
 {
-	// not really needed if pt approach works
-
-	// check not colliding with self
-	//if (index_j != index_i) {  // RESTORE WHEN DEBUGGED
-
 	// self-collisions ok when computing density
 	// no self-collisions in the case of pressure
 
-
 	if (sphp->choice == 0 || (index_j != index_i)) {  // RESTORE WHEN DEBUGGED
 	//{
+        int num = get_global_size(0); //this was being passed through all the functions; could but put back..
 		// get the particle info (in the current grid) to test against
 		float4 position_j = pos(index_j); 
 

@@ -84,6 +84,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/sph/XSPH
     ${rtpslib_SOURCE_DIR}/system/sph/Collision_wall
     
+    ${rtpslib_SOURCE_DIR}/system/sph/Prep
     ${rtpslib_SOURCE_DIR}/system/sph/Hash
     ${rtpslib_SOURCE_DIR}/system/sph/BitonicSort
     ${rtpslib_SOURCE_DIR}/system/sph/DataStructures

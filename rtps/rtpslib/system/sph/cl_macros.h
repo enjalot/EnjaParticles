@@ -46,16 +46,16 @@
 #define color_normal(i)    	vars_sorted[i+NORMAL*numParticles]
 */
 
-#define unsorted_density(i)   		vars_unsorted[i+DENS     *numParticles].x
-#define unsorted_pos(i) 	  		vars_unsorted[i+POS      *numParticles]
-#define unsorted_vel(i) 	  		vars_unsorted[i+VEL      *numParticles]
-#define unsorted_force(i) 	  		vars_unsorted[i+FOR      *numParticles]
-#define unsorted_density_denom(i)   vars_unsorted[i+DENS_DENOM*numParticles].y
-#define unsorted_color(i)     		vars_unsorted[i+COL      *numParticles].x
-#define unsorted_surf_tens(i) 		vars_unsorted[i+SURF_TENS*numParticles]
-#define unsorted_color_normal(i)    vars_unsorted[i+NORMAL*numParticles]
-#define unsorted_veleval(i)    		vars_unsorted[i+VELEVAL*numParticles]
-#define unsorted_xsph(i)    		vars_unsorted[i+XSPH*numParticles]
+#define unsorted_density(i)   		vars_unsorted[i+DENS        *numParticles].x
+#define unsorted_pos(i) 	  		vars_unsorted[i+POS         *numParticles]
+#define unsorted_vel(i) 	  		vars_unsorted[i+VEL         *numParticles]
+#define unsorted_force(i) 	  		vars_unsorted[i+FOR         *numParticles]
+#define unsorted_density_denom(i)   vars_unsorted[i+DENS_DENOM  *numParticles].y
+#define unsorted_color(i)     		vars_unsorted[i+COL         *numParticles].x
+#define unsorted_surf_tens(i) 		vars_unsorted[i+SURF_TENS   *numParticles]
+#define unsorted_color_normal(i)    vars_unsorted[i+NORMAL      *numParticles]
+#define unsorted_veleval(i)    		vars_unsorted[i+VELEVAL     *numParticles]
+#define unsorted_xsph(i)    		vars_unsorted[i+XSPH        *numParticles]
 
 
 // FOR DEBUGGING

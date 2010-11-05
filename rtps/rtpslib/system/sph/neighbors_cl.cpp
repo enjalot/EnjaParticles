@@ -81,7 +81,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 	void IterateParticlesInCell(
 		__global float4*    vars_sorted,
 		PointData* pt,
-		uint 	numParticles,
 		int4 	cellPos,
 		uint 	index_i,
 		float4 	position_i,
@@ -108,7 +107,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 			for(uint index_j=startIndex; index_j < endIndex; index_j++) {			
 #if 1
 				//***** UPDATE pt (sum)
-				ForPossibleNeighbor(vars_sorted, pt, numParticles, index_i, index_j, position_i, gp, /*fp,*/ sphp /*ARGS*/);
+				ForPossibleNeighbor(vars_sorted, pt, index_i, index_j, position_i, gp, /*fp,*/ sphp /*ARGS*/);
 #endif
 			}
 		}
@@ -120,7 +119,6 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 	void IterateParticlesInNearbyCells(
 		__global float4* vars_sorted,
 		PointData* pt,
-		int		numParticles, // on Linux, remove __constant
 		int 	index_i, 
 		float4   position_i, 
 		__global int* 		cell_indices_start,
@@ -144,7 +142,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 					int4 ipos = (int4) (x,y,z,1);
 
 					// **** SUMMATION/UPDATE
-					IterateParticlesInCell(vars_sorted, pt, numParticles, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp,/* fp,*/ sphp /*ARGS*/);
+					IterateParticlesInCell(vars_sorted, pt, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp,/* fp,*/ sphp /*ARGS*/);
 
 				//barrier(CLK_LOCAL_MEM_FENCE); // DEBUG
 				// SERIOUS PROBLEM: Results different than results with cli = 5 (bottom of this file)
@@ -169,7 +167,9 @@ __kernel void neighbors(
 {
     // particle index
 	int nb_vars = sphp->nb_vars;
-	int numParticles = sphp->num;
+	//int numParticles = sphp->num;
+    //int numParticles = get_global_size(0);
+    int num = get_global_size(0);
 
 
 	int index = get_global_id(0);
@@ -184,18 +184,18 @@ __kernel void neighbors(
 	zeroPoint(&pt);
 
 	if (sphp->choice == 0) { // update density
-    	IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp /*ARGS*/);
+    	IterateParticlesInNearbyCells(vars_sorted, &pt, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp /*ARGS*/);
 		density(index) = sphp->wpoly6_coef * pt.density.x;
 		// code reaches this point on first call
 	}
 	if (sphp->choice == 1) { // update force
-    	IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp /*ARGS*/);
+    	IterateParticlesInNearbyCells(vars_sorted, &pt, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp /*ARGS*/);
 		force(index) = pt.force; // Does not seem to maintain value into euler.cl
 		xsph(index) = sphp->wpoly6_coef * pt.xsph;
 		// SERIOUS PROBLEM: Results different than results with cli = 4 (bottom of this file)
 	}
 	if (sphp->choice == 2) { // update surface tension (NOT DEBUGGED)
-    	IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, /*fp,*/ sphp /*ARGS*/);
+    	IterateParticlesInNearbyCells(vars_sorted, &pt, index, position_i, cell_indexes_start, cell_indexes_end, gp, /*fp,*/ sphp /*ARGS*/);
 		float norml = length(pt.color_normal);
 		if (norml > 1.) {
 			float4 stension = -0.3f * pt.color_lapl * pt.color_normal / norml;
@@ -203,7 +203,7 @@ __kernel void neighbors(
 		}
 	}
 	if (sphp->choice == 3) { // denominator in density normalization
-    	IterateParticlesInNearbyCells(vars_sorted, &pt, numParticles, index, position_i, cell_indexes_start, cell_indexes_end, gp, /*fp,*/ sphp /*ARGS*/);
+    	IterateParticlesInNearbyCells(vars_sorted, &pt, index, position_i, cell_indexes_start, cell_indexes_end, gp, /*fp,*/ sphp /*ARGS*/);
 
 		// NOT WORKING. NEED DEBUG STATEMENTS
 		density(index) /= pt.density.y;

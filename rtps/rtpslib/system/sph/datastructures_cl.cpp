@@ -22,7 +22,7 @@ __kernel void datastructures(
 {
 	uint index = get_global_id(0);
     //shouldn't we use the num particles? hmm
-	int numParticles = get_global_size(0);
+	int num = get_global_size(0);
 
 
 	// particle index	
@@ -68,6 +68,7 @@ __kernel void datastructures(
 	}
 
 	uint sorted_index = sort_indices[index];
+    //uint sorted_index = index;
 
 	// Copy data from old unsorted buffer to sorted buffer
 
@@ -81,6 +82,7 @@ __kernel void datastructures(
 	// Variables to sort could change for different types of simulations 
 	// SHOULD I divide by simulation scale upon return? do not think so
 	pos(index)     = unsorted_pos(sorted_index) * sphp->simulation_scale;
+	//pos(index)     = unsorted_pos(index) * sphp->simulation_scale;
 	vel(index)     = unsorted_vel(sorted_index);
 	veleval(index) = unsorted_veleval(sorted_index); // not sure if needed
 	//density(index) = unsorted_density(sorted_index); // only for debugging
