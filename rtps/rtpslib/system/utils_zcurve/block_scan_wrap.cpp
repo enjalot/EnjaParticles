@@ -45,6 +45,7 @@ void GE_SPH::blockScan(int which)
 	kern.setArg(iarg++, cl_params->getDevicePtr());
 	kern.setArg(iarg++, cl_GridParamsScaled->getDevicePtr());
 
+	#if 0
 	cl_cell_indices_nb->copyToHost();
 	cl_cell_indices_start->copyToHost();
 	int* nbf = cl_cell_indices_nb->getHostPtr();
@@ -58,6 +59,7 @@ void GE_SPH::blockScan(int which)
 	}
 	printf("count= %d\n", count);
 	//exit(0);
+	#endif
 
 	#if 0
 	cl_cell_offset->copyToHost();
@@ -68,7 +70,7 @@ void GE_SPH::blockScan(int which)
 	//exit(0);
 	#endif
 
-	cl_cell_offset->copyToDevice();
+	//cl_cell_offset->copyToDevice();
 
 	// probably inefficient. Increase to 64 in the future perhaps
 	int work_size = 32;  

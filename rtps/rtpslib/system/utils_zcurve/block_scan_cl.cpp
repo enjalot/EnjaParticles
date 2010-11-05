@@ -59,11 +59,17 @@ __kernel void block_scan(
 					__global float4*   vars_sorted, 
 		   			__global int* cell_indices_start,
 		   			__global int* cell_indices_nb,
+
+		   			//__constant int4* hash_to_grid_index,
 		   			__global int4* hash_to_grid_index,
+
 		   			//__constant int4* cell_offset,  // DOES NOT WORK OK
 		   			__global int4* cell_offset, 
+
 		   			__global struct SPHParams* sphp,
-		   			__constant struct GridParams* gp,
+		   			//__constant struct SPHParams* sphp,
+
+		   			__global struct GridParams* gp,
 		   			//__constant struct GridParams* gp,
 					__local  float4* locc   
 					DUMMY_ARGS
@@ -94,6 +100,7 @@ __kernel void block_scan(
 	// nb particles in cell with given hash
 	int nb = cell_indices_nb[hash]; 
 
+
 	// the cell is empty
 	if (nb <= 0) return;
 
@@ -103,12 +110,18 @@ __kernel void block_scan(
 	// this leads to errors
 	if (nb > 32) nb = 32;  
 
+
 	// nb is number of particles in cell
 	// nb >= 1
 
 	// maybe start is wrong? 
 	// particle position (index) in sorted array
 	int start = cell_indices_start[hash];
+
+	// TEMPORARY
+	if (lid < nb) {
+		density(start+lid) = locc[lid].w;
+	}
 
 	// nb threads = nb cells * 32
 	// Initialize all particles [start, start+1, ..., start+nb-1]

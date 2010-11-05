@@ -368,10 +368,10 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 
 		// must call sort and build first. 
 		// DEBUGGING
-		blockScan(0);
-		//neighborSearch(0); //density
-		//printGPUDiagnostics(1);
-		//exit(0);
+		//blockScan(0);
+		neighborSearch(0); //density
+		printGPUDiagnostics(1);
+		exit(0);
 		return;
 
 		//blockScanPres(0);
