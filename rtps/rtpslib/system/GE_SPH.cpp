@@ -369,9 +369,9 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 		// must call sort and build first. 
 		// DEBUGGING
 		blockScan(0);
-		exit(0);
-		printGPUDiagnostics(1);
-		exit(0);
+		//neighborSearch(0); //density
+		//printGPUDiagnostics(1);
+		//exit(0);
 		return;
 
 		//blockScanPres(0);
@@ -817,10 +817,11 @@ void GE_SPH::printGPUDiagnostics(int count)
 
 			//if (p.z > 6. && force[i].z > 0) {
 				printf("-------- i = %d --------\n", i);
-				//printf("(%d) pos: %f, %f, %f, rho= %f\n", count, p.x, p.y, p.z, rho);
-				printf("(%d) pos: %g, %g, %g, %g, rho=%g\n", count, p.x, p.y, p.z, p.w, rho);
-				printf("(%d) vel: %g, %g, %g, %g\n", count, vel.x, vel.y, vel.z, vel.w);
-				printf("(%d) veleval: %g, %g, %g\n", count, veval.x, veval.y, veval.z);
+				//printf("(%d) pos: %f, %f, %f, rho= %f\n", i, count, p.x, p.y, p.z, rho);
+				printf("(%d,%d) pos: %g, %g, %g, %g, rho=%g\n", i, count, p.x, p.y, p.z, p.w, rho);
+				printf("(%d,%d) vel: %g, %g, %g, %g\n", i, count, vel.x, vel.y, vel.z, vel.w);
+				printf("(%d,%d) veleval: %g, %g, %g\n", i, count, veval.x, veval.y, veval.z);
+				printf("(%d,%d) density: %g\n", i, count, rho);
 			//}
 	
 			int max = icli[i].x < 50 ? icli[i].x : 50;

@@ -2,6 +2,14 @@
 #define _WPOLY6_CL_
 
 //----------------------------------------------------------------------
+float Wpoly6_glob(float4 r, float h)
+{
+    float r2 = r.x*r.x + r.y*r.y + r.z*r.z;  // dist_squared(r);
+
+	float hr2 = (h*h-r2); 
+	return hr2*hr2*hr2;
+}
+//----------------------------------------------------------------------
 float Wpoly6(float4 r, float h, __constant struct SPHParams* params)
 {
     float r2 = r.x*r.x + r.y*r.y + r.z*r.z;  // dist_squared(r);

@@ -45,6 +45,20 @@ void GE_SPH::blockScan(int which)
 	kern.setArg(iarg++, cl_params->getDevicePtr());
 	kern.setArg(iarg++, cl_GridParamsScaled->getDevicePtr());
 
+	cl_cell_indices_nb->copyToHost();
+	cl_cell_indices_start->copyToHost();
+	int* nbf = cl_cell_indices_nb->getHostPtr();
+	int* startf = cl_cell_indices_start->getHostPtr();
+	//cl_cell_indices_nb->copyToDevice();
+	GridParamsScaled* ip = cl_GridParamsScaled->getHostPtr();
+	int count = 0;
+	for (int i=0; i < ip->nb_points; i++) {
+		printf("i=%d, start= %d, nb= %d\n", i, startf[i], nbf[i]);
+		count += nbf[i];
+	}
+	printf("count= %d\n", count);
+	//exit(0);
+
 	#if 0
 	cl_cell_offset->copyToHost();
 	int4* cc = cl_cell_offset->getHostPtr();
@@ -74,6 +88,11 @@ void GE_SPH::blockScan(int which)
 	size_t nb_blocks = (size_t) gps->nb_points;
 	// global must be an integer multiple of work_size
 	int global = nb_blocks * work_size;
+
+	printf("nb_blocks= %d\n", nb_blocks);
+	printf("global= %d\n", global);
+	printf("work_size= %d\n", work_size);
+	//exit(0);
 
 	//cl_GridParamsScaled->copyToHost();
 	//printf("nb points in grid: %d\n", gps->nb_points);

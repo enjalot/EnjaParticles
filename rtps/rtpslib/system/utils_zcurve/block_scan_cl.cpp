@@ -50,6 +50,11 @@ int calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 }
 
 //----------------------------------------------------------------------
+// about 450 out of 512 densities are correct! WHY? 
+// Probably because something wrong with threads, blocks, etc. 
+// By definition, a particle should have a non-zero density even if it has 
+// no neighbors! I must be confusing blocks and particles at some point!
+//----------------------------------------------------------------------
 __kernel void block_scan(
 					__global float4*   vars_sorted, 
 		   			__global int* cell_indices_start,
@@ -57,8 +62,9 @@ __kernel void block_scan(
 		   			__global int4* hash_to_grid_index,
 		   			//__constant int4* cell_offset,  // DOES NOT WORK OK
 		   			__global int4* cell_offset, 
-		   			__constant struct SPHParams* sphp,
+		   			__global struct SPHParams* sphp,
 		   			__constant struct GridParams* gp,
+		   			//__constant struct GridParams* gp,
 					__local  float4* locc   
 					DUMMY_ARGS
 			  )
@@ -68,8 +74,8 @@ __kernel void block_scan(
 // Total: 58*4*10 = 2320 bytes  (with float3 in cuda: 7 variables)
 // maximum of 6 blocks per multi-processor, on the mac (that is fine). 
 
-	int numParticles = gp->numParticles;
-	int num_grid_points = gp->nb_points;
+	int numParticles = gp->numParticles; // needed for macros
+	//int num_grid_points = gp->nb_points;
 
 	// tot nb threads = number of particles
 	// tot nb blocks = to number of grid cells
@@ -77,29 +83,31 @@ __kernel void block_scan(
 	// not related to particles. 32 threads per cell (there are often less
 	// than 32 particles per cell
 
-	// workgrup: lid in [0,31]
+	// work item thread: lid in [0,31]
 	int lid  = get_local_id(0);
 
-	// block id (one block per cell with particles)
+	// block id (one block per cell)
 	// save value of all threads in this group
 	int hash = get_group_id(0);
 
 	// next four lines would not be necessary once blocks are concatenated
-	// nb particles in cell with hash
+	// nb particles in cell with given hash
 	int nb = cell_indices_nb[hash]; 
 
 	// the cell is empty
 	if (nb <= 0) return;
 
 	// First assume blocks of size 32
-	// bring local particles into shared memory
+	// bring local particles in block into shared memory
 	// limit to 32 particles per block
 	// this leads to errors
 	if (nb > 32) nb = 32;  
 
+	// nb is number of particles in cell
+	// nb >= 1
 
-	// nb is nb particles in cell
-
+	// maybe start is wrong? 
+	// particle position (index) in sorted array
 	int start = cell_indices_start[hash];
 
 	// nb threads = nb cells * 32
@@ -109,7 +117,9 @@ __kernel void block_scan(
 	if (lid < nb) {
 		// bring particle data from central cell into local memory
 		locc[lid]   = pos(start+lid);
-		locc[lid].w = 0.0f;     // to store density
+		locc[lid].w = 0.0f;
+	} else { 		// should not be required
+		locc[lid] = 0.;
 	}
 
 	barrier(CLK_LOCAL_MEM_FENCE); // should not be required
@@ -121,79 +131,81 @@ __kernel void block_scan(
 	int cstart=0;
 	int cnb=0;
 
+	int4 cell = 0;
+
+	barrier(CLK_LOCAL_MEM_FENCE);
 
 	if (lid < 27) { // FOR DEBUGGING
 		// index of neighbor cell (including center)
-		c = c + cell_offset[lid]; 
+		// perhaps I could define cell_offset[28,29,30,31] 
+		// to avoid if statement?
+		cell = c + cell_offset[lid]; 
 
 		// check whether cellHash is valid? It is in principle
 		// if fluid is always off by 2-3 cells from the boundary. 
-		cellHash = calcGridHash(c, gp->grid_res, false);
+		cellHash = calcGridHash(cell, gp->grid_res, false);
 
 		// cstart not always correct
+		// list of particles in cell with hash cellHash
 		cstart = cell_indices_start[cellHash];
+
+		// one values for each thread in warp (first 27)
 		cnb = cell_indices_nb[cellHash];
+
 	} else {
-		;
+		return;
 	}
 
 	barrier(CLK_LOCAL_MEM_FENCE);
 
 	float rho = 0;
+	// ri only makes sense for particles 0 through nb-1
+	//   only if lid < nb
 	float4 ri = (float4)(locc[lid].xyz, 0.);
 
+	// accumulate data from neighboring cells (lid in [0,26])
+	//locc[nb+lid] = (float4) (0., 0., 0., 0.);
+
+
 	for (int i=0; i < 32; i++) {   	// max of 32 particles per cell
+	// since cnb < 32, how can density be higher when using cnb? 
+
+	// there are cnb particles per cell
+	// cnb is the number of neighbors in each cell
+	// each thread treats a different neighbor, which has a different number
+	// of points
+
+		// neighbor cell lid positions loaded to shared memory
+		locc[nb+lid] = (float4)(900., 900., 900., 1.);
 		barrier(CLK_LOCAL_MEM_FENCE);
-		locc[nb+lid] = (float4) (0., 0., 0., 0.);
 
 		// Bring in single particle from neighboring blocks, one per thread
 
 		// each thread takes care of one neighboring block
 		// densities are 1000 and 5000. WHY? WHY? 
+		// bring data from global memory to shared memory
 		if (lid < 27) {  // only 27 neighbors
-			if (cnb > i) {   // global access (called 32x)
+			// next statement has an effect
+			if (i < cnb) {   // global access (called 32 times)
 				locc[nb+lid] = pos(cstart+i); // ith particle in cell
-			} else {
-				// outside smoothing radius (for automatic rejection)
-				locc[nb+lid] = (float4)(900., 900., 900., 1.);
-			}
+			} 
 		}
 
 		barrier(CLK_LOCAL_MEM_FENCE);
 		
-		// UPDATE THE DENSITIES for particles in center cell
-
-		#if 0
-		for (int j=0; j < nb; j++) {  // iterate voer center cells
-			//if (lid >= nb) continue;
-			if (cnb <= i) continue;
-			float4 ri = (float4)(locc[j].xyz, 0.); // CORRECT LINE????
-			float4 rj = (float4)(locc[nb+lid].xyz, 0.); // CORRECT LINE????
+		#if 1
+		// go over single particle read in from  neighboring cells
+		// loop over neighboring cell, consider single particle in each cell
+		// including the center cell
+		for (int j=0; j < 27; j++) {   	// cell 13 is the center
+			if (lid >= nb) continue;
+			float4 rj = (float4)(locc[nb+j].xyz, 0.); // CORRECT LINE????
 			float4 r = rj-ri;
-			float rad = length(r);
-
-			//if (cnb > i) rho++; // 27*8 hits. Sounds right. 
+			float rad = length(r); // users sqrt without a need
 
 			if (rad < sphp->smoothing_distance) {
 				// cannot use x,y,z from loc (position and is required)
-				locc[j].w += sphp->wpoly6_coef * sphp->mass * Wpoly6(r, sphp->smoothing_distance, sphp);
-			}
-		}
-		#endif
-
-		#if 1
-		for (int j=0; j < 27; j++) {   	// cell 13 is the center
-			//if (lid >= nb) continue;
-			if (cnb <= i) continue;
-			float4 rj = (float4)(locc[nb+j].xyz, 0.); // CORRECT LINE????
-			float4 r = rj-ri;
-			float rad = length(r);
-
-			//if (cnb > i) rho++; // 27*8 hits. Sounds right. 
-
-			if (rad < sphp->smoothing_distance && lid < nb) {
-				// cannot use x,y,z from loc (position and is required)
-				locc[lid].w += sphp->wpoly6_coef * sphp->mass * Wpoly6(r, sphp->smoothing_distance, sphp);
+				locc[lid].w += sphp->wpoly6_coef * sphp->mass * Wpoly6_glob(r, sphp->smoothing_distance);
 			}
 		}
 		#endif
@@ -205,12 +217,6 @@ __kernel void block_scan(
 	
 	if (lid < nb) {
 		density(start+lid) = locc[lid].w;
-		//vel(start+lid).y = locc[lid].w;
-		//vel(start+lid).z = rho;
-
-		// only 1st 8 positions (within first block) have densities with 
-		// two values: 1100 and 5500. Do not know where 5100 comes from!
-		// There are 27, 50 or 100 neighbors of a given cell. NO IDEA WHY. 
 	}
 
 	return;
