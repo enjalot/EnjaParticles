@@ -193,11 +193,12 @@ void GE_SPH::update()
 	//printf("count= %d\n", count);
 
 #ifdef GPU
-	if (count%20 == 0) {
+	if (count%10 == 0) {
 		//count = 0;
 		printf("ITERATION: %d\n", count*nb_sub_iter);
 		printf("count= %d, nb_sub_iter= %d\n", count, nb_sub_iter);
 		GE::Time::printAll();
+		printf("GE::Time::printAll()\n"); exit(0);
 	}
 #endif
 
@@ -371,7 +372,7 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 		blockScan(0);
 		//neighborSearch(0); //density
 		printGPUDiagnostics(1);
-		exit(0);
+		//exit(0);
 		return;
 
 		//blockScanPres(0);

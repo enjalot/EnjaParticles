@@ -175,30 +175,30 @@ __kernel void block_scan(
 
 	// ri only makes sense for particles 0 through nb-1
 	//   only if lid < nb
-	float4 ri = (float4)(locc[lid].xyz, 0.);
-
-	// accumulate data from neighboring cells (lid in [0,26])
-	//locc[nb+lid] = (float4) (0., 0., 0., 0.);
+	//float4 ri = (float4)(locc[lid].xyz, 0.);
 
 	float rho = 0.;
+	locc[nb+lid] = (float4)(900., 900., 900., 1.);
 
 	// if there are 8 neighbors, I should only loop 8 times!
-	//for (int i=0; i < 32; i++) {   	// max of 32 particles per cell
-	   // should compute this maximum 
-	for (int i=0; i < 8; i++) {   	// max of 8 particles per cell
-		// do not understand why next line does not work
-		// cnb: number of particles in cell lid
-		//if (i >= cnb) continue; // SCREWS UP RESULTS!
-	// since cnb < 32, how can density be higher when using cnb? 
+	// max of 12 particles per cell
+	// if more than 12, flow is too compressible, and results are wrong 
+	// anyway (should have some kind of check).
+	// (originall i < 32)
+	for (int i=0; i < 12; i++) {   
+
+	// max of 32 particles per cell
+    // should compute this maximum 
+	//for (int i=0; i < 8; i++) {   	// max of 8 particles per cell
 
 	// there are cnb particles per cell
 	// cnb is the number of neighbors in each cell
 	// each thread treats a different neighbor, which has a different number
 	// of points
 
-		// neighbor cell lid positions loaded to shared memory
-		locc[nb+lid] = (float4)(900., 900., 900., 1.);
-		//float4 loc = (float4)(900., 900., 900., 1.);
+		// particle positions in neighbor cell "lid" loaded to shared memory
+		float4 loc = locc[nb+lid]; 
+
 		barrier(CLK_LOCAL_MEM_FENCE);
 
 		// Bring in single particle from neighboring blocks, one per thread
@@ -206,12 +206,13 @@ __kernel void block_scan(
 		// each thread takes care of one neighboring block
 		// densities are 1000 and 5000. WHY? WHY? 
 		// bring data from global memory to shared memory
+
 		//if (lid < 27) {  // only 27 neighbors
 		{
 			// next statement has an effect
+			// cnb is the number of cells in neighbor [lid]
 			if (i < cnb) {   // global access (called 32 times)
-				locc[nb+lid] = pos(cstart+i); // ith particle in cell
-				//loc = pos(cstart+i); // ith particle in cell lid
+				loc = pos(cstart+i); // ith particle in cell
 			} 
 		}
 
@@ -221,35 +222,43 @@ __kernel void block_scan(
 		// loop over neighboring cell, consider single particle in each cell
 		// including the center cell
 
-		// This loop is very expensive! Even if empty!
-		//float acoef = sphp->wpoly6_coef;
-
 		// It should be possible to organize the calculations more efficiently!
 
-		if (lid < nb) {
-			for (int j=0; j < 27; j++) { 
-				// does not change results, and the time either
-				//if (i >= cnb) continue;
+		// loop over particles in center cell
+		#if 1
+		for (int k=0; k < nb; k++) {
+			float4 ri = (float4)(locc[k].xyz, 0.); // CORRECT LINE????
+			//float4 rj = (float4)(locc[nb+lid].xyz, 0.); // CORRECT LINE????
+			float4 rj = (float4)(loc.xyz, 0.); // CORRECT LINE????
+			float4 r = rj-ri;
+			float rad = length(r); // uses sqrt without a need
+			if (rad < sphp->smoothing_distance) {
+			    // must sum all 27 terms and not just one
+				rho += Wpoly6_glob(r, sphp->smoothing_distance);
+			}
+		}
+		#endif
 
-				//if (lid >= nb) continue; // decreased time slightly (10%)
-				// redundant calculations, not used
+		#if 0
+		if (lid < nb) {
+			for (int j=0; j < 27; j++) {   	// cell 13 is the center
+				//if (lid >= nb) continue;
 				#if 1
 				float4 rj = (float4)(locc[nb+j].xyz, 0.); // CORRECT LINE????
-				//float4 rj = (float4)(loc.xyz, 0.); 
 				float4 r = rj-ri;
-				//rj = rj-ri;
 				float rad = length(r); // users sqrt without a need
-				//float rad = length(rj); // users sqrt without a need
 
 				if (rad < sphp->smoothing_distance) {
 					// cannot use x,y,z from loc (position and is required)
 					// This line accounts for 70 ms!!! Without it, time is 15 ms
+					//locc[lid].w += 1.;
 					rho += Wpoly6_glob(r, sphp->smoothing_distance);
-					//rho += Wpoly6_glob(rj, sphp->smoothing_distance);
+					//locc[lid].w += Wpoly6_glob(r, sphp->smoothing_distance);
 				}
 				#endif
 			}
 		}
+		#endif
 	}
 
 	barrier(CLK_LOCAL_MEM_FENCE);
