@@ -25,9 +25,15 @@ void SPH::loadPrep()
 void SPH::prep()
 {
 
-	int ctaSize = 128; // work group size
+	//int ctaSize = 128; // work group size
 	// Hash based on unscaled data
-	k_prep.execute(num, ctaSize);
+    try {
+	k_prep.execute(num);
+    }
+    catch(cl::Error er) {
+        printf("ERROR(prep): %s(%s)\n", er.what(), oclErrorString(er.err()));
+        exit(1);
+    }
 	
     ps->cli->queue.finish();
 }

@@ -26,8 +26,8 @@ public:
     virtual GLuint getPosVBO() { return pos_vbo; };
     virtual GLuint getColVBO() { return col_vbo; };
 
-    virtual void addBox(int nn, float4 min, float4 max){};
-    virtual void addBall(int nn, float4 center, float radius){};
+    virtual void addBox(int nn, float4 min, float4 max, bool scaled){};
+    virtual void addBall(int nn, float4 center, float radius, bool scaled){};
     
 
 protected:

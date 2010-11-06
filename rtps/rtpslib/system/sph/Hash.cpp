@@ -29,7 +29,8 @@ void SPH::hash()
 
 	int ctaSize = 128; // work group size
 	// Hash based on unscaled data
-	k_hash.execute(num, ctaSize);
+    // not sure why i'm getting errors with arbitrary # particles nad workgroup size
+	k_hash.execute(num);//, ctaSize);
 	// set cell_indicies_start to -1
 	int minus = 0xffffffff;
 

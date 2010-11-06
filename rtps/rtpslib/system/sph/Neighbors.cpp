@@ -63,10 +63,20 @@ void SPH::neighborSearch(int choice)
     cl_SPHParams.copyToDevice(vparams);
 
 
+    
+    std::vector<int4> cli = cli_debug.copyToHost(2);
+    for (int i=0; i < 2; i++) 
+    {  
+		printf("cli_debug: %d\n", cli[i].w);
+    }
+
+
+
 	size_t global = (size_t) num;
 	int local = 128;
 
- 	k_neighbors.execute(global, local);
+    //can't use local size with arbitray num particles?
+ 	k_neighbors.execute(global);//, local);
 	ps->cli->queue.finish();
    
 
@@ -75,15 +85,15 @@ void SPH::neighborSearch(int choice)
 	printf("which == %d *** \n", choice);
 
 	printf("***** PRINT neighbors diagnostics ******\n");
-    std::vector<int4> cli = cli_debug.copyToHost(num);
+    cli = cli_debug.copyToHost(num);
     std::vector<float4> clf = clf_debug.copyToHost(num);
 
 	//for (int i=0; i < num; i++) {  
-	for (int i=0; i < 2; i++) 
+	for (int i=0; i < 10; i++) 
     {  
+		printf("-----\n");
 		printf("clf_debug: %f, %f, %f, %f\n", clf[i].x, clf[i].y, clf[i].z, clf[i].w);
 		printf("cli_debug: %d, %d, %d, %d\n", cli[i].x, cli[i].y, cli[i].z, cli[i].w);
-		printf("-----\n");
     }
 
 

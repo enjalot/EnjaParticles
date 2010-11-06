@@ -55,14 +55,35 @@ void SPH::buildDataStructures()
 	
     printf("start cell indices\n");
     printf("end cell indices\n");
-    //int nbc = 20;
-    std::vector<int> sci = cl_cell_indices_start.copyToHost(nbc);
-    std::vector<int> eci = cl_cell_indices_end.copyToHost(nbc);
+    nbc = grid_params.nb_cells;
+    std::vector<int> is = cl_cell_indices_start.copyToHost(nbc);
+    std::vector<int> ie = cl_cell_indices_end.copyToHost(nbc);
 
+    /*
     for(int i = 0; i < nbc; i++)
     {
-        printf("sci[%d] %d eci[%d] %d\n", i, sci[i], i, eci[i]);
+        printf("sci[%d] %d eci[%d] %d\n", i, is[i], i, ie[i]);
     }
+    */
+
+    int nb_particles = 0;
+    int nb;
+    int asdf = 0;
+    for (int i=0; i < grid_params.nb_cells; i++) {
+    //for (int i=0; i < 100; i++) {
+        //printf("is,ie[%d]= %d, %d\n", i, is[i], ie[i]);
+        // ie[i] SHOULD NEVER BE ZERO 
+        //printf("is[%d] %d ie[%d] %d\n", i, is[i], i, ie[i]);
+        if (is[i] != -1 && ie[i] != 0) {
+            nb = ie[i] - is[i];
+            nb_particles += nb;
+        }
+        if (is[i] != -1 && ie[i] != 0 && i > 600 && i < 1000) { 
+            asdf++;
+            printf("(GPU) [%d]: indices_start: %d, indices_end: %d, nb pts: %d\n", i, is[i], ie[i], nb);
+        }
+    }
+    printf("asdf: %d\n", asdf);
 
 
 

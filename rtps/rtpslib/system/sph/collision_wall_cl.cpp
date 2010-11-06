@@ -6,6 +6,7 @@ float4 calculateRepulsionForce(float4 normal, float4 vel, float boundary_stiffne
 {
     vel.w = 0.0f;
     float4 repulsion_force = (boundary_stiffness * distance - boundary_dampening * dot(normal, vel))*normal;
+    repulsion_force.w = 0.0f;
     return repulsion_force;
 }
 
@@ -50,7 +51,7 @@ __kernel void collision_wall(
 		__constant struct SPHParams* params)
 {
     unsigned int i = get_global_id(0);
-    int num = params->num;
+    int num = get_global_size(0);
     if(i > num) return;
 
 

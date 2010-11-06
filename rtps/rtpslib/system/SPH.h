@@ -113,9 +113,9 @@ public:
 
     void update();
     //wrapper around IV.h addRect
-    void addBox(int nn, float4 min, float4 max);
+    void addBox(int nn, float4 min, float4 max, bool scaled);
     //wrapper around IV.h addSphere
-    void addBall(int nn, float4 center, float radius);
+    void addBall(int nn, float4 center, float radius, bool scaled);
     
     
 private:

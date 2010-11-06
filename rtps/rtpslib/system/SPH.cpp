@@ -161,17 +161,17 @@ SPH::SPH(RTPS *psfr, int n)
     ////////////////// Setup some initial particles
     //// really this should be setup by the user
     //int nn = 1024;
-    int nn = 4096;
+    int nn = 2048;
     //float4 min = float4(.4, .4, .1, 0.0f);
     //float4 max = float4(.6, .6, .4, 0.0f);
 
-	float4 min   = float4(-559.*scale, -15*scale, .5*scale, 1.);
-	float4 max   = float4(220.*scale, 225.*scale, 450.*scale, 1);
+	float4 min   = float4(-559., -15., .5, 1.);
+	float4 max   = float4(220., 225., 450., 1);
 
     //float4 min = float4(.1, .1, .1, 0.0f);
     //float4 max = float4(.3, .3, .4, 0.0f);
 
-    addBox(nn, min, max);
+    addBox(nn, min, max, false);
     
     /*
     min = float4(.05/scale, .05/scale, .3/scale, 0.0f);
@@ -288,7 +288,7 @@ void SPH::updateGPU()
         neighborSearch(0);  //density
         printf("forces\n");
         neighborSearch(1);  //forces
-        exit(0);
+        //exit(0);
 
         printf("collision\n");
         collision();
@@ -485,15 +485,25 @@ void SPH::setupDomain()
     
 }
 
-void SPH::addBox(int nn, float4 min, float4 max)
+void SPH::addBox(int nn, float4 min, float4 max, bool scaled)
 {
-    vector<float4> rect = addRect(nn, min, max, sph_settings.spacing, sph_settings.simulation_scale);
+    float scale = 1.0f;
+    if(scaled)
+    {
+        scale = sph_settings.simulation_scale;
+    }
+    vector<float4> rect = addRect(nn, min, max, sph_settings.spacing, scale);
     pushParticles(rect);
 }
 
-void SPH::addBall(int nn, float4 center, float radius)
+void SPH::addBall(int nn, float4 center, float radius, bool scaled)
 {
-    vector<float4> sphere = addSphere(nn, center, radius, sph_settings.spacing, sph_settings.simulation_scale);
+    float scale = 1.0f;
+    if(scaled)
+    {
+        scale = sph_settings.simulation_scale;
+    }
+    vector<float4> sphere = addSphere(nn, center, radius, sph_settings.spacing, scale);
     pushParticles(sphere);
 }
 
@@ -536,7 +546,9 @@ void SPH::pushParticles(vector<float4> pos)
     cl_position.acquire();
     //reprep the unsorted (packed) array to account for new particles
     //might need to do it conditionally if particles are added or subtracted
+    printf("about to prep\n");
     prep();
+    printf("done with prep\n");
     cl_position.release();
 
 #else
