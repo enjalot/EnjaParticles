@@ -32,6 +32,7 @@ void SPH::buildDataStructures()
 {
 
 
+    /*
     int nbc = 20;
     std::vector<int> sh = cl_sort_hashes.copyToHost(nbc);
     //std::vector<int> eci = cl_cell_indices_end.copyToHost(nbc);
@@ -40,19 +41,24 @@ void SPH::buildDataStructures()
     {
         printf("sh[%d] %d\n", i, sh[i]);
     }
+    */
 
 
-
-    printf("about to data structures\n");
+    //printf("about to data structures\n");
 	int workSize = 64; // work group size
     try
     {
 	    k_datastructures.execute(num, workSize);
     }
     catch (cl::Error er) {
-        printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+        printf("ERROR(data structures): %s(%s)\n", er.what(), oclErrorString(er.err()));
     }
 	
+    ps->cli->queue.finish();
+
+#if 0 
+    //printouts
+    int nbc = 0;
     printf("start cell indices\n");
     printf("end cell indices\n");
     nbc = grid_params.nb_cells;
@@ -80,16 +86,15 @@ void SPH::buildDataStructures()
         }
         if (is[i] != -1 && ie[i] != 0 && i > 600 && i < 1000) { 
             asdf++;
-            printf("(GPU) [%d]: indices_start: %d, indices_end: %d, nb pts: %d\n", i, is[i], ie[i], nb);
+            //printf("(GPU) [%d]: indices_start: %d, indices_end: %d, nb pts: %d\n", i, is[i], ie[i], nb);
         }
     }
     printf("asdf: %d\n", asdf);
-
-
-
-    ps->cli->queue.finish();
-
     printf("done with data structures\n");
+#endif
+
+
+
 
 
 }

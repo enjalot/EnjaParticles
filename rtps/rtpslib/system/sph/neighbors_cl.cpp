@@ -109,13 +109,13 @@ __kernel void neighbors(
 {
     // particle index
 	int nb_vars = sphp->nb_vars;
-	//int numParticles = sphp->num;
+	int num = sphp->num;
     //int numParticles = get_global_size(0);
-    int num = get_global_size(0);
+    //int num = get_global_size(0);
 
 
 	int index = get_global_id(0);
-    if (index >= numParticles) return;
+    if (index >= num) return;
 
     float4 position_i = pos(index);
 

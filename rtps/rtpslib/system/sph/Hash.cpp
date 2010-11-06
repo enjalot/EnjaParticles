@@ -13,6 +13,7 @@ void SPH::loadHash()
 
     printf("kernel made, set args\n");
     int args = 0;
+    k_hash.setArg(args++, num); 
     k_hash.setArg(args++, cl_vars_unsorted.getDevicePtr()); // positions + other variables
 	k_hash.setArg(args++, cl_sort_hashes.getDevicePtr());
 	k_hash.setArg(args++, cl_sort_indices.getDevicePtr());
@@ -29,8 +30,8 @@ void SPH::hash()
 
 	int ctaSize = 128; // work group size
 	// Hash based on unscaled data
-    // not sure why i'm getting errors with arbitrary # particles nad workgroup size
-	k_hash.execute(num);//, ctaSize);
+    k_hash.setArg(0, num); 
+	k_hash.execute(num, ctaSize);
 	// set cell_indicies_start to -1
 	int minus = 0xffffffff;
 
@@ -47,7 +48,7 @@ void SPH::hash()
 	//sset(gp->nb_points, minus, cl_cell_indices_start->getDevicePtr());
 	//exit(0);   // SOMETHING WRONG with sset!!! WHY? 
 
-	printHashDiagnostics();
+    //printHashDiagnostics();
 
 	#if 0
 	GridParams& gp = *cl_GridParams->getHostPtr();

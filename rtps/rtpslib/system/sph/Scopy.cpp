@@ -24,7 +24,7 @@ void SPH::scopy(int n, cl_mem xsrc, cl_mem ydst)
 	size_t local = 128; //cl.getMaxWorkSize(kern.getKernel());
 
     //not sure why i can't use local
-	k_scopy.execute(global);//, local);
+	k_scopy.execute(global, local);
 	ps->cli->queue.finish();
 
 }

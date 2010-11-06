@@ -51,7 +51,8 @@ __kernel void collision_wall(
 		__constant struct SPHParams* params)
 {
     unsigned int i = get_global_id(0);
-    int num = get_global_size(0);
+    //int num = get_global_size(0);
+	int num = params->num;
     if(i > num) return;
 
 

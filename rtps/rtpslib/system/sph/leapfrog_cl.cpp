@@ -12,7 +12,9 @@ __kernel void leapfrog(
 		float dt)
 {
     unsigned int i = get_global_id(0);
-	int num = get_global_size(0); // for access functions in cl_macros.h
+	//int num = get_global_size(0); // for access functions in cl_macros.h
+	int num = params->num;
+    if(i >= num) return;
 
     float4 p = pos(i);
     float4 v = vel(i);

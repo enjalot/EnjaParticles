@@ -21,7 +21,8 @@ __kernel void datastructures(
 			  )
 {
 	uint index = get_global_id(0);
-	int num = get_global_size(0);
+    int num = sphp->num;
+	//int num = get_global_size(0);
 
 
 	// particle index	
@@ -34,6 +35,7 @@ __kernel void datastructures(
 	// two hash values per thread	
 
 	uint tid = get_local_id(0);
+    //if(tid >= 64) return;
 
 #if 1
 	sharedHash[tid+1] = hash;  // SOMETHING WRONG WITH hash on Fermi

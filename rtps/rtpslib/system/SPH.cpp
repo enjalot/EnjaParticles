@@ -161,24 +161,31 @@ SPH::SPH(RTPS *psfr, int n)
     ////////////////// Setup some initial particles
     //// really this should be setup by the user
     //int nn = 1024;
-    int nn = 2048;
+    int nn = 3333;
+    nn = 2048;
+    //nn = 1920;
     //float4 min = float4(.4, .4, .1, 0.0f);
     //float4 max = float4(.6, .6, .4, 0.0f);
 
-	float4 min   = float4(-559., -15., .5, 1.);
-	float4 max   = float4(220., 225., 450., 1);
+	//float4 min   = float4(-559., -15., .5, 1.);
+	//float4 max   = float4(220., 225., 450., 1);
+
+    float4 min   = float4(-559., -15., 200.5, 1.);
+	float4 max   = float4(220., 225., 650., 1);
+
+
 
     //float4 min = float4(.1, .1, .1, 0.0f);
     //float4 max = float4(.3, .3, .4, 0.0f);
 
     addBox(nn, min, max, false);
     
-    /*
-    min = float4(.05/scale, .05/scale, .3/scale, 0.0f);
-    max = float4(.2/scale, .2/scale, .45/scale, 0.0f);
-    addBox(nn, min, max);
-    */
-
+    nn = 512;
+    min = float4(-125, 75, 475, 0.0f);
+    max = float4(-75, 127, 525, 0.0f);
+    //addBox(nn, min, max, false);
+    //addBox(nn, min, max, false);
+   
     //float4 center = float4(.1/scale, .15/scale, .3/scale, 0.0f);
     //addBall(nn, center, .06/scale);
     //addBall(nn, center, .1/scale);
@@ -306,7 +313,7 @@ void SPH::updateGPU()
 void SPH::collision()
 {
     //when implemented other collision routines can be chosen here
-    k_collision_wall.execute(num);
+    k_collision_wall.execute(num, 128);
 }
 
 void SPH::integrate()
@@ -314,12 +321,12 @@ void SPH::integrate()
     if(sph_settings.integrator == EULER)
     {
         //k_euler.execute(max_num);
-        k_euler.execute(num);
+        k_euler.execute(num, 128);
     }
     else if(sph_settings.integrator == LEAPFROG)
     {
        //k_leapfrog.execute(max_num);
-       k_leapfrog.execute(num);
+       k_leapfrog.execute(num, 128);
     }
 }
 
@@ -519,7 +526,7 @@ void SPH::pushParticles(vector<float4> pos)
     //according to docs the assign function drops previous values which is no good
     for(int i = 0; i < nn; i++)
     {
-        positions[num+i] = pos[i];
+        //positions[num+i] = pos[i];
         cols[i] = color;
     }
 #ifdef GPU

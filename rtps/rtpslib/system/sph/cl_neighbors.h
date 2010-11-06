@@ -26,7 +26,8 @@ inline void ForNeighbor(__global float4*  vars_sorted,
 	  			__constant struct SPHParams* sphp
 				)
 {
-	int num = get_global_size(0);
+    int num = sphp->num;
+    //int num = get_global_size(0);
 
 
 	if (sphp->choice == 0) {

@@ -25,6 +25,7 @@
 // comes from K_Grid_Hash
 // CANNOT USE references to structures/classes as arguments!
 __kernel void hash(
+           int num,
            __global float4* vars_unsorted,
            __global uint* sort_hashes,
            __global uint* sort_indexes,
@@ -37,7 +38,7 @@ __kernel void hash(
 {
     // particle index
     uint index = get_global_id(0);
-	int num = get_global_size(0);
+	//int num = get_global_size(0);
     if (index >= num) return;
 
 	// initialize to -1 (used in kernel datastructures in build_datastructures_wrap.cpp
@@ -65,7 +66,7 @@ __kernel void hash(
     //fdebug[index] = (float4)((p.x - gp->grid_min.x) * gp->grid_inv_delta.x, p.x, 0,0);
     clf[index] = (float4)((p.x - gp->grid_min.x) * gp->grid_delta.x, p.x, 0,0);
 	cli[index] = gridPos;
-    cli[index].w = hash;
+    cli[index].w = num;
 }
 //----------------------------------------------------------------------
 

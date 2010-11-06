@@ -12,6 +12,7 @@ void SPH::loadPrep()
     k_prep = Kernel(ps->cli, path, "prep");
 
     int args = 0;
+    k_prep.setArg(args++, num);
 	k_prep.setArg(args++, cl_density.getDevicePtr());
 	k_prep.setArg(args++, cl_position.getDevicePtr());
 	k_prep.setArg(args++, cl_velocity.getDevicePtr());
@@ -25,10 +26,11 @@ void SPH::loadPrep()
 void SPH::prep()
 {
 
-	//int ctaSize = 128; // work group size
+    k_prep.setArg(0, num);
+    int ctaSize = 128; // work group size
 	// Hash based on unscaled data
     try {
-	k_prep.execute(num);
+	k_prep.execute(num, ctaSize);
     }
     catch(cl::Error er) {
         printf("ERROR(prep): %s(%s)\n", er.what(), oclErrorString(er.err()));
