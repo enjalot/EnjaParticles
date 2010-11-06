@@ -197,7 +197,8 @@ __kernel void block_scan(
 	// of points
 
 		// particle positions in neighbor cell "lid" loaded to shared memory
-		float4 loc = locc[nb+lid]; 
+		//float4 loc = locc[nb+lid]; 
+		locc[nb+lid] = (float4)(900., 900., 900., 1.);
 
 		barrier(CLK_LOCAL_MEM_FENCE);
 
@@ -207,12 +208,44 @@ __kernel void block_scan(
 		// densities are 1000 and 5000. WHY? WHY? 
 		// bring data from global memory to shared memory
 
+		// sum 32 elements
+		// If float4, we really have 128 floats so we need 64 threads, 
+		// so we could use two warps. 
+		// a[0] = a[0] + a[1], 
+		// a[2] = a[2] + a[3] 
+		// a[4] = a[4] + a[5], ..., 
+		// a[30] = a[30]+a[31]
+		// a[2*i] += a[2*i+1] (i < 5)
+
+		// a[0] = a[0] + a[2]
+		// a[4] = a[4] + a[6]
+		// a[8] = a[8] + a[10]
+		// ...
+		// a[28] = a[28] + a[30]
+		// a[4*i] += a[4*i+2] (i < 4)
+
+		// a[0] = a[0] + a[4]
+		// a[8] = a[8] + a[12]
+		// a[16] = a[16] + a[20]
+		// a[24] = a[24] + a[28]
+		// a[8*i] += a[8*i+4]  (i < 3)
+
+		// a[0] = a[0] + a[8]
+		// a[16] = a[16] + a[24]
+		// a[16*i] += a[16*i+8]  (i < 2)
+		
+		// a[0] = a[0] + a[16]
+		// a[i] += a[16]   (i < 1)
+		// DONE
+
+
 		//if (lid < 27) {  // only 27 neighbors
 		{
 			// next statement has an effect
 			// cnb is the number of cells in neighbor [lid]
 			if (i < cnb) {   // global access (called 32 times)
-				loc = pos(cstart+i); // ith particle in cell
+				//loc = pos(cstart+i); // ith particle in cell
+				locc[nb+lid] = (float4)(900., 900., 900., 1.);
 			} 
 		}
 

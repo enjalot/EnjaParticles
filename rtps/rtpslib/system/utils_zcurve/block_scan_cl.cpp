@@ -7,6 +7,8 @@
 #include "cl_macros.h"
 #include "cl_structures.h"
 #include "neighbors.cpp"
+#include "sum_cl.cpp"
+#include "bank_conflicts.h"
 
 //----------------------------------------------------------------------
 int calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
@@ -92,6 +94,38 @@ __kernel void block_scan(
 
 	// work item thread: lid in [0,31]
 	int lid  = get_local_id(0);
+
+//----------------------------------
+	barrier(CLK_LOCAL_MEM_FENCE); // should not be required
+ 	locc[lid] = 1.;
+	//float4 sm = sum(locc);
+	//sum(locc);
+//----------------------------------
+	int ai;
+	int bi;
+	int offset = 1;
+	int sz = 16;
+
+	//int lid = get_local_id(0);
+	for (int d = sz; d > 0; d >>=1) {
+		// not needed if within single warp since all threads execute 
+        //simultaneously
+		//barrier(CLK_LOCAL_MEM_FENCE); // should not be required
+
+		if (lid < d) {
+			ai = offset*(2*lid+1)-1;
+			bi = offset*(2*lid+2)-1;
+			//loc[bi] += loc[ai];
+			LOCC(bi) += LOCC(ai);
+		}
+		offset <<= 1;
+	}
+return;
+
+	//return loc[bi]; // sum should not be required since in local storage
+//----------------------------------
+
+	barrier(CLK_LOCAL_MEM_FENCE); // should not be required
 
 	// block id (one block per cell)
 	// save value of all threads in this group

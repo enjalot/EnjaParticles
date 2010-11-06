@@ -14,6 +14,7 @@ SET(FILES
    block_scan_cl
    block_scan_loop_cl
    block_scan_pres_cl
+   sum_cl
 )  # ignore cpp extension
 
 # Only executes when I do "cmake"
