@@ -7,6 +7,8 @@
 #include "cl_macros.h"
 #include "cl_structures.h"
 #include "neighbors.cpp"
+#include "sum_cl.cpp"
+#include "bank_conflicts.h"
 
 //----------------------------------------------------------------------
 int calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
@@ -208,37 +210,6 @@ __kernel void block_scan(
 		// densities are 1000 and 5000. WHY? WHY? 
 		// bring data from global memory to shared memory
 
-		// sum 32 elements
-		// If float4, we really have 128 floats so we need 64 threads, 
-		// so we could use two warps. 
-		// a[0] = a[0] + a[1], 
-		// a[2] = a[2] + a[3] 
-		// a[4] = a[4] + a[5], ..., 
-		// a[30] = a[30]+a[31]
-		// a[2*i] += a[2*i+1] (i < 5)
-
-		// a[0] = a[0] + a[2]
-		// a[4] = a[4] + a[6]
-		// a[8] = a[8] + a[10]
-		// ...
-		// a[28] = a[28] + a[30]
-		// a[4*i] += a[4*i+2] (i < 4)
-
-		// a[0] = a[0] + a[4]
-		// a[8] = a[8] + a[12]
-		// a[16] = a[16] + a[20]
-		// a[24] = a[24] + a[28]
-		// a[8*i] += a[8*i+4]  (i < 3)
-
-		// a[0] = a[0] + a[8]
-		// a[16] = a[16] + a[24]
-		// a[16*i] += a[16*i+8]  (i < 2)
-		
-		// a[0] = a[0] + a[16]
-		// a[i] += a[16]   (i < 1)
-		// DONE
-
-
 		//if (lid < 27) {  // only 27 neighbors
 		{
 			// next statement has an effect
@@ -258,37 +229,20 @@ __kernel void block_scan(
 		// It should be possible to organize the calculations more efficiently!
 
 		// loop over particles in center cell
+		// given ri, sum as follows: 
+		// if sum of 32 elements costs 3 sec, and I do the sum 8 times, 
+        // that costs 24 sec. Very high cost. 
 		#if 1
 		for (int k=0; k < nb; k++) {
 			float4 ri = (float4)(locc[k].xyz, 0.); // CORRECT LINE????
-			//float4 rj = (float4)(locc[nb+lid].xyz, 0.); // CORRECT LINE????
-			float4 rj = (float4)(loc.xyz, 0.); // CORRECT LINE????
+			float4 rj = (float4)(locc[nb+lid].xyz, 0.); // CORRECT LINE????
+			//float4 rj = (float4)(loc.xyz, 0.); // CORRECT LINE????
 			float4 r = rj-ri;
 			float rad = length(r); // uses sqrt without a need
 			if (rad < sphp->smoothing_distance) {
 			    // must sum all 27 terms and not just one
-				rho += Wpoly6_glob(r, sphp->smoothing_distance);
-			}
-		}
-		#endif
-
-		#if 0
-		if (lid < nb) {
-			for (int j=0; j < 27; j++) {   	// cell 13 is the center
-				//if (lid >= nb) continue;
-				#if 1
-				float4 rj = (float4)(locc[nb+j].xyz, 0.); // CORRECT LINE????
-				float4 r = rj-ri;
-				float rad = length(r); // users sqrt without a need
-
-				if (rad < sphp->smoothing_distance) {
-					// cannot use x,y,z from loc (position and is required)
-					// This line accounts for 70 ms!!! Without it, time is 15 ms
-					//locc[lid].w += 1.;
-					rho += Wpoly6_glob(r, sphp->smoothing_distance);
-					//locc[lid].w += Wpoly6_glob(r, sphp->smoothing_distance);
-				}
-				#endif
+				//rho += Wpoly6_glob(r, sphp->smoothing_distance);
+				//rho = Wpoly6_glob(r, sphp->smoothing_distance);
 			}
 		}
 		#endif

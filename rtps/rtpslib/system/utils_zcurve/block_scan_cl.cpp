@@ -107,6 +107,7 @@ __kernel void block_scan(
 	int sz = 16;
 
 	//int lid = get_local_id(0);
+	#if 0
 	for (int d = sz; d > 0; d >>=1) {
 		// not needed if within single warp since all threads execute 
         //simultaneously
@@ -120,7 +121,9 @@ __kernel void block_scan(
 		}
 		offset <<= 1;
 	}
-return;
+	#endif
+
+	//----------------------------------------------------------------------
 
 	//return loc[bi]; // sum should not be required since in local storage
 //----------------------------------
@@ -138,6 +141,28 @@ return;
 
 	// the cell is empty
 	if (nb <= 0) return;
+
+//----------------------------------------------------------------------
+	//if (get_group_id(0) > 500) return;
+
+#if 0
+// only costs 2 ms
+// cost of these 5 lines:  55 ms (TOO MUCH)
+        { locc[lid] += locc[lid + 16]; }
+        { locc[lid] += locc[lid +  8]; }
+        { locc[lid] += locc[lid +  4]; }
+        { locc[lid] += locc[lid +  2]; }
+        { locc[lid] += locc[lid +  1]; }
+        //if (bsdatakSize >=  32) { sdata[tid] += sdata[tid + 16]; }
+        //if (blockSize >=  16) { sdata[tid] += sdata[tid +  8]; }
+        //if (blockSize >=   8) { sdata[tid] += sdata[tid +  4]; }
+        //if (blockSize >=   4) { sdata[tid] += sdata[tid +  2]; }
+        //if (blockSize >=   2) { sdata[tid] += sdata[tid +  1]; }
+//return;
+#endif
+
+	//sum(locc);
+//----------------------------------------------------------------------
 
 	// First assume blocks of size 32
 	// bring local particles in block into shared memory

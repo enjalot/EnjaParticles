@@ -14,11 +14,11 @@ void GE_SPH::blockScan(int which)
 		try {
 			string path(CL_SPH_UTIL_SOURCE_DIR);
 
-			path = path + "/block_scan_cl.cl";
+			//path = path + "/block_scan_cl.cl";
 
 			// interchange loops when updating the density for higher 
 			// efficiency. Still 32 threads per warp
-			//path = path + "/block_scan_loop_cl.cl";
+			path = path + "/block_scan_loop_cl.cl";
 
 			int length;
 			char* src = file_contents(path.c_str(), &length);

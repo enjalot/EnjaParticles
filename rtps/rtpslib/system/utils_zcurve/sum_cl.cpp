@@ -7,8 +7,21 @@
 // single warp of 32 threads summing 32 elements in loc
 // unro
 
-inline void sum(__local float4* loc)
+inline void sum(__local float4* locc)
 {
+// blocks of size 32 only
+
+	int lid = get_local_id(0);
+	{ locc[lid] += locc[lid + 16]; }
+	{ locc[lid] += locc[lid +  8]; }
+	{ locc[lid] += locc[lid +  4]; }
+	{ locc[lid] += locc[lid +  2]; }
+	{ locc[lid] += locc[lid +  1]; }
+
+// there are bank conflicts
+// sum in loc[0]
+
+#if 0
 	int ai;
 	int bi;
 	int offset = 1;
@@ -26,6 +39,7 @@ inline void sum(__local float4* loc)
 		}
 		offset <<= 1;
 	}
+#endif
 
 	//return loc[bi]; // sum should not be required since in local storage
 
