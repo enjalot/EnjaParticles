@@ -13,6 +13,7 @@ void SPH::loadHash()
 
     printf("kernel made, set args\n");
     int args = 0;
+    k_hash.setArg(args++, num); 
     k_hash.setArg(args++, cl_vars_unsorted.getDevicePtr()); // positions + other variables
 	k_hash.setArg(args++, cl_sort_hashes.getDevicePtr());
 	k_hash.setArg(args++, cl_sort_indices.getDevicePtr());
@@ -29,6 +30,7 @@ void SPH::hash()
 
 	int ctaSize = 128; // work group size
 	// Hash based on unscaled data
+    k_hash.setArg(0, num); 
 	k_hash.execute(num, ctaSize);
 	// set cell_indicies_start to -1
 	int minus = 0xffffffff;
@@ -46,7 +48,7 @@ void SPH::hash()
 	//sset(gp->nb_points, minus, cl_cell_indices_start->getDevicePtr());
 	//exit(0);   // SOMETHING WRONG with sset!!! WHY? 
 
-	printHashDiagnostics();
+    //printHashDiagnostics();
 
 	#if 0
 	GridParams& gp = *cl_GridParams->getHostPtr();
@@ -82,10 +84,10 @@ void SPH::printHashDiagnostics()
 	//cli_debug->copyToHost();
 
 	//for (int i=0; i < num; i++) {  
-	for (int i=0; i < 2; i++) {  
+	for (int i=0; i < 10; i++) {  
 		printf(" cl_sort_hash[%d] %u, cl_sort_indices[%d]: %u\n", i, sh[i], i, si[i]);
-		printf("cli_debug: %d, %d, %d\n", cli[i].x, cli[i].y, cli[i].z);
-		printf("clf_debug: %f, %f, %f\n", clf[i].x, clf[i].y, clf[i].z);
+		printf("cli_debug: %d, %d, %d, %d\n", cli[i].x, cli[i].y, cli[i].z, cli[i].w);
+		printf("clf_debug: %f, %f, %f, %f\n", clf[i].x, clf[i].y, clf[i].z, clf[i].w);
 		printf("-----\n");
 
 		#if 0

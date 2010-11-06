@@ -24,22 +24,22 @@ void Domain::calculateCells(float cell_size)
     size = float4(max.x - min.x,
                   max.y - min.y,
                   max.z - min.z,
-                  1.0f);
+                  0.0f);
 
     res = float4(ceil(size.x / cell_size),
                  ceil(size.y / cell_size),
                  ceil(size.z / cell_size),
-                 1.0f);
+                 0.0f);
 
     size = float4(res.x * cell_size,
                   res.y * cell_size,
                   res.z * cell_size,
-                  1.0f);
+                  0.0f);
 
     delta = float4(res.x / size.x,
                    res.y / size.y,
                    res.z / size.z,
-                   1.0f);
+                   0.0f);
     /*
     delta = float4(size.x / res.x,
                    size.y / res.y,

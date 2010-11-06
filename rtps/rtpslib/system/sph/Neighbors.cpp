@@ -33,12 +33,10 @@ void SPH::loadNeighbors()
 	//kern.setArg(iarg++, cl_FluidParams->getDevicePtr());
 	kern.setArg(iarg++, cl_SPHParams.getDevicePtr());
 
-    /*
 	// ONLY IF DEBUGGING
-	kern.setArg(iarg++, clf_debug->getDevicePtr());
-	kern.setArg(iarg++, cli_debug->getDevicePtr());
+	kern.setArg(iarg++, clf_debug.getDevicePtr());
+	kern.setArg(iarg++, cli_debug.getDevicePtr());
 	//kern.setArg(iarg++, cl_index_neigh->getDevicePtr());
-    */
 
 
 
@@ -64,48 +62,43 @@ void SPH::neighborSearch(int choice)
     vparams.push_back(params);
     cl_SPHParams.copyToDevice(vparams);
 
+    /*
+    std::vector<int4> cli = cli_debug.copyToHost(2);
+    for (int i=0; i < 2; i++) 
+    {  
+		printf("cli_debug: %d\n", cli[i].w);
+    }
+    */
 
 	size_t global = (size_t) num;
 	int local = 128;
 
- 	k_neighbors.execute(global, local);
+    try{
+ 	k_neighbors.execute(num, local);
+    }
+
+    catch (cl::Error er) {
+        printf("ERROR(neighbor %d): %s(%s)\n", choice, er.what(), oclErrorString(er.err()));
+    }
 	ps->cli->queue.finish();
-   
-    /*
-	if (which == 0) ts_cl[TI_DENS]->end();
-	if (which == 1) ts_cl[TI_PRES]->end();
-	if (which == 2) ts_cl[TI_COL]->end();
-	if (which == 3) ts_cl[TI_COL_NORM]->end();
-    */
 
-#if 0
-	if (which != 0) return;
+#if 0 //printouts    
+    //DEBUGING
 	printf("============================================\n");
-	printf("which == %d *** \n", which);
+	printf("which == %d *** \n", choice);
 
-	clf_debug->copyToHost();
-	cli_debug->copyToHost();
-	float4* fclf = clf_debug->getHostPtr();
-	int4*   icli = cli_debug->getHostPtr();
+	printf("***** PRINT neighbors diagnostics ******\n");
+    cli = cli_debug.copyToHost(num);
+    std::vector<float4> clf = clf_debug.copyToHost(num);
 
-	cl_index_neigh->copyToHost();
-	int* n = cl_index_neigh->getHostPtr();
-
-	for (int i=0; i < nb_el; i++) { 
-	//for (int i=0; i < 500; i++) { 
-	//for (int i=500; i < 510; i++) { 
-		printf("----------------------------\n");
-		printf("clf[%d]= %f, %f, %f, %f\n", i, fclf[i].x, fclf[i].y, fclf[i].z, fclf[i].w);
-		printf("cli[%d]= %d, %d, %d, %d\n", i, icli[i].x, icli[i].y, icli[i].z, icli[i].w);
-		printf("index(%d): (%d)", i, icli[i].x); 
-		int max = icli[i].x < 50 ? icli[i].x : 50;
-		for (int j=0; j < icli[i].x; j++) {
-			printf("%d, ", n[j+50*i]);
-		}
-		printf("\n");
-	}
-	//exit(0);
-	#endif
+	//for (int i=0; i < num; i++) {  
+	for (int i=0; i < 10; i++) 
+    {  
+		printf("-----\n");
+		printf("clf_debug: %f, %f, %f, %f\n", clf[i].x, clf[i].y, clf[i].z, clf[i].w);
+		printf("cli_debug: %d, %d, %d, %d\n", cli[i].x, cli[i].y, cli[i].z, cli[i].w);
+    }
+#endif
 
 }
 

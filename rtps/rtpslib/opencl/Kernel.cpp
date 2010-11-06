@@ -20,8 +20,16 @@ void Kernel::execute(int ndrange)
 
 void Kernel::execute(int ndrange, int worksize)
 {
+    int global = ndrange / worksize;
+    //printf("global: %d\n", global);
+    global = worksize*global + worksize;
+    //printf("global2: %d\n", global);
+    //global = ndrange;
+
+
     //TODO add error checking
-    cli->err = cli->queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(ndrange), cl::NDRange(worksize), NULL, &cli->event);
+    //cli->err = cli->queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(ndrange), cl::NDRange(worksize), NULL, &cli->event);
+    cli->err = cli->queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(global), cl::NDRange(worksize), NULL, &cli->event);
     cli->queue.finish();
 }
 

@@ -174,9 +174,9 @@ void appKeyboard(unsigned char key, int x, int y)
             break;
         case 'r': //drop a rectangle
             int nn = 512;
-            float4 min = float4(.4, .4, .5, 0.0f);
-            float4 max = float4(.6, .6, .8, 0.0f);
-            ps->system->addBox(nn, min, max);
+            float4 min = float4(-125, 75, 475, 0.0f);
+            float4 max = float4(-75, 127, 525, 0.0f);
+            ps->system->addBox(nn, min, max, false);
                 
 
     }

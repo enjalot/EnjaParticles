@@ -7,6 +7,7 @@
 #include "cl_macros.h"
 
 __kernel void prep(
+           int num,
            __global float* density,
            __global float4* position,
            __global float4* velocity,
@@ -18,7 +19,7 @@ __kernel void prep(
     // particle index
     uint i = get_global_id(0);
 	// do not use gp->numParticles (since it numParticles changed via define)
-	int num = get_global_size(0);
+	//int num = get_global_size(0);
     if (i >= num) return;  // num: 512
 
     //index = sort_indexes[i];

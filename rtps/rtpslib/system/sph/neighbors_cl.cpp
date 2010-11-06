@@ -11,69 +11,8 @@
 #include "cl_macros.h"
 #include "cl_structs.h"
 #include "cl_neighbors.h"
+#include "cl_hash.h"
 
-
-/*--------------------------------------------------------------*/
-int4 calcGridCell(float4 p, float4 grid_min, float4 grid_delta)
-{
-	// subtract grid_min (cell position) and multiply by delta
-	//return make_int4((p-grid_min) * grid_delta);
-
-	//float4 pp = (p-grid_min)*grid_delta;
-	float4 pp;
-	pp.x = (p.x-grid_min.x)*grid_delta.x;
-	pp.y = (p.y-grid_min.y)*grid_delta.y;
-	pp.z = (p.z-grid_min.z)*grid_delta.z;
-	pp.w = (p.w-grid_min.w)*grid_delta.w;
-
-	int4 ii;
-	ii.x = (int) pp.x;
-	ii.y = (int) pp.y;
-	ii.z = (int) pp.z;
-	ii.w = (int) pp.w;
-	return ii;
-}
-
-/*--------------------------------------------------------------*/
-uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
-{
-	// each variable on single line or else STRINGIFY DOES NOT WORK
-	int gx;
-	int gy;
-	int gz;
-
-	if(wrapEdges) {
-		int gsx = (int)floor(grid_res.x);
-		int gsy = (int)floor(grid_res.y);
-		int gsz = (int)floor(grid_res.z);
-
-//          //power of 2 wrapping..
-//          gx = gridPos.x & gsx-1;
-//          gy = gridPos.y & gsy-1;
-//          gz = gridPos.z & gsz-1;
-
-		// wrap grid... but since we can not assume size is power of 2 we can't use binary AND/& :/
-		gx = gridPos.x % gsx;
-		gy = gridPos.y % gsy;
-		gz = gridPos.z % gsz;
-		if(gx < 0) gx+=gsx;
-		if(gy < 0) gy+=gsy;
-		if(gz < 0) gz+=gsz;
-	} else {
-		gx = gridPos.x;
-		gy = gridPos.y;
-		gz = gridPos.z;
-	}
-
-
-	//We choose to simply traverse the grid cells along the x, y, and z axes, in that order. The inverse of
-	//this space filling curve is then simply:
-	// index = x + y*width + z*width*height
-	//This means that we process the grid structure in "depth slice" order, and
-	//each such slice is processed in row-column order.
-
-	return (gz*grid_res.y + gy) * grid_res.x + gx; 
-}
 
 	/*--------------------------------------------------------------*/
 	/* Iterate over particles found in the nearby cells (including cell of position_i)
@@ -81,6 +20,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 	void IterateParticlesInCell(
 		__global float4*    vars_sorted,
 		PointData* pt,
+        uint num,
 		int4 	cellPos,
 		uint 	index_i,
 		float4 	position_i,
@@ -89,7 +29,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 		__constant struct GridParams* gp,
 		//__constant struct FluidParams* fp,
 		__constant struct SPHParams* sphp
-		//DUMMY_ARGS
+		DEBUG_ARGS
     )
 	{
 		// get hash (of position) of current cell
@@ -107,7 +47,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 			for(uint index_j=startIndex; index_j < endIndex; index_j++) {			
 #if 1
 				//***** UPDATE pt (sum)
-				ForPossibleNeighbor(vars_sorted, pt, index_i, index_j, position_i, gp, /*fp,*/ sphp /*ARGS*/);
+				ForPossibleNeighbor(vars_sorted, pt, num, index_i, index_j, position_i, gp, /*fp,*/ sphp DEBUG_ARGV);
 #endif
 			}
 		}
@@ -119,6 +59,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 	void IterateParticlesInNearbyCells(
 		__global float4* vars_sorted,
 		PointData* pt,
+        uint num,
 		int 	index_i, 
 		float4   position_i, 
 		__global int* 		cell_indices_start,
@@ -126,7 +67,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 		__constant struct GridParams* gp,
 		//__constant struct FluidParams* fp,
 		__constant struct SPHParams* sphp
-		//DUMMY_ARGS
+		DEBUG_ARGS
 		)
 	{
 		// initialize force on particle (collisions)
@@ -143,7 +84,7 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 					int4 ipos = (int4) (x,y,z,1);
 
 					// **** SUMMATION/UPDATE
-					IterateParticlesInCell(vars_sorted, pt, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp,/* fp,*/ sphp /*ARGS*/);
+					IterateParticlesInCell(vars_sorted, pt, num, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp,/* fp,*/ sphp DEBUG_ARGV);
 
 				//barrier(CLK_LOCAL_MEM_FENCE); // DEBUG
 				// SERIOUS PROBLEM: Results different than results with cli = 5 (bottom of this file)
@@ -163,40 +104,44 @@ __kernel void neighbors(
 				__constant struct GridParams* gp,
 				//__constant struct FluidParams* fp, 
 				__constant struct SPHParams* sphp 
-				//DUMMY_ARGS
+				DEBUG_ARGS
 				)
 {
     // particle index
 	int nb_vars = sphp->nb_vars;
-	//int numParticles = sphp->num;
+	int num = sphp->num;
     //int numParticles = get_global_size(0);
-    int num = get_global_size(0);
+    //int num = get_global_size(0);
 
 
 	int index = get_global_id(0);
-    if (index >= numParticles) return;
+    if (index >= num) return;
 
     float4 position_i = pos(index);
 
+    //debuging
+    cli[index].w = 0;
+
+
     // Do calculations on particles in neighboring cells
-
-
 	PointData pt;
 	zeroPoint(&pt);
 
 	if (sphp->choice == 0) { // update density
-    	IterateParticlesInNearbyCells(vars_sorted, &pt, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp /*ARGS*/);
+    	IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
 		density(index) = sphp->wpoly6_coef * pt.density.x;
+        clf[index].w = density(index);
 		// code reaches this point on first call
 	}
 	if (sphp->choice == 1) { // update force
-    	IterateParticlesInNearbyCells(vars_sorted, &pt, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp /*ARGS*/);
+    	IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
 		force(index) = pt.force; // Does not seem to maintain value into euler.cl
+        clf[index].xyz = pt.force.xyz;
 		xsph(index) = sphp->wpoly6_coef * pt.xsph;
 		// SERIOUS PROBLEM: Results different than results with cli = 4 (bottom of this file)
 	}
 	if (sphp->choice == 2) { // update surface tension (NOT DEBUGGED)
-    	IterateParticlesInNearbyCells(vars_sorted, &pt, index, position_i, cell_indexes_start, cell_indexes_end, gp, /*fp,*/ sphp /*ARGS*/);
+    	IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, /*fp,*/ sphp DEBUG_ARGV);
 		float norml = length(pt.color_normal);
 		if (norml > 1.) {
 			float4 stension = -0.3f * pt.color_lapl * pt.color_normal / norml;
@@ -204,9 +149,8 @@ __kernel void neighbors(
 		}
 	}
 	if (sphp->choice == 3) { // denominator in density normalization
-    	IterateParticlesInNearbyCells(vars_sorted, &pt, index, position_i, cell_indexes_start, cell_indexes_end, gp, /*fp,*/ sphp /*ARGS*/);
+    	IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, /*fp,*/ sphp DEBUG_ARGV);
 
-		// NOT WORKING. NEED DEBUG STATEMENTS
 		density(index) /= pt.density.y;
 	}
 }

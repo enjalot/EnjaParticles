@@ -16,13 +16,14 @@ void SPH::loadScopy()
 void SPH::scopy(int n, cl_mem xsrc, cl_mem ydst)
 {
     int args = 0;
-    k_hash.setArg(args++, n);
-	k_hash.setArg(args++, xsrc);
-	k_hash.setArg(args++, ydst);
+    k_scopy.setArg(args++, n);
+	k_scopy.setArg(args++, xsrc);
+	k_scopy.setArg(args++, ydst);
 
     size_t global = (size_t) n;
 	size_t local = 128; //cl.getMaxWorkSize(kern.getKernel());
 
+    //not sure why i can't use local
 	k_scopy.execute(global, local);
 	ps->cli->queue.finish();
 
