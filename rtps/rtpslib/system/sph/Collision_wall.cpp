@@ -4,17 +4,16 @@ namespace rtps {
 
 void SPH::loadCollision_wall()
 {
-    #include "collision_wall.cl"
-    //printf("%s\n", euler_program_source.c_str());
-    k_collision_wall = Kernel(ps->cli, collision_wall_program_source, "collision_wall");
+    printf("create collision wall kernel\n");
+
+    std::string path(SPH_CL_SOURCE_DIR);
+    path += "/collision_wall_cl.cl";
+    k_collision_wall = Kernel(ps->cli, path, "collision_wall");
   
-    //TODO: fix the way we are wrapping buffers
-    k_collision_wall.setArg(0, cl_position.cl_buffer[0]);
-    //k_collision_wall.setArg(1, cl_velocity.cl_buffer[0]);
-    //should check for leapfrog, then want to use veleval
-    k_collision_wall.setArg(1, cl_veleval.cl_buffer[0]);
-    k_collision_wall.setArg(2, cl_force.cl_buffer[0]);
-    k_collision_wall.setArg(3, cl_params.cl_buffer[0]);
+    int iargs = 0;
+    k_collision_wall.setArg(iargs++, cl_vars_sorted.getDevicePtr());
+    k_collision_wall.setArg(iargs++, cl_GridParamsScaled.getDevicePtr());
+    k_collision_wall.setArg(iargs++, cl_SPHParams.getDevicePtr());
 
 } 
 
@@ -90,12 +89,21 @@ float4 calculateFrictionForce(float4 vel, float4 force, float4 normal, float fri
 void SPH::cpuCollision_wall()
 {
 
+    float4* vel;
+    if(sph_settings.integrator == EULER)
+    {
+        vel = &velocities[0];
+    }
+    else if(sph_settings.integrator == LEAPFROG)
+    {
+        vel = &veleval[0];
+    }
     for(int i = 0; i < num; i++)
     {
         
         float scale = params.simulation_scale;
         float4 p = positions[i];
-        float4 v = velocities[i];
+        float4 v = vel[i];
         float4 f = forces[i];
         /*
         v.x *= scale;

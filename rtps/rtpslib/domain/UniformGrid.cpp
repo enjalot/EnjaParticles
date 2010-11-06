@@ -4,25 +4,29 @@
 
 namespace rtps {
 
-UniformGrid::UniformGrid(float3 min, float3 max, float cell_size)
+UniformGrid::UniformGrid(float4 min, float4 max, float cell_size)
 {
     this->min = min;
     this->max = max;
-    size = float3(max.x - min.x,
+    size = float4(max.x - min.x,
                   max.y - min.y,
-                  max.z - min.z);
+                  max.z - min.z,
+                  0.0f);
 
-    res = float3(ceil(size.x / cell_size),
+    res = float4(ceil(size.x / cell_size),
                  ceil(size.y / cell_size),
-                 ceil(size.z / cell_size));
+                 ceil(size.z / cell_size),
+                 0.0f);
 
-    size = float3(res.x * cell_size,
+    size = float4(res.x * cell_size,
                   res.y * cell_size,
-                  res.z * cell_size);
+                  res.z * cell_size,
+                  0.0f);
 
-    delta = float3(res.x / size.x,
+    delta = float4(res.x / size.x,
                    res.y / size.y,
-                   res.z / size.z);
+                   res.z / size.z,
+                   0.0f);
 
 }
 

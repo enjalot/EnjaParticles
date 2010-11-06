@@ -16,4 +16,8 @@ RTPSettings::RTPSettings(SysType system, int max_particles, float dt)
     this->dt = dt;
 }
 
+RTPSettings::RTPSettings(int max_particles, float maxspeed, float separationdist, float perceptionrange, float color[])
+{
+}
+
 }

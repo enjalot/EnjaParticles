@@ -4,19 +4,31 @@ namespace rtps {
 
 void SPH::loadLeapFrog()
 {
-    #include "leapfrog.cl"
-    //printf("%s\n", euler_program_source.c_str());
-    k_leapfrog = Kernel(ps->cli, leapfrog_program_source, "leapfrog");
-  
-    //TODO: fix the way we are wrapping buffers
-    k_leapfrog.setArg(0, cl_position.cl_buffer[0]);
-    k_leapfrog.setArg(1, cl_velocity.cl_buffer[0]);
-    k_leapfrog.setArg(2, cl_veleval.cl_buffer[0]);
-    k_leapfrog.setArg(3, cl_force.cl_buffer[0]);
-    k_leapfrog.setArg(4, cl_xsph.cl_buffer[0]);
-    k_leapfrog.setArg(5, ps->settings.dt); //time step
-    k_leapfrog.setArg(6, cl_params.cl_buffer[0]);
+    printf("create leapfrog kernel\n");
 
+    std::string path(SPH_CL_SOURCE_DIR);
+    path += "/leapfrog_cl.cl";
+    k_leapfrog = Kernel(ps->cli, path, "leapfrog");
+  
+    int iargs = 0;
+    k_leapfrog.setArg(iargs++, cl_sort_indices.getDevicePtr());
+    k_leapfrog.setArg(iargs++, cl_vars_unsorted.getDevicePtr());
+    k_leapfrog.setArg(iargs++, cl_vars_sorted.getDevicePtr());
+    k_leapfrog.setArg(iargs++, cl_position.getDevicePtr());
+    k_leapfrog.setArg(iargs++, cl_SPHParams.getDevicePtr());
+    k_leapfrog.setArg(iargs++, ps->settings.dt); //time step
+
+    /*
+    //TODO: fix the way we are wrapping buffers
+    k_leapfrog.setArg(0, cl_position.getDevicePtr());
+    k_leapfrog.setArg(1, cl_velocity.getDevicePtr());
+    k_leapfrog.setArg(2, cl_veleval.getDevicePtr());
+    k_leapfrog.setArg(3, cl_force.getDevicePtr());
+    k_leapfrog.setArg(4, cl_xsph.getDevicePtr());
+    k_leapfrog.setArg(5, cl_color.getDevicePtr());
+    k_leapfrog.setArg(6, ps->settings.dt); //time step
+    k_leapfrog.setArg(7, cl_SPHParams.getDevicePtr());
+    */
 } 
 
 void SPH::cpuLeapFrog()

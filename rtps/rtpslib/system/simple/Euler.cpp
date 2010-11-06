@@ -3,22 +3,18 @@
 
 namespace rtps {
 
-#if 0
-void SPH::loadEuler()
+void Simple::loadEuler()
 {
-    #include "euler.cl"
-    //printf("%s\n", euler_program_source.c_str());
-    k_euler = Kernel(ps->cli, euler_program_source, "euler");
+    std::string path(SIMPLE_CL_SOURCE_DIR);
+    path += "/euler_cl.cl";
+    k_euler = Kernel(ps->cli, path, "euler");
   
-    //TODO: fix the way we are wrapping buffers
-    k_euler.setArg(0, cl_position.cl_buffer[0]);
-    k_euler.setArg(1, cl_velocity.cl_buffer[0]);
-    k_euler.setArg(2, cl_force.cl_buffer[0]);
+    k_euler.setArg(0, cl_position.getDevicePtr());
+    k_euler.setArg(1, cl_velocity.getDevicePtr());
+    k_euler.setArg(2, cl_force.getDevicePtr());
     k_euler.setArg(3, ps->settings.dt); //time step
-    k_euler.setArg(4, cl_params.cl_buffer[0]);
 
 } 
-#endif
 
 float distance(float4 p1, float4 p2)
 {

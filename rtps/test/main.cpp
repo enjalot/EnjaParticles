@@ -23,7 +23,12 @@
 int window_width = 800;
 int window_height = 600;
 int glutWindowHandle = 0;
-float translate_x = 0.0f;
+/*
+float translate_x = -.5f;
+float translate_y = 0.f;//-200.0f;//300.f;
+float translate_z = 1.5f;//200.f;
+*/
+float translate_x = -100;
 float translate_y = -200.0f;//300.f;
 float translate_z = 200.f;
 
@@ -59,9 +64,16 @@ void *font = GLUT_BITMAP_8_BY_13;
 
 rtps::RTPS* ps;
 //#define NUM_PARTICLES 16384
+<<<<<<< HEAD
 //#define NUM_PARTICLES 8192
 #define NUM_PARTICLES 1024
 #define DT .003f
+=======
+#define NUM_PARTICLES 4096
+//#define NUM_PARTICLES 2048
+//#define NUM_PARTICLES 1024
+#define DT .0003f
+>>>>>>> 0c42d607f317a57f6d655738e0330825ed7be003
 
 //timers
 //GE::Time *ts[3];
@@ -141,8 +153,8 @@ void init_gl()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glRotatef(-90, 1.0, 0.0, 0.0);
-    //glTranslatef(translate_x, translate_z, translate_y);
-    glTranslatef(0, translate_z, translate_y);
+    glTranslatef(translate_x, translate_z, translate_y);
+    //glTranslatef(0, translate_z, translate_y);
     //glRotatef(-90, 1.0, 0.0, 0.0);
 
     return;
@@ -160,6 +172,13 @@ void appKeyboard(unsigned char key, int x, int y)
             // Cleanup up and quit
             appDestroy();
             break;
+        case 'r': //drop a rectangle
+            int nn = 512;
+            float4 min = float4(.4, .4, .5, 0.0f);
+            float4 max = float4(.6, .6, .8, 0.0f);
+            ps->system->addBox(nn, min, max);
+                
+
     }
 }
 
@@ -222,7 +241,7 @@ void appMotion(int x, int y)
         rotate_x += dy * 0.2;
         rotate_y += dx * 0.2;
     } else if (mouse_buttons & 4) {
-        translate_z -= dy * 0.5;
+        translate_z -= dy * 0.1;
     }
 
     mouse_old_x = x;
@@ -233,8 +252,8 @@ void appMotion(int x, int y)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glRotatef(-90, 1.0, 0.0, 0.0);
-    //glTranslatef(translate_x, translate_z, translate_y);
-    glTranslatef(0, translate_z, translate_y);
+    glTranslatef(translate_x, translate_z, translate_y);
+    //glTranslatef(0, translate_z, translate_y);
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
     glutPostRedisplay();
