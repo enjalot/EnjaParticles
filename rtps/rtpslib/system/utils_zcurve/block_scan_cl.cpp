@@ -182,7 +182,11 @@ __kernel void block_scan(
 
 	float rho = 0.;
 
-	for (int i=0; i < 32; i++) {   	// max of 32 particles per cell
+	// if there are 8 neighbors, I should only loop 8 times!
+	//for (int i=0; i < 32; i++) {   	// max of 32 particles per cell
+	   // should compute this maximum 
+	for (int i=0; i < 8; i++) {   	// max of 8 particles per cell
+		//if (i >= cnb) continue; // SCREWS UP RESULTS!
 	// since cnb < 32, how can density be higher when using cnb? 
 
 	// there are cnb particles per cell
@@ -215,21 +219,25 @@ __kernel void block_scan(
 		// This loop is very expensive! Even if empty!
 		//float acoef = sphp->wpoly6_coef;
 
-		for (int j=0; j < 27; j++) {   	// cell 13 is the center
-		#if 1
-			if (lid >= nb) continue;
-			float4 rj = (float4)(locc[nb+j].xyz, 0.); // CORRECT LINE????
-			float4 r = rj-ri;
-			float rad = length(r); // users sqrt without a need
+		// It should be possible to organize the calculations more efficiently!
 
-			if (rad < sphp->smoothing_distance) {
-				// cannot use x,y,z from loc (position and is required)
-				// This line accounts for 70 ms!!! Without it, time is 15 ms
-				//locc[lid].w += 1.;
-				rho += Wpoly6_glob(r, sphp->smoothing_distance);
-				//locc[lid].w += Wpoly6_glob(r, sphp->smoothing_distance);
+		if (lid < nb) {
+			for (int j=0; j < 27; j++) {   	// cell 13 is the center
+				//if (lid >= nb) continue;
+				#if 1
+				float4 rj = (float4)(locc[nb+j].xyz, 0.); // CORRECT LINE????
+				float4 r = rj-ri;
+				float rad = length(r); // users sqrt without a need
+
+				if (rad < sphp->smoothing_distance) {
+					// cannot use x,y,z from loc (position and is required)
+					// This line accounts for 70 ms!!! Without it, time is 15 ms
+					//locc[lid].w += 1.;
+					rho += Wpoly6_glob(r, sphp->smoothing_distance);
+					//locc[lid].w += Wpoly6_glob(r, sphp->smoothing_distance);
+				}
+				#endif
 			}
-		#endif
 		}
 	}
 

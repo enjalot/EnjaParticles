@@ -370,8 +370,8 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 		// DEBUGGING
 		blockScan(0);
 		//neighborSearch(0); //density
-		//printGPUDiagnostics(1);
-		//exit(0);
+		printGPUDiagnostics(1);
+		exit(0);
 		return;
 
 		//blockScanPres(0);
