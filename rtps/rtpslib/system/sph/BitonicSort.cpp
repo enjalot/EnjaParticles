@@ -73,13 +73,12 @@ void SPH::bitonic_sort()
 
     ps->cli->queue.finish();
 
-    /*
-	scopy(num, cl_sort_output_hashes->getDevicePtr(), 
-	             cl_sort_hashes->getDevicePtr());
-	scopy(num, cl_sort_output_indices->getDevicePtr(), 
-	             cl_sort_indices->getDevicePtr());
-    */
+	scopy(num, cl_sort_output_hashes.getDevicePtr(), 
+	             cl_sort_hashes.getDevicePtr());
+	scopy(num, cl_sort_output_indices.getDevicePtr(), 
+	             cl_sort_indices.getDevicePtr());
     
+    ps->cli->queue.finish();
 }
 
 }

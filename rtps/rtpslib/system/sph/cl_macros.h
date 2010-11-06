@@ -58,9 +58,9 @@
 #define unsorted_xsph(i)    		vars_unsorted[i+XSPH        *numParticles]
 
 
-// FOR DEBUGGING
-#define DUMMY_ARGS  , __global float4* clf, __global int4* cli
-#define       ARGS  , clf, cli
+// FOR DEBUGGING (could check for DEBUG flag
+#define DEBUG_ARGS  , __global float4* clf, __global int4* cli
+#define DEBUG_ARGV  , clf, cli
 
 // , __global int* index_neigh
 // , index_neigh

@@ -31,6 +31,18 @@ void SPH::buildDataStructures()
 // Generate hash list: stored in cl_sort_hashes
 {
 
+
+    int nbc = 20;
+    std::vector<int> sh = cl_sort_hashes.copyToHost(nbc);
+    //std::vector<int> eci = cl_cell_indices_end.copyToHost(nbc);
+
+    for(int i = 0; i < nbc; i++)
+    {
+        printf("sh[%d] %d\n", i, sh[i]);
+    }
+
+
+
     printf("about to data structures\n");
 	int workSize = 64; // work group size
     try
@@ -41,6 +53,19 @@ void SPH::buildDataStructures()
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
     }
 	
+    printf("start cell indices\n");
+    printf("end cell indices\n");
+    //int nbc = 20;
+    std::vector<int> sci = cl_cell_indices_start.copyToHost(nbc);
+    std::vector<int> eci = cl_cell_indices_end.copyToHost(nbc);
+
+    for(int i = 0; i < nbc; i++)
+    {
+        printf("sci[%d] %d eci[%d] %d\n", i, sci[i], i, eci[i]);
+    }
+
+
+
     ps->cli->queue.finish();
 
     printf("done with data structures\n");

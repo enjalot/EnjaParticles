@@ -52,13 +52,14 @@ inline void ForNeighbor(__global float4*  vars_sorted,
 //--------------------------------------------------
 inline void ForPossibleNeighbor(__global float4* vars_sorted, 
 						PointData* pt,
+                        uint numParticles,
 						uint index_i, 
 						uint index_j, 
 						float4 position_i,
 	  					__constant struct GridParams* gp,
 	  					//__constant struct FluidParams* fp,
 	  					__constant struct SPHParams* sphp
-	  					//DUMMY_ARGS
+	  					DEBUG_ARGS
 						)
 {
 	// self-collisions ok when computing density
@@ -66,7 +67,7 @@ inline void ForPossibleNeighbor(__global float4* vars_sorted,
 
 	if (sphp->choice == 0 || (index_j != index_i)) {  // RESTORE WHEN DEBUGGED
 	//{
-        int num = get_global_size(0); //this was being passed through all the functions; could but put back..
+        //int num = get_global_size(0); //this was being passed through all the functions; could but put back..
 		// get the particle info (in the current grid) to test against
 		float4 position_j = pos(index_j); 
 
@@ -80,8 +81,9 @@ inline void ForPossibleNeighbor(__global float4* vars_sorted,
 
 		if (rlen <= sphp->smoothing_distance) {
 #if 1
+            cli[index_i].w += 1;
 			// return updated pt
-			ForNeighbor(vars_sorted, pt, index_i, index_j, r, rlen, gp,/* fp,*/ sphp /*ARGS*/);
+			ForNeighbor(vars_sorted, pt, index_i, index_j, r, rlen, gp,/* fp,*/ sphp /*DEBUG_ARGV*/);
 #endif
 		}
 	}

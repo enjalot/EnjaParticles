@@ -25,7 +25,7 @@ __kernel void datastructures(
 
 
 	// particle index	
-	if (index >= numParticles) return;
+	if (index >= num) return;
 
 	uint hash = sort_hashes[index];
 
@@ -65,6 +65,8 @@ __kernel void datastructures(
 	if (index == numParticles - 1) {
 		cell_indices_end[hash] = index + 1;
 	}
+
+    //cell_indices_end[index] = 42;
 
 	uint sorted_index = sort_indices[index];
     //uint sorted_index = index;

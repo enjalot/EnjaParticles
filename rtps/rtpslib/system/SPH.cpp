@@ -288,6 +288,7 @@ void SPH::updateGPU()
         neighborSearch(0);  //density
         printf("forces\n");
         neighborSearch(1);  //forces
+        exit(0);
 
         printf("collision\n");
         collision();
@@ -424,6 +425,7 @@ void SPH::prepareSorted()
     // Size is the grid size. That is a problem since the number of
 	// occupied cells could be much less than the number of grid elements. 
     std::vector<int> gcells(grid_params.nb_cells);
+	int minus = 0xffffffff;
     std::fill(gcells.begin(), gcells.end(), 0);
 
 	cl_cell_indices_start = Buffer<int>(ps->cli, gcells);
