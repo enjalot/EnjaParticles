@@ -398,12 +398,13 @@ private:
 	void blockScanPres(int which);
 	void subtract();
 
+
 private:
 	int countPoints(double radius, int box_size);
 	void fixedSphere(int nx);
 	int setupTimers();
 	void initializeData();
-
+	void printBlockScanDebug();
 };
 
 }

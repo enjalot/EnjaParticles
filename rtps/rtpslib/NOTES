@@ -197,3 +197,9 @@ Oct. 24, 2010
 - got rid of all uint. 
  casting a uint to a float gives incorrect results. 
 ----------------------------------------------------------------------
+Nov. 5, 2010
+- one warp per block: works
+- two warps per block: wrong for about 50% of the points. Do not know why. 
+I created a routine that does all the work for a single warp, and the warps
+are independent. 
+----------------------------------------------------------------------

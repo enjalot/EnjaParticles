@@ -9,6 +9,8 @@ namespace rtps {
 void GE_SPH::blockScan(int which)
 {
 	static bool first_time = true;
+	static int work_size = 0;
+	int nb_warps;
 
 	if (first_time) {
 		try {
@@ -18,7 +20,15 @@ void GE_SPH::blockScan(int which)
 
 			// interchange loops when updating the density for higher 
 			// efficiency. Still 32 threads per warp
-			path = path + "/block_scan_loop_cl.cl";
+			//path = path + "/block_scan_loop_cl.cl";
+			//work_size = 32;  
+
+			// Try blocks of size 64 (two warps of 32: need more shared mem)
+			// efficiency. Still 32 threads per warp
+			path = path + "/block_scan_block64_cl.cl";
+			// optimum size ==> 16 ms for density (9 ms with old code) on mac
+			// many points have density way too high!
+			work_size = 32*2;  // WRONG RESULTS
 
 			int length;
 			char* src = file_contents(path.c_str(), &length);
@@ -31,6 +41,8 @@ void GE_SPH::blockScan(int which)
 		}
 	}
 
+
+	nb_warps = work_size / 32;
 	ts_cl[TI_DENS]->start();
 
 	Kernel kern = block_scan_kernel;
@@ -50,6 +62,71 @@ void GE_SPH::blockScan(int which)
 	kern.setArg(iarg++, cl_cell_offset->getDevicePtr());
 	kern.setArg(iarg++, cl_params->getDevicePtr());
 	kern.setArg(iarg++, cl_GridParamsScaled->getDevicePtr());
+
+
+	//cl_cell_offset->copyToDevice();
+
+	// probably inefficient. Increase to 64 in the future perhaps
+
+	// local memory
+	// space for 4 variables of 4 bytes (float) for (27+32) particles
+	// need enough space for all threads in the block
+	int nb_bytes = nb_warps * (32+32)* sizeof(float4);
+	printf("nb shared bytes per block: %d\n", nb_bytes);
+	printf("max nb blocks: %d\n", 1024*48/nb_bytes);
+	printf("nb warps: %d\n", nb_warps);
+
+    kern.setArgShared(iarg++, nb_bytes);
+
+	// ONLY IF DEBUGGING
+	kern.setArg(iarg++, clf_debug->getDevicePtr());
+	kern.setArg(iarg++, cli_debug->getDevicePtr());
+
+	// would be much less if the arrays were compactified
+	// nb blocks = nb grid cells
+	
+	size_t nb_blocks = (size_t) gps->nb_points / nb_warps;
+	if ((nb_warps*gps->nb_points) != nb_blocks) nb_blocks++;
+
+	// global must be an integer multiple of work_size
+	int global = nb_blocks * work_size;
+
+	printf("nb_points: %d\n", gps->nb_points);
+	printf("nb_warps: %d\n", nb_warps);
+	printf("nb_blocks= %d\n", nb_blocks);
+	printf("global= %d\n", global);
+	printf("work_size= %d\n", work_size);
+	//exit(0);
+
+	//cl_GridParamsScaled->copyToHost();
+	//printf("nb points in grid: %d\n", gps->nb_points);
+	//exit(0);
+
+	kern.execute(global, work_size);
+
+	ps->cli->queue.finish();
+	ts_cl[TI_DENS]->end();
+
+	printBlockScanDebug();
+	//exit(0);
+}
+//----------------------------------------------------------------------
+void GE_SPH::printBlockScanDebug()
+{
+	#if 0
+	// subtract works ok
+	cl_cell_indices_start->copyToHost();
+	cl_cell_indices_end->copyToHost();
+	cl_cell_indices_nb->copyToHost();
+	int* st = cl_cell_indices_start->getHostPtr();
+	int* en = cl_cell_indices_end->getHostPtr();
+	int* nb = cl_cell_indices_nb->getHostPtr();
+	for (int i=0; i < nb_el; i++) {
+		printf("(%d), st, en, nb= %d, %d, %d\n", i, st[i], en[i], nb[i]);
+	}
+	//exit(0);
+	#endif
+
 
 	#if 0
 	cl_cell_indices_nb->copyToHost();
@@ -76,57 +153,8 @@ void GE_SPH::blockScan(int which)
 	//exit(0);
 	#endif
 
-	//cl_cell_offset->copyToDevice();
 
-	// probably inefficient. Increase to 64 in the future perhaps
-	int work_size = 32;  
-
-	// local memory
-	// space for 4 variables of 4 bytes (float) for (27+32) particles
-	// need enough space for all threads in the block
-	int nb_bytes = (32+work_size)* 4 * sizeof(float);
-    kern.setArgShared(iarg++, nb_bytes);
-
-	// ONLY IF DEBUGGING
-	kern.setArg(iarg++, clf_debug->getDevicePtr());
-	kern.setArg(iarg++, cli_debug->getDevicePtr());
-
-	// would be much less if the arrays were compactified
-	// nb blocks = nb grid cells
-	size_t nb_blocks = (size_t) gps->nb_points;
-	// global must be an integer multiple of work_size
-	int global = nb_blocks * work_size;
-
-	printf("nb_blocks= %d\n", nb_blocks);
-	printf("global= %d\n", global);
-	printf("work_size= %d\n", work_size);
-	//exit(0);
-
-	//cl_GridParamsScaled->copyToHost();
-	//printf("nb points in grid: %d\n", gps->nb_points);
-	//exit(0);
-
-	kern.execute(global, work_size);
-
-	ps->cli->queue.finish();
-	ts_cl[TI_DENS]->end();
-
-	#if 0
-	// subtract works ok
-	cl_cell_indices_start->copyToHost();
-	cl_cell_indices_end->copyToHost();
-	cl_cell_indices_nb->copyToHost();
-	int* st = cl_cell_indices_start->getHostPtr();
-	int* en = cl_cell_indices_end->getHostPtr();
-	int* nb = cl_cell_indices_nb->getHostPtr();
-	for (int i=0; i < nb_el; i++) {
-		printf("(%d), st, en, nb= %d, %d, %d\n", i, st[i], en[i], nb[i]);
-	}
-	//exit(0);
-	#endif
-
-
-	#if 0
+	#if 1
 	printf("============================================\n");
 
 	clf_debug->copyToHost();
@@ -140,6 +168,7 @@ void GE_SPH::blockScan(int which)
 	int* n = cl_index_neigh->getHostPtr();
 
 	int count=0;
+	GridParamsScaled* gps = cl_GridParamsScaled->getHostPtr();
 
 	for (int i=0; i < gps->nb_points; i++) { 
 		if (nb[i] <= 0) continue;
@@ -159,9 +188,8 @@ void GE_SPH::blockScan(int which)
 	printf("nb grid points: %d\n", gps->nb_points);
 
 	gps->print();
-	//exit(0);
 	#endif
 }
-//----------------------------------------------------------------------
 
 } // namespace
+//----------------------------------------------------------------------
