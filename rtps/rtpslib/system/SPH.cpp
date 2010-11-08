@@ -162,7 +162,7 @@ SPH::SPH(RTPS *psfr, int n)
     //// really this should be setup by the user
     //int nn = 1024;
     int nn = 3333;
-    nn = 2048;
+    nn = 8192;
     //nn = 1920;
     //float4 min = float4(.4, .4, .1, 0.0f);
     //float4 max = float4(.6, .6, .4, 0.0f);
@@ -170,8 +170,8 @@ SPH::SPH(RTPS *psfr, int n)
 	//float4 min   = float4(-559., -15., .5, 1.);
 	//float4 max   = float4(220., 225., 450., 1);
 
-    float4 min   = float4(-559., -15., 200.5, 1.);
-	float4 max   = float4(220., 225., 650., 1);
+    float4 min   = float4(-559., -15., 00.5, 1.);
+	float4 max   = float4(-300., 225., 850., 1);
 
 
 
@@ -276,7 +276,7 @@ void SPH::updateGPU()
     cl_color.acquire();
     
     //sub-intervals
-    //for(int i=0; i < 10; i++)
+    for(int i=0; i < 5; i++)
     {
         /*
         k_density.execute(num);
