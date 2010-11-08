@@ -12,11 +12,21 @@ inline void sum(__local float4* locc)
 // blocks of size 32 only
 
 	int lid = get_local_id(0);
+	#if 0
+	{ LOCC(lid) += LOCC(lid + 16); }
+	{ LOCC(lid) += LOCC(lid +  8); }
+	{ LOCC(lid) += LOCC(lid +  4); }
+	{ LOCC(lid) += LOCC(lid +  2); }
+	{ LOCC(lid) += LOCC(lid +  1); }
+	#endif
+
+	#if 1
 	{ locc[lid] += locc[lid + 16]; }
 	{ locc[lid] += locc[lid +  8]; }
 	{ locc[lid] += locc[lid +  4]; }
 	{ locc[lid] += locc[lid +  2]; }
 	{ locc[lid] += locc[lid +  1]; }
+	#endif
 
 // there are bank conflicts
 // sum in loc[0]
