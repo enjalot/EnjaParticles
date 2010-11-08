@@ -1095,7 +1095,7 @@ void GE_SPH::initializeData()
     params->wspike_d_coef = 45.f/(pi*h6);
 	params->wvisc_coef = 15./(2.*pi*h3);
 	params->wvisc_d_coef = 15./(2.*pi*h3);
-	params->wvisc_dd_coef = 15./(pi*h6);
+	params->wvisc_dd_coef = 45./(pi*h6);
 	params->print();
 	cl_params->copyToDevice();
 
