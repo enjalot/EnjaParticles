@@ -33,7 +33,7 @@ __kernel void leapfrog(
 	float4 vnext = v + dt*f;
 	//float4 vnext = v;// + dt*f;
 	// WHY IS MY CORRECTION NEGATIVE and IAN's POSITIVE? 
-	vnext -= 0.005f * xsph(i); // should be param XSPH factor
+	vnext += 0.05f * xsph(i); // should be param XSPH factor
 
     p += dt * vnext;
     p.w = 1.0f; //just in case
