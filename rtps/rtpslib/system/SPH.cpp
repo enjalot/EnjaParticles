@@ -325,8 +325,8 @@ void SPH::integrate()
     }
     else if(sph_settings.integrator == LEAPFROG)
     {
-       //k_leapfrog.execute(max_num);
-       k_leapfrog.execute(num, 128);
+        //k_leapfrog.execute(max_num);
+        k_leapfrog.execute(num, 128);
     }
 }
 
