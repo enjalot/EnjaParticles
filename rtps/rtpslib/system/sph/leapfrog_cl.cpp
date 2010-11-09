@@ -38,7 +38,6 @@ __kernel void leapfrog(
     p += dt * vnext;
     p.w = 1.0f; //just in case
 	float4 veval = 0.5f*(v+vnext);
-	v = vnext;
 
 	uint originalIndex = sort_indices[i];
 	//uint originalIndex = i;
@@ -48,7 +47,7 @@ __kernel void leapfrog(
 	p.xyz /= params->simulation_scale;
 	unsorted_pos(originalIndex) 	= (float4)(p.xyz, dens);
     //unsorted_pos(originalIndex) = (float4)(pos(i).xyz / params->simulation_scale, 1.);
-	unsorted_vel(originalIndex) 	= v;
+	unsorted_vel(originalIndex) 	= vnext;
 	unsorted_veleval(originalIndex) = veval; 
 	positions[originalIndex] 		= (float4)(p.xyz, 1.);  // for plotting
     //positions[originalIndex] = unsorted_pos(originalIndex);

@@ -47,7 +47,9 @@ void SPH::bitonic_sort()
     try
     {
 		int dir = 1; 		// dir: direction
-		int batch = num;
+		//int batch = num;
+		int arrayLength = max_num;
+        int batch = max_num / arrayLength;
 
 		size_t szWorkgroup = bitonicSort(
                 NULL,
@@ -57,12 +59,8 @@ void SPH::bitonic_sort()
 				cl_sort_output_indices.getDevicePtr(), 
 				cl_sort_hashes.getDevicePtr(), 
 				cl_sort_indices.getDevicePtr(), 
-                //d_InputKey,
-                //d_InputVal,
-                //nb_el / arrayLength,
-                //arrayLength,
-                num / batch,
-				batch,
+                batch,
+                arrayLength,
                 dir
             );
     

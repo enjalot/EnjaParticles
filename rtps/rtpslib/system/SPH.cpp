@@ -284,22 +284,22 @@ void SPH::updateGPU()
         k_viscosity.execute(num);
         k_xsph.execute(num);
         */
-        printf("hash\n");
+        //printf("hash\n");
         hash();
-        printf("bitonic_sort\n");
+        //printf("bitonic_sort\n");
         bitonic_sort();
-        printf("data structures\n");
+        //printf("data structures\n");
         buildDataStructures(); //reorder
         
-        printf("density\n");
+        //printf("density\n");
         neighborSearch(0);  //density
-        printf("forces\n");
+        //printf("forces\n");
         neighborSearch(1);  //forces
         //exit(0);
 
-        printf("collision\n");
+        //printf("collision\n");
         collision();
-        printf("integrate\n");
+        //printf("integrate\n");
         integrate();
         //exit(0);
     }
@@ -359,7 +359,7 @@ void SPH::calculateSPHSettings()
     params.rest_distance = sph_settings.particle_rest_distance;
     params.smoothing_distance = sph_settings.smoothing_distance;
     params.simulation_scale = sph_settings.simulation_scale;
-    params.boundary_stiffness = 10000.0f;
+    params.boundary_stiffness = 20000.0f;
     params.boundary_dampening = 256.0f;
     params.boundary_distance = sph_settings.particle_rest_distance * .5f;
     params.EPSILON = .00001f;
@@ -390,38 +390,16 @@ void SPH::prepareSorted()
     std::vector<float4> unsorted(max_num*nb_var);
     std::vector<float4> sorted(max_num*nb_var);
 
-    std::fill(unsorted.begin(), unsorted.end(),float4(0.0f, 0.2f, 0.0f, 1.0f));
-    std::fill(sorted.begin(), sorted.end(),float4(0.0f, 0.0f, 0.2f, 1.0f));
+    std::fill(unsorted.begin(), unsorted.end(),float4(0.0f, 0.0f, 0.0f, 1.0f));
+    std::fill(sorted.begin(), sorted.end(),float4(0.0f, 0.0f, 0.0f, 1.0f));
 
-    //This really should be done on the GPU
-    //we probably need to recopy if dynamically adding/removing particles
-    /*
-	for (int i=0; i < max_num; i++) 
-    {
-		//vars[i+DENS*num] = densities[i];
-		// PROBLEM: density is float, but vars_unsorted is float4
-		// HOW TO DEAL WITH THIS WITHOUT DOUBLING MEMORY ACCESS in 
-		// buildDataStructures. 
-
-		unsorted[i+DENS*max_num].x = densities[i];
-		unsorted[i+DENS*max_num].y = 1.0; // for surface tension (always 1)
-		unsorted[i+POS*max_num] = positions[i];
-		unsorted[i+VEL*max_num] = velocities[i];
-		unsorted[i+FOR*max_num] = forces[i];
-
-		// SHOULD NOT BE REQUIRED
-		sorted[i+DENS*max_num].x = densities[i];
-		sorted[i+DENS*max_num].y = 1.0;  // for surface tension (always 1)
-		sorted[i+POS*max_num] = positions[i];
-		sorted[i+VEL*max_num] = velocities[i];
-		sorted[i+FOR*max_num] = forces[i];
-	}
-    */
     cl_vars_unsorted = Buffer<float4>(ps->cli, unsorted);
     cl_vars_sorted = Buffer<float4>(ps->cli, sorted);
 
     std::vector<int> keys(max_num);
-    std::fill(keys.begin(), keys.end(), 0);
+    //to get around limits of bitonic sort only handling powers of 2
+#include "limits.h"
+    std::fill(keys.begin(), keys.end(), INT_MAX);
 	cl_sort_indices  = Buffer<int>(ps->cli, keys);
 	cl_sort_hashes   = Buffer<int>(ps->cli, keys);
 
