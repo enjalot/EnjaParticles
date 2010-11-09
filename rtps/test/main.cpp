@@ -63,9 +63,9 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 rtps::RTPS* ps;
-//#define NUM_PARTICLES 16384
-#define NUM_PARTICLES 8192
+#define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 8192
+//#define NUM_PARTICLES 2048
 //#define NUM_PARTICLES 1024
 #define DT .0003f
 

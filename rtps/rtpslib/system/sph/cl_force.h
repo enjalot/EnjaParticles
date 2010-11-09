@@ -31,9 +31,13 @@
 
 	#if 1
 	// Add XSPH stabilization term
-	float Wijpol6 = Wpoly6(rlen, sphp->smoothing_distance, sphp);
+    // the poly6 kernel calculation seems to be wrong, using rlen as a vector when it is a float...
+	//float Wijpol6 = Wpoly6(r, sphp->smoothing_distance, sphp) * sphp->wpoly6_coeff;
+    float h = sphp->smoothing_distance;
+    float hr2 = (h*h - rlen*rlen);
+	float Wijpol6 = hr2*hr2*hr2;// * sphp->wpoly6_coeff;
 	//float Wijpol6 = sphp->wpoly6_coef * Wpoly6(rlen, sphp->smoothing_distance, sphp);
-	pt->xsph +=  (2.f * sphp->mass * (velj-veli)/(di.x+dj.x) * Wijpol6);
+	pt->xsph +=  (2.f * sphp->mass * Wijpol6 * (velj-veli)/(di.x+dj.x));
 	pt->xsph.w = 0.f;
 	#endif
 

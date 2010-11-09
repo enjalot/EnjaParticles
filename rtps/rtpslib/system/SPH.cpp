@@ -170,8 +170,8 @@ SPH::SPH(RTPS *psfr, int n)
 	//float4 min   = float4(-559., -15., .5, 1.);
 	//float4 max   = float4(220., 225., 450., 1);
 
-    float4 min   = float4(-559., -15., 00.5, 1.);
-	float4 max   = float4(-300., 225., 850., 1);
+    float4 min   = float4(-559., -15., 0.5, 1.);
+	float4 max   = float4(-400., 225., 1050., 1);
 
 
 
@@ -276,7 +276,7 @@ void SPH::updateGPU()
     cl_color.acquire();
     
     //sub-intervals
-    for(int i=0; i < 5; i++)
+    for(int i=0; i < 10; i++)
     {
         /*
         k_density.execute(num);
