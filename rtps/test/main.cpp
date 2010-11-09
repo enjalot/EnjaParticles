@@ -65,10 +65,10 @@ void *font = GLUT_BITMAP_8_BY_13;
 rtps::RTPS* ps;
 //#define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 8192
-#define NUM_PARTICLES 4096
-//#define NUM_PARTICLES 2048
+//#define NUM_PARTICLES 4096
+#define NUM_PARTICLES 2048
 //#define NUM_PARTICLES 1024
-#define DT .0001f
+#define DT .0003f
 
 //timers
 //GE::Time *ts[3];
@@ -170,7 +170,7 @@ void appKeyboard(unsigned char key, int x, int y)
         case 'r': //drop a rectangle
             int nn = 256;
             float4 min = float4(-150, 50, 675, 0.0f);
-            float4 max = float4(-50, 150, 875, 0.0f);
+            float4 max = float4(-50, 150, 975, 0.0f);
             ps->system->addBox(nn, min, max, false);
                 
 
@@ -223,7 +223,7 @@ void appMouse(int button, int state, int x, int y)
     mouse_old_x = x;
     mouse_old_y = y;
 
-    glutPostRedisplay();
+    //glutPostRedisplay();
 }
 
 void appMotion(int x, int y)
@@ -251,7 +251,7 @@ void appMotion(int x, int y)
     //glTranslatef(0, translate_z, translate_y);
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
-    glutPostRedisplay();
+    //glutPostRedisplay();
 }
 
 

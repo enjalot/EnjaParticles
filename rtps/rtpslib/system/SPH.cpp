@@ -115,7 +115,8 @@ SPH::SPH(RTPS *psfr, int n)
 	//float4 max   = float4(-400., 225., 1050., 1);
     //grid = Domain(float4(-560,-30,0,0), float4(256, 256, 1276, 0));
     float4 min   = float4(100., -15., 0.5, 1.);
-	float4 max   = float4(255., 225., 1050., 1);
+    //float4 min   = float4(100., -15., 550, 1.);
+	float4 max   = float4(255., 225., 1250., 1);
 
 
 
@@ -517,19 +518,20 @@ void SPH::pushParticles(vector<float4> pos)
     cl_color.acquire();
     
     printf("about to prep 0\n");
-    prep(0);
+    //prep(0);
     printf("done with prep 0\n");
 
     cl_position.copyToDevice(pos, num);
     cl_color.copyToDevice(cols, num);
+
+    cl_color.release();
+    cl_position.release();
 
     params.num = num+nn;
     std::vector<SPHParams> vparams(0);
     vparams.push_back(params);
     cl_SPHParams.copyToDevice(vparams);
 
-    cl_color.release();
-    cl_position.release();
 
     printf("about to updateNum\n");
     ps->updateNum(params.num);
@@ -543,7 +545,6 @@ void SPH::pushParticles(vector<float4> pos)
     prep(1);
     printf("done with prep\n");
     cl_position.release();
-
 #else
     num += nn;  //keep track of number of particles we use
 #endif

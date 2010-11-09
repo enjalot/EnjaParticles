@@ -38,6 +38,7 @@ void SPH::prep(int stage)
      * i don't think straight copy is most efficient...
      */
 
+    printf("num: %d, stage: %d\n", num, stage);
     k_prep.setArg(0, num);
     k_prep.setArg(1, stage);
     int ctaSize = 128; // work group size
