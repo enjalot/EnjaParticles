@@ -168,7 +168,7 @@ void appKeyboard(unsigned char key, int x, int y)
             appDestroy();
             break;
         case 'r': //drop a rectangle
-            int nn = 512;
+            int nn = 256;
             float4 min = float4(-150, 50, 675, 0.0f);
             float4 max = float4(-50, 150, 875, 0.0f);
             ps->system->addBox(nn, min, max, false);

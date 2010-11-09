@@ -356,11 +356,10 @@ void SPH::prepareSorted()
     cl_position = Buffer<float4>(ps->cli, pos_vbo);
     cl_color = Buffer<float4>(ps->cli, col_vbo);
 
-    //pure opencl buffers
+    //pure opencl buffers: these are deprecated
     cl_force = Buffer<float4>(ps->cli, forces);
     cl_velocity = Buffer<float4>(ps->cli, velocities);
     cl_veleval = Buffer<float4>(ps->cli, veleval);
-
     cl_density = Buffer<float>(ps->cli, densities);
     cl_xsph = Buffer<float4>(ps->cli, xsphs);
 
@@ -517,6 +516,10 @@ void SPH::pushParticles(vector<float4> pos)
     cl_position.acquire();
     cl_color.acquire();
     
+    printf("about to prep 0\n");
+    prep(0);
+    printf("done with prep 0\n");
+
     cl_position.copyToDevice(pos, num);
     cl_color.copyToDevice(cols, num);
 
@@ -537,7 +540,7 @@ void SPH::pushParticles(vector<float4> pos)
     //reprep the unsorted (packed) array to account for new particles
     //might need to do it conditionally if particles are added or subtracted
     printf("about to prep\n");
-    prep();
+    prep(1);
     printf("done with prep\n");
     cl_position.release();
 

@@ -225,7 +225,7 @@ private:
     void updateGPU();
 
     //Nearest Neighbors search related functions
-    void prep();
+    void prep(int stage);
     void hash();
     void printHashDiagnostics();
     void bitonic_sort();

@@ -13,19 +13,24 @@ void SPH::loadPrep()
 
     int args = 0;
     k_prep.setArg(args++, num);
-	k_prep.setArg(args++, cl_density.getDevicePtr());
+    k_prep.setArg(args++, 0);
 	k_prep.setArg(args++, cl_position.getDevicePtr());
+    k_prep.setArg(args++, cl_vars_unsorted.getDevicePtr());
+    k_prep.setArg(args++, cl_vars_sorted.getDevicePtr()); 
+	k_prep.setArg(args++, cl_sort_indices.getDevicePtr());
+
+
+    /*
+	k_prep.setArg(args++, cl_density.getDevicePtr());
 	k_prep.setArg(args++, cl_velocity.getDevicePtr());
 	k_prep.setArg(args++, cl_veleval.getDevicePtr());
 	k_prep.setArg(args++, cl_force.getDevicePtr());
 	k_prep.setArg(args++, cl_xsph.getDevicePtr());
-    k_prep.setArg(args++, cl_vars_unsorted.getDevicePtr()); // positions + other variables
-	//k_prep.setArg(args++, cl_sort_indices.getDevicePtr());
-
-
+    */
+    
 }
 
-void SPH::prep()
+void SPH::prep(int stage)
 {
     /**
      * sometimes we only want to copy positions
@@ -34,6 +39,7 @@ void SPH::prep()
      */
 
     k_prep.setArg(0, num);
+    k_prep.setArg(1, stage);
     int ctaSize = 128; // work group size
 	// Hash based on unscaled data
     try {
