@@ -20,6 +20,12 @@ Render::Render(GLuint pos, GLuint col, int n)
     pos_vbo = pos;
     col_vbo = col;
     num = n;
+
+    glsl = true;
+    if(glsl)
+    {
+        glsl_program = compileShaders();
+    }
 }
 
 Render::~Render()
@@ -98,7 +104,6 @@ void Render::render()
     glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
 
 
-    /*
     //TODO enable GLSL shading 
     if(glsl)
     {
@@ -110,6 +115,9 @@ void Render::render()
         glEnable(GL_DEPTH_TEST);
 
         glUseProgram(glsl_program);
+        float point_scale = 1.f;
+        float particle_radius = 5.f;
+        bool blending = false;
         //glUniform1f( glGetUniformLocation(m_program, "pointScale"), m_window_h / tanf(m_fov * m_fHalfViewRadianFactor));
         glUniform1f( glGetUniformLocation(glsl_program, "pointScale"), point_scale);
         glUniform1f( glGetUniformLocation(glsl_program, "blending"), blending );
@@ -124,7 +132,6 @@ void Render::render()
     }
     else   // do not use glsl
     {
-*/
         glDisable(GL_LIGHTING);
         //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
@@ -134,7 +141,7 @@ void Render::render()
         glPointSize(5.0f);
 
         drawArrays();
-    //}
+    }
     //printf("done rendering, clean up\n");
    
     glPopClientAttrib();
@@ -200,8 +207,7 @@ void Render::render_box(float4 min, float4 max)
 }
 
 //----------------------------------------------------------------------
-/*
-int EnjaParticles::compileShaders()
+GLuint Render::compileShaders()
 {
 
     //this may not be the cleanest implementation
@@ -249,6 +255,5 @@ int EnjaParticles::compileShaders()
 
     return program;
 }
-*/
 
 }

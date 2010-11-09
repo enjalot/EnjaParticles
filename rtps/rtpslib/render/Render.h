@@ -21,14 +21,8 @@ public:
 
     //decide which kind of rendering to use
     enum RenderType {POINTS, SPRITES};
-    RenderType rtype;
 
-    //number of particles
-    int num;
     void setNum(int nn){num = nn;};
-
-    GLuint pos_vbo;
-    GLuint col_vbo;
 
     void render();
     void drawArrays();
@@ -36,6 +30,19 @@ public:
     void render_box(float4 min, float4 max);
 
     //void compileShaders();
+
+private:
+    //number of particles
+    int num;
+
+    RenderType rtype;
+    bool glsl;
+    GLuint glsl_program;    
+
+    GLuint pos_vbo;
+    GLuint col_vbo;
+
+    GLuint compileShaders();
 
 };
 

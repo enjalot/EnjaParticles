@@ -17,6 +17,8 @@ void SPH::loadPrep()
 	k_prep.setArg(args++, cl_position.getDevicePtr());
 	k_prep.setArg(args++, cl_velocity.getDevicePtr());
 	k_prep.setArg(args++, cl_veleval.getDevicePtr());
+	k_prep.setArg(args++, cl_force.getDevicePtr());
+	k_prep.setArg(args++, cl_xsph.getDevicePtr());
     k_prep.setArg(args++, cl_vars_unsorted.getDevicePtr()); // positions + other variables
 	//k_prep.setArg(args++, cl_sort_indices.getDevicePtr());
 
@@ -25,12 +27,17 @@ void SPH::loadPrep()
 
 void SPH::prep()
 {
+    /**
+     * sometimes we only want to copy positions
+     * this should probably be replaced with Scopy
+     * i don't think straight copy is most efficient...
+     */
 
     k_prep.setArg(0, num);
     int ctaSize = 128; // work group size
 	// Hash based on unscaled data
     try {
-	k_prep.execute(num, ctaSize);
+    	k_prep.execute(num, ctaSize);
     }
     catch(cl::Error er) {
         printf("ERROR(prep): %s(%s)\n", er.what(), oclErrorString(er.err()));

@@ -37,9 +37,7 @@ SPH::SPH(RTPS *psfr, int n)
     //seed random
     srand ( time(NULL) );
 
-    //for reading back different values from the kernel
-    std::vector<float4> error_check(max_num);
-    
+   
     //init sph stuff
     //sph_settings.simulation_scale = .001;
     sph_settings.simulation_scale = .001f;
@@ -56,18 +54,8 @@ SPH::SPH(RTPS *psfr, int n)
     //set up the grid
     setupDomain();
 
-
-
     sph_settings.integrator = LEAPFROG;
     //sph_settings.integrator = EULER;
-
-    std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 1.0f, 0.0f));
-    std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
-    std::fill(veleval.begin(), veleval.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
-
-    std::fill(densities.begin(), densities.end(), 0.0f);
-    std::fill(xsphs.begin(), xsphs.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
-    std::fill(error_check.begin(), error_check.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
 
     //*** end Initialization
 
@@ -78,56 +66,8 @@ SPH::SPH(RTPS *psfr, int n)
 #ifdef GPU
     printf("RUNNING ON THE GPU\n");
 
-    // VBO creation, TODO: should be abstracted to another class
-    managed = true;
-    printf("positions: %zd, %zd, %zd\n", positions.size(), sizeof(float4), positions.size()*sizeof(float4));
-    pos_vbo = createVBO(&positions[0], positions.size()*sizeof(float4), GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
-    printf("pos vbo: %d\n", pos_vbo);
-    col_vbo = createVBO(&colors[0], colors.size()*sizeof(float4), GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
-    printf("col vbo: %d\n", col_vbo);
-    // end VBO creation
-
-    //vbo buffers
-    cl_position = Buffer<float4>(ps->cli, pos_vbo);
-    cl_color = Buffer<float4>(ps->cli, col_vbo);
-
-    //pure opencl buffers
-    cl_force = Buffer<float4>(ps->cli, forces);
-    cl_velocity = Buffer<float4>(ps->cli, velocities);
-    cl_veleval = Buffer<float4>(ps->cli, veleval);
-
-    cl_density = Buffer<float>(ps->cli, densities);
-    cl_xsph = Buffer<float4>(ps->cli, xsphs);
-
-    //cl_error_check= Buffer<float4>(ps->cli, error_check);
-
-    //TODO make a helper constructor for buffer to make a cl_mem from a struct
-    std::vector<SPHParams> vparams(0);
-    vparams.push_back(params);
-    cl_SPHParams = Buffer<SPHParams>(ps->cli, vparams);
-
-    //Setup Grid Parameter structs
-    std::vector<GridParams> gparams(0);
-    gparams.push_back(grid_params);
-    cl_GridParams = Buffer<GridParams>(ps->cli, gparams);
-    //scaled Grid Parameters
-    std::vector<GridParams> sgparams(0);
-    sgparams.push_back(grid_params_scaled);
-    cl_GridParamsScaled = Buffer<GridParams>(ps->cli, sgparams);
-
-
-    //setup debug arrays
-    std::vector<float4> clfv(max_num);
-    std::fill(clfv.begin(), clfv.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
-    std::vector<int4> cliv(max_num);
-    std::fill(cliv.begin(), cliv.end(),int4(0.0f, 0.0f, 0.0f, 0.0f));
-    clf_debug = Buffer<float4>(ps->cli, clfv);
-    cli_debug = Buffer<int4>(ps->cli, cliv);
-
     //setup the sorted and unsorted arrays
     prepareSorted();
-
-
 
     //replace these with the 2 steps
     loadDensity();
@@ -172,8 +112,6 @@ SPH::SPH(RTPS *psfr, int n)
 
     float4 min   = float4(-559., -15., 0.5, 1.);
 	float4 max   = float4(-400., 225., 1050., 1);
-
-
 
     //float4 min = float4(.1, .1, .1, 0.0f);
     //float4 max = float4(.3, .3, .4, 0.0f);
@@ -386,7 +324,67 @@ void SPH::calculateSPHSettings()
 void SPH::prepareSorted()
 {
     #include "sph/cl_macros.h"
+    
+    //for reading back different values from the kernel
+    std::vector<float4> error_check(max_num);
+ 
+    std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 1.0f, 0.0f));
+    std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
+    std::fill(veleval.begin(), veleval.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
 
+    std::fill(densities.begin(), densities.end(), 0.0f);
+    std::fill(xsphs.begin(), xsphs.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
+    std::fill(error_check.begin(), error_check.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
+
+    // VBO creation, TODO: should be abstracted to another class
+    managed = true;
+    printf("positions: %zd, %zd, %zd\n", positions.size(), sizeof(float4), positions.size()*sizeof(float4));
+    pos_vbo = createVBO(&positions[0], positions.size()*sizeof(float4), GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+    printf("pos vbo: %d\n", pos_vbo);
+    col_vbo = createVBO(&colors[0], colors.size()*sizeof(float4), GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+    printf("col vbo: %d\n", col_vbo);
+    // end VBO creation
+
+    //vbo buffers
+    cl_position = Buffer<float4>(ps->cli, pos_vbo);
+    cl_color = Buffer<float4>(ps->cli, col_vbo);
+
+    //pure opencl buffers
+    cl_force = Buffer<float4>(ps->cli, forces);
+    cl_velocity = Buffer<float4>(ps->cli, velocities);
+    cl_veleval = Buffer<float4>(ps->cli, veleval);
+
+    cl_density = Buffer<float>(ps->cli, densities);
+    cl_xsph = Buffer<float4>(ps->cli, xsphs);
+
+    //cl_error_check= Buffer<float4>(ps->cli, error_check);
+
+    //TODO make a helper constructor for buffer to make a cl_mem from a struct
+    std::vector<SPHParams> vparams(0);
+    vparams.push_back(params);
+    cl_SPHParams = Buffer<SPHParams>(ps->cli, vparams);
+
+    //Setup Grid Parameter structs
+    std::vector<GridParams> gparams(0);
+    gparams.push_back(grid_params);
+    cl_GridParams = Buffer<GridParams>(ps->cli, gparams);
+    //scaled Grid Parameters
+    std::vector<GridParams> sgparams(0);
+    sgparams.push_back(grid_params_scaled);
+    cl_GridParamsScaled = Buffer<GridParams>(ps->cli, sgparams);
+
+
+    //setup debug arrays
+    std::vector<float4> clfv(max_num);
+    std::fill(clfv.begin(), clfv.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
+    std::vector<int4> cliv(max_num);
+    std::fill(cliv.begin(), cliv.end(),int4(0.0f, 0.0f, 0.0f, 0.0f));
+    clf_debug = Buffer<float4>(ps->cli, clfv);
+    cli_debug = Buffer<int4>(ps->cli, cliv);
+
+
+
+    //sorted and unsorted arrays
     std::vector<float4> unsorted(max_num*nb_var);
     std::vector<float4> sorted(max_num*nb_var);
 
