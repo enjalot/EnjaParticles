@@ -22,6 +22,7 @@ Render::Render(GLuint pos, GLuint col, int n)
     num = n;
 
     glsl = true;
+    //glsl = false;
     if(glsl)
     {
         glsl_program = compileShaders();

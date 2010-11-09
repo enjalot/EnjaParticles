@@ -70,10 +70,12 @@ SPH::SPH(RTPS *psfr, int n)
     prepareSorted();
 
     //replace these with the 2 steps
+    /*
     loadDensity();
     loadPressure();
     loadViscosity();
     loadXSPH();
+    */
 
     //loadStep1();
     //loadStep2();
@@ -102,16 +104,20 @@ SPH::SPH(RTPS *psfr, int n)
     //// really this should be setup by the user
     //int nn = 1024;
     int nn = 3333;
-    nn = 8192;
-    //nn = 1920;
+    //nn = 8192;
+    //nn = 2048;
+    nn = 1024;
     //float4 min = float4(.4, .4, .1, 0.0f);
     //float4 max = float4(.6, .6, .4, 0.0f);
 
-	//float4 min   = float4(-559., -15., .5, 1.);
-	//float4 max   = float4(220., 225., 450., 1);
 
-    float4 min   = float4(-559., -15., 0.5, 1.);
-	float4 max   = float4(-400., 225., 1050., 1);
+    //float4 min   = float4(-559., -15., 0.5, 1.);
+	//float4 max   = float4(-400., 225., 1050., 1);
+    //grid = Domain(float4(-560,-30,0,0), float4(256, 256, 1276, 0));
+    float4 min   = float4(100., -15., 0.5, 1.);
+	float4 max   = float4(255., 225., 1050., 1);
+
+
 
     //float4 min = float4(.1, .1, .1, 0.0f);
     //float4 max = float4(.3, .3, .4, 0.0f);
@@ -214,7 +220,8 @@ void SPH::updateGPU()
     cl_color.acquire();
     
     //sub-intervals
-    for(int i=0; i < 10; i++)
+    int sub_intervals = 10;  //should be a setting
+    for(int i=0; i < sub_intervals; i++)
     {
         /*
         k_density.execute(num);

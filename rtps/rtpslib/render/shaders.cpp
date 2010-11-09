@@ -21,7 +21,7 @@ void main()
     //we packed radius in the 4th component of vertex
     //pointRadius = gl_Vertex.w;
     //gl_PointSize = pointRadius * (pointScale / dist);
-    gl_PointSize = 20.0f;
+    gl_PointSize = 20.0;
     //gl_PointSize = pointRadius * (1.0 / dist);
 
     gl_TexCoord[0] = gl_MultiTexCoord0;
