@@ -248,6 +248,9 @@ void SPH::updateGPU()
         //printf("integrate\n");
         integrate();
         //exit(0);
+        //
+        //Andrew's rendering emporium
+        //neighborSearch(4);
     }
 
     cl_position.release();

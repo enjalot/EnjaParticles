@@ -138,8 +138,8 @@ __kernel void neighbors(
 		force(index) = pt.force; // Does not seem to maintain value into euler.cl
         clf[index].xyz = pt.force.xyz;
 		xsph(index) = sphp->wpoly6_coef * pt.xsph;
-		// SERIOUS PROBLEM: Results different than results with cli = 4 (bottom of this file)
 	}
+
 	if (sphp->choice == 2) { // update surface tension (NOT DEBUGGED)
     	IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, /*fp,*/ sphp DEBUG_ARGV);
 		float norml = length(pt.color_normal);
