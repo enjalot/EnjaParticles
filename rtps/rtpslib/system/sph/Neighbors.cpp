@@ -62,13 +62,13 @@ void SPH::neighborSearch(int choice)
     vparams.push_back(params);
     cl_SPHParams.copyToDevice(vparams);
 
-    /*
+#if 0
     std::vector<int4> cli = cli_debug.copyToHost(2);
     for (int i=0; i < 2; i++) 
     {  
 		printf("cli_debug: %d\n", cli[i].w);
     }
-    */
+#endif
 
 	size_t global = (size_t) num;
 	int local = 128;
@@ -86,7 +86,6 @@ void SPH::neighborSearch(int choice)
     //DEBUGING
 	printf("============================================\n");
 	printf("which == %d *** \n", choice);
-
 	printf("***** PRINT neighbors diagnostics ******\n");
     cli = cli_debug.copyToHost(num);
     std::vector<float4> clf = clf_debug.copyToHost(num);
@@ -97,6 +96,7 @@ void SPH::neighborSearch(int choice)
 		printf("-----\n");
 		printf("clf_debug: %f, %f, %f, %f\n", clf[i].x, clf[i].y, clf[i].z, clf[i].w);
 		printf("cli_debug: %d, %d, %d, %d\n", cli[i].x, cli[i].y, cli[i].z, cli[i].w);
+//		printf("pos : %f, %f, %f, %f\n", pos[i].x, pos[i].y, pos[i].z, pos[i].w);
     }
 #endif
 

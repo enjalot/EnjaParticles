@@ -8,6 +8,7 @@ __kernel void leapfrog(
 		__global float4* vars_unsorted, 
 		__global float4* vars_sorted, 
 		__global float4* positions,  // for VBO 
+		__global float4* color,
 		__constant struct SPHParams* params, 
 		float dt)
 {
@@ -50,6 +51,7 @@ __kernel void leapfrog(
 	unsorted_vel(originalIndex) 	= vnext;
 	unsorted_veleval(originalIndex) = veval; 
 	positions[originalIndex] 		= (float4)(p.xyz, 1.);  // for plotting
+	color[originalIndex]			= surface(i);
     //positions[originalIndex] = unsorted_pos(originalIndex);
     //positions[i] = unsorted_pos(i);
 

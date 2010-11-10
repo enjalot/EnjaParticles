@@ -52,6 +52,7 @@ typedef struct SPHParams
 	float attraction;
 	float spring;
 	float gravity; // -9.8 m/sec^2
+	float surface_threshold;
 
     //Kernel Coefficients
     float wpoly6_coef;

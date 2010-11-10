@@ -23,6 +23,7 @@ typedef struct SPHParams
 	float attraction;
 	float spring;
 	float gravity; // -9.8 m/sec^2
+	float surface_threshold;
 
     float wpoly6_coef;
 	float wpoly6_d_coef;
@@ -54,6 +55,8 @@ typedef struct PointData
 	float4 force;
 	float4 surf_tens;
 	float4 xsph;
+	float4 center_of_mass;
+	int num_neighbors;
 } PointData;
 
 //----------------------------------------------------------------------

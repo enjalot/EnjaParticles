@@ -47,7 +47,7 @@ SPH::SPH(RTPS *psfr, int n)
     //grid = Domain(float4(0,0,0,0), float4(1/scale, 1/scale, 1/scale, 0));
     //grid = Domain(float4(0,0,0,0), float4(1/scale, 1/scale, 1/scale, 0));
     //grid = Domain(float4(0,0,0,0), float4(30, 30, 30, 0));
-    grid = Domain(float4(-560,-30,0,0), float4(256, 256, 1276, 0));
+    grid = Domain(float4(0,-30,0,0), float4(256, 256, 1276, 0));
 
     //SPH settings depend on number of particles used
     calculateSPHSettings();
@@ -114,7 +114,7 @@ SPH::SPH(RTPS *psfr, int n)
     //float4 min   = float4(-559., -15., 0.5, 1.);
 	//float4 max   = float4(-400., 225., 1050., 1);
     //grid = Domain(float4(-560,-30,0,0), float4(256, 256, 1276, 0));
-    float4 min   = float4(100., -15., 0.5, 1.);
+    float4 min   = float4(0.5, -15., 0.5, 1.);
     //float4 min   = float4(100., -15., 550, 1.);
 	float4 max   = float4(255., 225., 1250., 1);
 
@@ -250,7 +250,7 @@ void SPH::updateGPU()
         //exit(0);
         //
         //Andrew's rendering emporium
-        //neighborSearch(4);
+	neighborSearch(4);
     }
 
     cl_position.release();
@@ -315,6 +315,7 @@ void SPH::calculateSPHSettings()
     params.PI = 3.14159265f;
     params.K = 20.0f;
     params.num = num;
+    params.surface_threshold = 0.01;
 
 	float h = params.smoothing_distance;
 	float pi = acos(-1.0);
