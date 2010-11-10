@@ -31,6 +31,7 @@ Render::Render(GLuint pos, GLuint col, int n)
 
 Render::~Render()
 {
+    printf("Render destructor\n");
 }
 
 void Render::drawArrays()

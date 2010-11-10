@@ -20,6 +20,7 @@ RTPS::RTPS(RTPSettings s)
 
 RTPS::~RTPS()
 {
+    printf("RTPS destructor\n");
     delete system;
     delete cli;
     delete renderer;

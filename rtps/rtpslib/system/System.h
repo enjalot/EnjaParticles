@@ -19,6 +19,7 @@ class System
 public:
     virtual void update() = 0;
     
+    virtual ~System(){};
     
     virtual Domain getGrid(){ return grid; };
     virtual int getNum(){ return num; };

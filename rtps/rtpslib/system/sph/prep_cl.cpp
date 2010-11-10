@@ -34,10 +34,10 @@ __kernel void prep(
     {
         //we only want to do this for the old num 
         uint index = sort_indices[i];
-        unsorted_density(index) = density(i);
+        //unsorted_density(index) = density(i);
         unsorted_vel(index) = vel(i);
         unsorted_veleval(index) = veleval(i);
-        unsorted_force(index) = force(i);
+        //unsorted_force(index) = force(i);
     }
 
     /*
