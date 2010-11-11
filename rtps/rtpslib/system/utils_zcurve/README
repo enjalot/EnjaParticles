@@ -10,3 +10,7 @@ It should not affect hashing in any way!
 
 In GridParam: store actual number of particles.
 In Settings: store max number of particles (power of two). 
+----------------------------------------------------------------------
+Nov. 11, 2010
+----------------------------------------------------------------------
+

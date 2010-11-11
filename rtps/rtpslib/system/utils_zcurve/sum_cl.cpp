@@ -7,7 +7,29 @@
 // single warp of 32 threads summing 32 elements in loc
 // unro
 
-inline void sum(__local float4* locc)
+// fast to have a sum over scalars?
+inline void sum1(__local float4* locc, int nb)
+{
+// locc[0,..,nb-1]  = center particles
+// locc[nb+lid] = neighboring particles
+// return: 
+// locc[i] = sum_j W(r_i-r_j)     j=0, ... 31
+
+
+	int lid = get_local_id(0);
+	//int nbl = nb + lid;
+	int nbl = lid;
+
+	// Execute this sum over the first nb elements of locc
+
+	{ locc[nbl].w += locc[nbl + 16].w; }
+	{ locc[nbl].w += locc[nbl +  8].w; }
+	{ locc[nbl].w += locc[nbl +  4].w; }
+	{ locc[nbl].w += locc[nbl +  2].w; }
+	{ locc[nbl].w += locc[nbl +  1].w; }
+}
+//----------------------------------------------------------------------
+inline void sum4(__local float4* locc, int nb)
 {
 // blocks of size 32 only
 
@@ -20,12 +42,14 @@ inline void sum(__local float4* locc)
 	{ LOCC(lid) += LOCC(lid +  1); }
 	#endif
 
+	int nbl = nb + lid;
+
 	#if 1
-	{ locc[lid] += locc[lid + 16]; }
-	{ locc[lid] += locc[lid +  8]; }
-	{ locc[lid] += locc[lid +  4]; }
-	{ locc[lid] += locc[lid +  2]; }
-	{ locc[lid] += locc[lid +  1]; }
+	{ locc[nbl] += locc[nbl + 16]; }
+	{ locc[nbl] += locc[nbl +  8]; }
+	{ locc[nbl] += locc[nbl +  4]; }
+	{ locc[nbl] += locc[nbl +  2]; }
+	{ locc[nbl] += locc[nbl +  1]; }
 	#endif
 
 // there are bank conflicts

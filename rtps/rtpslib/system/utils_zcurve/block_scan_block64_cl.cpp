@@ -72,6 +72,8 @@ void block_scan_one_warp(
 	// next four lines would not be necessary once blocks are concatenated
 	// nb particles in cell with given hash
 	int nb = cell_indices_nb[hash];  // grid cell
+	// advantage (??) of nb32=32 : warp alignment in shared memory
+	int nb32 = 32; // first 32 elements of shared memory: center particles
 
 	// the cell is empty
 	if (nb <= 0) return;
@@ -176,80 +178,45 @@ void block_scan_one_warp(
 	float4 ri = (float4)(locc[lid].xyz, 0.);
 
 	// accumulate data from neighboring cells (lid in [0,26])
-	//locc[nb+lid] = (float4) (0., 0., 0., 0.);
 
 	float rho = 0.;
 
 	// if there are 8 neighbors, I should only loop 8 times!
-	//for (int i=0; i < 32; i++) {   	// max of 32 particles per cell
-	   // should compute this maximum 
-	for (int i=0; i < 8; i++) {   	// max of 8 particles per cell
-		// do not understand why next line does not work
-		// cnb: number of particles in cell lid
-		//if (i >= cnb) continue; // SCREWS UP RESULTS!
-	// since cnb < 32, how can density be higher when using cnb? 
+	for (int i=0; i < 8; i++)
+	{   	// max of 8 particles per cell
 
-	// there are cnb particles per cell
-	// cnb is the number of neighbors in each cell
-	// each thread treats a different neighbor, which has a different number
-	// of points
-
-		// neighbor cell lid positions loaded to shared memory
-		locc[nb+lid] = (float4)(900., 900., 900., 1.);
-		barrier(CLK_LOCAL_MEM_FENCE);
+		locc[nb32+lid] = (float4)(900., 900., 900., 1.);
+		//barrier(CLK_LOCAL_MEM_FENCE);
 
 		// Bring in single particle from neighboring blocks, one per thread
 
-		//if (lid < 27) {  // only 27 neighbors
 		{
-			// next statement has an effect
-			if (i < cnb) {   // global access (called 32 times)
-				locc[nb+lid] = pos(cstart+i); // ith particle in cell
+			if (i < cnb)   // global access (called 32 times)  // 
+			{
+				locc[nb32+lid] = pos(cstart+i); // ith particle in cell
 			} 
 		}
 
-
 		barrier(CLK_LOCAL_MEM_FENCE);
 		
-		if (lid < nb) {
-			for (int j=0; j < 27; j++) { 
-				// does not change results, and the time either
-				//if (i >= cnb) continue;
-
-				//if (lid >= nb) continue; // decreased time slightly (10%)
-				// redundant calculations, not used
-				#if 1
-				// three dependencies, which required additional warps
-				// to interleave for efficiency. 
-				// (12 warps to fill the pipe on the Fermi)
-				float4 rj = (float4)(locc[nb+j].xyz, 0.); // CORRECT LINE????
-				//float4 rj = (float4)(loc.xyz, 0.); 
+		{
+			// execute operation in parallel for all particles in center cell
+			for (int j=0; j < 27; j++)
+			{ 
+				float4 rj = (float4)(locc[nb32+j].xyz, 0.); // CORRECT LINE????
 				float4 r = rj-ri;
-				//rj = rj-ri;
-				float rad = length(r); // users sqrt without a need
-				//float rad = length(rj); // users sqrt without a need
 
-
-				if (rad < sphp->smoothing_distance) {
-					// cannot use x,y,z from loc (position and is required)
-					// This line accounts for 70 ms!!! Without it, time is 15 ms
-					rho += Wpoly6_glob(r, sphp->smoothing_distance);
-					//rho += 1.;
-				}
-				#endif
+				// put the check for distance INSIDE the routine. 
+				// much faster. 
+				rho += Wpoly6_glob(r, sphp->smoothing_distance);
 			}
 		}
-		//sum(locc); // adds 30% to the time. 
 	}
 
 	barrier(CLK_LOCAL_MEM_FENCE);
 
-	// sums too many times if there are two warps!
-
-	
 	if (lid < nb) {
 		density(start+lid) = rho * sphp->wpoly6_coef * sphp->mass;
-		//density(start+lid) = rho;
 	}
 
 	return;

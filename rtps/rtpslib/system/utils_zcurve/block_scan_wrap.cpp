@@ -28,7 +28,7 @@ void GE_SPH::blockScan(int which)
 			path = path + "/block_scan_block64_cl.cl";
 			// optimum size ==> 16 ms for density (9 ms with old code) on mac
 			// many points have density way too high!
-			work_size = 1*32;  // WRONG RESULTS
+			work_size = 8*32;  // WRONG RESULTS
 
 			int length;
 			char* src = file_contents(path.c_str(), &length);

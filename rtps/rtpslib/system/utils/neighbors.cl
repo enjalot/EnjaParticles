@@ -191,7 +191,7 @@ float Wvisc_dr(float rlen, float h, __constant struct SPHParams* params)
 float Wvisc_lapl(float rlen, float h, __constant struct SPHParams* params)
 {
  float h3 = h*h*h;
- float alpha = 15./(params->PI * h3*h3);
+ float alpha = 45./(params->PI * h3*h3);
  float Wij = alpha*(h-rlen);
  return Wij;
 }

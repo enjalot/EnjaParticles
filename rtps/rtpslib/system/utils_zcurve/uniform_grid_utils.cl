@@ -130,13 +130,18 @@ float Wpoly6_glob(float4 r, float h)
     float r2 = r.x*r.x + r.y*r.y + r.z*r.z;
 
  float hr2 = (h*h-r2);
- return hr2*hr2*hr2;
+
+ if (hr2 > 0) {
+  return hr2*hr2*hr2;
+ } else {
+  return 0.;
+ }
 }
 
 float Wpoly6(float4 r, float h, __constant struct SPHParams* params)
 {
     float r2 = r.x*r.x + r.y*r.y + r.z*r.z;
-# 24 "wpoly6.cl"
+# 29 "wpoly6.cl"
  float hr2 = (h*h-r2);
 
  return hr2*hr2*hr2;
@@ -178,7 +183,7 @@ float Wspiky(float rlen, float h, __constant struct SPHParams* params)
 
 float Wspiky_dr(float rlen, float h, __constant struct SPHParams* params)
 {
-# 74 "wpoly6.cl"
+# 79 "wpoly6.cl"
  float hr2 = h - rlen;
  return -hr2*hr2/rlen;
 
@@ -205,7 +210,7 @@ float Wvisc_dr(float rlen, float h, __constant struct SPHParams* params)
 float Wvisc_lapl(float rlen, float h, __constant struct SPHParams* params)
 {
  float h3 = h*h*h;
- float alpha = 15./(params->PI * h3*h3);
+ float alpha = 45./(params->PI * h3*h3);
  float Wij = alpha*(h-rlen);
  return Wij;
 }
