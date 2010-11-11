@@ -315,7 +315,7 @@ void SPH::calculateSPHSettings()
     params.PI = 3.14159265f;
     params.K = 20.0f;
     params.num = num;
-    params.surface_threshold = 0.01;
+    params.surface_threshold = 2.0 * params.simulation_scale; //0.01;
 
 	float h = params.smoothing_distance;
 	float pi = acos(-1.0);
