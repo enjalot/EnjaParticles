@@ -191,6 +191,7 @@ void block_scan_one_warp(
 		// Bring in single particle from neighboring blocks, one per thread
 
 		{
+			// if: no influence on speed, affects results
 			if (i < cnb)   // global access (called 32 times)  // 
 			{
 				locc[nb32+lid] = pos(cstart+i); // ith particle in cell
@@ -200,16 +201,81 @@ void block_scan_one_warp(
 		barrier(CLK_LOCAL_MEM_FENCE);
 		
 		{
-			// execute operation in parallel for all particles in center cell
+				float4 r;
+				float rho1=0;
+				float rho2=0;
+
+			#if 0
+				r = locc[nb32+0]-ri; 
+				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+1]-ri;
+				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+2]-ri;
+				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+3]-ri;
+				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+4]-ri;
+				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+5]-ri;
+				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+6]-ri;
+				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+7]-ri;
+				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+8]-ri;
+				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+9]-ri;
+				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+10]-ri;
+				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+11]-ri;
+				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+12]-ri;
+				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+13]-ri;
+				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+14]-ri;
+				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+15]-ri;
+				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+16]-ri;
+				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+17]-ri;
+				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+18]-ri;
+				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+19]-ri;
+				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+20]-ri;
+				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+21]-ri;
+				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+22]-ri;
+				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+23]-ri;
+				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+24]-ri;
+				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+25]-ri;
+				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
+				r = locc[nb32+26]-ri;
+				rho += Wpoly6_glob(r, sphp->smoothing_distance);
+				rho += rho1 + rho2;
+
+			#else
 			for (int j=0; j < 27; j++)
 			{ 
-				float4 rj = (float4)(locc[nb32+j].xyz, 0.); // CORRECT LINE????
+				//float4 rj = (float4)(locc[nb32+j].xyz, 0.); // CORRECT LINE????
+				// no need to zero out .w component since I am not using it
+				// and it is initialized to zero
+				float4 rj = locc[nb32+j]; // CORRECT LINE????
 				float4 r = rj-ri;
 
 				// put the check for distance INSIDE the routine. 
-				// much faster. 
+				// much faster then check outside the routine. 
 				rho += Wpoly6_glob(r, sphp->smoothing_distance);
 			}
+			#endif
 		}
 	}
 
