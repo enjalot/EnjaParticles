@@ -53,6 +53,11 @@ typedef struct GE_SPHSettings
 } GE_SPHSettings;
 
 //-------------------------
+struct CellOffsets
+{
+	int4 offsets[32];
+};
+//-------------------------
 // GORDON Datastructure for Grids. To be reconciled with Ian's
 struct GridParams
 {
@@ -275,7 +280,9 @@ public:
 	BufferGE<int4>* cl_hash_to_grid_index;
 
 	// fast access to 27 nearest cells
-	BufferGE<int4>* cl_cell_offset;
+	BufferGE<int4>* cl_cell_offset; // problems in OpenCL related to __constant
+	BufferGE<CellOffsets>* cl_CellOffsets; // 
+
 
 	// index neighbors. Maximum of 50
 	BufferGE<int>* 		cl_index_neigh;

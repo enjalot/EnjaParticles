@@ -60,10 +60,7 @@ void block_scan_one_warp(
 
 		   			__global int4* hash_to_grid_index,
 
-		   			//__constant int4* cell_offset, 
-		   			//__global int4* cell_offset, 
-		   			__local int4* cell_offset, 
-		   			//__constant struct CellOffsets* cell_offset,  
+		   			__global int4* cell_offset, 
 
 		   			__constant struct SPHParams* sphp,
 
@@ -78,7 +75,6 @@ void block_scan_one_warp(
 	int nb = cell_indices_nb[hash];  // grid cell
 	// advantage (??) of nb32=32 : warp alignment in shared memory
 	int nb32 = 32; // first 32 elements of shared memory: center particles
-
 
 	// the cell is empty
 	if (nb <= 0) return;
@@ -97,13 +93,11 @@ void block_scan_one_warp(
 
 	// work item thread: lid in [0,31]
 	int lid  = get_local_id(0);
-
 	// I am assuming that continuous global ids correspond 
 	// to continuous local ids
 	int warp = lid >> 5; // should equal 0,...,nb_warps-1
 	lid = lid - (warp<<5); // in [0,31]
 	//lid = lid % 32;
-
 
 //----------------------------------
 
@@ -162,7 +156,6 @@ void block_scan_one_warp(
 		// perhaps I could define cell_offset[28,29,30,31] 
 		// to avoid if statement?
 		cell = c + cell_offset[lid]; 
-		//cell = c + cell_offset->offsets[lid]; 
 
 		// check whether cellHash is valid? It is in principle
 		// if fluid is always off by 2-3 cells from the boundary. 
@@ -319,7 +312,6 @@ __kernel void block_scan(
 					// __constant is not working
 		   			//__constant int4* cell_offset,  // DOES NOT WORK OK
 		   			__global int4* cell_offset, 
-		   			//__constant struct CellOffsets* cell_offset,  
 
 		   			//__global struct SPHParams* sphp,
 		   			__constant struct SPHParams* sphp,
@@ -334,12 +326,6 @@ __kernel void block_scan(
 	if (get_group_id(0) >= gp->nb_points) return;
 
 	int lid  = get_local_id(0);
-
-	__local int4 l_cell_offset[32];
-	if (lid < 32) {
-		l_cell_offset[lid] = cell_offset[lid];
-	}
-
 	//int nb_warps = get_local_size(0) >> 5;
 	int nb_warps = get_local_size(0) / 32;
 	//int warp = lid >> 5; // should equal 0, ..., nb_warps-1
@@ -373,8 +359,7 @@ __kernel void block_scan(
 		   			cell_indices_start,
 		   			cell_indices_nb,
 		   			hash_to_grid_index,
-		   			//cell_offset, 
-		   			l_cell_offset, 
+		   			cell_offset, 
 		   			sphp,
 		   			gp,
 					hash,
@@ -388,8 +373,7 @@ __kernel void block_scan(
 		   			cell_indices_start,
 		   			cell_indices_nb,
 		   			hash_to_grid_index,
-		   			//cell_offset, 
-		   			l_cell_offset, 
+		   			cell_offset, 
 		   			sphp,
 		   			gp,
 					hash+1, // change the hash for next cell

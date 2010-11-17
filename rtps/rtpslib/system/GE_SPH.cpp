@@ -110,7 +110,10 @@ GE_SPH::~GE_SPH()
         col_vbo = 0;
     }
 
+
 	#if 1
+	delete cl_CellOffsets;
+
 	delete 	cl_vars_sorted;
 	delete 	cl_vars_unsorted;
 	//delete 	cl_cells; // positions in Ian code
@@ -212,6 +215,8 @@ void GE_SPH::setupArrays()
 
 // Need an assign operator (no memory allocation)
 
+	cl_CellOffsets = new BufferGE<CellOffsets>(ps->cli, 1); // neighbors
+
 	cl_GridParams = new BufferGE<GridParams>(ps->cli, 1); // destroys ...
 	cl_GridParamsScaled = new BufferGE<GridParamsScaled>(ps->cli, 1); // destroys ...
 
@@ -271,7 +276,7 @@ void GE_SPH::setupArrays()
 	// size: total number of grid points
 	cl_hash_to_grid_index = new BufferGE<int4>(ps->cli, gp.nb_points);
 
-	cl_cell_offset = new BufferGE<int4>(ps->cli, 27);
+	cl_cell_offset = new BufferGE<int4>(ps->cli, 32);
 
 	#if 0
 	// ERROR
@@ -1124,15 +1129,21 @@ void GE_SPH::initializeData()
 	// This list will avoid triple for loop, which might be expensive when 
 	// searching adjacent neighbors and will enable each thread to work 
 	// with a different cell
+
+	CellOffsets* c_offset = cl_CellOffsets->getHostPtr();
 	int4* cell_offset = cl_cell_offset->getHostPtr();
+
 	int count27 = 0;
 	for (int k=-1; k <= 1; k++) {
 	for (int j=-1; j <= 1; j++) {
 	for (int i=-1; i <= 1; i++) {
-		cell_offset[count27++] = int4(i, j, k, 1);
+		c_offset->offsets[count27] = int4(i, j, k, 1);
+		cell_offset[count27] = int4(i, j, k, 1);
+		count27++;
 	}}}
 
 	cl_cell_offset->copyToDevice();
+	cl_CellOffsets->copyToDevice(); // hopefully will work with __constant
 
 	#if 0
 	for (int h=0; h < nx*ny*nz; h++) {

@@ -26,6 +26,7 @@ void GE_SPH::blockScan(int which)
 			// Try blocks of size 64 (two warps of 32: need more shared mem)
 			// efficiency. Still 32 threads per warp
 			path = path + "/block_scan_block64_cl.cl";
+			//path = path + "/block_scan_block64a_cl.cl";
 			// optimum size ==> 16 ms for density (9 ms with old code) on mac
 			// many points have density way too high!
 			work_size = 2*32;  // WRONG RESULTS
@@ -52,6 +53,7 @@ void GE_SPH::blockScan(int which)
 	cl_FluidParams->copyToDevice();
 
 	GridParamsScaled* gps = cl_GridParamsScaled->getHostPtr();
+
 	
 	int iarg = 0;
 	//kern.setArg(iarg++, gps->nb_points);
@@ -60,6 +62,7 @@ void GE_SPH::blockScan(int which)
 	kern.setArg(iarg++, cl_cell_indices_nb->getDevicePtr());
 	kern.setArg(iarg++, cl_hash_to_grid_index->getDevicePtr());
 	kern.setArg(iarg++, cl_cell_offset->getDevicePtr());
+	//kern.setArg(iarg++, cl_CellOffsets->getDevicePtr());
 	kern.setArg(iarg++, cl_params->getDevicePtr());
 	kern.setArg(iarg++, cl_GridParamsScaled->getDevicePtr());
 
@@ -71,7 +74,8 @@ void GE_SPH::blockScan(int which)
 	// local memory
 	// space for 4 variables of 4 bytes (float) for (27+32) particles
 	// need enough space for all threads in the block
-	int nb_bytes = nb_warps * (32+32)* sizeof(float4);
+	// Factor 10 for debugging only
+	int nb_bytes = 2 * nb_warps * (32+32)* sizeof(float4);
 	printf("nb shared bytes per block: %d\n", nb_bytes);
 	printf("max nb blocks: %d\n", 1024*48/nb_bytes);
 	printf("nb warps: %d\n", nb_warps);

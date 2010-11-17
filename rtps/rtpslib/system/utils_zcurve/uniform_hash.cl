@@ -14,6 +14,12 @@
 
 
 
+struct CellOffsets
+{
+ int4 offsets[32];
+};
+
+
 
 typedef struct PointData
 {

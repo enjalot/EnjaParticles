@@ -3,6 +3,12 @@
 #ifndef _CL_STRUCTURES_H_
 #define _CL_STRUCTURES_H_
 
+//----------------------------------------------------------------------
+struct CellOffsets
+{
+	int4 offsets[32];
+};
+//----------------------------------------------------------------------
 // Will be local variable
 // used to output multiple variables per point
 typedef struct PointData
