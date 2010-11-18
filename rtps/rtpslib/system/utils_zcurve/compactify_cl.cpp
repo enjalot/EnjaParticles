@@ -99,6 +99,7 @@ __kernel void compactifyArrayKernel(
 	__local int count_loc[BLOCK_SIZE+5]; // avoid bank conflicts: extra memory
 	__local int prefix_loc[BLOCK_SIZE];
 
+
 	//prescan(output, input, count_loc, nb);  // seems to work
 
 	// each blocks considers a section of input array
@@ -111,7 +112,7 @@ __kernel void compactifyArrayKernel(
 	int count = 0;
 
 	for (int i=0; i < chunk; i += block_size) {
-		int in = input[i+lid];
+		int in = input[block_size*bid+i+lid];
 		if (in != 0) {
 			count++;
 		}
@@ -135,12 +136,12 @@ __kernel void compactifyArrayKernel(
 	{ count_loc[lid] += count_loc[lid +  1]; }
 	#endif
 
-	int count_sum = count_loc[lid];
+	int count_sum = count_loc[0];
 
 	//processorCounts[bid] = count_sum; // global access
 	processorCounts[bid] = count_loc[0]; // global access
-	output[lid] = count_loc[0];
-	return;
+//	output[bid] = processorCounts[bid];
+//	return;
 
 	barrier(CLK_LOCAL_MEM_FENCE);
 
@@ -152,36 +153,35 @@ __kernel void compactifyArrayKernel(
 			processorCounts[i] += processorCounts[i-1];
 		}
 	}
+	//output[bid] = processorCounts[bid];
+	//return;
 
 	
 	barrier(CLK_LOCAL_MEM_FENCE);
 
 
-	barrier(CLK_LOCAL_MEM_FENCE);
-
+	//output[bid*block_size+lid] = processorCounts[bid];
+	//output[bid*block_size+lid+1] = 2;//bid;
+	//return;
 	#if 1
 	prescan(processorOffsets, processorCounts, count_loc, nb_blocks);
 	#endif
 
-	processorOffsets[0] = 0; // single block
+	//processorOffsets[0] = 0; // single block
 	barrier(CLK_LOCAL_MEM_FENCE);
 
-	__local int b[BLOCK_SIZE];
+	__local int b[BLOCK_SIZE]; // *2 not required. 
 	__local int cnt[1];
 
 	int j = processorOffsets[bid];
 	cnt[0] = 0;
-	//output[lid] = j;
-	//return;
 
 	int numValid = 0;
 	for (int i=0; i < chunk; i += block_size) {
-		int a = input[i+lid];
+		//int a = input[block_size*bid+i+lid];
 		// compaction of a single block
-		int numValid = compactSIMD(input+i, b, cnt);
-		//output[lid] = b[lid]; return;
+		int numValid = compactSIMD(input+i+block_size*bid, b, cnt);
 		// b[0..s), numValid <-- compactSIMD a(0..S)
-		//output[j] = b;
 		if (lid < numValid) {
 			output[j+lid] = b[lid];
 		}

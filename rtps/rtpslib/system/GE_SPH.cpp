@@ -357,15 +357,18 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
     cl_position->acquire();
     cl_color->acquire();
 
-	int nn_elem = 64;
+	int nn_elem = 2*2*64;
 	BufferGE<int> cl_input(ps->cli, nn_elem);
 	BufferGE<int> cl_compact(ps->cli, nn_elem);
 	int* v = cl_input.getHostPtr();
 	for (int i=0; i < nn_elem; i++) {
 		v[i] = i+1;
 	}
-	//v[3] = 0;
-	//v[13] = 0;
+	v[3] = 0;
+	v[13] = 0;
+	v[37] = 0;
+	v[43] = 0;
+	v[44] = 0;
 	cl_input.copyToDevice();
 	for (int i=0; i < 20; i++) {
 		compactify(cl_input, cl_compact);
