@@ -14,7 +14,6 @@ void  prescan(
 	__local T* temp, 
 	int n) 
 {
-
 	int offset = 1; 
 	int lid = get_local_id(0);
 	int ai = lid;
@@ -91,7 +90,6 @@ __kernel void compactifyArrayKernel(
 // order is not important
 {
 
-
 	int tid = get_global_id(0);
 	int lid = get_local_id(0);
 	int bid = get_group_id(0);
@@ -100,6 +98,8 @@ __kernel void compactifyArrayKernel(
 
 	__local int count_loc[BLOCK_SIZE+5]; // avoid bank conflicts: extra memory
 	__local int prefix_loc[BLOCK_SIZE];
+
+	//prescan(output, input, count_loc, nb);  // seems to work
 
 	// each blocks considers a section of input array
 	// number of elements treated per block
@@ -123,6 +123,8 @@ __kernel void compactifyArrayKernel(
 	// assume 32 threads per block
 	if (block_size != 32) return;
 
+	// HOW DOES IT WORK IF THERE ARE TWO BLOCKS??? ERROR? 
+
 	barrier(CLK_LOCAL_MEM_FENCE);
 
 	#if 1
@@ -137,6 +139,8 @@ __kernel void compactifyArrayKernel(
 
 	//processorCounts[bid] = count_sum; // global access
 	processorCounts[bid] = count_loc[0]; // global access
+	output[lid] = count_loc[0];
+	return;
 
 	barrier(CLK_LOCAL_MEM_FENCE);
 
@@ -155,18 +159,8 @@ __kernel void compactifyArrayKernel(
 
 	barrier(CLK_LOCAL_MEM_FENCE);
 
-	#if 0
-	// use all threads of this block
-	//prefix_loc[lid] = processorCounts[lid];
-	//output[lid] = prefix_loc[lid];
-	//return;
-
-	//prefix_loc[0] = 0;
-	//prefix_loc[1+2*lid] += prefix_loc[2*lid];
-	//prefix_loc[1+2*lid] += prefix_loc[2+2*lid];
-
-	// I really need a post scan. For later. 
-	prescan(processorOffsets, processorCounts, count_loc, block_size);
+	#if 1
+	prescan(processorOffsets, processorCounts, count_loc, nb_blocks);
 	#endif
 
 	processorOffsets[0] = 0; // single block
