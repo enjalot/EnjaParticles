@@ -69,6 +69,46 @@ UniformGrid::UniformGrid(float4 min, float4 max, float cell_size, float sim_scal
                    size.z / res.z, 
 				   1.);
 
+// Given resolution, find power of two grid size equal or beyond the current 
+// resolution, and reset the resolution without changing the position of the 
+// boundaries. 
+
+	pow_two_res.x = PowerOfTwo(res.x);
+	pow_two_res.y = PowerOfTwo(res.y);
+	pow_two_res.z = PowerOfTwo(res.z);
+	pow_two_res.w = 1;
+	res.print("res");
+	pow_two_res.print("pow_two_res");
+
+	// Modified dimensions
+    size = float4(pow_two_res.x * world_cell_size,
+                  pow_two_res.y * world_cell_size,
+                  pow_two_res.z * world_cell_size,
+				  1.);
+
+    // change maximum extent of the domain
+	max.x = min.x + pow_two_res.x * cell_size;
+	max.y = min.y + pow_two_res.y * cell_size;
+	max.z = min.z + pow_two_res.z * cell_size;
+
+	res.x = pow_two_res.x;
+	res.y = pow_two_res.y;
+	res.z = pow_two_res.z;
+	res.print("res");
+	//exit(0);
+}
+//----------------------------------------------------------------------
+int UniformGrid::PowerOfTwo(int val)
+{
+	int ret = 1;
+
+	for (int i=0; i < 30; i++) {
+		ret = ret << 1;
+		//printf("ret= %d\n", ret);
+		if (ret >= val) {
+			return ret;
+		}
+	}
 }
 //----------------------------------------------------------------------
 UniformGrid::UniformGrid(float4 min, float4 max, int4 nb_cells, float sim_scale)

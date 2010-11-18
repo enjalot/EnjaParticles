@@ -82,6 +82,8 @@ public:
 	static int getNbBytesGPU() { return total_bytes_GPU; } 
 	static int getNbBytesCPU() { return total_bytes_CPU; } 
 
+	int getSize() { return nb_el; }
+
 private:
 	BufferGE(const BufferGE&); // copy constructor
 	const BufferGE& operator=(const BufferGE&) const;

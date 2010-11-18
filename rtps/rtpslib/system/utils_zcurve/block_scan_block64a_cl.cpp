@@ -10,6 +10,7 @@
 #include "sum_cl.cpp"
 #include "bank_conflicts.h"
 #include "block_scan_one_warp_multi_warp_cl.cpp"
+#include "get_indices_cl.cpp"
 
 //----------------------------------------------------------------------
 int calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
@@ -55,12 +56,17 @@ int calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 // Work of a single warp. 
 void block_scan_one_warp(
 					__global float4*   vars_sorted, 
+
+					// Perhaps combine into array of float2
 		   			__global int* cell_indices_start,
 		   			__global int* cell_indices_nb,
 
 		   			__global int4* hash_to_grid_index,
 
-		   			__global int4* cell_offset, 
+		   			//__constant int4* cell_offset, 
+		   			//__global int4* cell_offset, 
+		   			__local int4* cell_offset, 
+		   			//__constant struct CellOffsets* cell_offset,  
 
 		   			__constant struct SPHParams* sphp,
 
@@ -75,6 +81,7 @@ void block_scan_one_warp(
 	int nb = cell_indices_nb[hash];  // grid cell
 	// advantage (??) of nb32=32 : warp alignment in shared memory
 	int nb32 = 32; // first 32 elements of shared memory: center particles
+
 
 	// the cell is empty
 	if (nb <= 0) return;
@@ -93,11 +100,13 @@ void block_scan_one_warp(
 
 	// work item thread: lid in [0,31]
 	int lid  = get_local_id(0);
+
 	// I am assuming that continuous global ids correspond 
 	// to continuous local ids
 	int warp = lid >> 5; // should equal 0,...,nb_warps-1
 	lid = lid - (warp<<5); // in [0,31]
 	//lid = lid % 32;
+
 
 //----------------------------------
 
@@ -156,6 +165,7 @@ void block_scan_one_warp(
 		// perhaps I could define cell_offset[28,29,30,31] 
 		// to avoid if statement?
 		cell = c + cell_offset[lid]; 
+		//cell = c + cell_offset->offsets[lid]; 
 
 		// check whether cellHash is valid? It is in principle
 		// if fluid is always off by 2-3 cells from the boundary. 
@@ -187,96 +197,29 @@ void block_scan_one_warp(
 	{   		// max of 8 particles per cell
 
 		locc[nb32+lid] = (float4)(900., 900., 900., 1.);
-		//barrier(CLK_LOCAL_MEM_FENCE);
 
 		// Bring in single particle from neighboring blocks, one per thread
 
+		// if: no influence on speed, affects results
+		if (i < cnb)   // global access (called 32 times)  // 
 		{
-			// if: no influence on speed, affects results
-			if (i < cnb)   // global access (called 32 times)  // 
-			{
-				locc[nb32+lid] = pos(cstart+i); // ith particle in cell
-			} 
-		}
+			// Texture fetch would be better!
+			locc[nb32+lid] = pos(cstart+i); // ith particle in cell
+		} 
 
 		barrier(CLK_LOCAL_MEM_FENCE);
 		
-		{
-				float4 r;
-				float rho1=0;
-				float rho2=0;
-#if 1
-			#if 0
-				r = locc[nb32+0]-ri; 
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+1]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+2]-ri;
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+3]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+4]-ri;
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+5]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+6]-ri;
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+7]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+8]-ri;
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+9]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+10]-ri;
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+11]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+12]-ri;
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+13]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+14]-ri;
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+15]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+16]-ri;
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+17]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+18]-ri;
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+19]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+20]-ri;
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+21]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+22]-ri;
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+23]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+24]-ri;
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+25]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+26]-ri;
-				rho += Wpoly6_glob(r, sphp->smoothing_distance);
-				rho += rho1 + rho2;
+		for (int j=0; j < 27; j++)
+		{ 
+			// no need to zero out .w component since I am not using it
+			// and it is initialized to zero
+			float4 rj = locc[nb32+j]; // CORRECT LINE????
+			float4 r = rj-ri;
 
-			#else
-			for (int j=0; j < 27; j++)
-			{ 
-				// no need to zero out .w component since I am not using it
-				// and it is initialized to zero
-				float4 rj = locc[nb32+j]; // CORRECT LINE????
-				float4 r = rj-ri;
-
-				// put the check for distance INSIDE the routine. 
-				// much faster then check outside the routine. 
-				rho += Wpoly6_glob(r, sphp->smoothing_distance);
-			}
-			#endif
-#endif
+			// put the check for distance INSIDE the routine. 
+			// much faster then check outside the routine. 
+			// use 2D texture and do 2D hardware interpolation?
+			rho += Wpoly6_glob(r, sphp->smoothing_distance);
 		}
 	}
 
@@ -286,7 +229,6 @@ void block_scan_one_warp(
 
 	if (lid < nb) {
 		density(start+lid) = rho * sphp->wpoly6_coef * sphp->mass;
-		//density(start+lid) = locc[lid].w;
 	}
 
 	return;
@@ -312,6 +254,7 @@ __kernel void block_scan(
 					// __constant is not working
 		   			//__constant int4* cell_offset,  // DOES NOT WORK OK
 		   			__global int4* cell_offset, 
+		   			//__constant struct CellOffsets* cell_offset,  
 
 		   			//__global struct SPHParams* sphp,
 		   			__constant struct SPHParams* sphp,
@@ -326,6 +269,12 @@ __kernel void block_scan(
 	if (get_group_id(0) >= gp->nb_points) return;
 
 	int lid  = get_local_id(0);
+
+	__local int4 l_cell_offset[32];
+	if (lid < 32) {
+		l_cell_offset[lid] = cell_offset[lid];
+	}
+
 	//int nb_warps = get_local_size(0) >> 5;
 	int nb_warps = get_local_size(0) / 32;
 	//int warp = lid >> 5; // should equal 0, ..., nb_warps-1
@@ -359,7 +308,8 @@ __kernel void block_scan(
 		   			cell_indices_start,
 		   			cell_indices_nb,
 		   			hash_to_grid_index,
-		   			cell_offset, 
+		   			//cell_offset, 
+		   			l_cell_offset, 
 		   			sphp,
 		   			gp,
 					hash,
@@ -373,7 +323,8 @@ __kernel void block_scan(
 		   			cell_indices_start,
 		   			cell_indices_nb,
 		   			hash_to_grid_index,
-		   			cell_offset, 
+		   			//cell_offset, 
+		   			l_cell_offset, 
 		   			sphp,
 		   			gp,
 					hash+1, // change the hash for next cell

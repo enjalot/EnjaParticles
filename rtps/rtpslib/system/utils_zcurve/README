@@ -13,4 +13,6 @@ In Settings: store max number of particles (power of two).
 ----------------------------------------------------------------------
 Nov. 11, 2010
 ----------------------------------------------------------------------
-
+Can I perhaps get grid resolution = power of 2?  This will accelerate
+some operations
+----------------------------------------------------------------------

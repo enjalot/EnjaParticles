@@ -356,6 +356,26 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
     glFinish();
     cl_position->acquire();
     cl_color->acquire();
+
+	int nn_elem = 32;
+	BufferGE<int> cl_input(ps->cli, nn_elem);
+	BufferGE<int> cl_compact(ps->cli, nn_elem);
+	int* v = cl_input.getHostPtr();
+	for (int i=0; i < nn_elem; i++) {
+		v[i] = i+1;
+	}
+	//v[3] = 0;
+	//v[13] = 0;
+	cl_input.copyToDevice();
+	for (int i=0; i < 1; i++) {
+		compactify(cl_input, cl_compact);
+	}
+	cl_compact.copyToHost();
+	int* vo = cl_compact.getHostPtr();
+	for (int i=0; i < nn_elem; i++) {
+		printf("in/compact= %d, %d\n", v[i], vo[i]);
+	}
+	exit(0);
     
     for(int i=0; i < nb_sub_iter; i++)
     {
@@ -1042,6 +1062,7 @@ int GE_SPH::setupTimers()
 	               = new GE::Time("radix sort",     time_offset, print_freq);
 	ts_cl[TI_BITONIC_SORT] 
 				   = new GE::Time("bitonic sort",   time_offset, print_freq);
+	ts_cl[TI_COMPACTIFY] = new GE::Time("compactify",   time_offset, print_freq);
 }
 //----------------------------------------------------------------------
 void GE_SPH::initializeData()

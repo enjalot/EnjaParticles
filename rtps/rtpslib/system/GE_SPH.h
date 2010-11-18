@@ -238,7 +238,7 @@ public:
 	// Timers
 	enum {TI_HASH=0, TI_RADIX_SORT, TI_BITONIC_SORT, TI_BUILD, TI_NEIGH, 
 		  TI_DENS, TI_PRES, TI_EULER, TI_LEAPFROG, TI_VISC, TI_UPDATE, TI_COLLISION_WALL, 
-		  TI_COL, TI_COL_NORM}; //14
+		  TI_COL, TI_COL_NORM, TI_COMPACTIFY}; //15
 	GE::Time* ts_cl[20];   // ts_cl  is GE::Time**
 
 	int nb_el;
@@ -333,6 +333,7 @@ private:
 	Kernel sset_int_kernel;
     Kernel block_scan_kernel;
     Kernel block_scan_pres_kernel;
+	Kernel compactify_kernel;
 
     BufferGE<GE_SPHParams>* cl_params;
 
@@ -404,6 +405,7 @@ private:
 	void blockScan(int which);
 	void blockScanPres(int which);
 	void subtract();
+	void compactify(BufferGE<int>& cl_orig, BufferGE<int>&  cl_compact);
 
 
 private:

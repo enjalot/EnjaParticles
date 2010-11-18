@@ -25,8 +25,8 @@ void GE_SPH::blockScan(int which)
 
 			// Try blocks of size 64 (two warps of 32: need more shared mem)
 			// efficiency. Still 32 threads per warp
-			path = path + "/block_scan_block64_cl.cl";
-			//path = path + "/block_scan_block64a_cl.cl";
+			//path = path + "/block_scan_block64_cl.cl";
+			path = path + "/block_scan_block64a_cl.cl";
 			// optimum size ==> 16 ms for density (9 ms with old code) on mac
 			// many points have density way too high!
 			work_size = 2*32;  // WRONG RESULTS
@@ -90,7 +90,7 @@ void GE_SPH::blockScan(int which)
 	// nb blocks = nb grid cells
 	
 	size_t nb_blocks = (size_t) gps->nb_points / nb_warps;
-	if ((nb_warps*gps->nb_points) != nb_blocks) nb_blocks++;
+	if ((nb_warps*nb_blocks) != gps->nb_points) nb_blocks++;
 
 	// global must be an integer multiple of work_size
 	int global = nb_blocks * work_size;

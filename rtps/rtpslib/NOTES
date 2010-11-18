@@ -204,5 +204,8 @@ are in float4 units, not bytes.
 - Time decreases by 10% for 2 or 4 warps per block. Very little improvement. 
 - What if one warp treats two blocks? 
 ----------------------------------------------------------------------
-Nov. 7, 2010
+Nov. 17, 2010
+- perhaps have grid resolution = power of 2? 
+- extend grid to make sure there is power of two, without changing boundaries. 
+----------------------------------------------------------------------
 

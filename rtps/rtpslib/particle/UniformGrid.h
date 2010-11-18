@@ -25,8 +25,10 @@ public:
     float4 getBndMax(){ return bnd_max; };
 	float4 getDelta() { return delta; };
 	float4 getRes() { return res; };
+	int4 getPowTwoRes() { return pow_two_res; };
 	float4 getSize() { return size; };
 	int getNbPoints() { return (int) (res.x*res.y*res.z); }
+	int PowerOfTwo(int val);
 
 	void print();
 
@@ -39,6 +41,7 @@ public:
 
     float4 size;
     float4 res;
+    int4 pow_two_res;
 	float4 delta;
 };
    
