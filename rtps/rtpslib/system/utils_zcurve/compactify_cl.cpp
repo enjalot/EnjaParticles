@@ -93,19 +93,20 @@ __kernel void compactifyArrayKernel(
 // (0,0,1,2,0,7) ==> (2,1,7,0,0,0)  
 // order is not important
 {
+	// count: number of valid elements for each block
+	// assume 32 threads per block
+	int block_size = get_local_size(0);
+	if (block_size != 32) return;
 
-#if 1
 	int tid = get_global_id(0);
 	int lid = get_local_id(0);
 	int bid = get_group_id(0);
 	int nb_blocks = get_num_groups(0);
-	int block_size = get_local_size(0);
 
 	__local int count_loc[BLOCK_SIZE+5]; // avoid bank conflicts: extra memory
 	__local int prefix_loc[BLOCK_SIZE];
 	__local int b[BLOCK_SIZE]; // *2 not required. 
 	__local int cnt[1];
-
 
 
 	//prescan(output, input, count_loc, nb);  // seems to work
@@ -127,10 +128,6 @@ __kernel void compactifyArrayKernel(
 	}
 
 	count_loc[lid] = count;
-
-	// count: number of valid elements for each block
-	// assume 32 threads per block
-	if (block_size != 32) return;
 
 	// HOW DOES IT WORK IF THERE ARE TWO BLOCKS??? ERROR? 
 
@@ -162,7 +159,7 @@ __kernel void compactifyArrayKernel(
 	// otherwise, other blocks will retrieve value from global memory BEFORE it is updated, since
 	// I cannot synchronize multiple blocks together
 	// So now, each block is accessing the same global memory multiple times. VERY INEFFICIENT!!
-	if (lid == 0)
+	if (lid == 0 && bid == 0)
 	{
 		processorOffsets[0] = 0;
 		// very expensive access to global memory
@@ -171,6 +168,9 @@ __kernel void compactifyArrayKernel(
 			processorOffsets[i] = processorCounts[i-1];
 		}
 	}
+	return;
+
+#if 0
 	//int jj = processorOffsets[bid];
 	int jj = processorCounts[bid];
 	//output[bid] = jj; return;
@@ -220,6 +220,7 @@ __kernel void compactifyArrayKernel(
 		j = j + numValid;
 	}
 #endif
+
 
 	return;
 }

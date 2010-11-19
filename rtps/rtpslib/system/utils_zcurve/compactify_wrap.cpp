@@ -33,19 +33,11 @@ void GE_SPH::compactify(BufferGE<int>& cl_orig, BufferGE<int>&  cl_compact,
 		}
 	}
 
-	//BufferGE<int> cl_processorCounts(ps->cli, work_size);
-	//BufferGE<int> cl_processorOffsets(ps->cli, work_size);
-
 	nb_warps = work_size / 32;
 
 	Kernel kern = compactify_kernel;
 	kern.setProfiling(true);
 
-	//FluidParams* fp = cl_FluidParams->getHostPtr();
-	//cl_FluidParams->copyToDevice();
-	//GridParamsScaled* gps = cl_GridParamsScaled->getHostPtr();
-
-	
 	int iarg = 0;
 	#if 0
 	kern.setArg(iarg++, cl_compact.getDevicePtr());
@@ -102,19 +94,10 @@ void GE_SPH::compactifyDown(BufferGE<int>& cl_orig, BufferGE<int>&  cl_compact,
 		}
 	}
 
-	//BufferGE<int> cl_processorCounts(ps->cli, work_size);
-	//BufferGE<int> cl_processorOffsets(ps->cli, work_size);
-
 	nb_warps = work_size / 32;
 
-	Kernel kern = compactify_kernel;
+	Kernel kern = compactify_down_kernel;
 	kern.setProfiling(true);
-
-	FluidParams* fp = cl_FluidParams->getHostPtr();
-	cl_FluidParams->copyToDevice();
-
-	GridParamsScaled* gps = cl_GridParamsScaled->getHostPtr();
-
 	
 	int iarg = 0;
 	#if 0
@@ -139,11 +122,11 @@ void GE_SPH::compactifyDown(BufferGE<int>& cl_orig, BufferGE<int>&  cl_compact,
 	int global = nb_blocks * work_size;
 
 	ps->cli->queue.finish();
-	ts_cl[TI_COMPACTIFY]->start();
+	ts_cl[TI_COMPACTIFY_DOWN]->start();
 
 	kern.execute(global, work_size);
 	ps->cli->queue.finish();
-	ts_cl[TI_COMPACTIFY]->end();
+	ts_cl[TI_COMPACTIFY_DOWN]->end();
 }
 //----------------------------------------------------------------------
 

@@ -357,7 +357,7 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
     cl_position->acquire();
     cl_color->acquire();
 
-	int nn_elem = 5*32;
+	int nn_elem = 5000*32;
 
 	int work_size = 128;  // greater than actual worksize 
 	BufferGE<int> cl_processorCounts(ps->cli, work_size);
@@ -375,9 +375,10 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 	v[43] = 0;
 	v[44] = 0;
 	cl_input.copyToDevice();
-	for (int i=0; i < 20; i++) {
+	//for (int i=0; i < 10; i++) {
+	for (int i=0; i < 10; i++) {
 		compactify(cl_input, cl_compact, cl_processorCounts, cl_processorOffsets);
-		//compactifyDown(cl_input, cl_compact, cl_processorCounts, cl_processorOffsets);
+		compactifyDown(cl_input, cl_compact, cl_processorCounts, cl_processorOffsets);
 		printf("iteration %d\n", i);
 	}
 	cl_compact.copyToHost();
@@ -1074,6 +1075,7 @@ int GE_SPH::setupTimers()
 	ts_cl[TI_BITONIC_SORT] 
 				   = new GE::Time("bitonic sort",   time_offset, print_freq);
 	ts_cl[TI_COMPACTIFY] = new GE::Time("compactify",   time_offset, print_freq);
+	ts_cl[TI_COMPACTIFY_DOWN] = new GE::Time("compactify",   time_offset, print_freq);
 }
 //----------------------------------------------------------------------
 void GE_SPH::initializeData()
