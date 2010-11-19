@@ -16,3 +16,9 @@ Nov. 11, 2010
 Can I perhaps get grid resolution = power of 2?  This will accelerate
 some operations
 ----------------------------------------------------------------------
+immediate return
+queued to end: 0.486752 (ms)
+queued to submit: 0.011904 (ms)
+submit to start: 0.230176 (ms)
+start to end: 0.244672 (ms)
+

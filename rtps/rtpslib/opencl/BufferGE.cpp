@@ -7,8 +7,9 @@ int BufferGE<T>::total_bytes_GPU = 0;
 template <class T>
 int BufferGE<T>::total_bytes_CPU = 0;
 
+
 template <class T>
-BufferGE<T>::BufferGE(CL *cli, T* data, int sz)
+BufferGE<T>::BufferGE(CL *cli, T* data, int sz, int io_type)
 {
     this->cli = cli;
     this->data = data;
@@ -21,7 +22,7 @@ BufferGE<T>::BufferGE(CL *cli, T* data, int sz)
 		externalPtr = true;
 
 		// create buffer on GPU
-    	cl_buffer.push_back(cl::Buffer(cli->context, CL_MEM_READ_WRITE, sz*sizeof(T), NULL, &cli->err));
+    	cl_buffer.push_back(cl::Buffer(cli->context, io_type, sz*sizeof(T), NULL, &cli->err));
 		printf("BufferGE constructor: err= %d, sz= %d\n", cli->err, sz);
     	//copyToDevice();
 		total_bytes_GPU += sz*sizeof(T);
@@ -35,7 +36,7 @@ BufferGE<T>::BufferGE(CL *cli, T* data, int sz)
 
 //----------------------------------------------------------------------
 template <class T>
-BufferGE<T>::BufferGE(CL *cli, int sz)
+BufferGE<T>::BufferGE(CL *cli, int sz, int io_type)
 {
 	//printf("enter BufferGE constructor and allocate data\n");
 	//printf("sizeof(T): %d\n", sizeof(T));
@@ -47,7 +48,7 @@ BufferGE<T>::BufferGE(CL *cli, int sz)
 	data = new T [nb_el];
 
 	// create buffer on GPU
-   	cl_buffer.push_back(cl::Buffer(cli->context, CL_MEM_READ_WRITE, sz*sizeof(T), NULL, &cli->err));
+   	cl_buffer.push_back(cl::Buffer(cli->context, io_type, sz*sizeof(T), NULL, &cli->err));
 
 	total_bytes_GPU += sz*sizeof(T);
 	total_bytes_CPU += sz*sizeof(T);

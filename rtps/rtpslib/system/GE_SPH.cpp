@@ -357,7 +357,12 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
     cl_position->acquire();
     cl_color->acquire();
 
-	int nn_elem = 2*2*64;
+	int nn_elem = 5*32;
+
+	int work_size = 128;  // greater than actual worksize 
+	BufferGE<int> cl_processorCounts(ps->cli, work_size);
+	BufferGE<int> cl_processorOffsets(ps->cli, work_size);
+
 	BufferGE<int> cl_input(ps->cli, nn_elem);
 	BufferGE<int> cl_compact(ps->cli, nn_elem);
 	int* v = cl_input.getHostPtr();
@@ -371,7 +376,9 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 	v[44] = 0;
 	cl_input.copyToDevice();
 	for (int i=0; i < 20; i++) {
-		compactify(cl_input, cl_compact);
+		compactify(cl_input, cl_compact, cl_processorCounts, cl_processorOffsets);
+		//compactifyDown(cl_input, cl_compact, cl_processorCounts, cl_processorOffsets);
+		printf("iteration %d\n", i);
 	}
 	cl_compact.copyToHost();
 	int* vo = cl_compact.getHostPtr();

@@ -18,6 +18,7 @@ SET(FILES
    block_scan_pres_cl
    sum_cl
    compactify_cl
+   compactify_down_cl
 )  # ignore cpp extension
 
 # Only executes when I do "cmake"

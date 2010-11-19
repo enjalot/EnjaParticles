@@ -204,7 +204,9 @@ void CL::setup_gl_cl()
     //create the command queue we will use to execute OpenCL commands
     ///command_queue = clCreateCommandQueue(context, devices[deviceUsed], 0, &err);
     try{
-        queue = cl::CommandQueue(context, devices[deviceUsed], 0, &err);
+        //queue = cl::CommandQueue(context, devices[deviceUsed], 0, &err);
+		printf("CLL.cpp::enable queue profiling\n");
+        queue = cl::CommandQueue(context, devices[deviceUsed], CL_QUEUE_PROFILING_ENABLE, &err);
     }
     catch (cl::Error er) {
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));

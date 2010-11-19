@@ -334,6 +334,7 @@ private:
     Kernel block_scan_kernel;
     Kernel block_scan_pres_kernel;
 	Kernel compactify_kernel;
+	Kernel compactify_down_kernel;
 
     BufferGE<GE_SPHParams>* cl_params;
 
@@ -405,7 +406,10 @@ private:
 	void blockScan(int which);
 	void blockScanPres(int which);
 	void subtract();
-	void compactify(BufferGE<int>& cl_orig, BufferGE<int>&  cl_compact);
+	void compactify(BufferGE<int>& cl_orig, BufferGE<int>&  cl_compact,
+		BufferGE<int>& cl_processorCounts, BufferGE<int>& cl_processorOffsets);
+	void compactifyDown(BufferGE<int>& cl_orig, BufferGE<int>&  cl_compact,
+		BufferGE<int>& cl_processorCounts, BufferGE<int>& cl_processorOffsets);
 
 
 private:

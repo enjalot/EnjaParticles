@@ -2961,6 +2961,27 @@ public:
         const VECTOR_CLASS<Event>* events = NULL,
         Event* event = NULL) const
     {
+	//GE
+
+	#if 0
+	::clEnqueueNDRangeKernel(
+                object_, kernel(), (cl_uint) global.dimensions(),
+                NULL,
+                (const ::size_t*) global,
+                (const ::size_t*) local,
+                0, NULL, NULL);
+	#endif
+	#if 0
+	::clEnqueueNDRangeKernel(
+                object_, kernel(), (cl_uint) global.dimensions(),
+                offset.dimensions() != 0 ? (const ::size_t*) offset : NULL,
+                (const ::size_t*) global,
+                local.dimensions() != 0 ? (const ::size_t*) local : NULL,
+                (events != NULL) ? (cl_uint) events->size() : 0,
+                (events != NULL && events->size() > 0) ? (cl_event*) &events->front() : NULL,
+				(cl_event*) event);
+		#endif
+	#if 1
         return detail::errHandler(
             ::clEnqueueNDRangeKernel(
                 object_, kernel(), (cl_uint) global.dimensions(),
@@ -2971,6 +2992,7 @@ public:
                 (events != NULL && events->size() > 0) ? (cl_event*) &events->front() : NULL,
                 (cl_event*) event),
             __ENQUEUE_NDRANGE_KERNEL_ERR);
+	#endif
     }
 
     cl_int enqueueTask(

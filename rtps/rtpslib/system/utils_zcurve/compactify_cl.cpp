@@ -79,17 +79,22 @@ int compactSIMD(__global int* a, __local int* result, __local int* cnt)
 	return *cnt;
 }
 //----------------------------------------------------------------------
+#if 0
+__kernel void compactifyArrayKernel(__global int* output)
+#else
 __kernel void compactifyArrayKernel(
             __global int* output, 
             __global int* input,
 			__global int* processorCounts, 
 			__global int* processorOffsets, 
 			int nb)
+#endif
 // Compactify an array
 // (0,0,1,2,0,7) ==> (2,1,7,0,0,0)  
 // order is not important
 {
 
+#if 1
 	int tid = get_global_id(0);
 	int lid = get_local_id(0);
 	int bid = get_group_id(0);
@@ -98,6 +103,9 @@ __kernel void compactifyArrayKernel(
 
 	__local int count_loc[BLOCK_SIZE+5]; // avoid bank conflicts: extra memory
 	__local int prefix_loc[BLOCK_SIZE];
+	__local int b[BLOCK_SIZE]; // *2 not required. 
+	__local int cnt[1];
+
 
 
 	//prescan(output, input, count_loc, nb);  // seems to work
@@ -138,21 +146,38 @@ __kernel void compactifyArrayKernel(
 
 	int count_sum = count_loc[0];
 
+	// total number of valid entires in block bid
 	//processorCounts[bid] = count_sum; // global access
 	processorCounts[bid] = count_loc[0]; // global access
-//	output[bid] = processorCounts[bid];
-//	return;
 
 	barrier(CLK_LOCAL_MEM_FENCE);
+	//output[bid*block_size+lid] = 0;  // SHOULD NOT BE NEEDED
 
 	// brute force prefix sum
 	// all blocks (for now) do same calculation
 	// only block 0 and thread 0 does the calculation
-	if (bid == 0 && lid == 0) {
+	// update global memory
+
+	// Must make sure that every block does this operation, but a single thread in each block
+	// otherwise, other blocks will retrieve value from global memory BEFORE it is updated, since
+	// I cannot synchronize multiple blocks together
+	// So now, each block is accessing the same global memory multiple times. VERY INEFFICIENT!!
+	if (lid == 0)
+	{
+		processorOffsets[0] = 0;
+		// very expensive access to global memory
 		for (int i=1; i < nb_blocks; i++) {
 			processorCounts[i] += processorCounts[i-1];
+			processorOffsets[i] = processorCounts[i-1];
 		}
 	}
+	//int jj = processorOffsets[bid];
+	int jj = processorCounts[bid];
+	//output[bid] = jj; return;
+
+	// these counts are now offsets!
+
+	barrier(CLK_LOCAL_MEM_FENCE); // only acts on a single block (all other threads wait)
 	//output[bid] = processorCounts[bid];
 	//return;
 
@@ -164,16 +189,23 @@ __kernel void compactifyArrayKernel(
 	//output[bid*block_size+lid+1] = 2;//bid;
 	//return;
 	#if 1
-	prescan(processorOffsets, processorCounts, count_loc, nb_blocks);
+	// each block does same prescan
+	#if 0
+	if (lid == 0) {
+		prescan(processorOffsets, processorCounts, count_loc, nb_blocks);
+	}
+	#endif
+	//output[bid] = processorOffsets[bid];
+	output[bid] = processorCounts[bid];
+	//return;
 	#endif
 
 	//processorOffsets[0] = 0; // single block
 	barrier(CLK_LOCAL_MEM_FENCE);
 
-	__local int b[BLOCK_SIZE]; // *2 not required. 
-	__local int cnt[1];
-
 	int j = processorOffsets[bid];
+	//int j = processorCounts[bid];
+	//output[bid] = j; return;
 	cnt[0] = 0;
 
 	int numValid = 0;
@@ -187,6 +219,8 @@ __kernel void compactifyArrayKernel(
 		}
 		j = j + numValid;
 	}
+#endif
+
 	return;
 }
 //----------------------------------------------------------------------

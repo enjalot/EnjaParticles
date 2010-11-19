@@ -14,6 +14,7 @@
 
 namespace rtps {
 
+
 template <class T>
 class BufferGE
 {
@@ -26,16 +27,19 @@ private:
 	static int total_bytes_GPU;
 	static int total_bytes_CPU;
 
+//public:
+//enum IOType {READ_WRITE=0, READ, WRITE};
+
 public:
     BufferGE(){ cli=NULL; data = 0;}
 
     //allocate memory
 	//do not transfer data to GPU by default
-	BufferGE(CL *cli, int sz);
+	BufferGE(CL *cli, int sz, int io_type=CL_MEM_READ_WRITE);
 
     //create an OpenCL buffer from existing external data
 	//do not transfer data to GPU by default
-	BufferGE(CL *cli, T* data, int sz);
+	BufferGE(CL *cli, T* data, int sz, int io_type=CL_MEM_READ_WRITE);
 	//BufferGE(CL *cli, std::vector<T>& data);
 		
 

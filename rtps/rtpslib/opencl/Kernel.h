@@ -28,6 +28,7 @@ public:
     //we will want to access buffers by name when going accross systems
     std::string name;
     std::string source;
+	bool set_profiling;
 
     CL *cli;
     //we need to build a program to have a kernel
@@ -45,6 +46,8 @@ public:
 
     //assumes null range for worksize offset 
 	void execute(int ndrange, int worksize);
+
+	void setProfiling(bool prof);
     
 };
 
