@@ -383,11 +383,11 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 	//for (int i=0; i < 10; i++) {
 	for (int i=0; i < 10; i++) {
 		newCompactifyWrap(cl_input, cl_compact, *cl_processorCounts, *cl_processorOffsets);
-		exit(0);
-		compactify(cl_input, cl_compact, *cl_processorCounts, *cl_processorOffsets);
-		compactifyMiddle(*cl_processorCounts, *cl_processorOffsets, cl_temp_sums);
-		sumScanSingleBlock(cl_temp_sums, cl_temp_sums_out);
-		compactifyDown(cl_input, cl_compact, *cl_processorCounts, *cl_processorOffsets);
+		//exit(0);
+		//compactify(cl_input, cl_compact, *cl_processorCounts, *cl_processorOffsets);
+		//compactifyMiddle(*cl_processorCounts, *cl_processorOffsets, cl_temp_sums);
+		//sumScanSingleBlock(cl_temp_sums, cl_temp_sums_out);
+		//compactifyDown(cl_input, cl_compact, *cl_processorCounts, *cl_processorOffsets);
 		printf("iteration %d\n", i);
 	}
 	cl_compact.copyToHost();
@@ -1087,6 +1087,11 @@ int GE_SPH::setupTimers()
 	ts_cl[TI_COMPACTIFY_DOWN] = new GE::Time("compactifyDown",   time_offset, print_freq);
 	ts_cl[TI_COMPACTIFY_MIDDLE] = new GE::Time("compactifyMiddle",   time_offset, print_freq);
 	ts_cl[TI_SCAN_SUM_SINGLE] = new GE::Time("scanSumSingleBlock", time_offset, print_freq);
+	ts_cl[TI_COMPACTIFY_SUB1] = new GE::Time("compactify_sub1",   time_offset, print_freq);
+	ts_cl[TI_COMPACTIFY_SUB2] = new GE::Time("compactify_sub2",   time_offset, print_freq);
+	ts_cl[TI_COMPACTIFY_SUB2SUM] = new GE::Time("compactify_sub2sum",   time_offset, print_freq);
+	ts_cl[TI_COMPACTIFY_SUB3] = new GE::Time("compactify_sub3",   time_offset, print_freq);
+	ts_cl[TI_COMPACTIFY_SUB4] = new GE::Time("compactify_sub4",   time_offset, print_freq);
 }
 //----------------------------------------------------------------------
 void GE_SPH::initializeData()

@@ -222,4 +222,13 @@ of 128)
 Cost should independent of the distribution of invalid elements since all elements 
 must be checked. 
 ----------------------------------------------------------------------
+Works! blocks of size 128
+Nb cells: 262,000, on the MacOSX, 330M graphics card. 
+compactify_sub1: tot (ms): 9.925, avg: 1.985, (count=5)
+compactify_sub2: tot (ms): 5.424, avg: 1.0848, (count=5)
+compactify_sub2sum: tot (ms): 6.17, avg: 1.234, (count=5)
+compactify_sub3: tot (ms): 2.186, avg: 0.4372, (count=5)
+compactify_sub4: tot (ms): 48.814, avg: 9.7628, (count=5) <<<< EXPENSIV
+(rtps) system update: tot (ms): 0, avg: -0, (count=-4)
+
 ----------------------------------------------------------------------

@@ -42,11 +42,11 @@ void GE_SPH::newCompactifyWrap(BufferGE<int>& cl_orig, BufferGE<int>&  cl_compac
 
 	sub1(cl_orig, work_size, cl_sum);
 	sub2(cl_sum, work_size_1, cl_sum_out,cl_sum_accu);
-	printf("enter sub2sum\n");
 	sub2Sum(cl_sum_accu, work_size_1, cl_sum_accu_out); // single block
 	sub3(cl_sum_out, work_size_1, cl_sum_accu_out);
-	exit(0);
-	sub4(cl_orig, work_size, cl_sum, cl_compact);
+	printf("enter sub4\n");
+	sub4(cl_orig, work_size, cl_sum_out, cl_compact);
+	//exit(0);
 }
 //----------------------------------------------------------------------
 //sub1(cl_orig, work_size, cl_sum);
@@ -96,11 +96,11 @@ void GE_SPH::sub1(BufferGE<int>& cl_orig, int work_size, BufferGE<int>& cl_proce
 	printf("compactify::processcount size: %d\n", cl_processorCounts.getSize());
 
 	ps->cli->queue.finish();
-	ts_cl[TI_COMPACTIFY]->start();
+	ts_cl[TI_COMPACTIFY_SUB1]->start();
 
 	kern.execute(global, work_size);
 	ps->cli->queue.finish();
-	ts_cl[TI_COMPACTIFY]->end();
+	ts_cl[TI_COMPACTIFY_SUB1]->end();
 
 	#if 0
 	cl_processorCounts.copyToHost();
@@ -175,11 +175,11 @@ void GE_SPH::sub2(BufferGE<int>& cl_sum, int work_size, BufferGE<int>& cl_sum_ou
 	//exit(0);
 
 	ps->cli->queue.finish();
-	ts_cl[TI_COMPACTIFY]->start();
+	ts_cl[TI_COMPACTIFY_SUB2]->start();
 
 	kern.execute(global, work_size);
 	ps->cli->queue.finish();
-	ts_cl[TI_COMPACTIFY]->end();
+	ts_cl[TI_COMPACTIFY_SUB2]->end();
 
 	#if 1
 	cl_sum.copyToHost();
@@ -250,11 +250,11 @@ void GE_SPH::sub2Sum(BufferGE<int>& cl_sum_accu, int work_size,
 	
 
 	ps->cli->queue.finish();
-	ts_cl[TI_SCAN_SUM_SINGLE]->start();
+	ts_cl[TI_COMPACTIFY_SUB2SUM]->start();
 
 	kern.execute(global, work_size);
 	ps->cli->queue.finish();
-	ts_cl[TI_SCAN_SUM_SINGLE]->end();
+	ts_cl[TI_COMPACTIFY_SUB2SUM]->end();
 
 	// printout
 
@@ -330,12 +330,11 @@ void GE_SPH::sub3(BufferGE<int>& cl_sum_out, int work_size, BufferGE<int>& cl_su
 	//exit(0);
 
 	ps->cli->queue.finish();
-	ts_cl[TI_COMPACTIFY]->start();
-
+	ts_cl[TI_COMPACTIFY_SUB3]->start();
 
 	kern.execute(global, work_size);
 	ps->cli->queue.finish();
-	ts_cl[TI_COMPACTIFY]->end();
+	ts_cl[TI_COMPACTIFY_SUB3]->end();
 
 	#if 1
 	cl_sum_out.copyToHost();
@@ -347,10 +346,104 @@ void GE_SPH::sub3(BufferGE<int>& cl_sum_out, int work_size, BufferGE<int>& cl_su
 	}
 	printf("global= %d\n", global);
 	printf("work_size= %d, nb_blocks= %d\n", work_size, nb_blocks);
-	exit(0);
+	//exit(0);
 	#endif
 #endif
 }
+//----------------------------------------------------------------------
+void GE_SPH::sub4(BufferGE<int>& cl_orig, int work_size, BufferGE<int>& cl_sum_out,
+                  BufferGE<int>& cl_compact)
+{
+	static bool first_time = true;
+
+	if (first_time) {
+		try {
+			string path(CL_SPH_UTIL_SOURCE_DIR);
+
+			// Try blocks of size 64 (two warps of 32: need more shared mem)
+			// efficiency. Still 32 threads per warp
+			path = path + "/compactify_sub4_cl.cl";
+
+			int length;
+			char* src = file_contents(path.c_str(), &length);
+			std::string strg(src);
+        	compactify_sub4_kernel = Kernel(ps->cli, strg, "compactifySub4Kernel");
+			first_time = false;
+		} catch(cl::Error er) {
+			exit(1);
+		}
+	}
+
+	Kernel kern = compactify_sub4_kernel;
+	kern.setProfiling(true);
+
+	int iarg = 0;
+	#if 0
+	kern.setArg(iarg++, cl_compact.getDevicePtr());
+	#else
+	kern.setArg(iarg++, cl_compact.getDevicePtr());
+	kern.setArg(iarg++, cl_orig.getDevicePtr());
+	kern.setArg(iarg++, cl_sum_out.getDevicePtr()); 
+	kern.setArg(iarg++, cl_compact.getSize()); // size  320k
+	#endif
+
+	printf("compactSub4::cl_compact_size: %d\n", cl_compact.getSize());
+
+	// Each thread handles two elements of the block
+	size_t nb_blocks = (cl_orig.getSize()) / work_size;
+
+	//nb_blocks = 16;
+	//work_size = 2048/nb_blocks;
+
+	printf("compactify_sub4::nb_blocks= %d, work_size= %d\n", nb_blocks, work_size);
+	printf("compactify_sub4::orig size: %d\n", cl_sum_out.getSize());
+	if ((work_size*nb_blocks) != (cl_orig.getSize())) {
+		printf("work_size*nb_blocks= %d\n", work_size*nb_blocks);
+		printf("compactify_sub4:: work_size not an even divider of nb_elem/2\n");
+		exit(0);
+		nb_blocks++;
+	}
+
+#if 1
+// FIRST 2048 are WRONG!!! WHY? 
+
+	// global must be an integer multiple of work_size
+	int global = nb_blocks * work_size;
+	printf("compactify_sub4::global size: %d\n", global);
+	//exit(0);
+
+	ps->cli->queue.finish();
+	ts_cl[TI_COMPACTIFY_SUB4]->start();
+
+
+	kern.execute(global, work_size);
+	ps->cli->queue.finish();
+	ts_cl[TI_COMPACTIFY_SUB4]->end();
+
+	#if 1
+	cl_orig.copyToHost();
+	cl_compact.copyToHost();
+	int* in = cl_orig.getHostPtr();
+	int* ou = cl_compact.getHostPtr();
+	for (int i=0; i < cl_compact.getSize(); i++) {
+		printf("orig[%d]= %d, compact[%d], %d\n", i, in[i], i, ou[i]);
+	}
+	printf("global= %d\n", global);
+	printf("work_size= %d, nb_blocks= %d\n", work_size, nb_blocks);
+
+	cl_sum_out.copyToHost();
+	int* cc = cl_sum_out.getHostPtr();
+
+	for (int i=0; i < cl_sum_out.getSize(); i++) {
+		printf(".. cl_sum_out[%d]= %d\n", i, cc[i]);
+	}
+	printf("sum_out size: %d\n", cl_sum_out.getSize());
+	//exit(0);
+	#endif
+#endif
+}
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
