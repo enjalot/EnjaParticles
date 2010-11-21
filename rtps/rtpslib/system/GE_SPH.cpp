@@ -357,11 +357,16 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
     cl_position->acquire();
     cl_color->acquire();
 
-	int nn_elem = 5000*32;
+	GridParamsScaled& gps = *(cl_GridParamsScaled->getHostPtr());
+	int nn_elem = gps.nb_points;
+	printf("nn_elem= %d\n", nn_elem);
+	//int nn_elem = 8*32;
 
-	int work_size = 128;  // greater than actual worksize 
-	BufferGE<int> cl_processorCounts(ps->cli, work_size);
-	BufferGE<int> cl_processorOffsets(ps->cli, work_size);
+	// maximum number of blocks in problem
+	cl_processorCounts  = new BufferGE<int>(ps->cli, gps.nb_points/32);
+	cl_processorOffsets = new BufferGE<int>(ps->cli, gps.nb_points/32);
+	BufferGE<int> cl_temp_sums(ps->cli, 128); // must be nb blocks in compactify_middle
+	BufferGE<int> cl_temp_sums_out(ps->cli, 128); // must be nb blocks in compactify_middle
 
 	BufferGE<int> cl_input(ps->cli, nn_elem);
 	BufferGE<int> cl_compact(ps->cli, nn_elem);
@@ -377,8 +382,12 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 	cl_input.copyToDevice();
 	//for (int i=0; i < 10; i++) {
 	for (int i=0; i < 10; i++) {
-		compactify(cl_input, cl_compact, cl_processorCounts, cl_processorOffsets);
-		compactifyDown(cl_input, cl_compact, cl_processorCounts, cl_processorOffsets);
+		newCompactifyWrap(cl_input, cl_compact, *cl_processorCounts, *cl_processorOffsets);
+		exit(0);
+		compactify(cl_input, cl_compact, *cl_processorCounts, *cl_processorOffsets);
+		compactifyMiddle(*cl_processorCounts, *cl_processorOffsets, cl_temp_sums);
+		sumScanSingleBlock(cl_temp_sums, cl_temp_sums_out);
+		compactifyDown(cl_input, cl_compact, *cl_processorCounts, *cl_processorOffsets);
 		printf("iteration %d\n", i);
 	}
 	cl_compact.copyToHost();
@@ -1075,7 +1084,9 @@ int GE_SPH::setupTimers()
 	ts_cl[TI_BITONIC_SORT] 
 				   = new GE::Time("bitonic sort",   time_offset, print_freq);
 	ts_cl[TI_COMPACTIFY] = new GE::Time("compactify",   time_offset, print_freq);
-	ts_cl[TI_COMPACTIFY_DOWN] = new GE::Time("compactify",   time_offset, print_freq);
+	ts_cl[TI_COMPACTIFY_DOWN] = new GE::Time("compactifyDown",   time_offset, print_freq);
+	ts_cl[TI_COMPACTIFY_MIDDLE] = new GE::Time("compactifyMiddle",   time_offset, print_freq);
+	ts_cl[TI_SCAN_SUM_SINGLE] = new GE::Time("scanSumSingleBlock", time_offset, print_freq);
 }
 //----------------------------------------------------------------------
 void GE_SPH::initializeData()

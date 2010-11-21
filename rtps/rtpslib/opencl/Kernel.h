@@ -29,6 +29,8 @@ public:
     std::string name;
     std::string source;
 	bool set_profiling;
+	bool is_compiled;   // set to true after compiled
+	std::string path; // where is kernel located
 
     CL *cli;
     //we need to build a program to have a kernel

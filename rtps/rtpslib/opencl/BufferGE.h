@@ -22,7 +22,8 @@ private:
 	T* data;
 	//GLuint vbo_id;
 	bool externalPtr;
-	int nb_el;
+	int max_size; // set buffer to max size
+	int nb_el; // always <= max_size
 	/// Total storage allocated (GPU + CPU)
 	static int total_bytes_GPU;
 	static int total_bytes_CPU;

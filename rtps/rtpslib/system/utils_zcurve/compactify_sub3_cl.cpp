@@ -7,6 +7,7 @@
 
 
 //----------------------------------------------------------------------
+#if 0
 int sumReduce(__local int* s_data, int nb_elem)
 {
 	int lid = get_local_id(0);
@@ -29,14 +30,16 @@ int sumReduce(__local int* s_data, int nb_elem)
 	sum = s_data[0];
 	return sum;
 }
+#endif
 //----------------------------------------------------------------------
 void  prescan(
     __global T* g_odata, 
 	__global T* g_idata, 
+	__global T* temp_sum, 
 	__local T* temp, 
 	int n) 
 {
-// executed within a single block
+// executed within a single block with id = get_group_id(0)
 
 	int offset = 1; 
 	int lid = get_local_id(0);
@@ -58,6 +61,7 @@ void  prescan(
 	}
 
 	if (lid == 0) {
+		temp_sum[get_group_id(0)] = temp[n-1];
 		temp[n-1] = 0;
 	}
 
@@ -81,17 +85,19 @@ void  prescan(
 	g_odata[2*lid]   = temp[2*lid];
 	g_odata[2*lid+1] = temp[2*lid+1];
 	barrier(CLK_LOCAL_MEM_FENCE);
+	//g_odata[2*lid] = 2;
+	//g_odata[2*lid+1] = 3;
 }
 //----------------------------------------------------------------------
 #if 0
-__kernel void compactifyArrayKernel(__global int* output)
+__kernel void compactifySub3Kernel(__global int* output)
 #else
-__kernel void compactifyArrayKernel(
-            __global int* output, 
-            __global int* input,
-			__global int* processorCounts, 
+__kernel void compactifySub3Kernel(
 			__global int* processorOffsets, 
-			int nb)
+			__global int* sum_temp, // store temporary sums 
+			int offset_size, 
+			int accu_size)
+			//int nb)
 #endif
 // Compactify an array
 // (0,0,1,2,0,7) ==> (2,1,7,0,0,0)  
@@ -104,7 +110,7 @@ __kernel void compactifyArrayKernel(
 	int block_size = get_local_size(0);
 
 	int tid = get_global_id(0);
-	//if (tid >= nb) return;
+	//if (tid >= offset_size) return;
 
 	int lid = get_local_id(0);
 	int nb_blocks = get_num_groups(0);
@@ -115,8 +121,10 @@ __kernel void compactifyArrayKernel(
 
 	// each blocks considers a section of input array
 	// number of elements treated per block
-	int chunk = nb/nb_blocks;
-	if (chunk*nb_blocks != nb) chunk++;
+	int chunk = offset_size/nb_blocks;
+	if (chunk*nb_blocks != offset_size) chunk++;
+	//processorOffsets[bid] = chunk;
+	//return;
 
 	// for now, chunk*nb_blocks = nb exactly
 	//output[bid] = chunk; return;
@@ -126,52 +134,35 @@ __kernel void compactifyArrayKernel(
 	int count = 0;
 
 	// case where chunk = block_size
-	int in = input[block_size*bid+lid];
-	if (in != 0) count++;
-
-	#if 0
-	for (int i=0; i < chunk; i += block_size) {
-		int in = input[chunk*bid+i+lid];
-		if (in != 0) {
-			count++;
-		}
-	}
-	#endif
-
-	//output[lid+bid*block_size] = count; return;
-
-	//return;
+	//int in = input[block_size*bid+lid];
+	//if (in != 0) count++;
 
 	count_loc[lid] = count;
-	//if (bid == 0) output[lid] = count;
+
+	// I NEED A NEW KERNEL!!
+
+#if 1
+	// At this point, I must synchronize between all blocks, 
+	// so I need another kernel with processorCounts as input, and processorOffsets
+	// as output
+
+	// divide arrays among blocks (even division in this case)
+	// n threads can handle 2*n elements
+	int nb_sub_blocks = offset_size / (2*block_size); // perhaps add 1?
+	processorOffsets[bid] = nb_sub_blocks;
+	// processorCounts: 2k elements (nb blocks)
+
+	int offset = bid*block_size*2; // 2*block_size elements per block for sum
+	//processorOffsets[bid] = offset;
 	//return;
 
-	// HOW DOES IT WORK IF THERE ARE TWO BLOCKS??? ERROR? 
-	// Apply scan algorithm for multi-warp block
+	// in each block
+	int s = sum_temp[bid];   // sum_temp: 16 elements
 
-	barrier(CLK_LOCAL_MEM_FENCE);
-	int count_sum;
-	count_sum = sumReduce(count_loc, block_size);
-	barrier(CLK_LOCAL_MEM_FENCE);
-
-	// int warp_nb = lid >> 5;
-	// int count_sum[warp_nb] = sumReduce(count_loc+(warp_nb<<5), 32)
-	// int count_offset = scan sum of count_sum
-
-	// total number of valid entires in block bid
-	processorCounts[bid] = count_sum; // global access
-
-//	barrier(CLK_LOCAL_MEM_FENCE);
-
-	// brute force prefix sum
-	// all blocks (for now) do same calculation
-	// only block 0 and thread 0 does the calculation
-	// update global memory
-
-	// Must make sure that every block does this operation, but a single thread in each block
-	// otherwise, other blocks will retrieve value from global memory BEFORE it is updated, since
-	// I cannot synchronize multiple blocks together
-	// So now, each block is accessing the same global memory multiple times. VERY INEFFICIENT!!
+	// update processorOffsets (2048 elements)
+	processorOffsets[bid*block_size+lid] += s;
+	//processorOffsets[bid*block_size+lid] = s;
+#endif
 
 	return;
 }

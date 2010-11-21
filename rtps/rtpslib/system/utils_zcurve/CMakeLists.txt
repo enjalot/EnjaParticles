@@ -19,6 +19,13 @@ SET(FILES
    sum_cl
    compactify_cl
    compactify_down_cl
+   compactify_middle_cl
+   compactify_sub1_cl
+   compactify_sub2_cl
+   compactify_sub2sum_cl
+   compactify_sub3_cl
+   //compactify_sub4_cl
+   sum_scan_single_block_cl
 )  # ignore cpp extension
 
 # Only executes when I do "cmake"

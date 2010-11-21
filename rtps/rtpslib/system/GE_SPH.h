@@ -238,7 +238,9 @@ public:
 	// Timers
 	enum {TI_HASH=0, TI_RADIX_SORT, TI_BITONIC_SORT, TI_BUILD, TI_NEIGH, 
 		  TI_DENS, TI_PRES, TI_EULER, TI_LEAPFROG, TI_VISC, TI_UPDATE, TI_COLLISION_WALL, 
-		  TI_COL, TI_COL_NORM, TI_COMPACTIFY, TI_COMPACTIFY_DOWN}; //16
+		  TI_COL, TI_COL_NORM, TI_COMPACTIFY, TI_COMPACTIFY_DOWN,
+		  TI_COMPACTIFY_MIDDLE, TI_SCAN_SUM_SINGLE
+		  }; //18
 	GE::Time* ts_cl[30];   // ts_cl  is GE::Time**
 
 	int nb_el;
@@ -286,6 +288,9 @@ public:
 
 	// index neighbors. Maximum of 50
 	BufferGE<int>* 		cl_index_neigh;
+
+	BufferGE<int>* cl_processorCounts;
+	BufferGE<int>* cl_processorOffsets;
 
 	BufferGE<float4>*	clf_debug;  //just for debugging cl files
 	BufferGE<int4>*		cli_debug;  //just for debugging cl files
@@ -335,6 +340,14 @@ private:
     Kernel block_scan_pres_kernel;
 	Kernel compactify_kernel;
 	Kernel compactify_down_kernel;
+	Kernel compactify_middle_kernel;
+	Kernel sum_scan_single_block_kernel;
+
+	Kernel compactify_sub1_kernel;
+	Kernel compactify_sub2_kernel;
+	Kernel compactify_sub3_kernel;
+	Kernel compactify_sub4_kernel;
+	Kernel sub2_sum_kernel;;
 
     BufferGE<GE_SPHParams>* cl_params;
 
@@ -410,6 +423,21 @@ private:
 		BufferGE<int>& cl_processorCounts, BufferGE<int>& cl_processorOffsets);
 	void compactifyDown(BufferGE<int>& cl_orig, BufferGE<int>&  cl_compact,
 		BufferGE<int>& cl_processorCounts, BufferGE<int>& cl_processorOffsets);
+	void compactifyMiddle(BufferGE<int>& cl_processorCounts, 
+		BufferGE<int>& cl_processorOffsets, BufferGE<int>& cl_temp_sums);
+	void newCompactifyWrap(BufferGE<int>& cl_orig, BufferGE<int>&  cl_compact, 
+		BufferGE<int>& cl_processorCounts, BufferGE<int>& cl_processorOffsets);
+	void sumScanSingleBlock(BufferGE<int>& cl_input, 
+		                    BufferGE<int>& cl_output);
+
+private:
+	void sub1(   BufferGE<int>& cl_orig, int work_size,   BufferGE<int>& cl_sum);
+	void sub2(   BufferGE<int>& cl_sum,  int work_size,   BufferGE<int>& cl_sum_out, 
+	             BufferGE<int>& cl_sum_accu);
+	void sub2Sum(BufferGE<int>& cl_sum_accu, int work_size,
+		         BufferGE<int>& cl_sum_accu_out);
+	void sub3(   BufferGE<int>& cl_sum,  int work_size_1, BufferGE<int>& cl_sum_accu);
+	void sub4(   BufferGE<int>& cl_orig, int work_size,   BufferGE<int>& cl_sum, BufferGE<int>& cl_compact);
 
 
 private:

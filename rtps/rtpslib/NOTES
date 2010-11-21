@@ -208,4 +208,18 @@ Nov. 17, 2010
 - perhaps have grid resolution = power of 2? 
 - extend grid to make sure there is power of two, without changing boundaries. 
 ----------------------------------------------------------------------
+Nov. 19, 2010
+nn_elem= 262144 (grid size)
+Compactification of array of integers
+330M: 5.2 ms + 9.4 ms = 13.6 ms (too much!!)
+  (4 warps per block)
+Potentially, I can decrease first stage down to 1.5 ms (better computation of offsets)
+Potentially, I can decrease first stage down to 0.8 (cost of compactSIMD)
+Both costs above are due to computation done with single thread single warp. Very very 
+inefficient, since there are 4 warps and 32 threads per warp! (potential cost: factor
+of 128)
 
+Cost should independent of the distribution of invalid elements since all elements 
+must be checked. 
+----------------------------------------------------------------------
+----------------------------------------------------------------------
