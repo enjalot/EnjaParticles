@@ -1,4 +1,5 @@
 #ifndef _COMPACTIFY_CL_
+//
 #define _COMPACTIFY_CL_
 
 #include "bank_conflicts.h"
