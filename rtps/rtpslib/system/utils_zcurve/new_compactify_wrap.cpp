@@ -46,7 +46,6 @@ void GE_SPH::newCompactifyWrap(BufferGE<int>& cl_orig, BufferGE<int>&  cl_compac
 	sub3(cl_sum_out, work_size_1, cl_sum_accu_out);
 	printf("enter sub4\n");
 	sub4(cl_orig, work_size, cl_sum_out, cl_compact);
-	//exit(0);
 }
 //----------------------------------------------------------------------
 //sub1(cl_orig, work_size, cl_sum);
@@ -113,7 +112,6 @@ void GE_SPH::sub1(BufferGE<int>& cl_orig, int work_size, BufferGE<int>& cl_proce
 	}
 	printf("global= %d\n", global);
 	printf("work_size= %d, nb_blocks= %d\n", work_size, nb_blocks);
-	exit(0);
 	#endif
 }
 //----------------------------------------------------------------------

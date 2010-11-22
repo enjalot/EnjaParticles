@@ -360,11 +360,12 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 	GridParamsScaled& gps = *(cl_GridParamsScaled->getHostPtr());
 	int nn_elem = gps.nb_points;
 	printf("nn_elem= %d\n", nn_elem);
-	//int nn_elem = 8*32;
+	//nn_elem *= 4;
+
 
 	// maximum number of blocks in problem
-	cl_processorCounts  = new BufferGE<int>(ps->cli, gps.nb_points/32);
-	cl_processorOffsets = new BufferGE<int>(ps->cli, gps.nb_points/32);
+	cl_processorCounts  = new BufferGE<int>(ps->cli, nn_elem/32);
+	cl_processorOffsets = new BufferGE<int>(ps->cli, nn_elem/32);
 	BufferGE<int> cl_temp_sums(ps->cli, 128); // must be nb blocks in compactify_middle
 	BufferGE<int> cl_temp_sums_out(ps->cli, 128); // must be nb blocks in compactify_middle
 

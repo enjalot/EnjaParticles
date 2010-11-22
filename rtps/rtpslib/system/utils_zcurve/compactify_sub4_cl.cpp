@@ -6,6 +6,7 @@
 #define T int
 
 //----------------------------------------------------------------------
+#if 0
 // more efficient
 // do operation on each of n warps. 
 int compactSIMDwarp(__global int* a, __local int* result, __local int* bout, __local int* cnt, __local int* cnt_out)
@@ -38,6 +39,7 @@ int compactSIMDwarp(__global int* a, __local int* result, __local int* bout, __l
 		cnt[which_warp] = count;
 	}
 	barrier(CLK_LOCAL_MEM_FENCE);
+	barrier(CLK_GLOBAL_MEM_FENCE);
 
 	#if 0
 	c[0] = 0;
@@ -68,6 +70,7 @@ int compactSIMDwarp(__global int* a, __local int* result, __local int* bout, __l
 	barrier(CLK_LOCAL_MEM_FENCE);
 	return cnt_out[3];
 }
+#endif
 //----------------------------------------------------------------------
 // non-efficient
 int compactSIMD(__global int* a, __local int* result, __local int* cnt)
@@ -127,17 +130,29 @@ __kernel void compactifySub4Kernel(
 	// figure out offsets
 	int count = 0;
 
+	output[tid] = 0;
+	barrier(CLK_LOCAL_MEM_FENCE);
+
 	#if 1
 	//count_loc[lid] = count;
 	int j = processorOffsets[bid];
-	// compactSIMD: too expensive!!
-	int numValid = compactSIMDwarp(input+block_size*bid, b, bout, cnt, cnt_out);
-	//int numValid = compactSIMD(input+block_size*bid, b, cnt);
-	//int numValid = bid;
-		input[tid] = tid;
-	return;
+	int numValid = compactSIMD(input+block_size*bid, b, cnt);
 	if (lid < numValid) {
-		output[j+lid] = bout[lid];
+		output[j+lid] = b[lid]; //numValid; //b[id];
+	}
+	return;
+
+	// compactSIMD: too expensive!!
+	//int numValid = compactSIMDwarp(input+block_size*bid, b, bout, cnt, cnt_out);
+	//int numValid = bid;
+		//input[tid] = tid;
+	//return;
+
+
+
+	if (lid < numValid) {
+		output[j+lid] = b[lid];
+		//output[j+lid] = bout[lid];
 	}
 	return;
 	#endif
