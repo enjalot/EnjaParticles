@@ -21,8 +21,8 @@ void GE_SPH::newCompactifyWrap(BufferGE<int>& cl_orig, BufferGE<int>&  cl_compac
 	static bool first_time = true;
 	//static int work_size = 0;
 
-	int work_size = MULT*32;       // 124
-	int work_size_1 = MULT*32 / 2; // 64
+	int work_size = MULT*32;       // 128 threads
+	int work_size_1 = MULT*32 / 2; // 64 threads
 
 	int nb_blocks;
 	int nb_blocks_1;
@@ -40,16 +40,29 @@ void GE_SPH::newCompactifyWrap(BufferGE<int>& cl_orig, BufferGE<int>&  cl_compac
 	BufferGE<int> cl_sum_accu_out(ps->cli, nb_blocks_1/2);
 
 
+
 	sub1(cl_orig, work_size, nb_blocks, cl_sum);
-	sub2(cl_sum, work_size_1, nb_blocks, cl_sum_out,cl_sum_accu);
-	sub2Sum(cl_sum_accu, work_size_1, nb_blocks, cl_sum_accu_out); // single block
-	sub3(cl_sum_out, work_size_1, nb_blocks, cl_sum_accu_out);
+
+	int nb_blocks_2 = nb_blocks_1/2;
+	int work_size_2 = work_size_1;
+	sub2(cl_sum, work_size_2, nb_blocks_2, cl_sum_out,cl_sum_accu);
+
+	int work_size_sum2 = cl_sum_accu.getSize();
+	int nb_blocks_sum2 = 1;
+	sub2Sum(cl_sum_accu, work_size_sum2, nb_blocks_sum2, cl_sum_accu_out); // single block
+
+	int nb_blocks_3 = nb_blocks_1 / 2;
+	int work_size_3 = nb_blocks / nb_blocks_3;
+	sub3(cl_sum_out, work_size_3, nb_blocks_3, cl_sum_accu_out);
+
 	printf("enter sub4\n");
+	int nb_blocks_4 = nb_blocks;
+	int work_size_4 = work_size;
 	sub4(cl_orig, work_size, nb_blocks, cl_sum_out, cl_compact);
 }
 //----------------------------------------------------------------------
 //sub1(cl_orig, work_size, cl_sum);
-void GE_SPH::sub1(BufferGE<int>& cl_orig, int work_size, int nb_blks, BufferGE<int>& cl_processorCounts)
+void GE_SPH::sub1(BufferGE<int>& cl_orig, int work_size, int nb_blocks, BufferGE<int>& cl_processorCounts)
 {
 	static bool first_time = true;
 
@@ -84,10 +97,13 @@ void GE_SPH::sub1(BufferGE<int>& cl_orig, int work_size, int nb_blks, BufferGE<i
 	kern.setArg(iarg++, cl_orig.getSize()); // size; 320k
 	#endif
 
-	size_t nb_blocks = cl_orig.getSize() / work_size;
 	printf("compactify_sub1::nb_blocks= %d, work_size= %d\n", nb_blocks, work_size);
 	printf("compactify_sub1::orig size: %d\n", cl_orig.getSize());
-	if ((work_size*nb_blocks) != cl_orig.getSize()) nb_blocks++;
+	if ((work_size*nb_blocks) != cl_orig.getSize()) {
+		nb_blocks++;
+		printf("sub1: nb_blks does not divide evenly into cl_orig.getSize()\n");
+		exit(0);
+	}
 
 	// global must be an integer multiple of work_size
 	int global = nb_blocks * work_size;
@@ -115,7 +131,7 @@ void GE_SPH::sub1(BufferGE<int>& cl_orig, int work_size, int nb_blks, BufferGE<i
 	#endif
 }
 //----------------------------------------------------------------------
-void GE_SPH::sub2(BufferGE<int>& cl_sum, int work_size, int nb_blks, BufferGE<int>& cl_sum_out, BufferGE<int>& cl_sum_accu)
+void GE_SPH::sub2(BufferGE<int>& cl_sum, int work_size, int nb_blocks, BufferGE<int>& cl_sum_out, BufferGE<int>& cl_sum_accu)
 {
 // input: array size 2048
 // block size = work_size = 64
@@ -156,8 +172,6 @@ void GE_SPH::sub2(BufferGE<int>& cl_sum, int work_size, int nb_blks, BufferGE<in
 	kern.setArg(iarg++, cl_sum.getSize()); // size; 2048
 	#endif
 
-	// Each thread handles two elements of the block
-	size_t nb_blocks = (cl_sum.getSize()/2) / work_size;
 	printf("compactify_sub2::nb_blocks= %d, work_size= %d\n", nb_blocks, work_size);
 	printf("compactify_sub2::orig size: %d\n", cl_sum.getSize());
 	if ((work_size*nb_blocks) != (cl_sum.getSize()/2)) {
@@ -179,7 +193,8 @@ void GE_SPH::sub2(BufferGE<int>& cl_sum, int work_size, int nb_blks, BufferGE<in
 	ps->cli->queue.finish();
 	ts_cl[TI_COMPACTIFY_SUB2]->end();
 
-	#if 1
+	#if 0
+	printf("***** sub2 ******\n");
 	cl_sum.copyToHost();
 	cl_sum_out.copyToHost();
 	cl_sum_accu.copyToHost();
@@ -198,7 +213,7 @@ void GE_SPH::sub2(BufferGE<int>& cl_sum, int work_size, int nb_blks, BufferGE<in
 	#endif
 }
 //----------------------------------------------------------------------
-void GE_SPH::sub2Sum(BufferGE<int>& cl_sum_accu, int work_size, int nb_blks, 
+void GE_SPH::sub2Sum(BufferGE<int>& cl_sum_accu, int work_size, int nb_blocks, 
 		             BufferGE<int>& cl_sum_accu_out)
 {
 	static bool first_time = true;
@@ -221,8 +236,6 @@ void GE_SPH::sub2Sum(BufferGE<int>& cl_sum_accu, int work_size, int nb_blks,
 
 	printf("inside sub2sum\n");
 
-	int nb_blocks = 1;
-	work_size = cl_sum_accu.getSize(); // 32 (16 * 128 = 2048)
 	// global must be an integer multiple of work_size
 	int global = nb_blocks * work_size; // 16
 
@@ -270,7 +283,7 @@ void GE_SPH::sub2Sum(BufferGE<int>& cl_sum_accu, int work_size, int nb_blks,
 	#endif
 }
 //----------------------------------------------------------------------
-void GE_SPH::sub3(BufferGE<int>& cl_sum_out, int work_size, int nb_blks, BufferGE<int>& cl_sum_accu_out)
+void GE_SPH::sub3(BufferGE<int>& cl_sum_out, int work_size, int nb_blocks, BufferGE<int>& cl_sum_accu_out)
 {
 	#if 1
 	static bool first_time = true;
@@ -306,12 +319,6 @@ void GE_SPH::sub3(BufferGE<int>& cl_sum_out, int work_size, int nb_blks, BufferG
 	kern.setArg(iarg++, cl_sum_out.getSize()); // size; 2048
 	kern.setArg(iarg++, cl_sum_accu_out.getSize()); // size 16
 	#endif
-
-	// Each thread handles two elements of the block
-	size_t nb_blocks = (cl_sum_out.getSize()) / work_size;
-
-	nb_blocks = 16;
-	work_size = 2048/nb_blocks;
 
 	printf("compactify_sub3::nb_blocks= %d, work_size= %d\n", nb_blocks, work_size);
 	printf("compactify_sub3::orig size: %d\n", cl_sum_out.getSize());
@@ -349,7 +356,7 @@ void GE_SPH::sub3(BufferGE<int>& cl_sum_out, int work_size, int nb_blks, BufferG
 #endif
 }
 //----------------------------------------------------------------------
-void GE_SPH::sub4(BufferGE<int>& cl_orig, int work_size, int nb_blks,  BufferGE<int>& cl_sum_out,
+void GE_SPH::sub4(BufferGE<int>& cl_orig, int work_size, int nb_blocks,  BufferGE<int>& cl_sum_out,
                   BufferGE<int>& cl_compact)
 {
 	static bool first_time = true;
@@ -386,12 +393,6 @@ void GE_SPH::sub4(BufferGE<int>& cl_orig, int work_size, int nb_blks,  BufferGE<
 	#endif
 
 	printf("compactSub4::cl_compact_size: %d\n", cl_compact.getSize());
-
-	// Each thread handles two elements of the block
-	size_t nb_blocks = (cl_orig.getSize()) / work_size;
-
-	//nb_blocks = 16;
-	//work_size = 2048/nb_blocks;
 
 	printf("compactify_sub4::nb_blocks= %d, work_size= %d\n", nb_blocks, work_size);
 	printf("compactify_sub4::orig size: %d\n", cl_sum_out.getSize());
