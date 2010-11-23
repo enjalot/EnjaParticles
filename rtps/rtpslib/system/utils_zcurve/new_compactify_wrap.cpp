@@ -40,16 +40,16 @@ void GE_SPH::newCompactifyWrap(BufferGE<int>& cl_orig, BufferGE<int>&  cl_compac
 	BufferGE<int> cl_sum_accu_out(ps->cli, nb_blocks_1/2);
 
 
-	sub1(cl_orig, work_size, cl_sum);
-	sub2(cl_sum, work_size_1, cl_sum_out,cl_sum_accu);
-	sub2Sum(cl_sum_accu, work_size_1, cl_sum_accu_out); // single block
-	sub3(cl_sum_out, work_size_1, cl_sum_accu_out);
+	sub1(cl_orig, work_size, nb_blocks, cl_sum);
+	sub2(cl_sum, work_size_1, nb_blocks, cl_sum_out,cl_sum_accu);
+	sub2Sum(cl_sum_accu, work_size_1, nb_blocks, cl_sum_accu_out); // single block
+	sub3(cl_sum_out, work_size_1, nb_blocks, cl_sum_accu_out);
 	printf("enter sub4\n");
-	sub4(cl_orig, work_size, cl_sum_out, cl_compact);
+	sub4(cl_orig, work_size, nb_blocks, cl_sum_out, cl_compact);
 }
 //----------------------------------------------------------------------
 //sub1(cl_orig, work_size, cl_sum);
-void GE_SPH::sub1(BufferGE<int>& cl_orig, int work_size, BufferGE<int>& cl_processorCounts)
+void GE_SPH::sub1(BufferGE<int>& cl_orig, int work_size, int nb_blks, BufferGE<int>& cl_processorCounts)
 {
 	static bool first_time = true;
 
@@ -115,7 +115,7 @@ void GE_SPH::sub1(BufferGE<int>& cl_orig, int work_size, BufferGE<int>& cl_proce
 	#endif
 }
 //----------------------------------------------------------------------
-void GE_SPH::sub2(BufferGE<int>& cl_sum, int work_size, BufferGE<int>& cl_sum_out, BufferGE<int>& cl_sum_accu)
+void GE_SPH::sub2(BufferGE<int>& cl_sum, int work_size, int nb_blks, BufferGE<int>& cl_sum_out, BufferGE<int>& cl_sum_accu)
 {
 // input: array size 2048
 // block size = work_size = 64
@@ -198,7 +198,7 @@ void GE_SPH::sub2(BufferGE<int>& cl_sum, int work_size, BufferGE<int>& cl_sum_ou
 	#endif
 }
 //----------------------------------------------------------------------
-void GE_SPH::sub2Sum(BufferGE<int>& cl_sum_accu, int work_size,
+void GE_SPH::sub2Sum(BufferGE<int>& cl_sum_accu, int work_size, int nb_blks, 
 		             BufferGE<int>& cl_sum_accu_out)
 {
 	static bool first_time = true;
@@ -270,7 +270,7 @@ void GE_SPH::sub2Sum(BufferGE<int>& cl_sum_accu, int work_size,
 	#endif
 }
 //----------------------------------------------------------------------
-void GE_SPH::sub3(BufferGE<int>& cl_sum_out, int work_size, BufferGE<int>& cl_sum_accu_out)
+void GE_SPH::sub3(BufferGE<int>& cl_sum_out, int work_size, int nb_blks, BufferGE<int>& cl_sum_accu_out)
 {
 	#if 1
 	static bool first_time = true;
@@ -349,7 +349,7 @@ void GE_SPH::sub3(BufferGE<int>& cl_sum_out, int work_size, BufferGE<int>& cl_su
 #endif
 }
 //----------------------------------------------------------------------
-void GE_SPH::sub4(BufferGE<int>& cl_orig, int work_size, BufferGE<int>& cl_sum_out,
+void GE_SPH::sub4(BufferGE<int>& cl_orig, int work_size, int nb_blks,  BufferGE<int>& cl_sum_out,
                   BufferGE<int>& cl_compact)
 {
 	static bool first_time = true;

@@ -436,13 +436,13 @@ private:
 		                    BufferGE<int>& cl_output);
 
 private:
-	void sub1(   BufferGE<int>& cl_orig, int work_size,   BufferGE<int>& cl_sum);
-	void sub2(   BufferGE<int>& cl_sum,  int work_size,   BufferGE<int>& cl_sum_out, 
+	void sub1(   BufferGE<int>& cl_orig, int work_size, int nb_blks,   BufferGE<int>& cl_sum);
+	void sub2(   BufferGE<int>& cl_sum,  int work_size, int nb_blks,   BufferGE<int>& cl_sum_out, 
 	             BufferGE<int>& cl_sum_accu);
-	void sub2Sum(BufferGE<int>& cl_sum_accu, int work_size,
+	void sub2Sum(BufferGE<int>& cl_sum_accu, int work_size, int nb_blks,
 		         BufferGE<int>& cl_sum_accu_out);
-	void sub3(   BufferGE<int>& cl_sum,  int work_size_1, BufferGE<int>& cl_sum_accu);
-	void sub4(   BufferGE<int>& cl_orig, int work_size,   BufferGE<int>& cl_sum_out, 
+	void sub3(   BufferGE<int>& cl_sum,  int work_size_1, int nb_blks, BufferGE<int>& cl_sum_accu);
+	void sub4(   BufferGE<int>& cl_orig, int work_size, int nb_blks,   BufferGE<int>& cl_sum_out, 
 	             BufferGE<int>& cl_compact);
 
 

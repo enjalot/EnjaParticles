@@ -364,10 +364,18 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 
 
 	// maximum number of blocks in problem
+	// blocks can never be smaller than 32 so cl_processorCounts is larger than necessary
 	cl_processorCounts  = new BufferGE<int>(ps->cli, nn_elem/32);
 	cl_processorOffsets = new BufferGE<int>(ps->cli, nn_elem/32);
-	BufferGE<int> cl_temp_sums(ps->cli, 128); // must be nb blocks in compactify_middle
-	BufferGE<int> cl_temp_sums_out(ps->cli, 128); // must be nb blocks in compactify_middle
+	//BufferGE<int> cl_temp_sums(ps->cli, 128); // must be nb blocks in compactify_middle
+	//BufferGE<int> cl_temp_sums_out(ps->cli, 128); // must be nb blocks in compactify_middle
+
+	int sz = cl_processorCounts->getSize();
+	//BufferGE<int> cl_temp_sums(ps->cli, sz/128); // must be nb blocks in compactify_middle
+	//BufferGE<int> cl_temp_sums_out(ps->cli, sz/128); // must be nb blocks in compactify_middle
+
+	//BufferGE<int>* cl_temp_sums = new BufferGE<int>(ps->cli, sz/128); // must be nb blocks in compactify_middle
+	//BufferGE<int>* cl_temp_sums_out = new BufferGE<int>(ps->cli, sz/128); // must be nb blocks in compactify_middle
 
 	BufferGE<int> cl_input(ps->cli, nn_elem);
 	BufferGE<int> cl_compact(ps->cli, nn_elem);
