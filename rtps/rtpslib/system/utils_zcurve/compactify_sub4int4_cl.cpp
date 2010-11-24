@@ -73,7 +73,8 @@ int compactSIMDwarp(__global int* a, __local int* result, __local int* bout, __l
 #endif
 //----------------------------------------------------------------------
 // non-efficient
-int compactSIMD(__global int* a, __local int* result, __local int* cnt)
+int compactSIMD(__global int* nb, __global int* hash, __global int* start, 
+     __local int4* result, __local int* cnt)
 {
 	// compact a single block
 	// Could compact warps separately, but then I need a processorOffset for 
@@ -84,8 +85,8 @@ int compactSIMD(__global int* a, __local int* result, __local int* cnt)
 
 	if (lid == 0) {
 		for (int i=0; i < block_size; i++) {
-			if (a[i] != 0) {
-				result[count] = a[i];
+			if (nb[i] != 0) {
+				result[count] = (int4)(hash[i], nb[i], start[i], 0);
 				count++;
 			}
 		}
@@ -99,8 +100,10 @@ int compactSIMD(__global int* a, __local int* result, __local int* cnt)
 __kernel void compactifySub4int4Kernel(__global int* output)
 #else
 __kernel void compactifySub4int4Kernel(
-			__global int* output, 
-			__global int* input, 
+			__global int4* output, 
+			__global int* input_hash, 
+			__global int* input_nb, 
+			__global int* input_start, 
 			__global int* processorOffsets, 
 			int nb)
 #endif
@@ -123,7 +126,7 @@ __kernel void compactifySub4int4Kernel(
 	//__local int count_loc[512]; // avoid bank conflicts: extra memory
 	__local int cnt[4]; // 4 warps per block
 	__local int cnt_out[4]; // 4 warps per block
-	__local int b[128]; // *2 not required. 
+	__local int4 b[128]; // *2 not required. 
 	__local int bout[128]; // *2 not required. 
 
 	// phase 1
@@ -136,9 +139,12 @@ __kernel void compactifySub4int4Kernel(
 	#if 1
 	//count_loc[lid] = count;
 	int j = processorOffsets[bid];
-	int numValid = compactSIMD(input+block_size*bid, b, cnt);
+	//int numValid = compactSIMD(input+block_size*bid, b, cnt);
+	int st = block_size*bid;
+	//int numValid = compactSIMD(input+block_size*bid, b, cnt);
+	int numValid = compactSIMD(input_nb+st, input_hash+st, input_start+st, b, cnt);
 	if (lid < numValid) {
-		output[j+lid] = b[lid]; //numValid; //b[id];
+		output[j+lid] = b[lid];
 	}
 	return;
 

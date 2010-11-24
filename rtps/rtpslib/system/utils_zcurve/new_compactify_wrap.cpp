@@ -460,6 +460,7 @@ void GE_SPH::sub4(BufferGE<int>& cl_orig, int work_size, int nb_blocks,  BufferG
 #endif
 }
 //----------------------------------------------------------------------
+#if 1
 void GE_SPH::sub4int4(BufferGE<int>& cl_orig, int work_size, int nb_blocks,  BufferGE<int>& cl_sum_out,
                   BufferGE<int4>& cl_compact)
 {
@@ -492,7 +493,10 @@ void GE_SPH::sub4int4(BufferGE<int>& cl_orig, int work_size, int nb_blocks,  Buf
 	kern.setArg(iarg++, cl_compact.getDevicePtr());
 	#else
 	kern.setArg(iarg++, cl_compact.getDevicePtr());
-	kern.setArg(iarg++, cl_orig.getDevicePtr());
+	//kern.setArg(iarg++, cl_orig.getDevicePtr());
+	kern.setArg(iarg++, cl_sort_hashes->getDevicePtr());
+	kern.setArg(iarg++, cl_cell_indices_nb->getDevicePtr());
+	kern.setArg(iarg++, cl_cell_indices_start->getDevicePtr());
 	kern.setArg(iarg++, cl_sum_out.getDevicePtr()); 
 	kern.setArg(iarg++, cl_compact.getSize()); // size  320k
 	#endif
@@ -540,6 +544,7 @@ void GE_SPH::sub4int4(BufferGE<int>& cl_orig, int work_size, int nb_blocks,  Buf
 	#endif
 #endif
 }
+#endif
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------

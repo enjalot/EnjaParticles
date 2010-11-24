@@ -138,7 +138,7 @@ __kernel void compactifySub4Kernel(
 	int j = processorOffsets[bid];
 	int numValid = compactSIMD(input+block_size*bid, b, cnt);
 	if (lid < numValid) {
-		output[j+lid] = b[lid]; //numValid; //b[id];
+		output[j+lid] = b[lid];
 	}
 	return;
 
@@ -147,8 +147,6 @@ __kernel void compactifySub4Kernel(
 	//int numValid = bid;
 		//input[tid] = tid;
 	//return;
-
-
 
 	if (lid < numValid) {
 		output[j+lid] = b[lid];

@@ -75,6 +75,7 @@ set (rtpslib_SOURCES
 	${rtpslib_SOURCE_DIR}/system/${UTILS}/subtract_wrap.cpp
 	${rtpslib_SOURCE_DIR}/system/${UTILS}/compactify_wrap.cpp
 	${rtpslib_SOURCE_DIR}/system/${UTILS}/new_compactify_wrap.cpp
+	#${rtpslib_SOURCE_DIR}/system/${UTILS}/new_compactify_int4_wrap.cpp
 
 	${rtpslib_SOURCE_DIR}/system/${UTILS}/zcurve_indices.cpp;
 

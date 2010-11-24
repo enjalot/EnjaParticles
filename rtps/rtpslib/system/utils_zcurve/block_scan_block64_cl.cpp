@@ -9,7 +9,7 @@
 #include "neighbors.cpp"
 #include "sum_cl.cpp"
 #include "bank_conflicts.h"
-#include "block_scan_one_warp_multi_warp_cl.cpp"
+//#include "block_scan_one_warp_multi_warp_cl.cpp"
 
 //----------------------------------------------------------------------
 int calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)

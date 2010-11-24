@@ -9,7 +9,7 @@
 #include "neighbors.cpp"
 #include "sum_cl.cpp"
 #include "bank_conflicts.h"
-#include "block_scan_one_warp_multi_warp_cl.cpp"
+//#include "block_scan_one_warp_multi_warp_cl.cpp"
 #include "get_indices_cl.cpp"
 
 //----------------------------------------------------------------------

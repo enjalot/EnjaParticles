@@ -45,7 +45,6 @@ __kernel void compactifyDownKernel(
 // order is not important
 {
 
-#if 1
 	// count: number of valid elements for each block
 	// assume 32 threads per block
 	int block_size = get_local_size(0);
@@ -117,3 +116,4 @@ __kernel void compactifyDownKernel(
 //----------------------------------------------------------------------
 
 #endif
+
