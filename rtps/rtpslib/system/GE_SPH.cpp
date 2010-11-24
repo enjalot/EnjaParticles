@@ -95,7 +95,6 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	GridParamsScaled& gps = *(cl_GridParamsScaled->getHostPtr());
 	gp.print();
 	gps.print();
-	exit(0);
 }
 
 //----------------------------------------------------------------------
@@ -126,6 +125,7 @@ GE_SPH::~GE_SPH()
 	delete 	cl_cell_indices_start;
 	delete 	cl_cell_indices_end;
 	delete 	cl_cell_indices_nb;
+	delete 	cl_cell_compact;
 	delete 	cl_vars_sort_indices;
 	delete 	cl_sort_hashes;
 	delete 	cl_sort_indices;
@@ -306,6 +306,7 @@ void GE_SPH::setupArrays()
 	cl_cell_indices_start = new BufferGE<int>(ps->cli, gp.nb_points);
 	cl_cell_indices_end   = new BufferGE<int>(ps->cli, gp.nb_points);
 	cl_cell_indices_nb    = new BufferGE<int>(ps->cli, gp.nb_points);
+	cl_cell_compact       = new BufferGE<int4>(ps->cli, gp.nb_points);
 	//printf("gp.nb_points= %d\n", gp.nb_points); exit(0);
 
 	// For bitonic sort. Remove when bitonic sort no longer used

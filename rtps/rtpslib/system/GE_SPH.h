@@ -280,6 +280,9 @@ public:
 	BufferGE<int>* 		cl_cell_indices_start;
 	BufferGE<int>* 		cl_cell_indices_end;
 	BufferGE<int>* 		cl_cell_indices_nb;
+	// contains nb, start, grid hash (nb always > 0)
+	BufferGE<int4>* 	cl_cell_compact;
+	int nb_compact;
 	BufferGE<int>* 		cl_vars_sort_indices;
 	BufferGE<int>* 		cl_sort_hashes;
 	BufferGE<int>* 		cl_sort_indices;
