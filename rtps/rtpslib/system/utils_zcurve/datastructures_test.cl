@@ -56,6 +56,8 @@ struct GridParamsScaled
     int num;
     int nb_vars;
     int nb_points;
+ int4 expo;
+ int4 shift[27];
 };
 
 struct GridParams
@@ -73,6 +75,8 @@ struct GridParams
     int num;
     int nb_vars;
     int nb_points;
+ int4 expo;
+ int4 shift[27];
 };
 
 struct FluidParams

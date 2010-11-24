@@ -60,6 +60,52 @@ void GE_SPH::newCompactifyWrap(BufferGE<int>& cl_orig, BufferGE<int>&  cl_compac
 	sub4(cl_orig, work_size, nb_blocks, cl_sum_out, cl_compact);
 }
 //----------------------------------------------------------------------
+void GE_SPH::newCompactifyWrap(BufferGE<int>& cl_orig, BufferGE<int4>&  cl_compact, 
+	BufferGE<int>& cl_processorCounts, BufferGE<int>& cl_processorOffsets)
+{
+	printf("inside newCompactifyWrap, <int4>\n");
+	static bool first_time = true;
+	//static int work_size = 0;
+
+	int work_size = 4*32;       // 128 threads
+	int work_size_1 = 4*32 / 4; // 64 threads
+
+	if (work_size < 32 || work_size_1 < 32) {
+		printf("compactifyWrap::work_size must be >= 32\n");
+		exit(0);
+	}
+
+	int nb_blocks = cl_orig.getSize() / work_size;
+	int nb_blocks_1 = nb_blocks / work_size_1; 
+
+	printf("work_size, work_size_1= %d, %d\n", work_size, work_size_1);
+	printf("nb_blocks, nb_blocks_1= %d, %d\n", nb_blocks, nb_blocks_1);
+
+	BufferGE<int> cl_sum(ps->cli, nb_blocks);
+	BufferGE<int> cl_sum_out(ps->cli, nb_blocks);
+	// divide by two since in implementation of reduced sum: there are two threads per element
+	BufferGE<int> cl_sum_accu(ps->cli, nb_blocks_1/2);
+	BufferGE<int> cl_sum_accu_out(ps->cli, nb_blocks_1/2);
+
+	sub1(cl_orig, work_size, nb_blocks, cl_sum);
+
+	int nb_blocks_2 = nb_blocks_1/2;
+	int work_size_2 = work_size_1;
+	sub2(cl_sum, work_size_2, nb_blocks_2, cl_sum_out,cl_sum_accu);
+
+	int work_size_sum2 = cl_sum_accu.getSize();
+	int nb_blocks_sum2 = 1;
+	sub2Sum(cl_sum_accu, work_size_sum2, nb_blocks_sum2, cl_sum_accu_out); // single block
+
+	int nb_blocks_3 = nb_blocks_1 / 2;
+	int work_size_3 = nb_blocks / nb_blocks_3;
+	sub3(cl_sum_out, work_size_3, nb_blocks_3, cl_sum_accu_out);
+
+	int nb_blocks_4 = nb_blocks;
+	int work_size_4 = work_size;
+	sub4int4(cl_orig, work_size, nb_blocks, cl_sum_out, cl_compact);
+}
+//----------------------------------------------------------------------
 //sub1(cl_orig, work_size, cl_sum);
 void GE_SPH::sub1(BufferGE<int>& cl_orig, int work_size, int nb_blocks, BufferGE<int>& cl_processorCounts)
 {
@@ -413,6 +459,96 @@ void GE_SPH::sub4(BufferGE<int>& cl_orig, int work_size, int nb_blocks,  BufferG
 	#endif
 #endif
 }
+//----------------------------------------------------------------------
+void GE_SPH::sub4int4(BufferGE<int>& cl_orig, int work_size, int nb_blocks,  BufferGE<int>& cl_sum_out,
+                  BufferGE<int4>& cl_compact)
+{
+	printf("*** inside sub4int4\n");
+	static bool first_time = true;
+
+	if (first_time) {
+		try {
+			string path(CL_SPH_UTIL_SOURCE_DIR);
+
+			// Try blocks of size 64 (two warps of 32: need more shared mem)
+			// efficiency. Still 32 threads per warp
+			path = path + "/compactify_sub4int4_cl.cl";
+
+			int length;
+			char* src = file_contents(path.c_str(), &length);
+			std::string strg(src);
+        	compactify_sub4int4_kernel = Kernel(ps->cli, strg, "compactifySub4int4Kernel");
+			first_time = false;
+		} catch(cl::Error er) {
+			exit(1);
+		}
+	}
+
+	Kernel kern = compactify_sub4int4_kernel;
+	kern.setProfiling(true);
+
+	int iarg = 0;
+	#if 0
+	kern.setArg(iarg++, cl_compact.getDevicePtr());
+	#else
+	kern.setArg(iarg++, cl_compact.getDevicePtr());
+	kern.setArg(iarg++, cl_orig.getDevicePtr());
+	kern.setArg(iarg++, cl_sum_out.getDevicePtr()); 
+	kern.setArg(iarg++, cl_compact.getSize()); // size  320k
+	#endif
+
+	if ((work_size*nb_blocks) != (cl_orig.getSize())) {
+		printf("work_size*nb_blocks= %d\n", work_size*nb_blocks);
+		printf("compactify_sub4:: work_size not an even divider of nb_elem/2\n");
+		exit(0);
+		nb_blocks++;
+	}
+
+#if 1
+// FIRST 2048 are WRONG!!! WHY? 
+
+	// global must be an integer multiple of work_size
+	int global = nb_blocks * work_size;
+
+	ps->cli->queue.finish();
+	ts_cl[TI_COMPACTIFY_SUB4]->start();
+
+
+	kern.execute(global, work_size);
+	ps->cli->queue.finish();
+	ts_cl[TI_COMPACTIFY_SUB4]->end();
+
+	#if 1
+	cl_orig.copyToHost();
+	cl_compact.copyToHost();
+	int* in = cl_orig.getHostPtr();
+	int4* ou = cl_compact.getHostPtr();
+	for (int i=0; i < cl_compact.getSize(); i++) {
+		printf("orig[%d]= %d, compact[%d]= %d, %d, %d \n", i, in[i], i, ou[i].x, ou[i].y, ou[i].z);
+	}
+	printf("global= %d\n", global);
+	printf("work_size= %d, nb_blocks= %d\n", work_size, nb_blocks);
+
+	cl_sum_out.copyToHost();
+	int* cc = cl_sum_out.getHostPtr();
+
+	for (int i=0; i < cl_sum_out.getSize(); i++) {
+		printf(".. cl_sum_out[%d]= %d\n", i, cc[i]);
+	}
+	printf("sum_out size: %d\n", cl_sum_out.getSize());
+	//exit(0);
+	#endif
+#endif
+}
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------

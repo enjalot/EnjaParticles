@@ -50,6 +50,8 @@ struct GridParamsScaled
     int numParticles;
     int nb_vars;
     int nb_points;
+ int4 expo;
+ int4 shift[27];
 };
 
 struct GridParams
@@ -67,6 +69,8 @@ struct GridParams
     int numParticles;
     int nb_vars;
     int nb_points;
+ int4 expo;
+ int4 shift[27];
 };
 
 struct FluidParams

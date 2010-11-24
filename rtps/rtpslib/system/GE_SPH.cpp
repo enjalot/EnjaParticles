@@ -395,7 +395,8 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 	cl_input.copyToDevice();
 	//for (int i=0; i < 10; i++) {
 	for (int i=0; i < 10; i++) {
-		newCompactifyWrap(cl_input, cl_compact, *cl_processorCounts, *cl_processorOffsets);
+		//newCompactifyWrap(cl_input, cl_compact, *cl_processorCounts, *cl_processorOffsets);
+		newCompactifyWrap(cl_input, *cl_cell_compact, *cl_processorCounts, *cl_processorOffsets);
 		printf("iteration %d\n", i);
 	}
 	cl_compact.copyToHost();

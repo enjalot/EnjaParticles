@@ -367,6 +367,7 @@ private:
 	Kernel compactify_sub2_kernel;
 	Kernel compactify_sub3_kernel;
 	Kernel compactify_sub4_kernel;
+	Kernel compactify_sub4int4_kernel;
 	Kernel sub2_sum_kernel;;
 
     BufferGE<GE_SPHParams>* cl_params;
@@ -447,6 +448,8 @@ private:
 		BufferGE<int>& cl_processorOffsets, BufferGE<int>& cl_temp_sums);
 	void newCompactifyWrap(BufferGE<int>& cl_orig, BufferGE<int>&  cl_compact, 
 		BufferGE<int>& cl_processorCounts, BufferGE<int>& cl_processorOffsets);
+	void newCompactifyWrap(BufferGE<int>& cl_orig, BufferGE<int4>&  cl_compact, 
+		BufferGE<int>& cl_processorCounts, BufferGE<int>& cl_processorOffsets);
 	void sumScanSingleBlock(BufferGE<int>& cl_input, 
 		                    BufferGE<int>& cl_output);
 
@@ -459,6 +462,8 @@ private:
 	void sub3(   BufferGE<int>& cl_sum,  int work_size_1, int nb_blks, BufferGE<int>& cl_sum_accu);
 	void sub4(   BufferGE<int>& cl_orig, int work_size, int nb_blks,   BufferGE<int>& cl_sum_out, 
 	             BufferGE<int>& cl_compact);
+	void sub4int4(BufferGE<int>& cl_orig, int work_size, int nb_blocks,  BufferGE<int>& cl_sum_out,
+                  BufferGE<int4>& cl_compact);
 
 
 private:

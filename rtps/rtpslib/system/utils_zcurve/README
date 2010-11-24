@@ -42,3 +42,4 @@ of a grid cell, so the grid hash is the index (not necessarily the z_curve hash)
 so I can deduce the (i,j,k) efficiently, via shift operators (if the grid size
 is a power of two. 
 ----------------------------------------------------------------------
+Does not work yet (version of compactification with int4)
