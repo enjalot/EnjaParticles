@@ -43,7 +43,6 @@ __kernel void compactifySub1Kernel(
 // order is not important
 {
 	// count: number of valid elements for each block
-	// assume 32 threads per block
 	int bid = get_group_id(0);
 	int block_size = get_local_size(0);
 
@@ -51,16 +50,11 @@ __kernel void compactifySub1Kernel(
 	//if (tid >= nb) return;
 
 	int lid = get_local_id(0);
-	int nb_blocks = get_num_groups(0);
+	//int nb_blocks = get_num_groups(0);
 
 	__local int count_loc[512]; // avoid bank conflicts: extra memory
 
-	// each blocks considers a section of input array
-	// number of elements treated per block
 
-
-	// phase 1
-	// figure out offsets
 	int count = 0;
 
 	// case where chunk = block_size
@@ -68,20 +62,13 @@ __kernel void compactifySub1Kernel(
 	if (in != 0) count++;
 
 	count_loc[lid] = count;
-
-	// HOW DOES IT WORK IF THERE ARE TWO BLOCKS??? ERROR? 
-	// Apply scan algorithm for multi-warp block
+	int count_sum;
 
 	barrier(CLK_LOCAL_MEM_FENCE);
-	int count_sum;
 	count_sum = sumReduce(count_loc, block_size);
 	barrier(CLK_LOCAL_MEM_FENCE);
 
-	// int warp_nb = lid >> 5;
-	// int count_sum[warp_nb] = sumReduce(count_loc+(warp_nb<<5), 32)
-	// int count_offset = scan sum of count_sum
-
-	// total number of valid entires in block bid
+	// total number of valid entries in block bid
 	processorCounts[bid] = count_sum; // global access
 
 	return;

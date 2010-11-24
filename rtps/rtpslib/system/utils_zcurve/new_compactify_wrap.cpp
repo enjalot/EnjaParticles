@@ -21,14 +21,16 @@ void GE_SPH::newCompactifyWrap(BufferGE<int>& cl_orig, BufferGE<int>&  cl_compac
 	static bool first_time = true;
 	//static int work_size = 0;
 
-	int work_size = MULT*32;       // 128 threads
-	int work_size_1 = MULT*32 / 2; // 64 threads
+	int work_size = 4*32;       // 128 threads
+	int work_size_1 = 4*32 / 4; // 64 threads
 
-	int nb_blocks;
-	int nb_blocks_1;
+	if (work_size < 32 || work_size_1 < 32) {
+		printf("compactifyWrap::work_size must be >= 32\n");
+		exit(0);
+	}
 
-	nb_blocks = cl_orig.getSize() / work_size;
-	nb_blocks_1 = nb_blocks / work_size_1; 
+	int nb_blocks = cl_orig.getSize() / work_size;
+	int nb_blocks_1 = nb_blocks / work_size_1; 
 
 	printf("work_size, work_size_1= %d, %d\n", work_size, work_size_1);
 	printf("nb_blocks, nb_blocks_1= %d, %d\n", nb_blocks, nb_blocks_1);
@@ -38,8 +40,6 @@ void GE_SPH::newCompactifyWrap(BufferGE<int>& cl_orig, BufferGE<int>&  cl_compac
 	// divide by two since in implementation of reduced sum: there are two threads per element
 	BufferGE<int> cl_sum_accu(ps->cli, nb_blocks_1/2);
 	BufferGE<int> cl_sum_accu_out(ps->cli, nb_blocks_1/2);
-
-
 
 	sub1(cl_orig, work_size, nb_blocks, cl_sum);
 
@@ -55,7 +55,6 @@ void GE_SPH::newCompactifyWrap(BufferGE<int>& cl_orig, BufferGE<int>&  cl_compac
 	int work_size_3 = nb_blocks / nb_blocks_3;
 	sub3(cl_sum_out, work_size_3, nb_blocks_3, cl_sum_accu_out);
 
-	printf("enter sub4\n");
 	int nb_blocks_4 = nb_blocks;
 	int work_size_4 = work_size;
 	sub4(cl_orig, work_size, nb_blocks, cl_sum_out, cl_compact);
@@ -97,8 +96,6 @@ void GE_SPH::sub1(BufferGE<int>& cl_orig, int work_size, int nb_blocks, BufferGE
 	kern.setArg(iarg++, cl_orig.getSize()); // size; 320k
 	#endif
 
-	printf("compactify_sub1::nb_blocks= %d, work_size= %d\n", nb_blocks, work_size);
-	printf("compactify_sub1::orig size: %d\n", cl_orig.getSize());
 	if ((work_size*nb_blocks) != cl_orig.getSize()) {
 		nb_blocks++;
 		printf("sub1: nb_blks does not divide evenly into cl_orig.getSize()\n");
@@ -107,8 +104,6 @@ void GE_SPH::sub1(BufferGE<int>& cl_orig, int work_size, int nb_blocks, BufferGE
 
 	// global must be an integer multiple of work_size
 	int global = nb_blocks * work_size;
-	printf("compactify_sub1::global size: %d\n", global);
-	printf("compactify::processcount size: %d\n", cl_processorCounts.getSize());
 
 	ps->cli->queue.finish();
 	ts_cl[TI_COMPACTIFY_SUB1]->start();
@@ -172,8 +167,6 @@ void GE_SPH::sub2(BufferGE<int>& cl_sum, int work_size, int nb_blocks, BufferGE<
 	kern.setArg(iarg++, cl_sum.getSize()); // size; 2048
 	#endif
 
-	printf("compactify_sub2::nb_blocks= %d, work_size= %d\n", nb_blocks, work_size);
-	printf("compactify_sub2::orig size: %d\n", cl_sum.getSize());
 	if ((work_size*nb_blocks) != (cl_sum.getSize()/2)) {
 		printf("compactify_sub2:: work_size not an even divider of nb_elem/2\n");
 		exit(0);
@@ -182,9 +175,6 @@ void GE_SPH::sub2(BufferGE<int>& cl_sum, int work_size, int nb_blocks, BufferGE<
 
 	// global must be an integer multiple of work_size
 	int global = nb_blocks * work_size;
-	printf("compactify_sub2::global size: %d\n", global);
-	printf("compactify_sub2::cl_sum size: %d\n", cl_sum.getSize());
-	//exit(0);
 
 	ps->cli->queue.finish();
 	ts_cl[TI_COMPACTIFY_SUB2]->start();
@@ -234,15 +224,8 @@ void GE_SPH::sub2Sum(BufferGE<int>& cl_sum_accu, int work_size, int nb_blocks,
 		}
 	}
 
-	printf("inside sub2sum\n");
-
 	// global must be an integer multiple of work_size
 	int global = nb_blocks * work_size; // 16
-
-	printf("compactify_sub2Sum::work_size= %d\n", work_size);
-	printf("compactify_sub2Sum::global= %d\n", global);
-	printf("compactify_sub2Sum::sub_blocks= %d\n", nb_blocks);
-	printf("compactify_sub2Sum::sum_accu size= %d\n", cl_sum_accu.getSize());
 
 	Kernel kern = sub2_sum_kernel;
 	kern.setProfiling(true);
@@ -320,8 +303,6 @@ void GE_SPH::sub3(BufferGE<int>& cl_sum_out, int work_size, int nb_blocks, Buffe
 	kern.setArg(iarg++, cl_sum_accu_out.getSize()); // size 16
 	#endif
 
-	printf("compactify_sub3::nb_blocks= %d, work_size= %d\n", nb_blocks, work_size);
-	printf("compactify_sub3::orig size: %d\n", cl_sum_out.getSize());
 	if ((work_size*nb_blocks) != (cl_sum_out.getSize())) {
 		printf("compactify_sub3:: work_size not an even divider of nb_elem/2\n");
 		exit(0);
@@ -330,9 +311,6 @@ void GE_SPH::sub3(BufferGE<int>& cl_sum_out, int work_size, int nb_blocks, Buffe
 
 	// global must be an integer multiple of work_size
 	int global = nb_blocks * work_size;
-	printf("compactify_sub3::global size: %d\n", global);
-	printf("compactify_sub3::cl_sum size: %d\n", cl_sum_out.getSize());
-	//exit(0);
 
 	ps->cli->queue.finish();
 	ts_cl[TI_COMPACTIFY_SUB3]->start();
@@ -392,10 +370,6 @@ void GE_SPH::sub4(BufferGE<int>& cl_orig, int work_size, int nb_blocks,  BufferG
 	kern.setArg(iarg++, cl_compact.getSize()); // size  320k
 	#endif
 
-	printf("compactSub4::cl_compact_size: %d\n", cl_compact.getSize());
-
-	printf("compactify_sub4::nb_blocks= %d, work_size= %d\n", nb_blocks, work_size);
-	printf("compactify_sub4::orig size: %d\n", cl_sum_out.getSize());
 	if ((work_size*nb_blocks) != (cl_orig.getSize())) {
 		printf("work_size*nb_blocks= %d\n", work_size*nb_blocks);
 		printf("compactify_sub4:: work_size not an even divider of nb_elem/2\n");
@@ -408,8 +382,6 @@ void GE_SPH::sub4(BufferGE<int>& cl_orig, int work_size, int nb_blocks,  BufferG
 
 	// global must be an integer multiple of work_size
 	int global = nb_blocks * work_size;
-	printf("compactify_sub4::global size: %d\n", global);
-	//exit(0);
 
 	ps->cli->queue.finish();
 	ts_cl[TI_COMPACTIFY_SUB4]->start();

@@ -21,4 +21,24 @@ queued to end: 0.486752 (ms)
 queued to submit: 0.011904 (ms)
 submit to start: 0.230176 (ms)
 start to end: 0.244672 (ms)
+----------------------------------------------------------------------
+Nov. 23, 2010
+Given list of indices and hashes (of all the particles), sort the hashes.
+The list of indices refer to the particles in order, with the cells ordered
+according to its hash. 
 
+In buildDatastructures, I create the arrays cl_cell_indices_start, 
+cl_cell_indices_end, and cl_cell_indices_nb. 
+
+Next, I must compactify the indices and hash array. Remove all indices
+where cl_cell_indices_nb are zero. Create an array of int4 where each 
+quadruple is really: (hash, nb, start), which refer to the particle at
+that index. 
+
+What we want is that the order of the hashes be in z_curve order, and NOT in 
+grid order. But the hash in the int4 array is the grid hash. INTERESTING, NO? 
+I also need an array (including the zeros), which contain the (nb,start)
+of a grid cell, so the grid hash is the index (not necessarily the z_curve hash), 
+so I can deduce the (i,j,k) efficiently, via shift operators (if the grid size
+is a power of two. 
+----------------------------------------------------------------------

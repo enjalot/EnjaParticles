@@ -74,6 +74,8 @@ struct GridParams
 	int				numParticles;
 	int				nb_vars; // for combined array
 	int 			nb_points; // nb grid points
+	int4			expo; // grid_res = 2^exp
+	int4			shift[27]; // neighbors
 
 	void print()
 	{
@@ -89,6 +91,10 @@ struct GridParams
 		printf("numParticles= %d\n", numParticles);
 		printf("nb grid points: %d\n", nb_points);
 		printf("nb_vars: %d\n", nb_vars);
+		expo.print("expo");
+		for (int i=0; i < 27; i++) {
+			printf("shift[%d]= %d, %d, %d, %d\n", i, shift[i].x,shift[i].y,shift[i].z,shift[i].w);
+		}
 	}
 };
 //----------------------------------------------------------------------
@@ -109,6 +115,8 @@ struct GridParamsScaled
 	int				numParticles;
 	int				nb_vars; // for combined array
 	int				nb_points;
+	int4			expo; // grid_res = 2^exp
+	int4			shift[27]; // neighbors
 
 	void print() {
 		printf("----- GridParmsScaled ----\n");
@@ -123,6 +131,10 @@ struct GridParamsScaled
 		printf("numParticles= %d\n", numParticles);
 		printf("nb grid points: %d\n", nb_points);
 		printf("nb_vars: %d\n", nb_vars);
+		expo.print("expo");
+		for (int i=0; i < 27; i++) {
+			printf("shift[%d]= %d, %d, %d, %d\n", i, shift[i].x,shift[i].y,shift[i].z,shift[i].w);
+		}
 	}
 };
 //----------------------------------------------------------------------

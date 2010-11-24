@@ -90,6 +90,12 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 
 	setupTimers();
 	initializeData();
+
+	GridParams& gp = *(cl_GridParams->getHostPtr());
+	GridParamsScaled& gps = *(cl_GridParamsScaled->getHostPtr());
+	gp.print();
+	gps.print();
+	exit(0);
 }
 
 //----------------------------------------------------------------------
@@ -242,6 +248,12 @@ void GE_SPH::setupArrays()
 	gp.nb_vars = nb_vars;
 	gp.nb_points = (int) (gp.grid_res.x*gp.grid_res.y*gp.grid_res.z);
 
+	int4 expo;
+	expo.x = log(gp.grid_res.x) / log(2.);
+	expo.y = log(gp.grid_res.y) / log(2.);
+	expo.z = log(gp.grid_res.z) / log(2.);
+	gp.expo = expo;
+
 	cl_GridParams->copyToDevice();
 
     float ss = params.simulation_scale;
@@ -258,9 +270,8 @@ void GE_SPH::setupArrays()
 	gps.nb_vars = nb_vars;
 	gps.numParticles = nb_el;
 	gps.nb_points = (int) (gps.grid_res.x*gps.grid_res.y*gps.grid_res.z);
+	gps.expo = gp.expo;
 
-	gp.print();
-	gps.print();
 
 	cl_GridParamsScaled->copyToDevice();
 
@@ -360,22 +371,14 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 	GridParamsScaled& gps = *(cl_GridParamsScaled->getHostPtr());
 	int nn_elem = gps.nb_points;
 	printf("nn_elem= %d\n", nn_elem);
-	//nn_elem *= 4;
 
 
 	// maximum number of blocks in problem
 	// blocks can never be smaller than 32 so cl_processorCounts is larger than necessary
 	cl_processorCounts  = new BufferGE<int>(ps->cli, nn_elem/32);
 	cl_processorOffsets = new BufferGE<int>(ps->cli, nn_elem/32);
-	//BufferGE<int> cl_temp_sums(ps->cli, 128); // must be nb blocks in compactify_middle
-	//BufferGE<int> cl_temp_sums_out(ps->cli, 128); // must be nb blocks in compactify_middle
 
 	int sz = cl_processorCounts->getSize();
-	//BufferGE<int> cl_temp_sums(ps->cli, sz/128); // must be nb blocks in compactify_middle
-	//BufferGE<int> cl_temp_sums_out(ps->cli, sz/128); // must be nb blocks in compactify_middle
-
-	//BufferGE<int>* cl_temp_sums = new BufferGE<int>(ps->cli, sz/128); // must be nb blocks in compactify_middle
-	//BufferGE<int>* cl_temp_sums_out = new BufferGE<int>(ps->cli, sz/128); // must be nb blocks in compactify_middle
 
 	BufferGE<int> cl_input(ps->cli, nn_elem);
 	BufferGE<int> cl_compact(ps->cli, nn_elem);
@@ -392,11 +395,6 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 	//for (int i=0; i < 10; i++) {
 	for (int i=0; i < 10; i++) {
 		newCompactifyWrap(cl_input, cl_compact, *cl_processorCounts, *cl_processorOffsets);
-		//exit(0);
-		//compactify(cl_input, cl_compact, *cl_processorCounts, *cl_processorOffsets);
-		//compactifyMiddle(*cl_processorCounts, *cl_processorOffsets, cl_temp_sums);
-		//sumScanSingleBlock(cl_temp_sums, cl_temp_sums_out);
-		//compactifyDown(cl_input, cl_compact, *cl_processorCounts, *cl_processorOffsets);
 		printf("iteration %d\n", i);
 	}
 	cl_compact.copyToHost();
@@ -405,9 +403,10 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 		printf("in/compact= %d, %d\n", v[i], vo[i]);
 	}
 	GE::Time::printAll();
-	exit(0);
+	//exit(0);
     
-    for(int i=0; i < nb_sub_iter; i++)
+    //for(int i=0; i < nb_sub_iter; i++)
+    for(int i=0; i < 15; i++)
     {
 		// ***** Create HASH ****
 		hash();
@@ -421,6 +420,7 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 
 		// **** Reorder pos, vel
 		buildDataStructures(); 
+		continue;
 
 		// must call sort and build first. 
 		// DEBUGGING
@@ -459,11 +459,12 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
         // ***** TIME UPDATE *****
 		//computeEuler();
 		//printf("leapfrog\n");
-		computeLeapfrog();
+		//computeLeapfrog();
 	}
 
 	// *** OUTPUT PHYSICAL VARIABLES FROM THE GPU
-	//exit(0);
+	GE::Time::printAll();
+	exit(0);
 
     cl_position->release();
     cl_color->release();
@@ -1164,7 +1165,8 @@ void GE_SPH::initializeData()
 	cl_params->copyToDevice();
 
 	// size: total number of grid points
-	GridParamsScaled* gp = (cl_GridParamsScaled->getHostPtr());
+	GridParamsScaled* gps = (cl_GridParamsScaled->getHostPtr());
+	GridParams* gp = (cl_GridParams->getHostPtr());
 	int4* gi = cl_hash_to_grid_index->getHostPtr();
 
 	// grid_res should really be integers or else I might have the 
@@ -1198,6 +1200,8 @@ void GE_SPH::initializeData()
 	for (int i=-1; i <= 1; i++) {
 		c_offset->offsets[count27] = int4(i, j, k, 1);
 		cell_offset[count27] = int4(i, j, k, 1);
+		gp->shift[count27] = cell_offset[count27];
+		gps->shift[count27] = cell_offset[count27];
 		count27++;
 	}}}
 
