@@ -25,8 +25,8 @@ void GE_SPH::blockScan(int which)
 
 			// Try blocks of size 64 (two warps of 32: need more shared mem)
 			// efficiency. Still 32 threads per warp
-			//path = path + "/block_scan_block64_cl.cl";
-			path = path + "/block_scan_block64a_cl.cl";
+			path = path + "/block_scan_block64_cl.cl";
+			//path = path + "/block_scan_block64a_cl.cl";
 			// optimum size ==> 16 ms for density (9 ms with old code) on mac
 			// many points have density way too high!
 			work_size = 2*32;  // WRONG RESULTS
@@ -44,7 +44,6 @@ void GE_SPH::blockScan(int which)
 
 
 	nb_warps = work_size / 32;
-	ts_cl[TI_DENS]->start();
 
 	Kernel kern = block_scan_kernel;
 
@@ -65,6 +64,8 @@ void GE_SPH::blockScan(int which)
 	//kern.setArg(iarg++, cl_CellOffsets->getDevicePtr());
 	kern.setArg(iarg++, cl_params->getDevicePtr());
 	kern.setArg(iarg++, cl_GridParamsScaled->getDevicePtr());
+	kern.setArg(iarg++, cl_cell_compact->getDevicePtr());
+	kern.setArg(iarg++, cl_return_values->getDevicePtr());  // ***
 
 
 	//cl_cell_offset->copyToDevice();
@@ -87,15 +88,25 @@ void GE_SPH::blockScan(int which)
 	kern.setArg(iarg++, cli_debug->getDevicePtr());
 
 	// would be much less if the arrays were compactified
-	// nb blocks = nb grid cells
+
+	// nb blocks should equal nb of elements in compact array
+	// I do not understand why I am dividing by nb_warps. I guess it is because 
+	// global must be a multiple of work_size
+	// nb blocks = nb grid cells in compactified array
+
+	GPUReturnValues* rv = cl_return_values->getHostPtr();
+	size_t nb_blocks = (size_t) rv->compact_size / nb_warps;
+	if ((nb_warps*nb_blocks) != rv->compact_size) nb_blocks++;
+
 	
-	size_t nb_blocks = (size_t) gps->nb_points / nb_warps;
-	if ((nb_warps*nb_blocks) != gps->nb_points) nb_blocks++;
+	//size_t nb_blocks = (size_t) gps->nb_points / nb_warps;
+	//if ((nb_warps*nb_blocks) != gps->nb_points) nb_blocks++;
 
 	// global must be an integer multiple of work_size
 	int global = nb_blocks * work_size;
 
 	printf("nb_points: %d\n", gps->nb_points);
+	printf("nb points in compact array: %d\n", rv->compact_size);
 	printf("nb_warps: %d\n", nb_warps);
 	printf("nb_blocks= %d\n", nb_blocks);
 	printf("global= %d\n", global);
@@ -106,8 +117,9 @@ void GE_SPH::blockScan(int which)
 	//printf("nb points in grid: %d\n", gps->nb_points);
 	//exit(0);
 
+	ps->cli->queue.finish();
+	ts_cl[TI_DENS]->start();
 	kern.execute(global, work_size);
-
 	ps->cli->queue.finish();
 	ts_cl[TI_DENS]->end();
 

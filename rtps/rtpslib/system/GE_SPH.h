@@ -26,6 +26,7 @@ namespace rtps {
 
 //class DataStructures;
 
+
 //keep track of the fluid settings
 typedef struct GE_SPHSettings
 {
@@ -56,6 +57,11 @@ typedef struct GE_SPHSettings
 struct CellOffsets
 {
 	int4 offsets[32];
+};
+//-------------------------
+struct GPUReturnValues
+{
+	int compact_size;
 };
 //-------------------------
 // GORDON Datastructure for Grids. To be reconciled with Ian's
@@ -291,6 +297,7 @@ public:
 	BufferGE<GridParams>*  cl_GridParams;
 	BufferGE<GridParamsScaled>*  cl_GridParamsScaled;
 	BufferGE<FluidParams>* cl_FluidParams;
+	BufferGE<GPUReturnValues>* cl_return_values;
 
 	// indices for Z-curve indexing
 	BufferGE<int>* cl_xindex;

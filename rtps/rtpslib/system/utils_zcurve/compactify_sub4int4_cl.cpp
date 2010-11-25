@@ -1,6 +1,7 @@
 #ifndef _COMPACTIFY_CL_
 #define _COMPACTIFY_CL_
 
+#include "cl_structures.h"
 #include "bank_conflicts.h"
 
 #define T int
@@ -106,6 +107,7 @@ __kernel void compactifySub4int4Kernel(
 			__global int* input_nb, 
 			__global int* input_start, 
 			__global int* processorOffsets, 
+			__global struct GPUReturnValues* rv,
 			int nb)
 #endif
 // Compactify an array
@@ -123,6 +125,11 @@ __kernel void compactifySub4int4Kernel(
 
 	int lid = get_local_id(0);
 	int nb_blocks = get_num_groups(0);
+
+	if (tid == 0) {
+		rv->compact_size = processorOffsets[nb_blocks-1];
+	}
+	//barrier(CLK_LOCAL_MEM_FENCE);
 
 	//__local int count_loc[512]; // avoid bank conflicts: extra memory
 	__local int cnt[4]; // 4 warps per block

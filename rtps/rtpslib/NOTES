@@ -230,5 +230,12 @@ compactify_sub2sum: tot (ms): 6.17, avg: 1.234, (count=5)
 compactify_sub3: tot (ms): 2.186, avg: 0.4372, (count=5)
 compactify_sub4: tot (ms): 48.814, avg: 9.7628, (count=5) <<<< EXPENSIV
 (rtps) system update: tot (ms): 0, avg: -0, (count=-4)
-
 ----------------------------------------------------------------------
+Nov. 25, 2010
+- compactification into an array of size <int4> works!
+- density calculation with block_scan_block64_cl.cpp takes 40 ms without using 
+  the compact array to cut short the scan
+- takes 23 ms by simply considering the first section of the compact array (the nonzero
+elements)
+----------------------------------------------------------------------
+

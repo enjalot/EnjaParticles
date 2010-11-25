@@ -17,6 +17,11 @@
 
 
 
+struct GPUReturnValues
+{
+ int compact_size;
+};
+
 struct CellOffsets
 {
  int4 offsets[32];

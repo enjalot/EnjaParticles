@@ -103,6 +103,7 @@ void GE_SPH::newCompactifyWrap(BufferGE<int>& cl_orig, BufferGE<int4>&  cl_compa
 	int nb_blocks_4 = nb_blocks;
 	int work_size_4 = work_size;
 	sub4int4(cl_orig, work_size, nb_blocks, cl_sum_out, cl_compact);
+	//printf("xxxxx\n"); exit(0);
 }
 //----------------------------------------------------------------------
 //sub1(cl_orig, work_size, cl_sum);
@@ -377,6 +378,7 @@ void GE_SPH::sub3(BufferGE<int>& cl_sum_out, int work_size, int nb_blocks, Buffe
 	//exit(0);
 	#endif
 #endif
+	printf("exit sub3\n");
 }
 //----------------------------------------------------------------------
 void GE_SPH::sub4(BufferGE<int>& cl_orig, int work_size, int nb_blocks,  BufferGE<int>& cl_sum_out,
@@ -487,6 +489,8 @@ void GE_SPH::sub4int4(BufferGE<int>& cl_orig, int work_size, int nb_blocks,  Buf
 	Kernel kern = compactify_sub4int4_kernel;
 	kern.setProfiling(true);
 
+	// I should return the number of compacted elements in the compact array
+
 	int iarg = 0;
 	#if 0
 	kern.setArg(iarg++, cl_compact.getDevicePtr());
@@ -496,8 +500,11 @@ void GE_SPH::sub4int4(BufferGE<int>& cl_orig, int work_size, int nb_blocks,  Buf
 	kern.setArg(iarg++, cl_cell_indices_nb->getDevicePtr());
 	kern.setArg(iarg++, cl_cell_indices_start->getDevicePtr());
 	kern.setArg(iarg++, cl_sum_out.getDevicePtr()); 
-	kern.setArg(iarg++, cl_compact.getSize()); // size  320k
+	kern.setArg(iarg++, cl_return_values->getDevicePtr()); // size  320k
+	kern.setArg(iarg++, cl_compact.getSize());
 	#endif
+
+	//printf("yyy\n"); exit(0);
 
 	if ((work_size*nb_blocks) != (cl_orig.getSize())) {
 		printf("work_size*nb_blocks= %d\n", work_size*nb_blocks);
@@ -523,9 +530,9 @@ void GE_SPH::sub4int4(BufferGE<int>& cl_orig, int work_size, int nb_blocks,  Buf
 	ts_cl[TI_COMPACTIFY_SUB4]->end();
 
 	printf("exit ....\n");
-printf("0\n");
-//computeCellStartEndGPU();
-//exit(0);
+	cl_return_values->copyToHost();
+	GPUReturnValues* rv = cl_return_values->getHostPtr();
+	printf("cl_return_values: %d\n", rv->compact_size);
 
 	//printf("... before\n");
 	//computeCellStartEndGPU();
@@ -539,14 +546,14 @@ printf("0\n");
 	cl_cell_indices_nb->copyToHost();
 	int* nbb = cl_cell_indices_nb->getHostPtr();
 
-	//int tot = 0;
+	int tot = 0;
 	for (int i=0; i < cl_compact.getSize(); i++) {
 		if (ou[i].y > 0) {
 			printf("orig[%d]= %d, compact[%d]= %d, %d, %d \n", i, in[i], i, ou[i].x, ou[i].y, ou[i].z);
-			//tot += ou[i].y;
+			tot += ou[i].y;
 		}
 	}
-	//printf("tot nb part = %d\n", tot); exit(0);
+	printf("tot nb part = %d\n", tot); 
 	printf("compact size: %d\n", cl_compact.getSize());
 	printf("global= %d\n", global);
 	printf("work_size= %d, nb_blocks= %d\n", work_size, nb_blocks);
@@ -564,21 +571,6 @@ printf("0\n");
 #endif
 }
 #endif
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------

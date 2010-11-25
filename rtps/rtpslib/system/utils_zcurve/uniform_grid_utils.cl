@@ -15,6 +15,11 @@
 
 
 
+struct GPUReturnValues
+{
+ int compact_size;
+};
+
 struct CellOffsets
 {
  int4 offsets[32];
@@ -515,6 +520,8 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 
 __kernel void K_SumStep1(
     __global float4* vars_sorted,
+    __global int4* cell_compact,
+    __constant struct GPUReturnValues* rv,
           __global int* cell_indexes_start,
           __global int* cell_indexes_end,
     __constant struct GridParams* gp,
@@ -530,6 +537,9 @@ __kernel void K_SumStep1(
 
  int index = get_global_id(0);
     if (index >= num) return;
+
+
+
 
     float4 position_i = vars_sorted[index+1*num];
 

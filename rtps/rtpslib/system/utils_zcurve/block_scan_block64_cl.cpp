@@ -54,6 +54,7 @@ int calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 //----------------------------------------------------------------------
 // Work of a single warp. 
 void block_scan_one_warp(
+					__global int4* cell_compact, 
 					__global float4*   vars_sorted, 
 		   			__global int* cell_indices_start,
 		   			__global int* cell_indices_nb,
@@ -75,19 +76,21 @@ void block_scan_one_warp(
 {
 	// next four lines would not be necessary once blocks are concatenated
 	// nb particles in cell with given hash
+
 	int nb = cell_indices_nb[hash];  // grid cell
 	// advantage (??) of nb32=32 : warp alignment in shared memory
 	int nb32 = 32; // first 32 elements of shared memory: center particles
 
-
 	// the cell is empty
-	if (nb <= 0) return;
+	// cell can not be empty since am using compacted array
+	//if (nb <= 0) return;
 
 	// First assume blocks of size 32
 	// bring local particles in block into shared memory
 	// limit to 32 particles per block
 	// this leads to errors
-	if (nb > 32) nb = 32;  
+	// This cannot happen if I break up blocks that are larger than 32
+	// if (nb > 32) nb = 32;  
 
 
 // Hash size: (32+26) particles per cell * 4 bytes * (densi + vel + vel) 
@@ -196,6 +199,7 @@ void block_scan_one_warp(
 		locc[nb32+lid] = (float4)(900., 900., 900., 1.);
 		//barrier(CLK_LOCAL_MEM_FENCE);
 
+// ERROR BETWEEN HERE AND AAAA
 		// Bring in single particle from neighboring blocks, one per thread
 
 		{
@@ -205,6 +209,8 @@ void block_scan_one_warp(
 				locc[nb32+lid] = pos(cstart+i); // ith particle in cell
 			} 
 		}
+// AAAA
+return;
 
 		barrier(CLK_LOCAL_MEM_FENCE);
 		
@@ -326,12 +332,19 @@ __kernel void block_scan(
 
 		   			//__global struct GridParams* gp,
 		   			__constant struct GridParams* gp,
+					__global int4* cell_compact, 
+					__constant struct GPUReturnValues* rv, 
 					__local  float4* locc   
 					DUMMY_ARGS
 			  )
 {
+	int bid = get_group_id(0);
+	if (bid >> rv->compact_size) {
+		return;
+	}
+
 	int numParticles = gp->numParticles; // needed for macros
-	if (get_group_id(0) >= gp->nb_points) return;
+	//if (bid >= gp->nb_points) return;
 
 	int lid  = get_local_id(0);
 
@@ -354,7 +367,10 @@ __kernel void block_scan(
 
 	// hash: grid cell number
 	// SOMETHING WRONG WITH HASH
-	int hash = warp + nb_warps*get_group_id(0);
+
+	// if group has 32 threads (=single warp), hash = group number (nb_warp=1, warp=0)
+	// if group has 64 threads (2 warps), 32 threads still handle single group
+	int hash = warp + nb_warps*bid;
 
 
 	// I am now having 2-4 warps per block, each warp handles one cell
@@ -369,6 +385,7 @@ __kernel void block_scan(
 
 	// warp deals with one cell
 	block_scan_one_warp(
+					cell_compact, 
 					vars_sorted, 
 		   			cell_indices_start,
 		   			cell_indices_nb,
@@ -380,10 +397,12 @@ __kernel void block_scan(
 					hash,
 					locc+warp*64 // unit is float4
 					ARGS);
+	return;
 
 	// same warp deals with next cell
 	#if 0
 	block_scan_one_warp(
+					cell_compact,
 					vars_sorted, 
 		   			cell_indices_start,
 		   			cell_indices_nb,

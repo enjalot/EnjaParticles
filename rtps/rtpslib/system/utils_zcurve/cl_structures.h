@@ -4,6 +4,11 @@
 #define _CL_STRUCTURES_H_
 
 //----------------------------------------------------------------------
+struct GPUReturnValues
+{
+	int compact_size;
+};
+//----------------------------------------------------------------------
 struct CellOffsets
 {
 	int4 offsets[32];

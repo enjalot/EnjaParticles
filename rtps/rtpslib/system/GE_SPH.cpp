@@ -222,6 +222,7 @@ void GE_SPH::setupArrays()
 // Need an assign operator (no memory allocation)
 
 	cl_CellOffsets = new BufferGE<CellOffsets>(ps->cli, 1); // neighbors
+	cl_return_values = new BufferGE<GPUReturnValues>(ps->cli, 1);
 
 	cl_GridParams = new BufferGE<GridParams>(ps->cli, 1); // destroys ...
 	cl_GridParamsScaled = new BufferGE<GridParamsScaled>(ps->cli, 1); // destroys ...
@@ -432,11 +433,13 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 		//newCompactifyWrap(cl_input, *cl_cell_compact, *cl_processorCounts, *cl_processorOffsets);
 		newCompactifyWrap(*cl_cell_indices_nb, *cl_cell_compact, *cl_processorCounts, *cl_processorOffsets);
 		printf("... exit newCompactifyWrap ...\n");
-		continue;
 
 		// must call sort and build first. 
 		// DEBUGGING
+		//neighborSearch(0); //density
 		blockScan(0);
+		continue;
+
 		//neighborSearch(0); //density
 		printGPUDiagnostics(1);
 		//exit(0);
