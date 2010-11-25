@@ -84,6 +84,7 @@ void GE_SPH::buildDataStructures()
     ps->cli->queue.finish();
 
 	//computeCellStartEndGPU();
+	//exit(0);
 
 	subtract();  // NEED ARGUMENTS
 
@@ -151,11 +152,15 @@ void GE_SPH::printBuildDiagnostics()
 //----------------------------------------------------------------------
 void GE_SPH::computeCellStartEndGPU()
 {
+	subtract();
+
 	printf("****\n");
 	cl_cell_indices_start->copyToHost();
 	cl_cell_indices_end->copyToHost();
+	cl_cell_indices_nb->copyToHost();
 	int* is = cl_cell_indices_start->getHostPtr();
 	int* ie = cl_cell_indices_end->getHostPtr();
+	int* in = cl_cell_indices_nb->getHostPtr();
 	GridParams& gp = *(cl_GridParams->getHostPtr());
 	int grid_size = (int) (gp.grid_res.x * gp.grid_res.y * gp.grid_res.z);
 
@@ -166,11 +171,12 @@ void GE_SPH::computeCellStartEndGPU()
 			//printf("is,ie[%d]= %d, %d\n", i, is[i], ie[i]);
 			// ie[i] SHOULD NEVER BE ZERO 
 			if (is[i] != -1 && ie[i] != 0) {
-				nb = ie[i] - is[i];
+				//nb = ie[i] - is[i];
+				nb = in[i];
 				nb_particles += nb;
 			}
 			if (is[i] != -1 && ie[i] != 0) { ;
-				printf("(GPU) [%d]: indices_start: %d, indices_end: %d, nb pts: %d\n", i, is[i], ie[i], nb);
+				printf("(GPU) [%d]: indices_start: %d, indices_end: %d, nb pts: %d\n", i, is[i], ie[i], in[i]);
 			}
 		}
 

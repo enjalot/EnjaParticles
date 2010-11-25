@@ -394,11 +394,16 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 	v[44] = 0;
 	cl_input.copyToDevice();
 	//for (int i=0; i < 10; i++) {
+	#if 0
 	for (int i=0; i < 10; i++) {
 		//newCompactifyWrap(cl_input, cl_compact, *cl_processorCounts, *cl_processorOffsets);
+		printf("... enter newCompactifyWrap ...\n");
 		newCompactifyWrap(cl_input, *cl_cell_compact, *cl_processorCounts, *cl_processorOffsets);
+		printf("... exit newCompactifyWrap ...\n");
+		exit(0);
 		printf("iteration %d\n", i);
 	}
+	#endif
 	cl_compact.copyToHost();
 	int* vo = cl_compact.getHostPtr();
 	for (int i=0; i < nn_elem; i++) {
@@ -422,6 +427,11 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 
 		// **** Reorder pos, vel
 		buildDataStructures(); 
+
+		printf("... enter newCompactifyWrap ...\n");
+		//newCompactifyWrap(cl_input, *cl_cell_compact, *cl_processorCounts, *cl_processorOffsets);
+		newCompactifyWrap(*cl_cell_indices_nb, *cl_cell_compact, *cl_processorCounts, *cl_processorOffsets);
+		printf("... exit newCompactifyWrap ...\n");
 		continue;
 
 		// must call sort and build first. 

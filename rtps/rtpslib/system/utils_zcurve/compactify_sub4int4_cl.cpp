@@ -87,6 +87,7 @@ int compactSIMD(__global int* nb, __global int* hash, __global int* start,
 		for (int i=0; i < block_size; i++) {
 			if (nb[i] != 0) {
 				result[count] = (int4)(hash[i], nb[i], start[i], 0);
+				//result[count] = (int4)(1,2,3,4);
 				count++;
 			}
 		}
@@ -133,7 +134,11 @@ __kernel void compactifySub4int4Kernel(
 	// figure out offsets
 	int count = 0;
 
-	output[tid] = 0;
+	//output[tid] = (int4) (1,2,3,4);
+	//return;
+
+	//output[tid] = (int4) (input_hash[tid], input_start[tid], input_nb[tid], 1);
+	//return;
 	barrier(CLK_LOCAL_MEM_FENCE);
 
 	#if 1
@@ -145,6 +150,8 @@ __kernel void compactifySub4int4Kernel(
 	int numValid = compactSIMD(input_nb+st, input_hash+st, input_start+st, b, cnt);
 	if (lid < numValid) {
 		output[j+lid] = b[lid];
+		//output[j+tid] = input_nb[st+lid];
+		//output[j+lid] = (int4) (1,2,3,4);
 	}
 	return;
 

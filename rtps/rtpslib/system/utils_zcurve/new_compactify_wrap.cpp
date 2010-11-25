@@ -63,7 +63,6 @@ void GE_SPH::newCompactifyWrap(BufferGE<int>& cl_orig, BufferGE<int>&  cl_compac
 void GE_SPH::newCompactifyWrap(BufferGE<int>& cl_orig, BufferGE<int4>&  cl_compact, 
 	BufferGE<int>& cl_processorCounts, BufferGE<int>& cl_processorOffsets)
 {
-	printf("inside newCompactifyWrap, <int4>\n");
 	static bool first_time = true;
 	//static int work_size = 0;
 
@@ -493,7 +492,6 @@ void GE_SPH::sub4int4(BufferGE<int>& cl_orig, int work_size, int nb_blocks,  Buf
 	kern.setArg(iarg++, cl_compact.getDevicePtr());
 	#else
 	kern.setArg(iarg++, cl_compact.getDevicePtr());
-	//kern.setArg(iarg++, cl_orig.getDevicePtr());
 	kern.setArg(iarg++, cl_sort_hashes->getDevicePtr());
 	kern.setArg(iarg++, cl_cell_indices_nb->getDevicePtr());
 	kern.setArg(iarg++, cl_cell_indices_start->getDevicePtr());
@@ -513,6 +511,8 @@ void GE_SPH::sub4int4(BufferGE<int>& cl_orig, int work_size, int nb_blocks,  Buf
 
 	// global must be an integer multiple of work_size
 	int global = nb_blocks * work_size;
+	printf("nb_blocks= %d, work_size= %d, global= %d\n", nb_blocks, work_size, global);
+	//exit(0);
 
 	ps->cli->queue.finish();
 	ts_cl[TI_COMPACTIFY_SUB4]->start();
@@ -522,16 +522,35 @@ void GE_SPH::sub4int4(BufferGE<int>& cl_orig, int work_size, int nb_blocks,  Buf
 	ps->cli->queue.finish();
 	ts_cl[TI_COMPACTIFY_SUB4]->end();
 
+	printf("exit ....\n");
+printf("0\n");
+//computeCellStartEndGPU();
+//exit(0);
+
+	//printf("... before\n");
+	//computeCellStartEndGPU();
+	//printf(".... after\n"); 
+
 	#if 1
 	cl_orig.copyToHost();
 	cl_compact.copyToHost();
 	int* in = cl_orig.getHostPtr();
 	int4* ou = cl_compact.getHostPtr();
+	cl_cell_indices_nb->copyToHost();
+	int* nbb = cl_cell_indices_nb->getHostPtr();
+
+	//int tot = 0;
 	for (int i=0; i < cl_compact.getSize(); i++) {
-		printf("orig[%d]= %d, compact[%d]= %d, %d, %d \n", i, in[i], i, ou[i].x, ou[i].y, ou[i].z);
+		if (ou[i].y > 0) {
+			printf("orig[%d]= %d, compact[%d]= %d, %d, %d \n", i, in[i], i, ou[i].x, ou[i].y, ou[i].z);
+			//tot += ou[i].y;
+		}
 	}
+	//printf("tot nb part = %d\n", tot); exit(0);
+	printf("compact size: %d\n", cl_compact.getSize());
 	printf("global= %d\n", global);
 	printf("work_size= %d, nb_blocks= %d\n", work_size, nb_blocks);
+	//exit(0);
 
 	cl_sum_out.copyToHost();
 	int* cc = cl_sum_out.getHostPtr();
