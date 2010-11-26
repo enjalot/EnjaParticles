@@ -9,8 +9,13 @@
 #include "neighbors.cpp"
 #include "sum_cl.cpp"
 #include "bank_conflicts.h"
+#include "get_indices_cl.cpp"
 //#include "block_scan_one_warp_multi_warp_cl.cpp"
 
+float4 int2float(int4 i4)
+{
+	return (float4)(i4.x,i4.y,i4.z,i4.w);
+}
 //----------------------------------------------------------------------
 int calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 {
@@ -54,7 +59,9 @@ int calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 //----------------------------------------------------------------------
 // Work of a single warp. 
 void block_scan_one_warp(
-					__global int4* cell_compact, 
+					int warp_id, 
+					//__global int4* cell_compact, 
+					int4 cell_compact, 
 					__global float4*   vars_sorted, 
 		   			__global int* cell_indices_start,
 		   			__global int* cell_indices_nb,
@@ -67,9 +74,8 @@ void block_scan_one_warp(
 		   			//__constant struct CellOffsets* cell_offset,  
 
 		   			__constant struct SPHParams* sphp,
-
 		   			__constant struct GridParams* gp,
-					int hash,
+					//int hash,
 					__local  float4* locc   
 					DUMMY_ARGS
 			  )
@@ -77,7 +83,9 @@ void block_scan_one_warp(
 	// next four lines would not be necessary once blocks are concatenated
 	// nb particles in cell with given hash
 
-	int nb = cell_indices_nb[hash];  // grid cell
+	int hash  = cell_compact.x;  // grid cell
+	int nb    = cell_compact.y;  // grid cell
+	int start = cell_compact.z;
 	// advantage (??) of nb32=32 : warp alignment in shared memory
 	int nb32 = 32; // first 32 elements of shared memory: center particles
 
@@ -92,7 +100,6 @@ void block_scan_one_warp(
 	// This cannot happen if I break up blocks that are larger than 32
 	// if (nb > 32) nb = 32;  
 
-
 // Hash size: (32+26) particles per cell * 4 bytes * (densi + vel + vel) 
 //  32  = nb particles in a cell, 26: 1 particle 26 different neihgbor cells
 // Total: 58*4*10 = 2320 bytes  (with float3 in cuda: 7 variables)
@@ -100,64 +107,57 @@ void block_scan_one_warp(
 
 	// work item thread: lid in [0,31]
 	int lid  = get_local_id(0);
+	int numParticles = gp->numParticles;
+
+	// First value is 5. Should be 6. Where did it go? 
+	if (lid < nb) {
+		density(start+lid) = gp->expo.x;
+	}
+	return;
+
+	//density(start+lid) = nb;
+	//return;
+
+	// this updates every values of density array
+	//density(start+lid) = 2;
+	//return;
 
 	// I am assuming that continuous global ids correspond 
 	// to continuous local ids
-	int warp = lid >> 5; // should equal 0,...,nb_warps-1
-	lid = lid - (warp<<5); // in [0,31]
-	//lid = lid % 32;
+	// warp_id = 0,..,nb_warps-1
+	lid = lid - (warp_id<<5); // in [0,31]
 
-
-//----------------------------------
-
-	int numParticles = gp->numParticles; // needed for macros
-	int start = cell_indices_start[hash];
-
-	// Time: 2.7ms if call to density and return
-	//density(start+lid) = sphp->wpoly6_coef * sphp->mass;
-	//density(start+lid) = 1.; // difference with previous line
+	//if (lid > 31) density(start) = lid;
 	//return;
-//----------------------------------------------------------------------
-	//if (get_group_id(0) > 500) return;
-
-//----------------------------------------------------------------------
-
-	// nb threads = nb cells * 32
-	// Initialize all particles [start, start+1, ..., start+nb-1]
-	// start+lid refers to a particular particle
- 	//clf[start+lid] = ri; //ri; always zero for warp 1
 
 	// each cell has its area in shared memory
-	if (lid < nb) {
+	if (lid < nb) { // serialized since only 8 particles per cell
 		// bring particle data from central cell into local memory
 		locc[lid]   = pos(start+lid);
 		locc[lid].w = 0.0f;
-		//cli[start+lid] = warp; //ri;
-		//cli[start+lid].y = nb; // nb is number of particles in cell[hash]
-		//cli[start+lid].z = hash;
-		//cli[start+lid].w = lid;
-
-		// works
-		//clf[start+lid] = pos(start+lid);//[lid]; //ri;
-
-		// does not work with 2 warps and beyond: WHY NOT?
-		//clf[start+lid] = locc[lid];
 	} else { 		// should not be required
-		locc[lid] = 0.;
+		locc[lid] = 0.0f;
 	}
 
 	barrier(CLK_LOCAL_MEM_FENCE); // should not be required
 
 	// same value for 32 threads
-	// index of central cell
-	int4 c = hash_to_grid_index[hash];
+	// get indices of central cell
+	//int4 c = hash_to_grid_index[hash];
+
+	int4 c = get_indices(hash, gp->expo); // only slightly faster
+	density(start+lid) = hash;
+	pos(start+lid) = int2float(gp->expo); 
+	return;
+
 	int cellHash=-1;
 	int cstart=0;
 	int cnb=0;
 
-	int4 cell = 0;
+	int4 cell = (int4) (0,0,0,0);
+	pos(start+lid) = (float4)(0., 0., 0., 0.); // not required
 
-	//barrier(CLK_LOCAL_MEM_FENCE);
+	barrier(CLK_LOCAL_MEM_FENCE);
 
 
 	if (lid < 27) { // FOR DEBUGGING
@@ -165,7 +165,6 @@ void block_scan_one_warp(
 		// perhaps I could define cell_offset[28,29,30,31] 
 		// to avoid if statement?
 		cell = c + cell_offset[lid]; 
-		//cell = c + cell_offset->offsets[lid]; 
 
 		// check whether cellHash is valid? It is in principle
 		// if fluid is always off by 2-3 cells from the boundary. 
@@ -173,14 +172,27 @@ void block_scan_one_warp(
 
 		// cstart not always correct
 		// list of particles in cell with hash cellHash
-		cstart = cell_indices_start[cellHash];
+		// NEED TO combine (start and nb into an int2)
+		cstart = cell_indices_start[cellHash]; // global access
 
-		// one values for each thread in warp (first 27)
-		cnb = cell_indices_nb[cellHash];
-
+		// one value for each thread in warp (first 27)
+		cnb = cell_indices_nb[cellHash];  // global access
+		density(start+lid) = (float) cellHash;
+	//	pos(start+lid) = (float4)(1.,2.,3.,4.);
+		pos(start+lid) = int2float(c); // WRONG
 	} else {
-		return;
+		//return;
+		cnb = 0;
+		cstart = 0;
+		cellHash = 0;
+		//pos(start+lid) = (float4)(-1.,2.,3.,4.);
 	}
+	return;
+
+	// start: particle starting position
+	//clf[start+lid] = int2float(cell_offset[lid]);
+	//cli[start+lid] = (int4)(1,2,3,4); //int2float(c);
+    //return;
 
 	barrier(CLK_LOCAL_MEM_FENCE);
 
@@ -204,13 +216,14 @@ void block_scan_one_warp(
 
 		{
 			// if: no influence on speed, affects results
-			if (i < cnb)   // global access (called 32 times)  // 
+		 return; //no bug
+			if (i < cnb) 
 			{
+		//return; // Bug
 				locc[nb32+lid] = pos(cstart+i); // ith particle in cell
 			} 
 		}
-// AAAA
-return;
+			return;
 
 		barrier(CLK_LOCAL_MEM_FENCE);
 		
@@ -219,64 +232,6 @@ return;
 				float rho1=0;
 				float rho2=0;
 #if 1
-			#if 0
-				r = locc[nb32+0]-ri; 
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+1]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+2]-ri;
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+3]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+4]-ri;
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+5]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+6]-ri;
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+7]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+8]-ri;
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+9]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+10]-ri;
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+11]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+12]-ri;
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+13]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+14]-ri;
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+15]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+16]-ri;
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+17]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+18]-ri;
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+19]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+20]-ri;
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+21]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+22]-ri;
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+23]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+24]-ri;
-				rho1 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+25]-ri;
-				rho2 += Wpoly6_glob(r, sphp->smoothing_distance);
-				r = locc[nb32+26]-ri;
-				rho += Wpoly6_glob(r, sphp->smoothing_distance);
-				rho += rho1 + rho2;
-
-			#else
 			for (int j=0; j < 27; j++)
 			{ 
 				// no need to zero out .w component since I am not using it
@@ -287,8 +242,8 @@ return;
 				// put the check for distance INSIDE the routine. 
 				// much faster then check outside the routine. 
 				rho += Wpoly6_glob(r, sphp->smoothing_distance);
+				rho = 2;
 			}
-			#endif
 #endif
 		}
 	}
@@ -299,6 +254,7 @@ return;
 
 	if (lid < nb) {
 		density(start+lid) = rho * sphp->wpoly6_coef * sphp->mass;
+		//density(start+lid) = rho;
 		//density(start+lid) = locc[lid].w;
 	}
 
@@ -315,16 +271,16 @@ return;
 // Warp size is now 64. 
 //----------------------------------------------------------------------
 __kernel void block_scan(
-					__global float4*   vars_sorted, 
-		   			__global int* cell_indices_start,
-		   			__global int* cell_indices_nb,
+					__global float4*  vars_sorted, 
+		   			__global int*     cell_indices_start,
+		   			__global int*     cell_indices_nb,
 
 		   			//__constant int4* hash_to_grid_index,
-		   			__global int4* hash_to_grid_index,
+		   			__global int4*    hash_to_grid_index,
 
 					// __constant is not working
 		   			//__constant int4* cell_offset,  // DOES NOT WORK OK
-		   			__global int4* cell_offset, 
+		   			__global int4*    cell_offset, 
 		   			//__constant struct CellOffsets* cell_offset,  
 
 		   			//__global struct SPHParams* sphp,
@@ -338,31 +294,18 @@ __kernel void block_scan(
 					DUMMY_ARGS
 			  )
 {
-	int bid = get_group_id(0);
-	if (bid >> rv->compact_size) {
-		return;
-	}
-
-	int numParticles = gp->numParticles; // needed for macros
-	//if (bid >= gp->nb_points) return;
-
 	int lid  = get_local_id(0);
+	int nb_warps = get_local_size(0) >> 5;
+	int warp_id = lid >> 5; // should equal 0, ..., nb_warps-1
+	int bid = get_group_id(0);
 
 	__local int4 l_cell_offset[32];
-	if (lid < 32) {
+	if (lid < 27) {
 		l_cell_offset[lid] = cell_offset[lid];
+		// shift is a constant variable
+		//l_cell_offset[lid] = gp->shift[lid];
 	}
 
-	//int nb_warps = get_local_size(0) >> 5;
-	int nb_warps = get_local_size(0) / 32;
-	//int warp = lid >> 5; // should equal 0, ..., nb_warps-1
-	int warp = lid / 32; // should equal 0, ..., nb_warps-1
-	// 1024 = (32+32)*sizeof(float4) // memory for single warp
-
-	//if (lid == 0) {
-	// unit is float4, so 64 and not 64*sizeof(float4) = 1024
-	//__local float4* locc1 = locc+warp*64; //(warp << 10);   // *1024; 
-	//}
 	barrier(CLK_LOCAL_MEM_FENCE); // should not be required
 
 	// hash: grid cell number
@@ -370,14 +313,21 @@ __kernel void block_scan(
 
 	// if group has 32 threads (=single warp), hash = group number (nb_warp=1, warp=0)
 	// if group has 64 threads (2 warps), 32 threads still handle single group
-	int hash = warp + nb_warps*bid;
+	int pt = warp_id + nb_warps*bid;
+	int numParticles = gp->numParticles;
+	//density(pt) = pt; // seems ok: pt = [0,4806)
+	//return;
 
+	int4 compact = cell_compact[pt];
+	//density(pt) = compact.y;
+	//return;
 
 	// I am now having 2-4 warps per block, each warp handles one cell
 	// I should also have each warp handle two cells (possibly use 
 	// more registers, but that does not matter)
 	// if 2-4 warps per block, it helps WHY? (no synchronization, but less
-	// calls to kernel? Not sure). Each warp still has equal nb memory access. 
+	// calls to kernel? Not sure). Each warp still has equal nb of 
+	// memory accesses. 
 	// Gain on Fermi should be much greater than gain on mac 
 	// (due to L1/L2 cache)
 	// one warp with multiple cells: more work per thread. Good if less memory
@@ -385,36 +335,19 @@ __kernel void block_scan(
 
 	// warp deals with one cell
 	block_scan_one_warp(
-					cell_compact, 
+					warp_id, // which warp: 0,..., nb_warps-1
+					compact,
 					vars_sorted, 
 		   			cell_indices_start,
 		   			cell_indices_nb,
 		   			hash_to_grid_index,
-		   			//cell_offset, 
 		   			l_cell_offset, 
 		   			sphp,
 		   			gp,
-					hash,
-					locc+warp*64 // unit is float4
+					locc+warp_id*64 // unit is float4
 					ARGS);
 	return;
 
-	// same warp deals with next cell
-	#if 0
-	block_scan_one_warp(
-					cell_compact,
-					vars_sorted, 
-		   			cell_indices_start,
-		   			cell_indices_nb,
-		   			hash_to_grid_index,
-		   			//cell_offset, 
-		   			l_cell_offset, 
-		   			sphp,
-		   			gp,
-					hash+1, // change the hash for next cell
-					locc+warp*64 // unit is float4
-					ARGS);
-	#endif
 
 	barrier(CLK_LOCAL_MEM_FENCE); // should not be required
 }

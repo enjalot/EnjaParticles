@@ -95,6 +95,8 @@ GE_SPH::GE_SPH(RTPS *psfr, int n)
 	GridParamsScaled& gps = *(cl_GridParamsScaled->getHostPtr());
 	gp.print();
 	gps.print();
+	cl_GridParams->copyToDevice();
+	cl_GridParamsScaled->copyToDevice();
 }
 
 //----------------------------------------------------------------------
@@ -253,9 +255,10 @@ void GE_SPH::setupArrays()
 	expo.x = log(gp.grid_res.x) / log(2.);
 	expo.y = log(gp.grid_res.y) / log(2.);
 	expo.z = log(gp.grid_res.z) / log(2.);
+	expo.w = 1;
 	gp.expo = expo;
 
-	cl_GridParams->copyToDevice();
+	//cl_GridParams->copyToDevice();
 
     float ss = params.simulation_scale;
 
@@ -274,7 +277,7 @@ void GE_SPH::setupArrays()
 	gps.expo = gp.expo;
 
 
-	cl_GridParamsScaled->copyToDevice();
+	//cl_GridParamsScaled->copyToDevice();
 
 	cl_vars_unsorted = new BufferGE<float4>(ps->cli, nb_el*nb_vars);
 	cl_vars_sorted   = new BufferGE<float4>(ps->cli, nb_el*nb_vars);
@@ -438,11 +441,11 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 		// DEBUGGING
 		//neighborSearch(0); //density
 		blockScan(0);
-		continue;
 
 		//neighborSearch(0); //density
 		printGPUDiagnostics(1);
-		//exit(0);
+		exit(0);
+		continue;
 		return;
 
 		//blockScanPres(0);

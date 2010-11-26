@@ -141,11 +141,6 @@ __kernel void compactifySub4int4Kernel(
 	// figure out offsets
 	int count = 0;
 
-	//output[tid] = (int4) (1,2,3,4);
-	//return;
-
-	//output[tid] = (int4) (input_hash[tid], input_start[tid], input_nb[tid], 1);
-	//return;
 	barrier(CLK_LOCAL_MEM_FENCE);
 
 	#if 1

@@ -43,3 +43,7 @@ so I can deduce the (i,j,k) efficiently, via shift operators (if the grid size
 is a power of two. 
 ----------------------------------------------------------------------
 Does not work yet (version of compactification with int4)
+----------------------------------------------------------------------
+Nov. 25, 2010
+- new branch rtps_compact, for the development of density calculation based on compact array
+----------------------------------------------------------------------

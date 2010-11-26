@@ -29,7 +29,7 @@ void GE_SPH::blockScan(int which)
 			//path = path + "/block_scan_block64a_cl.cl";
 			// optimum size ==> 16 ms for density (9 ms with old code) on mac
 			// many points have density way too high!
-			work_size = 2*32;  // WRONG RESULTS
+			work_size = 1*32;
 
 			int length;
 			char* src = file_contents(path.c_str(), &length);
@@ -52,8 +52,9 @@ void GE_SPH::blockScan(int which)
 	cl_FluidParams->copyToDevice();
 
 	GridParamsScaled* gps = cl_GridParamsScaled->getHostPtr();
+	//gps->print();
+	//exit(0);
 
-	
 	int iarg = 0;
 	//kern.setArg(iarg++, gps->nb_points);
 	kern.setArg(iarg++, cl_vars_sorted->getDevicePtr());
@@ -123,7 +124,7 @@ void GE_SPH::blockScan(int which)
 	ps->cli->queue.finish();
 	ts_cl[TI_DENS]->end();
 
-	//printBlockScanDebug();
+	printBlockScanDebug();
 	//exit(0);
 }
 //----------------------------------------------------------------------
@@ -173,6 +174,7 @@ void GE_SPH::printBlockScanDebug()
 	#if 1
 	printf("============================================\n");
 
+
 	clf_debug->copyToHost();
 	cli_debug->copyToHost();
 	float4* fclf = clf_debug->getHostPtr();
@@ -180,14 +182,20 @@ void GE_SPH::printBlockScanDebug()
 	cl_cell_indices_nb->copyToHost();
 	int* nb = cl_cell_indices_nb->getHostPtr();
 
+	cl_cell_compact->copyToHost();
+	int4* cmp = cl_cell_compact->getHostPtr();
+
 	cl_index_neigh->copyToHost();
 	int* n = cl_index_neigh->getHostPtr();
 
 	int count=0;
 	GridParamsScaled* gps = cl_GridParamsScaled->getHostPtr();
 
-	for (int i=0; i < gps->nb_points; i++) { 
-		if (nb[i] <= 0) continue;
+	//for (int i=0; i < gps->nb_points; i++) { 
+	printf("nb_el= %d\n", nb_el); 
+	for (int i=0; i < nb_el; i++) { 
+		//if (nb[i] <= 0) continue;
+		//if (cmp[i].y <= 0) continue;
 		count += nb[i];
 		printf("----------------------------\n");
 		printf("clf[%d]= %f, %f, %f, %f\n", i, fclf[i].x, fclf[i].y, fclf[i].z, fclf[i].w);
