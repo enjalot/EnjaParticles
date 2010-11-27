@@ -65,15 +65,9 @@ void block_scan_one_warp(
 					__global float4*   vars_sorted, 
 		   			__global int* cell_indices_start,
 		   			__global int* cell_indices_nb,
-		   			//__global int4* hash_to_grid_index,
-		   			//__constant int4* cell_offset, 
-		   			//__global int4* cell_offset, 
 		   			__local int4* cell_offset, 
-		   			//__constant struct CellOffsets* cell_offset,  
-
 		   			__constant struct SPHParams* sphp,
 		   			__constant struct GridParams* gp,
-					//int hash,
 					__local  float4* locc   
 					DUMMY_ARGS
 			  )
