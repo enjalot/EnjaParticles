@@ -60,4 +60,9 @@ to problems.  Better to have int4, int4, int4, int
 ----------------------------------------------------------------------
 One reason density computation is so slow (70 ms) with new compact arrays is that density 
 is a float4 (and not a float) to simplify my programming. So global memory access is more expensive
+
+calling wpoly routine: 21.8656 ms
+Not calling wpoly routine (inline): 19.357 ms (gain of 10%)
+
+Will work well on Fermi. If 20x over Mac, then density: 
 ----------------------------------------------------------------------

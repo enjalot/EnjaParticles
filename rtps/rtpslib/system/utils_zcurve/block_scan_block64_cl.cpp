@@ -61,7 +61,7 @@ int calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 // Work of a single warp. 
 void block_scan_one_warp(
 					int warp_id, 
-					int4 cell_compact, 
+					__local int4 cell_compact, 
 					__global float4*   vars_sorted, 
 		   			__global int* cell_indices_start,
 		   			__global int* cell_indices_nb,
@@ -123,8 +123,6 @@ void block_scan_one_warp(
 	int new_start = cell_indices_start[hash];
 	int new_nb = cell_indices_nb[hash];
 	if (lid < nb) {
-		//pos(start+lid).x = start;
-		//pos(start+lid).y = new_start;
 		//if (start != new_start) {
 		if (nb != new_nb) {
 			density(start+lid) = -5;
@@ -143,9 +141,6 @@ void block_scan_one_warp(
 	// same value for 32 threads
 	// get indices of central cell
 	int4 c = get_indices(hash, gp->expo); // only slightly faster
-
-	//pos(start+lid) = int2float(c);
-	//return;
 
 	int cellHash=-1;
 	int cstart=0;
@@ -188,27 +183,29 @@ void block_scan_one_warp(
 	// accumulate data from neighboring cells (lid in [0,26])
 
 	float rho = 0.;
+	float4 r;
+	float4 rj;
 
 	// if there is a max of 8 particles per neighbor cell, I should only 
 	// loop a max of 8 times!
+	// Important to compute the maximum number of particles across all neighbors to 
+	// minimize number of times loop is called
 	for (int i=0; i < 8; i++)
 	{   		// max of 8 particles per cell
 
 		// lid in [0,27)
-		locc[nb32+lid] = (float4)(900., 900., 900., 1.);
 		barrier(CLK_LOCAL_MEM_FENCE);
 
 // ERROR BETWEEN HERE AND AAAA
 		// Bring in single particle from neighboring blocks, one per thread
-
-		// ith particle in cell
 		// cstart is different for each neighbor cell
-		if (i < cnb) locc[nb32+lid] = pos(cstart+i); 
-
-		barrier(CLK_LOCAL_MEM_FENCE);
+		if (i < cnb) {
+			locc[nb32+lid] = pos(cstart+i); 
+		} else {
+			locc[nb32+lid] = (float4)(900., 900., 900., 1.);
+		}
 		
 		{
-		    float4 r;
 			// All particles in the center cell are handled in parallel
 			for (int j=0; j < 27; j++)
 			{ 
@@ -216,17 +213,25 @@ void block_scan_one_warp(
 				// and it is initialized to zero
 				// I am loading 8 items from locc, but only use one. rj is computed on each 
 				// thread, and takes on the same value
-				float4 rj = locc[nb32+j]; 
-				float4 r = rj-ri;
+				//rj = locc[nb32+j]; 
+				//r = rj-ri;
+
+				r = locc[nb32+j] - ri;
 
 				// put the check for distance INSIDE the routine. 
 				// much faster then check outside the routine. 
 
 				// next line takes 30 ms!
 				//rho += Wpoly6_glob(r, sphp->smoothing_distance);
-				rho += Wpoly6_glob(r, 0.016153f);
-				// smoothing distance: 0.016 (very few points < 0.016)
-				//rho = sphp->smoothing_distance;
+				rho += Wpoly6_glob(r, 0.016153f); // twice  the time of rho += 1 (10 ms)
+	// costs 30ms
+    //float r2 = r.x*r.x + r.y*r.y + r.z*r.z;  // dist_squared(r);
+	//float hr2 = (0.016153*0.016153-r2); 
+
+	//if (hr2 > 0) {
+		//rho += hr2*hr2*hr2;
+	//} 
+				//rho += 1.0;  
 			}
 		}
 	}
@@ -300,7 +305,21 @@ __kernel void block_scan(
 	//density(pt) = gp->nb_points; // 1 // WRONG
 	//return;
 
-	int4 compact = cell_compact[pt];
+	__local int4 loc_compact;
+
+	// Using temporary memory messes up the density of the last point!!! HOW?
+	// This happens when more than one warp per block. In that case, loc_compact should 
+	// be dimensioned according to the number of warps
+	// ONLY USE SINGLE WARP PER BLOCK with this technique
+	if (lid == 0) {
+		loc_compact = cell_compact[pt]; // single global access
+	}
+	barrier(CLK_LOCAL_MEM_FENCE); // should not be required
+	barrier(CLK_GLOBAL_MEM_FENCE); // should not be required
+
+
+	//int4 compact = tmp; 
+	//int4 compact = cell_compact[pt];
 	//density(pt) = compact.y;
 	//return;
 
@@ -318,7 +337,7 @@ __kernel void block_scan(
 	// warp deals with one cell
 	block_scan_one_warp(
 					warp_id, // which warp: 0,..., nb_warps-1
-					compact,
+					loc_compact,
 					vars_sorted, 
 		   			cell_indices_start,
 		   			cell_indices_nb,
