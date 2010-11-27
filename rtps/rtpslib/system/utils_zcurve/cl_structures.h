@@ -42,11 +42,11 @@ struct GridParamsScaled
     float4          grid_res;
     float4          grid_delta;
     float4          grid_inv_delta;
+	int4			expo; // grid_res = 2^expo
+	int4			shift[27]; // neighbors
     int             numParticles; // nb fluid particles: wrong spot for this variable
     int             nb_vars; // for combined variables (vars_sorted, etc.)
     int             nb_points; // total number of grid points
-	int4			expo; // grid_res = 2^expo
-	int4			shift[27]; // neighbors
 };
 //----------------------------------------------------------------------
 struct GridParams
@@ -61,11 +61,11 @@ struct GridParams
     float4          grid_res;
     float4          grid_delta;
     float4          grid_inv_delta;
+	int4			expo; // grid_res = 2^expo
+	int4			shift[27]; // neighbors
     int             numParticles; // nb fluid particles: wrong spot for this variable
     int             nb_vars; // for combined variables (vars_sorted, etc.)
     int             nb_points; // total number of grid points
-	int4			expo; // grid_res = 2^expo
-	int4			shift[27]; // neighbors
 };
 //----------------------------------------------------------------------
 struct FluidParams

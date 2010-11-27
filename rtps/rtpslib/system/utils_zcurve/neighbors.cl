@@ -55,11 +55,11 @@ struct GridParamsScaled
     float4 grid_res;
     float4 grid_delta;
     float4 grid_inv_delta;
+ int4 expo;
+ int4 shift[27];
     int num;
     int nb_vars;
     int nb_points;
- int4 expo;
- int4 shift[27];
 };
 
 struct GridParams
@@ -74,11 +74,11 @@ struct GridParams
     float4 grid_res;
     float4 grid_delta;
     float4 grid_inv_delta;
+ int4 expo;
+ int4 shift[27];
     int num;
     int nb_vars;
     int nb_points;
- int4 expo;
- int4 shift[27];
 };
 
 struct FluidParams

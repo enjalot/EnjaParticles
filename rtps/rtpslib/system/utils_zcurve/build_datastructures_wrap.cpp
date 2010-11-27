@@ -72,14 +72,12 @@ void GE_SPH::buildDataStructures()
 	//printf("AFTER BUILD ARGS\n");
 
 	int err;
-	//printf("EXECUTE BUILD\n");
-
+	printf("BEFORE EXECUTE BUILD\n");
    	kern.execute(nb_el, workSize); 
-	//printf("AFTER EXECUTE BUILD\n");
+	printf("AFTER EXECUTE BUILD\n");
 
 	//printBuildDiagnostics();
 	//printf("after build diagnostics\n");
-	//exit(0);
 
     ps->cli->queue.finish();
 

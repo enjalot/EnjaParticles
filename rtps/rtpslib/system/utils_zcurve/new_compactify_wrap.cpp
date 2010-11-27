@@ -57,7 +57,7 @@ void GE_SPH::newCompactifyWrap(BufferGE<int>& cl_orig, BufferGE<int>&  cl_compac
 
 	int nb_blocks_4 = nb_blocks;
 	int work_size_4 = work_size;
-	sub4(cl_orig, work_size, nb_blocks, cl_sum_out, cl_compact);
+	sub4(cl_orig, work_size_4, nb_blocks_4, cl_sum_out, cl_compact);
 }
 //----------------------------------------------------------------------
 void GE_SPH::newCompactifyWrap(BufferGE<int>& cl_orig, BufferGE<int4>&  cl_compact, 
@@ -76,6 +76,9 @@ void GE_SPH::newCompactifyWrap(BufferGE<int>& cl_orig, BufferGE<int4>&  cl_compa
 
 	int nb_blocks = cl_orig.getSize() / work_size;
 	int nb_blocks_1 = nb_blocks / work_size_1; 
+
+	//printf("size: %d\n", cl_orig.getSize());  // 262144
+	//exit(0);
 
 	printf("work_size, work_size_1= %d, %d\n", work_size, work_size_1);
 	printf("nb_blocks, nb_blocks_1= %d, %d\n", nb_blocks, nb_blocks_1);
@@ -496,9 +499,10 @@ void GE_SPH::sub4int4(BufferGE<int>& cl_orig, int work_size, int nb_blocks,  Buf
 	kern.setArg(iarg++, cl_compact.getDevicePtr());
 	#else
 	kern.setArg(iarg++, cl_compact.getDevicePtr());
-	kern.setArg(iarg++, cl_sort_hashes->getDevicePtr());
-	kern.setArg(iarg++, cl_cell_indices_nb->getDevicePtr());
-	kern.setArg(iarg++, cl_cell_indices_start->getDevicePtr());
+	// NOT SURE ABOUT cl_sort_hashes (PER PARTICLE)
+	kern.setArg(iarg++, cl_sort_hashes->getDevicePtr());  // size: nb_el
+	kern.setArg(iarg++, cl_cell_indices_nb->getDevicePtr()); // grid size
+	kern.setArg(iarg++, cl_cell_indices_start->getDevicePtr()); // grid size
 	kern.setArg(iarg++, cl_sum_out.getDevicePtr()); 
 	kern.setArg(iarg++, cl_return_values->getDevicePtr()); // size  320k
 	kern.setArg(iarg++, cl_compact.getSize());
@@ -544,19 +548,32 @@ void GE_SPH::sub4int4(BufferGE<int>& cl_orig, int work_size, int nb_blocks,  Buf
 	int* in = cl_orig.getHostPtr();
 	int4* ou = cl_compact.getHostPtr();
 	cl_cell_indices_nb->copyToHost();
+	cl_cell_indices_start->copyToHost();
 	int* nbb = cl_cell_indices_nb->getHostPtr();
+	int* stt = cl_cell_indices_start->getHostPtr();
 
 	int tot = 0;
-	for (int i=0; i < cl_compact.getSize(); i++) {
-		if (ou[i].y > 0) {
-			printf("orig[%d]= %d, compact[%d]= %d, %d, %d \n", i, in[i], i, ou[i].x, ou[i].y, ou[i].z);
-			tot += ou[i].y;
-		}
+	printf("Hashes should be monotonically increasing\n");
+	printf("hash[compact], nb[compact], start[compact]");
+	for (int i=0; i < rv->compact_size; i++) {
+		printf("compact[%d]= %d, %d, %d \n", i, ou[i].x, ou[i].y, ou[i].z);
+		tot += ou[i].y;
 	}
+	printf("----------------------------------------\n");
 	printf("tot nb part = %d\n", tot); 
 	printf("compact size: %d\n", cl_compact.getSize());
 	printf("global= %d\n", global);
 	printf("work_size= %d, nb_blocks= %d\n", work_size, nb_blocks);
+	printf("----------------------------------------\n");
+
+	GridParamsScaled* gps = cl_GridParamsScaled->getHostPtr();
+	printf("loop over all grid cells, only print cells with particles\n");
+	printf("nb[cell_index], start[cell_index]\n");
+	for (int i=0; i < gps->nb_points; i++) {
+		if (nbb[i] == 0) continue;
+		printf("nb[%d]= %d, start[%d]= %d\n", i, nbb[i], i, stt[i]);
+	}
+	printf("----------------------------------------\n");
 	//exit(0);
 
 	cl_sum_out.copyToHost();

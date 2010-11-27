@@ -42,7 +42,6 @@ void GE_SPH::blockScan(int which)
 		}
 	}
 
-
 	nb_warps = work_size / 32;
 
 	Kernel kern = block_scan_kernel;
@@ -51,9 +50,21 @@ void GE_SPH::blockScan(int which)
 	fp->choice = which;
 	cl_FluidParams->copyToDevice();
 
+	// cl_cell_offset and gps->shift appear to be the same
 	GridParamsScaled* gps = cl_GridParamsScaled->getHostPtr();
-	//gps->print();
-	//exit(0);
+	cl_GridParamsScaled->copyToDevice();
+	printf("BEFORE EXEC\n");
+
+	#if 0
+	gps->print();
+	printf("----- cl_cell_offset \n");
+	cl_cell_offset->getDevicePtr();
+	int4* co = cl_cell_offset->getHostPtr();
+	for (int i=0; i < 27; i++) {
+		co[i].print("cell offset");
+	}
+	exit(0);
+	#endif
 
 	int iarg = 0;
 	//kern.setArg(iarg++, gps->nb_points);
@@ -121,6 +132,10 @@ void GE_SPH::blockScan(int which)
 	ps->cli->queue.finish();
 	ts_cl[TI_DENS]->start();
 	kern.execute(global, work_size);
+
+	printf("AFTER EXEC\n");
+	gps->print();
+
 	ps->cli->queue.finish();
 	ts_cl[TI_DENS]->end();
 

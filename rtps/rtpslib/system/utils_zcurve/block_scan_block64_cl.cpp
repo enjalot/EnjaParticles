@@ -12,6 +12,7 @@
 #include "get_indices_cl.cpp"
 //#include "block_scan_one_warp_multi_warp_cl.cpp"
 
+//----------------------------------------------------------------------
 float4 int2float(int4 i4)
 {
 	return (float4)(i4.x,i4.y,i4.z,i4.w);
@@ -60,14 +61,11 @@ int calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges)
 // Work of a single warp. 
 void block_scan_one_warp(
 					int warp_id, 
-					//__global int4* cell_compact, 
 					int4 cell_compact, 
 					__global float4*   vars_sorted, 
 		   			__global int* cell_indices_start,
 		   			__global int* cell_indices_nb,
-
 		   			__global int4* hash_to_grid_index,
-
 		   			//__constant int4* cell_offset, 
 		   			//__global int4* cell_offset, 
 		   			__local int4* cell_offset, 
@@ -86,6 +84,8 @@ void block_scan_one_warp(
 	int hash  = cell_compact.x;  // grid cell
 	int nb    = cell_compact.y;  // grid cell
 	int start = cell_compact.z;
+
+
 	// advantage (??) of nb32=32 : warp alignment in shared memory
 	int nb32 = 32; // first 32 elements of shared memory: center particles
 
@@ -109,26 +109,10 @@ void block_scan_one_warp(
 	int lid  = get_local_id(0);
 	int numParticles = gp->numParticles;
 
-	// First value is 5. Should be 6. Where did it go? 
-	if (lid < nb) {
-		density(start+lid) = gp->expo.x;
-	}
-	return;
-
-	//density(start+lid) = nb;
-	//return;
-
-	// this updates every values of density array
-	//density(start+lid) = 2;
-	//return;
-
 	// I am assuming that continuous global ids correspond 
 	// to continuous local ids
 	// warp_id = 0,..,nb_warps-1
 	lid = lid - (warp_id<<5); // in [0,31]
-
-	//if (lid > 31) density(start) = lid;
-	//return;
 
 	// each cell has its area in shared memory
 	if (lid < nb) { // serialized since only 8 particles per cell
@@ -139,26 +123,46 @@ void block_scan_one_warp(
 		locc[lid] = 0.0f;
 	}
 
+
+
+	#if 0
+	// Check: 
+	// This check fails most of the time!!! WHY? 
+	int new_start = cell_indices_start[hash];
+	int new_nb = cell_indices_nb[hash];
+	if (lid < nb) {
+		//pos(start+lid).x = start;
+		//pos(start+lid).y = new_start;
+		//if (start != new_start) {
+		if (nb != new_nb) {
+			density(start+lid) = -5;
+		} else {
+			density(start+lid) = -15;
+		}
+	} else {
+		density(start+lid) = -35;
+	}
+	return;
+	#endif
+
 	barrier(CLK_LOCAL_MEM_FENCE); // should not be required
+	//barrier(CLK_GLOBAL_MEM_FENCE);
 
 	// same value for 32 threads
 	// get indices of central cell
 	//int4 c = hash_to_grid_index[hash];
-
 	int4 c = get_indices(hash, gp->expo); // only slightly faster
-	density(start+lid) = hash;
-	pos(start+lid) = int2float(gp->expo); 
-	return;
+
+	//pos(start+lid) = int2float(c);
+	//return;
 
 	int cellHash=-1;
 	int cstart=0;
 	int cnb=0;
 
 	int4 cell = (int4) (0,0,0,0);
-	pos(start+lid) = (float4)(0., 0., 0., 0.); // not required
 
 	barrier(CLK_LOCAL_MEM_FENCE);
-
 
 	if (lid < 27) { // FOR DEBUGGING
 		// index of neighbor cell (including center)
@@ -177,22 +181,12 @@ void block_scan_one_warp(
 
 		// one value for each thread in warp (first 27)
 		cnb = cell_indices_nb[cellHash];  // global access
-		density(start+lid) = (float) cellHash;
-	//	pos(start+lid) = (float4)(1.,2.,3.,4.);
-		pos(start+lid) = int2float(c); // WRONG
 	} else {
-		//return;
+		return;
 		cnb = 0;
 		cstart = 0;
 		cellHash = 0;
-		//pos(start+lid) = (float4)(-1.,2.,3.,4.);
 	}
-	return;
-
-	// start: particle starting position
-	//clf[start+lid] = int2float(cell_offset[lid]);
-	//cli[start+lid] = (int4)(1,2,3,4); //int2float(c);
-    //return;
 
 	barrier(CLK_LOCAL_MEM_FENCE);
 
@@ -204,58 +198,55 @@ void block_scan_one_warp(
 
 	float rho = 0.;
 
-	// if there are 8 neighbors, I should only loop 8 times!
+	// if there is a max of 8 particles per neighbor cell, I should only 
+	// loop a max of 8 times!
 	for (int i=0; i < 8; i++)
 	{   		// max of 8 particles per cell
 
+		// lid in [0,27)
 		locc[nb32+lid] = (float4)(900., 900., 900., 1.);
-		//barrier(CLK_LOCAL_MEM_FENCE);
+		barrier(CLK_LOCAL_MEM_FENCE);
 
 // ERROR BETWEEN HERE AND AAAA
 		// Bring in single particle from neighboring blocks, one per thread
 
-		{
-			// if: no influence on speed, affects results
-		 return; //no bug
-			if (i < cnb) 
-			{
-		//return; // Bug
-				locc[nb32+lid] = pos(cstart+i); // ith particle in cell
-			} 
-		}
-			return;
+		// ith particle in cell
+		// cstart is different for each neighbor cell
+		if (i < cnb) locc[nb32+lid] = pos(cstart+i); 
+
+	//return;
 
 		barrier(CLK_LOCAL_MEM_FENCE);
 		
 		{
-				float4 r;
-				float rho1=0;
-				float rho2=0;
-#if 1
+		    float4 r;
+			// All particles in the center cell are handled in parallel
 			for (int j=0; j < 27; j++)
 			{ 
 				// no need to zero out .w component since I am not using it
 				// and it is initialized to zero
+				// I am loading 8 items from locc, but only use one. rj is computed on each 
+				// thread, and takes on the same value
 				float4 rj = locc[nb32+j]; // CORRECT LINE????
 				float4 r = rj-ri;
 
 				// put the check for distance INSIDE the routine. 
 				// much faster then check outside the routine. 
+
+				// next line takes 30 ms!
 				rho += Wpoly6_glob(r, sphp->smoothing_distance);
-				rho = 2;
+				// smoothing distance: 0.016 (very few points < 0.016)
+				//rho = sphp->smoothing_distance;
 			}
-#endif
 		}
 	}
 
-#endif
 
 	barrier(CLK_LOCAL_MEM_FENCE);
 
 	if (lid < nb) {
+		// takes 30 ms !!!
 		density(start+lid) = rho * sphp->wpoly6_coef * sphp->mass;
-		//density(start+lid) = rho;
-		//density(start+lid) = locc[lid].w;
 	}
 
 	return;
@@ -274,19 +265,9 @@ __kernel void block_scan(
 					__global float4*  vars_sorted, 
 		   			__global int*     cell_indices_start,
 		   			__global int*     cell_indices_nb,
-
-		   			//__constant int4* hash_to_grid_index,
 		   			__global int4*    hash_to_grid_index,
-
-					// __constant is not working
-		   			//__constant int4* cell_offset,  // DOES NOT WORK OK
 		   			__global int4*    cell_offset, 
-		   			//__constant struct CellOffsets* cell_offset,  
-
-		   			//__global struct SPHParams* sphp,
 		   			__constant struct SPHParams* sphp,
-
-		   			//__global struct GridParams* gp,
 		   			__constant struct GridParams* gp,
 					__global int4* cell_compact, 
 					__constant struct GPUReturnValues* rv, 
@@ -304,6 +285,7 @@ __kernel void block_scan(
 		l_cell_offset[lid] = cell_offset[lid];
 		// shift is a constant variable
 		//l_cell_offset[lid] = gp->shift[lid];
+		// Obviously, gp->shift and cell_offset are not identical!
 	}
 
 	barrier(CLK_LOCAL_MEM_FENCE); // should not be required
@@ -316,6 +298,12 @@ __kernel void block_scan(
 	int pt = warp_id + nb_warps*bid;
 	int numParticles = gp->numParticles;
 	//density(pt) = pt; // seems ok: pt = [0,4806)
+	//return;
+
+	//density(pt) = gp->expo.x; // 5
+	//density(pt) = gp->expo.y; // 7
+	//density(pt) = gp->expo.z; // 1 // WRONG
+	//density(pt) = gp->nb_points; // 1 // WRONG
 	//return;
 
 	int4 compact = cell_compact[pt];
@@ -347,7 +335,6 @@ __kernel void block_scan(
 					locc+warp_id*64 // unit is float4
 					ARGS);
 	return;
-
 
 	barrier(CLK_LOCAL_MEM_FENCE); // should not be required
 }

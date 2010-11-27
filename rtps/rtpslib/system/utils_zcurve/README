@@ -47,3 +47,14 @@ Does not work yet (version of compactification with int4)
 Nov. 25, 2010
 - new branch rtps_compact, for the development of density calculation based on compact array
 ----------------------------------------------------------------------
+Nov 26, 2010
+- in gridParam structure, be careful when adding int4 to the structure since
+they should be aligned. So having int4, int4, int, int4 will ikely to lead
+to problems.  Better to have int4, int4, int4, int
+----------------------------------------------------------------------
+- timing on mac: 32k particles, 360k grid: 25ms for density (used to be 50 ms)
+----------------------------------------------------------------------
+	kern.setArg(iarg++, cl_sort_hashes->getDevicePtr());  // size: nb_el
+	kern.setArg(iarg++, cl_cell_indices_nb->getDevicePtr()); // grid size
+	kern.setArg(iarg++, cl_cell_indices_start->getDevicePtr()); // grid size
+----------------------------------------------------------------------

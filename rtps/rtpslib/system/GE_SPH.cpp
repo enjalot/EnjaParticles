@@ -433,7 +433,6 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 		buildDataStructures(); 
 
 		printf("... enter newCompactifyWrap ...\n");
-		//newCompactifyWrap(cl_input, *cl_cell_compact, *cl_processorCounts, *cl_processorOffsets);
 		newCompactifyWrap(*cl_cell_indices_nb, *cl_cell_compact, *cl_processorCounts, *cl_processorOffsets);
 		printf("... exit newCompactifyWrap ...\n");
 
@@ -444,6 +443,7 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 
 		//neighborSearch(0); //density
 		printGPUDiagnostics(1);
+		printf("exit GPU diagonistics\n");
 		exit(0);
 		continue;
 		return;
@@ -894,8 +894,8 @@ void GE_SPH::printGPUDiagnostics(int count)
 				printf("-------- i = %d --------\n", i);
 				//printf("(%d) pos: %f, %f, %f, rho= %f\n", i, count, p.x, p.y, p.z, rho);
 				printf("(%d,%d) pos: %g, %g, %g, %g, rho=%g\n", i, count, p.x, p.y, p.z, p.w, rho);
-				printf("(%d,%d) vel: %g, %g, %g, %g\n", i, count, vel.x, vel.y, vel.z, vel.w);
-				printf("(%d,%d) veleval: %g, %g, %g\n", i, count, veval.x, veval.y, veval.z);
+				//printf("(%d,%d) vel: %g, %g, %g, %g\n", i, count, vel.x, vel.y, vel.z, vel.w);
+				//printf("(%d,%d) veleval: %g, %g, %g\n", i, count, veval.x, veval.y, veval.z);
 				printf("(%d,%d) density: %g\n", i, count, rho);
 			//}
 	

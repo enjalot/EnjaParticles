@@ -77,11 +77,11 @@ struct GridParams
     float4          grid_res;
     float4          grid_delta;
     float4          grid_inv_delta;
+	int4			expo; // grid_res = 2^exp
+	int4			shift[27]; // neighbors
 	int				numParticles;
 	int				nb_vars; // for combined array
 	int 			nb_points; // nb grid points
-	int4			expo; // grid_res = 2^exp
-	int4			shift[27]; // neighbors
 
 	void print()
 	{
@@ -118,11 +118,11 @@ struct GridParamsScaled
 
     float4          grid_delta;
     float4          grid_inv_delta;
+	int4			expo; // grid_res = 2^exp
+	int4			shift[27]; // neighbors
 	int				numParticles;
 	int				nb_vars; // for combined array
 	int				nb_points;
-	int4			expo; // grid_res = 2^exp
-	int4			shift[27]; // neighbors
 
 	void print() {
 		printf("----- GridParmsScaled ----\n");

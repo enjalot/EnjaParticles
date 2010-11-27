@@ -74,7 +74,7 @@ int compactSIMDwarp(__global int* a, __local int* result, __local int* bout, __l
 #endif
 //----------------------------------------------------------------------
 // non-efficient
-int compactSIMD(__global int* nb, __global int* hash, __global int* start, 
+int compactSIMD(__constant int st, __global int* nb, __global int* start, 
      __local int4* result, __local int* cnt)
 {
 	// compact a single block
@@ -87,13 +87,18 @@ int compactSIMD(__global int* nb, __global int* hash, __global int* start,
 	if (lid == 0) {
 		for (int i=0; i < block_size; i++) {
 			if (nb[i] != 0) {
-				result[count] = (int4)(hash[i], nb[i], start[i], 0);
+				// ****** something wrong? ******
+				// size(nb) and size(start): gp.nb_points
+				// size(hash): nb particles 
+				result[count] = (int4)(st+i, nb[i], start[i], 0);
 				//result[count] = (int4)(1,2,3,4);
 				count++;
 			}
 		}
 		*cnt = count;
 	}
+
+	// count: number of elements in compacted section of block
 	barrier(CLK_LOCAL_MEM_FENCE);
 	return *cnt;
 }
@@ -114,6 +119,7 @@ __kernel void compactifySub4int4Kernel(
 // (0,0,1,2,0,7) ==> (2,1,7,0,0,0)  
 // order is not important
 {
+// I AM NOT SURE ABOUT INPUT_HASH array!!!!
 
 	// count: number of valid elements for each block
 	// assume 32 threads per block
@@ -149,7 +155,7 @@ __kernel void compactifySub4int4Kernel(
 	//int numValid = compactSIMD(input+block_size*bid, b, cnt);
 	int st = block_size*bid;
 	//int numValid = compactSIMD(input+block_size*bid, b, cnt);
-	int numValid = compactSIMD(input_nb+st, input_hash+st, input_start+st, b, cnt);
+	int numValid = compactSIMD(st, input_nb+st, input_start+st, b, cnt);
 	if (lid < numValid) {
 		output[j+lid] = b[lid];
 		//output[j+tid] = input_nb[st+lid];
@@ -162,7 +168,6 @@ __kernel void compactifySub4int4Kernel(
 	//int numValid = bid;
 		//input[tid] = tid;
 	//return;
-
 
 
 	if (lid < numValid) {
