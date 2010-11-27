@@ -58,3 +58,6 @@ to problems.  Better to have int4, int4, int4, int
 	kern.setArg(iarg++, cl_cell_indices_nb->getDevicePtr()); // grid size
 	kern.setArg(iarg++, cl_cell_indices_start->getDevicePtr()); // grid size
 ----------------------------------------------------------------------
+One reason density computation is so slow (70 ms) with new compact arrays is that density 
+is a float4 (and not a float) to simplify my programming. So global memory access is more expensive
+----------------------------------------------------------------------

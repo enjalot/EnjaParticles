@@ -117,8 +117,6 @@ void block_scan_one_warp(
 		locc[lid] = 0.0f;
 	}
 
-
-
 	#if 0
 	// Check: 
 	// This check fails most of the time!!! WHY? 
@@ -207,8 +205,6 @@ void block_scan_one_warp(
 		// cstart is different for each neighbor cell
 		if (i < cnb) locc[nb32+lid] = pos(cstart+i); 
 
-	//return;
-
 		barrier(CLK_LOCAL_MEM_FENCE);
 		
 		{
@@ -220,20 +216,26 @@ void block_scan_one_warp(
 				// and it is initialized to zero
 				// I am loading 8 items from locc, but only use one. rj is computed on each 
 				// thread, and takes on the same value
-				float4 rj = locc[nb32+j]; // CORRECT LINE????
+				float4 rj = locc[nb32+j]; 
 				float4 r = rj-ri;
 
 				// put the check for distance INSIDE the routine. 
 				// much faster then check outside the routine. 
 
 				// next line takes 30 ms!
-				rho += Wpoly6_glob(r, sphp->smoothing_distance);
+				//rho += Wpoly6_glob(r, sphp->smoothing_distance);
+				rho += Wpoly6_glob(r, 0.016153f);
 				// smoothing distance: 0.016 (very few points < 0.016)
 				//rho = sphp->smoothing_distance;
 			}
 		}
 	}
 
+	// for faster speed: 
+	// use textures access for kernels (with hardware linear interpolation, but less accurate)
+	// use z-curve indexing for better ordering of sorted particles (essentially reorder the 
+	//     grid cells)
+	//  
 
 	barrier(CLK_LOCAL_MEM_FENCE);
 

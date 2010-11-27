@@ -4,6 +4,7 @@
 //----------------------------------------------------------------------
 float Wpoly6_glob(float4 r, float h)
 {
+	// costs 30ms
     float r2 = r.x*r.x + r.y*r.y + r.z*r.z;  // dist_squared(r);
 
 	float hr2 = (h*h-r2); 

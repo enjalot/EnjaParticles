@@ -138,6 +138,7 @@ struct SPHParams
 
 float Wpoly6_glob(float4 r, float h)
 {
+
     float r2 = r.x*r.x + r.y*r.y + r.z*r.z;
 
  float hr2 = (h*h-r2);
@@ -152,7 +153,7 @@ float Wpoly6_glob(float4 r, float h)
 float Wpoly6(float4 r, float h, __constant struct SPHParams* params)
 {
     float r2 = r.x*r.x + r.y*r.y + r.z*r.z;
-# 29 "wpoly6.cl"
+# 30 "wpoly6.cl"
  float hr2 = (h*h-r2);
 
  return hr2*hr2*hr2;
@@ -194,7 +195,7 @@ float Wspiky(float rlen, float h, __constant struct SPHParams* params)
 
 float Wspiky_dr(float rlen, float h, __constant struct SPHParams* params)
 {
-# 79 "wpoly6.cl"
+# 80 "wpoly6.cl"
  float hr2 = h - rlen;
  return -hr2*hr2/rlen;
 
