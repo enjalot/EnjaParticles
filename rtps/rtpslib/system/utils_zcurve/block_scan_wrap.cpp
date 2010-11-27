@@ -71,7 +71,7 @@ void GE_SPH::blockScan(int which)
 	kern.setArg(iarg++, cl_vars_sorted->getDevicePtr());
 	kern.setArg(iarg++, cl_cell_indices_start->getDevicePtr());
 	kern.setArg(iarg++, cl_cell_indices_nb->getDevicePtr());
-	kern.setArg(iarg++, cl_hash_to_grid_index->getDevicePtr());
+	//kern.setArg(iarg++, cl_hash_to_grid_index->getDevicePtr());
 	kern.setArg(iarg++, cl_cell_offset->getDevicePtr());
 	//kern.setArg(iarg++, cl_CellOffsets->getDevicePtr());
 	kern.setArg(iarg++, cl_params->getDevicePtr());

@@ -65,7 +65,7 @@ void block_scan_one_warp(
 					__global float4*   vars_sorted, 
 		   			__global int* cell_indices_start,
 		   			__global int* cell_indices_nb,
-		   			__global int4* hash_to_grid_index,
+		   			//__global int4* hash_to_grid_index,
 		   			//__constant int4* cell_offset, 
 		   			//__global int4* cell_offset, 
 		   			__local int4* cell_offset, 
@@ -150,7 +150,6 @@ void block_scan_one_warp(
 
 	// same value for 32 threads
 	// get indices of central cell
-	//int4 c = hash_to_grid_index[hash];
 	int4 c = get_indices(hash, gp->expo); // only slightly faster
 
 	//pos(start+lid) = int2float(c);
@@ -265,7 +264,6 @@ __kernel void block_scan(
 					__global float4*  vars_sorted, 
 		   			__global int*     cell_indices_start,
 		   			__global int*     cell_indices_nb,
-		   			__global int4*    hash_to_grid_index,
 		   			__global int4*    cell_offset, 
 		   			__constant struct SPHParams* sphp,
 		   			__constant struct GridParams* gp,
@@ -328,7 +326,6 @@ __kernel void block_scan(
 					vars_sorted, 
 		   			cell_indices_start,
 		   			cell_indices_nb,
-		   			hash_to_grid_index,
 		   			l_cell_offset, 
 		   			sphp,
 		   			gp,

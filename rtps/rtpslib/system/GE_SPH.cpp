@@ -444,7 +444,7 @@ void GE_SPH::computeOnGPU(int nb_sub_iter)
 		//neighborSearch(0); //density
 		printGPUDiagnostics(1);
 		printf("exit GPU diagonistics\n");
-		exit(0);
+		//exit(0);
 		continue;
 		return;
 
