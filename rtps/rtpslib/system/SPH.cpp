@@ -38,7 +38,8 @@ SPH::SPH(RTPS *psfr, int n)
     srand ( time(NULL) );
 
    
-    float sd = 100;
+    //float sd = 100;
+    float sd = 80;
     //init sph stuff
     //sph_settings.simulation_scale = .001;
     sph_settings.simulation_scale = .001f*sd;
@@ -48,7 +49,8 @@ SPH::SPH(RTPS *psfr, int n)
     //grid = Domain(float4(0,0,0,0), float4(1/scale, 1/scale, 1/scale, 0));
     //grid = Domain(float4(0,0,0,0), float4(1/scale, 1/scale, 1/scale, 0));
     //grid = Domain(float4(0,0,0,0), float4(30, 30, 30, 0));
-    grid = Domain(float4(-560/sd,-30/sd,0,0), float4(256/sd, 256/sd, 1276/sd, 0));
+    //grid = Domain(float4(-560/sd,-30/sd,0,0), float4(256/sd, 256/sd, 1276/sd, 0));
+    grid = ps->settings.grid;
 
     //SPH settings depend on number of particles used
     calculateSPHSettings();
@@ -124,7 +126,7 @@ SPH::SPH(RTPS *psfr, int n)
     //float4 min = float4(.1, .1, .1, 0.0f);
     //float4 max = float4(.3, .3, .4, 0.0f);
 
-    addBox(nn, min, max, false);
+    //addBox(nn, min, max, false);
     
     nn = 512;
     min = float4(-125, 75, 475, 0.0f);
@@ -233,22 +235,22 @@ void SPH::updateGPU()
         k_viscosity.execute(num);
         k_xsph.execute(num);
         */
-        printf("hash\n");
+        //printf("hash\n");
         hash();
-        printf("bitonic_sort\n");
+        //printf("bitonic_sort\n");
         bitonic_sort();
-        printf("data structures\n");
+        //printf("data structures\n");
         buildDataStructures(); //reorder
         
-        printf("density\n");
+        //printf("density\n");
         neighborSearch(0);  //density
-        printf("forces\n");
+        //printf("forces\n");
         neighborSearch(1);  //forces
         //exit(0);
 
-        printf("collision\n");
+        //printf("collision\n");
         collision();
-        printf("integrate\n");
+        //printf("integrate\n");
         integrate();
         //exit(0);
         //

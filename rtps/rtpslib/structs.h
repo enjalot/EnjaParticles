@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <math.h>
 
+namespace rtps
+{
+
 typedef struct float3 {
     //we have to add 4th component to match how OpenCL does float3 on GPU
 	float x, y, z, w;
@@ -96,7 +99,7 @@ typedef struct float4
 		return c;
 	}
 
-	float4 operator+=(float4 a) {
+	void operator+=(float4 a) {
 		(*this).x += a.x;
 		(*this).y += a.y;
 		(*this).z += a.z;
@@ -132,6 +135,6 @@ typedef struct float4
 float magnitude(float4 vec);
 float dist_squared(float4 vec);
 
-
+}
 
 #endif

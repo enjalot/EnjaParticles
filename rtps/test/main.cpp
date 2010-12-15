@@ -19,6 +19,7 @@
 
 #include "RTPS.h"
 //#include "timege.h"
+using namespace rtps;
 
 int window_width = 800;
 int window_height = 600;
@@ -119,7 +120,8 @@ int main(int argc, char** argv)
 
         
     //default constructor
-    rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT);
+    rtps::RTPSettings settings;
+    //rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
     ps = new rtps::RTPS(settings);
 
     glutMainLoop();
