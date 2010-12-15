@@ -15,6 +15,7 @@ void SPH::loadPrep()
     k_prep.setArg(args++, num);
     k_prep.setArg(args++, 0);
 	k_prep.setArg(args++, cl_position.getDevicePtr());
+	k_prep.setArg(args++, cl_velocity.getDevicePtr());
     k_prep.setArg(args++, cl_vars_unsorted.getDevicePtr());
     k_prep.setArg(args++, cl_vars_sorted.getDevicePtr()); 
 	k_prep.setArg(args++, cl_sort_indices.getDevicePtr());

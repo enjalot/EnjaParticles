@@ -483,7 +483,7 @@ void SPH::setupDomain()
     
 }
 
-void SPH::addBox(int nn, float4 min, float4 max, bool scaled)
+int SPH::addBox(int nn, float4 min, float4 max, bool scaled)
 {
     float scale = 1.0f;
     if(scaled)
@@ -492,6 +492,7 @@ void SPH::addBox(int nn, float4 min, float4 max, bool scaled)
     }
     vector<float4> rect = addRect(nn, min, max, sph_settings.spacing, scale);
     pushParticles(rect);
+    return rect.size();
 }
 
 void SPH::addBall(int nn, float4 center, float radius, bool scaled)
@@ -508,32 +509,36 @@ void SPH::addBall(int nn, float4 center, float radius, bool scaled)
 void SPH::pushParticles(vector<float4> pos)
 {
     int nn = pos.size();
+    if (num + nn > max_num) {return;}
     float rr = (rand() % 255)/255.0f;
     float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
     printf("random: %f\n", rr);
 
     std::vector<float4> cols(nn);
-    //there should be a better/faster way to do this with vector iterator or something?
-    //according to docs the assign function drops previous values which is no good
-    for(int i = 0; i < nn; i++)
-    {
-        //positions[num+i] = pos[i];
-        cols[i] = color;
-    }
+    std::vector<float4> vels(nn);
+
+    std::fill(cols.begin(), cols.end(),color);
+    std::fill(vels.begin(), vels.end(),float4(1.0f, 1.0f, -1.0f, 0.0f));
+
 #ifdef GPU
     glFinish();
     cl_position.acquire();
     cl_color.acquire();
-    
-    printf("about to prep 0\n");
-    //prep(0);
-    printf("done with prep 0\n");
+ 
+    //printf("about to prep 0\n");
+    prep(0);
+    //printf("done with prep 0\n");
 
+   
     cl_position.copyToDevice(pos, num);
     cl_color.copyToDevice(cols, num);
 
     cl_color.release();
     cl_position.release();
+
+    //2 is from cl_macros.h should probably not hardcode this number
+    cl_velocity.copyToDevice(vels, num);
+    //cl_vars_unsorted.copyToDevice(vels, max_num*8+num);
 
     params.num = num+nn;
     std::vector<SPHParams> vparams(0);
