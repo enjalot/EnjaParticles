@@ -309,7 +309,7 @@ void SPH::integrate()
 int SPH::setupTimers()
 {
     //int print_freq = 20000;
-    int print_freq = 100; //one second
+    int print_freq = 1000; //one second
     int time_offset = 5;
 
     timers[TI_UPDATE]     = new GE::Time("update", time_offset, print_freq);
@@ -557,7 +557,7 @@ void SPH::pushParticles(vector<float4> pos)
     std::vector<float4> vels(nn);
 
     std::fill(cols.begin(), cols.end(),color);
-    std::fill(vels.begin(), vels.end(),float4(2.0f, 2.0f, -2.0f, 0.0f));
+    std::fill(vels.begin(), vels.end(),float4(1.0f, 1.0f, -1.0f, 0.0f));
 
 #ifdef GPU
     glFinish();

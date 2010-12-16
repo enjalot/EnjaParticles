@@ -281,7 +281,7 @@ GLuint Render::compileShaders()
 int Render::setupTimers()
 {
     //int print_freq = 20000;
-    int print_freq = 100; //one second
+    int print_freq = 1000; //one second
     int time_offset = 5;
 
     timers[TI_RENDER]     = new GE::Time("render", time_offset, print_freq);
