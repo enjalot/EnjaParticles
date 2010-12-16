@@ -10,6 +10,8 @@
 //#include "../util.h"
 #include "../domain/Domain.h"
 
+#include "timege.h"
+
 
 namespace rtps {
 
@@ -117,6 +119,13 @@ public:
     //wrapper around IV.h addSphere
     void addBall(int nn, float4 center, float radius, bool scaled);
     
+    enum {TI_HASH=0, TI_BITONIC_SORT, TI_BUILD, TI_NEIGH, 
+          TI_DENS, TI_FORCE, TI_EULER, TI_LEAPFROG, TI_UPDATE, TI_COLLISION_WALL
+          }; //10
+    GE::Time* timers[30];
+    int setupTimers();
+
+
     
 private:
     //the particle system framework

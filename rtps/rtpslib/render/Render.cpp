@@ -27,6 +27,7 @@ Render::Render(GLuint pos, GLuint col, int n)
     {
         glsl_program = compileShaders();
     }
+    setupTimers();
 }
 
 Render::~Render()
@@ -102,6 +103,11 @@ void Render::render()
 {
     // Render the particles with OpenGL
 
+    for(int i= 0; i < 10; i++)
+    {
+        timers[TI_RENDER]->start();
+    }
+
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
 
@@ -156,6 +162,11 @@ void Render::render()
     //make sure rendering timing is accurate
     glFinish();
     //printf("done rendering\n");
+
+    for(int i= 0; i < 10; i++)
+    {
+        timers[TI_RENDER]->end();
+    }
 
 }
 
@@ -257,5 +268,20 @@ GLuint Render::compileShaders()
 
     return program;
 }
+
+
+int Render::setupTimers()
+{
+    //int print_freq = 20000;
+    int print_freq = 100; //one second
+    int time_offset = 5;
+
+    timers[TI_RENDER]     = new GE::Time("render", time_offset, print_freq);
+    if(glsl)
+    {
+        timers[TI_GLSL]     = new GE::Time("glsl", time_offset, print_freq);
+    }
+}
+
 
 }

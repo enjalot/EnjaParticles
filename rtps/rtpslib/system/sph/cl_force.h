@@ -23,7 +23,7 @@
 
 	#if 1
 	//float vvisc = .001f; // SHOULD BE SET IN GE_SPH.cpp
-	float vvisc = .001f; // SHOULD BE SET IN GE_SPH.cpp
+	float vvisc = .1f; // SHOULD BE SET IN GE_SPH.cpp
 	float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
 	stress += vvisc * (velj-veli) * dWijlapl;
 	#endif

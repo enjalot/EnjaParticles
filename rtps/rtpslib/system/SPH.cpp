@@ -62,6 +62,7 @@ SPH::SPH(RTPS *psfr, int n)
 
     //*** end Initialization
 
+    setupTimers();
 
 #ifdef CPU
     printf("RUNNING ON THE CPU\n");
@@ -221,14 +222,16 @@ void SPH::updateCPU()
 
 void SPH::updateGPU()
 {
+
     glFinish();
     cl_position.acquire();
     cl_color.acquire();
     
     //sub-intervals
-    int sub_intervals = 10;  //should be a setting
+    int sub_intervals = 1;  //should be a setting
     for(int i=0; i < sub_intervals; i++)
     {
+        timers[TI_UPDATE]->start();
         /*
         k_density.execute(num);
         k_pressure.execute(num);
@@ -236,18 +239,30 @@ void SPH::updateGPU()
         k_xsph.execute(num);
         */
         //printf("hash\n");
+        timers[TI_HASH]->start();
         hash();
+        timers[TI_HASH]->end();
         //printf("bitonic_sort\n");
+        timers[TI_BITONIC_SORT]->start();
         bitonic_sort();
+        timers[TI_BITONIC_SORT]->end();
         //printf("data structures\n");
+        timers[TI_BUILD]->start();
         buildDataStructures(); //reorder
+        timers[TI_BUILD]->end();
         
+        timers[TI_NEIGH]->start();
         //printf("density\n");
+        timers[TI_DENS]->start();
         neighborSearch(0);  //density
+        timers[TI_DENS]->end();
         //printf("forces\n");
+        timers[TI_FORCE]->start();
         neighborSearch(1);  //forces
+        timers[TI_FORCE]->end();
         //exit(0);
-
+        timers[TI_NEIGH]->end();
+        
         //printf("collision\n");
         collision();
         //printf("integrate\n");
@@ -256,6 +271,7 @@ void SPH::updateGPU()
         //
         //Andrew's rendering emporium
         //neighborSearch(4);
+        timers[TI_UPDATE]->end();
     }
 
     cl_position.release();
@@ -267,7 +283,9 @@ void SPH::updateGPU()
 void SPH::collision()
 {
     //when implemented other collision routines can be chosen here
+    timers[TI_COLLISION_WALL]->start();
     k_collision_wall.execute(num, 128);
+    timers[TI_COLLISION_WALL]->end();
 }
 
 void SPH::integrate()
@@ -275,15 +293,36 @@ void SPH::integrate()
     if(sph_settings.integrator == EULER)
     {
         //k_euler.execute(max_num);
+        timers[TI_EULER]->start();
         k_euler.execute(num, 128);
+        timers[TI_EULER]->end();
     }
     else if(sph_settings.integrator == LEAPFROG)
     {
         //k_leapfrog.execute(max_num);
+        timers[TI_LEAPFROG]->start();
         k_leapfrog.execute(num, 128);
+        timers[TI_LEAPFROG]->end();
     }
 }
 
+int SPH::setupTimers()
+{
+    //int print_freq = 20000;
+    int print_freq = 100; //one second
+    int time_offset = 5;
+
+    timers[TI_UPDATE]     = new GE::Time("update", time_offset, print_freq);
+    timers[TI_HASH]     = new GE::Time("hash", time_offset, print_freq);
+    timers[TI_BUILD]     = new GE::Time("build", time_offset, print_freq);
+    timers[TI_BITONIC_SORT]     = new GE::Time("bitonic_sort", time_offset, print_freq);
+    timers[TI_NEIGH]     = new GE::Time("neigh", time_offset, print_freq);
+    timers[TI_DENS]     = new GE::Time("dens", time_offset, print_freq);
+    timers[TI_FORCE]     = new GE::Time("force", time_offset, print_freq);
+    timers[TI_COLLISION_WALL]     = new GE::Time("collision_wall", time_offset, print_freq);
+    timers[TI_EULER]     = new GE::Time("euler", time_offset, print_freq);
+    timers[TI_LEAPFROG]     = new GE::Time("leapfrog", time_offset, print_freq);
+}
 
 void SPH::calculateSPHSettings()
 {
@@ -518,7 +557,7 @@ void SPH::pushParticles(vector<float4> pos)
     std::vector<float4> vels(nn);
 
     std::fill(cols.begin(), cols.end(),color);
-    std::fill(vels.begin(), vels.end(),float4(1.0f, 1.0f, -1.0f, 0.0f));
+    std::fill(vels.begin(), vels.end(),float4(2.0f, 2.0f, -2.0f, 0.0f));
 
 #ifdef GPU
     glFinish();

@@ -10,6 +10,7 @@
 #endif
 
 #include "../structs.h"
+#include "../timege.h"
 
 namespace rtps{
 
@@ -28,6 +29,11 @@ public:
     void drawArrays();
 
     void render_box(float4 min, float4 max);
+
+    enum {TI_RENDER=0, TI_GLSL 
+          }; //2
+    GE::Time* timers[2];
+    int setupTimers();
 
     //void compileShaders();
 
