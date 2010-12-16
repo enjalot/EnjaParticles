@@ -21,8 +21,8 @@ Render::Render(GLuint pos, GLuint col, int n)
     col_vbo = col;
     num = n;
 
-    glsl = true;
-    //glsl = false;
+    //glsl = true;
+    glsl = false;
     if(glsl)
     {
         glsl_program = compileShaders();
@@ -118,6 +118,7 @@ void Render::render()
         //printf("GLSL\n");
         glEnable(GL_POINT_SPRITE_ARB);
         glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
+        //this isn't looking good for ATI, check for their extension?
         glEnable(GL_VERTEX_PROGRAM_POINT_SIZE_NV);
         glDepthMask(GL_TRUE);
         glEnable(GL_DEPTH_TEST);
@@ -246,6 +247,13 @@ GLuint Render::compileShaders()
         printf("Vertex Shader log:\n %s\n", log);
     }
     glCompileShader(fragment_shader);
+    glGetShaderiv(fragment_shader, GL_INFO_LOG_LENGTH, &len);
+    if(len > 0)
+    {
+        char log[1024];
+        glGetShaderInfoLog(fragment_shader, 1024, 0, log);
+        printf("Fragment Shader log:\n %s\n", log);
+    }
 
     GLuint program = glCreateProgram();
 

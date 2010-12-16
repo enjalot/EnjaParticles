@@ -41,6 +41,7 @@ float Wpoly6_lapl(float4 r, float h, __constant struct SPHParams* params)
 	float h3 = h2*h;
 	float alpha = -945.f/(32.0f*params->PI*h3*h3*h3);
 	float Wij = alpha*(h2-r2)*(2.*h2-7.f*r2);
+    return Wij;
 }
 //----------------------------------------------------------------------
 float Wspiky(float rlen, float h, __constant struct SPHParams* params)
