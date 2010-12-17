@@ -21,8 +21,8 @@ Render::Render(GLuint pos, GLuint col, int n)
     col_vbo = col;
     num = n;
 
-    //glsl = true;
-    glsl = false;
+    glsl = true;
+    //glsl = false;
     if(glsl)
     {
         glsl_program = compileShaders();

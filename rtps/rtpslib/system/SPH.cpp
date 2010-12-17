@@ -228,7 +228,7 @@ void SPH::updateGPU()
     cl_color.acquire();
     
     //sub-intervals
-    int sub_intervals = 1;  //should be a setting
+    int sub_intervals = 5;  //should be a setting
     for(int i=0; i < sub_intervals; i++)
     {
         timers[TI_UPDATE]->start();
@@ -557,7 +557,9 @@ void SPH::pushParticles(vector<float4> pos)
     std::vector<float4> vels(nn);
 
     std::fill(cols.begin(), cols.end(),color);
-    std::fill(vels.begin(), vels.end(),float4(1.0f, 1.0f, -1.0f, 0.0f));
+    float v = 1.0f;
+    float4 iv = float4(v, v, -v, 0.0f);
+    std::fill(vels.begin(), vels.end(),iv);
 
 #ifdef GPU
     glFinish();
