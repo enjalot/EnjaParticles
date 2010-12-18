@@ -20,6 +20,7 @@ RTPS::RTPS(RTPSettings s)
 
 RTPS::~RTPS()
 {
+    printf("RTPS destructor\n");
     delete system;
     delete cli;
     delete renderer;
@@ -33,6 +34,8 @@ void RTPS::Init()
 
 
     cli = new CL();
+    system = NULL;
+    renderer = NULL;
 
     printf("init: settings.system: %d\n", settings.system);
     //TODO choose based on settings
@@ -69,12 +72,23 @@ void RTPS::render()
     //so System should own the renderer object
     if(settings.system == RTPSettings::SPH)
     {
-        UniformGrid grid = system->getGrid();
+        Domain grid = system->getGrid();
         //should check if grid exists
-        renderer->render_box(grid.getMin(), grid.getMax());
+        renderer->render_box(grid.getBndMin(), grid.getBndMax());
     }
 
     renderer->render();
+}
+
+void RTPS::updateNum(int num)
+{
+    printf("about to test for renderer\n");
+    if(renderer)
+    {
+        renderer->setNum(num);
+    }
+    //this segfaults for some reason
+    //system->setNum(num);
 }
 
 }

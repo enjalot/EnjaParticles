@@ -19,13 +19,19 @@
 
 #include "RTPS.h"
 //#include "timege.h"
+using namespace rtps;
 
 int window_width = 800;
 int window_height = 600;
 int glutWindowHandle = 0;
-float translate_x = 0.0f;
-float translate_y = -200.0f;//300.f;
-float translate_z = 200.f;
+/*
+float translate_x = -.5f;
+float translate_y = 0.f;//-200.0f;//300.f;
+float translate_z = 1.5f;//200.f;
+*/
+float translate_x = -1.00;
+float translate_y = -2.00f;//300.f;
+float translate_z = 2.00f;
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -58,9 +64,10 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 rtps::RTPS* ps;
-//#define NUM_PARTICLES 16384
-///#define NUM_PARTICLES 4096
-#define NUM_PARTICLES 2048
+#define NUM_PARTICLES 16384
+//#define NUM_PARTICLES 8192
+//#define NUM_PARTICLES 4096
+//#define NUM_PARTICLES 2048
 //#define NUM_PARTICLES 1024
 #define DT .001f
 
@@ -113,7 +120,9 @@ int main(int argc, char** argv)
 
         
     //default constructor
-    rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT);
+    //rtps::RTPSettings settings;
+    rtps::Domain grid = Domain(float4(-5,-.3,0,0), float4(2, 2, 12, 0));
+    rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
     ps = new rtps::RTPS(settings);
 
     glutMainLoop();
@@ -142,8 +151,8 @@ void init_gl()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glRotatef(-90, 1.0, 0.0, 0.0);
-    //glTranslatef(translate_x, translate_z, translate_y);
-    glTranslatef(0, translate_z, translate_y);
+    glTranslatef(translate_x, translate_z, translate_y);
+    //glTranslatef(0, translate_z, translate_y);
     //glRotatef(-90, 1.0, 0.0, 0.0);
 
     return;
@@ -161,6 +170,14 @@ void appKeyboard(unsigned char key, int x, int y)
             // Cleanup up and quit
             appDestroy();
             break;
+        case 'r': //drop a rectangle
+            int nn = 512;
+            int sd = 100;
+            float4 min = float4(-150/sd, 50/sd, 675/sd, 0.0f);
+            float4 max = float4(-50/sd, 150/sd, 975/sd, 0.0f);
+            ps->system->addBox(nn, min, max, false);
+                
+
     }
 }
 
@@ -210,7 +227,7 @@ void appMouse(int button, int state, int x, int y)
     mouse_old_x = x;
     mouse_old_y = y;
 
-    glutPostRedisplay();
+    //glutPostRedisplay();
 }
 
 void appMotion(int x, int y)
@@ -223,7 +240,7 @@ void appMotion(int x, int y)
         rotate_x += dy * 0.2;
         rotate_y += dx * 0.2;
     } else if (mouse_buttons & 4) {
-        translate_z -= dy * 0.5;
+        translate_z -= dy * 0.1;
     }
 
     mouse_old_x = x;
@@ -234,11 +251,11 @@ void appMotion(int x, int y)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glRotatef(-90, 1.0, 0.0, 0.0);
-    //glTranslatef(translate_x, translate_z, translate_y);
-    glTranslatef(0, translate_z, translate_y);
+    glTranslatef(translate_x, translate_z, translate_y);
+    //glTranslatef(0, translate_z, translate_y);
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
-    glutPostRedisplay();
+    //glutPostRedisplay();
 }
 
 

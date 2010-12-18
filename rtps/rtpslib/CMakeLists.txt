@@ -16,7 +16,30 @@ SET( CMAKE_MODULE_PATH
 
 message("${CMAKE_MODULE_PATH}\n")
 
-#FIND_PACKAGE (GLUT)
+
+###### SETTING RELATED TO GPU VS CPU IMPLEMENTATIONS ##########################
+SET(WITH_OPENCL TRUE)
+
+ADD_DEFINITIONS(-g )
+#ADD_DEFINITIONS(-DDEBUG)
+IF(WITH_OPENCL)
+    ADD_DEFINITIONS(-DGPU)
+ENDIF(WITH_OPENCL)
+#might want to have CPU even if we have OpenCL available
+#ADD_DEFINITIONS(-DCPU)
+
+##############################################################################
+
+##### Source Paths ############################################################
+ADD_DEFINITIONS(-DSIMPLE_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_simple")
+ADD_DEFINITIONS(-DSPH_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_sph")
+ADD_DEFINITIONS(-DBITONIC_CL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/")
+
+
+
+##############################################################################
+
+
 FIND_PACKAGE (OpenGL)
 FIND_PACKAGE (OPENCL)
 FIND_PACKAGE (GLEW)
@@ -26,45 +49,64 @@ set (rtpslib_INCLUDES
     ${OPENGL_INCLUDE_DIR}
     ${GLEW_INCLUDE_PATH}
     ${BASE_DIR}/opencl10
+    ${rtpslib_SOURCE_DIR}
+    ${rtpslib_SOURCE_DIR}/system
+    ${rtpslib_SOURCE_DIR}/render
+    ${rtpslib_SOURCE_DIR}/domain
+    ${rtpslib_SOURCE_DIR}/opencl
+    ${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src
+
 )
 
 
-#library
+#library source files (don't explicitly give file extension, inferred from source type)
 set (rtpslib_SOURCES
-    ${rtpslib_SOURCE_DIR}/RTPS.cpp
-    ${rtpslib_SOURCE_DIR}/RTPSettings.cpp
-    ${rtpslib_SOURCE_DIR}/util.cpp
-    ${rtpslib_SOURCE_DIR}/structs.cpp
+    ${rtpslib_SOURCE_DIR}/RTPS
+    ${rtpslib_SOURCE_DIR}/RTPSettings
+    ${rtpslib_SOURCE_DIR}/util
+    ${rtpslib_SOURCE_DIR}/structs
+    ${rtpslib_SOURCE_DIR}/timege
 
-    ${rtpslib_SOURCE_DIR}/opencl/CLL.cpp
-    ${rtpslib_SOURCE_DIR}/opencl/Kernel.cpp
-    #${rtpslib_SOURCE_DIR}/opencl/Buffer.cpp
+    ${rtpslib_SOURCE_DIR}/render/Render
 
-    ${rtpslib_SOURCE_DIR}/render/Render.cpp
+    ${rtpslib_SOURCE_DIR}/domain/Domain
+    ${rtpslib_SOURCE_DIR}/domain/IV
 
-    ${rtpslib_SOURCE_DIR}/particle/UniformGrid.cpp
     
     ${rtpslib_SOURCE_DIR}/system/Simple.cpp
-    ${rtpslib_SOURCE_DIR}/system/simple/Euler.cpp
+    ${rtpslib_SOURCE_DIR}/system/simple/Euler
     
     ${rtpslib_SOURCE_DIR}/system/SPH.cpp
-    ${rtpslib_SOURCE_DIR}/system/sph/Euler.cpp
-    ${rtpslib_SOURCE_DIR}/system/sph/LeapFrog.cpp
-    ${rtpslib_SOURCE_DIR}/system/sph/Density.cpp
-    ${rtpslib_SOURCE_DIR}/system/sph/Pressure.cpp
-    ${rtpslib_SOURCE_DIR}/system/sph/Viscosity.cpp
-    ${rtpslib_SOURCE_DIR}/system/sph/XSPH.cpp
-    ${rtpslib_SOURCE_DIR}/system/sph/Collision_wall.cpp
-
+    ${rtpslib_SOURCE_DIR}/system/sph/Euler
+    ${rtpslib_SOURCE_DIR}/system/sph/LeapFrog
+    ${rtpslib_SOURCE_DIR}/system/sph/Density
+    ${rtpslib_SOURCE_DIR}/system/sph/Pressure
+    ${rtpslib_SOURCE_DIR}/system/sph/Viscosity
+    ${rtpslib_SOURCE_DIR}/system/sph/XSPH
+    ${rtpslib_SOURCE_DIR}/system/sph/Collision_wall
+    
+    ${rtpslib_SOURCE_DIR}/system/sph/Prep
+    ${rtpslib_SOURCE_DIR}/system/sph/Hash
+    ${rtpslib_SOURCE_DIR}/system/sph/BitonicSort
+    ${rtpslib_SOURCE_DIR}/system/sph/DataStructures
+    ${rtpslib_SOURCE_DIR}/system/sph/Neighbors
+	
+    ${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src/oclBitonicSort_launcher.cpp
+    #these should probably be in the OpenCL classes
+    ${rtpslib_SOURCE_DIR}/system/sph/Scopy
+    #${rtpslib_SOURCE_DIR}/system/sph/SetInt
 
     #${rtpslib_SOURCE_DIR}/particle
     )
 
+IF(WITH_OPENCL)
+SET(rtpslib_SOURCES ${rtpslib_SOURCES}
+    ${rtpslib_SOURCE_DIR}/opencl/CLL.cpp
+    ${rtpslib_SOURCE_DIR}/opencl/Kernel.cpp
+    #${rtpslib_SOURCE_DIR}/opencl/Buffer.cpp
+    )
+ENDIF(WITH_OPENCL)
 
-
-ADD_DEFINITIONS(-g )
-ADD_DEFINITIONS(-DGPU)
-#ADD_DEFINITIONS(-DCPU)
 
 INCLUDE_DIRECTORIES(${rtpslib_INCLUDES})
 ADD_LIBRARY(rtps SHARED ${rtpslib_SOURCES})
@@ -97,3 +139,8 @@ add_custom_command(
 )
 
 add_custom_target(doc DEPENDS ${DOXYGEN_OUTPUT})
+
+
+
+ADD_SUBDIRECTORY(system/simple)
+ADD_SUBDIRECTORY(system/sph)

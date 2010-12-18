@@ -1,0 +1,20 @@
+
+
+rtpslib:
+- redo UniformGrid as Domain class (rename particle directory to domain)
+- port in gordon's branch
+    * opencl functions and source loading method
+    - intialization routines and options
+    - change to a 2 step method (instead of seperate loops for each calculation)
+    - neighbor list cl code
+- dynamic addition subtraction of particles in the system (cpp interface, blender, and hooks in the gpu?)
+    - active/inactive flag for particles
+        - where should checks be? probably want reordering so we can just check i < num_active or something
+        - probably need to implement neighborlist stuff first to get better idea
+
+- start framework for opencl support investigation functions (also check for nvidia at runtime so we can do some specific things like custom compiler options)
+- cpu implementation of grid-hash method to remove n2 global search (also prepare for z-indexing)
+- prepare a CPU only option with #ifdefs (so android can use same source)
+    - CPU only should also be a runtime setting...
+
+

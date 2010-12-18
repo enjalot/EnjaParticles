@@ -20,10 +20,19 @@ Render::Render(GLuint pos, GLuint col, int n)
     pos_vbo = pos;
     col_vbo = col;
     num = n;
+
+    glsl = true;
+    //glsl = false;
+    if(glsl)
+    {
+        glsl_program = compileShaders();
+    }
+    setupTimers();
 }
 
 Render::~Render()
 {
+    printf("Render destructor\n");
 }
 
 void Render::drawArrays()
@@ -94,22 +103,30 @@ void Render::render()
 {
     // Render the particles with OpenGL
 
+    for(int i= 0; i < 10; i++)
+    {
+        timers[TI_RENDER]->start();
+    }
+
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
 
 
-    /*
     //TODO enable GLSL shading 
     if(glsl)
     {
         //printf("GLSL\n");
         glEnable(GL_POINT_SPRITE_ARB);
         glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
+        //this isn't looking good for ATI, check for their extension?
         glEnable(GL_VERTEX_PROGRAM_POINT_SIZE_NV);
         glDepthMask(GL_TRUE);
         glEnable(GL_DEPTH_TEST);
 
         glUseProgram(glsl_program);
+        float point_scale = 1.f;
+        float particle_radius = 5.f;
+        bool blending = false;
         //glUniform1f( glGetUniformLocation(m_program, "pointScale"), m_window_h / tanf(m_fov * m_fHalfViewRadianFactor));
         glUniform1f( glGetUniformLocation(glsl_program, "pointScale"), point_scale);
         glUniform1f( glGetUniformLocation(glsl_program, "blending"), blending );
@@ -124,7 +141,6 @@ void Render::render()
     }
     else   // do not use glsl
     {
-*/
         glDisable(GL_LIGHTING);
         //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
@@ -134,7 +150,7 @@ void Render::render()
         glPointSize(5.0f);
 
         drawArrays();
-    //}
+    }
     //printf("done rendering, clean up\n");
    
     glPopClientAttrib();
@@ -148,9 +164,14 @@ void Render::render()
     glFinish();
     //printf("done rendering\n");
 
+    for(int i= 0; i < 10; i++)
+    {
+        timers[TI_RENDER]->end();
+    }
+
 }
 
-void Render::render_box(float3 min, float3 max)
+void Render::render_box(float4 min, float4 max)
 {
 	
     glEnable(GL_DEPTH_TEST);
@@ -200,8 +221,7 @@ void Render::render_box(float3 min, float3 max)
 }
 
 //----------------------------------------------------------------------
-/*
-int EnjaParticles::compileShaders()
+GLuint Render::compileShaders()
 {
 
     //this may not be the cleanest implementation
@@ -227,6 +247,13 @@ int EnjaParticles::compileShaders()
         printf("Vertex Shader log:\n %s\n", log);
     }
     glCompileShader(fragment_shader);
+    glGetShaderiv(fragment_shader, GL_INFO_LOG_LENGTH, &len);
+    if(len > 0)
+    {
+        char log[1024];
+        glGetShaderInfoLog(fragment_shader, 1024, 0, log);
+        printf("Fragment Shader log:\n %s\n", log);
+    }
 
     GLuint program = glCreateProgram();
 
@@ -249,6 +276,20 @@ int EnjaParticles::compileShaders()
 
     return program;
 }
-*/
+
+
+int Render::setupTimers()
+{
+    //int print_freq = 20000;
+    int print_freq = 1000; //one second
+    int time_offset = 5;
+
+    timers[TI_RENDER]     = new GE::Time("render", time_offset, print_freq);
+    if(glsl)
+    {
+        timers[TI_GLSL]     = new GE::Time("glsl", time_offset, print_freq);
+    }
+}
+
 
 }

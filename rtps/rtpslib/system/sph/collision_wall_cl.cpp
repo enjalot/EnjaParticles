@@ -1,30 +1,12 @@
-#define STRINGIFY(A) #A
-
-//do the SPH pressure calculations and update the force
-std::string collision_wall_program_source = STRINGIFY(
-
-typedef struct SPHParams
-{
-    float4 grid_min;            //float3s are really float4 in opencl 1.0 & 1.1
-    float4 grid_max;            //so we have padding in C++ definition
-    float mass;
-    float rest_distance;
-    float smoothing_distance;
-    float simulation_scale;
-    float boundary_stiffness;
-    float boundary_dampening;
-    float boundary_distance;
-    float EPSILON;
-    float PI;       //delicious
-    float K;        //speed of sound
- 
-} SPHParams;
+#include "cl_macros.h"
+#include "cl_structs.h"
 
 //from Krog '10
 float4 calculateRepulsionForce(float4 normal, float4 vel, float boundary_stiffness, float boundary_dampening, float distance)
 {
     vel.w = 0.0f;
     float4 repulsion_force = (boundary_stiffness * distance - boundary_dampening * dot(normal, vel))*normal;
+    repulsion_force.w = 0.0f;
     return repulsion_force;
 }
 
@@ -63,13 +45,20 @@ float4 calculateFrictionForce(float4 vel, float4 force, float4 normal, float fri
 }
 
 
-__kernel void collision_wall(__global float4* pos, __global float4* vel,  __global float4* force, __constant struct SPHParams* params)
+__kernel void collision_wall(
+		__global float4* vars_sorted, 
+		__constant struct GridParams* gp,
+		__constant struct SPHParams* params)
 {
     unsigned int i = get_global_id(0);
+    //int num = get_global_size(0);
+	int num = params->num;
+    if(i > num) return;
 
-    float4 p = pos[i];
-    float4 v = vel[i];// * params->simulation_scale;
-    float4 f = force[i];
+
+    float4 p = pos(i);
+    float4 v = vel(i);// * params->simulation_scale;
+    float4 f = force(i);
     float4 r_f = (float4)(0.f, 0.f, 0.f, 0.f);
     float4 f_f = (float4)(0.f, 0.f, 0.f, 0.f);
 
@@ -78,8 +67,8 @@ __kernel void collision_wall(__global float4* pos, __global float4* vel,  __glob
     float friction_kinetic = 0.0f;
     float friction_static_limit = 0.0f;
 
-    //bottom wall
-    float diff = params->boundary_distance - (p.z - params->grid_min.z) * params->simulation_scale;
+    //Z walls
+    float diff = params->boundary_distance - (p.z - gp->bnd_min.z);
     if (diff > params->EPSILON)
     {
         float4 normal = (float4)(0.0f, 0.0f, 1.0f, 0.0f);
@@ -87,16 +76,26 @@ __kernel void collision_wall(__global float4* pos, __global float4* vel,  __glob
         f_f += calculateFrictionForce(v, f, normal, friction_kinetic, friction_static_limit);
         //r_f += calculateRepulsionForce(normal, v, boundary_stiffness, boundary_dampening, boundary_distance);
     }
+    diff = params->boundary_distance - (gp->bnd_max.z - p.z);
+    if (diff > params->EPSILON)
+    {
+        float4 normal = (float4)(0.0f, 0.0f, -1.0f, 0.0f);
+        r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
+        f_f += calculateFrictionForce(v, f, normal, friction_kinetic, friction_static_limit);
+        //r_f += calculateRepulsionForce(normal, v, boundary_stiffness, boundary_dampening, boundary_distance);
+    }
+
+
 
     //Y walls
-    diff = params->boundary_distance - (p.y - params->grid_min.y) * params->simulation_scale;
+    diff = params->boundary_distance - (p.y - gp->bnd_min.y);
     if (diff > params->EPSILON)
     {
         float4 normal = (float4)(0.0f, 1.0f, 0.0f, 0.0f);
         r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
         f_f += calculateFrictionForce(v, f, normal, friction_kinetic, friction_static_limit);
     }
-    diff = params->boundary_distance - (params->grid_max.y - p.y) * params->simulation_scale;
+    diff = params->boundary_distance - (gp->bnd_max.y - p.y);
     if (diff > params->EPSILON)
     {
         float4 normal = (float4)(0.0f, -1.0f, 0.0f, 0.0f);
@@ -104,14 +103,14 @@ __kernel void collision_wall(__global float4* pos, __global float4* vel,  __glob
         f_f += calculateFrictionForce(v, f, normal, friction_kinetic, friction_static_limit);
     }
     //X walls
-    diff = params->boundary_distance - (p.x - params->grid_min.x) * params->simulation_scale;
+    diff = params->boundary_distance - (p.x - gp->bnd_min.x);
     if (diff > params->EPSILON)
     {
         float4 normal = (float4)(1.0f, 0.0f, 0.0f, 0.0f);
         r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
         f_f += calculateFrictionForce(v, f, normal, friction_kinetic, friction_static_limit);
     }
-    diff = params->boundary_distance - (params->grid_max.x - p.x) * params->simulation_scale;
+    diff = params->boundary_distance - (gp->bnd_max.x - p.x);
     if (diff > params->EPSILON)
     {
         float4 normal = (float4)(-1.0f, 0.0f, 0.0f, 0.0f);
@@ -120,8 +119,6 @@ __kernel void collision_wall(__global float4* pos, __global float4* vel,  __glob
     }
 
 
-    force[i] += r_f + f_f;
+    force(i) += r_f + f_f;
 
 }
-);
-

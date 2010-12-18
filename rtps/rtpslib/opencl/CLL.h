@@ -37,8 +37,8 @@ public:
     //setup an OpenCL context that shares with OpenGL
     void setup_gl_cl();
 
-    cl::Program loadProgram(std::string source);
-    cl::Kernel loadKernel(std::string name, std::string source);
+    cl::Program loadProgram(std::string path);
+    cl::Kernel loadKernel(std::string path, std::string name);
 
     //TODO add oclErrorString to the class
     //move from util.h/cpp

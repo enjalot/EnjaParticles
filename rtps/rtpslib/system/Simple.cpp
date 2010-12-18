@@ -54,26 +54,17 @@ Simple::Simple(RTPS *psfr, int n)
     cl_color = Buffer<float4>(ps->cli, col_vbo);
     printf("done with cl_buffers\n");
 
-    /*
+
+
     //pure opencl buffers
     cl_force = Buffer<float4>(ps->cli, forces);
     cl_velocity = Buffer<float4>(ps->cli, velocities);;
 
     //could generalize this to other integration methods later (leap frog, RK4)
     printf("create euler kernel\n");
-    
-    #include "simple/euler.cl"
-    printf("%s\n", euler_program_source.c_str());
-    k_euler = Kernel(ps->cli, euler_program_source, "euler");
-  
-    //TODO: fix the way we are wrapping buffers
-    k_euler.setArg(0, cl_position.cl_buffer[0]);
-    k_euler.setArg(1, cl_velocity.cl_buffer[0]);
-    k_euler.setArg(2, cl_force.cl_buffer[0]);
-    k_euler.setArg(3, .01f); //time step (should be set from settings)
-    printf("euler created\n");
-    */
-}
+    loadEuler();
+
+   }
 
 Simple::~Simple()
 {
@@ -107,7 +98,6 @@ void Simple::update()
 #endif
 #ifdef GPU
 
-/*
     //call kernels
     //add timings
     glFinish();
@@ -126,7 +116,6 @@ void Simple::update()
     cl_position.release();
     cl_color.release();
     //printf("release gl: %s\n", oclErrorString(err));
-*/
 #endif
 }
 

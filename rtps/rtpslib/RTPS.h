@@ -13,7 +13,7 @@
 #include "system/System.h"
 
 //initial value API
-#include "particle/IV.h"
+#include "domain/IV.h"
 
 //settings class to configure the framework
 #include "RTPSettings.h"
@@ -49,9 +49,14 @@ public:
     //initial value helper
     //IV iv;
 
-
     void update();
     void render();
+    
+    //should this be private?
+    void updateNum(int num);
+    
+
+
 };
 
 }

@@ -18,14 +18,15 @@ namespace rtps {
 
 void SPH::loadDensity()
 {
-    #include "density.cl"
-    //printf("%s\n", density_program_source.c_str());
-    k_density = Kernel(ps->cli, density_program_source, "density");
+    printf("create density kernel\n");
+
+    std::string path(SPH_CL_SOURCE_DIR);
+    path += "/density_cl.cl";
+    k_density = Kernel(ps->cli, path, "density");
   
-    //TODO: fix the way we are wrapping buffers
-    k_density.setArg(0, cl_position.cl_buffer[0]);
-    k_density.setArg(1, cl_density.cl_buffer[0]);
-    k_density.setArg(2, cl_params.cl_buffer[0]);
+    k_density.setArg(0, cl_position.getDevicePtr());
+    k_density.setArg(1, cl_density.getDevicePtr());
+    k_density.setArg(2, cl_SPHParams.getDevicePtr());
     //k_density.setArg(3, cl_error_check.cl_buffer[0]);
 
 } 

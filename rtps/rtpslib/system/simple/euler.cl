@@ -1,6 +1,3 @@
-#define STRINGIFY(A) #A
-
-std::string euler_program_source = STRINGIFY(
 __kernel void euler(__global float4* pos, __global float4* vel, __global float4* force, float h)
 {
     unsigned int i = get_global_id(0);
@@ -8,6 +5,7 @@ __kernel void euler(__global float4* pos, __global float4* vel, __global float4*
     float4 p = pos[i];
     float4 v = vel[i];
     float4 f = force[i];
+
 
     //external force is gravity
     f.z += -9.8f;
@@ -19,5 +17,4 @@ __kernel void euler(__global float4* pos, __global float4* vel, __global float4*
     vel[i] = v;
     pos[i] = p;
 }
-);
 

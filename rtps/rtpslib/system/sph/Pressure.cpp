@@ -7,16 +7,17 @@ namespace rtps {
 
 void SPH::loadPressure()
 {
-    #include "pressure.cl"
-    //printf("%s\n", euler_program_source.c_str());
-    k_pressure = Kernel(ps->cli, pressure_program_source, "pressure");
+    printf("create pressure kernel\n");
+
+    std::string path(SPH_CL_SOURCE_DIR);
+    path += "/pressure_cl.cl";
+    k_pressure = Kernel(ps->cli, path, "pressure");
   
-    printf("asdf\n");
     //TODO: fix the way we are wrapping buffers
-    k_pressure.setArg(0, cl_position.cl_buffer[0]);
-    k_pressure.setArg(1, cl_density.cl_buffer[0]);
-    k_pressure.setArg(2, cl_force.cl_buffer[0]);
-    k_pressure.setArg(3, cl_params.cl_buffer[0]);
+    k_pressure.setArg(0, cl_position.getDevicePtr());
+    k_pressure.setArg(1, cl_density.getDevicePtr());
+    k_pressure.setArg(2, cl_force.getDevicePtr());
+    k_pressure.setArg(3, cl_SPHParams.getDevicePtr());
 
 } 
 

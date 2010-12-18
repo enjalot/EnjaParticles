@@ -26,7 +26,22 @@ public:
     Buffer(CL *cli, GLuint vbo_id);
     ~Buffer();
 
-    //we will want to access buffers by name when going across systems
+	cl_mem getDevicePtr() { return cl_buffer[0](); }
+   
+    //need to acquire and release arrays from OpenGL context if we have a VBO
+    void acquire();
+    void release();
+
+    void copyToDevice(const std::vector<T> &data);
+    //pastes the data over the current array starting at [start]
+    void copyToDevice(const std::vector<T> &data, int start);
+    std::vector<T> copyToHost(int num);
+
+    void set(T val);
+    void set(const std::vector<T> &data);
+
+private:
+     //we will want to access buffers by name when going across systems
     //std::string name;
     //the actual buffer handled by the Khronos OpenCL c++ header
     //cl::Memory cl_buffer;
@@ -37,15 +52,6 @@ public:
     //if this is a VBO we store its id
     GLuint vbo_id;
 
-    //need to acquire and release arrays from OpenGL context if we have a VBO
-    void acquire();
-    void release();
-
-    void copyToDevice(const std::vector<T> &data);
-    std::vector<T> copyToHost(int num);
-
-    void set(T val);
-    void set(const std::vector<T> &data);
 
 };
 

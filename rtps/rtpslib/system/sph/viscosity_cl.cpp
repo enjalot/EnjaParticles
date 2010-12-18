@@ -1,25 +1,4 @@
-#define STRINGIFY(A) #A
-
-//do the SPH pressure calculations and update the force
-std::string viscosity_program_source = STRINGIFY(
-
-typedef struct SPHParams
-{
-    float4 grid_min;            //float3s are really float4 in opencl 1.0 & 1.1
-    float4 grid_max;            //so we have padding in C++ definition
-    float mass;
-    float rest_distance;
-    float smoothing_distance;
-    float simulation_scale;
-    float boundary_stiffness;
-    float boundary_dampening;
-    float boundary_distance;
-    float EPSILON;
-    float PI;       //delicious
-    float K;        //speed of sound
- 
-} SPHParams;
-
+#include "cl_structs.h"
 
 float magnitude(float4 vec)
 {
@@ -34,6 +13,9 @@ float dist_squared(float4 vec)
 __kernel void viscosity(__global float4* pos, __global float4* veleval, __global float* density, __global float4* force, __constant struct SPHParams* params)
 {
     unsigned int i = get_global_id(0);
+    int num = params->num;
+    if(i > num) return;
+
 
     float4 p = pos[i] * params->simulation_scale;
     float4 v = veleval[i];// * params->simulation_scale;
@@ -42,8 +24,6 @@ __kernel void viscosity(__global float4* pos, __global float4* veleval, __global
     //float mu = 1.0f;
     float mu = 1.001f;
 
-    //obviously this is going to be passed in as a parameter (rather we will use neighbor search)
-    int num = get_global_size(0);
     float h = params->smoothing_distance;
 
     //stuff from Tim's code (need to match #s to papers)
@@ -86,5 +66,3 @@ __kernel void viscosity(__global float4* pos, __global float4* veleval, __global
     force[i] += f;
 
 }
-);
-
