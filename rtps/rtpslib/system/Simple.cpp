@@ -10,35 +10,27 @@ namespace rtps {
 
 Simple::Simple(RTPS *psfr, int n)
 {
-    num = n;
+    max_num = n;
+    num = max_num;
     //store the particle system framework
     ps = psfr;
+    grid = ps->settings.grid;
 
-    /*
-    std::vector<float4> positions(num);
-    std::vector<float4> colors(num);
-    std::vector<float4> forces(num);
-    std::vector<float4> velocities(num);
-    */
     printf("num: %d\n", num);
-    positions.resize(num);
-    colors.resize(num);
-    forces.resize(num);
-    velocities.resize(num);
+    positions.resize(max_num);
+    colors.resize(max_num);
+    forces.resize(max_num);
+    velocities.resize(max_num);
 
-    
-    int j = 0;
-    for(int i = 0; i < num; i++)
-    {
-        positions[i] = float4(i % 16, j, 0.0f, 0.0f);
-        colors[i] = float4(1.0f, 0.0f, 0.0f, 0.0f);
-        if(i % 16 == 0)
-        {
-            j++;
-        }
-    }
+    float4 min = grid.getBndMin();
+    float4 max = grid.getBndMax();
+
+    float spacing = .1; 
+    std::vector<float4> box = addRect(num, min, max, spacing, 1);     std::copy(box.begin(), box.end(), positions.begin());
+
+
     //std::fill(positions.begin(), positions.end(), float4(0.0f, 0.0f, 0.0f, 1.0f));
-    //std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));
+    std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));
     std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     
@@ -48,6 +40,7 @@ Simple::Simple(RTPS *psfr, int n)
     col_vbo = createVBO(&colors[0], colors.size()*sizeof(float4), GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
     printf("col vbo: %d\n", col_vbo);
 
+#if GPU
     //vbo buffers
     printf("making cl_buffers\n");
     cl_position = Buffer<float4>(ps->cli, pos_vbo);
@@ -63,6 +56,7 @@ Simple::Simple(RTPS *psfr, int n)
     //could generalize this to other integration methods later (leap frog, RK4)
     printf("create euler kernel\n");
     loadEuler();
+#endif
 
    }
 
@@ -91,7 +85,13 @@ void Simple::update()
 
     //printf("pushing positions to gpu\n");
     glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
-    glBufferData(GL_ARRAY_BUFFER, num * sizeof(float4), &positions[0], GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(float4), &positions[0], GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, col_vbo);
+    glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(float4), &colors[0], GL_DYNAMIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glFinish();
+
     //printf("done pushing to gpu\n");
 
 
