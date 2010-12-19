@@ -1,6 +1,5 @@
 #include <stdio.h>
 
-
 #include <GL/glew.h>
 #if defined __APPLE__ || defined(MACOSX)
     #include <GLUT/glut.h>
@@ -10,6 +9,7 @@
 #endif
 
 #include "Render.h"
+#include "util.h"
 
 
 namespace rtps{
@@ -21,11 +21,17 @@ Render::Render(GLuint pos, GLuint col, int n)
     col_vbo = col;
     num = n;
 
+    printf("GL VERSION %s\n", glGetString(GL_VERSION));
     glsl = true;
     //glsl = false;
+    //mikep = true;
     if(glsl)
     {
         glsl_program = compileShaders();
+    }
+    else if(mikep)
+    {  
+        glsl_program = mpShaders();
     }
     setupTimers();
 }
@@ -138,6 +144,32 @@ void Render::render()
 
         glUseProgram(0);
         glDisable(GL_POINT_SPRITE_ARB);
+    }
+    else if(mikep)
+    {
+         //printf("GLSL\n");
+        glEnable(GL_POINT_SPRITE_ARB);
+        glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
+        //this isn't looking good for ATI, check for their extension?
+        glEnable(GL_VERTEX_PROGRAM_POINT_SIZE_NV);
+        glDepthMask(GL_TRUE);
+        glEnable(GL_DEPTH_TEST);
+
+        glUseProgram(glsl_program);
+        float emit = 1.f;
+        float alpha = .5f;
+
+        glUniform1f( glGetUniformLocation(glsl_program, "emit"), emit);
+        glUniform1f( glGetUniformLocation(glsl_program, "alpha"), alpha);
+
+        glColor4f(1, 1, 1, 1);
+
+        drawArrays();
+
+        glUseProgram(0);
+        glDisable(GL_POINT_SPRITE_ARB);
+
+
     }
     else   // do not use glsl
     {
@@ -276,6 +308,89 @@ GLuint Render::compileShaders()
 
     return program;
 }
+
+
+//----------------------------------------------------------------------
+GLuint Render::mpShaders()
+{
+
+    //this may not be the cleanest implementation
+    #include "mpshaders.cpp"
+
+    printf("vertex shader:\n%s\n", vertex_shader_source);
+    printf("geometry shader:\n%s\n", geometry_shader_source);
+    printf("fragment shader:\n%s\n", fragment_shader_source);
+
+
+    GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    GLuint geometry_shader = glCreateShader(GL_GEOMETRY_SHADER_EXT);
+    GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+
+    glShaderSource(vertex_shader, 1, &vertex_shader_source, 0);
+    glShaderSource(geometry_shader, 1, &geometry_shader_source, 0);
+    glShaderSource(fragment_shader, 1, &fragment_shader_source, 0);
+    
+    glCompileShader(vertex_shader);
+    GLint len;
+    glGetShaderiv(vertex_shader, GL_INFO_LOG_LENGTH, &len);
+    printf("vertex len %d\n", len);
+    if(len > 0)
+    {
+        char log[1024];
+        glGetShaderInfoLog(vertex_shader, 1024, 0, log);
+        printf("Vertex Shader log:\n %s\n", log);
+    }
+
+    glCompileShader(geometry_shader);
+    glGetShaderiv(geometry_shader, GL_INFO_LOG_LENGTH, &len);
+    printf("geometry len %d\n", len);
+    if(len > 0)
+    {
+        char log[1024];
+        glGetShaderInfoLog(geometry_shader, 1024, 0, log);
+        printf("Geometry Shader log:\n %s\n", log);
+    }
+ 
+
+    glCompileShader(fragment_shader);
+    glGetShaderiv(fragment_shader, GL_INFO_LOG_LENGTH, &len);
+    printf("fragment len %d\n", len);
+    if(len > 0)
+    {
+        char log[1024];
+        glGetShaderInfoLog(fragment_shader, 1024, 0, log);
+        printf("Fragment Shader log:\n %s\n", log);
+    }
+
+    GLuint program = glCreateProgram();
+
+    glAttachShader(program, vertex_shader);
+    glAttachShader(program, geometry_shader);
+    glAttachShader(program, fragment_shader);
+
+    glProgramParameteriEXT(program,GL_GEOMETRY_VERTICES_OUT_EXT,3);
+    glProgramParameteriEXT(program,GL_GEOMETRY_INPUT_TYPE_EXT,GL_TRIANGLES);
+    glProgramParameteriEXT(program,GL_GEOMETRY_OUTPUT_TYPE_EXT,GL_TRIANGLE_STRIP);
+
+    glLinkProgram(program);
+
+    // check if program linked
+    GLint success = 0;
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+
+    if (!success) {
+        char temp[256];
+        glGetProgramInfoLog(program, 256, 0, temp);
+        printf("Failed to link program:\n%s\n", temp);
+        glDeleteProgram(program);
+        program = 0;
+    }
+
+    return program;
+}
+
+
+
 
 
 int Render::setupTimers()

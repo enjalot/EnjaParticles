@@ -7,9 +7,11 @@
 
 namespace rtps{
 
-    
+
+//NVIDIA helper functions    
 const char* oclErrorString(cl_int error);
-    
+cl_int oclGetPlatformID(cl_platform_id* clSelectedPlatformID);
+
 class CL
 {
 public:

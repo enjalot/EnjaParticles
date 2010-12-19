@@ -109,12 +109,12 @@ void Simple::cpuEuler()
 
         //float4 pp = predator_prey(p);
         float4 pp = runge_kutta(p, h);
-        v = pp;
+        //v = pp;
         float4 ff1 = force_field(p, f1, .84f, 15.0f);
         float4 ff2 = force_field(p, f2, 1.4f, 16.0f);
         float4 ff3 = force_field(p, f3, .8f, 15.0f);
 
-        //f += ff1 + ff2 + ff3;
+        f += ff1 + ff2 + ff3;
 
         v.x += h*f.x;
         v.y += h*f.y;

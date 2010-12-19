@@ -43,12 +43,14 @@ private:
 
     RenderType rtype;
     bool glsl;
+    bool mikep;
     GLuint glsl_program;    
 
     GLuint pos_vbo;
     GLuint col_vbo;
 
     GLuint compileShaders();
+    GLuint mpShaders();
 
 };
 

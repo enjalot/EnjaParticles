@@ -109,7 +109,7 @@ void Simple::update()
     //euler integration
     //err = queue.enqueueNDRangeKernel(k_euler, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
     //queue.finish();
-    printf("executing euler in simple!\n");
+    //printf("executing euler in simple!\n");
     k_euler.execute(num);
 
     //err = queue.enqueueReleaseGLObjects(&enjas->cl_vbos, NULL, &event);
