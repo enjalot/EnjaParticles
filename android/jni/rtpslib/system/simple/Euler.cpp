@@ -47,12 +47,13 @@ float4 norm_dir(float4 p1, float4 p2)
 float4 force_field(float4 p, float4 ff, float dist, float max_force)
 {
     float d = distance(p, ff);
-    if(d < 14)
+    if(d < dist)
     {
         float4 dir = norm_dir(p, ff);
         float mag = max_force * (dist - d)/dist;
         dir.x *= mag;
         dir.y *= mag;
+        dir.z *= mag;
         return dir;
     }
     return float4(0, 0, 0, 0);
@@ -64,8 +65,9 @@ void Simple::cpuEuler()
     float h = ps->settings.dt;
     //printf("h: %f\n", h);
 
-    float4 f1 = float4(20, 10, 0, 0);
-    float4 f2 = float4(-5, 50, 0, 0);
+    float4 f1 = float4(.5, .0, .0, 0);
+    float4 f2 = float4(1, 1, .3, 0);
+    float4 f3 = float4(1.5, .0, .0, 0);
 
 
     for(int i = 0; i < num; i++)
@@ -95,11 +97,13 @@ void Simple::cpuEuler()
         }
         */
 
-        float4 ff1 = force_field(p, f1, 14.0f, 15.0f);
-        float4 ff2 = force_field(p, f2, 14.0f, 15.0f);
+        float4 ff1 = force_field(p, f1, .4f, 20.0f);
+        float4 ff2 = force_field(p, f2, 1.4f, 20.0f);
+        float4 ff3 = force_field(p, f3, .4f, 20.0f);
 
-        f.x += ff1.x + ff2.x;
-        f.y += ff1.y + ff2.y;
+        f.x += ff1.x + ff2.x + ff3.x;
+        f.y += ff1.y + ff2.y + ff3.y;
+        f.z += ff1.z + ff2.z + ff3.z;
 
         v.x += h*f.x;
         v.y += h*f.y;
@@ -112,6 +116,23 @@ void Simple::cpuEuler()
 
         velocities[i] = v;
         positions[i] = p;
+        
+
+
+        float colx = v.x;
+        float coly = v.y;
+        float colz = v.z;
+        if(colx < 0) {colx = -1.0f*colx;}
+        if(colx > 1) {colx = 1.0f;}
+        if(coly < 0) {coly = -1.0f*coly;}
+        if(coly > 1) {coly = 1.0f;}
+        if(colz < 0) {colz = -1.0f*colz;}
+        if(colz > 1) {colz = 1.0f;}
+
+        colors[i].x = colx;
+        colors[i].y = coly;
+        colors[i].z = colz;
+     
     }
     //printf("v.z %f p.z %f \n", velocities[0].z, positions[0].z);
 }

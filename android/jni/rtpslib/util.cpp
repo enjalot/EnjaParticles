@@ -4,6 +4,8 @@
 #include <string.h>
 #include <string>
 
+#include <android/log.h>
+
 #include "importgl.h"
 
 #include "util.h"
@@ -27,10 +29,12 @@ GLuint createVBO(const void* data, int dataSize, GLenum target, GLenum usage)
     glGetBufferParameteriv(target, GL_BUFFER_SIZE, &bufferSize);
     if(dataSize != bufferSize)
     {
+
+        __android_log_print(ANDROID_LOG_INFO, "RTPS", "vbo prob: %d", id);
         glDeleteBuffers(1, &id);
         id = 0;
         //cout << "[createVBO()] Data size is mismatch with input array\n";
-        printf("[createVB()] Data size is mismatch with input array\n");
+        //printf("[createVB()] Data size is mismatch with input array\n");
     }
     //this was important for working inside blender!
     glBindBuffer(target, 0);

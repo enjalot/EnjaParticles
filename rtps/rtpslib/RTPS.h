@@ -4,7 +4,9 @@
 #include <vector>
 
 //OpenCL API
+#ifdef INCOPENCL
 #include "opencl/CLL.h"
+#endif
 
 //Render API
 #include "render/Render.h"
@@ -39,7 +41,9 @@ public:
     RTPSettings settings;
     
     //OpenCL abstraction instance
+#ifdef INCOPENCL
     CL *cli;
+#endif
     Render *renderer;
 
     //will be instanciated as a specific subclass like SPH or Boids

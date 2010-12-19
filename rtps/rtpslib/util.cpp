@@ -62,7 +62,7 @@ GLuint createVBO(const void* data, int dataSize, GLenum target, GLenum usage)
     return id;      // return VBO id
 }
 
-
+#ifdef INCOPENCL
 
 //NVIDIA's code
 //////////////////////////////////////////////////////////////////////////////
@@ -136,4 +136,5 @@ cl_int oclGetPlatformID(cl_platform_id* clSelectedPlatformID)
     return CL_SUCCESS;
 }
 
+#endif
 

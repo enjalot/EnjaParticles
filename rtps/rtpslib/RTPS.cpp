@@ -33,7 +33,9 @@ void RTPS::Init()
     glewInit();
 
 
+#ifdef INCOPENCL
     cli = new CL();
+#endif
     system = NULL;
     renderer = NULL;
 

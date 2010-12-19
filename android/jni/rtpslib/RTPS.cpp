@@ -2,6 +2,7 @@
 #include "system/Simple.h"
 #include "system/SPH.h"
 
+#include <android/log.h>
 
 namespace rtps{
     
@@ -62,15 +63,29 @@ void RTPS::render()
 
     //this functionality should be inside the system's render() function
     //so System should own the renderer object
-    if(settings.system == RTPSettings::SPH)
+    //if(settings.system == RTPSettings::SPH)
     {
-        UniformGrid grid = system->getGrid();
+        //Domain grid = system->getGrid();
+        Domain grid = settings.grid;
         //should check if grid exists
-        renderer->render_box(grid.getMin(), grid.getMax());
+        renderer->render_box(grid.getBndMin(), grid.getBndMax());
     }
 
+    //__android_log_print(ANDROID_LOG_INFO, "RTPS", "about to render");
     renderer->render();
 }
+
+void RTPS::updateNum(int num)
+{
+    printf("about to test for renderer\n");
+    if(renderer)
+    {   
+        renderer->setNum(num);
+    }   
+    //this segfaults for some reason
+    //system->setNum(num);
+}
+
 
 }
 

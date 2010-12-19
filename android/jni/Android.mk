@@ -10,13 +10,15 @@ LOCAL_CFLAGS := -DANDROID_NDK \
 
 LOCAL_SRC_FILES := \
     importgl.c \
+	glue.c \
     rtps.cpp \
 	rtpslib/RTPS.cpp \
 	rtpslib/RTPSettings.cpp \
 	rtpslib/structs.cpp \
 	rtpslib/util.cpp \
 	rtpslib/render/Render.cpp \
-	rtpslib/particle/UniformGrid.cpp \
+	rtpslib/domain/Domain.cpp \
+	rtpslib/domain/IV.cpp \
 	rtpslib/system/Simple.cpp \
 	rtpslib/system/simple/Euler.cpp \
 	rtpslib/system/SPH.cpp \

@@ -8,8 +8,10 @@
 #include "Domain.h"
 #include "IV.h"
 
-#include "oclSortingNetworks_common.h"
-extern "C" void closeBitonicSort(void);
+#if INCOPENCL
+    #include "oclSortingNetworks_common.h"
+    extern "C" void closeBitonicSort(void);
+#endif
 
 //for random
 #include<time.h>

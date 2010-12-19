@@ -5,8 +5,10 @@
 
 #include "../RTPS.h"
 #include "System.h"
-#include "../opencl/Kernel.h"
-#include "../opencl/Buffer.h"
+#ifdef INCOPENCL
+    #include "../opencl/Kernel.h"
+    #include "../opencl/Buffer.h"
+#endif
 //#include "../util.h"
 #include "../domain/Domain.h"
 
@@ -145,6 +147,45 @@ private:
     void pushParticles(vector<float4> pos);
     //void popParticles();
 
+
+    std::vector<float4> positions;
+    std::vector<float4> colors;
+    std::vector<float>  densities;
+    std::vector<float4> forces;
+    std::vector<float4> velocities;
+    std::vector<float4> veleval;
+    std::vector<float4> xsphs;
+
+
+    //CPU functions
+    void cpuDensity();
+    void cpuPressure();
+    void cpuViscosity();
+    void cpuXSPH();
+    void cpuCollision_wall();
+    void cpuEuler();
+    void cpuLeapFrog();
+
+    void updateCPU();
+
+    //Nearest Neighbors search related functions
+    void prep(int stage);
+    void hash();
+    void printHashDiagnostics();
+    void bitonic_sort();
+    void buildDataStructures();
+    void neighborSearch(int choice);
+    void collision();
+    void integrate();
+
+    float Wpoly6(float4 r, float h);
+    float Wspiky(float4 r, float h);
+    float Wviscosity(float4 r, float h);
+
+#ifdef INCOPENCL
+
+    void updateGPU();
+
     Kernel k_density, k_pressure, k_viscosity;
     Kernel k_collision_wall;
     Kernel k_euler, k_leapfrog;
@@ -157,15 +198,6 @@ private:
 
     //This should be in OpenCL classes
     Kernel k_scopy;
-
-    std::vector<float4> positions;
-    std::vector<float4> colors;
-    std::vector<float>  densities;
-    std::vector<float4> forces;
-    std::vector<float4> velocities;
-    std::vector<float4> veleval;
-    std::vector<float4> xsphs;
-
     Buffer<float4>      cl_position;
     Buffer<float4>      cl_color;
     Buffer<float>       cl_density;
@@ -221,36 +253,12 @@ private:
     void loadDataStructures();
     void loadNeighbors();
 
-    //CPU functions
-    void cpuDensity();
-    void cpuPressure();
-    void cpuViscosity();
-    void cpuXSPH();
-    void cpuCollision_wall();
-    void cpuEuler();
-    void cpuLeapFrog();
-
-    void updateCPU();
-    void updateGPU();
-
-    //Nearest Neighbors search related functions
-    void prep(int stage);
-    void hash();
-    void printHashDiagnostics();
-    void bitonic_sort();
-    void buildDataStructures();
-    void neighborSearch(int choice);
-    void collision();
-    void integrate();
-
-    float Wpoly6(float4 r, float h);
-    float Wspiky(float4 r, float h);
-    float Wviscosity(float4 r, float h);
 
     //OpenCL helper functions, should probably be part of the OpenCL classes
     void loadScopy();
 	void scopy(int n, cl_mem xsrc, cl_mem ydst); 
 	//void sset_int(int n, int val, cl_mem xdst);
+#endif //INCOPENCL
    
 };
 

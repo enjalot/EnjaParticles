@@ -17,6 +17,7 @@
 #include <assert.h>
 
 #include "importgl.h"
+#include "glue.h"
 
 #include "app.h"
 
@@ -34,16 +35,22 @@ static float fingerY = 0;
 static float cameraAngleX = 0;
 static float cameraAngleY = 0;
 
+static float translate_x = .0f;
+static float translate_y = .0f;
+static float translate_z = 5.0f;
+
 
 //5 second particle length
 #define RUN_LENGTH  (5 * 1000)
 #undef PI
 #define PI 3.1415926535897932f
 
-#define NUM_PARTICLES 100
-#define DT .001f
+//#define NUM_PARTICLES 100
+#define NUM_PARTICLES 1000
+#define DT .004f
 
-rtps::RTPS* ps;
+using namespace rtps;
+RTPS* ps;
 
 static long sStartTick = 0;
 static long sTick = 0;
@@ -61,7 +68,7 @@ void appTouch(float* xp, float* yp)
 {
     float x = *xp;
     float y = *yp;
-    //__android_log_print(ANDROID_LOG_INFO, "RTPS", "touch!");
+    __android_log_print(ANDROID_LOG_INFO, "RTPS", "touch! sph");
 
     //__android_log_print(ANDROID_LOG_INFO, "RTPS", "new verts! x=%g y=%f", x, y);
     x = 2.*(x/width) - 1.;
@@ -69,7 +76,32 @@ void appTouch(float* xp, float* yp)
     //__android_log_print(ANDROID_LOG_INFO, "RTPS", "new verts scaled x=%f y=%f", x, y);
     //make_vertices(vertices, NUM_PARTICLES, x, y);
     //init_generator(x,y);
+    if(ps->settings.system == RTPSettings::SPH)
+    {
+        int nn = 50;
+        float4 min = float4(.1,.1,.1, 1.0);
+        float4 max = float4(.9, .5, .9, 1.0);
+        ps->system->addBox(nn, min, max, false);
+        __android_log_print(ANDROID_LOG_INFO, "RTPS", "nn: %d", nn);
+    }
+    else if(ps->settings.system == RTPSettings::Simple)
+    {
+        
+    }
 
+}
+void appTouchSimple(float* xp, float* yp)
+{
+    float x = *xp;
+    float y = *yp;
+    __android_log_print(ANDROID_LOG_INFO, "RTPS", "touch! simple");
+
+    //__android_log_print(ANDROID_LOG_INFO, "RTPS", "new verts! x=%g y=%f", x, y);
+    x = 2.*(x/width) - 1.;
+    y = 1. - 2.*(y/height);
+    //__android_log_print(ANDROID_LOG_INFO, "RTPS", "new verts scaled x=%f y=%f", x, y);
+    //make_vertices(vertices, NUM_PARTICLES, x, y);
+    //init_generator(x,y);
 }
 //when someone touches we need first place they touched
 void appDown(float* xp, float* yp)
@@ -84,8 +116,8 @@ void appMove(float* xp, float* yp)
 {
     float x = *xp;
     float y = *yp;
-    cameraAngleY += (x -fingerX);
-    cameraAngleX += (y -fingerY);
+    cameraAngleY += (x -fingerX) * .1;
+    cameraAngleX += (y -fingerY) * .1;
     fingerX = x;
     fingerY = y;
     //__android_log_print(ANDROID_LOG_INFO, "RTPS", "camera angle! x=%f y=%f", cameraAngleX, cameraAngleY);
@@ -93,10 +125,12 @@ void appMove(float* xp, float* yp)
 // Called from the app framework.
 void appInit()
 {
+    __android_log_print(ANDROID_LOG_INFO, "RTPS", "RTPS INITIALIZING");
     srand48(time(NULL));
-    rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT);
-    //rtps::RTPSettings settings(rtps::RTPSettings::Simple, NUM_PARTICLES, DT);
-    ps = new rtps::RTPS(settings);
+    Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
+    //rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
+    RTPSettings settings(RTPSettings::Simple, NUM_PARTICLES, DT, grid);
+    ps = new RTPS(settings);
     
     __android_log_print(ANDROID_LOG_INFO, "RTPS", "RTPS INITIALIZED");
     //__android_log_print(ANDROID_LOG_INFO, "RTPS", "can i haz init vertices[0]=%f generator[0].x=%f", vertices[0], generator[0].x);
@@ -108,6 +142,7 @@ void appInit()
 // Called from the app framework.
 void appDeinit()
 {
+    __android_log_print(ANDROID_LOG_INFO, "RTPS", "RTPS DEINITIALIZED");
 }
 
 static void gluPerspective(GLfloat fovy, GLfloat aspect,
@@ -136,15 +171,26 @@ static void prepareFrame()
     glLoadIdentity();
 
     //rotation works but wont be nice till we draw a box
-    gluPerspective(45, (float)width / height, 0.5f, 1500);
+    gluPerspective(90, (float)width / height, 0.1f, 10000);
+   
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
     //glRotatef(-90, 1, 0, 0);
     glRotatef(cameraAngleX, 1, 0, 0);   // pitch
     glRotatef(cameraAngleY, 0, 0, 1);   // heading
+    //glTranslatef(translate_x, translate_y, translate_z);
+    //glTranslatef(2,0,-10);
+    gluLookAtf(  0,0,2,
+                0,0,0,
+                0,1,0);
+
+    //for Simple
+    glRotatef(-90, 0, 0, 1);
+    glTranslatef(-1,-1,1);
     //__android_log_print(ANDROID_LOG_INFO, "RTPS", "rotate? x=%f y=%f", cameraAngleX, cameraAngleY);
 
 
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
 
     /*
     glMatrixMode(GL_PROJECTION);
@@ -164,6 +210,7 @@ static void prepareFrame()
  */
 void appRender(long tick, int w, int h)
 {
+    //__android_log_print(ANDROID_LOG_INFO, "RTPS", "APP RENDER");
     width = w;
     height = h;
     if (sStartTick == 0)
@@ -191,8 +238,8 @@ void appRender(long tick, int w, int h)
 
     prepareFrame();
 
-
     ps->render();
+    
     /*
     //draw some particles!
     //glColor4f(1., 1., 1., 1.);
