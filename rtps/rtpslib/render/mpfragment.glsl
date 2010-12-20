@@ -1,5 +1,5 @@
 #version 330
-#fragment shader
+//#fragment shader
 in vec2 texCoord;
 out vec4 outColor;
 
@@ -9,8 +9,8 @@ uniform float emit, alpha;
 void main(void) {
 
     // load color texture
-    vec4 color;
-    color = texture2D(col, texCoord);
+    vec4 color = vec4(1.,0.,0.,1.);
+    //color = texture2D(col, texCoord);
 
     // apply material panel values
     color.rgb *= emit;
