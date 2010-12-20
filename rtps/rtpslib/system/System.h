@@ -10,6 +10,7 @@
 #endif
 
 #include "../domain/Domain.h"
+#include "ForceField.h"
 
 #include<stdio.h>
 namespace rtps {
@@ -29,6 +30,8 @@ public:
 
     virtual int addBox(int nn, float4 min, float4 max, bool scaled){ return 0;};
     virtual void addBall(int nn, float4 center, float radius, bool scaled){};
+
+    virtual void addForceField(ForceField ff){};
     
 
 protected:

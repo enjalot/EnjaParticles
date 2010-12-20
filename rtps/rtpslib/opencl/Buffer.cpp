@@ -14,6 +14,18 @@ Buffer<T>::Buffer(CL *cli, const std::vector<T> &data)
 
 }
 
+template <class T>
+Buffer<T>::Buffer(CL *cli, const std::vector<T> &data, unsigned int memtype)
+{
+    this->cli = cli;
+    //this->data = data;
+
+    cl_buffer.push_back(cl::Buffer(cli->context, memtype, data.size()*sizeof(T), NULL, &cli->err));
+    copyToDevice(data);
+
+
+}
+
 
 template <class T>
 Buffer<T>::Buffer(CL *cli, GLuint vbo_id)

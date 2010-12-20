@@ -15,18 +15,35 @@ Simple::Simple(RTPS *psfr, int n)
     //store the particle system framework
     ps = psfr;
     grid = ps->settings.grid;
+    forcefields_enabled = true;
+    max_forcefields = 100;
 
     printf("num: %d\n", num);
     positions.resize(max_num);
     colors.resize(max_num);
     forces.resize(max_num);
     velocities.resize(max_num);
+    //forcefields.resize(max_forcefields);
 
     float4 min = grid.getBndMin();
     float4 max = grid.getBndMax();
 
     float spacing = .1; 
-    std::vector<float4> box = addRect(num, min, max, spacing, 1);     std::copy(box.begin(), box.end(), positions.begin());
+    std::vector<float4> box = addRect(num, min, max, spacing, 1);
+    std::copy(box.begin(), box.end(), positions.begin());
+
+
+    float4 center = float4(1,1,.1,1);
+    float4 center2 = float4(2,2,.1,1);
+    float4 center3 = float4(1,2,.1,1);
+
+    forcefields.push_back( ForceField(center2, .5, 5) );
+    forcefields.push_back( ForceField(center, .5, 5) );
+    forcefields.push_back( ForceField(center3, .5, 5) );
+
+    //forcefields.push_back( ForceField(center, 1., 20, 0, 0) );
+        //forcefields.push_back( ForceField() );
+    //forcefields.push_back( ForceField() );
 
 
     //std::fill(positions.begin(), positions.end(), float4(0.0f, 0.0f, 0.0f, 1.0f));
@@ -46,9 +63,6 @@ Simple::Simple(RTPS *psfr, int n)
     cl_position = Buffer<float4>(ps->cli, pos_vbo);
     cl_color = Buffer<float4>(ps->cli, col_vbo);
     printf("done with cl_buffers\n");
-
-
-
     //pure opencl buffers
     cl_force = Buffer<float4>(ps->cli, forces);
     cl_velocity = Buffer<float4>(ps->cli, velocities);;
@@ -56,6 +70,15 @@ Simple::Simple(RTPS *psfr, int n)
     //could generalize this to other integration methods later (leap frog, RK4)
     printf("create euler kernel\n");
     loadEuler();
+    
+
+    printf("load forcefiels");
+    loadForceField();   
+    loadForceFields(forcefields);
+
+     
+
+
 #endif
 
    }
@@ -80,6 +103,7 @@ void Simple::update()
 {
 #ifdef CPU
 
+    cpuForceField();
     //printf("calling cpuEuler\n");
     cpuEuler();
 
@@ -101,21 +125,15 @@ void Simple::update()
     //call kernels
     //add timings
     glFinish();
-    //err = queue.enqueueAcquireGLObjects(&enjas->cl_vbos, NULL, &event);
     cl_position.acquire();
     cl_color.acquire();
-    //printf("acquire: %s\n", oclErrorString(err));
-    
-    //euler integration
-    //err = queue.enqueueNDRangeKernel(k_euler, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
-    //queue.finish();
-    //printf("executing euler in simple!\n");
+   
+    //k_forcefield.execute(num, 128);
+    k_forcefield.execute(num);
     k_euler.execute(num);
 
-    //err = queue.enqueueReleaseGLObjects(&enjas->cl_vbos, NULL, &event);
     cl_position.release();
     cl_color.release();
-    //printf("release gl: %s\n", oclErrorString(err));
 #endif
 }
 

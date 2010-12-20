@@ -75,6 +75,7 @@ set (rtpslib_SOURCES
 
     
     ${rtpslib_SOURCE_DIR}/system/Simple.cpp
+    ${rtpslib_SOURCE_DIR}/system/simple/ForceField
     ${rtpslib_SOURCE_DIR}/system/simple/Euler
     
     ${rtpslib_SOURCE_DIR}/system/SPH.cpp

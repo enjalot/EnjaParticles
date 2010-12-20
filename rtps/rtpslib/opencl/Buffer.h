@@ -21,6 +21,7 @@ public:
     Buffer(){ cli=NULL; vbo_id=0; };
     //create an OpenCL buffer from existing data
     Buffer(CL *cli, const std::vector<T> &data);
+    Buffer(CL *cli, const std::vector<T> &data, unsigned int memtype);
     //create a OpenCL BufferGL from a vbo_id
     //if managed is true then the destructor will delete the VBO
     Buffer(CL *cli, GLuint vbo_id);

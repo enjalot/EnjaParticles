@@ -59,7 +59,7 @@ __kernel void euler(__global float4* pos, __global float4* vel, __global float4*
     float4 v = vel[i];
     float4 f = force[i];
 
-
+/*
     //external force is gravity
     //f.z += -9.8f;
     float4 ffp = (float4)(1.0f,1.0f,0.0f,1.0f);
@@ -68,6 +68,7 @@ __kernel void euler(__global float4* pos, __global float4* vel, __global float4*
     float4 ff = force_field(p, ffp, dist, max_force);
     f += ff;
 
+*/
     v += h*f;
     p += h*v;
     p.w = 1.0f; //just in case

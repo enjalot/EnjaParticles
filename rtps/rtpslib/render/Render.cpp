@@ -24,7 +24,7 @@ Render::Render(GLuint pos, GLuint col, int n)
     printf("GL VERSION %s\n", glGetString(GL_VERSION));
     glsl = true;
     //glsl = false;
-    //mikep = true;
+    mikep = false;
     if(glsl)
     {
         glsl_program = compileShaders();

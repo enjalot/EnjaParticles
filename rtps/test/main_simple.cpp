@@ -177,6 +177,10 @@ void appKeyboard(unsigned char key, int x, int y)
             // Cleanup up and quit
             appDestroy();
             break;
+        case 'f'://add forcefield
+            ForceField ff(float4(0,0,0,1), .5, 2);
+            ps->system->addForceField(ff);
+
     }
 }
 
