@@ -37,9 +37,9 @@ Simple::Simple(RTPS *psfr, int n)
     float4 center2 = float4(2,2,.1,1);
     float4 center3 = float4(1,2,.1,1);
 
-    forcefields.push_back( ForceField(center2, .5, 5) );
-    forcefields.push_back( ForceField(center, .5, 5) );
-    forcefields.push_back( ForceField(center3, .5, 5) );
+    forcefields.push_back( ForceField(center2, .5,.1) );
+    forcefields.push_back( ForceField(center, .5, .1) );
+    forcefields.push_back( ForceField(center3, .5, .1) );
 
     //forcefields.push_back( ForceField(center, 1., 20, 0, 0) );
         //forcefields.push_back( ForceField() );

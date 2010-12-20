@@ -188,7 +188,7 @@ void appRender()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    int subintervals = 10;
+    int subintervals = 1;
     for(int i = 0; i < subintervals; i++)
     {
         ps->update();

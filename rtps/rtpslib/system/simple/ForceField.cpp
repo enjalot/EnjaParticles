@@ -125,6 +125,7 @@ float4 runge_kutta(float4 yn, float h)
 float4 force_field(float4 p, float4 ff, float dist, float max_force)
 {
     float d = distance(p, ff);
+    //printf("distance: %f, dist %f\n", d, dist);
     if(d < dist)
     {
         float4 dir = norm_dir(p, ff);
@@ -132,6 +133,7 @@ float4 force_field(float4 p, float4 ff, float dist, float max_force)
         dir.x *= mag;
         dir.y *= mag;
         dir.z *= mag;
+        printf("forcefield: %f, %f, %f\n", dir.x, dir.y, dir.z);
         return dir;
     }
     return float4(0, 0, 0, 0);
@@ -139,7 +141,7 @@ float4 force_field(float4 p, float4 ff, float dist, float max_force)
 
 void Simple::cpuForceField()
 {
-
+    //float4 c = forcefields[0].center;
     for(int i = 0; i < num; i++)
     {
         float4 p = positions[i];

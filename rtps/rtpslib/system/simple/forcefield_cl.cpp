@@ -24,6 +24,34 @@ float4 norm_dir(float4 p1, float4 p2)
     return dir;
 }
 
+float4 explode(float4 p, float4 c, float dist, float mag)
+{
+    float4 f = (float4)(0,0,0,0);
+    float dsqr = euclidean_distance(p, c);
+    if(dsqr < dist)
+    {
+        f = p - c;
+        float norm = sqrt(f.x*f.x + f.y*f.y + f.z*f.z);
+        f /= norm;
+        f *= dsqr*mag;
+    }
+    return f;
+}
+float4 implode(float4 p, float4 c, float dist, float mag)
+{
+    float4 f = (float4)(0,0,0,0);
+    float dsqr = euclidean_distance(p, c);
+    if(dsqr < dist)
+    {
+        f = c - p;
+        float norm = sqrt(f.x*f.x + f.y*f.y + f.z*f.z);
+        f /= norm;
+        f *= dsqr*mag;
+    }
+    return f;
+}
+
+
 float4 force_field(float4 p, float4 ff, float dist, float max_force)
 {
     float d = euclidean_distance(p, ff);
@@ -119,7 +147,9 @@ __kernel void forcefield(__global float4* pos, __global float4* vel, __global fl
     */
     for(int j = 0; j < n_ff; j++)
     {
-        force[i] += force_field(p, ffloc[j].center, ffloc[j].radius, ffloc[j].max_force);
+        //force[i] += force_field(p, ffloc[j].center, ffloc[j].radius, ffloc[j].max_force);
+        //force[i] += implode(p, ffloc[j].center, ffloc[j].radius, ffloc[j].max_force);
+        force[i] += explode(p, ffloc[j].center, ffloc[j].radius, ffloc[j].max_force);
     }
 
     /*
