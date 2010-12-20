@@ -42,7 +42,7 @@ __kernel void vel_update(__global float4* vertices, __global float4* colors, __g
         vel = (float4)(dot(transform[0], vel), dot(transform[1], vel), dot(transform[2], vel), 0);
         //vel = vel_t + transform[3];
 
-        velocities[i] = 5*vel;
+        velocities[i] = velo_gen[i];
         /*
         velocities[i].x = 5*velo_gen[i].x;
         velocities[i].y = 5*velo_gen[i].y;

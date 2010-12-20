@@ -23,8 +23,8 @@ Render::Render(GLuint pos, GLuint col, int n)
 
     printf("GL VERSION %s\n", glGetString(GL_VERSION));
     glsl = true;
-    //glsl = false;
-    //mikep = true;
+    glsl = false;
+    mikep = true;
     if(glsl)
     {
         glsl_program = compileShaders();
@@ -367,11 +367,11 @@ GLuint Render::mpShaders()
     glAttachShader(program, vertex_shader);
     glAttachShader(program, geometry_shader);
     glAttachShader(program, fragment_shader);
-
-    glProgramParameteriEXT(program,GL_GEOMETRY_VERTICES_OUT_EXT,3);
-    glProgramParameteriEXT(program,GL_GEOMETRY_INPUT_TYPE_EXT,GL_TRIANGLES);
+    
+    glProgramParameteriEXT(program,GL_GEOMETRY_VERTICES_OUT_EXT,4);
+    glProgramParameteriEXT(program,GL_GEOMETRY_INPUT_TYPE_EXT,GL_POINT);
     glProgramParameteriEXT(program,GL_GEOMETRY_OUTPUT_TYPE_EXT,GL_TRIANGLE_STRIP);
-
+    
     glLinkProgram(program);
 
     // check if program linked

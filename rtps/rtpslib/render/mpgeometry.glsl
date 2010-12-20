@@ -1,7 +1,7 @@
 #version 330
 //#geometry shader
 
-layout(triangles) in;
+layout(points) in;
 layout(triangle_strip) out;
 out vec2 texCoord;
 
@@ -11,7 +11,6 @@ out vec2 texCoord;
 void main() 
 {
     //for(int i = 0; i < gl_in.length(); i++) {  // avoid duplicate draw
-
     int j = 0;
     for (int j=0; j < gl_in.length(); j++) 
     {

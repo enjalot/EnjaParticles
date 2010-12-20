@@ -57,7 +57,7 @@ int EnjaParticles::update()
 
     if(collision)
     {
-        err = collision_kernel.setArg(4, dt);
+        err = collision_kernel.setArg(5, dt);
 		size_t glob = num; // 10000
 		size_t loc = 256;
 		try {
@@ -355,6 +355,7 @@ void EnjaParticles::popCorn()
         err = collision_kernel.setArg(0, cl_vbos[0]);      //position
         //printf("collision arg 0: %s\n", oclErrorString(err));
         err = collision_kernel.setArg(1, cl_velocities);   //velocities
+        err = collision_kernel.setArg(2, cl_vbos[1]);   //colors
         //printf("collision arg 1: %s\n", oclErrorString(err));
     //}
 
