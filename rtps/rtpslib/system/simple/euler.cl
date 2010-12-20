@@ -1,3 +1,56 @@
+//normalized vector pointing from p1 to p2
+float4 norm_dir(float4 p1, float4 p2)
+{
+    float4 dir = float4(p2.x - p1.x, p2.y - p1.y, p2.z - p1.z, 0.0f);
+    float norm = length(dir);
+    if(norm > 0)
+    {
+        dir /= norm;
+    }
+    return dir;
+}
+
+float4 predator_prey(float4 p)
+{
+    float4 v = float4(0,0,0,0);
+    int a1 = 2;
+    int a2 = 2;
+    int b1 = 1;
+    int b2 = 1;
+    v.x = a1*p.x - b1*p.x*p.y;
+    v.y = -a2*p.y + b2*p.y*p.x;
+    //v.x = a1 - b1*p.y;
+    //v.y = -a2 + b2*p.x;
+    return v;
+}
+
+float4 runge_kutta(float4 yn, float h)
+{
+    float4 k1 = predator_prey(yn); 
+    float4 k2 = predator_prey(yn + .5f*h*k1);
+    float4 k3 = predator_prey(yn + .5f*h*k2);
+    float4 k4 = predator_prey(yn + h*k3);
+
+    float4 vn = (k1 + 2.f*k2 + 2.f*k3 + k4);
+    return (1./6.)*vn;
+}
+
+
+
+float4 force_field(float4 p, float4 ff, float dist, float max_force)
+{
+    float d = distance(p, ff);
+    if(d < dist)
+    {
+        float4 dir = norm_dir(p, ff);
+        float mag = max_force * (dist - d)/dist;
+        dir *= mag;
+        return dir;
+    }
+    return float4(0, 0, 0, 0);
+}
+
+
 __kernel void euler(__global float4* pos, __global float4* vel, __global float4* force, float h)
 {
     unsigned int i = get_global_id(0);
@@ -8,7 +61,12 @@ __kernel void euler(__global float4* pos, __global float4* vel, __global float4*
 
 
     //external force is gravity
-    f.z += -9.8f;
+    //f.z += -9.8f;
+    float4 ffp = (float4)(1.0f,1.0f,0.0f,1.0f);
+    float dist = 1.0f;
+    float max_force = 10.0f;
+    ff = force_field(p, ffp, dist, max_force);
+    //f += ff;
 
     v += h*f;
     p += h*v;
@@ -16,5 +74,6 @@ __kernel void euler(__global float4* pos, __global float4* vel, __global float4*
 
     vel[i] = v;
     pos[i] = p;
+
 }
 

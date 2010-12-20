@@ -190,14 +190,14 @@ void appRender()
         ps->update();
     }
 	
-    //glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
 
     ps->render();
 
     //showFPS(enjas->getFPS(), enjas->getReport());
     glutSwapBuffers();
 
-	//glDisable(GL_DEPTH_TEST);
+	glDisable(GL_DEPTH_TEST);
 }
 
 void appDestroy()

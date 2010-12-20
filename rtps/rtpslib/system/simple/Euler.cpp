@@ -12,7 +12,8 @@ void Simple::loadEuler()
     k_euler.setArg(0, cl_position.getDevicePtr());
     k_euler.setArg(1, cl_velocity.getDevicePtr());
     k_euler.setArg(2, cl_force.getDevicePtr());
-    k_euler.setArg(3, ps->settings.dt); //time step
+    k_euler.setArg(3, cl_color.getDevicePtr());
+    k_euler.setArg(4, ps->settings.dt); //time step
 
 } 
 
@@ -128,6 +129,7 @@ void Simple::cpuEuler()
 
         velocities[i] = v;
         positions[i] = p;
+
 
         float colx = v.x;
         float coly = v.y;
