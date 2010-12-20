@@ -69,6 +69,7 @@ void main()
     vec3 h = normalize(lightDir + v);
     float specular = pow(max(0.0, dot(n, h)), shininess);
     gl_FragColor = gl_Color * diffuse + specular;
+    gl_FragColor.w = gl_Color.w;
 }
 
 

@@ -23,9 +23,9 @@ Render::Render(GLuint pos, GLuint col, int n)
 
     printf("GL VERSION %s\n", glGetString(GL_VERSION));
     glsl = true;
-    glsl = false;
-    mikep = true;
-    blending = true;
+    //glsl = false;
+    mikep = false;
+    blending = false;
     if(glsl)
     {
         glsl_program = compileShaders();
@@ -49,12 +49,6 @@ void Render::drawArrays()
     //glMatrixMode(GL_MODELVIEW_MATRIX);
     //glPushMatrix();
     //glLoadMatrixd(gl_transform);
-
-    if(blending)
-    {
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    }
 
     //printf("color buffer\n");
     glBindBuffer(GL_ARRAY_BUFFER, col_vbo);
@@ -117,6 +111,12 @@ void Render::render()
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
 
+    if(blending)
+    {
+        glDepthMask(GL_FALSE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
 
     //TODO enable GLSL shading 
     if(glsl)
@@ -126,9 +126,6 @@ void Render::render()
         glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
         //this isn't looking good for ATI, check for their extension?
         glEnable(GL_VERTEX_PROGRAM_POINT_SIZE_NV);
-        //glDepthMask(GL_TRUE);
-        glDepthMask(GL_FALSE);
-        //glEnable(GL_DEPTH_TEST);
 
         glUseProgram(glsl_program);
         float point_scale = 1.f;
@@ -139,7 +136,7 @@ void Render::render()
         glUniform1f( glGetUniformLocation(glsl_program, "pointRadius"), particle_radius );
 
        
-        glColor4f(1, 1, 1, .5);
+        glColor4f(1, 1, 1, 1);
 
         drawArrays();
 
@@ -150,16 +147,6 @@ void Render::render()
     }
     else if(mikep)
     {
-         //printf("GLSL\n");
-        //glEnable(GL_POINT_SPRITE_ARB);
-        //glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
-        //this isn't looking good for ATI, check for their extension?
-        //glEnable(GL_VERTEX_PROGRAM_POINT_SIZE_NV);
-        
-        //glEnable(GL_DEPTH_TEST);
-        glDepthMask(GL_FALSE);
-
-
         //Texture stuff
         glEnable(GL_TEXTURE_2D);
         glActiveTexture(GL_TEXTURE0);
@@ -184,11 +171,6 @@ void Render::render()
         glDisable(GL_TEXTURE_2D);
 
         glUseProgram(0);
-
-        glDepthMask(GL_FALSE);
-        //glDisable(GL_DEPTH_TEST);
-        //glDisable(GL_POINT_SPRITE_ARB);
-        
         
     }
     else   // do not use glsl
@@ -205,6 +187,8 @@ void Render::render()
     }
     //printf("done rendering, clean up\n");
    
+    glDepthMask(GL_TRUE);
+
     glPopClientAttrib();
     glPopAttrib();
     //glDisable(GL_POINT_SMOOTH);

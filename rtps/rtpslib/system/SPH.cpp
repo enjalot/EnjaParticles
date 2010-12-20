@@ -329,8 +329,8 @@ void SPH::calculateSPHSettings()
     /*!
     * The Particle Mass (and hence everything following) depends on the MAXIMUM number of particles in the system
     */
-    //sph_settings.rest_density = 1000;
-    sph_settings.rest_density = 2000;
+    sph_settings.rest_density = 1000;
+    //sph_settings.rest_density = 2000;
 
     sph_settings.particle_mass = (128*1024.0)/max_num * .0002;
     printf("particle mass: %f\n", sph_settings.particle_mass);
@@ -362,8 +362,8 @@ void SPH::calculateSPHSettings()
     params.num = num;
     params.viscosity = .001f;
     //params.viscosity = 1.0f;
-    //params.gravity = -9.8f;
-    params.gravity = 0.0f;
+    params.gravity = -9.8f;
+    //params.gravity = 0.0f;
     params.velocity_limit = 600.0f;
     params.xsph_factor = .05f;
 
