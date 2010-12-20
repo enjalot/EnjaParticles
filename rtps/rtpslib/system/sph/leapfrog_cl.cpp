@@ -21,19 +21,19 @@ __kernel void leapfrog(
     float4 f = force(i);
 
     //external force is gravity
-    f.z += -9.8f;
+    f.z += params->gravity;
 	f.w = 0.f;
 
     float speed = length(f);
-    if(speed > 600.0f) //velocity limit, need to pass in as struct
+    if(speed > params->velocity_limit) //velocity limit, need to pass in as struct
     {
-        f *= 600.0f/speed;
+        f *= params->velocity_limit/speed;
     }
 
 	float4 vnext = v + dt*f;
 	//float4 vnext = v;// + dt*f;
 	// WHY IS MY CORRECTION NEGATIVE and IAN's POSITIVE? 
-	vnext += 0.05f * xsph(i); // should be param XSPH factor
+	vnext += params->xsph_factor * xsph(i);
 
     p += dt * vnext;
     p.w = 1.0f; //just in case
