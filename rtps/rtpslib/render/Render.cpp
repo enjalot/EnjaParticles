@@ -25,12 +25,14 @@ Render::Render(GLuint pos, GLuint col, int n)
     glsl = true;
     glsl = false;
     mikep = true;
+    blending = true;
     if(glsl)
     {
         glsl_program = compileShaders();
     }
     else if(mikep)
     {  
+        loadTexture();
         glsl_program = mpShaders();
     }
     setupTimers();
@@ -48,13 +50,11 @@ void Render::drawArrays()
     //glPushMatrix();
     //glLoadMatrixd(gl_transform);
 
-    /*
     if(blending)
     {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
-    */
 
     //printf("color buffer\n");
     glBindBuffer(GL_ARRAY_BUFFER, col_vbo);
@@ -126,34 +126,44 @@ void Render::render()
         glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
         //this isn't looking good for ATI, check for their extension?
         glEnable(GL_VERTEX_PROGRAM_POINT_SIZE_NV);
-        glDepthMask(GL_TRUE);
-        glEnable(GL_DEPTH_TEST);
+        //glDepthMask(GL_TRUE);
+        glDepthMask(GL_FALSE);
+        //glEnable(GL_DEPTH_TEST);
 
         glUseProgram(glsl_program);
         float point_scale = 1.f;
         float particle_radius = 5.f;
-        bool blending = false;
         //glUniform1f( glGetUniformLocation(m_program, "pointScale"), m_window_h / tanf(m_fov * m_fHalfViewRadianFactor));
         glUniform1f( glGetUniformLocation(glsl_program, "pointScale"), point_scale);
         glUniform1f( glGetUniformLocation(glsl_program, "blending"), blending );
         glUniform1f( glGetUniformLocation(glsl_program, "pointRadius"), particle_radius );
 
-        glColor4f(1, 1, 1, 1);
+       
+        glColor4f(1, 1, 1, .5);
 
         drawArrays();
 
         glUseProgram(0);
+        
+        glDepthMask(GL_FALSE);
         glDisable(GL_POINT_SPRITE_ARB);
     }
     else if(mikep)
     {
          //printf("GLSL\n");
-        glEnable(GL_POINT_SPRITE_ARB);
-        glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
+        //glEnable(GL_POINT_SPRITE_ARB);
+        //glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
         //this isn't looking good for ATI, check for their extension?
-        glEnable(GL_VERTEX_PROGRAM_POINT_SIZE_NV);
-        glDepthMask(GL_TRUE);
-        glEnable(GL_DEPTH_TEST);
+        //glEnable(GL_VERTEX_PROGRAM_POINT_SIZE_NV);
+        
+        //glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_FALSE);
+
+
+        //Texture stuff
+        glEnable(GL_TEXTURE_2D);
+        glActiveTexture(GL_TEXTURE0);
+
 
         glUseProgram(glsl_program);
         float emit = 1.f;
@@ -162,14 +172,24 @@ void Render::render()
         glUniform1f( glGetUniformLocation(glsl_program, "emit"), emit);
         glUniform1f( glGetUniformLocation(glsl_program, "alpha"), alpha);
 
+        //Texture stuff
+        glUniform1i( glGetUniformLocation(glsl_program, "col"), 0);
+        glBindTexture(GL_TEXTURE_2D, gl_tex);
+
         glColor4f(1, 1, 1, 1);
 
         drawArrays();
 
+        //Texture
+        glDisable(GL_TEXTURE_2D);
+
         glUseProgram(0);
-        glDisable(GL_POINT_SPRITE_ARB);
 
-
+        glDepthMask(GL_FALSE);
+        //glDisable(GL_DEPTH_TEST);
+        //glDisable(GL_POINT_SPRITE_ARB);
+        
+        
     }
     else   // do not use glsl
     {
@@ -405,6 +425,77 @@ int Render::setupTimers()
         timers[TI_GLSL]     = new GE::Time("glsl", time_offset, print_freq);
     }
 }
+
+
+
+
+
+
+GLuint Render::loadTexture()
+{
+/*
+    //load the image with OpenCV
+    std::string path(CL_SOURCE_DIR);
+    //path += "/tex/particle.jpg";
+    //path += "/tex/enjalot.jpg";
+    path += "/tex/fsu_seal.jpg";
+    Mat img = imread(path, 1);
+    //Mat img = imread("tex/enjalot.jpg", 1);
+    //convert from BGR to RGB colors
+    //cvtColor(img, img, CV_BGR2RGB);
+    //this is ugly but it makes an iterator over our image data
+    //MatIterator_<Vec<uchar, 3> > it = img.begin<Vec<uchar,3> >(), it_end = img.end<Vec<uchar,3> >();
+    MatIterator_<Vec<uchar, 3> > it = img.begin<Vec<uchar,3> >(), it_end = img.end<Vec<uchar,3> >();
+    int w = img.size().width;
+    int h = img.size().height;
+    int n = w * h;
+    std::vector<unsigned char> image;//there are n bgr values 
+
+    printf("read image data %d \n", n);
+    for(; it != it_end; ++it)
+    {
+   //     printf("asdf: %d\n", it[0][0]);
+        image.push_back(it[0][0]);
+        image.push_back(it[0][1]);
+        image.push_back(it[0][2]);
+    }
+    unsigned char* asdf = &image[0];
+    printf("char string:\n");
+    for(int i = 0; i < 3*n; i++)
+    {
+        printf("%d,", asdf[i]);
+    }
+    printf("\n charstring over\n");
+  */  
+    int w = 32;
+    int h = 32;
+    #include "../../sprites/particle.txt"
+    //#include "../../sprites/reddit.txt"
+/*
+    w=100;
+    h=100;
+    #include "../../sprites/fsu_seal.txt"
+    w = 96;
+    h = 96;
+    #include "../../sprites/enjalot.txt"
+*/
+    //load as gl texture
+    glGenTextures(1, &gl_tex);
+    glBindTexture(GL_TEXTURE_2D, gl_tex);
+
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
+     GL_BGR_EXT, GL_UNSIGNED_BYTE, &image[0]);
+
+
+}
+
+
+
 
 
 }

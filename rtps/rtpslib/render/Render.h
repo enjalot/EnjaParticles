@@ -44,13 +44,16 @@ private:
     RenderType rtype;
     bool glsl;
     bool mikep;
+    bool blending;
     GLuint glsl_program;    
+    GLuint gl_tex;
 
     GLuint pos_vbo;
     GLuint col_vbo;
 
     GLuint compileShaders();
     GLuint mpShaders();
+    GLuint loadTexture();
 
 };
 
