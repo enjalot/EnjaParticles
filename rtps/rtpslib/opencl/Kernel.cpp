@@ -26,25 +26,19 @@ void Kernel::execute(int ndrange, int worksize)
     //printf("global2: %d\n", global);
     //global = ndrange;
 
-
-    printf("in kernel execute\n");
     try
     {
         //TODO add error checking
         //cli->err = cli->queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(ndrange), cl::NDRange(worksize), NULL, &cli->event);
         cli->err = cli->queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(global), cl::NDRange(worksize), NULL, &cli->event);
-
-    printf("queue finish kernel try\n");
         cli->queue.finish();
 
 
-    printf("done kernel try\n");
     }
     catch (cl::Error er) {
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
     }
 
-    printf("done kernel execute\n");
 }
 
 void Kernel::setArgShared(int arg, int nb_bytes)
