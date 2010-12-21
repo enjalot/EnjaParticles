@@ -25,9 +25,10 @@ Render::Render(GLuint pos, GLuint col, int n)
     glsl = true;
     //glsl = false;
     mikep = false;
-    blending = false;
+    blending = true;
     if(glsl)
     {
+        loadTexture();
         glsl_program = compileShaders();
     }
     else if(mikep)
@@ -121,6 +122,12 @@ void Render::render()
     //TODO enable GLSL shading 
     if(glsl)
     {
+
+        //Texture stuff
+        glEnable(GL_TEXTURE_2D);
+        glActiveTexture(GL_TEXTURE0);
+
+
         //printf("GLSL\n");
         glEnable(GL_POINT_SPRITE_ARB);
         glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
@@ -135,6 +142,11 @@ void Render::render()
         glUniform1f( glGetUniformLocation(glsl_program, "blending"), blending );
         glUniform1f( glGetUniformLocation(glsl_program, "pointRadius"), particle_radius );
 
+        //Texture stuff
+        glUniform1i( glGetUniformLocation(glsl_program, "col"), 0);
+        glBindTexture(GL_TEXTURE_2D, gl_tex);
+
+
        
         glColor4f(1, 1, 1, 1);
 
@@ -144,6 +156,11 @@ void Render::render()
         
         glDepthMask(GL_FALSE);
         glDisable(GL_POINT_SPRITE_ARB);
+        
+        //Texture
+        glDisable(GL_TEXTURE_2D);
+
+
     }
     else if(mikep)
     {
@@ -413,16 +430,17 @@ int Render::setupTimers()
 
 
 
-
-
 GLuint Render::loadTexture()
 {
+
+
+
 /*
     //load the image with OpenCV
-    std::string path(CL_SOURCE_DIR);
+    std::string path(GLSL_SOURCE_DIR);
     //path += "/tex/particle.jpg";
     //path += "/tex/enjalot.jpg";
-    path += "/tex/fsu_seal.jpg";
+    path += "/../../sprites/blue.jpg";
     Mat img = imread(path, 1);
     //Mat img = imread("tex/enjalot.jpg", 1);
     //convert from BGR to RGB colors
@@ -453,7 +471,8 @@ GLuint Render::loadTexture()
   */  
     int w = 32;
     int h = 32;
-    #include "../../sprites/particle.txt"
+    //#include "../../sprites/particle.txt"
+    #include "../../sprites/blue.txt"
     //#include "../../sprites/reddit.txt"
 /*
     w=100;
@@ -473,7 +492,7 @@ GLuint Render::loadTexture()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
-     GL_BGR_EXT, GL_UNSIGNED_BYTE, &image[0]);
+    GL_BGR_EXT, GL_UNSIGNED_BYTE, &image[0]);
 
 
 }

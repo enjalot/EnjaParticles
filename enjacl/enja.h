@@ -112,7 +112,7 @@ class EnjaParticles
 public:
 
 	/// Radix sort of integer array
-	void sort(std::vector<int> sort_int, std::vector<int> unsort_int);
+	//void sort(std::vector<int> sort_int, std::vector<int> unsort_int);
 
 	// cl_float3 does not appear to exist. I'd have to extend cl_platform.h
 	void hash(std::vector<cl_float4> list, GridParams& gp);

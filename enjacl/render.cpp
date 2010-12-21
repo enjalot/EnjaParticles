@@ -150,20 +150,19 @@ int EnjaParticles::render()
 }
 
 //should switch to blender's library, or just pass in the texture from blender
-/*
 #include "highgui.h"
 #include "cv.h"
 using namespace cv;
-*/
 //int EnjaParticles::loadTexture(std::vector<unsigned char> image, int w, int h)
 int EnjaParticles::loadTexture()
 {
-/*
+///*
     //load the image with OpenCV
     std::string path(CL_SOURCE_DIR);
     //path += "/tex/particle.jpg";
     //path += "/tex/enjalot.jpg";
-    path += "/tex/fsu_seal.jpg";
+    path += "/../../sprites/blue.jpg";
+    printf("path: %s\n", path.c_str());
     Mat img = imread(path, 1);
     //Mat img = imread("tex/enjalot.jpg", 1);
     //convert from BGR to RGB colors
@@ -191,14 +190,14 @@ int EnjaParticles::loadTexture()
         printf("%d,", asdf[i]);
     }
     printf("\n charstring over\n");
-  */  
-    int w = 32;
-    int h = 32;
+  //*/  
+    //int w = 32;
+    //int h = 32;
     //#include "tex/particle.txt"
     //#include "tex/reddit.txt"
     w=100;
     h=100;
-    #include "tex/fsu_seal.txt"
+   // #include "tex/fsu_seal.txt"
     /*
     int w = 96;
     int h = 96;

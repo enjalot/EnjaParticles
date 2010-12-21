@@ -21,7 +21,7 @@
 #endif
 
 
-#include "RadixSort.h"
+//#include "RadixSort.h"
 #include "enja.h"
 #include "util.h"
 #include "timege.h"
@@ -131,7 +131,7 @@ int EnjaParticles::update()
 		unsort_int.push_back(nb_el-i);
 	}
 
-	sort(unsort_int, sort_int);
+	//sort(unsort_int, sort_int);
 
 	GridParams gp;
 	gp.grid_size = float3(1.,1.,1.);
@@ -218,6 +218,7 @@ void EnjaParticles::hash(std::vector<cl_float4> list, GridParams& gp)
 
 	// Check hashes
 }
+/*
 //----------------------------------------------------------------------
 void EnjaParticles::sort(std::vector<int> sort_int, std::vector<int> unsort_int)
 {
@@ -255,6 +256,9 @@ void EnjaParticles::sort(std::vector<int> sort_int, std::vector<int> unsort_int)
     queue.finish();
 #endif
 }
+
+*/
+
 //----------------------------------------------------------------------
 void EnjaParticles::popCorn()
 {

@@ -45,6 +45,7 @@ FIND_PACKAGE (OpenGL)
 FIND_PACKAGE (OPENCL)
 FIND_PACKAGE (GLEW)
 
+
 set (rtpslib_INCLUDES
     #${GLUT_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
@@ -56,6 +57,8 @@ set (rtpslib_INCLUDES
     ${rtpslib_SOURCE_DIR}/domain
     ${rtpslib_SOURCE_DIR}/opencl
     ${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src
+    
+    ${OpenCV_INCLUDE_DIRS}
 
 )
 

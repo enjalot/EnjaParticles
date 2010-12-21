@@ -374,7 +374,7 @@ void appRender()
     plane[3] = Vec4(5,-5,-1,0);
 */
 
-    enjas->update();
+    //enjas->update();
 
 	glEnable(GL_DEPTH_TEST);
 
