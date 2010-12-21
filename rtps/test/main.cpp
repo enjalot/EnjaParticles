@@ -19,6 +19,7 @@
 
 #include "RTPS.h"
 //#include "timege.h"
+using namespace rtps;
 
 int window_width = 800;
 int window_height = 600;
@@ -119,7 +120,10 @@ int main(int argc, char** argv)
 
         
     //default constructor
-    rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT);
+    //rtps::RTPSettings settings;
+    //rtps::Domain grid = Domain(float4(-5,-.3,0,0), float4(2, 2, 12, 0));
+    rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
+    rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
     ps = new rtps::RTPS(settings);
 
     glutMainLoop();
@@ -132,7 +136,7 @@ void init_gl()
 {
     // default initialization
     glClearColor(0.0, 0.0, 0.0, 1.0);
-    glDisable(GL_DEPTH_TEST);
+    //glDisable(GL_DEPTH_TEST);
 
     // viewport
     glViewport(0, 0, window_width, window_height);
@@ -149,6 +153,14 @@ void init_gl()
     glLoadIdentity();
     glRotatef(-90, 1.0, 0.0, 0.0);
     glTranslatef(translate_x, translate_z, translate_y);
+    //glTranslatef(0, 10, 0);
+    /*
+    gluLookAt(  0,10,0,
+                0,0,0,
+                0,0,1);
+    */
+
+
     //glTranslatef(0, translate_z, translate_y);
     //glRotatef(-90, 1.0, 0.0, 0.0);
 
@@ -168,10 +180,12 @@ void appKeyboard(unsigned char key, int x, int y)
             appDestroy();
             break;
         case 'r': //drop a rectangle
-            int nn = 256;
+            int nn = 512;
             int sd = 100;
-            float4 min = float4(-150/sd, 50/sd, 675/sd, 0.0f);
-            float4 max = float4(-50/sd, 150/sd, 975/sd, 0.0f);
+            //float4 min = float4(-150/sd, 50/sd, 675/sd, 0.0f);
+            //float4 max = float4(-50/sd, 150/sd, 975/sd, 0.0f);
+            float4 min = float4(.1, .1, .1, 1.0f);
+            float4 max = float4(.9, .5, .9, 1.0f);
             ps->system->addBox(nn, min, max, false);
                 
 
@@ -184,7 +198,7 @@ void appRender()
 
     ps->update();
 	
-    //glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
 
     ps->render();
 

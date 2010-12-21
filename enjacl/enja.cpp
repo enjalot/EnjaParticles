@@ -90,6 +90,11 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
         //initialize the particle life array with random values between 0 and 1
         //v[i].w = drand48();
         v[i].w = 1.0f;
+        v[i].w = drand48();
+        v[i].x *= 3.0f;
+        v[i].y *= 3.0f;
+        v[i].z *= 3.0f;
+        //v[i].w = 1.0f;
     }
 
     num = n;
@@ -232,6 +237,9 @@ EnjaParticles::EnjaParticles(int s, AVec4 g, AVec4 v, int len, int n, float radi
     
     srand48(time(NULL));
     int j;
+    int mod = n % len;
+    float lifeoff = 1.0/(float)mod;
+    printf("mod: %d, lifeoff: %f\n", mod, lifeoff);
     for(int i=0; i < n; i++)
     {
         //fill the vert_gen
@@ -244,6 +252,17 @@ EnjaParticles::EnjaParticles(int s, AVec4 g, AVec4 v, int len, int n, float radi
         c[i].y = 0.0;   //Green
         c[i].z = 0.0;   //Blue
         c[i].w = 1.0;   //Alpha
+
+        /*
+        if(i / len == 0)
+        {
+            _velo_gen[i].w;
+        }
+        else
+        {
+        */
+        //    _velo_gen[i].w =1.0 - lifeoff*(i / len);
+        //}
     }
 
    

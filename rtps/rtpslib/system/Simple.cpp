@@ -10,35 +10,44 @@ namespace rtps {
 
 Simple::Simple(RTPS *psfr, int n)
 {
-    num = n;
+    max_num = n;
+    num = max_num;
     //store the particle system framework
     ps = psfr;
+    grid = ps->settings.grid;
+    forcefields_enabled = true;
+    max_forcefields = 100;
 
-    /*
-    std::vector<float4> positions(num);
-    std::vector<float4> colors(num);
-    std::vector<float4> forces(num);
-    std::vector<float4> velocities(num);
-    */
     printf("num: %d\n", num);
-    positions.resize(num);
-    colors.resize(num);
-    forces.resize(num);
-    velocities.resize(num);
+    positions.resize(max_num);
+    colors.resize(max_num);
+    forces.resize(max_num);
+    velocities.resize(max_num);
+    //forcefields.resize(max_forcefields);
 
-    
-    int j = 0;
-    for(int i = 0; i < num; i++)
-    {
-        positions[i] = float4(i % 16, j, 0.0f, 0.0f);
-        colors[i] = float4(1.0f, 0.0f, 0.0f, 0.0f);
-        if(i % 16 == 0)
-        {
-            j++;
-        }
-    }
+    float4 min = grid.getBndMin();
+    float4 max = grid.getBndMax();
+
+    float spacing = .1; 
+    std::vector<float4> box = addRect(num, min, max, spacing, 1);
+    std::copy(box.begin(), box.end(), positions.begin());
+
+
+    float4 center = float4(1,1,.1,1);
+    float4 center2 = float4(2,2,.1,1);
+    float4 center3 = float4(1,2,.1,1);
+
+    forcefields.push_back( ForceField(center2, .5,.1) );
+    forcefields.push_back( ForceField(center, .5, .1) );
+    forcefields.push_back( ForceField(center3, .5, .1) );
+
+    //forcefields.push_back( ForceField(center, 1., 20, 0, 0) );
+        //forcefields.push_back( ForceField() );
+    //forcefields.push_back( ForceField() );
+
+
     //std::fill(positions.begin(), positions.end(), float4(0.0f, 0.0f, 0.0f, 1.0f));
-    //std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));
+    std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));
     std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     
@@ -48,14 +57,12 @@ Simple::Simple(RTPS *psfr, int n)
     col_vbo = createVBO(&colors[0], colors.size()*sizeof(float4), GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
     printf("col vbo: %d\n", col_vbo);
 
+#if GPU
     //vbo buffers
     printf("making cl_buffers\n");
     cl_position = Buffer<float4>(ps->cli, pos_vbo);
     cl_color = Buffer<float4>(ps->cli, col_vbo);
     printf("done with cl_buffers\n");
-
-
-
     //pure opencl buffers
     cl_force = Buffer<float4>(ps->cli, forces);
     cl_velocity = Buffer<float4>(ps->cli, velocities);;
@@ -63,6 +70,16 @@ Simple::Simple(RTPS *psfr, int n)
     //could generalize this to other integration methods later (leap frog, RK4)
     printf("create euler kernel\n");
     loadEuler();
+    
+
+    printf("load forcefiels");
+    loadForceField();   
+    loadForceFields(forcefields);
+
+     
+
+
+#endif
 
    }
 
@@ -86,12 +103,19 @@ void Simple::update()
 {
 #ifdef CPU
 
+    cpuForceField();
     //printf("calling cpuEuler\n");
     cpuEuler();
 
     //printf("pushing positions to gpu\n");
     glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
-    glBufferData(GL_ARRAY_BUFFER, num * sizeof(float4), &positions[0], GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(float4), &positions[0], GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, col_vbo);
+    glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(float4), &colors[0], GL_DYNAMIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glFinish();
+
     //printf("done pushing to gpu\n");
 
 
@@ -101,21 +125,15 @@ void Simple::update()
     //call kernels
     //add timings
     glFinish();
-    //err = queue.enqueueAcquireGLObjects(&enjas->cl_vbos, NULL, &event);
     cl_position.acquire();
     cl_color.acquire();
-    //printf("acquire: %s\n", oclErrorString(err));
-    
-    //euler integration
-    //err = queue.enqueueNDRangeKernel(k_euler, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
-    //queue.finish();
-    printf("executing euler in simple!\n");
+   
+    //k_forcefield.execute(num, 128);
+    k_forcefield.execute(num);
     k_euler.execute(num);
 
-    //err = queue.enqueueReleaseGLObjects(&enjas->cl_vbos, NULL, &event);
     cl_position.release();
     cl_color.release();
-    //printf("release gl: %s\n", oclErrorString(err));
 #endif
 }
 

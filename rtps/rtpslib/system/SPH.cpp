@@ -38,7 +38,8 @@ SPH::SPH(RTPS *psfr, int n)
     srand ( time(NULL) );
 
    
-    float sd = 100;
+    //float sd = 100;
+    float sd = 80;
     //init sph stuff
     //sph_settings.simulation_scale = .001;
     sph_settings.simulation_scale = .001f*sd;
@@ -48,7 +49,8 @@ SPH::SPH(RTPS *psfr, int n)
     //grid = Domain(float4(0,0,0,0), float4(1/scale, 1/scale, 1/scale, 0));
     //grid = Domain(float4(0,0,0,0), float4(1/scale, 1/scale, 1/scale, 0));
     //grid = Domain(float4(0,0,0,0), float4(30, 30, 30, 0));
-    grid = Domain(float4(-560/sd,-30/sd,0,0), float4(256/sd, 256/sd, 1276/sd, 0));
+    //grid = Domain(float4(-560/sd,-30/sd,0,0), float4(256/sd, 256/sd, 1276/sd, 0));
+    grid = ps->settings.grid;
 
     //SPH settings depend on number of particles used
     calculateSPHSettings();
@@ -60,6 +62,7 @@ SPH::SPH(RTPS *psfr, int n)
 
     //*** end Initialization
 
+    setupTimers();
 
 #ifdef CPU
     printf("RUNNING ON THE CPU\n");
@@ -124,7 +127,7 @@ SPH::SPH(RTPS *psfr, int n)
     //float4 min = float4(.1, .1, .1, 0.0f);
     //float4 max = float4(.3, .3, .4, 0.0f);
 
-    addBox(nn, min, max, false);
+    //addBox(nn, min, max, false);
     
     nn = 512;
     min = float4(-125, 75, 475, 0.0f);
@@ -219,41 +222,56 @@ void SPH::updateCPU()
 
 void SPH::updateGPU()
 {
+
     glFinish();
     cl_position.acquire();
     cl_color.acquire();
     
     //sub-intervals
-    int sub_intervals = 10;  //should be a setting
+    int sub_intervals = 5;  //should be a setting
     for(int i=0; i < sub_intervals; i++)
     {
+        timers[TI_UPDATE]->start();
         /*
         k_density.execute(num);
         k_pressure.execute(num);
         k_viscosity.execute(num);
         k_xsph.execute(num);
         */
-        printf("hash\n");
+        //printf("hash\n");
+        timers[TI_HASH]->start();
         hash();
-        printf("bitonic_sort\n");
+        timers[TI_HASH]->end();
+        //printf("bitonic_sort\n");
+        timers[TI_BITONIC_SORT]->start();
         bitonic_sort();
-        printf("data structures\n");
+        timers[TI_BITONIC_SORT]->end();
+        //printf("data structures\n");
+        timers[TI_BUILD]->start();
         buildDataStructures(); //reorder
+        timers[TI_BUILD]->end();
         
-        printf("density\n");
+        timers[TI_NEIGH]->start();
+        //printf("density\n");
+        timers[TI_DENS]->start();
         neighborSearch(0);  //density
-        printf("forces\n");
+        timers[TI_DENS]->end();
+        //printf("forces\n");
+        timers[TI_FORCE]->start();
         neighborSearch(1);  //forces
+        timers[TI_FORCE]->end();
         //exit(0);
-
-        printf("collision\n");
+        timers[TI_NEIGH]->end();
+        
+        //printf("collision\n");
         collision();
-        printf("integrate\n");
+        //printf("integrate\n");
         integrate();
         //exit(0);
         //
         //Andrew's rendering emporium
 	neighborSearch(4);
+        timers[TI_UPDATE]->end();
     }
 
     cl_position.release();
@@ -265,7 +283,9 @@ void SPH::updateGPU()
 void SPH::collision()
 {
     //when implemented other collision routines can be chosen here
+    timers[TI_COLLISION_WALL]->start();
     k_collision_wall.execute(num, 128);
+    timers[TI_COLLISION_WALL]->end();
 }
 
 void SPH::integrate()
@@ -273,15 +293,36 @@ void SPH::integrate()
     if(sph_settings.integrator == EULER)
     {
         //k_euler.execute(max_num);
+        timers[TI_EULER]->start();
         k_euler.execute(num, 128);
+        timers[TI_EULER]->end();
     }
     else if(sph_settings.integrator == LEAPFROG)
     {
         //k_leapfrog.execute(max_num);
+        timers[TI_LEAPFROG]->start();
         k_leapfrog.execute(num, 128);
+        timers[TI_LEAPFROG]->end();
     }
 }
 
+int SPH::setupTimers()
+{
+    //int print_freq = 20000;
+    int print_freq = 1000; //one second
+    int time_offset = 5;
+
+    timers[TI_UPDATE]     = new GE::Time("update", time_offset, print_freq);
+    timers[TI_HASH]     = new GE::Time("hash", time_offset, print_freq);
+    timers[TI_BUILD]     = new GE::Time("build", time_offset, print_freq);
+    timers[TI_BITONIC_SORT]     = new GE::Time("bitonic_sort", time_offset, print_freq);
+    timers[TI_NEIGH]     = new GE::Time("neigh", time_offset, print_freq);
+    timers[TI_DENS]     = new GE::Time("dens", time_offset, print_freq);
+    timers[TI_FORCE]     = new GE::Time("force", time_offset, print_freq);
+    timers[TI_COLLISION_WALL]     = new GE::Time("collision_wall", time_offset, print_freq);
+    timers[TI_EULER]     = new GE::Time("euler", time_offset, print_freq);
+    timers[TI_LEAPFROG]     = new GE::Time("leapfrog", time_offset, print_freq);
+}
 
 void SPH::calculateSPHSettings()
 {
@@ -289,6 +330,7 @@ void SPH::calculateSPHSettings()
     * The Particle Mass (and hence everything following) depends on the MAXIMUM number of particles in the system
     */
     sph_settings.rest_density = 1000;
+    //sph_settings.rest_density = 2000;
 
     sph_settings.particle_mass = (128*1024.0)/max_num * .0002;
     printf("particle mass: %f\n", sph_settings.particle_mass);
@@ -319,6 +361,12 @@ void SPH::calculateSPHSettings()
     params.K = 20.0f;
     params.num = num;
     params.surface_threshold = 0.01;
+    params.viscosity = .001f;
+    //params.viscosity = 1.0f;
+    params.gravity = -9.8f;
+    //params.gravity = 0.0f;
+    params.velocity_limit = 600.0f;
+    params.xsph_factor = .05f;
 
 	float h = params.smoothing_distance;
 	float pi = acos(-1.0);
@@ -482,7 +530,7 @@ void SPH::setupDomain()
     
 }
 
-void SPH::addBox(int nn, float4 min, float4 max, bool scaled)
+int SPH::addBox(int nn, float4 min, float4 max, bool scaled)
 {
     float scale = 1.0f;
     if(scaled)
@@ -491,6 +539,7 @@ void SPH::addBox(int nn, float4 min, float4 max, bool scaled)
     }
     vector<float4> rect = addRect(nn, min, max, sph_settings.spacing, scale);
     pushParticles(rect);
+    return rect.size();
 }
 
 void SPH::addBall(int nn, float4 center, float radius, bool scaled)
@@ -507,32 +556,38 @@ void SPH::addBall(int nn, float4 center, float radius, bool scaled)
 void SPH::pushParticles(vector<float4> pos)
 {
     int nn = pos.size();
+    if (num + nn > max_num) {return;}
     float rr = (rand() % 255)/255.0f;
     float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
     printf("random: %f\n", rr);
 
     std::vector<float4> cols(nn);
-    //there should be a better/faster way to do this with vector iterator or something?
-    //according to docs the assign function drops previous values which is no good
-    for(int i = 0; i < nn; i++)
-    {
-        //positions[num+i] = pos[i];
-        cols[i] = color;
-    }
+    std::vector<float4> vels(nn);
+
+    std::fill(cols.begin(), cols.end(),color);
+    float v = 1.0f;
+    float4 iv = float4(v, v, -v, 0.0f);
+    std::fill(vels.begin(), vels.end(),iv);
+
 #ifdef GPU
     glFinish();
     cl_position.acquire();
     cl_color.acquire();
-    
-    printf("about to prep 0\n");
-    //prep(0);
-    printf("done with prep 0\n");
+ 
+    //printf("about to prep 0\n");
+    prep(0);
+    //printf("done with prep 0\n");
 
+   
     cl_position.copyToDevice(pos, num);
     cl_color.copyToDevice(cols, num);
 
     cl_color.release();
     cl_position.release();
+
+    //2 is from cl_macros.h should probably not hardcode this number
+    cl_velocity.copyToDevice(vels, num);
+    //cl_vars_unsorted.copyToDevice(vels, max_num*8+num);
 
     params.num = num+nn;
     std::vector<SPHParams> vparams(0);

@@ -10,6 +10,8 @@
 //#include "../util.h"
 #include "../domain/Domain.h"
 
+#include "timege.h"
+
 
 namespace rtps {
 
@@ -45,15 +47,21 @@ typedef struct SPHParams
     float EPSILON;
     float PI;       //delicious
     float K;        //gas constant
+    float viscosity;
+    float velocity_limit;
+    float xsph_factor;
 
+
+
+	float gravity; // -9.8 m/sec^2
     float friction_coef;
 	float restitution_coef;
 	float shear;
 	float attraction;
 	float spring;
-	float gravity; // -9.8 m/sec^2
 	float surface_threshold;
 
+    
     //Kernel Coefficients
     float wpoly6_coef;
 	float wpoly6_d_coef;
@@ -114,10 +122,17 @@ public:
 
     void update();
     //wrapper around IV.h addRect
-    void addBox(int nn, float4 min, float4 max, bool scaled);
+    int addBox(int nn, float4 min, float4 max, bool scaled);
     //wrapper around IV.h addSphere
     void addBall(int nn, float4 center, float radius, bool scaled);
     
+    enum {TI_HASH=0, TI_BITONIC_SORT, TI_BUILD, TI_NEIGH, 
+          TI_DENS, TI_FORCE, TI_EULER, TI_LEAPFROG, TI_UPDATE, TI_COLLISION_WALL
+          }; //10
+    GE::Time* timers[30];
+    int setupTimers();
+
+
     
 private:
     //the particle system framework

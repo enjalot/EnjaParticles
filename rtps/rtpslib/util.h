@@ -7,11 +7,7 @@
 
 char *file_contents(const char *filename, int *length);
 
-
 GLuint createVBO(const void* data, int dataSize, GLenum target, GLenum usage);
 int deleteVBO(GLuint id);
-
-cl_int oclGetPlatformID(cl_platform_id* clSelectedPlatformID);
-
 
 #endif

@@ -13,10 +13,7 @@ IF (WIN32)
 
     # TODO this is only a hack assuming the 64 bit library will
     # not be found on 32 bit system
-    FIND_LIBRARY(OPENCL_LIBRARIES opencl64 )
-    IF( OPENCL_LIBRARIES )
-        FIND_LIBRARY(OPENCL_LIBRARIES opencl32 )
-    ENDIF( OPENCL_LIBRARIES )
+    FIND_LIBRARY(OPENCL_LIBRARIES opencl )
 
 ELSE (WIN32)
 

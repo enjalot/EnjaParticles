@@ -19,13 +19,14 @@
 
 #include "RTPS.h"
 //#include "timege.h"
+using namespace rtps;
 
 int window_width = 800;
 int window_height = 600;
 int glutWindowHandle = 0;
-float translate_x = -10.0f;
-float translate_y = -10.0f;
-float translate_z = 20.0f;
+float translate_x = -1.0f;
+float translate_y = -1.0f;
+float translate_z = -1.0f;
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -61,7 +62,7 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 8192
 #define NUM_PARTICLES 1024
-#define DT .001f
+#define DT .005f
 
 
 //timers
@@ -116,7 +117,9 @@ int main(int argc, char** argv)
     printf("num particles: %d\n", NUM_PARTICLES);
     printf("dt: %f\n", DT);
 
-    rtps::RTPSettings settings(rtps::RTPSettings::Simple, NUM_PARTICLES, DT);
+    
+    rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
+    rtps::RTPSettings settings(rtps::RTPSettings::Simple, NUM_PARTICLES, DT, grid);
     ps = new rtps::RTPS(settings);
 
     glutMainLoop();
@@ -124,16 +127,9 @@ int main(int argc, char** argv)
 }
 
 
-
-void init_gl()
+void setView()
 {
-    // default initialization
-    glClearColor(0.0, 0.0, 0.0, 1.0);
-    glDisable(GL_DEPTH_TEST);
-
-    // viewport
-    glViewport(0, 0, window_width, window_height);
-
+    
     // projection
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -144,10 +140,27 @@ void init_gl()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glRotatef(-90, 1.0, 0.0, 0.0);
-    glTranslatef(translate_x, translate_z, translate_y);
+    //glRotatef(-90, 1.0, 0.0, 0.0);
+    glTranslatef(translate_x, translate_y, translate_z);
     //glTranslatef(0, translate_z, translate_y);
     //glRotatef(-90, 1.0, 0.0, 0.0);
+    gluLookAt(  0,0,1,
+                0,0,0,
+                0,1,0);
+
+
+}
+
+void init_gl()
+{
+    // default initialization
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    //glDisable(GL_DEPTH_TEST);
+
+    setView();
+    // viewport
+    glViewport(0, 0, window_width, window_height);
+
 
     return;
 
@@ -164,6 +177,10 @@ void appKeyboard(unsigned char key, int x, int y)
             // Cleanup up and quit
             appDestroy();
             break;
+        case 'f'://add forcefield
+            ForceField ff(float4(0,0,0,1), .5, 2);
+            ps->system->addForceField(ff);
+
     }
 }
 
@@ -171,16 +188,20 @@ void appRender()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    ps->update();
+    int subintervals = 1;
+    for(int i = 0; i < subintervals; i++)
+    {
+        ps->update();
+    }
 	
-    //glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
 
     ps->render();
 
     //showFPS(enjas->getFPS(), enjas->getReport());
     glutSwapBuffers();
 
-	//glDisable(GL_DEPTH_TEST);
+	glDisable(GL_DEPTH_TEST);
 }
 
 void appDestroy()
@@ -234,11 +255,9 @@ void appMotion(int x, int y)
 
     // set view matrix
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glRotatef(-90, 1.0, 0.0, 0.0);
-    glTranslatef(translate_x, translate_z, translate_y);
-    //glTranslatef(0, translate_z, translate_y);
+    setView();
+
+
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
     glutPostRedisplay();

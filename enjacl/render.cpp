@@ -10,7 +10,6 @@
 #include "enja.h"
 #include "timege.h"
 
-
 void EnjaParticles::drawArrays()
 {
 
@@ -22,6 +21,7 @@ void EnjaParticles::drawArrays()
     {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     }
 
     //printf("color buffer\n");
@@ -87,9 +87,15 @@ int EnjaParticles::render()
         //printf("GLSL\n");
         glEnable(GL_POINT_SPRITE_ARB);
         glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
-        glEnable(GL_VERTEX_PROGRAM_POINT_SIZE_NV);
+        glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
         glDepthMask(GL_TRUE);
         glEnable(GL_DEPTH_TEST);
+        //glDisable(GL_DEPTH_TEST);
+
+
+        glEnable(GL_TEXTURE_2D);
+        glActiveTexture(GL_TEXTURE0);
+
 
         glUseProgram(glsl_program);
         //glUniform1f( glGetUniformLocation(m_program, "pointScale"), m_window_h / tanf(m_fov * m_fHalfViewRadianFactor));
@@ -97,12 +103,18 @@ int EnjaParticles::render()
         glUniform1f( glGetUniformLocation(glsl_program, "blending"), blending );
         glUniform1f( glGetUniformLocation(glsl_program, "pointRadius"), particle_radius );
 
-        glColor4f(1, 1, 1, 1);
+        glUniform1i( glGetUniformLocation(glsl_program, "texture_color"), 0);
+
+        //glColor4f(1, 1, 1, 1);
+
+        glBindTexture(GL_TEXTURE_2D, gl_tex);
 
         drawArrays();
 
         glUseProgram(0);
+        glDisable(GL_TEXTURE_2D);
         glDisable(GL_POINT_SPRITE_ARB);
+        //glEnable(GL_DEPTH_TEST);
     }
     else
     {
@@ -137,6 +149,74 @@ int EnjaParticles::render()
 
 }
 
+//should switch to blender's library, or just pass in the texture from blender
+#include "highgui.h"
+#include "cv.h"
+using namespace cv;
+//int EnjaParticles::loadTexture(std::vector<unsigned char> image, int w, int h)
+int EnjaParticles::loadTexture()
+{
+///*
+    //load the image with OpenCV
+    std::string path(CL_SOURCE_DIR);
+    //path += "/tex/particle.jpg";
+    //path += "/tex/enjalot.jpg";
+    path += "/../../sprites/blue.jpg";
+    printf("path: %s\n", path.c_str());
+    Mat img = imread(path, 1);
+    //Mat img = imread("tex/enjalot.jpg", 1);
+    //convert from BGR to RGB colors
+    //cvtColor(img, img, CV_BGR2RGB);
+    //this is ugly but it makes an iterator over our image data
+    //MatIterator_<Vec<uchar, 3> > it = img.begin<Vec<uchar,3> >(), it_end = img.end<Vec<uchar,3> >();
+    MatIterator_<Vec<uchar, 3> > it = img.begin<Vec<uchar,3> >(), it_end = img.end<Vec<uchar,3> >();
+    int w = img.size().width;
+    int h = img.size().height;
+    int n = w * h;
+    std::vector<unsigned char> image;//there are n bgr values 
+
+    printf("read image data %d \n", n);
+    for(; it != it_end; ++it)
+    {
+   //     printf("asdf: %d\n", it[0][0]);
+        image.push_back(it[0][0]);
+        image.push_back(it[0][1]);
+        image.push_back(it[0][2]);
+    }
+    unsigned char* asdf = &image[0];
+    printf("char string:\n");
+    for(int i = 0; i < 3*n; i++)
+    {
+        printf("%d,", asdf[i]);
+    }
+    printf("\n charstring over\n");
+  //*/  
+    //int w = 32;
+    //int h = 32;
+    //#include "tex/particle.txt"
+    //#include "tex/reddit.txt"
+    w=100;
+    h=100;
+   // #include "tex/fsu_seal.txt"
+    /*
+    int w = 96;
+    int h = 96;
+    #include "tex/enjalot.txt"
+    */
+    //load as gl texture
+    glGenTextures(1, &gl_tex);
+    glBindTexture(GL_TEXTURE_2D, gl_tex);
+
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
+     GL_BGR_EXT, GL_UNSIGNED_BYTE, &image[0]);
+
+
+}
 
 int EnjaParticles::compileShaders()
 {
@@ -164,6 +244,13 @@ int EnjaParticles::compileShaders()
         printf("Vertex Shader log:\n %s\n", log);
     }
     glCompileShader(fragment_shader);
+    glGetShaderiv(fragment_shader, GL_INFO_LOG_LENGTH, &len);
+    if(len > 0)
+    {
+        char log[1024];
+        glGetShaderInfoLog(fragment_shader, 1024, 0, log);
+        printf("Vertex Shader log:\n %s\n", log);
+    }
 
     GLuint program = glCreateProgram();
 
@@ -195,6 +282,7 @@ void EnjaParticles::use_glsl()
     if(glsl_program != 0)
     {
         glsl = true;
+        loadTexture();
     }
     else
     {

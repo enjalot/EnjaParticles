@@ -3,6 +3,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 # List of files to precompile
 SET(FILES
    euler_cl
+   forcefield_cl
 )  # ignore cpp extension
 
 # Only executes when I do "cmake"

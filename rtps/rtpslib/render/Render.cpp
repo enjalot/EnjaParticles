@@ -1,6 +1,5 @@
 #include <stdio.h>
 
-
 #include <GL/glew.h>
 #if defined __APPLE__ || defined(MACOSX)
     #include <GLUT/glut.h>
@@ -10,6 +9,7 @@
 #endif
 
 #include "Render.h"
+#include "util.h"
 
 
 namespace rtps{
@@ -21,12 +21,22 @@ Render::Render(GLuint pos, GLuint col, int n)
     col_vbo = col;
     num = n;
 
+    printf("GL VERSION %s\n", glGetString(GL_VERSION));
     glsl = true;
     //glsl = false;
+    mikep = false;
+    blending = true;
     if(glsl)
     {
+        loadTexture();
         glsl_program = compileShaders();
     }
+    else if(mikep)
+    {  
+        loadTexture();
+        glsl_program = mpShaders();
+    }
+    setupTimers();
 }
 
 Render::~Render()
@@ -40,14 +50,6 @@ void Render::drawArrays()
     //glMatrixMode(GL_MODELVIEW_MATRIX);
     //glPushMatrix();
     //glLoadMatrixd(gl_transform);
-
-    /*
-    if(blending)
-    {
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    }
-    */
 
     //printf("color buffer\n");
     glBindBuffer(GL_ARRAY_BUFFER, col_vbo);
@@ -102,35 +104,91 @@ void Render::render()
 {
     // Render the particles with OpenGL
 
+    for(int i= 0; i < 10; i++)
+    {
+        timers[TI_RENDER]->start();
+    }
+
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
 
+    if(blending)
+    {
+        glDepthMask(GL_FALSE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
 
     //TODO enable GLSL shading 
     if(glsl)
     {
+
+        //Texture stuff
+        glEnable(GL_TEXTURE_2D);
+        glActiveTexture(GL_TEXTURE0);
+
+
         //printf("GLSL\n");
         glEnable(GL_POINT_SPRITE_ARB);
         glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
+        //this isn't looking good for ATI, check for their extension?
         glEnable(GL_VERTEX_PROGRAM_POINT_SIZE_NV);
-        glDepthMask(GL_TRUE);
-        glEnable(GL_DEPTH_TEST);
 
         glUseProgram(glsl_program);
         float point_scale = 1.f;
         float particle_radius = 5.f;
-        bool blending = false;
         //glUniform1f( glGetUniformLocation(m_program, "pointScale"), m_window_h / tanf(m_fov * m_fHalfViewRadianFactor));
         glUniform1f( glGetUniformLocation(glsl_program, "pointScale"), point_scale);
         glUniform1f( glGetUniformLocation(glsl_program, "blending"), blending );
         glUniform1f( glGetUniformLocation(glsl_program, "pointRadius"), particle_radius );
 
+        //Texture stuff
+        glUniform1i( glGetUniformLocation(glsl_program, "col"), 0);
+        glBindTexture(GL_TEXTURE_2D, gl_tex);
+
+
+       
         glColor4f(1, 1, 1, 1);
 
         drawArrays();
 
         glUseProgram(0);
+        
+        glDepthMask(GL_FALSE);
         glDisable(GL_POINT_SPRITE_ARB);
+        
+        //Texture
+        glDisable(GL_TEXTURE_2D);
+
+
+    }
+    else if(mikep)
+    {
+        //Texture stuff
+        glEnable(GL_TEXTURE_2D);
+        glActiveTexture(GL_TEXTURE0);
+
+
+        glUseProgram(glsl_program);
+        float emit = 1.f;
+        float alpha = .5f;
+
+        glUniform1f( glGetUniformLocation(glsl_program, "emit"), emit);
+        glUniform1f( glGetUniformLocation(glsl_program, "alpha"), alpha);
+
+        //Texture stuff
+        glUniform1i( glGetUniformLocation(glsl_program, "col"), 0);
+        glBindTexture(GL_TEXTURE_2D, gl_tex);
+
+        glColor4f(1, 1, 1, 1);
+
+        drawArrays();
+
+        //Texture
+        glDisable(GL_TEXTURE_2D);
+
+        glUseProgram(0);
+        
     }
     else   // do not use glsl
     {
@@ -146,6 +204,8 @@ void Render::render()
     }
     //printf("done rendering, clean up\n");
    
+    glDepthMask(GL_TRUE);
+
     glPopClientAttrib();
     glPopAttrib();
     //glDisable(GL_POINT_SMOOTH);
@@ -156,6 +216,11 @@ void Render::render()
     //make sure rendering timing is accurate
     glFinish();
     //printf("done rendering\n");
+
+    for(int i= 0; i < 10; i++)
+    {
+        timers[TI_RENDER]->end();
+    }
 
 }
 
@@ -235,6 +300,13 @@ GLuint Render::compileShaders()
         printf("Vertex Shader log:\n %s\n", log);
     }
     glCompileShader(fragment_shader);
+    glGetShaderiv(fragment_shader, GL_INFO_LOG_LENGTH, &len);
+    if(len > 0)
+    {
+        char log[1024];
+        glGetShaderInfoLog(fragment_shader, 1024, 0, log);
+        printf("Fragment Shader log:\n %s\n", log);
+    }
 
     GLuint program = glCreateProgram();
 
@@ -257,5 +329,176 @@ GLuint Render::compileShaders()
 
     return program;
 }
+
+
+//----------------------------------------------------------------------
+GLuint Render::mpShaders()
+{
+
+    //this may not be the cleanest implementation
+    #include "mpshaders.cpp"
+
+    printf("vertex shader:\n%s\n", vertex_shader_source);
+    printf("geometry shader:\n%s\n", geometry_shader_source);
+    printf("fragment shader:\n%s\n", fragment_shader_source);
+
+
+    GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    GLuint geometry_shader = glCreateShader(GL_GEOMETRY_SHADER_EXT);
+    GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+
+    glShaderSource(vertex_shader, 1, &vertex_shader_source, 0);
+    glShaderSource(geometry_shader, 1, &geometry_shader_source, 0);
+    glShaderSource(fragment_shader, 1, &fragment_shader_source, 0);
+    
+    glCompileShader(vertex_shader);
+    GLint len;
+    glGetShaderiv(vertex_shader, GL_INFO_LOG_LENGTH, &len);
+    printf("vertex len %d\n", len);
+    if(len > 0)
+    {
+        char log[1024];
+        glGetShaderInfoLog(vertex_shader, 1024, 0, log);
+        printf("Vertex Shader log:\n %s\n", log);
+    }
+
+    glCompileShader(geometry_shader);
+    glGetShaderiv(geometry_shader, GL_INFO_LOG_LENGTH, &len);
+    printf("geometry len %d\n", len);
+    if(len > 0)
+    {
+        char log[1024];
+        glGetShaderInfoLog(geometry_shader, 1024, 0, log);
+        printf("Geometry Shader log:\n %s\n", log);
+    }
+ 
+
+    glCompileShader(fragment_shader);
+    glGetShaderiv(fragment_shader, GL_INFO_LOG_LENGTH, &len);
+    printf("fragment len %d\n", len);
+    if(len > 0)
+    {
+        char log[1024];
+        glGetShaderInfoLog(fragment_shader, 1024, 0, log);
+        printf("Fragment Shader log:\n %s\n", log);
+    }
+
+    GLuint program = glCreateProgram();
+
+    glAttachShader(program, vertex_shader);
+    glAttachShader(program, geometry_shader);
+    glAttachShader(program, fragment_shader);
+    
+    glProgramParameteriEXT(program,GL_GEOMETRY_VERTICES_OUT_EXT,4);
+    glProgramParameteriEXT(program,GL_GEOMETRY_INPUT_TYPE_EXT,GL_POINT);
+    glProgramParameteriEXT(program,GL_GEOMETRY_OUTPUT_TYPE_EXT,GL_TRIANGLE_STRIP);
+    
+    glLinkProgram(program);
+
+    // check if program linked
+    GLint success = 0;
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+
+    if (!success) {
+        char temp[256];
+        glGetProgramInfoLog(program, 256, 0, temp);
+        printf("Failed to link program:\n%s\n", temp);
+        glDeleteProgram(program);
+        program = 0;
+    }
+
+    return program;
+}
+
+
+
+
+
+int Render::setupTimers()
+{
+    //int print_freq = 20000;
+    int print_freq = 1000; //one second
+    int time_offset = 5;
+
+    timers[TI_RENDER]     = new GE::Time("render", time_offset, print_freq);
+    if(glsl)
+    {
+        timers[TI_GLSL]     = new GE::Time("glsl", time_offset, print_freq);
+    }
+}
+
+
+
+
+GLuint Render::loadTexture()
+{
+
+
+
+/*
+    //load the image with OpenCV
+    std::string path(GLSL_SOURCE_DIR);
+    //path += "/tex/particle.jpg";
+    //path += "/tex/enjalot.jpg";
+    path += "/../../sprites/blue.jpg";
+    Mat img = imread(path, 1);
+    //Mat img = imread("tex/enjalot.jpg", 1);
+    //convert from BGR to RGB colors
+    //cvtColor(img, img, CV_BGR2RGB);
+    //this is ugly but it makes an iterator over our image data
+    //MatIterator_<Vec<uchar, 3> > it = img.begin<Vec<uchar,3> >(), it_end = img.end<Vec<uchar,3> >();
+    MatIterator_<Vec<uchar, 3> > it = img.begin<Vec<uchar,3> >(), it_end = img.end<Vec<uchar,3> >();
+    int w = img.size().width;
+    int h = img.size().height;
+    int n = w * h;
+    std::vector<unsigned char> image;//there are n bgr values 
+
+    printf("read image data %d \n", n);
+    for(; it != it_end; ++it)
+    {
+   //     printf("asdf: %d\n", it[0][0]);
+        image.push_back(it[0][0]);
+        image.push_back(it[0][1]);
+        image.push_back(it[0][2]);
+    }
+    unsigned char* asdf = &image[0];
+    printf("char string:\n");
+    for(int i = 0; i < 3*n; i++)
+    {
+        printf("%d,", asdf[i]);
+    }
+    printf("\n charstring over\n");
+  */  
+    int w = 32;
+    int h = 32;
+    //#include "../../sprites/particle.txt"
+    #include "../../sprites/blue.txt"
+    //#include "../../sprites/reddit.txt"
+/*
+    w=100;
+    h=100;
+    #include "../../sprites/fsu_seal.txt"
+    w = 96;
+    h = 96;
+    #include "../../sprites/enjalot.txt"
+*/
+    //load as gl texture
+    glGenTextures(1, &gl_tex);
+    glBindTexture(GL_TEXTURE_2D, gl_tex);
+
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
+    GL_BGR_EXT, GL_UNSIGNED_BYTE, &image[0]);
+
+
+}
+
+
+
+
 
 }

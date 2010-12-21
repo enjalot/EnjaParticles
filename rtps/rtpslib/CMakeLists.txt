@@ -34,6 +34,7 @@ ENDIF(WITH_OPENCL)
 ADD_DEFINITIONS(-DSIMPLE_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_simple")
 ADD_DEFINITIONS(-DSPH_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_sph")
 ADD_DEFINITIONS(-DBITONIC_CL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/")
+ADD_DEFINITIONS(-DGLSL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/render/")
 
 
 
@@ -43,6 +44,7 @@ ADD_DEFINITIONS(-DBITONIC_CL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/opencl/bitonic_so
 FIND_PACKAGE (OpenGL)
 FIND_PACKAGE (OPENCL)
 FIND_PACKAGE (GLEW)
+
 
 set (rtpslib_INCLUDES
     #${GLUT_INCLUDE_DIR}
@@ -55,6 +57,8 @@ set (rtpslib_INCLUDES
     ${rtpslib_SOURCE_DIR}/domain
     ${rtpslib_SOURCE_DIR}/opencl
     ${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src
+    
+    ${OpenCV_INCLUDE_DIRS}
 
 )
 
@@ -65,6 +69,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/RTPSettings
     ${rtpslib_SOURCE_DIR}/util
     ${rtpslib_SOURCE_DIR}/structs
+    ${rtpslib_SOURCE_DIR}/timege
 
     ${rtpslib_SOURCE_DIR}/render/Render
 
@@ -73,6 +78,7 @@ set (rtpslib_SOURCES
 
     
     ${rtpslib_SOURCE_DIR}/system/Simple.cpp
+    ${rtpslib_SOURCE_DIR}/system/simple/ForceField
     ${rtpslib_SOURCE_DIR}/system/simple/Euler
     
     ${rtpslib_SOURCE_DIR}/system/SPH.cpp

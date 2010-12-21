@@ -21,9 +21,10 @@ FIND_PACKAGE (GLUT)
 FIND_PACKAGE (OpenGL)
 FIND_PACKAGE (OPENCL)
 FIND_PACKAGE (GLEW)
+FIND_PACKAGE (OpenCV REQUIRED)
 
 INCLUDE_DIRECTORIES( 
-	oclRadixSort/inc
+    #oclRadixSort/inc
 	${GLUT_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
     ${GLEW_INCLUDE_PATH}
@@ -31,6 +32,7 @@ INCLUDE_DIRECTORIES(
 	$ENV{OPENCL_HOME}/../shared/inc
     #${OPENCL_INCLUDE_DIR}
     ${enjacl_SOURCE_DIR}/../opencl10
+    #${OpenCV_INCLUDE_DIRS}
 )
 
 message("Opencl Home: $ENV{OPENCL_HOME}")
@@ -40,10 +42,12 @@ ADD_DEFINITIONS(-DGL_INTEROP)
 ADD_DEFINITIONS(-DOPENCL_SHARED)
 ADD_DEFINITIONS(-g )
 
+#ADD_DEFINITIONS(-Bstatic)
+
 #particles opencl library
 set (CLCXXFILES  
-	oclRadixSort/src/RadixSort.cpp
-	oclRadixSort/src/Scan.cpp
+    #oclRadixSort/src/RadixSort.cpp
+    #oclRadixSort/src/Scan.cpp
     enja.cpp 
     opencl.cpp 
     physics/collision.cpp 
@@ -62,18 +66,19 @@ SET(EXEC_CL sph.x)
 ADD_EXECUTABLE(${EXEC_CL} main.cpp util.cpp)
 
 TARGET_LINK_LIBRARIES (${ocllib}
-   $ENV{OPENCL_HOME}/../shared/lib/libshrutil_x86_64.a
-   $ENV{OPENCL_HOME}/common/lib/liboclUtil_x86_64.a
+    #$ENV{OPENCL_HOME}/../shared/lib/libshrutil_x86_64.a
+    #$ENV{OPENCL_HOME}/common/lib/liboclUtil_x86_64.a
 )
 
 TARGET_LINK_LIBRARIES (${EXEC_CL}
-   $ENV{OPENCL_HOME}/../shared/lib/libshrutil_x86_64.a
-   $ENV{OPENCL_HOME}/common/lib/liboclUtil_x86_64.a
+    #$ENV{OPENCL_HOME}/../shared/lib/libshrutil_x86_64.a
+    #$ENV{OPENCL_HOME}/common/lib/liboclUtil_x86_64.a
    ${ocllib}
    ${GLUT_LIBRARIES}
    ${OPENGL_LIBRARIES}
    ${OPENCL_LIBRARIES}
    ${GLEW_LIBRARY}
+     ${OpenCV_LIBS}
 )
 
 

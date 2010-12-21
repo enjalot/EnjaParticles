@@ -246,12 +246,23 @@ int main(int argc, char** argv)
 
     
     //default constructor
+    /*
     enjas = new EnjaParticles(EnjaParticles::SPH, NUM_PARTICLES);
     enjas->particle_radius = 2.0f;
     //enjas->use_glsl();
     enjas->updates = 1;
     enjas->dt = .002;
     //enjas->collision = true;
+    */
+    enjas = new EnjaParticles(EnjaParticles::GRAVITY, NUM_PARTICLES);
+    enjas->particle_radius = 20.0f;
+    
+    enjas->use_glsl();
+    enjas->blending = true;    
+
+    enjas->updates = 1;
+    enjas->dt = .001;
+    enjas->collision = true;
 
 
 
@@ -363,7 +374,7 @@ void appRender()
     plane[3] = Vec4(5,-5,-1,0);
 */
 
-    enjas->update();
+    //enjas->update();
 
 	glEnable(GL_DEPTH_TEST);
 

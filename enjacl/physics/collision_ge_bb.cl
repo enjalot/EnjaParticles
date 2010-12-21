@@ -181,7 +181,7 @@ bool intersect_box_ge(float4 pos, float4 vel, __local Box* box, float dt)
 #endif
 //----------------------------------------------------------------------
 
-float4 collisions_box(float4 pos, float4 vel, int first, int last, __global Box* boxes_glob, float dt, __local Box* boxes, __global Triangle* triangles, int f_tri, int l_tri, __global int* tri_offsets)
+float4 collisions_box(float4 pos, float4 vel, int first, int last, __global Box* boxes_glob, float dt, __local Box* boxes, __global Triangle* triangles, int f_tri, int l_tri, __global int* tri_offsets, __global float4* colors, int i)
 {
 #if 1
 	int one_box = 6; // nb floats in Box
@@ -192,7 +192,7 @@ float4 collisions_box(float4 pos, float4 vel, int first, int last, __global Box*
 
 	//store the magnitude of the velocity
     //float mag = sqrt(vel.x*vel.x + vel.y*vel.y + vel.z*vel.z); 
-    float damping = 1.0f;
+    float damping = .9f;
 
 	// variables: 
 	// triangles, pos, vel
@@ -223,6 +223,14 @@ float4 collisions_box(float4 pos, float4 vel, int first, int last, __global Box*
             		float s = 2.0f*(dot(triangles[k].normal, vel));
 					vel = vel - s*triangles[k].normal;
 					vel = vel*damping;
+
+                    
+                    colors[i].x -= .1f;
+                    colors[i].y += .1f;
+                    colors[i].z += .2f;
+                    
+                    colors[i].z -= .05f;
+
 					return vel; // slow down the code? 
 					break;
 				}
@@ -234,7 +242,7 @@ float4 collisions_box(float4 pos, float4 vel, int first, int last, __global Box*
 	return vel;
 }
 //----------------------------------------------------------------------
-__kernel void collision_ge( __global float4* vertices, __global float4* velocities, __global Box* boxes_glob, int n_boxes, float dt, __global int* tri_offsets, __global int* triangles,  __local Box* boxes)
+__kernel void collision_ge( __global float4* vertices, __global float4* velocities, __global float4* colors, __global Box* boxes_glob, int n_boxes, float dt, __global int* tri_offsets, __global int* triangles,  __local Box* boxes)
 {
 #if 1
     unsigned int i = get_global_id(0);
@@ -258,7 +266,7 @@ __kernel void collision_ge( __global float4* vertices, __global float4* velociti
 		int f_tri = tri_offsets[j];
 		int l_tri = tri_offsets[j+1];
 		// offsets are monotonic
-		vel = collisions_box(pos, vel, first, last, boxes_glob, dt, boxes, triangles, f_tri, l_tri, tri_offsets);
+		vel = collisions_box(pos, vel, first, last, boxes_glob, dt, boxes, triangles, f_tri, l_tri, tri_offsets, colors, i);
 	}
 
     velocities[i].x = vel.x;

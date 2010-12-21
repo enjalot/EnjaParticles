@@ -16,15 +16,20 @@ typedef struct SPHParams
     float EPSILON;
     float PI;       //delicious
     float K;        //speed of sound
+    float viscosity;
+    float velocity_limit;
+    float xsph_factor;
+
+
 	
+	float gravity; // -9.8 m/sec^2
     float friction_coef;
 	float restitution_coef;
 	float shear;
 	float attraction;
 	float spring;
-	float gravity; // -9.8 m/sec^2
 	float surface_threshold;
-
+    
     float wpoly6_coef;
 	float wpoly6_d_coef;
 	float wpoly6_dd_coef; // laplacian

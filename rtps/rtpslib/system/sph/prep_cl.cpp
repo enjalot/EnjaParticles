@@ -10,6 +10,7 @@ __kernel void prep(
            int num,
            int stage,
            __global float4* position,
+           __global float4* velocity,
            __global float4* vars_unsorted,
            __global float4* vars_sorted,
            __global uint* sort_indices
@@ -25,19 +26,17 @@ __kernel void prep(
     uint i = get_global_id(0);
     if (i >= num) return;
 
+    uint index = sort_indices[i];
 
     if(stage == 1)
     {
         unsorted_pos(i) = position[i];
+        unsorted_vel(i) = velocity[i];
+
     }
     else if(stage == 0)
     {
-        //we only want to do this for the old num 
-        uint index = sort_indices[i];
-        //unsorted_density(index) = density(i);
-        unsorted_vel(index) = vel(i);
-        unsorted_veleval(index) = veleval(i);
-        //unsorted_force(index) = force(i);
+        velocity[index] = vel(i);
     }
 
     /*

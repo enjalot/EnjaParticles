@@ -10,6 +10,7 @@
 #endif
 
 #include "../structs.h"
+#include "../timege.h"
 
 namespace rtps{
 
@@ -29,6 +30,11 @@ public:
 
     void render_box(float4 min, float4 max);
 
+    enum {TI_RENDER=0, TI_GLSL 
+          }; //2
+    GE::Time* timers[2];
+    int setupTimers();
+
     //void compileShaders();
 
 private:
@@ -37,12 +43,17 @@ private:
 
     RenderType rtype;
     bool glsl;
+    bool mikep;
+    bool blending;
     GLuint glsl_program;    
+    GLuint gl_tex;
 
     GLuint pos_vbo;
     GLuint col_vbo;
 
     GLuint compileShaders();
+    GLuint mpShaders();
+    GLuint loadTexture();
 
 };
 
