@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <GL/glew.h>
 #if defined __APPLE__ || defined(MACOSX)
@@ -44,6 +45,7 @@ Render::~Render()
     printf("Render destructor\n");
 }
 
+//----------------------------------------------------------------------
 void Render::drawArrays()
 {
 
