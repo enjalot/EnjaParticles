@@ -154,8 +154,8 @@ __kernel void neighbors(
 		density(index) /= pt.density.y;
 	}
 	
-	if (sphp->choice == 4) { //Extract surface particles
-		IterateParticlesInNearbyCells(vars_sorted,&pt,num,index, position_i, cell_indexes_start, cell_indexes_end, gp, /*fp,*/ sphp DEBUG_ARGV);
+	/*if (sphp->choice == 4) { //Extract surface particles
+		IterateParticlesInNearbyCells(vars_sorted,&pt,num,index, position_i, cell_indexes_start, cell_indexes_end, gp, sphp DEBUG_ARGV);
 		
 		pt.center_of_mass = pt.center_of_mass/pt.num_neighbors;
 		float4 dist = pos(index)-pt.center_of_mass;
@@ -166,7 +166,7 @@ __kernel void neighbors(
 			surface(index) = (float4){1.0,1.0,1.0,1.0};
 		else
 			surface(index) = (float4){0.0,0.0,0.0,0.0};
-	}
+	}*/
 }
 
 /*-------------------------------------------------------------- */

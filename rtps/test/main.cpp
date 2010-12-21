@@ -28,9 +28,9 @@ float translate_x = -.5f;
 float translate_y = 0.f;//-200.0f;//300.f;
 float translate_z = 1.5f;//200.f;
 */
-float translate_x = -100;
-float translate_y = -200.0f;//300.f;
-float translate_z = 200.f;
+float translate_x = -1.00;
+float translate_y = -2.00f;//300.f;
+float translate_z = 2.00f;
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -63,12 +63,12 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 rtps::RTPS* ps;
-//#define NUM_PARTICLES 16384
+#define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 8192
 //#define NUM_PARTICLES 4096
-#define NUM_PARTICLES 2048
+//#define NUM_PARTICLES 2048
 //#define NUM_PARTICLES 1024
-#define DT .00003f
+#define DT .001f
 
 //timers
 //GE::Time *ts[3];
@@ -169,8 +169,9 @@ void appKeyboard(unsigned char key, int x, int y)
             break;
         case 'r': //drop a rectangle
             int nn = 256;
-            float4 min = float4(-150, 50, 675, 0.0f);
-            float4 max = float4(-50, 150, 975, 0.0f);
+            int sd = 100;
+            float4 min = float4(-150/sd, 50/sd, 675/sd, 0.0f);
+            float4 max = float4(-50/sd, 150/sd, 975/sd, 0.0f);
             ps->system->addBox(nn, min, max, false);
                 
 

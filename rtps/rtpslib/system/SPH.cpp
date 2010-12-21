@@ -38,16 +38,17 @@ SPH::SPH(RTPS *psfr, int n)
     srand ( time(NULL) );
 
    
+    float sd = 100;
     //init sph stuff
     //sph_settings.simulation_scale = .001;
-    sph_settings.simulation_scale = .001f;
+    sph_settings.simulation_scale = .001f*sd;
     float scale = sph_settings.simulation_scale;
 
     //grid = Domain(float4(0,0,0,0), float4(.25/scale, .5/scale, .5/scale, 0));
     //grid = Domain(float4(0,0,0,0), float4(1/scale, 1/scale, 1/scale, 0));
     //grid = Domain(float4(0,0,0,0), float4(1/scale, 1/scale, 1/scale, 0));
     //grid = Domain(float4(0,0,0,0), float4(30, 30, 30, 0));
-    grid = Domain(float4(0,-30,0,0), float4(256, 256, 1276, 0));
+    grid = Domain(float4(-560/sd,-30/sd,0,0), float4(256/sd, 256/sd, 1276/sd, 0));
 
     //SPH settings depend on number of particles used
     calculateSPHSettings();
@@ -104,9 +105,9 @@ SPH::SPH(RTPS *psfr, int n)
     //// really this should be setup by the user
     //int nn = 1024;
     int nn = 3333;
-    //nn = 8192;
+    nn = 8192;
     //nn = 2048;
-    nn = 1024;
+    //nn = 1024;
     //float4 min = float4(.4, .4, .1, 0.0f);
     //float4 max = float4(.6, .6, .4, 0.0f);
 
@@ -114,9 +115,9 @@ SPH::SPH(RTPS *psfr, int n)
     //float4 min   = float4(-559., -15., 0.5, 1.);
 	//float4 max   = float4(-400., 225., 1050., 1);
     //grid = Domain(float4(-560,-30,0,0), float4(256, 256, 1276, 0));
-    float4 min   = float4(0.5, -15., 0.5, 1.);
+    float4 min   = float4(100./sd, -15./sd, 0.5/sd, 1.);
     //float4 min   = float4(100., -15., 550, 1.);
-	float4 max   = float4(255., 225., 1250., 1);
+	float4 max   = float4(255./sd, 225./sd, 1250./sd, 1);
 
 
 
@@ -151,6 +152,7 @@ SPH::SPH(RTPS *psfr, int n)
 
 SPH::~SPH()
 {
+    printf("SPH destructor\n");
     if(pos_vbo && managed)
     {
         glBindBuffer(1, pos_vbo);
@@ -165,6 +167,7 @@ SPH::~SPH()
     }
 
     //Needed while bitonic sort is still C interface
+    printf("close bitonic sort\n");
     closeBitonicSort();
 }
 
@@ -230,22 +233,22 @@ void SPH::updateGPU()
         k_viscosity.execute(num);
         k_xsph.execute(num);
         */
-        //printf("hash\n");
+        printf("hash\n");
         hash();
-        //printf("bitonic_sort\n");
+        printf("bitonic_sort\n");
         bitonic_sort();
-        //printf("data structures\n");
+        printf("data structures\n");
         buildDataStructures(); //reorder
         
-        //printf("density\n");
+        printf("density\n");
         neighborSearch(0);  //density
-        //printf("forces\n");
+        printf("forces\n");
         neighborSearch(1);  //forces
         //exit(0);
 
-        //printf("collision\n");
+        printf("collision\n");
         collision();
-        //printf("integrate\n");
+        printf("integrate\n");
         integrate();
         //exit(0);
         //
