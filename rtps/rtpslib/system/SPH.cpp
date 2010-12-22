@@ -146,6 +146,21 @@ SPH::SPH(RTPS *psfr, int n)
     
     //////////////
 
+    printf("about to sort ghosts!\n");
+    //we call bitonic sort in here
+    sortGhosts();
+
+    //using bitonic sort, reset these buffers on GPU before going on
+    std::vector<int> keys(max_num);
+    //to get around limits of bitonic sort only handling powers of 2
+    #include "limits.h"
+    std::fill(keys.begin(), keys.end(), INT_MAX);
+
+    cl_sort_indices.copyToDevice(keys);
+    cl_sort_hashes.copyToDevice(keys);
+    cl_sort_output_hashes.copyToDevice(keys);
+    cl_sort_output_indices.copyToDevice(keys);
+
 
     
     
@@ -226,6 +241,7 @@ void SPH::updateGPU()
     glFinish();
     cl_position.acquire();
     cl_color.acquire();
+    cl_ghosts.acquire();
     
     //sub-intervals
     int sub_intervals = 5;  //should be a setting
@@ -274,8 +290,10 @@ void SPH::updateGPU()
         timers[TI_UPDATE]->end();
     }
 
+    cl_ghosts.release();
     cl_position.release();
     cl_color.release();
+
 
 
 }
@@ -362,8 +380,8 @@ void SPH::calculateSPHSettings()
     params.num = num;
     params.viscosity = .001f;
     //params.viscosity = 1.0f;
-    params.gravity = -9.8f;
-    //params.gravity = 0.0f;
+    //params.gravity = -9.8f;
+    params.gravity = 0.0f;
     params.velocity_limit = 600.0f;
     params.xsph_factor = .05f;
 
@@ -484,6 +502,28 @@ void SPH::prepareSorted()
 	cl_sort_output_hashes = Buffer<int>(ps->cli, keys);
 	cl_sort_output_indices = Buffer<int>(ps->cli, keys);
 
+    //scaling is 1.0
+    //ghosts = addGhosts(4096, grid.getMin(), grid.getMax(), sph_settings.spacing, 1.0);
+    //ghosts = addGhosts(4096, grid.getMin(), grid.getMax(), sph_settings.spacing, sph_settings.simulation_scale);
+    //ghosts = addRect(nn, min, max, sph_settings.spacing, 1.0);
+    nb_ghosts = max_num;  //bitonic sort will only work with nb_ghosts = max_num
+    //ghosts = addGhosts(nb_ghosts, grid.getMin(), grid.getMax(), sph_settings.spacing, 1.0);
+    //ghosts = addGhosts(nb_ghosts, grid.getBndMin(), grid.getBndMax(), sph_settings.spacing, 1.0);
+    float cell_size = sph_settings.smoothing_distance / sph_settings.simulation_scale;
+    ghosts = addGhosts(nb_ghosts, grid.getMin(), grid.getMax(), cell_size, 1.0);
+    printf("ghosts.size(): %zd\n", ghosts.size());
+    ghost_vbo = createVBO(&ghosts[0], ghosts.size()*sizeof(float4), GL_ARRAY_BUFFER, GL_STATIC_READ);
+    printf("ghost vbo: %d\n", ghost_vbo);
+    printf("\n\n\n\n");
+    cl_ghosts = Buffer<float4>(ps->cli, ghost_vbo);
+    cl_ghosts_sorted = Buffer<float4>(ps->cli, ghosts);
+
+    cl_ghosts.acquire();
+    loadGhostHash();
+    loadGhostDataStructures();
+    cl_ghosts.release();
+
+
 }
 
 void SPH::setupDomain()
@@ -564,7 +604,7 @@ void SPH::pushParticles(vector<float4> pos)
     std::vector<float4> vels(nn);
 
     std::fill(cols.begin(), cols.end(),color);
-    float v = 1.0f;
+    float v = 0.0f;
     float4 iv = float4(v, v, -v, 0.0f);
     std::fill(vels.begin(), vels.end(),iv);
 

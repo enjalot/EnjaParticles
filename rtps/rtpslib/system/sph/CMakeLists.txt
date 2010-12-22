@@ -14,6 +14,8 @@ SET(FILES
     datastructures_cl
     neighbors_cl
     scopy_cl
+    ghost_hash_cl
+    ghost_datastructures_cl
 )  # ignore cpp extension
 
 # Only executes when I do "cmake"

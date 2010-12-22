@@ -3,6 +3,11 @@
 
 #include <vector>
 
+//defines useful structs like float3 and float4
+#include "util.h"
+
+
+
 //OpenCL API
 #include "opencl/CLL.h"
 
@@ -17,9 +22,6 @@
 
 //settings class to configure the framework
 #include "RTPSettings.h"
-
-//defines useful structs like float3 and float4
-#include "util.h"
 
 namespace rtps {
 
@@ -55,7 +57,9 @@ public:
     //should this be private?
     void updateNum(int num);
     
-
+    //temporary render control
+    bool render_particles;
+    bool render_ghosts;
 
 };
 

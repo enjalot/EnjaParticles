@@ -64,15 +64,6 @@ void Simple::loadForceFields(std::vector<ForceField> ff)
 }
 
 
-float distance(float4 p1, float4 p2)
-{
-    return sqrt((p1.x - p2.x)*(p1.x - p2.x) + (p1.y-p2.y)*(p1.y-p2.y) + (p1.z-p2.z)*(p1.z-p2.z));
-}
-
-float length(float4 v)
-{
-    return sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
-}
 
 //normalized vector pointing from p1 to p2
 float4 norm_dir(float4 p1, float4 p2)

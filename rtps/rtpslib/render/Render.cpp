@@ -1,15 +1,7 @@
 #include <stdio.h>
 
-#include <GL/glew.h>
-#if defined __APPLE__ || defined(MACOSX)
-    #include <GLUT/glut.h>
-#else
-    #include <GL/glut.h>
-    //OpenCL stuff
-#endif
-
-#include "Render.h"
 #include "util.h"
+#include "Render.h"
 
 
 namespace rtps{
@@ -26,10 +18,16 @@ Render::Render(GLuint pos, GLuint col, int n)
     //glsl = false;
     mikep = false;
     blending = true;
+    blending = false;
+    ghosts = true;
     if(glsl)
     {
         loadTexture();
         glsl_program = compileShaders();
+    }
+    if(ghosts)
+    {
+        glsl_ghost_program = ghostShaders();
     }
     else if(mikep)
     {  
@@ -99,6 +97,63 @@ void Render::drawArrays()
     //glPopMatrix();
 }
 
+
+void Render::drawGhosts()
+{
+    
+
+    if(true)
+    {
+        glDepthMask(GL_FALSE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+    glEnable(GL_POINT_SPRITE_ARB);
+    glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
+    //this isn't looking good for ATI, check for their extension?
+    glEnable(GL_VERTEX_PROGRAM_POINT_SIZE_NV);
+
+    glUseProgram(glsl_ghost_program);
+   
+    //glDisable(GL_LIGHTING);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+    // draws circles instead of squares
+    //glEnable(GL_POINT_SMOOTH); 
+    //TODO make the point size a setting
+    //glPointSize(5.0f);
+
+
+    //glColor4f(1, 1, 1, 1);
+
+    //drawArrays();
+    {
+    //printf("vertex buffer\n");
+        //printf("render ghost vbo: %d\n", ghost_vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, ghost_vbo);
+        glVertexPointer(4, GL_FLOAT, 0, 0);
+
+       //printf("enable client state\n");
+        glEnableClientState(GL_VERTEX_ARRAY);
+        //Need to disable these for blender
+        glDisableClientState(GL_NORMAL_ARRAY);
+        //glDisableClientState(GL_EDGE_FLAG_ARRAY);
+
+        //printf("draw arrays num: %d\n", num);
+
+        //printf("NUM %d\n", num);
+        glDrawArrays(GL_POINTS, 0, nb_ghosts);
+
+        glDisableClientState(GL_VERTEX_ARRAY);
+    }
+
+
+    glUseProgram(0);
+    glDisable(GL_POINT_SPRITE_ARB);
+
+
+    }
+
 //----------------------------------------------------------------------
 void Render::render()
 {
@@ -119,92 +174,86 @@ void Render::render()
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
-    //TODO enable GLSL shading 
-    if(glsl)
+    if(render_particles)
     {
+        //TODO enable GLSL shading 
+        if(glsl)
+        {
+            //printf("GLSL\n");
+            glEnable(GL_POINT_SPRITE_ARB);
+            glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
+            //this isn't looking good for ATI, check for their extension?
+            glEnable(GL_VERTEX_PROGRAM_POINT_SIZE_NV);
 
-        //Texture stuff
-        glEnable(GL_TEXTURE_2D);
-        glActiveTexture(GL_TEXTURE0);
+            glUseProgram(glsl_program);
+            float point_scale = 1.f;
+            float particle_radius = 5.f;
+            //glUniform1f( glGetUniformLocation(m_program, "pointScale"), m_window_h / tanf(m_fov * m_fHalfViewRadianFactor));
+            glUniform1f( glGetUniformLocation(glsl_program, "pointScale"), point_scale);
+            glUniform1f( glGetUniformLocation(glsl_program, "blending"), blending );
+            glUniform1f( glGetUniformLocation(glsl_program, "pointRadius"), particle_radius );
 
+           
+            glColor4f(1, 1, 1, 1);
 
-        //printf("GLSL\n");
-        glEnable(GL_POINT_SPRITE_ARB);
-        glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
-        //this isn't looking good for ATI, check for their extension?
-        glEnable(GL_VERTEX_PROGRAM_POINT_SIZE_NV);
+            drawArrays();
 
-        glUseProgram(glsl_program);
-        float point_scale = 1.f;
-        float particle_radius = 5.f;
-        //glUniform1f( glGetUniformLocation(m_program, "pointScale"), m_window_h / tanf(m_fov * m_fHalfViewRadianFactor));
-        glUniform1f( glGetUniformLocation(glsl_program, "pointScale"), point_scale);
-        glUniform1f( glGetUniformLocation(glsl_program, "blending"), blending );
-        glUniform1f( glGetUniformLocation(glsl_program, "pointRadius"), particle_radius );
-
-        //Texture stuff
-        glUniform1i( glGetUniformLocation(glsl_program, "col"), 0);
-        glBindTexture(GL_TEXTURE_2D, gl_tex);
-
-
-       
-        glColor4f(1, 1, 1, 1);
-
-        drawArrays();
-
-        glUseProgram(0);
-        
-        glDepthMask(GL_FALSE);
-        glDisable(GL_POINT_SPRITE_ARB);
-        
-        //Texture
-        glDisable(GL_TEXTURE_2D);
+            glUseProgram(0);
+            
+            glDepthMask(GL_FALSE);
+            glDisable(GL_POINT_SPRITE_ARB);
+        }
+        else if(mikep)
+        {
+            //Texture stuff
+            glEnable(GL_TEXTURE_2D);
+            glActiveTexture(GL_TEXTURE0);
 
 
-    }
-    else if(mikep)
-    {
-        //Texture stuff
-        glEnable(GL_TEXTURE_2D);
-        glActiveTexture(GL_TEXTURE0);
+            glUseProgram(glsl_program);
+            float emit = 1.f;
+            float alpha = .5f;
 
+            glUniform1f( glGetUniformLocation(glsl_program, "emit"), emit);
+            glUniform1f( glGetUniformLocation(glsl_program, "alpha"), alpha);
 
-        glUseProgram(glsl_program);
-        float emit = 1.f;
-        float alpha = .5f;
+            //Texture stuff
+            glUniform1i( glGetUniformLocation(glsl_program, "col"), 0);
+            glBindTexture(GL_TEXTURE_2D, gl_tex);
 
-        glUniform1f( glGetUniformLocation(glsl_program, "emit"), emit);
-        glUniform1f( glGetUniformLocation(glsl_program, "alpha"), alpha);
+            glColor4f(1, 1, 1, 1);
 
-        //Texture stuff
-        glUniform1i( glGetUniformLocation(glsl_program, "col"), 0);
-        glBindTexture(GL_TEXTURE_2D, gl_tex);
+            drawArrays();
 
-        glColor4f(1, 1, 1, 1);
+            //Texture
+            glDisable(GL_TEXTURE_2D);
 
-        drawArrays();
+            glUseProgram(0);
+            
+        }
+        else   // do not use glsl
+        {
+            glDisable(GL_LIGHTING);
+            //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-        //Texture
-        glDisable(GL_TEXTURE_2D);
+            // draws circles instead of squares
+            glEnable(GL_POINT_SMOOTH); 
+            //TODO make the point size a setting
+            glPointSize(5.0f);
 
-        glUseProgram(0);
-        
-    }
-    else   // do not use glsl
-    {
-        glDisable(GL_LIGHTING);
-        //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
-		// draws circles instead of squares
-        glEnable(GL_POINT_SMOOTH); 
-        //TODO make the point size a setting
-        glPointSize(5.0f);
-
-        drawArrays();
-    }
+            drawArrays();
+        }
     //printf("done rendering, clean up\n");
+    }//render_particles
    
     glDepthMask(GL_TRUE);
+
+    if(render_ghosts)
+    {
+        drawGhosts();
+    }
+
+
 
     glPopClientAttrib();
     glPopAttrib();
@@ -213,6 +262,8 @@ void Render::render()
     //glEnable(GL_LIGHTING);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    
+  
     //make sure rendering timing is accurate
     glFinish();
     //printf("done rendering\n");
@@ -223,55 +274,64 @@ void Render::render()
     }
 
 }
-
-void Render::render_box(float4 min, float4 max)
+//----------------------------------------------------------------------
+GLuint Render::ghostShaders()
 {
-	
-    glEnable(GL_DEPTH_TEST);
-    glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
-    //draw grid
-    glBegin(GL_LINES);
-    //1st face
-    glVertex3f(min.x, min.y, min.z);
-    glVertex3f(min.x, min.y, max.z);
+
+    //this may not be the cleanest implementation
+    #include "ghost_shaders.cpp"
+
+    //printf("vertex shader:\n%s\n", vertex_shader_source);
+    //printf("fragment shader:\n%s\n", fragment_shader_source);
+
+
+    GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+
+    glShaderSource(vertex_shader, 1, &vertex_shader_source, 0);
+    glShaderSource(fragment_shader, 1, &fragment_shader_source, 0);
     
-    glVertex3f(min.x, max.y, min.z);
-    glVertex3f(min.x, max.y, max.z);
+    glCompileShader(vertex_shader);
+    GLint len;
+    glGetShaderiv(vertex_shader, GL_INFO_LOG_LENGTH, &len);
+    if(len > 0)
+    {
+        char log[1024];
+        glGetShaderInfoLog(vertex_shader, 1024, 0, log);
+        printf("Vertex Shader log:\n %s\n", log);
+    }
+    glCompileShader(fragment_shader);
+    glGetShaderiv(fragment_shader, GL_INFO_LOG_LENGTH, &len);
+    if(len > 0)
+    {
+        char log[1024];
+        glGetShaderInfoLog(fragment_shader, 1024, 0, log);
+        printf("Fragment Shader log:\n %s\n", log);
+    }
 
-    glVertex3f(min.x, min.y, min.z);
-    glVertex3f(min.x, max.y, min.z);
- 
-    glVertex3f(min.x, min.y, max.z);
-    glVertex3f(min.x, max.y, max.z);
-    //2nd face
-    glVertex3f(max.x, min.y, min.z);
-    glVertex3f(max.x, min.y, max.z);
-    
-    glVertex3f(max.x, max.y, min.z);
-    glVertex3f(max.x, max.y, max.z);
+    GLuint program = glCreateProgram();
 
-    glVertex3f(max.x, min.y, min.z);
-    glVertex3f(max.x, max.y, min.z);
- 
-    glVertex3f(max.x, min.y, max.z);
-    glVertex3f(max.x, max.y, max.z);
-    //connections
-    glVertex3f(min.x, min.y, min.z);
-    glVertex3f(max.x, min.y, min.z);
- 
-    glVertex3f(min.x, max.y, min.z);
-    glVertex3f(max.x, max.y, min.z);
- 
-    glVertex3f(min.x, min.y, max.z);
-    glVertex3f(max.x, min.y, max.z);
- 
-    glVertex3f(min.x, max.y, max.z);
-    glVertex3f(max.x, max.y, max.z);
-    
-    glEnd();
+    glAttachShader(program, vertex_shader);
+    glAttachShader(program, fragment_shader);
 
+    glLinkProgram(program);
 
+    // check if program linked
+    GLint success = 0;
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+
+    if (!success) {
+        char temp[256];
+        glGetProgramInfoLog(program, 256, 0, temp);
+        printf("Failed to link program:\n%s\n", temp);
+        glDeleteProgram(program);
+        program = 0;
+    }
+
+    return program;
 }
+
+
 
 //----------------------------------------------------------------------
 GLuint Render::compileShaders()
@@ -500,5 +560,53 @@ GLuint Render::loadTexture()
 
 
 
+void Render::render_box(float4 min, float4 max)
+{
+	
+    glEnable(GL_DEPTH_TEST);
+    glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
+    //draw grid
+    glBegin(GL_LINES);
+    //1st face
+    glVertex3f(min.x, min.y, min.z);
+    glVertex3f(min.x, min.y, max.z);
+    
+    glVertex3f(min.x, max.y, min.z);
+    glVertex3f(min.x, max.y, max.z);
+
+    glVertex3f(min.x, min.y, min.z);
+    glVertex3f(min.x, max.y, min.z);
+ 
+    glVertex3f(min.x, min.y, max.z);
+    glVertex3f(min.x, max.y, max.z);
+    //2nd face
+    glVertex3f(max.x, min.y, min.z);
+    glVertex3f(max.x, min.y, max.z);
+    
+    glVertex3f(max.x, max.y, min.z);
+    glVertex3f(max.x, max.y, max.z);
+
+    glVertex3f(max.x, min.y, min.z);
+    glVertex3f(max.x, max.y, min.z);
+ 
+    glVertex3f(max.x, min.y, max.z);
+    glVertex3f(max.x, max.y, max.z);
+    //connections
+    glVertex3f(min.x, min.y, min.z);
+    glVertex3f(max.x, min.y, min.z);
+ 
+    glVertex3f(min.x, max.y, min.z);
+    glVertex3f(max.x, max.y, min.z);
+ 
+    glVertex3f(min.x, min.y, max.z);
+    glVertex3f(max.x, min.y, max.z);
+ 
+    glVertex3f(min.x, max.y, max.z);
+    glVertex3f(max.x, max.y, max.z);
+    
+    glEnd();
+
+
+}
 
 }

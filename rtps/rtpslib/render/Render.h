@@ -28,6 +28,8 @@ public:
     void render();
     void drawArrays();
 
+    void drawGhosts();
+
     void render_box(float4 min, float4 max);
 
     enum {TI_RENDER=0, TI_GLSL 
@@ -35,7 +37,11 @@ public:
     GE::Time* timers[2];
     int setupTimers();
 
+    GLuint ghost_vbo;
+    int nb_ghosts;
     //void compileShaders();
+    bool render_particles;
+    bool render_ghosts;
 
 private:
     //number of particles
@@ -45,13 +51,16 @@ private:
     bool glsl;
     bool mikep;
     bool blending;
+    bool ghosts;
     GLuint glsl_program;    
+    GLuint glsl_ghost_program;
     GLuint gl_tex;
 
     GLuint pos_vbo;
     GLuint col_vbo;
 
     GLuint compileShaders();
+    GLuint ghostShaders();
     GLuint mpShaders();
     GLuint loadTexture();
 

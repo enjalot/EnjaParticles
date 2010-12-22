@@ -86,4 +86,17 @@ std::vector<T> Buffer<T>::copyToHost(int num)
 
 }
 
+template <class T>
+std::vector<T> Buffer<T>::copyToHost(int start, int num)
+{
+    //TODO clean up this memory/buffer issue
+    std::vector<T> data(num);
+    //TODO pass back a pointer instead of a copy
+    //std::vector<T> data = new std::vector<T>(num);
+    cli->err = cli->queue.enqueueReadBuffer(*((cl::Buffer*)&cl_buffer[0]), CL_TRUE, start*data.size()*sizeof(T), data.size()*sizeof(T), &data[0], NULL, &cli->event);
+    cli->queue.finish();
+    return data;
+
+}
+
 //}

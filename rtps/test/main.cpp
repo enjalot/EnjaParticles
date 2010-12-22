@@ -174,20 +174,31 @@ void appKeyboard(unsigned char key, int x, int y)
     {
         case '\033': // escape quits
         case '\015': // Enter quits    
+        case 'p':
+            ps->render_particles = !ps->render_particles;
+            break;
+        case 'g':
+            ps->render_ghosts = !ps->render_ghosts;
+            break;
         case 'Q':    // Q quits
         case 'q':    // q (or escape) quits
             // Cleanup up and quit
             appDestroy();
             break;
         case 'r': //drop a rectangle
-            int nn = 512;
+            int nn = 64;
             int sd = 100;
             //float4 min = float4(-150/sd, 50/sd, 675/sd, 0.0f);
             //float4 max = float4(-50/sd, 150/sd, 975/sd, 0.0f);
-            float4 min = float4(.1, .1, .1, 1.0f);
-            float4 max = float4(.9, .5, .9, 1.0f);
+            //float4 min = float4(.1, .1, .1, 1.0f);
+            //float4 max = float4(.9, .5, .9, 1.0f);
+            //float4 min = float4(.3, .3, .3, 1.0f);
+            //float4 max = float4(.8, .8, .8, 1.0f);
+            float4 min = float4(1. , 1., .7, 1.0f);
+            float4 max = float4(1.5, 1.5, 1.1, 1.0f);
             ps->system->addBox(nn, min, max, false);
-                
+            break;
+               
 
     }
 }
