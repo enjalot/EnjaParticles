@@ -532,8 +532,8 @@ GLuint Render::loadTexture()
     int w = 32;
     int h = 32;
     //#include "../../sprites/particle.txt"
-    #include "../../sprites/blue.txt"
-    //#include "../../sprites/reddit.txt"
+    //#include "../../sprites/blue.txt"
+    #include "../../sprites/reddit.txt"
 /*
     w=100;
     h=100;

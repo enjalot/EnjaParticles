@@ -104,46 +104,7 @@ SPH::SPH(RTPS *psfr, int n)
     loadDataStructures();
     loadNeighbors();
 
-    ////////////////// Setup some initial particles
-    //// really this should be setup by the user
-    //int nn = 1024;
-    int nn = 3333;
-    nn = 8192;
-    //nn = 2048;
-    //nn = 1024;
-    //float4 min = float4(.4, .4, .1, 0.0f);
-    //float4 max = float4(.6, .6, .4, 0.0f);
-
-
-    //float4 min   = float4(-559., -15., 0.5, 1.);
-	//float4 max   = float4(-400., 225., 1050., 1);
-    //grid = Domain(float4(-560,-30,0,0), float4(256, 256, 1276, 0));
-    float4 min   = float4(100./sd, -15./sd, 0.5/sd, 1.);
-    //float4 min   = float4(100., -15., 550, 1.);
-	float4 max   = float4(255./sd, 225./sd, 1250./sd, 1);
-
-
-
-    //float4 min = float4(.1, .1, .1, 0.0f);
-    //float4 max = float4(.3, .3, .4, 0.0f);
-
-    //addBox(nn, min, max, false);
-    
-    nn = 512;
-    min = float4(-125, 75, 475, 0.0f);
-    max = float4(-75, 127, 525, 0.0f);
-    //addBox(nn, min, max, false);
-    //addBox(nn, min, max, false);
-   
-    //float4 center = float4(.1/scale, .15/scale, .3/scale, 0.0f);
-    //addBall(nn, center, .06/scale);
-    //addBall(nn, center, .1/scale);
-    ////////////////// Done with setup particles
-
-    ////DEBUG STUFF
-    printf("positions 0: \n");
-    positions[0].print();
-    
+     
     //////////////
 
     printf("about to sort ghosts!\n");
@@ -506,7 +467,8 @@ void SPH::prepareSorted()
     //ghosts = addGhosts(4096, grid.getMin(), grid.getMax(), sph_settings.spacing, 1.0);
     //ghosts = addGhosts(4096, grid.getMin(), grid.getMax(), sph_settings.spacing, sph_settings.simulation_scale);
     //ghosts = addRect(nn, min, max, sph_settings.spacing, 1.0);
-    nb_ghosts = max_num;  //bitonic sort will only work with nb_ghosts = max_num
+    //nb_ghosts = max_num;  //bitonic sort will only work with nb_ghosts = max_num
+    nb_ghosts = grid_params.nb_cells;
     //ghosts = addGhosts(nb_ghosts, grid.getMin(), grid.getMax(), sph_settings.spacing, 1.0);
     //ghosts = addGhosts(nb_ghosts, grid.getBndMin(), grid.getBndMax(), sph_settings.spacing, 1.0);
     float cell_size = sph_settings.smoothing_distance / sph_settings.simulation_scale;

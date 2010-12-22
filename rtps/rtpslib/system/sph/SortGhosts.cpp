@@ -9,9 +9,13 @@ void SPH::sortGhosts()
 {
 
     cl_ghosts.acquire();
+    printf("ghost hash\n");
     ghost_hash();
+    printf("bitonic sort\n");
     bitonic_sort();
+    printf("ghost data structures\n");
     build_ghost_datastructures();
+    printf("ghost release\n");
 
     cl_ghosts.release();
 }
@@ -25,7 +29,7 @@ void SPH::loadGhostHash()
 
     printf("kernel made, set args\n");
     int args = 0;
-    k_ghost_hash.setArg(args++, max_num); 
+    k_ghost_hash.setArg(args++, nb_ghosts); 
     k_ghost_hash.setArg(args++, cl_ghosts.getDevicePtr()); // positions + other variables
 	k_ghost_hash.setArg(args++, cl_sort_hashes.getDevicePtr());
 	k_ghost_hash.setArg(args++, cl_sort_indices.getDevicePtr());
@@ -47,7 +51,7 @@ void SPH::loadGhostDataStructures()
     printf("kernel made, set args\n");
 
     int iarg = 0;
-	k_ghost_datastructures.setArg(iarg++, max_num);
+	k_ghost_datastructures.setArg(iarg++, nb_ghosts);
 	k_ghost_datastructures.setArg(iarg++, cl_ghosts.getDevicePtr());
     k_ghost_datastructures.setArg(iarg++, cl_ghosts_sorted.getDevicePtr());
 	k_ghost_datastructures.setArg(iarg++, cl_sort_hashes.getDevicePtr());
@@ -67,7 +71,9 @@ void SPH::ghost_hash()
 
 	int ctaSize = 128; // work group size
 	// Hash based on unscaled data
-    k_ghost_hash.setArg(0, max_num); 
+    printf("ghost hash set arg\n");
+    k_ghost_hash.setArg(0, nb_ghosts);
+    printf("ghost hash execute\n"); 
 	k_ghost_hash.execute(max_num, ctaSize);
 
 	ps->cli->queue.finish();

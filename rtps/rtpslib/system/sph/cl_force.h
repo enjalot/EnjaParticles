@@ -22,12 +22,12 @@
 	// Add viscous forces
 
 	#if 1
-	float vvisc = sphp->viscosity;
+	float visc = sphp->viscosity;
 	float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
-	stress += vvisc * (velj-veli) * dWijlapl;
+	stress += visc * (velj-veli) * dWijlapl;
 	#endif
 
-	stress *=  sphp->mass/(di.x*dj.x);  // original
+	stress *=  sphp->mass/(di.x*dj.x)*2.f;  // original
 
 	#if 1
 	// Add XSPH stabilization term
