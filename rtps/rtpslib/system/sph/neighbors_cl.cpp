@@ -195,6 +195,9 @@ void IterateGhosts(
                         //*/
                         stress *=  sphp->mass/(di.x*dj);  // original
                         pt->force += stress * (1.5 - gpos.w / sphp->simulation_scale);
+
+                        float Wijpol6 = Wpoly6(r, sphp->smoothing_distance, sphp);
+	                    pt->xsph +=  (2.f * sphp->mass * Wijpol6 * (velj-veli)/(di.x+dj));
                         //pt->force += (float4)(0,0,-.1,0);
                         clf[index_i] = stress;
                     }
