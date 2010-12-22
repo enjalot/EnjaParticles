@@ -37,6 +37,7 @@ public:
     //pastes the data over the current array starting at [start]
     void copyToDevice(const std::vector<T> &data, int start);
     std::vector<T> copyToHost(int num);
+    std::vector<T> copyToHost(int start, int num);
 
     void set(T val);
     void set(const std::vector<T> &data);

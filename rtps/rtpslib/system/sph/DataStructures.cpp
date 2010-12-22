@@ -93,10 +93,8 @@ void SPH::buildDataStructures()
     printf("done with data structures\n");
 #endif
 
-
-
-
-
 }
+
+
 
 }

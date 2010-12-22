@@ -97,8 +97,117 @@
 //--------------------------------------------------------------
 // compute forces on particles
 
+void IterateGhosts(
+		__global float4* vars_sorted,
+		__global float4* ghosts,
+		PointData* pt,
+        uint num,
+		uint 	index_i,
+		float4   position_i, 
+		__constant struct GridParams* gp,
+		//__constant struct FluidParams* fp,
+		__constant struct SPHParams* sphp
+		DEBUG_ARGS
+		)
+{
+    int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_delta);
+
+    float4 di = density(index_i);  // should not repeat
+
+    float4 gdeb = ghosts[calcGridHash(cell, gp->grid_res, false)];
+    
+    /*
+    cli[index_i].x = (int)(position_i.x*10000);
+    cli[index_i].y = (int)(position_i.y*10000);
+    cli[index_i].z = (int)(position_i.z*10000);
+    */
+    cli[index_i] = cell;
+    cli[index_i].w = calcGridHash(cell, gp->grid_res, false);
+    
+    clf[index_i].xy = gdeb.xy;//*sphp->simulation_scale;
+    clf[index_i].zw = position_i.xy;
+    clf[index_i].x = 0;
+    clf[index_i].y = 0;
+    //cli[index_i] = cell;
+
+
+    // iterate through the 3^3 cells in and around the given position
+    // can't unroll these loops, they are not innermost 
+    for(int z=cell.z-1; z<=cell.z+1; ++z) 
+    {
+        for(int y=cell.y-1; y<=cell.y+1; ++y) 
+        {
+            for(int x=cell.x-1; x<=cell.x+1; ++x) 
+            {
+                int4 ipos = (int4) (x,y,z,1);
+		        uint cellHash = calcGridHash(ipos, gp->grid_res, false);
+                
+
+                float4 gpos = ghosts[cellHash];// * sphp->simulation_scale;//one ghost per grid cell
+                // get the relative distance between the two particles, translate to simulation space
+                float4 r = (position_i - gpos); 
+                r.w = 0.f; // I stored density in 4th component
+                // |r|
+                float rlen = length(r);
+                clf[index_i].x = rlen;
+                clf[index_i].y = sphp->smoothing_distance;
+                clf[index_i].z = di.x;
+                clf[index_i].w = 0;
+                if(rlen < sphp->smoothing_distance)
+                {
+                    //rlen = rlen / 2.;
+                    if(sphp->choice == 0)
+                    {
+                        //calculate density from ghost
+                        float Wij = Wpoly6(r, sphp->smoothing_distance, sphp);
+                        pt->density.x += 3.0 * (1 - gpos.w) * sphp->mass*Wij;
+
+                    }
+                    else if(sphp->choice == 1)
+                    {
+                        //calculate force from ghost
+                        // gradient
+                        float dWijdr = Wspiky_dr(rlen, sphp->smoothing_distance, sphp);
+
+                        float dj = 1000. * (1.9 - gpos.w/sphp->simulation_scale);
+                        //float dj = 1000.;
+
+                        //form simple SPH in Krog's thesis
+
+                        float rest_density = 1000.f;
+                        float Pi = sphp->K*(di.x - rest_density);
+                        float Pj = sphp->K*(dj - rest_density);
+
+                        float kern = -dWijdr * (Pi + Pj)*0.5 * sphp->wspiky_d_coef;
+                        float4 stress = kern*r; // correct version
+
+                        ///*
+                        float4 veli = veleval(index_i); // sorted
+                        float4 velj = -veli;
+
+                        // Add viscous forces
+
+                        #if 1
+                        float vvisc = 1.0;
+                        float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
+                        stress += vvisc * (velj-veli) * dWijlapl;
+                        #endif
+                        //*/
+                        stress *=  sphp->mass/(di.x*dj);  // original
+                        pt->force += stress * (1.5 - gpos.w / sphp->simulation_scale);
+                        //pt->force += (float4)(0,0,-.1,0);
+                        clf[index_i] = stress;
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 __kernel void neighbors(
 				__global float4* vars_sorted,
+                __global float4* ghosts,
         		__global int*    cell_indexes_start,
         		__global int*    cell_indexes_end,
 				__constant struct GridParams* gp,
@@ -120,7 +229,7 @@ __kernel void neighbors(
     float4 position_i = pos(index);
 
     //debuging
-    cli[index].w = 0;
+    //cli[index].w = 0;
 
 
     // Do calculations on particles in neighboring cells
@@ -130,13 +239,21 @@ __kernel void neighbors(
 	if (sphp->choice == 0) { // update density
     	IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
 		density(index) = sphp->wpoly6_coef * pt.density.x;
-        clf[index].w = density(index);
+        
+        //IterateGhosts(vars_sorted, ghosts, &pt, num, index, position_i, gp, sphp DEBUG_ARGV);
+
+        //clf[index].w = density(index);
 		// code reaches this point on first call
 	}
 	if (sphp->choice == 1) { // update force
     	IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
-		force(index) = pt.force; // Does not seem to maintain value into euler.cl
-        clf[index].xyz = pt.force.xyz;
+        
+        IterateGhosts(vars_sorted, ghosts, &pt, num, index, position_i, gp, sphp DEBUG_ARGV);
+		
+        force(index) = pt.force; // Does not seem to maintain value into euler.cl
+        
+
+        //clf[index].xyz = pt.force.xyz;
 		xsph(index) = sphp->wpoly6_coef * pt.xsph;
 	}
 

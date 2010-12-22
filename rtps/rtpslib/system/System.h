@@ -33,6 +33,8 @@ public:
 
     virtual void addForceField(ForceField ff){};
     
+    GLuint ghost_vbo;
+    int nb_ghosts;
 
 protected:
     //number of particles

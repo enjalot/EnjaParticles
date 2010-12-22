@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <iostream>
 
+#include "../util.h"
+
 //#include <GL/glew.h>
 #if defined __APPLE__ || defined(MACOSX)
     //OpenGL stuff
@@ -12,7 +14,6 @@
 //
 
 #include "CLL.h"
-#include "../util.h"
 
 namespace rtps {
 

@@ -52,9 +52,15 @@ void RTPS::Init()
     }
     
 
+    render_particles = true;
+    render_ghosts = true;
     //pass in the position and color vbo ids to the renderer
     //get the number from the system
     renderer = new Render(system->getPosVBO(), system->getColVBO(), system->getNum());
+
+    //should only be done if we have ghosts
+    renderer->ghost_vbo = system->ghost_vbo;
+    renderer->nb_ghosts = system->nb_ghosts;
 }
 
 void RTPS::update()
@@ -67,6 +73,10 @@ void RTPS::update()
 
 void RTPS::render()
 {
+
+    //temporary control to turn on and off rendering of ghosts/particles
+    renderer->render_particles = render_particles;
+    renderer->render_ghosts = render_ghosts;
 
     //this functionality should be inside the system's render() function
     //so System should own the renderer object

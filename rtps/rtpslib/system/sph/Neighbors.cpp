@@ -27,6 +27,7 @@ void SPH::loadNeighbors()
     printf("setting kernel args\n");
 	int iarg = 0;
 	kern.setArg(iarg++, cl_vars_sorted.getDevicePtr());
+	kern.setArg(iarg++, cl_ghosts_sorted.getDevicePtr());
 	kern.setArg(iarg++, cl_cell_indices_start.getDevicePtr());
 	kern.setArg(iarg++, cl_cell_indices_end.getDevicePtr());
 	kern.setArg(iarg++, cl_GridParamsScaled.getDevicePtr());
@@ -81,6 +82,19 @@ void SPH::neighborSearch(int choice)
         printf("ERROR(neighbor %d): %s(%s)\n", choice, er.what(), oclErrorString(er.err()));
     }
 	ps->cli->queue.finish();
+#if 0
+    if(choice == 1)
+    {
+        std::vector<int4> cli = cli_debug.copyToHost(10);
+        std::vector<float4> clf = clf_debug.copyToHost(10);
+        for (int i=0; i < 1; i++) 
+        {  
+            printf("num force calcs: %d\n", cli[10].w);
+		    printf("cli_debug: %d, %d, %d\n", cli[i].x, cli[i].y, cli[i].z);
+		    printf("clf_debug: %f, %f, %f %f\n", clf[i].x, clf[i].y, clf[i].z, clf[i].w);
+        }
+    }
+#endif
 
 #if 0 //printouts    
     //DEBUGING

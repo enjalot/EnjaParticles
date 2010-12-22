@@ -130,7 +130,6 @@ public:
     GE::Time* timers[30];
     int setupTimers();
 
-
     
 private:
     //the particle system framework
@@ -171,6 +170,24 @@ private:
     std::vector<float4> veleval;
     std::vector<float4> xsphs;
 
+    //all ghost stuff here
+    void pushGhosts(vector<float4> gs);
+    void sortGhosts();
+    void loadGhostHash();
+    void loadGhostDataStructures();
+    void ghost_hash();
+    void build_ghost_datastructures();
+    void printGhostHashDiagnostics();
+
+    Kernel k_ghost_hash, k_ghost_datastructures;
+
+    std::vector<float4> ghosts;
+	Buffer<float4>   	cl_ghosts;
+	Buffer<float4>   	cl_ghosts_sorted;
+
+
+
+
     Buffer<float4>      cl_position;
     Buffer<float4>      cl_color;
     Buffer<float>       cl_density;
@@ -178,6 +195,7 @@ private:
     Buffer<float4>      cl_velocity;
     Buffer<float4>      cl_veleval;
     Buffer<float4>      cl_xsph;
+
 
     //Neighbor Search related arrays
 	Buffer<float4> 	    cl_vars_sorted;

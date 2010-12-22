@@ -92,6 +92,9 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/sph/BitonicSort
     ${rtpslib_SOURCE_DIR}/system/sph/DataStructures
     ${rtpslib_SOURCE_DIR}/system/sph/Neighbors
+
+    ${rtpslib_SOURCE_DIR}/system/sph/SortGhosts.cpp
+
 	
     ${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src/oclBitonicSort_launcher.cpp
     #these should probably be in the OpenCL classes
