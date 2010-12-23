@@ -64,9 +64,11 @@ __kernel void ghost_hash(
 
     //fdebug[index] = gp->grid_inv_delta;
     //fdebug[index] = (float4)((p.x - gp->grid_min.x) * gp->grid_inv_delta.x, p.x, 0,0);
+    /*
     clf[index] = (float4)((p.x - gp->grid_min.x) * gp->grid_delta.x, p.x, 0,0);
 	cli[index] = gridPos;
     cli[index].w = num;
+    */
 }
 //----------------------------------------------------------------------
 

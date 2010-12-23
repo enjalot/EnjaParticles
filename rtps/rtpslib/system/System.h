@@ -35,6 +35,7 @@ public:
     
     GLuint ghost_vbo;
     int nb_ghosts;
+    int max_ghosts;
 
 protected:
     //number of particles

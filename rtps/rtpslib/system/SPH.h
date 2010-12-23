@@ -184,6 +184,13 @@ private:
     std::vector<float4> ghosts;
 	Buffer<float4>   	cl_ghosts;
 	Buffer<float4>   	cl_ghosts_sorted;
+//Two arrays for bitonic sort (sort not done in place)
+	Buffer<int> 		cl_ghosts_sort_hashes;
+	Buffer<int> 		cl_ghosts_sort_indices;
+	Buffer<int>         cl_ghosts_sort_output_hashes;
+	Buffer<int>         cl_ghosts_sort_output_indices;
+    
+
 
 
 
@@ -260,7 +267,7 @@ private:
     void prep(int stage);
     void hash();
     void printHashDiagnostics();
-    void bitonic_sort();
+    void bitonic_sort(bool ghosts);
     void buildDataStructures();
     void neighborSearch(int choice);
     void collision();

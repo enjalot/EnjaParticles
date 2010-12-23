@@ -53,8 +53,8 @@ extern "C" void initBitonicSort(cl_context cxGPUContext, cl_command_queue cqPara
 	const char* pathr = paths.c_str();
 	FILE* fd =fopen(pathr, "r");
 	//printf("fd= %d\n", fd);
-	char* cBitonicSort = new char [30000];
-	int nb = fread(cBitonicSort, 1, 30000, fd);
+	char* cBitonicSort = new char [300000];
+	int nb = fread(cBitonicSort, 1, 300000, fd);
 	kernelLength = nb;
 	//printf("pathr= %s\n", pathr);
 	//printf("cBitonicSort= %s\n", cBitonicSort);

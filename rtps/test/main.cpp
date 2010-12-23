@@ -64,8 +64,10 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 rtps::RTPS* ps;
-//#define NUM_PARTICLES 16384
-#define NUM_PARTICLES 8192
+//#define NUM_PARTICLES 262144
+//#define NUM_PARTICLES 131072
+#define NUM_PARTICLES 16384
+//#define NUM_PARTICLES 8192
 //#define NUM_PARTICLES 4096
 //#define NUM_PARTICLES 2048
 //#define NUM_PARTICLES 1024
@@ -121,8 +123,8 @@ int main(int argc, char** argv)
         
     //default constructor
     //rtps::RTPSettings settings;
-    //rtps::Domain grid = Domain(float4(-5,-.3,0,0), float4(2, 2, 12, 0));
     rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
+    //rtps::Domain grid = Domain(float4(0,0,0,0), float4(25, 25, 25, 0));
     rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
     ps = new rtps::RTPS(settings);
 
@@ -186,7 +188,7 @@ void appKeyboard(unsigned char key, int x, int y)
             appDestroy();
             break;
         case 'r': //drop a rectangle
-            int nn = 64;
+            int nn = 32;
             int sd = 100;
             //float4 min = float4(-150/sd, 50/sd, 675/sd, 0.0f);
             //float4 max = float4(-50/sd, 150/sd, 975/sd, 0.0f);

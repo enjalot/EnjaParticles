@@ -42,28 +42,52 @@ void SPH::loadBitonicSort()
     }
 }
 
-void SPH::bitonic_sort()
+void SPH::bitonic_sort(bool ghosts)
 {
     try
     {
 		int dir = 1; 		// dir: direction
 		//int batch = num;
-		int arrayLength = max_num;
-        int batch = max_num / arrayLength;
+        if(ghosts)
+        {
+            int arrayLength = nb_ghosts;
+            int batch = nb_ghosts / arrayLength;
 
-		size_t szWorkgroup = bitonicSort(
-                NULL,
-                //d_OutputKey,
-                //d_OutputVal,
-				cl_sort_output_hashes.getDevicePtr(), 
-				cl_sort_output_indices.getDevicePtr(), 
-				cl_sort_hashes.getDevicePtr(), 
-				cl_sort_indices.getDevicePtr(), 
-                batch,
-                arrayLength,
-                dir
+
+            size_t szWorkgroup = bitonicSort(
+                    NULL,
+                    //d_OutputKey,
+                    //d_OutputVal,
+                    cl_ghosts_sort_output_hashes.getDevicePtr(), 
+                    cl_ghosts_sort_output_indices.getDevicePtr(), 
+                    cl_ghosts_sort_hashes.getDevicePtr(), 
+                    cl_ghosts_sort_indices.getDevicePtr(), 
+                    batch,
+                    arrayLength,
+                    dir
             );
-    
+
+        }
+        else
+        {
+
+		    int arrayLength = max_num;
+            int batch = max_num / arrayLength;
+
+
+            size_t szWorkgroup = bitonicSort(
+                    NULL,
+                    //d_OutputKey,
+                    //d_OutputVal,
+                    cl_sort_output_hashes.getDevicePtr(), 
+                    cl_sort_output_indices.getDevicePtr(), 
+                    cl_sort_hashes.getDevicePtr(), 
+                    cl_sort_indices.getDevicePtr(), 
+                    batch,
+                    arrayLength,
+                    dir
+                );
+        }
 	} catch (cl::Error er) {
         printf("ERROR(bitonic sort): %s(%s)\n", er.what(), oclErrorString(er.err()));
 		exit(0);
@@ -71,10 +95,24 @@ void SPH::bitonic_sort()
 
     ps->cli->queue.finish();
 
-	scopy(num, cl_sort_output_hashes.getDevicePtr(), 
-	             cl_sort_hashes.getDevicePtr());
-	scopy(num, cl_sort_output_indices.getDevicePtr(), 
-	             cl_sort_indices.getDevicePtr());
+    if(ghosts)
+    {
+        printf("ghosts scopy\n");
+        scopy(num, cl_ghosts_sort_output_hashes.getDevicePtr(), 
+                     cl_ghosts_sort_hashes.getDevicePtr());
+        scopy(num, cl_ghosts_sort_output_indices.getDevicePtr(), 
+                     cl_ghosts_sort_indices.getDevicePtr());
+
+        printf("ghosts done scopy\n");
+ 
+    }
+    else
+    {
+        scopy(num, cl_sort_output_hashes.getDevicePtr(), 
+                     cl_sort_hashes.getDevicePtr());
+        scopy(num, cl_sort_output_indices.getDevicePtr(), 
+                     cl_sort_indices.getDevicePtr());
+    }
     
     ps->cli->queue.finish();
 }

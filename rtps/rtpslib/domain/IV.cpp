@@ -40,7 +40,7 @@ float circle_fade(float4 center, float4 pos)
     float dist = distance(center, pos);
     if(dist < .4) 
     {
-        return .8f;
+        return 1.f;
     }
     else if(dist >=.4 && dist < .8)
     {
@@ -77,7 +77,7 @@ std::vector<float4> addGhosts(int num, float4 min, float4 max, float spacing, fl
     for (float y = ymin; y <= ymax; y+=spacing) {
     for (float x = xmin; x <= xmax; x+=spacing) {
         if (i >= num) break;				
-        rvec[i] = float4(x,y,z,0.0f);
+        rvec[i] = float4(x,y,z,0.f);
         rvec[i].w += circle_fade(center, rvec[i]);
         rvec[i].w += circle_fade(center2, rvec[i]);
         rvec[i].w += circle_fade(center3, rvec[i]);

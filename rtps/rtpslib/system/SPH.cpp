@@ -111,18 +111,7 @@ SPH::SPH(RTPS *psfr, int n)
     //we call bitonic sort in here
     sortGhosts();
 
-    //using bitonic sort, reset these buffers on GPU before going on
-    std::vector<int> keys(max_num);
-    //to get around limits of bitonic sort only handling powers of 2
-    #include "limits.h"
-    std::fill(keys.begin(), keys.end(), INT_MAX);
-
-    cl_sort_indices.copyToDevice(keys);
-    cl_sort_hashes.copyToDevice(keys);
-    cl_sort_output_hashes.copyToDevice(keys);
-    cl_sort_output_indices.copyToDevice(keys);
-
-
+    
     
     
 #endif
@@ -221,7 +210,7 @@ void SPH::updateGPU()
         timers[TI_HASH]->end();
         //printf("bitonic_sort\n");
         timers[TI_BITONIC_SORT]->start();
-        bitonic_sort();
+        bitonic_sort(false);
         timers[TI_BITONIC_SORT]->end();
         //printf("data structures\n");
         timers[TI_BUILD]->start();
@@ -469,10 +458,18 @@ void SPH::prepareSorted()
     //ghosts = addRect(nn, min, max, sph_settings.spacing, 1.0);
     //nb_ghosts = max_num;  //bitonic sort will only work with nb_ghosts = max_num
     nb_ghosts = grid_params.nb_cells;
+
+    //max_ghosts = 262144;
+    //max_ghosts = 2097152;
+    max_ghosts = 8192;
+
+
     //ghosts = addGhosts(nb_ghosts, grid.getMin(), grid.getMax(), sph_settings.spacing, 1.0);
     //ghosts = addGhosts(nb_ghosts, grid.getBndMin(), grid.getBndMax(), sph_settings.spacing, 1.0);
     float cell_size = sph_settings.smoothing_distance / sph_settings.simulation_scale;
     ghosts = addGhosts(nb_ghosts, grid.getMin(), grid.getMax(), cell_size, 1.0);
+    ghosts.resize(max_ghosts);
+    printf("nb_ghosts: %d\n", nb_ghosts);
     printf("ghosts.size(): %zd\n", ghosts.size());
     ghost_vbo = createVBO(&ghosts[0], ghosts.size()*sizeof(float4), GL_ARRAY_BUFFER, GL_STATIC_READ);
     printf("ghost vbo: %d\n", ghost_vbo);
@@ -480,10 +477,26 @@ void SPH::prepareSorted()
     cl_ghosts = Buffer<float4>(ps->cli, ghost_vbo);
     cl_ghosts_sorted = Buffer<float4>(ps->cli, ghosts);
 
+        //using bitonic sort, reset these buffers on GPU before going on
+    keys.resize(max_ghosts);
+    //to get around limits of bitonic sort only handling powers of 2
+    #include "limits.h"
+    std::fill(keys.begin(), keys.end(), INT_MAX);
+
+
+	cl_ghosts_sort_hashes = Buffer<int>(ps->cli, keys);
+	cl_ghosts_sort_indices = Buffer<int>(ps->cli, keys);
+	cl_ghosts_sort_output_hashes = Buffer<int>(ps->cli, keys);
+	cl_ghosts_sort_output_indices = Buffer<int>(ps->cli, keys);
+
+
+
+
     cl_ghosts.acquire();
     loadGhostHash();
     loadGhostDataStructures();
     cl_ghosts.release();
+
 
 
 }

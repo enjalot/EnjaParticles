@@ -12,7 +12,7 @@ void SPH::sortGhosts()
     printf("ghost hash\n");
     ghost_hash();
     printf("bitonic sort\n");
-    bitonic_sort();
+    bitonic_sort(true);
     printf("ghost data structures\n");
     build_ghost_datastructures();
     printf("ghost release\n");
@@ -31,8 +31,8 @@ void SPH::loadGhostHash()
     int args = 0;
     k_ghost_hash.setArg(args++, nb_ghosts); 
     k_ghost_hash.setArg(args++, cl_ghosts.getDevicePtr()); // positions + other variables
-	k_ghost_hash.setArg(args++, cl_sort_hashes.getDevicePtr());
-	k_ghost_hash.setArg(args++, cl_sort_indices.getDevicePtr());
+	k_ghost_hash.setArg(args++, cl_ghosts_sort_hashes.getDevicePtr());
+	k_ghost_hash.setArg(args++, cl_ghosts_sort_indices.getDevicePtr());
 	k_ghost_hash.setArg(args++, cl_GridParams.getDevicePtr());
     k_ghost_hash.setArg(args++, clf_debug.getDevicePtr());
 	k_ghost_hash.setArg(args++, cli_debug.getDevicePtr());
@@ -54,8 +54,8 @@ void SPH::loadGhostDataStructures()
 	k_ghost_datastructures.setArg(iarg++, nb_ghosts);
 	k_ghost_datastructures.setArg(iarg++, cl_ghosts.getDevicePtr());
     k_ghost_datastructures.setArg(iarg++, cl_ghosts_sorted.getDevicePtr());
-	k_ghost_datastructures.setArg(iarg++, cl_sort_hashes.getDevicePtr());
-	k_ghost_datastructures.setArg(iarg++, cl_sort_indices.getDevicePtr());
+	k_ghost_datastructures.setArg(iarg++, cl_ghosts_sort_hashes.getDevicePtr());
+	k_ghost_datastructures.setArg(iarg++, cl_ghosts_sort_indices.getDevicePtr());
 	k_ghost_datastructures.setArg(iarg++, cl_SPHParams.getDevicePtr());
 	//k_ghost_datastructures.setArg(iarg++, cl_GridParamsScaled->getDevicePtr());
     
@@ -69,14 +69,16 @@ void SPH::ghost_hash()
 // Generate hash list: stored in cl_sort_hashes
 {
 
-	int ctaSize = 128; // work group size
+	int ctaSize = 256; // work group size
 	// Hash based on unscaled data
     printf("ghost hash set arg\n");
     k_ghost_hash.setArg(0, nb_ghosts);
     printf("ghost hash execute\n"); 
-	k_ghost_hash.execute(max_num, ctaSize);
+	k_ghost_hash.execute(nb_ghosts, ctaSize);
+    printf("done with execute\n");
 
 	ps->cli->queue.finish();
+
 	//-------------------
 
 	//sset(gp->nb_points, minus, cl_cell_indices_start->getDevicePtr());
@@ -121,7 +123,7 @@ void SPH::build_ghost_datastructures()
 	int workSize = 64; // work group size
     try
     {
-	    k_ghost_datastructures.execute(max_num, workSize);
+	    k_ghost_datastructures.execute(nb_ghosts, workSize);
     }
     catch (cl::Error er) {
         printf("ERROR(data structures): %s(%s)\n", er.what(), oclErrorString(er.err()));
