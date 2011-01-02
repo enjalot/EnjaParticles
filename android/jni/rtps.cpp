@@ -46,7 +46,7 @@ static float translate_z = 5.0f;
 #define PI 3.1415926535897932f
 
 //#define NUM_PARTICLES 100
-#define NUM_PARTICLES 1000
+#define NUM_PARTICLES 4096
 #define DT .004f
 
 using namespace rtps;
@@ -79,8 +79,8 @@ void appTouch(float* xp, float* yp)
     if(ps->settings.system == RTPSettings::SPH)
     {
         int nn = 50;
-        float4 min = float4(.1,.1,.1, 1.0);
-        float4 max = float4(.9, .5, .9, 1.0);
+        float4 min = float4(.3,.3,.3, 1.0);
+        float4 max = float4(1., 1., 1., 1.0);
         ps->system->addBox(nn, min, max, false);
         __android_log_print(ANDROID_LOG_INFO, "RTPS", "nn: %d", nn);
     }
@@ -128,8 +128,8 @@ void appInit()
     __android_log_print(ANDROID_LOG_INFO, "RTPS", "RTPS INITIALIZING");
     srand48(time(NULL));
     Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
-    //rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
-    RTPSettings settings(RTPSettings::Simple, NUM_PARTICLES, DT, grid);
+    RTPSettings settings(RTPSettings::SPH, NUM_PARTICLES, DT, grid);
+    //RTPSettings settings(RTPSettings::Simple, NUM_PARTICLES, DT, grid);
     ps = new RTPS(settings);
     
     __android_log_print(ANDROID_LOG_INFO, "RTPS", "RTPS INITIALIZED");
