@@ -16,23 +16,23 @@ varying vec3 posEye;        // position of center in eye space
 void main()
 {
 
-    posEye = vec3(gl_ModelViewMatrix * vec4(gl_Vertex.xyz, 1.0));
-    float dist = length(posEye);
+    //posEye = vec3(gl_ModelViewMatrix * vec4(gl_Vertex.xyz, 1.0));
+    //float dist = length(posEye);
     //we packed radius in the 4th component of vertex
     //pointRadius = gl_Vertex.w;
     //gl_PointSize = pointRadius * (pointScale / dist);
-    gl_PointSize = 2.0*20.0;
+    gl_PointSize = 20.0;
     //gl_PointSize = pointRadius * (1.0 / dist);
 
     gl_TexCoord[0] = gl_MultiTexCoord0;
     gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz, 1.0);
 
-    gl_FrontColor = gl_Color;
+    /*gl_FrontColor = gl_Color;
 
     if(!blending)
     {
         gl_FrontColor.w = 1.0;
-    }
+    }*/
 
     
 }
@@ -49,7 +49,7 @@ uniform sampler2D col;
 
 void main()
 {
-    const vec3 lightDir = vec3(0.577, 0.577, 0.577);
+    /*const vec3 lightDir = vec3(0.577, 0.577, 0.577);
     const float shininess = 40.0;
 
     // calculate normal from texture coordinates
@@ -68,7 +68,8 @@ void main()
     
     vec3 v = normalize(-spherePosEye);
     vec3 h = normalize(lightDir + v);
-    float specular = pow(max(0.0, dot(n, h)), shininess);
+	float specular = pow(max(0.0, dot(n, h)), shininess); 
+	*/ 
     
     vec4 tex = texture2D(col, gl_TexCoord[0].st);
     //gl_FragColor = gl_Color * diffuse + specular;
@@ -80,7 +81,7 @@ void main()
     gl_FragColor.z = tex.z;
     */
     //gl_FragColor.w = gl_Color.w * (tex.x + tex.y + tex.z)/3.;
-    gl_FragColor.w = (tex.x + tex.y + tex.z)/3.;
+    //gl_FragColor.w = (tex.x + tex.y + tex.z)/3.;
 }
 
 

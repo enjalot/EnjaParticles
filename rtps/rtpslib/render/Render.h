@@ -29,6 +29,7 @@ public:
     void drawArrays();
 
     void render_box(float4 min, float4 max);
+    void render_table(float4 min, float4 max);
 
     enum {TI_RENDER=0, TI_GLSL 
           }; //2
@@ -53,9 +54,9 @@ private:
 
     GLuint compileShaders();
     GLuint mpShaders();
-    GLuint loadTexture();
-
-};
+    int loadTexture();
+	int generateCircleTexture(GLubyte r, GLubyte g, GLubyte b, GLubyte alpha, int diameter);
+};	
 
 
 }

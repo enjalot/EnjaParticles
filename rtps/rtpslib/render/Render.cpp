@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 
 #include <GL/glew.h>
@@ -29,7 +30,8 @@ Render::Render(GLuint pos, GLuint col, int n)
     blending = true;
     if(glsl)
     {
-        loadTexture();
+		generateCircleTexture(0,0,255,255,32);
+        //loadTexture();
         glsl_program = compileShaders();
     }
     else if(mikep)
@@ -150,7 +152,7 @@ void Render::render()
 
 
        
-        glColor4f(1, 1, 1, 1);
+        //glColor4f(1, 1, 1, 1);
 
         drawArrays();
 
@@ -273,6 +275,21 @@ void Render::render_box(float4 min, float4 max)
     glEnd();
 
 
+}
+
+void Render::render_table(float4 min, float4 max)
+{
+
+    glEnable(GL_DEPTH_TEST);
+    glColor4f(0.5f, 0.5f, 0.5f, 1.0f);
+    glBegin(GL_TRIANGLE_STRIP);
+    float4 scale = float4((0.25f)*(max.x-min.x),(0.25f)*(max.y-min.y),(0.25f)*(max.z-min.z),0.0f);
+    glVertex3f(min.x-scale.x, max.y+scale.y, min.z);
+    glVertex3f(min.x-scale.x, min.y-scale.y, min.z);
+    glVertex3f(max.x+scale.x, max.y+scale.y, min.z);
+    glVertex3f(max.x+scale.x, min.y-scale.y, min.z);
+
+    glEnd();
 }
 
 //----------------------------------------------------------------------
@@ -430,9 +447,51 @@ int Render::setupTimers()
 }
 
 
+int Render::generateCircleTexture(GLubyte r, GLubyte g, GLubyte b, GLubyte alpha, int diameter)
+{
+	unsigned int imageSize = diameter*diameter*4;
+	unsigned int radius = diameter/2;
+	GLubyte image[imageSize];
+	memset(image,0,imageSize);
 
+	for(unsigned int i = 0; i<imageSize; i+=4)
+	{
+		int x = ((i/4)%diameter)-(radius);
+		int y = (radius)-((i/4)/diameter);
+		if((x*x)+(y*y)<=(radius*radius))
+		{
+			printf("inside the circlex = %d y = %d \n",x,y);
+			image[i] = r;
+			image[i+1] = g;
+			image[i+2] = b;
+			image[i+3] = alpha;
+		}
+		else
+		{
+			printf("out of the circle x = %d y = %d \n",x,y);
+			image[i] =0;
+			image[i+1] =0;
+			image[i+2] =0;
+			image[i+3] =0;
+		}
+	}
 
-GLuint Render::loadTexture()
+	glGenTextures(1, &gl_tex);
+    glBindTexture(GL_TEXTURE_2D, gl_tex);
+
+    //glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, diameter, diameter, 0,
+    GL_RGBA, GL_UNSIGNED_BYTE, image);
+
+	return 0; //success
+}
+
+int Render::loadTexture()
 {
 
 
@@ -496,7 +555,7 @@ GLuint Render::loadTexture()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
     GL_BGR_EXT, GL_UNSIGNED_BYTE, &image[0]);
 
-
+	return 0; //success
 }
 
 

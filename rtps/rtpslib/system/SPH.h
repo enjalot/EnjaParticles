@@ -59,7 +59,7 @@ typedef struct SPHParams
 	float shear;
 	float attraction;
 	float spring;
-	float surface_threshold;
+	//float surface_threshold;
 
     
     //Kernel Coefficients

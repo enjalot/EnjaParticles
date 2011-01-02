@@ -68,6 +68,8 @@ void RTPS::update()
 void RTPS::render()
 {
 
+    glClearColor(0.25f, 0.5f, 0.75f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //this functionality should be inside the system's render() function
     //so System should own the renderer object
     if(settings.system == RTPSettings::SPH)
@@ -75,9 +77,10 @@ void RTPS::render()
         Domain grid = system->getGrid();
         //should check if grid exists
         renderer->render_box(grid.getBndMin(), grid.getBndMax());
+        renderer->render_table(grid.getBndMin(), grid.getBndMax());
     }
-
     renderer->render();
+
 }
 
 void RTPS::updateNum(int num)

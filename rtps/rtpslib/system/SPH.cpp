@@ -270,7 +270,7 @@ void SPH::updateGPU()
         //exit(0);
         //
         //Andrew's rendering emporium
-	neighborSearch(4);
+        //neighborSearch(4);
         timers[TI_UPDATE]->end();
     }
 
@@ -360,7 +360,13 @@ void SPH::calculateSPHSettings()
     params.PI = 3.14159265f;
     params.K = 20.0f;
     params.num = num;
-    params.surface_threshold = 2.0 * params.simulation_scale; //0.01;
+//    params.surface_threshold = 2.0 * params.simulation_scale; //0.01;
+    params.viscosity = .001f;
+    //params.viscosity = 1.0f;
+    params.gravity = -9.8f;
+    //params.gravity = 0.0f;
+    params.velocity_limit = 600.0f;
+    params.xsph_factor = .05f;
 
 	float h = params.smoothing_distance;
 	float pi = acos(-1.0);
