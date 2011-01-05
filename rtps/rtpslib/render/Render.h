@@ -14,6 +14,8 @@
 
 namespace rtps{
 
+enum Shaders {SHADER_DEPTH=0,SHADER_CURVATURE_FLOW,SHADER_FRESNEL};
+
 class Render
 {
 public:
@@ -22,6 +24,7 @@ public:
 
     //decide which kind of rendering to use
     enum RenderType {POINTS, SPRITES};
+
 
     void setNum(int nn){num = nn;};
 
@@ -52,7 +55,7 @@ private:
     GLuint pos_vbo;
     GLuint col_vbo;
 
-    GLuint compileShaders();
+    GLuint compileShaders(const char* vertex_file, const char* fragment_file, const char* geometry_file = NULL);
     GLuint mpShaders();
     int loadTexture();
 	int generateCircleTexture(GLubyte r, GLubyte g, GLubyte b, GLubyte alpha, int diameter);

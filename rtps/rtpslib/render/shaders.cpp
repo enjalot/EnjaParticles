@@ -25,7 +25,9 @@ void main()
     //gl_PointSize = pointRadius * (1.0 / dist);
 
     gl_TexCoord[0] = gl_MultiTexCoord0;
-    gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz, 1.0);
+    //gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz, 1.0);
+	gl_Position = ftransform();
+	gl_Position.z = gl_Position.z*gl_Position.w/5.0;
 
     /*gl_FrontColor = gl_Color;
 
@@ -68,13 +70,23 @@ void main()
     
     vec3 v = normalize(-spherePosEye);
     vec3 h = normalize(lightDir + v);
-	float specular = pow(max(0.0, dot(n, h)), shininess); 
-	*/ 
+	float specular = pow(max(0.0, dot(n, h)), shininess); */
+	
     
     vec4 tex = texture2D(col, gl_TexCoord[0].st);
     //gl_FragColor = gl_Color * diffuse + specular;
     //gl_FragColor = gl_Color * diffuse + specular;
-    gl_FragColor = tex;
+	if(tex.a>0.0)
+	{
+		//float d = (2.0 * gl_DepthRange.near) / (gl_DepthRange.far + gl_DepthRange.near - gl_FragCoord.z * (gl_DepthRange.diff));
+		//float d = (2.0 * 0.1) / (100.0 + 0.1 - gl_FragCoord.z * (99.9));
+		//gl_FragColor = vec4(d,d,d,tex.a);
+		gl_FragColor = vec4(gl_FragCoord.zzz,tex.a);
+	}
+    else
+	{
+		gl_FragColor = vec4(0.0);
+	}
     /*
     gl_FragColor.x = tex.x;
     gl_FragColor.y = tex.y;

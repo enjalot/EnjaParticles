@@ -36,6 +36,7 @@ float translate_z = 2.00f;
 // mouse controls
 int mouse_old_x, mouse_old_y;
 int mouse_buttons = 0;
+bool keys_pressed[256] = {false};
 float rotate_x = 0.0, rotate_y = 0.0;
 //std::vector<Triangle> triangles;
 //std::vector<Box> boxes;
@@ -51,6 +52,7 @@ std::vector<int> tri_offsets;
 void init_gl();
 
 void appKeyboard(unsigned char key, int x, int y);
+void keyUp(unsigned char key, int x, int y);
 void appRender();
 void appDestroy();
 
@@ -103,6 +105,7 @@ int main(int argc, char** argv)
     glutDisplayFunc(appRender); //main rendering function
     glutTimerFunc(30, timerCB, 30); //determin a minimum time between frames
     glutKeyboardFunc(appKeyboard);
+    glutKeyboardUpFunc(keyUp);
     glutMouseFunc(appMouse);
     glutMotionFunc(appMotion);
 
@@ -135,7 +138,7 @@ int main(int argc, char** argv)
 void init_gl()
 {
     // default initialization
-    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClearColor(0.1, 0.4, 0.6, 1.0);
     //glDisable(GL_DEPTH_TEST);
 
     // viewport
@@ -144,8 +147,8 @@ void init_gl()
     // projection
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    //gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 100.0);
-    gluPerspective(90.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 10000.0); //for lorentz
+    gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 100.0);
+    //gluPerspective(90.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 10000.0); //for lorentz
 
     // set view matrix
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -170,6 +173,7 @@ void init_gl()
 
 void appKeyboard(unsigned char key, int x, int y)
 {
+	keys_pressed[key]=true;
     switch(key) 
     {
         case '\033': // escape quits
@@ -178,18 +182,53 @@ void appKeyboard(unsigned char key, int x, int y)
         case 'q':    // q (or escape) quits
             // Cleanup up and quit
             appDestroy();
-            break;
-        case 'r': //drop a rectangle
-            int nn = 512;
-            int sd = 100;
-            //float4 min = float4(-150/sd, 50/sd, 675/sd, 0.0f);
-            //float4 max = float4(-50/sd, 150/sd, 975/sd, 0.0f);
-            float4 min = float4(.1, .1, .1, 1.0f);
-            float4 max = float4(.9, .5, .9, 1.0f);
-            ps->system->addBox(nn, min, max, false);
-                
-
+			return;
+		case 'r': //drop a rectangle
+		{
+				int nn = 512;
+				int sd = 100;
+				//float4 min = float4(-150/sd, 50/sd, 675/sd, 0.0f);
+				//float4 max = float4(-50/sd, 150/sd, 975/sd, 0.0f);
+				float4 min = float4(.1, .1, .1, 1.0f);
+				float4 max = float4(.9, .5, .9, 1.0f);
+				ps->system->addBox(nn, min, max, false);
+				return;
+		}
+	case 'w':
+		translate_z -= 0.1;
+		break;
+	case 'a':
+		translate_x -= 0.1;
+		break;
+	case 's':
+		translate_z += 0.1;
+		break;
+	case 'd':
+		translate_x += 0.1;
+		break;
+	case 'z':
+		translate_y += 0.1;
+		break;
+	case 'x':
+		translate_y -= 0.1;
+		break;
+	default:
+		return;
     }
+
+    // set view matrix
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glRotatef(-90, 1.0, 0.0, 0.0);
+    glTranslatef(translate_x, translate_z, translate_y);
+    glRotatef(rotate_x, 1.0, 0.0, 0.0);
+    glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
+}
+
+void keyUp(unsigned char key, int x, int y)
+{
+	keys_pressed[key]=false;
 }
 
 void appRender()
@@ -233,7 +272,7 @@ void appMouse(int button, int state, int x, int y)
         mouse_buttons |= 1<<button;
     } else if (state == GLUT_UP) {
         mouse_buttons = 0;
-    }
+    } 
 
     mouse_old_x = x;
     mouse_old_y = y;
@@ -253,6 +292,23 @@ void appMotion(int x, int y)
     } else if (mouse_buttons & 4) {
         translate_z -= dy * 0.1;
     }
+
+	if(keys_pressed['w'])
+	{
+		translate_z += 0.1;
+	}
+	else if(keys_pressed['a'])
+	{
+		translate_x -= 0.1;
+	}
+	else if(keys_pressed['s'])
+	{
+		translate_z -= 0.1;
+	}
+	else if(keys_pressed['d'])
+	{
+		translate_x += 0.1;
+	}
 
     mouse_old_x = x;
     mouse_old_y = y;

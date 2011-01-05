@@ -68,8 +68,6 @@ void RTPS::update()
 void RTPS::render()
 {
 
-    glClearColor(0.25f, 0.5f, 0.75f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //this functionality should be inside the system's render() function
     //so System should own the renderer object
     if(settings.system == RTPSettings::SPH)

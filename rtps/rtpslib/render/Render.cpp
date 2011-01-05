@@ -13,6 +13,7 @@
 #include "Render.h"
 #include "util.h"
 
+using namespace std;
 
 namespace rtps{
 
@@ -32,7 +33,11 @@ Render::Render(GLuint pos, GLuint col, int n)
     {
 		generateCircleTexture(0,0,255,255,32);
         //loadTexture();
-        glsl_program = compileShaders();
+		string vert(GLSL_BIN_DIR);
+		string frag(GLSL_BIN_DIR);
+		vert+="/depth_vert.glsl";
+		frag+="/depth_frag.glsl";
+        glsl_program = compileShaders(vert.c_str(),frag.c_str());
     }
     else if(mikep)
     {  
@@ -143,7 +148,7 @@ void Render::render()
         float particle_radius = 5.f;
         //glUniform1f( glGetUniformLocation(m_program, "pointScale"), m_window_h / tanf(m_fov * m_fHalfViewRadianFactor));
         glUniform1f( glGetUniformLocation(glsl_program, "pointScale"), point_scale);
-        glUniform1f( glGetUniformLocation(glsl_program, "blending"), blending );
+        //glUniform1f( glGetUniformLocation(glsl_program, "blending"), blending );
         glUniform1f( glGetUniformLocation(glsl_program, "pointRadius"), particle_radius );
 
         //Texture stuff
@@ -293,21 +298,53 @@ void Render::render_table(float4 min, float4 max)
 }
 
 //----------------------------------------------------------------------
-GLuint Render::compileShaders()
+GLuint Render::compileShaders(const char* vertex_file, const char* fragment_file, const char* geometry_file)
 {
 
     //this may not be the cleanest implementation
-    #include "shaders.cpp"
+    //#include "shaders.cpp"
 
     //printf("vertex shader:\n%s\n", vertex_shader_source);
     //printf("fragment shader:\n%s\n", fragment_shader_source);
+	char *vertex_shader_source = NULL,*fragment_shader_source= NULL,*geometry_shader_source=NULL;
+	int vert_size,frag_size,geom_size;
+	if(vertex_file)
+	{
+		vertex_shader_source = file_contents(vertex_file,&vert_size);
+		if(!vertex_shader_source)
+		{
+		   printf("Vertex shader file not found or is empty! Cannot compile shader");
+		   return -1;
+		}
+	}
+	else
+	{
+		printf("No vertex file specified! Cannot compile shader!");
+		return -1;
+	}
 
+	if(fragment_file)
+	{
+		fragment_shader_source = file_contents(fragment_file,&frag_size);
+		if(!fragment_shader_source)
+		{
+		   printf("Vertex shader file not found or is empty! Cannot compile shader");
+		   free(vertex_shader_source);
+		   return -1;
+		}
+	}
+	else
+	{
+		printf("No vertex file specified! Cannot compile shader!");
+		free(vertex_shader_source);
+		return -1;
+	}
 
     GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
 
-    glShaderSource(vertex_shader, 1, &vertex_shader_source, 0);
-    glShaderSource(fragment_shader, 1, &fragment_shader_source, 0);
+    glShaderSource(vertex_shader, 1, (const GLchar**)&vertex_shader_source, 0);
+    glShaderSource(fragment_shader, 1, (const GLchar**)&fragment_shader_source, 0);
     
     glCompileShader(vertex_shader);
     GLint len;
@@ -345,6 +382,10 @@ GLuint Render::compileShaders()
         glDeleteProgram(program);
         program = 0;
     }
+
+	//cleanup
+	free(vertex_shader_source);
+	free(fragment_shader_source);
 
     return program;
 }
