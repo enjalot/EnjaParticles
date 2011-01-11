@@ -213,9 +213,9 @@ int EnjaParticles::init(AVec4 g, AVec4 v, AVec4 c, int n)
     }
 
     //we initialize our timers, they only time every 5th call
-    ts[0] = new GE::Time("update", 5);
-    ts[1] = new GE::Time("render", 5);
-    ts[2] = new GE::Time("total render", 5);
+    ts[0] = new GE::Time("update", 1);
+    ts[1] = new GE::Time("render", 1);
+    ts[2] = new GE::Time("total render", 1);
 
 
     return 1;

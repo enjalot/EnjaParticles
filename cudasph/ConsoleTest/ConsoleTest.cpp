@@ -32,9 +32,18 @@ void testFluidSimLive()
 	SimulationSystem *system = new SimulationSystem(true);
 	system->Init();
 
+    int num = 4096;
+    num = 8192;
+    num = 16384;
+    num = 32768;
+    num = 65536;
+    num = 131072;
+    num = 262144;
+     
+
 	system->GetSettings()->SetValue("Timestep", 0.002);
 	//GE system->GetSettings()->SetValue("Particles Number", 128*1024);
-	system->GetSettings()->SetValue("Particles Number", 32*1024);
+	system->GetSettings()->SetValue("Particles Number", num);
 	system->GetSettings()->SetValue("Grid World Size",  1024);
 	system->GetSettings()->SetValue("Simulation Scale",  0.0005);
 	system->GetSettings()->SetValue("Rest Density",  1000);
@@ -65,7 +74,7 @@ void testFluidSimLive()
 	int ITERATIONS = 1000;
 	for(int i = 0; i < ITERATIONS; i++)
 	{
-		printf("..... Iteration %d\n", i);
+		//printf("..... Iteration %d\n", i);
 		timer->start();
 		system->Simulate(true, true);
 		timer->stop();
@@ -82,11 +91,13 @@ void testFluidSimLive()
 		// get average of fps history
 		double avg=0; for(int j=0;j<100;j++) fpshistory[j]==0? avg += fps : avg += fpshistory[j]; avg /= 100.0;
 
+        /*
 		cout << fixed;
 		cout << setw(15) << setprecision(1) << fps ;
 		cout << setw(15) << setprecision(1) << avg ;
 		cout << setw(15) << setprecision(1) <<  totalavg;
 		cout << "\r";
+        */
 	}
 	CUDA_SAFE_CALL(cudaThreadSynchronize());	
 

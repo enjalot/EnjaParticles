@@ -32,10 +32,11 @@ int EnjaParticles::update()
         printf("in update about to simulate\n");
         //1st arguement is mProgress
         SimLib::SimulationSystem* tmParticleSystem = (SimLib::SimulationSystem*)mParticleSystem;
+	ts_cl[0]->start();
 		tmParticleSystem->Simulate(true, fluidSettings->gridWallCollisions);
+	ts_cl[0]->stop();
         printf("simulated\n");
     }
-	ts_cl[0]->start();
 #ifdef GL_INTEROP   
     // map OpenGL buffer object for writing from OpenCL
     //clFinish(cqCommandQueue);
@@ -124,7 +125,6 @@ int EnjaParticles::update()
     */
 #endif
 
-	ts_cl[0]->stop();
 }
 
 

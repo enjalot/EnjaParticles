@@ -8,8 +8,8 @@
 
 
 
-set (CUDA_SDK_ROOT_DIR $ENV{CUDA_LOCAL})  # set environment variable
-set (CUDA_TOOLKIT_ROOT_DIR $ENV{CUDA_HOME})  # set environment variable
+set (CUDA_SDK_ROOT_DIR $ENV{CUDA_SDK_INSTALL_PATH})  # set environment variable
+set (CUDA_TOOLKIT_ROOT_DIR $ENV{CUDA_INSTALL_PATH})  # set environment variable
 
 SET(PLIB ${CUDA_SDK_ROOT_DIR}/common/lib)
 message("PLIB: ${PLIB}\n")
