@@ -147,7 +147,8 @@ void init_gl()
     // projection
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 100.0);
+    //gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 100.0);
+    gluPerspective(65.0, (GLfloat)window_width / (GLfloat) window_height, 0.3, 100.0);
     //gluPerspective(90.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 10000.0); //for lorentz
 
     // set view matrix
@@ -198,13 +199,13 @@ void appKeyboard(unsigned char key, int x, int y)
 		translate_z -= 0.1;
 		break;
 	case 'a':
-		translate_x -= 0.1;
+		translate_x += 0.1;
 		break;
 	case 's':
 		translate_z += 0.1;
 		break;
 	case 'd':
-		translate_x += 0.1;
+		translate_x -= 0.1;
 		break;
 	case 'z':
 		translate_y += 0.1;

@@ -28,21 +28,37 @@ Render::Render(GLuint pos, GLuint col, int n)
     glsl = true;
     //glsl = false;
     mikep = false;
-    blending = true;
+    //blending = true;
+    blending = false;
     if(glsl)
     {
 		generateCircleTexture(0,0,255,255,32);
+		glGenTextures(1, &gl_tex["depth"]);
+		glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,800,600,0,GL_DEPTH_COMPONENT,GL_UNSIGNED_BYTE,NULL);
+		/*glBindTexture(GL_TEXTURE_2D, gl_tex["depth"]);
+
+		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);*/
+
         //loadTexture();
 		string vert(GLSL_BIN_DIR);
 		string frag(GLSL_BIN_DIR);
+		vert+="/sphere_vert.glsl";
+		frag+="/sphere_frag.glsl";
+        glsl_program[SPHERE_SHADER] = compileShaders(vert.c_str(),frag.c_str());
+		vert = string(GLSL_BIN_DIR);
+		frag = string(GLSL_BIN_DIR);
 		vert+="/depth_vert.glsl";
 		frag+="/depth_frag.glsl";
-        glsl_program = compileShaders(vert.c_str(),frag.c_str());
+        glsl_program[DEPTH_SHADER] = compileShaders(vert.c_str(),frag.c_str());
     }
     else if(mikep)
     {  
         loadTexture();
-        glsl_program = mpShaders();
+        glsl_program[MIKEP_SHADER] = mpShaders();
     }
     setupTimers();
 }
@@ -131,45 +147,7 @@ void Render::render()
     //TODO enable GLSL shading 
     if(glsl)
     {
-
-        //Texture stuff
-        glEnable(GL_TEXTURE_2D);
-        glActiveTexture(GL_TEXTURE0);
-
-
-        //printf("GLSL\n");
-        glEnable(GL_POINT_SPRITE_ARB);
-        glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
-        //this isn't looking good for ATI, check for their extension?
-        glEnable(GL_VERTEX_PROGRAM_POINT_SIZE_NV);
-
-        glUseProgram(glsl_program);
-        float point_scale = 1.f;
-        float particle_radius = 5.f;
-        //glUniform1f( glGetUniformLocation(m_program, "pointScale"), m_window_h / tanf(m_fov * m_fHalfViewRadianFactor));
-        glUniform1f( glGetUniformLocation(glsl_program, "pointScale"), point_scale);
-        //glUniform1f( glGetUniformLocation(glsl_program, "blending"), blending );
-        glUniform1f( glGetUniformLocation(glsl_program, "pointRadius"), particle_radius );
-
-        //Texture stuff
-        glUniform1i( glGetUniformLocation(glsl_program, "col"), 0);
-        glBindTexture(GL_TEXTURE_2D, gl_tex);
-
-
-       
-        //glColor4f(1, 1, 1, 1);
-
-        drawArrays();
-
-        glUseProgram(0);
-        
-        glDepthMask(GL_FALSE);
-        glDisable(GL_POINT_SPRITE_ARB);
-        
-        //Texture
-        glDisable(GL_TEXTURE_2D);
-
-
+		renderPointsAsSpheres();
     }
     else if(mikep)
     {
@@ -178,16 +156,16 @@ void Render::render()
         glActiveTexture(GL_TEXTURE0);
 
 
-        glUseProgram(glsl_program);
+        glUseProgram(glsl_program[MIKEP_SHADER]);
         float emit = 1.f;
         float alpha = .5f;
 
-        glUniform1f( glGetUniformLocation(glsl_program, "emit"), emit);
-        glUniform1f( glGetUniformLocation(glsl_program, "alpha"), alpha);
+        glUniform1f( glGetUniformLocation(glsl_program[MIKEP_SHADER], "emit"), emit);
+        glUniform1f( glGetUniformLocation(glsl_program[MIKEP_SHADER], "alpha"), alpha);
 
         //Texture stuff
-        glUniform1i( glGetUniformLocation(glsl_program, "col"), 0);
-        glBindTexture(GL_TEXTURE_2D, gl_tex);
+        glUniform1i( glGetUniformLocation(glsl_program[MIKEP_SHADER], "col"), 0);
+        glBindTexture(GL_TEXTURE_2D, gl_tex["texture"]);
 
         glColor4f(1, 1, 1, 1);
 
@@ -231,6 +209,71 @@ void Render::render()
         timers[TI_RENDER]->end();
     }
 
+}
+
+void Render::orthoProjection()
+{
+	glMatrixMode(GL_PROJECTION);					// Select Projection
+	glPushMatrix();							// Push The Matrix
+	glLoadIdentity();						// Reset The Matrix
+	glOrtho( 0, 800 , 600 , 0, -1, 1 );				// Select Ortho Mode (640x480)
+	glMatrixMode(GL_MODELVIEW);					// Select Modelview Matrix
+	glPushMatrix();							// Push The Matrix
+	glLoadIdentity();						// Reset The Matrix
+}
+
+void Render::perspectiveProjection()
+{
+	glMatrixMode( GL_PROJECTION );					// Select Projection
+	glPopMatrix();							// Pop The Matrix
+	glMatrixMode( GL_MODELVIEW );					// Select Modelview
+	glPopMatrix();							// Pop The Matrix
+}
+
+void Render::fullscreenQuad()
+{
+	orthoProjection();
+	glBegin(GL_QUADS);
+			glTexCoord2f(0,1);
+			glVertex2f(0,0);
+
+			glTexCoord2f(0,0);
+			glVertex2f(0,600);
+
+			glTexCoord2f(1,0);
+			glVertex2f(800,600);
+
+			glTexCoord2f(1,1);
+			glVertex2f(800,0);
+	glEnd();
+	perspectiveProjection();
+}
+
+void Render::renderPointsAsSpheres()
+{
+
+        glEnable(GL_POINT_SPRITE_ARB);
+        glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
+        glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+
+        glUseProgram(glsl_program[SPHERE_SHADER]);
+        float particle_radius = 0.125f * 0.5f;
+        glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "pointScale"), 600. / tanf(60. * (0.5f * 3.1415926535f/180.0f)));
+        glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "pointRadius"), particle_radius );
+
+        glColor3f(1., 1., 1.);
+
+        drawArrays();
+		//copy depth value to a texture
+		glBindTexture(GL_TEXTURE_2D,gl_tex["depth"]);
+		glCopyTexSubImage2D(GL_TEXTURE_2D,0,0,0,0,0,800,600);
+		//fullscreenQuad();
+
+        glUseProgram(0);
+        
+        glDepthMask(GL_FALSE);
+		glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
+        glDisable(GL_POINT_SPRITE_ARB);
 }
 
 void Render::render_box(float4 min, float4 max)
@@ -517,8 +560,8 @@ int Render::generateCircleTexture(GLubyte r, GLubyte g, GLubyte b, GLubyte alpha
 		}
 	}
 
-	glGenTextures(1, &gl_tex);
-    glBindTexture(GL_TEXTURE_2D, gl_tex);
+	glGenTextures(1, &gl_tex["circle"]);
+    glBindTexture(GL_TEXTURE_2D, gl_tex["circle"]);
 
     //glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -585,8 +628,8 @@ int Render::loadTexture()
     #include "../../sprites/enjalot.txt"
 */
     //load as gl texture
-    glGenTextures(1, &gl_tex);
-    glBindTexture(GL_TEXTURE_2D, gl_tex);
+    glGenTextures(1, &gl_tex["texture"]);
+    glBindTexture(GL_TEXTURE_2D, gl_tex["texture"]);
 
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);

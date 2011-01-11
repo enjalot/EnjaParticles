@@ -1,6 +1,8 @@
 #ifndef RTPS_RENDER_H_INCLUDED
 #define RTPS_RENDER_H_INCLUDED
 
+#include <map>
+
 #if defined __APPLE__ || defined(MACOSX)
     //OpenGL stuff
     #include <OpenGL/gl.h>
@@ -24,18 +26,22 @@ public:
 
     //decide which kind of rendering to use
     enum RenderType {POINTS, SPRITES};
-
+	enum ShaderType {SPHERE_SHADER, DEPTH_SHADER, MIKEP_SHADER};
 
     void setNum(int nn){num = nn;};
 
     void render();
     void drawArrays();
 
+	void renderPointsAsSpheres();
+	void orthoProjection();
+	void perspectiveProjection();
+	void fullscreenQuad();
+
     void render_box(float4 min, float4 max);
     void render_table(float4 min, float4 max);
 
-    enum {TI_RENDER=0, TI_GLSL 
-          }; //2
+    enum {TI_RENDER=0, TI_GLSL}; //2
     GE::Time* timers[2];
     int setupTimers();
 
@@ -49,8 +55,8 @@ private:
     bool glsl;
     bool mikep;
     bool blending;
-    GLuint glsl_program;    
-    GLuint gl_tex;
+    std::map<ShaderType,GLuint> glsl_program;    
+    std::map<std::string,GLuint> gl_tex;
 
     GLuint pos_vbo;
     GLuint col_vbo;
