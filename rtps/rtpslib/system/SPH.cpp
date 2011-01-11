@@ -324,6 +324,14 @@ int SPH::setupTimers()
     timers[TI_LEAPFROG]     = new GE::Time("leapfrog", time_offset, print_freq);
 }
 
+void SPH::printTimers()
+{
+    for(int i = 0; i < 10; i++) //switch to vector of timers and use size()
+    {
+        timers[i]->print();
+    }
+}
+
 void SPH::calculateSPHSettings()
 {
     /*!

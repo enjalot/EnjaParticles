@@ -129,6 +129,7 @@ public:
           }; //10
     GE::Time* timers[30];
     int setupTimers();
+    void printTimers();
 
 
     

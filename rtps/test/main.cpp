@@ -64,6 +64,9 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 rtps::RTPS* ps;
+//#define NUM_PARTICLES 524288
+//#define NUM_PARTICLES 262144
+//#define NUM_PARTICLES 65536
 #define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 8192
 //#define NUM_PARTICLES 4096
@@ -170,24 +173,34 @@ void init_gl()
 
 void appKeyboard(unsigned char key, int x, int y)
 {
+    int nn;
+    float4 min;
+    float4 max;
     switch(key) 
     {
         case '\033': // escape quits
         case '\015': // Enter quits    
+        case 'd': //dam break
+            nn = 16384;
+            min = float4(.1, .1, .1, 1.0f);
+            max = float4(3.9, 3.9, 3.9, 1.0f);
+            ps->system->addBox(nn, min, max, false);
+            break;
+        case 'p': //print timers
+            ps->printTimers();
+            break;
         case 'Q':    // Q quits
         case 'q':    // q (or escape) quits
             // Cleanup up and quit
             appDestroy();
             break;
         case 'r': //drop a rectangle
-            int nn = 512;
-            int sd = 100;
-            //float4 min = float4(-150/sd, 50/sd, 675/sd, 0.0f);
-            //float4 max = float4(-50/sd, 150/sd, 975/sd, 0.0f);
-            float4 min = float4(.1, .1, .1, 1.0f);
-            float4 max = float4(.9, .5, .9, 1.0f);
+            nn = 512;
+            min = float4(.1, .1, .1, 1.0f);
+            max = float4(.9, .5, .9, 1.0f);
             ps->system->addBox(nn, min, max, false);
-                
+            break;
+               
 
     }
 }
