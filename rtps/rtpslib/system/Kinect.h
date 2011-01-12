@@ -28,6 +28,8 @@ public:
     ~Kinect();
 
     void update();
+    void setupTimers();
+    void printTimers();
 
     bool forcefields_enabled;
     int max_forcefields;
@@ -41,6 +43,9 @@ public:
     std::vector<float4> forces;
     std::vector<ForceField> forcefields;
 
+    std::vector<float4> kinect_data;
+    std::vector<float4> kinect_col;
+
 
     Kernel k_forcefield;
     Kernel k_euler;
@@ -51,6 +56,7 @@ public:
     Buffer<float4> cl_velocity;
     Buffer<ForceField> cl_forcefield;
     Buffer<float4> cl_kinect;
+    Buffer<float4> cl_kinect_col;
     
 
     void loadForceField();
@@ -68,6 +74,10 @@ public:
     ntk::RGBDImage current_frame;
     cv::Mat3b mapped_color;
  
+    enum {TI_KINECT=0, TI_KINECT_GPU, TI_KINECT_LOOP
+          }; //2
+    GE::Time* timers[3];
+
     
 };
 

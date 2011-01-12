@@ -17,7 +17,7 @@ namespace rtps{
 class Render
 {
 public:
-    Render(GLuint pos_vbo, GLuint vel_vbo, GLuint kin_vbo, int num);
+    Render(GLuint pos_vbo, GLuint vel_vbo, GLuint kin_vbo, GLuint kin_col_vbo, int num);
     ~Render();
 
     //decide which kind of rendering to use
@@ -54,6 +54,7 @@ private:
     GLuint pos_vbo;
     GLuint col_vbo;
     GLuint kin_vbo;
+    GLuint kin_col_vbo;
 
     GLuint compileShaders();
     GLuint mpShaders();

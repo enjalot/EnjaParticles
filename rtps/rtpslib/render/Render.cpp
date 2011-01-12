@@ -14,12 +14,13 @@
 
 namespace rtps{
 
-Render::Render(GLuint pos, GLuint col, GLuint kin, int n)
+Render::Render(GLuint pos, GLuint col, GLuint kin, GLuint kincol, int n)
 {
     rtype = POINTS;
     pos_vbo = pos;
     col_vbo = col;
     kin_vbo = kin;
+    kin_col_vbo = kincol;
     knum = 640*480;
 
     num = n;
@@ -105,6 +106,9 @@ void Render::drawArrays()
 void Render::drawKinect()
 {
 
+    glBindBuffer(GL_ARRAY_BUFFER, kin_col_vbo);
+    glColorPointer(4, GL_FLOAT, 0, 0);
+
 
     //printf("vertex buffer\n");
     glBindBuffer(GL_ARRAY_BUFFER, kin_vbo);
@@ -121,7 +125,7 @@ void Render::drawKinect()
     
     //printf("enable client state\n");
     glEnableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
     //glEnableClientState(GL_INDEX_ARRAY);
     
     //Need to disable these for blender
@@ -135,7 +139,7 @@ void Render::drawKinect()
 
     //printf("disable stuff\n");
     //glDisableClientState(GL_INDEX_ARRAY);
-    //glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
 
     //glPopMatrix();

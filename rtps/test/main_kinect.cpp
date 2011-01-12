@@ -134,7 +134,7 @@ void setView()
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     //gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 100.0);
-    gluPerspective(90.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 10000.0); //for lorentz
+    gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 1000.0); //for lorentz
 
     // set view matrix
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -172,6 +172,9 @@ void appKeyboard(unsigned char key, int x, int y)
     {
         case '\033': // escape quits
         case '\015': // Enter quits    
+        case 'p': //print timers
+            ps->printTimers();
+            break;
         case 'Q':    // Q quits
         case 'q':    // q (or escape) quits
             // Cleanup up and quit

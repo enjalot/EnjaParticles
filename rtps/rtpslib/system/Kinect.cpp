@@ -33,8 +33,8 @@ Kinect::Kinect(RTPS *psfr, int n)
     float4 max = grid.getBndMax();
 
     float spacing = .1; 
-    std::vector<float4> box = addRect(num, min, max, spacing, 1);
-    std::copy(box.begin(), box.end(), positions.begin());
+    //std::vector<float4> box = addRect(num, min, max, spacing, 1);
+    //std::copy(box.begin(), box.end(), positions.begin());
 
 
     float4 center = float4(1,1,.1,1);
@@ -105,12 +105,18 @@ Kinect::Kinect(RTPS *psfr, int n)
     processor.setFilterFlag(RGBDProcessor::NoAmplitudeIntensityUndistort, true);
 
    
-    std::vector<float4> kinect_data(640*480);
+    kinect_data.resize(640*480);
+    kinect_col.resize(640*480);
+    std::fill(kinect_col.begin(), kinect_col.end(),float4(0.0f, 0.0f, 0.0f, 1.0f));
     kin_vbo = createVBO(&kinect_data[0], kinect_data.size()*sizeof(float4), GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+    kin_col_vbo = createVBO(&kinect_col[0], kinect_col.size()*sizeof(float4), GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
     printf("kinect vbo: %d\n", kin_vbo);
+    printf("kinect color vbo: %d\n", kin_col_vbo);
     cl_kinect = Buffer<float4>(ps->cli, kin_vbo);
+    cl_kinect_col = Buffer<float4>(ps->cli, kin_col_vbo);
  
     
+    setupTimers();
 
 
 #endif
@@ -170,23 +176,26 @@ void Kinect::update()
     cl_color.release();
 #endif
 
+    timers[TI_KINECT]->start();
+
     //while (true)
     //{
-    printf("wait for next frame\n");
+    //printf("wait for next frame\n");
     grabber.waitForNextFrame();
     grabber.copyImageTo(current_frame);
     processor.processImage(current_frame);
 
-    printf("before assert\n");
+    //printf("before assert\n");
     ntk_assert(current_frame.calibration(), "Ensure there is calibration data in the image");
-    printf("after assert\n");
+    //printf("after assert\n");
     cv::Size cfs = current_frame.depth().size();
     mapped_color.create(current_frame.depth().size());
     mapped_color = Vec3b(0,0,0);
 
-    printf("curr fame size %d %d ", cfs.width, cfs.height);
-    std::vector<float4> kinect_data(cfs.width * cfs.height);
+    //printf("curr fame size %d %d ", cfs.width, cfs.height);
+    //std::vector<float4> kinect_data(cfs.width * cfs.height);
 
+    timers[TI_KINECT_LOOP]->start();
     // equivalent to for(int r = 0; r < im.rows; ++r) for (int c = 0; c < im.cols; ++c)
     for_all_rc(current_frame.depth())
     {
@@ -215,13 +224,29 @@ void Kinect::update()
       int c_rgb = p_rgb.x;
       // Check if the pixel coordinates are valid and set the value.
       if (is_yx_in_range(current_frame.rgb(), r_rgb, c_rgb))
-        mapped_color(r, c) = current_frame.rgb()(r_rgb, c_rgb);
+      {
+        Vec3b mcol = current_frame.rgb()(r_rgb, c_rgb);
+        mapped_color(r, c) = mcol;
+        kinect_col[r_rgb + c_rgb*cfs.height] = float4(mcol[2]/255.f, mcol[1]/255.f, mcol[0]/255.f, 1.0f);
+        //kinect_col[r + c*cfs.height] = float4(.5, .5, .5, 1.0f);
+        //printf("color! %d %d %d\n", mcol[0], mcol[1], mcol[2]);
+      }
     }
 
+    timers[TI_KINECT_LOOP]->end();
+    timers[TI_KINECT]->end();
+    timers[TI_KINECT_GPU]->start();
+   
     cl_kinect.acquire();
+    cl_kinect_col.acquire();
+   
     cl_kinect.copyToDevice(kinect_data);
+    cl_kinect_col.copyToDevice(kinect_col);
+   
     cl_kinect.release();
+    cl_kinect_col.release();
 
+    timers[TI_KINECT_GPU]->end();
     /*
     int fps = grabber.frameRate();
     cv::putText(current_frame.rgbRef(),
@@ -236,5 +261,25 @@ void Kinect::update()
 
 }
 
+void Kinect::setupTimers()
+{
+    //int print_freq = 20000;
+    int print_freq = 1000; //one second
+    int time_offset = 5;
+
+    timers[TI_KINECT]     = new GE::Time("kinect frame grab", time_offset, print_freq);
+    timers[TI_KINECT_GPU]     = new GE::Time("kinect gpu push", time_offset, print_freq);
+    timers[TI_KINECT_LOOP]     = new GE::Time("kinect pixel loop", time_offset, print_freq);
+ 
+
+}
+
+void Kinect::printTimers()
+{
+    for(int i = 0; i < 3; i++) //switch to vector of timers and use size()
+    {
+        timers[i]->print();
+    }
+}
 
 }

@@ -28,6 +28,7 @@ public:
     virtual GLuint getPosVBO() { return pos_vbo; };
     virtual GLuint getColVBO() { return col_vbo; };
     virtual GLuint getKinVBO() { return kin_vbo; };
+    virtual GLuint getKinColVBO() { return kin_col_vbo; };
 
     virtual int addBox(int nn, float4 min, float4 max, bool scaled){ return 0;};
     virtual void addBall(int nn, float4 center, float radius, bool scaled){};
@@ -45,6 +46,7 @@ protected:
     GLuint pos_vbo;
     GLuint col_vbo;
     GLuint kin_vbo;
+    GLuint kin_col_vbo;
     //flag is true if the system's constructor creates the VBOs for the system
     bool managed;
 

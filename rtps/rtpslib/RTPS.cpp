@@ -61,7 +61,7 @@ void RTPS::Init()
 
     //pass in the position and color vbo ids to the renderer
     //get the number from the system
-    renderer = new Render(system->getPosVBO(), system->getColVBO(), system->getKinVBO(), system->getNum());
+    renderer = new Render(system->getPosVBO(), system->getColVBO(), system->getKinVBO(), system->getKinColVBO(), system->getNum());
 }
 
 void RTPS::update()
