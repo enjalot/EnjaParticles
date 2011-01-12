@@ -41,6 +41,10 @@ set (test_SOURCES
 set (test_simple_SOURCES
     main_simple.cpp
     )
+set (kinect_SOURCES
+    main_kinect.cpp
+    )
+
 
 
 
@@ -49,6 +53,7 @@ ADD_DEFINITIONS(-g )
 INCLUDE_DIRECTORIES(${test_INCLUDES})
 ADD_EXECUTABLE(test.x ${test_SOURCES})
 ADD_EXECUTABLE(test_simple.x ${test_simple_SOURCES})
+ADD_EXECUTABLE(kinect.x ${kinect_SOURCES})
 
 message("current build dir:\n")
 message("${BASE_DIR}/rtps/build")
@@ -69,6 +74,10 @@ TARGET_LINK_LIBRARIES (test.x
 )
 
 TARGET_LINK_LIBRARIES (test_simple.x
+    ${LINK_LIBS}
+)
+
+TARGET_LINK_LIBRARIES (kinect.x
     ${LINK_LIBS}
 )
 

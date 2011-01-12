@@ -14,11 +14,14 @@
 
 namespace rtps{
 
-Render::Render(GLuint pos, GLuint col, int n)
+Render::Render(GLuint pos, GLuint col, GLuint kin, int n)
 {
     rtype = POINTS;
     pos_vbo = pos;
     col_vbo = col;
+    kin_vbo = kin;
+    knum = 640*480;
+
     num = n;
 
     printf("GL VERSION %s\n", glGetString(GL_VERSION));
@@ -98,6 +101,46 @@ void Render::drawArrays()
 
     //glPopMatrix();
 }
+
+void Render::drawKinect()
+{
+
+
+    //printf("vertex buffer\n");
+    glBindBuffer(GL_ARRAY_BUFFER, kin_vbo);
+    glVertexPointer(4, GL_FLOAT, 0, 0);
+
+    // map the buffer object into client's memory
+    /*
+    void* ptr = glMapBufferARB(GL_ARRAY_BUFFER, GL_READ_ONLY_ARB);
+    printf("Pos PTR[400]: %f\n", ((float*)ptr)[400]);
+    printf("Pos PTR[401]: %f\n", ((float*)ptr)[401]);
+    printf("Pos PTR[402]: %f\n", ((float*)ptr)[402]);
+    glUnmapBufferARB(GL_ARRAY_BUFFER); 
+    */
+    
+    //printf("enable client state\n");
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+    //glEnableClientState(GL_INDEX_ARRAY);
+    
+    //Need to disable these for blender
+    glDisableClientState(GL_NORMAL_ARRAY);
+    //glDisableClientState(GL_EDGE_FLAG_ARRAY);
+
+    //printf("draw arrays num: %d\n", num);
+
+    //printf("NUM %d\n", num);
+    glDrawArrays(GL_POINTS, 0, knum);
+
+    //printf("disable stuff\n");
+    //glDisableClientState(GL_INDEX_ARRAY);
+    //glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
+
+    //glPopMatrix();
+}
+
 
 //----------------------------------------------------------------------
 void Render::render()
@@ -198,6 +241,8 @@ void Render::render()
         glPointSize(5.0f);
 
         drawArrays();
+        glColor3f(0, 0, 1);
+        drawKinect();
     }
     //printf("done rendering, clean up\n");
    

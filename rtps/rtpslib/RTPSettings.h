@@ -9,7 +9,7 @@ class RTPSettings
 {
 public:
     //decide which system to use
-    enum SysType {Simple, SPH, SimpleFlock};
+    enum SysType {Simple, SPH, SimpleFlock, Kinect};
     SysType system;
 
 

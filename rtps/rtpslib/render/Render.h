@@ -17,7 +17,7 @@ namespace rtps{
 class Render
 {
 public:
-    Render(GLuint pos_vbo, GLuint vel_vbo, int num);
+    Render(GLuint pos_vbo, GLuint vel_vbo, GLuint kin_vbo, int num);
     ~Render();
 
     //decide which kind of rendering to use
@@ -27,6 +27,7 @@ public:
 
     void render();
     void drawArrays();
+    void drawKinect();
 
     void render_box(float4 min, float4 max);
 
@@ -41,6 +42,7 @@ public:
 private:
     //number of particles
     int num;
+    int knum;
 
     RenderType rtype;
     bool glsl;
@@ -51,6 +53,7 @@ private:
 
     GLuint pos_vbo;
     GLuint col_vbo;
+    GLuint kin_vbo;
 
     GLuint compileShaders();
     GLuint mpShaders();

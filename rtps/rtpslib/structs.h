@@ -135,6 +135,12 @@ typedef struct float4
 float magnitude(float4 vec);
 float dist_squared(float4 vec);
 
+float distance(float4 a, float4 b);
+float length(float4 v);
+float4 norm_dir(float4 p1, float4 p2);
+float4 predator_prey(float4 p);
+float4 runge_kutta(float4 yn, float h);
+float4 force_field(float4 p, float4 ff, float dist, float max_force);
 }
 
 #endif

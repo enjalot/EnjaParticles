@@ -2,6 +2,7 @@
 #include "RTPS.h"
 #include "system/Simple.h"
 #include "system/SPH.h"
+#include "system/Kinect.h"
 
 
 namespace rtps{
@@ -50,11 +51,17 @@ void RTPS::Init()
         printf("sph system\n");
         system = new SPH(this, settings.max_particles);
     }
+    else if (settings.system == RTPSettings::Kinect)
+    {
+        printf("kinect system\n");
+        system = new Kinect(this, settings.max_particles);
+    }
+ 
     
 
     //pass in the position and color vbo ids to the renderer
     //get the number from the system
-    renderer = new Render(system->getPosVBO(), system->getColVBO(), system->getNum());
+    renderer = new Render(system->getPosVBO(), system->getColVBO(), system->getKinVBO(), system->getNum());
 }
 
 void RTPS::update()

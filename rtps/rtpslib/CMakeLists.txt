@@ -35,6 +35,10 @@ ADD_DEFINITIONS(-DSIMPLE_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_simple")
 ADD_DEFINITIONS(-DSPH_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_sph")
 ADD_DEFINITIONS(-DBITONIC_CL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/")
 ADD_DEFINITIONS(-DGLSL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/render/")
+#Kinect
+#should really have this copy to bin and then serve from there?
+ADD_DEFINITIONS(-DDATA_DIR="${rtpslib_SOURCE_DIR}/data/")
+ADD_DEFINITIONS(-DKINECT_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_kinect")
 
 
 
@@ -44,6 +48,32 @@ ADD_DEFINITIONS(-DGLSL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/render/")
 FIND_PACKAGE (OpenGL)
 FIND_PACKAGE (OPENCL)
 FIND_PACKAGE (GLEW)
+
+set(RGBD /panfs/panasas1/users/idj03/research/kinect/rgbdemo-0.3.1-Source/nestk)
+
+## Qt stuff.
+SET(QT_USE_QTXML 1)
+SET(QT_USE_QTSVG 1)
+SET(QT_USE_QTOPENGL 1)
+SET(QT_USE_QTNETWORK 1)
+FIND_PACKAGE(Qt4)
+ADD_DEFINITIONS(-DUSE_QT)
+INCLUDE(${QT_USE_FILE})
+IF (NOT QT4_FOUND)
+  MESSAGE(FATAL_ERROR "Qt4 was not found. Check the QTDIR environment variable.")
+ENDIF(NOT QT4_FOUND)
+
+# For libfreenect
+IF (USE_FREENECT)
+    include_directories(${RGBD}/deps/libfreenect/include)
+    ADD_DEFINITIONS(-DUSE_FREENECT)
+    INCLUDE_DIRECTORIES(${LIBUSB_1_INCLUDE_DIR})
+    SET(FREENECT_LIBRARY freenect)
+ENDIF(USE_FREENECT)
+
+  SET(OpenCV_DIR ${RGBD}/../build)
+  FIND_PACKAGE(OpenCV REQUIRED)
+  INCLUDE_DIRECTORIES(${OPENCV_INCLUDE_DIRS})
 
 
 set (rtpslib_INCLUDES
@@ -59,6 +89,10 @@ set (rtpslib_INCLUDES
     ${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src
     
     ${OpenCV_INCLUDE_DIRS}
+    ${RGBD}/
+    ${RGBD}/deps/opencv/include
+    ${RGBD}/deps/libfreenect/include
+
 
 )
 
@@ -90,6 +124,10 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/sph/XSPH
     ${rtpslib_SOURCE_DIR}/system/sph/Collision_wall
     
+    ${rtpslib_SOURCE_DIR}/system/Kinect.cpp
+    ${rtpslib_SOURCE_DIR}/system/kinect/ForceField
+    ${rtpslib_SOURCE_DIR}/system/kinect/Euler
+    
     ${rtpslib_SOURCE_DIR}/system/sph/Prep
     ${rtpslib_SOURCE_DIR}/system/sph/Hash
     ${rtpslib_SOURCE_DIR}/system/sph/BitonicSort
@@ -116,11 +154,23 @@ ENDIF(WITH_OPENCL)
 INCLUDE_DIRECTORIES(${rtpslib_INCLUDES})
 ADD_LIBRARY(rtps SHARED ${rtpslib_SOURCES})
 
+message(${OpenCV_LIBS})
+message(${OpenCV_LIB_DIR})
+message("ADFASDFSADFSADFD")
+
 TARGET_LINK_LIBRARIES (rtps
     #${GLUT_LIBRARIES}
    ${OPENGL_LIBRARIES}
    ${OPENCL_LIBRARIES}
    ${GLEW_LIBRARY}
+   ${RGBD}/../build/lib/libnestk.a
+   ${QT_LIBRARIES}
+   #${OpenCV_LIBS}
+   #really need to fix this so that it can just use the CMake variables
+   ${OpenCV_LIB_DIR}/libopencv_core.so
+   ${OpenCV_LIB_DIR}/libopencv_highgui.so
+   ${OpenCV_LIB_DIR}/libopencv_contrib.so
+   ${OpenCV_LIB_DIR}/libfreenect.so
 )
 
 
@@ -149,3 +199,4 @@ add_custom_target(doc DEPENDS ${DOXYGEN_OUTPUT})
 
 ADD_SUBDIRECTORY(system/simple)
 ADD_SUBDIRECTORY(system/sph)
+ADD_SUBDIRECTORY(system/kinect)

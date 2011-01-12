@@ -1,9 +1,10 @@
-#include "../Simple.h"
+#include "../Kinect.h"
 #include <math.h>
+#include "../ForceField.h"
 
 namespace rtps {
 
-void Simple::loadForceField()
+void Kinect::loadForceField()
 {
 
     std::vector<ForceField> tff(max_forcefields);
@@ -25,7 +26,7 @@ void Simple::loadForceField()
 
    }
 
-void Simple::loadForceFields(std::vector<ForceField> ff)
+void Kinect::loadForceFields(std::vector<ForceField> ff)
 {
     glFinish();
     printf("LOAD forcefields: %d\n", forcefields_enabled);
@@ -64,8 +65,7 @@ void Simple::loadForceFields(std::vector<ForceField> ff)
 }
 
 
-
-void Simple::cpuForceField()
+void Kinect::cpuForceField()
 {
     //float4 c = forcefields[0].center;
     for(int i = 0; i < num; i++)
