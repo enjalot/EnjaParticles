@@ -91,6 +91,7 @@ set (rtpslib_INCLUDES
     ${OpenCV_INCLUDE_DIRS}
     ${RGBD}/
     ${RGBD}/deps/opencv/include
+    ${RGBD}/deps/eigen
     ${RGBD}/deps/libfreenect/include
 
 
@@ -127,6 +128,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/Kinect.cpp
     ${rtpslib_SOURCE_DIR}/system/kinect/ForceField
     ${rtpslib_SOURCE_DIR}/system/kinect/Euler
+    ${rtpslib_SOURCE_DIR}/system/kinect/Project
     
     ${rtpslib_SOURCE_DIR}/system/sph/Prep
     ${rtpslib_SOURCE_DIR}/system/sph/Hash
@@ -154,7 +156,7 @@ ENDIF(WITH_OPENCL)
 INCLUDE_DIRECTORIES(${rtpslib_INCLUDES})
 ADD_LIBRARY(rtps SHARED ${rtpslib_SOURCES})
 
-message(${OpenCV_LIBS})
+#message(${OpenCV_LIBS})
 message(${OpenCV_LIB_DIR})
 message("ADFASDFSADFSADFD")
 

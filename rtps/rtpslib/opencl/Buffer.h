@@ -34,6 +34,7 @@ public:
     void release();
 
     void copyToDevice(const std::vector<T> &data);
+    void copyRawToDevice(const T* data, int num); //copy 
     //pastes the data over the current array starting at [start]
     void copyToDevice(const std::vector<T> &data, int start);
     std::vector<T> copyToHost(int num);

@@ -74,6 +74,15 @@ void Buffer<T>::copyToDevice(const std::vector<T> &data, int start)
 }
 
 template <class T>
+void Buffer<T>::copyRawToDevice(const T* data, int num)
+{
+    //TODO clean up this memory/buffer issue (nasty pointer casting)
+    cli->err = cli->queue.enqueueWriteBuffer(*((cl::Buffer*)&cl_buffer[0]), CL_TRUE, 0, num*sizeof(T), data, NULL, &cli->event);
+    cli->queue.finish();
+
+}
+
+template <class T>
 std::vector<T> Buffer<T>::copyToHost(int num)
 {
     //TODO clean up this memory/buffer issue

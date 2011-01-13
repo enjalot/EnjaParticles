@@ -14,8 +14,11 @@
 #include <ntk/camera/rgbd_processor.h>
 #include <ntk/camera/calibration.h>
 #include <ntk/utils/opencv_utils.h>
+//#include <ntk/utils/eigen_utils.h>
 //#include <ntk/utils/arg.h>
 #include <ntk/geometry/pose_3d.h>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 
 
 namespace rtps {
@@ -45,23 +48,36 @@ public:
 
     std::vector<float4> kinect_data;
     std::vector<float4> kinect_col;
+    std::vector<float> kinect_depth;
+    std::vector<uchar> kinect_rgb;
+
+
 
 
     Kernel k_forcefield;
     Kernel k_euler;
+    Kernel k_project;
 
     Buffer<float4> cl_position;
     Buffer<float4> cl_color;
     Buffer<float4> cl_force;
     Buffer<float4> cl_velocity;
     Buffer<ForceField> cl_forcefield;
+
     Buffer<float4> cl_kinect;
     Buffer<float4> cl_kinect_col;
+    Buffer<float> cl_kinect_depth;
+    Buffer<uchar> cl_kinect_rgb;
+    Buffer<float> cl_pt; //projection transforms
+    Buffer<float> cl_ipt;
     
 
     void loadForceField();
     void loadForceFields(std::vector<ForceField> ff);
     void loadEuler();
+    void loadProject();
+
+    void projection();
 
     void cpuForceField();
     void cpuEuler();
@@ -73,6 +89,11 @@ public:
     ntk::RGBDProcessor processor;
     ntk::RGBDImage current_frame;
     cv::Mat3b mapped_color;
+
+    //get what we need to do this part on the GPU
+    cv::Mat1f pt; //project transform
+    cv::Mat1f ipt; //inverse project transform
+
  
     enum {TI_KINECT=0, TI_KINECT_GPU, TI_KINECT_LOOP
           }; //2

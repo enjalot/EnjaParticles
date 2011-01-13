@@ -104,18 +104,35 @@ Kinect::Kinect(RTPS *psfr, int n)
     processor.setFilterFlag(RGBDProcessor::FilterMedian, true);
     processor.setFilterFlag(RGBDProcessor::NoAmplitudeIntensityUndistort, true);
 
+    int imsize = 640*480;
    
-    kinect_data.resize(640*480);
-    kinect_col.resize(640*480);
+    kinect_data.resize(imsize);
+    kinect_col.resize(imsize);
+    kinect_depth.resize(imsize);
+    kinect_rgb.resize(imsize*3); //flattened rgb array
+
+
     std::fill(kinect_col.begin(), kinect_col.end(),float4(0.0f, 0.0f, 0.0f, 1.0f));
+    std::fill(kinect_depth.begin(), kinect_depth.end(),0);
+    std::fill(kinect_rgb.begin(), kinect_rgb.end(),0);
+   
     kin_vbo = createVBO(&kinect_data[0], kinect_data.size()*sizeof(float4), GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
     kin_col_vbo = createVBO(&kinect_col[0], kinect_col.size()*sizeof(float4), GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
     printf("kinect vbo: %d\n", kin_vbo);
     printf("kinect color vbo: %d\n", kin_col_vbo);
     cl_kinect = Buffer<float4>(ps->cli, kin_vbo);
     cl_kinect_col = Buffer<float4>(ps->cli, kin_col_vbo);
- 
-    
+
+    cl_kinect_depth = Buffer<float>(ps->cli, kinect_depth);
+    cl_kinect_rgb = Buffer<uchar>(ps->cli, kinect_rgb);
+
+    std::vector<float> trans(16);
+    cl_pt = Buffer<float>(ps->cli, trans);
+    cl_ipt = Buffer<float>(ps->cli, trans);
+
+
+    loadProject();
+
     setupTimers();
 
 
@@ -185,12 +202,28 @@ void Kinect::update()
     grabber.copyImageTo(current_frame);
     processor.processImage(current_frame);
 
+    
     //printf("before assert\n");
     ntk_assert(current_frame.calibration(), "Ensure there is calibration data in the image");
     //printf("after assert\n");
-    cv::Size cfs = current_frame.depth().size();
-    mapped_color.create(current_frame.depth().size());
+
+#if 0
+
+    //populate the GL textures with the frame data
+    cv::Mat1f depth = current_frame.depth();
+    cv::Mat1f rgb = current_frame.rgb();
+
+
+    cv::Size cfs = depth.size();
+    mapped_color.create(cfs);
     mapped_color = Vec3b(0,0,0);
+ 
+    //get what we need to do this part on the GPU
+    //Eigen::Projective3d project_transform;
+    //Eigen::Projective3d inv_project_transform;
+    project_transform = 
+
+ 
 
     //printf("curr fame size %d %d ", cfs.width, cfs.height);
     //std::vector<float4> kinect_data(cfs.width * cfs.height);
@@ -234,14 +267,63 @@ void Kinect::update()
     }
 
     timers[TI_KINECT_LOOP]->end();
+#endif
     timers[TI_KINECT]->end();
     timers[TI_KINECT_GPU]->start();
    
     cl_kinect.acquire();
     cl_kinect_col.acquire();
    
-    cl_kinect.copyToDevice(kinect_data);
-    cl_kinect_col.copyToDevice(kinect_col);
+    Pose3D* depth_pose = current_frame.calibration()->depth_pose;
+    Pose3D* rgb_pose = current_frame.calibration()->rgb_pose;
+    
+    pt = rgb_pose->cvProjectionMatrix();
+    pt.resize(4);
+    transpose(pt, pt);
+
+    //depth_pose->invert();
+    ipt = depth_pose->cvProjectionMatrix();
+    ipt.resize(4);
+    ipt = ipt.inv();
+    transpose(ipt, ipt); //i thought this matrix was column major
+
+    float* iptd = (float*)ipt.ptr();
+    float* ptd = (float*)pt.ptr();
+
+    /*
+    printf("ipt size: %d %d\n", ipt.size().width, ipt.size().height);
+    printf("%f %f %f %f\n", iptd[0], iptd[4], iptd[8], iptd[12]);
+    printf("%f %f %f %f\n", iptd[1], iptd[5], iptd[9], iptd[13]);
+    printf("%f %f %f %f\n", iptd[2], iptd[6], iptd[10], iptd[14]);
+    printf("%f %f %f %f\n", iptd[3], iptd[7], iptd[11], iptd[15]);
+    printf("%f %f %f %f\n", ipt(0,0), ipt(1,1), ipt(2,2), ipt(3,3));
+    */
+
+    cl_ipt.copyRawToDevice(iptd, 16);
+    cl_pt.copyRawToDevice(ptd, 16);
+
+
+    //populate the GL textures with the frame data
+    cv::Mat1f depth = current_frame.depth();
+    cv::Mat3b rgb = current_frame.rgb();
+
+    cv::Size sz = rgb.size();
+    //printf("rgb size: %d %d\n", sz.width, sz.height);
+    //printf("rgb step: %zd %zd\n", rgb.step[0]/sizeof(float), rgb.step[1]);
+
+
+    //float* p = &kinect_depth[0];
+    //p = (float*)depth.data;
+    //cl_kinect_depth.copyToDevice(kinect_depth);
+    cl_kinect_depth.copyRawToDevice((float*)depth.data, 640*480);
+    //p = &kinect_rgb[0];
+    //p = (float*)rgb.data;
+    //cl_kinect_rgb.copyToDevice(kinect_rgb);
+    cl_kinect_rgb.copyRawToDevice(rgb.data, 640*480*3);
+    //cl_kinect.copyToDevice(kinect_data);
+    //cl_kinect_col.copyToDevice(kinect_col);
+ 
+    projection();
    
     cl_kinect.release();
     cl_kinect_col.release();

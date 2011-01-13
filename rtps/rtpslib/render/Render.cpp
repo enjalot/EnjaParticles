@@ -244,8 +244,9 @@ void Render::render()
         //TODO make the point size a setting
         glPointSize(5.0f);
 
-        drawArrays();
+        //drawArrays();
         glColor3f(0, 0, 1);
+        glPointSize(1.0f);
         drawKinect();
     }
     //printf("done rendering, clean up\n");
