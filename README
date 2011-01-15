@@ -2,9 +2,10 @@
 *******************************************************************
     ### EnjaParticles in C++ using OpenCL and OpenGL interoperability
 
-enjacl/
-    the particle system library as well as a main.cpp to run it
-    check the README in here for build instructions and more info
+rtps/
+    The Real-Time Particle System library. Check README inside rtps/
+    for build and usage instructions
+
 cmake/
     cmake modules to help find necessary libraries
 
@@ -12,6 +13,11 @@ environment/
     scripts to set the environment variables for using this project
     with my BGEnjaParticles project
     http://github.com/enjalot/BGEnjaParticles
+
+enjacl/
+    my first attempt at making a particle system, deprecated
+    the particle system library as well as a main.cpp to run it
+    check the README in enjacl for build instructions and more info
 
 
 
