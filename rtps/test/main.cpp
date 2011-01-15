@@ -222,9 +222,9 @@ void appKeyboard(unsigned char key, int x, int y)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glRotatef(-90, 1.0, 0.0, 0.0);
-    glTranslatef(translate_x, translate_z, translate_y);
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
+    glTranslatef(translate_x, translate_z, translate_y);
 }
 
 void keyUp(unsigned char key, int x, int y)
@@ -319,10 +319,10 @@ void appMotion(int x, int y)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glRotatef(-90, 1.0, 0.0, 0.0);
-    glTranslatef(translate_x, translate_z, translate_y);
-    //glTranslatef(0, translate_z, translate_y);
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
+    glTranslatef(translate_x, translate_z, translate_y);
+    //glTranslatef(0, translate_z, translate_y);
     //glutPostRedisplay();
 }
 

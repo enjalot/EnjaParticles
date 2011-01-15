@@ -23,25 +23,27 @@ Render::Render(GLuint pos, GLuint col, int n)
     pos_vbo = pos;
     col_vbo = col;
     num = n;
+	window_height=600;
+	window_width=800;
 
     printf("GL VERSION %s\n", glGetString(GL_VERSION));
-    glsl = true;
-    //glsl = false;
-    mikep = false;
+    //glsl = true;
+    glsl = false;
+    mikep = true;
+    //mikep = false;
     //blending = true;
     blending = false;
     if(glsl)
     {
-		generateCircleTexture(0,0,255,255,32);
 		glGenTextures(1, &gl_tex["depth"]);
-		glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,800,600,0,GL_DEPTH_COMPONENT,GL_UNSIGNED_BYTE,NULL);
-		/*glBindTexture(GL_TEXTURE_2D, gl_tex["depth"]);
-
-		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glBindTexture(GL_TEXTURE_2D, gl_tex["depth"]);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);*/
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT32,window_width,window_height,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
+
+		generateCircleTexture(0,0,255,255,32);
 
         //loadTexture();
 		string vert(GLSL_BIN_DIR);
@@ -58,7 +60,15 @@ Render::Render(GLuint pos, GLuint col, int n)
     else if(mikep)
     {  
         loadTexture();
-        glsl_program[MIKEP_SHADER] = mpShaders();
+		GLenum param[] = {GL_GEOMETRY_VERTICES_OUT_EXT,GL_GEOMETRY_INPUT_TYPE_EXT,GL_GEOMETRY_OUTPUT_TYPE_EXT };
+		GLint value[] = {4,GL_POINT,GL_TRIANGLE_STRIP};
+		string vert(GLSL_BIN_DIR);
+		string frag(GLSL_BIN_DIR);
+		string geom(GLSL_BIN_DIR);
+		vert+="/mpvertex.glsl";
+		frag+="/mpfragment.glsl";
+		geom+="/mpgeometry.glsl";
+        glsl_program[MIKEP_SHADER] = compileShaders(vert.c_str(),frag.c_str(),geom.c_str(),param,value,3);
     }
     setupTimers();
 }
@@ -216,7 +226,7 @@ void Render::orthoProjection()
 	glMatrixMode(GL_PROJECTION);					// Select Projection
 	glPushMatrix();							// Push The Matrix
 	glLoadIdentity();						// Reset The Matrix
-	glOrtho( 0, 800 , 600 , 0, -1, 1 );				// Select Ortho Mode (640x480)
+	gluOrtho2D( 0,1,0,1);				// Select Ortho Mode (640x480)
 	glMatrixMode(GL_MODELVIEW);					// Select Modelview Matrix
 	glPushMatrix();							// Push The Matrix
 	glLoadIdentity();						// Reset The Matrix
@@ -264,14 +274,13 @@ void Render::renderPointsAsSpheres()
         glColor3f(1., 1., 1.);
 
         drawArrays();
+
 		//copy depth value to a texture
 		glBindTexture(GL_TEXTURE_2D,gl_tex["depth"]);
 		glCopyTexSubImage2D(GL_TEXTURE_2D,0,0,0,0,0,800,600);
-		//fullscreenQuad();
 
         glUseProgram(0);
         
-        glDepthMask(GL_FALSE);
 		glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
         glDisable(GL_POINT_SPRITE_ARB);
 }
@@ -321,7 +330,7 @@ void Render::render_box(float4 min, float4 max)
     glVertex3f(max.x, max.y, max.z);
     
     glEnd();
-
+	glDisable(GL_DEPTH_TEST);
 
 }
 
@@ -338,10 +347,11 @@ void Render::render_table(float4 min, float4 max)
     glVertex3f(max.x+scale.x, min.y-scale.y, min.z);
 
     glEnd();
+	glDisable(GL_DEPTH_TEST);
 }
 
 //----------------------------------------------------------------------
-GLuint Render::compileShaders(const char* vertex_file, const char* fragment_file, const char* geometry_file)
+GLuint Render::compileShaders(const char* vertex_file, const char* fragment_file, const char* geometry_file, GLenum* geom_param, GLint* geom_value, int geom_param_len)
 {
 
     //this may not be the cleanest implementation
@@ -371,26 +381,36 @@ GLuint Render::compileShaders(const char* vertex_file, const char* fragment_file
 		fragment_shader_source = file_contents(fragment_file,&frag_size);
 		if(!fragment_shader_source)
 		{
-		   printf("Vertex shader file not found or is empty! Cannot compile shader");
+		   printf("Fragment shader file not found or is empty! Cannot compile shader");
 		   free(vertex_shader_source);
 		   return -1;
 		}
 	}
 	else
 	{
-		printf("No vertex file specified! Cannot compile shader!");
+		printf("No fragment file specified! Cannot compile shader!");
 		free(vertex_shader_source);
 		return -1;
 	}
 
-    GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+	if(geometry_file)
+	{
+		geometry_shader_source = file_contents(fragment_file,&frag_size);
+		if(!geometry_shader_source)
+		{
+			printf("Geometry shader file not found or is empty! Cannot compile shader");
+			free(vertex_shader_source);
+			free(fragment_shader_source);
+			return -1;
+		}
+	}
 
-    glShaderSource(vertex_shader, 1, (const GLchar**)&vertex_shader_source, 0);
-    glShaderSource(fragment_shader, 1, (const GLchar**)&fragment_shader_source, 0);
-    
-    glCompileShader(vertex_shader);
     GLint len;
+    GLuint program = glCreateProgram();
+
+    GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertex_shader, 1, (const GLchar**)&vertex_shader_source, 0);
+    glCompileShader(vertex_shader);
     glGetShaderiv(vertex_shader, GL_INFO_LOG_LENGTH, &len);
     if(len > 0)
     {
@@ -398,6 +418,10 @@ GLuint Render::compileShaders(const char* vertex_file, const char* fragment_file
         glGetShaderInfoLog(vertex_shader, 1024, 0, log);
         printf("Vertex Shader log:\n %s\n", log);
     }
+    glAttachShader(program, vertex_shader);
+
+    GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment_shader, 1, (const GLchar**)&fragment_shader_source, 0);
     glCompileShader(fragment_shader);
     glGetShaderiv(fragment_shader, GL_INFO_LOG_LENGTH, &len);
     if(len > 0)
@@ -406,11 +430,28 @@ GLuint Render::compileShaders(const char* vertex_file, const char* fragment_file
         glGetShaderInfoLog(fragment_shader, 1024, 0, log);
         printf("Fragment Shader log:\n %s\n", log);
     }
-
-    GLuint program = glCreateProgram();
-
-    glAttachShader(program, vertex_shader);
     glAttachShader(program, fragment_shader);
+
+
+	if(geometry_shader_source)
+	{
+		GLuint geometry_shader = glCreateShader(GL_GEOMETRY_SHADER_EXT);
+		glShaderSource(geometry_shader, 1, (const GLchar**)&geometry_shader_source, 0);
+		glCompileShader(geometry_shader);
+		glGetShaderiv(geometry_shader, GL_INFO_LOG_LENGTH, &len);
+		printf("geometry len %d\n", len);
+		if(len > 0)
+		{
+			char log[1024];
+			glGetShaderInfoLog(geometry_shader, 1024, 0, log);
+			printf("Geometry Shader log:\n %s\n", log);
+		}
+		glAttachShader(program, geometry_shader);
+		for(int i = 0;i < geom_param_len; i++)
+		{
+			glProgramParameteriEXT(program,geom_param[i],geom_value[i]);
+		}
+	}
 
     glLinkProgram(program);
 
@@ -429,93 +470,10 @@ GLuint Render::compileShaders(const char* vertex_file, const char* fragment_file
 	//cleanup
 	free(vertex_shader_source);
 	free(fragment_shader_source);
+	free(geometry_shader_source);
 
     return program;
 }
-
-
-//----------------------------------------------------------------------
-GLuint Render::mpShaders()
-{
-
-    //this may not be the cleanest implementation
-    #include "mpshaders.cpp"
-
-    printf("vertex shader:\n%s\n", vertex_shader_source);
-    printf("geometry shader:\n%s\n", geometry_shader_source);
-    printf("fragment shader:\n%s\n", fragment_shader_source);
-
-
-    GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    GLuint geometry_shader = glCreateShader(GL_GEOMETRY_SHADER_EXT);
-    GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-
-    glShaderSource(vertex_shader, 1, &vertex_shader_source, 0);
-    glShaderSource(geometry_shader, 1, &geometry_shader_source, 0);
-    glShaderSource(fragment_shader, 1, &fragment_shader_source, 0);
-    
-    glCompileShader(vertex_shader);
-    GLint len;
-    glGetShaderiv(vertex_shader, GL_INFO_LOG_LENGTH, &len);
-    printf("vertex len %d\n", len);
-    if(len > 0)
-    {
-        char log[1024];
-        glGetShaderInfoLog(vertex_shader, 1024, 0, log);
-        printf("Vertex Shader log:\n %s\n", log);
-    }
-
-    glCompileShader(geometry_shader);
-    glGetShaderiv(geometry_shader, GL_INFO_LOG_LENGTH, &len);
-    printf("geometry len %d\n", len);
-    if(len > 0)
-    {
-        char log[1024];
-        glGetShaderInfoLog(geometry_shader, 1024, 0, log);
-        printf("Geometry Shader log:\n %s\n", log);
-    }
- 
-
-    glCompileShader(fragment_shader);
-    glGetShaderiv(fragment_shader, GL_INFO_LOG_LENGTH, &len);
-    printf("fragment len %d\n", len);
-    if(len > 0)
-    {
-        char log[1024];
-        glGetShaderInfoLog(fragment_shader, 1024, 0, log);
-        printf("Fragment Shader log:\n %s\n", log);
-    }
-
-    GLuint program = glCreateProgram();
-
-    glAttachShader(program, vertex_shader);
-    glAttachShader(program, geometry_shader);
-    glAttachShader(program, fragment_shader);
-    
-    glProgramParameteriEXT(program,GL_GEOMETRY_VERTICES_OUT_EXT,4);
-    glProgramParameteriEXT(program,GL_GEOMETRY_INPUT_TYPE_EXT,GL_POINT);
-    glProgramParameteriEXT(program,GL_GEOMETRY_OUTPUT_TYPE_EXT,GL_TRIANGLE_STRIP);
-    
-    glLinkProgram(program);
-
-    // check if program linked
-    GLint success = 0;
-    glGetProgramiv(program, GL_LINK_STATUS, &success);
-
-    if (!success) {
-        char temp[256];
-        glGetProgramInfoLog(program, 256, 0, temp);
-        printf("Failed to link program:\n%s\n", temp);
-        glDeleteProgram(program);
-        program = 0;
-    }
-
-    return program;
-}
-
-
-
-
 
 int Render::setupTimers()
 {
@@ -544,7 +502,6 @@ int Render::generateCircleTexture(GLubyte r, GLubyte g, GLubyte b, GLubyte alpha
 		int y = (radius)-((i/4)/diameter);
 		if((x*x)+(y*y)<=(radius*radius))
 		{
-			printf("inside the circlex = %d y = %d \n",x,y);
 			image[i] = r;
 			image[i+1] = g;
 			image[i+2] = b;
@@ -552,7 +509,6 @@ int Render::generateCircleTexture(GLubyte r, GLubyte g, GLubyte b, GLubyte alpha
 		}
 		else
 		{
-			printf("out of the circle x = %d y = %d \n",x,y);
 			image[i] =0;
 			image[i+1] =0;
 			image[i+2] =0;
@@ -563,7 +519,6 @@ int Render::generateCircleTexture(GLubyte r, GLubyte g, GLubyte b, GLubyte alpha
 	glGenTextures(1, &gl_tex["circle"]);
     glBindTexture(GL_TEXTURE_2D, gl_tex["circle"]);
 
-    //glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

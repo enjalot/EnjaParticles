@@ -57,12 +57,13 @@ private:
     bool blending;
     std::map<ShaderType,GLuint> glsl_program;    
     std::map<std::string,GLuint> gl_tex;
+	GLuint fbo;
+	int window_height,window_width;
 
     GLuint pos_vbo;
     GLuint col_vbo;
 
-    GLuint compileShaders(const char* vertex_file, const char* fragment_file, const char* geometry_file = NULL);
-    GLuint mpShaders();
+    GLuint compileShaders(const char* vertex_file, const char* fragment_file, const char* geometry_file = NULL, GLenum* geom_param=NULL, GLint* geom_value=NULL, int geom_param_len=0);
     int loadTexture();
 	int generateCircleTexture(GLubyte r, GLubyte g, GLubyte b, GLubyte alpha, int diameter);
 };	
