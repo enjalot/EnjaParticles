@@ -334,7 +334,7 @@ void Render::render_box(float4 min, float4 max)
     glVertex3f(max.x, max.y, max.z);
     
     glEnd();
-	glDisable(GL_DEPTH_TEST);
+	//glDisable(GL_DEPTH_TEST);
 
 }
 
@@ -351,7 +351,7 @@ void Render::render_table(float4 min, float4 max)
     glVertex3f(max.x+scale.x, min.y-scale.y, min.z);
 
     glEnd();
-	glDisable(GL_DEPTH_TEST);
+	//glDisable(GL_DEPTH_TEST);
 }
 
 //----------------------------------------------------------------------
