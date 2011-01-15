@@ -96,19 +96,20 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/sph/DataStructures
     ${rtpslib_SOURCE_DIR}/system/sph/Neighbors
 	
-    ${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src/oclBitonicSort_launcher.cpp
-    #these should probably be in the OpenCL classes
-    ${rtpslib_SOURCE_DIR}/system/sph/Scopy
-    #${rtpslib_SOURCE_DIR}/system/sph/SetInt
-
     #${rtpslib_SOURCE_DIR}/particle
     )
 
 IF(WITH_OPENCL)
 SET(rtpslib_SOURCES ${rtpslib_SOURCES}
-    ${rtpslib_SOURCE_DIR}/opencl/CLL.cpp
-    ${rtpslib_SOURCE_DIR}/opencl/Kernel.cpp
-    #${rtpslib_SOURCE_DIR}/opencl/Buffer.cpp
+    ${rtpslib_SOURCE_DIR}/opencl/CLL
+    ${rtpslib_SOURCE_DIR}/opencl/Kernel
+    #${rtpslib_SOURCE_DIR}/opencl/Buffer #template class
+
+    ${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src/oclBitonicSort_launcher
+    #${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src/BitonicSort #template class
+    #these should probably be in the OpenCL classes
+    ${rtpslib_SOURCE_DIR}/system/sph/Scopy
+    #${rtpslib_SOURCE_DIR}/system/sph/SetInt
     )
 ENDIF(WITH_OPENCL)
 

@@ -1,7 +1,9 @@
 #include "SPH.h"
-#include "oclSortingNetworks_common.h"
 
 #include <string.h>
+/*
+#include "oclSortingNetworks_common.h"
+
 
 extern "C" void initBitonicSort(cl_context cxGPUContext, cl_command_queue cqParamCommandQue, const char **argv);
 
@@ -17,12 +19,24 @@ extern"C" size_t bitonicSort(
     uint arrayLength,
     uint dir
 );
+*/
+
+
 
 namespace rtps
 {
 
 void SPH::loadBitonicSort()
 {
+
+    printf("about to instantiate sorting\n");
+    bitonic = Bitonic<int>( ps->cli,    
+                            &cl_sort_output_hashes,
+                            &cl_sort_output_indices,
+                            &cl_sort_hashes,
+                            &cl_sort_indices);
+
+    /*
     //not sure i like this technique... but while the bitonic sort is still
     //using the C interface probably necessary
     static bool first_time = true;
@@ -40,6 +54,7 @@ void SPH::loadBitonicSort()
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
         exit(0);
     }
+    */
 }
 
 void SPH::bitonic_sort()
@@ -51,6 +66,7 @@ void SPH::bitonic_sort()
 		int arrayLength = max_num;
         int batch = max_num / arrayLength;
 
+        /*
 		size_t szWorkgroup = bitonicSort(
                 NULL,
                 //d_OutputKey,
@@ -63,6 +79,10 @@ void SPH::bitonic_sort()
                 arrayLength,
                 dir
             );
+            */
+
+        printf("about to try sorting\n");
+        bitonic.Sort(batch, arrayLength, dir);
     
 	} catch (cl::Error er) {
         printf("ERROR(bitonic sort): %s(%s)\n", er.what(), oclErrorString(er.err()));

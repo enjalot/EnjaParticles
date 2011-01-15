@@ -8,8 +8,8 @@
 #include "Domain.h"
 #include "IV.h"
 
-#include "oclSortingNetworks_common.h"
-extern "C" void closeBitonicSort(void);
+//#include "oclSortingNetworks_common.h"
+//extern "C" void closeBitonicSort(void);
 
 //for random
 #include<time.h>
@@ -170,8 +170,8 @@ SPH::~SPH()
     }
 
     //Needed while bitonic sort is still C interface
-    printf("close bitonic sort\n");
-    closeBitonicSort();
+    //printf("close bitonic sort\n");
+    //closeBitonicSort();
 }
 
 void SPH::update()

@@ -16,7 +16,7 @@
 
 
 //Passed down by clBuildProgram
-//#define LOCAL_SIZE_LIMIT 1024
+#define LOCAL_SIZE_LIMIT 512
 
 
 

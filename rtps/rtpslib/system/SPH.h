@@ -7,6 +7,9 @@
 #include "System.h"
 #include "../opencl/Kernel.h"
 #include "../opencl/Buffer.h"
+
+#include "BitonicSort.h"
+
 //#include "../util.h"
 #include "../domain/Domain.h"
 
@@ -195,6 +198,8 @@ private:
     //Two arrays for bitonic sort (sort not done in place)
 	Buffer<int>         cl_sort_output_hashes;
 	Buffer<int>         cl_sort_output_indices;
+
+    Bitonic<int> bitonic;
     
     //Parameter structs
     Buffer<SPHParams>   cl_SPHParams;

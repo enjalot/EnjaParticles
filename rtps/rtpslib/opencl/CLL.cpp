@@ -22,7 +22,7 @@ CL::CL()
 }
 
 //----------------------------------------------------------------------
-cl::Program CL::loadProgram(std::string path)
+cl::Program CL::loadProgram(std::string path, std::string options)
 {
      // Program Setup
 
@@ -53,13 +53,13 @@ cl::Program CL::loadProgram(std::string path)
 #ifdef DEBUG
         srand(time(NULL));
         int rnd = rand() % 200 + 100;
-        char options[50];
+        char dgboptions[100];
         //should really check for NVIDIA platform before doing this
-        sprintf(options, "-cl-nv-verbose -cl-nv-maxrregcount=%d", rnd);
+        sprintf(dbgoptions, "%s -cl-nv-verbose -cl-nv-maxrregcount=%d", options.c_str(), rnd);
         //sprintf(options, "-D rand=%d -D DEBUG", rnd);
-        err = program.build(devices, options);
+        err = program.build(devices, dbgoptions);
 #else
-        err = program.build(devices);
+        err = program.build(devices, options.c_str());
 #endif
     }
     catch (cl::Error er) {
@@ -88,6 +88,20 @@ cl::Kernel CL::loadKernel(std::string path, std::string kernel_name)
     }
     return kernel;
 }
+
+//----------------------------------------------------------------------
+cl::Kernel CL::loadKernel(cl::Program program, std::string kernel_name)
+{
+    cl::Kernel kernel;
+    try{
+        kernel = cl::Kernel(program, kernel_name.c_str(), &err);
+    }
+    catch (cl::Error er) {
+        printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+    }
+    return kernel;
+}
+
 
 void CL::setup_gl_cl()
 {
