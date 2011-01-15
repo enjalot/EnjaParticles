@@ -72,6 +72,7 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 4096
 //#define NUM_PARTICLES 2048
 //#define NUM_PARTICLES 1024
+//#define NUM_PARTICLES 256
 #define DT .001f
 
 //timers

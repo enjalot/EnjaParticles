@@ -1,7 +1,7 @@
 #include "SPH.h"
 
 #include <string.h>
-/*
+
 #include "oclSortingNetworks_common.h"
 
 
@@ -19,7 +19,7 @@ extern"C" size_t bitonicSort(
     uint arrayLength,
     uint dir
 );
-*/
+
 
 
 
@@ -30,13 +30,21 @@ void SPH::loadBitonicSort()
 {
 
     printf("about to instantiate sorting\n");
+    
+    /*
+    printf("dev pointers: %d\n", cl_sort_output_hashes.getDevicePtr());
+    printf("dev pointers: %d\n", cl_sort_output_indices.getDevicePtr());
+    printf("dev pointers: %d\n", cl_sort_hashes.getDevicePtr());
+    printf("dev pointers: %d\n", cl_sort_indices.getDevicePtr());
+    */
     bitonic = Bitonic<int>( ps->cli,    
                             &cl_sort_output_hashes,
                             &cl_sort_output_indices,
                             &cl_sort_hashes,
                             &cl_sort_indices);
-
+    
     /*
+    
     //not sure i like this technique... but while the bitonic sort is still
     //using the C interface probably necessary
     static bool first_time = true;
@@ -55,6 +63,8 @@ void SPH::loadBitonicSort()
         exit(0);
     }
     */
+    
+    
 }
 
 void SPH::bitonic_sort()
@@ -66,6 +76,7 @@ void SPH::bitonic_sort()
 		int arrayLength = max_num;
         int batch = max_num / arrayLength;
 
+        
         /*
 		size_t szWorkgroup = bitonicSort(
                 NULL,
@@ -79,9 +90,10 @@ void SPH::bitonic_sort()
                 arrayLength,
                 dir
             );
-            */
+            
+        */
 
-        printf("about to try sorting\n");
+        //printf("about to try sorting\n");
         bitonic.Sort(batch, arrayLength, dir);
     
 	} catch (cl::Error er) {
@@ -91,12 +103,39 @@ void SPH::bitonic_sort()
 
     ps->cli->queue.finish();
 
+    /*
+    int nbc = 10;
+    std::vector<int> sh = cl_sort_hashes.copyToHost(nbc);
+    std::vector<int> eci = cl_cell_indices_end.copyToHost(nbc);
+
+    for(int i = 0; i < nbc; i++)
+    {
+        printf("before[%d] %d eci: %d\n; ", i, sh[i], eci[i]);
+    }
+    printf("\n");
+*/
+
+
 	scopy(num, cl_sort_output_hashes.getDevicePtr(), 
 	             cl_sort_hashes.getDevicePtr());
 	scopy(num, cl_sort_output_indices.getDevicePtr(), 
 	             cl_sort_indices.getDevicePtr());
-    
+
+    /*
     ps->cli->queue.finish();
+
+    sh = cl_sort_hashes.copyToHost(nbc);
+    eci = cl_cell_indices_end.copyToHost(nbc);
+
+    for(int i = 0; i < nbc; i++)
+    {
+        printf("after[%d] %d eci: %d\n; ", i, sh[i], eci[i]);
+    }
+    printf("\n");
+*/
+
+
+
 }
 
 }

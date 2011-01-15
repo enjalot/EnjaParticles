@@ -39,8 +39,9 @@ void SPH::buildDataStructures()
 
     for(int i = 0; i < nbc; i++)
     {
-        printf("sh[%d] %d\n", i, sh[i]);
+        printf("sh[%d] %d; ", i, sh[i]);
     }
+    printf("\n");
     */
 
 
