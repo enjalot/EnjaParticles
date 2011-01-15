@@ -23,9 +23,8 @@ Kernel::Kernel(CL *cli, cl::Program prog, std::string name)
 
 void Kernel::execute(int ndrange)
 {
-        printf("work group size: %d\n", ndrange);
-        if(ndrange <= 0)
-            return;
+    if(ndrange <= 0)
+        return;
     try
     {
         cl::Event event;
@@ -41,24 +40,24 @@ void Kernel::execute(int ndrange)
 
 void Kernel::execute(int ndrange, int worksize)
 {
-    printf("ndrange: %d\n", ndrange);
     int global;
     float factor = (1.0f * ndrange) / worksize;
-    printf("global f: %f\n", factor);
+    //printf("ndrange: %d\n", ndrange);
+    //printf("global f: %f\n", factor);
     if((int)factor != factor)
     {
         factor = (int)factor;
         global = worksize*factor + worksize;
-        printf("global2: %d\n", global);
+        //printf("global2: %d\n", global);
     }
     else
     {
         global = ndrange;
     }
 
-        printf("global %d, local %d\n", global, worksize);
-        if(ndrange <=0 || worksize <= 0)
-            return;
+        //printf("global %d, local %d\n", global, worksize);
+    if(ndrange <=0 || worksize <= 0)
+        return;
 
     try
     {
