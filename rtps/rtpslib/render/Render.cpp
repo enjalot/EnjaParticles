@@ -27,10 +27,10 @@ Render::Render(GLuint pos, GLuint col, int n)
 	window_width=800;
 
     printf("GL VERSION %s\n", glGetString(GL_VERSION));
-    //glsl = true;
-    glsl = false;
-    mikep = true;
-    //mikep = false;
+    glsl = true;
+    //glsl = false;
+    //mikep = true;
+    mikep = false;
     //blending = true;
     blending = false;
     if(glsl)
@@ -76,6 +76,10 @@ Render::Render(GLuint pos, GLuint col, int n)
 Render::~Render()
 {
     printf("Render destructor\n");
+	for(map<ShaderType,GLuint>::iterator i = glsl_program.begin();i!=glsl_program.end();i++)
+	{
+		glDeleteProgram(i->second);
+	}
 }
 
 //----------------------------------------------------------------------
@@ -248,13 +252,13 @@ void Render::fullscreenQuad()
 			glVertex2f(0,0);
 
 			glTexCoord2f(0,0);
-			glVertex2f(0,600);
+			glVertex2f(0,window_height);
 
 			glTexCoord2f(1,0);
-			glVertex2f(800,600);
+			glVertex2f(window_width,window_height);
 
 			glTexCoord2f(1,1);
-			glVertex2f(800,0);
+			glVertex2f(window_width,0);
 	glEnd();
 	perspectiveProjection();
 }
@@ -268,7 +272,7 @@ void Render::renderPointsAsSpheres()
 
         glUseProgram(glsl_program[SPHERE_SHADER]);
         float particle_radius = 0.125f * 0.5f;
-        glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "pointScale"), 600. / tanf(60. * (0.5f * 3.1415926535f/180.0f)));
+        glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "pointScale"), ((float)window_height) / tanf(60. * (0.5f * 3.1415926535f/180.0f)));
         glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "pointRadius"), particle_radius );
 
         glColor3f(1., 1., 1.);
@@ -433,9 +437,10 @@ GLuint Render::compileShaders(const char* vertex_file, const char* fragment_file
     glAttachShader(program, fragment_shader);
 
 
+	GLuint geometry_shader=0;
 	if(geometry_shader_source)
 	{
-		GLuint geometry_shader = glCreateShader(GL_GEOMETRY_SHADER_EXT);
+		geometry_shader = glCreateShader(GL_GEOMETRY_SHADER_EXT);
 		glShaderSource(geometry_shader, 1, (const GLchar**)&geometry_shader_source, 0);
 		glCompileShader(geometry_shader);
 		glGetShaderiv(geometry_shader, GL_INFO_LOG_LENGTH, &len);
@@ -468,6 +473,12 @@ GLuint Render::compileShaders(const char* vertex_file, const char* fragment_file
     }
 
 	//cleanup
+	glDeleteShader(vertex_shader);
+	glDeleteShader(fragment_shader);
+	if(geometry_shader)
+	{
+		glDeleteShader(geometry_shader);
+	}
 	free(vertex_shader_source);
 	free(fragment_shader_source);
 	free(geometry_shader_source);
