@@ -245,6 +245,7 @@ void appRender()
     }
     glEnd();
 
+    glDisable(GL_BLEND);
     //showFPS(enjas->getFPS(), enjas->getReport());
     glutSwapBuffers();
 

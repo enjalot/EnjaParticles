@@ -130,9 +130,9 @@ float intersect_triangle_ge(float4 pos, float4 vel, __local Triangle* tri, float
     det = dot(edge1, pvec);
 
     //non-culling branch
-    if(det > -eps && det < eps) {    // <<<<< if
+    //if(det > -eps && det < eps) {    // <<<<< if
     //culling
-    //if(det < eps){
+    if(det < eps){
         return -1;
         //return false;
 	}
