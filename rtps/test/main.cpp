@@ -31,7 +31,7 @@ float translate_z = 1.5f;//200.f;
 */
 float translate_x = -1.00;
 float translate_y = -2.00f;//300.f;
-float translate_z = 2.00f;
+float translate_z = 4.00f;
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -208,7 +208,7 @@ void appKeyboard(unsigned char key, int x, int y)
             make_cube(triangles, cen, cw);
             cen = float4(1+cw, 1+cw, cw-.1, 1.0f);
             make_cube(triangles, cen, cw);
-            cen = float4(1+cw+cw, 1+cw+cw, cw-.1, 1.0f);
+            cen = float4(1+3*cw, 1+3*cw, cw-.1, 1.0f);
             make_cube(triangles, cen, cw);
             ps->system->loadTriangles(triangles);
             break;
@@ -228,11 +228,12 @@ void appRender()
 
     ps->render();
 
-    glColor4f(0,0,1,.5);
+    glColor4f(0,0,1,1);
+/*
     glDepthMask(GL_FALSE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+*/
     glBegin(GL_TRIANGLES);
     //printf("num triangles %zd\n", triangles.size());
     for (int i=0; i < triangles.size(); i++) {
@@ -245,7 +246,7 @@ void appRender()
     }
     glEnd();
 
-    glDisable(GL_BLEND);
+    //glDisable(GL_BLEND);
     //showFPS(enjas->getFPS(), enjas->getReport());
     glutSwapBuffers();
 
