@@ -19,6 +19,9 @@
 #include "RTPSettings.h"
 
 //defines useful structs like float3 and float4
+#include "structs.h"
+
+//defines a few handy utility functions
 #include "util.h"
 
 namespace rtps {

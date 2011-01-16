@@ -1,13 +1,15 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <string>
 
 #include <GL/glew.h>
 #include <CL/cl.hpp>
 
 #include "util.h"
+
+namespace rtps
+{
 
 char *file_contents(const char *filename, int *length)
 {
@@ -64,3 +66,121 @@ GLuint createVBO(const void* data, int dataSize, GLenum target, GLenum usage)
 
 
 
+void make_cube(std::vector<Triangle> &triangles, float4 cen, float half_edge)
+{
+// Written by G. Erlebacher Aug. 5, 2010
+/*
+
+        7-----------6 
+       /           /|
+      /           / |           Z
+     4-----------5  |           |
+     |           |  2           |  Y
+     |           | /            | /
+     |           |/             |/
+     0-----------1              x------- X
+                  
+*/
+    printf("inside make_cube\n");
+    // vertices
+    std::vector<float4> v;
+    float h = half_edge;
+    float4 vv;
+
+    vv.set(cen.x-h, cen.y-h, cen.z-h);
+    v.push_back(vv);
+    vv.set(cen.x+h, cen.y-h, cen.z-h);
+    v.push_back(vv);
+    vv.set(cen.x+h, cen.y+h, cen.z-h);
+    v.push_back(vv);
+    vv.set(cen.x-h, cen.y+h, cen.z-h);
+    v.push_back(vv);
+    vv.set(cen.x-h, cen.y-h, cen.z+h);
+    v.push_back(vv);
+    vv.set(cen.x+h, cen.y-h, cen.z+h);
+    v.push_back(vv);
+    vv.set(cen.x+h, cen.y+h, cen.z+h);
+    v.push_back(vv);
+    vv.set(cen.x-h, cen.y+h, cen.z+h);
+    v.push_back(vv);
+
+    // Triangles
+    Triangle tri;
+
+    tri.verts[0] = v[2];
+    tri.verts[1] = v[1];
+    tri.verts[2] = v[0];
+    tri.normal.set(0.,0.,-1.,0.);
+    triangles.push_back(tri);
+
+    tri.verts[0] = v[3];
+    tri.verts[1] = v[2];
+    tri.verts[2] = v[0];
+    tri.normal.set(0.,0.,-1.,0.);
+    triangles.push_back(tri);
+    //printf("triangles: size: %zd\n", triangles.size());
+
+    tri.verts[0] = v[4];
+    tri.verts[1] = v[5];
+    tri.verts[2] = v[6];
+    tri.normal.set(0.,0.,+1.,0.);
+    triangles.push_back(tri);
+
+    tri.verts[0] = v[4];
+    tri.verts[1] = v[6];
+    tri.verts[2] = v[7];
+    tri.normal.set(0.,0.,+1.,0.);
+    triangles.push_back(tri);
+
+    //---
+    tri.verts[0] = v[0];
+    tri.verts[1] = v[1];
+    tri.verts[2] = v[5];
+    tri.normal.set(0.,-1.,0.,0.);
+    triangles.push_back(tri);
+
+    tri.verts[0] = v[0];
+    tri.verts[1] = v[5];
+    tri.verts[2] = v[4];
+    tri.normal.set(0.,-1.,0.,0.);
+    triangles.push_back(tri);
+
+    tri.verts[0] = v[7];
+    tri.verts[1] = v[6];
+    tri.verts[2] = v[2];
+    tri.normal.set(0.,+1.,0.,0.);
+    triangles.push_back(tri);
+
+    tri.verts[0] = v[7];
+    tri.verts[1] = v[2];
+    tri.verts[2] = v[3];
+    tri.normal.set(0.,+1.,0.,0.);
+    triangles.push_back(tri);
+
+    //----
+    tri.verts[0] = v[1];
+    tri.verts[1] = v[2];
+    tri.verts[2] = v[6];
+    tri.normal.set(+1.,0.,0.,0.);
+    triangles.push_back(tri);
+
+    tri.verts[0] = v[1];
+    tri.verts[1] = v[6];
+    tri.verts[2] = v[5];
+    tri.normal.set(+1.,0.,0.,0.);
+    triangles.push_back(tri);
+
+    tri.verts[0] = v[0];
+    tri.verts[1] = v[4];
+    tri.verts[2] = v[7];
+    tri.normal.set(-1.,0.,0.,0.);
+    triangles.push_back(tri);
+
+    tri.verts[0] = v[0];
+    tri.verts[1] = v[7];
+    tri.verts[2] = v[3];
+    tri.normal.set(-1.,0.,0.,0.);
+    triangles.push_back(tri);
+}
+
+}
