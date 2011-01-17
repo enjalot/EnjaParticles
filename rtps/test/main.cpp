@@ -228,12 +228,12 @@ void appRender()
 
     ps->render();
 
-    glColor4f(0,0,1,1);
-/*
+    glColor4f(0,0,1,.5);
+
     glDepthMask(GL_FALSE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-*/
+
     glBegin(GL_TRIANGLES);
     //printf("num triangles %zd\n", triangles.size());
     for (int i=0; i < triangles.size(); i++) {
@@ -246,7 +246,7 @@ void appRender()
     }
     glEnd();
 
-    //glDisable(GL_BLEND);
+    glDisable(GL_BLEND);
     //showFPS(enjas->getFPS(), enjas->getReport());
     glutSwapBuffers();
 

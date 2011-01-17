@@ -130,9 +130,9 @@ float intersect_triangle_ge(float4 pos, float4 vel, __local Triangle* tri, float
     det = dot(edge1, pvec);
 
     //non-culling branch
-    //if(det > -eps && det < eps) {    // <<<<< if
+    if(det > -eps && det < eps) {    // <<<<< if
     //culling
-    if(det < eps){
+    //if(det < eps){
         return -1;
         //return false;
 	}
@@ -231,7 +231,7 @@ float4 collisions_triangle(float4 pos,
         if (distance > eps && distance < params->boundary_distance)
         {
 
-            f += 3*calculateRepulsionForce(triangles[j].normal, vel, params->boundary_stiffness, params->boundary_dampening, distance);
+            f += calculateRepulsionForce(triangles[j].normal, vel, 5*params->boundary_stiffness, 5*params->boundary_dampening, distance);
             f += calculateFrictionForce(vel, force, triangles[j].normal, friction_kinetic, friction_static_limit);
             //f += (float4)(110,110,110,1);
 			/*

@@ -573,8 +573,9 @@ void SPH::pushParticles(vector<float4> pos)
     std::vector<float4> vels(nn);
 
     std::fill(cols.begin(), cols.end(),color);
-    float v = 1.0f;
-    float4 iv = float4(v, v, -v, 0.0f);
+    float v = .5f;
+    //float4 iv = float4(v, v, -v, 0.0f);
+    float4 iv = float4(0, v, -.1, 0.0f);
     std::fill(vels.begin(), vels.end(),iv);
 
 #ifdef GPU

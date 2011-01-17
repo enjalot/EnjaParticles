@@ -17,10 +17,6 @@ void SPH::loadCollision_wall()
 
 } 
 
-float dot(float4 a, float4 b)
-{
-    return a.x * b.x + a.y * b.y + a.z * b.z;
-}
 
 //from Krog '10
 float4 calculateRepulsionForce(float4 normal, float4 vel, float boundary_stiffness, float boundary_dampening, float boundary_distance)

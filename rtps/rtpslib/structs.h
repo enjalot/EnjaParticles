@@ -144,6 +144,9 @@ typedef struct Triangle
 //or be functions of the structs
 float magnitude(float4 vec);
 float dist_squared(float4 vec);
+float dot(float4 a, float4 b);
+float4 cross(float4 a, float4 b);
+float4 normalize(float4 vect);
 
 }
 

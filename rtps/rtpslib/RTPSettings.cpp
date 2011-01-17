@@ -26,6 +26,15 @@ RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain gri
     this->grid = grid;
 }
 
+//with triangle collision
+RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain grid, bool tri_collision)
+{
+    this->system = system;
+    this->max_particles = max_particles;
+    this->dt = dt;
+    this->grid = grid;
+    this->tri_collision = tri_collision;
+}
 RTPSettings::RTPSettings(int max_particles, float maxspeed, float separationdist, float perceptionrange, float color[])
 {
 }
