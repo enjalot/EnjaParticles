@@ -36,6 +36,7 @@ public:
           }; //2
     GE::Time* timers[2];
     int setupTimers();
+    void printTimers();
 
     GLuint ghost_vbo;
     int nb_ghosts;

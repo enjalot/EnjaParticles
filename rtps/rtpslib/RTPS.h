@@ -60,6 +60,8 @@ public:
     //temporary render control
     bool render_particles;
     bool render_ghosts;
+    void printTimers();
+
 
 };
 

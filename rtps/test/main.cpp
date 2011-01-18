@@ -66,11 +66,15 @@ void *font = GLUT_BITMAP_8_BY_13;
 rtps::RTPS* ps;
 //#define NUM_PARTICLES 262144
 //#define NUM_PARTICLES 131072
+//#define NUM_PARTICLES 524288
+//#define NUM_PARTICLES 262144
+//#define NUM_PARTICLES 65536
 #define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 8192
 //#define NUM_PARTICLES 4096
 //#define NUM_PARTICLES 2048
 //#define NUM_PARTICLES 1024
+//#define NUM_PARTICLES 256
 #define DT .001f
 
 //timers
@@ -172,15 +176,27 @@ void init_gl()
 
 void appKeyboard(unsigned char key, int x, int y)
 {
+    int nn;
+    float4 min;
+    float4 max;
     switch(key) 
     {
         case '\033': // escape quits
         case '\015': // Enter quits    
-        case 'p':
+        case 'h':
             ps->render_particles = !ps->render_particles;
             break;
         case 'g':
             ps->render_ghosts = !ps->render_ghosts;
+            break;
+        case 'd': //dam break
+            nn = 16384;
+            min = float4(.1, .1, .1, 1.0f);
+            max = float4(3.9, 3.9, 3.9, 1.0f);
+            ps->system->addBox(nn, min, max, false);
+            break;
+        case 'p': //print timers
+            ps->printTimers();
             break;
         case 'Q':    // Q quits
         case 'q':    // q (or escape) quits
@@ -196,8 +212,8 @@ void appKeyboard(unsigned char key, int x, int y)
             //float4 max = float4(.9, .5, .9, 1.0f);
             //float4 min = float4(.3, .3, .3, 1.0f);
             //float4 max = float4(.8, .8, .8, 1.0f);
-            float4 min = float4(1. , 1., .7, 1.0f);
-            float4 max = float4(1.5, 1.5, 1.1, 1.0f);
+            float4 min = float4(.9 , .9, .8, 1.0f);
+            float4 max = float4(1.4, 1.4, 1.2, 1.0f);
             ps->system->addBox(nn, min, max, false);
             break;
                

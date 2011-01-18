@@ -14,8 +14,8 @@ Render::Render(GLuint pos, GLuint col, int n)
     num = n;
 
     printf("GL VERSION %s\n", glGetString(GL_VERSION));
-    glsl = true;
-    //glsl = false;
+    //glsl = true;
+    glsl = false;
     mikep = false;
     blending = true;
     blending = false;
@@ -100,7 +100,6 @@ void Render::drawArrays()
 
 void Render::drawGhosts()
 {
-    
 
     if(true)
     {
@@ -159,10 +158,7 @@ void Render::render()
 {
     // Render the particles with OpenGL
 
-    for(int i= 0; i < 10; i++)
-    {
-        timers[TI_RENDER]->start();
-    }
+    timers[TI_RENDER]->start();
 
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
@@ -267,11 +263,7 @@ void Render::render()
     //make sure rendering timing is accurate
     glFinish();
     //printf("done rendering\n");
-
-    for(int i= 0; i < 10; i++)
-    {
-        timers[TI_RENDER]->end();
-    }
+    timers[TI_RENDER]->end();
 
 }
 //----------------------------------------------------------------------
@@ -485,6 +477,11 @@ int Render::setupTimers()
     {
         timers[TI_GLSL]     = new GE::Time("glsl", time_offset, print_freq);
     }
+}
+
+void Render::printTimers()
+{
+    timers[TI_RENDER]->print();
 }
 
 

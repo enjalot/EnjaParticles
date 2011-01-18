@@ -20,6 +20,16 @@ void SPH::sortGhosts()
     cl_ghosts.release();
 }
 
+void SPH::loadGhostBitonic()
+{
+    ghost_bitonic = Bitonic<int>( ps->cli,    
+        &cl_ghosts_sort_output_hashes,
+        &cl_ghosts_sort_output_indices,
+        &cl_ghosts_sort_hashes,
+        &cl_ghosts_sort_indices);
+ 
+}
+
 void SPH::loadGhostHash()
 {
     printf("create ghost hash kernel\n");

@@ -21,6 +21,7 @@ void SPH::loadNeighbors()
         printf("ERROR(neighborSearch): %s(%s)\n", er.what(), oclErrorString(er.err()));
         exit(1);
     }
+    printf("ASDFSDFSF\n");
 
 	Kernel kern = k_neighbors;
 	    	

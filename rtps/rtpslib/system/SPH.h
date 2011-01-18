@@ -7,6 +7,9 @@
 #include "System.h"
 #include "../opencl/Kernel.h"
 #include "../opencl/Buffer.h"
+
+#include "BitonicSort.h"
+
 //#include "../util.h"
 #include "../domain/Domain.h"
 
@@ -129,6 +132,7 @@ public:
           }; //10
     GE::Time* timers[30];
     int setupTimers();
+    void printTimers();
 
     
 private:
@@ -171,13 +175,17 @@ private:
     std::vector<float4> xsphs;
 
     //all ghost stuff here
+//GHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOST
     void pushGhosts(vector<float4> gs);
     void sortGhosts();
+    void loadGhostBitonic();
     void loadGhostHash();
     void loadGhostDataStructures();
     void ghost_hash();
     void build_ghost_datastructures();
     void printGhostHashDiagnostics();
+    void prepareGhosts();
+
 
     Kernel k_ghost_hash, k_ghost_datastructures;
 
@@ -189,9 +197,9 @@ private:
 	Buffer<int> 		cl_ghosts_sort_indices;
 	Buffer<int>         cl_ghosts_sort_output_hashes;
 	Buffer<int>         cl_ghosts_sort_output_indices;
-    
 
-
+    Bitonic<int> ghost_bitonic;
+//GHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOST
 
 
 
@@ -219,6 +227,8 @@ private:
     //Two arrays for bitonic sort (sort not done in place)
 	Buffer<int>         cl_sort_output_hashes;
 	Buffer<int>         cl_sort_output_indices;
+
+    Bitonic<int> bitonic;
     
     //Parameter structs
     Buffer<SPHParams>   cl_SPHParams;

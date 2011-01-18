@@ -170,14 +170,17 @@ void IterateGhosts(
                         // gradient
                         float dWijdr = Wspiky_dr(rlen, sphp->smoothing_distance, sphp);
 
-                        float dj = 1000.f * (1.7f - casper);
+                        float gdense = 1000.f * (1.7f - casper);
+                        float dj = gdense + 400 * (1.f - casper);
+                        //float dj = gdense * (1.7f - casper);
                         //float dj = 1000.;
 
                         //form simple SPH in Krog's thesis
 
                         float rest_density = 1000.f;
                         float Pi = sphp->K*(di.x - rest_density);
-                        float Pj = sphp->K*(dj - rest_density);
+                        //float Pj = sphp->K*(dj - rest_density);
+                        float Pj = sphp->K*(dj - gdense);
 
                         float kern = -dWijdr * (Pi + Pj)*0.5f * sphp->wspiky_d_coef;
                         float4 stress = kern*r; // correct version
@@ -188,18 +191,21 @@ void IterateGhosts(
 
                         // Add viscous forces
 
-                        #if 1
+                        #if 0
                         //float vvisc = 1.0f;
                         float visc = 1.01f - casper;
                         float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
                         stress += visc * (velj-veli) * dWijlapl;
                         #endif
                         //*/
-                        stress *=  sphp->mass/(di.x*dj);  // original
-                        pt->force += stress * (1.5f - casper);
+                        //stress *=  sphp->mass/(di.x*dj);  // original
+                        float mj = sphp->mass * (1.5f - casper);
+                        stress *=  mj/(di.x*dj);
+                        pt->force += stress;
 
                         float Wijpol6 = Wpoly6(r, sphp->smoothing_distance, sphp);
-	                    pt->xsph +=  (2.f * sphp->mass * Wijpol6 * (velj-veli)/(di.x+dj))*(1.3f-casper);
+	                    //pt->xsph +=  (2.f * sphp->mass * Wijpol6 * (velj-veli)/(di.x+dj))*(1.3f-casper);
+	                    pt->xsph +=  ((sphp->mass + mj) * Wijpol6 * (velj-veli)/(di.x+dj));
                         //pt->force += (float4)(0,0,-.1,0);
                         clf[index_i] = stress;
                     }

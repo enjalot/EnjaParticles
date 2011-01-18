@@ -16,7 +16,7 @@
 
 
 //Passed down by clBuildProgram
-//#define LOCAL_SIZE_LIMIT 1024
+//#define LOCAL_SIZE_LIMIT 512
 
 
 
@@ -172,6 +172,9 @@ void bitonicSortLocal1(
     d_DstVal[(LOCAL_SIZE_LIMIT / 2)] = l_val[get_local_id(0) + (LOCAL_SIZE_LIMIT / 2)];
 }
 
+
+
+
 //Bitonic merge iteration for 'stride' >= LOCAL_SIZE_LIMIT
 __kernel void bitonicMergeGlobal(
     __global uint *d_DstKey,
@@ -183,6 +186,7 @@ __kernel void bitonicMergeGlobal(
     uint stride,
     uint sortDir
 ){
+
     uint global_comparatorI = get_global_id(0);
     uint        comparatorI = global_comparatorI & (arrayLength / 2 - 1);
 
@@ -220,6 +224,7 @@ void bitonicMergeLocal(
     uint size,
     uint sortDir
 ){
+
     __local uint l_key[LOCAL_SIZE_LIMIT];
     __local uint l_val[LOCAL_SIZE_LIMIT];
 
@@ -251,3 +256,4 @@ void bitonicMergeLocal(
     d_DstKey[(LOCAL_SIZE_LIMIT / 2)] = l_key[get_local_id(0) + (LOCAL_SIZE_LIMIT / 2)];
     d_DstVal[(LOCAL_SIZE_LIMIT / 2)] = l_val[get_local_id(0) + (LOCAL_SIZE_LIMIT / 2)];
 }
+

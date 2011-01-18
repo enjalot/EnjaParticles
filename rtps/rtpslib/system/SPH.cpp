@@ -8,9 +8,6 @@
 #include "Domain.h"
 #include "IV.h"
 
-#include "oclSortingNetworks_common.h"
-extern "C" void closeBitonicSort(void);
-
 //for random
 #include<time.h>
 
@@ -72,6 +69,8 @@ SPH::SPH(RTPS *psfr, int n)
 
     //setup the sorted and unsorted arrays
     prepareSorted();
+    //prepare the ghost arrays
+    prepareGhosts();
 
     //replace these with the 2 steps
     /*
@@ -107,6 +106,7 @@ SPH::SPH(RTPS *psfr, int n)
      
     //////////////
 
+
     printf("about to sort ghosts!\n");
     //we call bitonic sort in here
     sortGhosts();
@@ -134,9 +134,6 @@ SPH::~SPH()
         col_vbo = 0;
     }
 
-    //Needed while bitonic sort is still C interface
-    printf("close bitonic sort\n");
-    closeBitonicSort();
 }
 
 void SPH::update()
@@ -292,6 +289,14 @@ int SPH::setupTimers()
     timers[TI_LEAPFROG]     = new GE::Time("leapfrog", time_offset, print_freq);
 }
 
+void SPH::printTimers()
+{
+    for(int i = 0; i < 10; i++) //switch to vector of timers and use size()
+    {
+        timers[i]->print();
+    }
+}
+
 void SPH::calculateSPHSettings()
 {
     /*!
@@ -444,13 +449,23 @@ void SPH::prepareSorted()
 	cl_cell_indices_end   = Buffer<int>(ps->cli, gcells);
 	//printf("gp.nb_points= %d\n", gp.nb_points); exit(0);
 
-
-
 	// For bitonic sort. Remove when bitonic sort no longer used
 	// Currently, there is an error in the Radix Sort (just run both
 	// sorts and compare outputs visually
 	cl_sort_output_hashes = Buffer<int>(ps->cli, keys);
 	cl_sort_output_indices = Buffer<int>(ps->cli, keys);
+
+}
+
+void SPH::prepareGhosts()
+{
+    
+    printf("prepareGhosts\n");
+
+    std::vector<int> keys(max_num);
+    //to get around limits of bitonic sort only handling powers of 2
+    #include "limits.h"
+    std::fill(keys.begin(), keys.end(), INT_MAX);
 
     //scaling is 1.0
     //ghosts = addGhosts(4096, grid.getMin(), grid.getMax(), sph_settings.spacing, 1.0);
@@ -462,7 +477,6 @@ void SPH::prepareSorted()
     //max_ghosts = 262144;
     //max_ghosts = 2097152;
     max_ghosts = 8192;
-
 
     //ghosts = addGhosts(nb_ghosts, grid.getMin(), grid.getMax(), sph_settings.spacing, 1.0);
     //ghosts = addGhosts(nb_ghosts, grid.getBndMin(), grid.getBndMax(), sph_settings.spacing, 1.0);
@@ -477,7 +491,7 @@ void SPH::prepareSorted()
     cl_ghosts = Buffer<float4>(ps->cli, ghost_vbo);
     cl_ghosts_sorted = Buffer<float4>(ps->cli, ghosts);
 
-        //using bitonic sort, reset these buffers on GPU before going on
+    //using bitonic sort, reset these buffers on GPU before going on
     keys.resize(max_ghosts);
     //to get around limits of bitonic sort only handling powers of 2
     #include "limits.h"
@@ -493,6 +507,7 @@ void SPH::prepareSorted()
 
 
     cl_ghosts.acquire();
+    loadGhostBitonic();
     loadGhostHash();
     loadGhostDataStructures();
     cl_ghosts.release();
