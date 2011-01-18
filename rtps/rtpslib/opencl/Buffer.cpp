@@ -28,10 +28,17 @@ Buffer<T>::Buffer(CL *cli, const std::vector<T> &data, unsigned int memtype)
 
 
 template <class T>
-Buffer<T>::Buffer(CL *cli, GLuint vbo_id)
+Buffer<T>::Buffer(CL *cli, GLuint bo_id, GLuint type)
 {
     this->cli = cli;
-    cl_buffer.push_back(cl::BufferGL(cli->context, CL_MEM_READ_WRITE, vbo_id, &cli->err));
+	if(type == 0)
+	{
+		cl_buffer.push_back(cl::BufferGL(cli->context, CL_MEM_READ_WRITE, bo_id, &cli->err));
+	}
+	else if (type == GL_RENDERBUFFER)
+	{
+		cl_buffer.push_back(cl::BufferRenderGL(cli->context,CL_MEM_READ_WRITE,bo_id, &cli->err));
+	}
 }
 
 template <class T>

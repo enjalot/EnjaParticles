@@ -29,6 +29,7 @@ cl::Program CL::loadProgram(std::string path)
     int length;
     const char* src = file_contents(path.c_str(), &length);
     std::string kernel_source(src);
+    delete[] src;
 
 
     //printf("kernel size: %d\n", pl);

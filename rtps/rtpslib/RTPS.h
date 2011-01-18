@@ -7,7 +7,7 @@
 #include "opencl/CLL.h"
 
 //Render API
-#include "render/Render.h"
+//#include "render/Render.h"
 
 //System API
 #include "system/System.h"
@@ -40,7 +40,7 @@ public:
     
     //OpenCL abstraction instance
     CL *cli;
-    Render *renderer;
+    //Render *renderer;
 
     //will be instanciated as a specific subclass like SPH or Boids
     System *system;

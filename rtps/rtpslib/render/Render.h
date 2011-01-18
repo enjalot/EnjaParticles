@@ -13,6 +13,9 @@
 
 #include "../structs.h"
 #include "../timege.h"
+#include "../opencl/CLL.h"
+#include "../opencl/Kernel.h"
+#include "../opencl/Buffer.h"
 
 namespace rtps{
 
@@ -21,7 +24,7 @@ enum Shaders {SHADER_DEPTH=0,SHADER_CURVATURE_FLOW,SHADER_FRESNEL};
 class Render
 {
 public:
-    Render(GLuint pos_vbo, GLuint vel_vbo, int num);
+    Render(GLuint pos_vbo, GLuint vel_vbo, int num, CL *cli);
     ~Render();
 
     //decide which kind of rendering to use
@@ -34,6 +37,8 @@ public:
     void drawArrays();
 
 	void renderPointsAsSpheres();
+	void smoothDepth();
+
 	void orthoProjection();
 	void perspectiveProjection();
 	void fullscreenQuad();
@@ -57,11 +62,15 @@ private:
     bool blending;
     std::map<ShaderType,GLuint> glsl_program;    
     std::map<std::string,GLuint> gl_tex;
-	GLuint fbo;
-	int window_height,window_width;
+	std::vector<GLuint> fbos;
+	std::vector<GLuint> rbos;
+	Buffer<float>	cl_depth;
+	Kernel	k_curvature_flow;
+	GLuint window_height,window_width;
 
     GLuint pos_vbo;
     GLuint col_vbo;
+	CL *cli;
 
     GLuint compileShaders(const char* vertex_file, const char* fragment_file, const char* geometry_file = NULL, GLenum* geom_param=NULL, GLint* geom_value=NULL, int geom_param_len=0);
     int loadTexture();

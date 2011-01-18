@@ -17,11 +17,12 @@ using namespace std;
 
 namespace rtps{
 
-Render::Render(GLuint pos, GLuint col, int n)
+Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 {
     rtype = POINTS;
     pos_vbo = pos;
     col_vbo = col;
+	this->cli=cli;
     num = n;
 	window_height=600;
 	window_width=800;
@@ -31,19 +32,46 @@ Render::Render(GLuint pos, GLuint col, int n)
     //glsl = false;
     //mikep = true;
     mikep = false;
-    //blending = true;
-    blending = false;
+    blending = true;
+    //blending = false;
     if(glsl)
     {
-		glGenTextures(1, &gl_tex["depth"]);
+		fbos.resize(1);
+		glGenFramebuffers(1,&fbos[0]);
+		rbos.resize(1);
+		glGenRenderbuffers(2,&rbos[0]);
+		glBindRenderbuffer(GL_RENDERBUFFER, rbos[0]);
+		glRenderbufferStorage(GL_RENDERBUFFER,GL_RGBA,window_width,window_height);
+		glBindRenderbuffer(GL_RENDERBUFFER, rbos[1]);
+		glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT32,window_width,window_height);
+		//glBindRenderbuffer(GL_RENDERBUFFER,0);
+
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,fbos[0]);
+		glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_RENDERBUFFER,rbos[0]);
+		glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER,rbos[1]);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);
+
+		cl_depth = Buffer<float>(cli,rbos[1],GL_RENDERBUFFER);
+
+		std::string path(GLSL_BIN_DIR);
+		path += "/curvature_flow.cl";
+		k_curvature_flow = Kernel(cli, path, "curvature_flow");
+
+		k_curvature_flow.setArg(0,cl_depth.getDevicePtr());
+		k_curvature_flow.setArg(1,window_width);
+		k_curvature_flow.setArg(2,window_height);
+		k_curvature_flow.setArg(3,40);
+
+
+		/*glGenTextures(1, &gl_tex["depth"]);
 		glBindTexture(GL_TEXTURE_2D, gl_tex["depth"]);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT32,window_width,window_height,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
+		glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT32,window_width,window_height,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);*/
 
-		generateCircleTexture(0,0,255,255,32);
+		//generateCircleTexture(0,0,255,255,32);
 
         //loadTexture();
 		string vert(GLSL_BIN_DIR);
@@ -80,6 +108,15 @@ Render::~Render()
 	{
 		glDeleteProgram(i->second);
 	}
+
+	//for(vector<GLuint>::iterator i=rbos.begin(); i!=rbos.end();i++)
+	//{
+	glDeleteRenderbuffers(rbos.size() ,&rbos[0]);
+	//}
+	//for(vector<GLuint>::iterator i=fbos.begin(); i!=fbos.end();i++)
+	//{
+	glDeleteFramebuffers(fbos.size(),&fbos[0]);
+	//}
 }
 
 //----------------------------------------------------------------------
@@ -153,7 +190,7 @@ void Render::render()
 
     if(blending)
     {
-        glDepthMask(GL_FALSE);
+        //glDepthMask(GL_FALSE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
@@ -161,7 +198,24 @@ void Render::render()
     //TODO enable GLSL shading 
     if(glsl)
     {
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,fbos[0]);
+		glDrawBuffer(rbos[0]);
+		glClearColor(0.2f,0.2f,0.8f,1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		renderPointsAsSpheres();
+		smoothDepth();
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);
+		glDrawBuffer(GL_BACK_LEFT);
+		glViewport(0,0,window_width,window_height);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER,fbos[0]);
+
+		glBlitFramebuffer(0,0,window_width,window_height,
+						  0,0,window_width,window_height,
+						  GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT,GL_LINEAR);
+
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER,0);
+
     }
     else if(mikep)
     {
@@ -210,7 +264,10 @@ void Render::render()
     glPopClientAttrib();
     glPopAttrib();
     //glDisable(GL_POINT_SMOOTH);
-    //glDisable(GL_BLEND);
+	if(blending)
+	{
+		glDisable(GL_BLEND);
+	}
     //glEnable(GL_LIGHTING);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -222,6 +279,15 @@ void Render::render()
     {
         timers[TI_RENDER]->end();
     }
+
+}
+
+void Render::smoothDepth()
+{
+	glFinish();
+	cl_depth.acquire();
+	k_curvature_flow.execute(window_width*window_height,128);
+	cl_depth.release();
 
 }
 
@@ -272,7 +338,7 @@ void Render::renderPointsAsSpheres()
 
         glUseProgram(glsl_program[SPHERE_SHADER]);
         float particle_radius = 0.125f * 0.5f;
-        glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "pointScale"), ((float)window_height) / tanf(60. * (0.5f * 3.1415926535f/180.0f)));
+        glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "pointScale"), ((float)window_width) / tanf(60. * (0.5f * 3.1415926535f/180.0f)));
         glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "pointRadius"), particle_radius );
 
         glColor3f(1., 1., 1.);
@@ -280,8 +346,8 @@ void Render::renderPointsAsSpheres()
         drawArrays();
 
 		//copy depth value to a texture
-		glBindTexture(GL_TEXTURE_2D,gl_tex["depth"]);
-		glCopyTexSubImage2D(GL_TEXTURE_2D,0,0,0,0,0,800,600);
+		//glBindTexture(GL_TEXTURE_2D,gl_tex["depth"]);
+		//glCopyTexSubImage2D(GL_TEXTURE_2D,0,0,0,0,0,800,600);
 
         glUseProgram(0);
         

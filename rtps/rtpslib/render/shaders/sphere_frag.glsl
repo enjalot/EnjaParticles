@@ -24,6 +24,7 @@ void main()
     float specular = pow(max(0.0, dot(n, h)), shininess);*/
 
 	//gl_FragColor.rgb = vec3(gl_FragDepth);
-    gl_FragColor = gl_Color * diffuse;
+    //gl_FragData[0] = gl_Color * diffuse;
+    gl_FragData[0] = gl_Color; //Thickness rendering
     //gl_FragColor = gl_Color * diffuse + specular;
 }

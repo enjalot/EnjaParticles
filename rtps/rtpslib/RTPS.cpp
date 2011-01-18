@@ -23,7 +23,7 @@ RTPS::~RTPS()
     printf("RTPS destructor\n");
     delete system;
     delete cli;
-    delete renderer;
+    //delete renderer;
 }
 
 void RTPS::Init()
@@ -35,7 +35,7 @@ void RTPS::Init()
 
     cli = new CL();
     system = NULL;
-    renderer = NULL;
+    //renderer = NULL;
 
     printf("init: settings.system: %d\n", settings.system);
     //TODO choose based on settings
@@ -54,7 +54,7 @@ void RTPS::Init()
 
     //pass in the position and color vbo ids to the renderer
     //get the number from the system
-    renderer = new Render(system->getPosVBO(), system->getColVBO(), system->getNum());
+    //renderer = new Render(system->getPosVBO(), system->getColVBO(), system->getNum());
 }
 
 void RTPS::update()
@@ -67,7 +67,8 @@ void RTPS::update()
 
 void RTPS::render()
 {
-
+	system->render();
+    /*renderer->render();
     //this functionality should be inside the system's render() function
     //so System should own the renderer object
     if(settings.system == RTPSettings::SPH)
@@ -76,18 +77,16 @@ void RTPS::render()
         //should check if grid exists
         renderer->render_box(grid.getBndMin(), grid.getBndMax());
         renderer->render_table(grid.getBndMin(), grid.getBndMax());
-    }
-    renderer->render();
-
+    }*/
 }
 
 void RTPS::updateNum(int num)
 {
     printf("about to test for renderer\n");
-    if(renderer)
+    /*if(renderer)
     {
         renderer->setNum(num);
-    }
+    }*/
     //this segfaults for some reason
     //system->setNum(num);
 }

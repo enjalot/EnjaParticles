@@ -151,6 +151,8 @@ SPH::SPH(RTPS *psfr, int n)
     
 #endif
 
+	renderer = new Render(pos_vbo,col_vbo,num,ps->cli);
+
 }
 
 SPH::~SPH()
@@ -557,9 +559,10 @@ void SPH::pushParticles(vector<float4> pos)
 {
     int nn = pos.size();
     if (num + nn > max_num) {return;}
-    float rr = (rand() % 255)/255.0f;
-    float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
-    printf("random: %f\n", rr);
+    //float rr = (rand() % 255)/255.0f;
+    //float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
+    //printf("random: %f\n", rr);
+	float4 color(0.0f,0.0f,0.1f,0.1f);
 
     std::vector<float4> cols(nn);
     std::vector<float4> vels(nn);
@@ -610,6 +613,14 @@ void SPH::pushParticles(vector<float4> pos)
 #else
     num += nn;  //keep track of number of particles we use
 #endif
+	renderer->setNum(num);
+}
+
+void SPH::render()
+{
+	System::render();
+	renderer->render_box(grid.getBndMin(), grid.getBndMax());
+    renderer->render_table(grid.getBndMin(), grid.getBndMax());
 }
 
 

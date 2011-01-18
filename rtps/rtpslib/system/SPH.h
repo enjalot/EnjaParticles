@@ -125,6 +125,7 @@ public:
     int addBox(int nn, float4 min, float4 max, bool scaled);
     //wrapper around IV.h addSphere
     void addBall(int nn, float4 center, float radius, bool scaled);
+	virtual void render();
     
     enum {TI_HASH=0, TI_BITONIC_SORT, TI_BUILD, TI_NEIGH, 
           TI_DENS, TI_FORCE, TI_EULER, TI_LEAPFROG, TI_UPDATE, TI_COLLISION_WALL
@@ -257,6 +258,7 @@ private:
     //OpenCL helper functions, should probably be part of the OpenCL classes
     void loadScopy();
 	void scopy(int n, cl_mem xsrc, cl_mem ydst); 
+	
 	//void sset_int(int n, int val, cl_mem xdst);
    
 };
