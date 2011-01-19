@@ -30,8 +30,8 @@ float translate_y = 0.f;//-200.0f;//300.f;
 float translate_z = 1.5f;//200.f;
 */
 float translate_x = -1.00;
-float translate_y = -2.00f;//300.f;
-float translate_z = 2.00f;
+float translate_y = -1.00f;//300.f;
+float translate_z = -2.00f;
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -155,8 +155,8 @@ void init_gl()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+    glTranslatef(translate_x, translate_y, translate_z);
     glRotatef(-90, 1.0, 0.0, 0.0);
-    glTranslatef(translate_x, translate_z, translate_y);
     //glTranslatef(0, 10, 0);
     /*
     gluLookAt(  0,10,0,
@@ -275,8 +275,8 @@ void appMotion(int x, int y)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+    glTranslatef(translate_x, translate_y, translate_z);
     glRotatef(-90, 1.0, 0.0, 0.0);
-    glTranslatef(translate_x, translate_z, translate_y);
     //glTranslatef(0, translate_z, translate_y);
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z

@@ -22,13 +22,13 @@ Render::Render(GLuint pos, GLuint col, int n)
     num = n;
 
     printf("GL VERSION %s\n", glGetString(GL_VERSION));
-    //glsl = true;
-    glsl = false;
+    glsl = true;
+    //glsl = false;
     mikep = false;
     blending = false;
     if(glsl)
     {
-        loadTexture();
+        //loadTexture();
         glsl_program = compileShaders();
     }
     else if(mikep)
@@ -140,8 +140,8 @@ void Render::render()
         glUniform1f( glGetUniformLocation(glsl_program, "pointRadius"), particle_radius );
 
         //Texture stuff
-        glUniform1i( glGetUniformLocation(glsl_program, "col"), 0);
-        glBindTexture(GL_TEXTURE_2D, gl_tex);
+        //glUniform1i( glGetUniformLocation(glsl_program, "col"), 0);
+        //glBindTexture(GL_TEXTURE_2D, gl_tex);
 
 
        
