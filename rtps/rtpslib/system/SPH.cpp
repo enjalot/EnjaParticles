@@ -82,6 +82,7 @@ SPH::SPH(RTPS *psfr, int n)
     //loadStep2();
 
     loadCollision_wall();
+    loadCollision_tri();
 
     //could generalize this to other integration methods later (leap frog, RK4)
     if(sph_settings.integrator == LEAPFROG)
@@ -222,7 +223,7 @@ void SPH::updateGPU()
     cl_color.acquire();
     
     //sub-intervals
-    int sub_intervals = 5;  //should be a setting
+    int sub_intervals = 15;  //should be a setting
     for(int i=0; i < sub_intervals; i++)
     {
         timers[TI_UPDATE]->start();
@@ -280,6 +281,11 @@ void SPH::collision()
     timers[TI_COLLISION_WALL]->start();
     k_collision_wall.execute(num, 128);
     timers[TI_COLLISION_WALL]->end();
+
+    timers[TI_COLLISION_TRI]->start();
+    collide_triangles();
+    timers[TI_COLLISION_TRI]->end();
+
 }
 
 void SPH::integrate()
@@ -314,13 +320,14 @@ int SPH::setupTimers()
     timers[TI_DENS]     = new GE::Time("dens", time_offset, print_freq);
     timers[TI_FORCE]     = new GE::Time("force", time_offset, print_freq);
     timers[TI_COLLISION_WALL]     = new GE::Time("collision_wall", time_offset, print_freq);
+    timers[TI_COLLISION_TRI]     = new GE::Time("collision_triangle", time_offset, print_freq);
     timers[TI_EULER]     = new GE::Time("euler", time_offset, print_freq);
     timers[TI_LEAPFROG]     = new GE::Time("leapfrog", time_offset, print_freq);
 }
 
 void SPH::printTimers()
 {
-    for(int i = 0; i < 10; i++) //switch to vector of timers and use size()
+    for(int i = 0; i < 11; i++) //switch to vector of timers and use size()
     {
         timers[i]->print();
     }
@@ -566,8 +573,9 @@ void SPH::pushParticles(vector<float4> pos)
     std::vector<float4> vels(nn);
 
     std::fill(cols.begin(), cols.end(),color);
-    float v = 1.0f;
-    float4 iv = float4(v, v, -v, 0.0f);
+    float v = .5f;
+    //float4 iv = float4(v, v, -v, 0.0f);
+    float4 iv = float4(0, v, -.1, 0.0f);
     std::fill(vels.begin(), vels.end(),iv);
 
 #ifdef GPU

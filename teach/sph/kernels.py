@@ -58,8 +58,8 @@ def main():
         Y += [Wspiky(h,[0, x])]
         dY += [dWspiky(h, [0,x])]
 
-    pylab.plot(X,Y)
-    #pylab.plot(X,dY)
+    #pylab.plot(X,Y)
+    pylab.plot(X,dY)
     pylab.show()
 
 

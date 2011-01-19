@@ -22,8 +22,8 @@ Render::Render(GLuint pos, GLuint col, int n)
     num = n;
 
     printf("GL VERSION %s\n", glGetString(GL_VERSION));
-    glsl = true;
-    //glsl = false;
+    //glsl = true;
+    glsl = false;
     mikep = false;
     blending = false;
     if(glsl)
@@ -195,7 +195,7 @@ void Render::render()
 		// draws circles instead of squares
         glEnable(GL_POINT_SMOOTH); 
         //TODO make the point size a setting
-        glPointSize(5.0f);
+        glPointSize(15.0f);
 
         drawArrays();
     }

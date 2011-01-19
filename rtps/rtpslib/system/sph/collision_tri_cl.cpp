@@ -1,4 +1,7 @@
-#define STRINGIFY(A) #A
+#include "cl_macros.h"
+#include "cl_structs.h"
+#include "cl_collision.h"
+
 
 // Aug. 4, 2010: Erlebacher version with shared memory
 // Aug. 6, 2010: Erlebacher version with bounding boxes instead of triangles
@@ -7,12 +10,11 @@
 //   across a corner, but this is unlikely to be a problem unless the 
 //   boxes are small. 
 
-// Sep. 5, 2010: enjalot version dealing with SPH forces instead of direct velocity changes
+// Jan. 15, 2011: enjalot version dealing with SPH forces instead of direct velocity changes
+//
 // 
 
 
-std::string collision_program_source = STRINGIFY(
-// prototype does not work?
 
 //----------------------------------------------------------------------
 float4 cross_product(float4 a, float4 b)
@@ -64,7 +66,7 @@ void global_to_shared_tri(__global float* tri_gl, __local float* tri_f, int one_
 
 	for (int j = loc_tid; j < nb_floats; j += block_sz) {
 		//if ((j+first_tri) > last_tri) break;
-		tri_f[j] = tri_gl[j+first_tri*one_tri];
+		tri_f[j] = tri_gl[j+first_tri*one_tri];       //multiply by simulation scale
 	}
 	#endif
 }
@@ -94,7 +96,8 @@ void global_to_shared_boxes(__global float* box_gl, __local float* box_f, int on
 #endif
 //----------------------------------------------------------------------
 #if 1
-bool intersect_triangle_ge(float4 pos, float4 vel, __global Triangle* tri, float dist, bool collided)
+//bool intersect_triangle_ge(float4 pos, float4 vel, __global Triangle* tri, float dist, bool collided)
+float intersect_triangle_ge(float4 pos, float4 vel, __local Triangle* tri, float dist, float eps, float scale)
 {
 	// There is serialization (since not all threads in a warp will have 
 	// "collided" set the same way)
@@ -113,25 +116,29 @@ bool intersect_triangle_ge(float4 pos, float4 vel, __global Triangle* tri, float
     //can't use commas with STRINGIFY trick
     float4 edge1;
     float4 edge2;
+    float4 v0 = tri->verts[0] * scale;
+    float4 v1 = tri->verts[1] * scale;
+    float4 v2 = tri->verts[2] * scale;
 
-    edge1 = tri->verts[1] - tri->verts[0];
-    edge2 = tri->verts[2] - tri->verts[0];
+    edge1 = v1 - v0;
+    edge2 = v2 - v0;
 
     float4 pvec;
     pvec = cross_product(vel, edge2);
 
     float det;
     det = dot(edge1, pvec);
-    float eps = .000001;
 
     //non-culling branch
     if(det > -eps && det < eps) {    // <<<<< if
-    //if(det < eps)
-        return false;
+    //culling
+    //if(det < eps){
+        return -1;
+        //return false;
 	}
 
     float4 tvec;
-    tvec = pos - tri->verts[0];
+    tvec = pos - v0;
 
 	// reduce register usage
     float inv_det = 1.0/det;
@@ -139,7 +146,8 @@ bool intersect_triangle_ge(float4 pos, float4 vel, __global Triangle* tri, float
     float u;
     u = dot(tvec, pvec) * inv_det;
     if (u < 0.0 || u > 1.0) {     // <<<<< if
-        return false;
+        //return false;
+        return -1;
 	}
 
     float4 qvec;
@@ -148,16 +156,17 @@ bool intersect_triangle_ge(float4 pos, float4 vel, __global Triangle* tri, float
     float v;
     v = dot(vel, qvec) * inv_det;
     if (v < 0.0 || (u + v) > 1.0f) { // <<<< if
-        return false;
+        //return false;
+        return -1;
 	}
 
     float t;
     t = dot(edge2, qvec) * inv_det;
 
     if(t > eps and t < dist)
-        return true;
+        return t;
 
-    return false;
+    return -1;
 }
 #endif
 //----------------------------------------------------------------------
@@ -180,11 +189,77 @@ bool intersect_box_ge(float4 pos, float4 vel, __local Box* box, float dt)
 	return false;
 }
 #endif
+
+//----------------------------------------------------------------------
+#if 1
+float4 collisions_triangle(float4 pos, 
+        float4 vel, 
+        float4 force, 
+        int first, 
+        int last, 
+        __global Triangle* triangles_glob, 
+        float dt, 
+        __local Triangle* triangles, 
+		__constant struct SPHParams* params
+)
+{
+	int one_tri = 16;
+	// copy triangles to shared memory 
+	// first, last: indices into triangles_glob
+	global_to_shared_tri(triangles_glob, triangles, one_tri, first, last);
+	barrier(CLK_LOCAL_MEM_FENCE);
+
+	//store the magnitude of the velocity
+	#if 1
+    //float mag = sqrt(vel.x*vel.x + vel.y*vel.y + vel.z*vel.z); 
+    //float damping = 1.0f;
+
+    //these should be moved to the params struct
+    //but set to 0 in both of Krog's simulations...
+    float friction_kinetic = 0.0f;
+    float friction_static_limit = 0.0f;
+
+
+    float eps = .000001;
+    float distance = 0.0f;
+    float4 f = (float4)(0,0,0,0); //returning the force
+    for (int j=0; j < (last-first); j++)
+    {
+        distance = intersect_triangle_ge(pos, vel, &triangles[j], params->boundary_distance, eps,params->simulation_scale);
+        //distance = intersect_triangle_ge(pos, vel, &triangles[j], dt, eps);
+        //if ( distance != -1)
+        if (distance > eps && distance < params->boundary_distance)
+        {
+
+            f += calculateRepulsionForce(triangles[j].normal, vel, 1*params->boundary_stiffness, 1*params->boundary_dampening, distance);
+            f += calculateFrictionForce(vel, force, triangles[j].normal, friction_kinetic, friction_static_limit);
+            //f += (float4)(110,110,110,1);
+			/*
+            //lets do some specular reflection
+            float s = 2.0f*(dot(triangles[j].normal, vel));
+			vel = vel - s*triangles[j].normal;
+ 				vp = v - (v.n) n
+ 				vn = (v.n) n
+
+ 				New velocity = (vp, -vn) = v - (v.n)n - v.n n
+                   = v - 2n v.n
+			vel = vel*damping;
+           */
+        }
+    }
+    #endif
+
+	return f;
+}
+#endif
+
+
+
 //----------------------------------------------------------------------
 
 float4 collisions_box(float4 pos, float4 vel, int first, int last, __global Box* boxes_glob, float dt, __local Box* boxes, __global Triangle* triangles, int f_tri, int l_tri, __global int* tri_offsets)
 {
-#if 1
+#if 0
 	int one_box = 6; // nb floats in Box
 	// copy triangles to shared memory 
 	// first, last: indices into triangles_glob
@@ -237,35 +312,51 @@ float4 collisions_box(float4 pos, float4 vel, int first, int last, __global Box*
 	return vel;
 }
 //----------------------------------------------------------------------
-__kernel void collision_ge( __global float4* pos, __global float4* vel, __global float4* force, __global Box* boxes_glob, int n_boxes, float dt, __global int* tri_offsets, __global int* triangles,  __local Box* boxes)
+//__kernel void collision_ge( __global float4* pos, __global float4* vel, __global float4* force, __global Box* boxes_glob, int n_boxes, float dt, __global int* tri_offsets, __global int* triangles,  __local Box* boxes)
+__kernel void collision_triangle(    __global float4* vars_sorted, 
+                                    __global Triangle* triangles_glob, 
+                                    int n_triangles, 
+                                    float dt, 
+		                            __constant struct SPHParams* params,
+                                    __local Triangle* triangles)
 {
 #if 1
     unsigned int i = get_global_id(0);
-    float4 p = pos[i];
-    float4 v = vel[i];
-    float4 f;
+	int num = params->num;
+    if(i > num) return;
+
+    float4 p = pos(i);
+    float4 v = vel(i);
+    float4 f = force(i);
 
 
-	// Find a way to Iterate over batches of n_triangles so the number
-	// of triangles can be increased. 
-
-	//int max_tri = 220;
-	int max_box = 600;
-
-	for (int j=0; j < n_boxes; j += max_box) {
+	int max_tri = 220;
+	//int max_box = 600;
+    
+    float4 rf = (float4)(0,0,0,0); //returning the force
+	//for (int j=0; j < n_boxes; j += max_box) {
+	for (int j=0; j < n_triangles; j += max_tri) {
 		int first = j;
-		int last = first + max_box;
-
+		//int last = first + max_box;
+		int last = first + max_tri;
+/*
 		if (last > n_boxes) {
 			last = n_boxes;
 		}
-		int f_tri = tri_offsets[j];
-		int l_tri = tri_offsets[j+1];
+*/
+		if (last > n_triangles) {
+			last = n_triangles;
+		}
+
+		//int f_tri = tri_offsets[j];
+		//int l_tri = tri_offsets[j+1];
 		// offsets are monotonic
-		f = collisions_box(p, v, first, last, boxes_glob, dt, boxes, triangles, f_tri, l_tri, tri_offsets);
+		//f = collisions_box(p, v, first, last, boxes_glob, dt, boxes, triangles, f_tri, l_tri, tri_offsets);
+		rf += collisions_triangle(p, v, f, first, last, triangles_glob, dt, triangles, params);
+    //rf = (float4)(11.,11.,11.,1);
 	}
 
-    force[i] = f;
+    force(i) += rf;
 /*
     vel[i].x = v.x;
     vel[i].y = v.y;
@@ -273,5 +364,4 @@ __kernel void collision_ge( __global float4* pos, __global float4* vel, __global
 */
 #endif
 }
-);
 //----------------------------------------------------------------------

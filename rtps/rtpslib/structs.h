@@ -130,10 +130,23 @@ typedef struct float4
 } float4;
 
 
+// size: 4*4 = 16 floats
+// shared memory = 65,536 bytes = 16,384 floats
+//               = 1024 triangles
+typedef struct Triangle
+{
+    float4 verts[3];
+    float4 normal;    //should pack this in verts array
+} Triangle;
+
+
 //maybe these helper functions should go elsewhere? 
 //or be functions of the structs
 float magnitude(float4 vec);
 float dist_squared(float4 vec);
+float dot(float4 a, float4 b);
+float4 cross(float4 a, float4 b);
+float4 normalize(float4 vect);
 
 }
 
