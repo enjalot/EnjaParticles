@@ -191,7 +191,7 @@ void SPH::updateGPU()
     cl_ghosts.acquire();
     
     //sub-intervals
-    int sub_intervals = 5;  //should be a setting
+    int sub_intervals = 1;  //should be a setting
     for(int i=0; i < sub_intervals; i++)
     {
         timers[TI_UPDATE]->start();
@@ -587,7 +587,8 @@ void SPH::pushParticles(vector<float4> pos)
     int nn = pos.size();
     if (num + nn > max_num) {return;}
     float rr = (rand() % 255)/255.0f;
-    float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
+    //float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
+    float4 color(1.0f, 0.0f, 0.0f, 1.0f);
     printf("random: %f\n", rr);
 
     std::vector<float4> cols(nn);

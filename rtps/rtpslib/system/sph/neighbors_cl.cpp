@@ -159,8 +159,9 @@ void IterateGhosts(
                     if(sphp->choice == 0)
                     {
                         //calculate density from ghost
+                        float casper = gpos.w/sphp->simulation_scale;
                         float Wij = Wpoly6(r, sphp->smoothing_distance, sphp);
-                        pt->density.x += 3.0f * (1.f - gpos.w) * sphp->mass*Wij;
+                        pt->density.x += 5.0f * (1.f - casper) * sphp->mass*Wij;
 
                     }
                     else if(sphp->choice == 1)
@@ -171,16 +172,16 @@ void IterateGhosts(
                         float dWijdr = Wspiky_dr(rlen, sphp->smoothing_distance, sphp);
 
                         float gdense = 1000.f * (1.7f - casper);
-                        float dj = gdense + 400 * (1.f - casper);
-                        //float dj = gdense * (1.7f - casper);
+                        float dj = gdense - 200 * (1.f - casper);
+                        //float dj = 1000. * (1.7f - casper);
                         //float dj = 1000.;
 
                         //form simple SPH in Krog's thesis
 
                         float rest_density = 1000.f;
                         float Pi = sphp->K*(di.x - rest_density);
-                        //float Pj = sphp->K*(dj - rest_density);
-                        float Pj = sphp->K*(dj - gdense);
+                        float Pj = sphp->K*(dj - rest_density);
+                        //float Pj = sphp->K*(dj - gdense);
 
                         float kern = -dWijdr * (Pi + Pj)*0.5f * sphp->wspiky_d_coef;
                         float4 stress = kern*r; // correct version

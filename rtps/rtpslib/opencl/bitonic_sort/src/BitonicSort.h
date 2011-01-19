@@ -6,6 +6,9 @@
 #include "../opencl/Buffer.h"
 //#include "../opencl/Scopy.h"
 
+#ifndef uint
+#define uint unsigned int
+#endif
 static const uint LOCAL_SIZE_LIMIT = 512U;
 
 namespace rtps

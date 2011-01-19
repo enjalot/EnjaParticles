@@ -14,15 +14,15 @@ Render::Render(GLuint pos, GLuint col, int n)
     num = n;
 
     printf("GL VERSION %s\n", glGetString(GL_VERSION));
-    //glsl = true;
-    glsl = false;
+    glsl = true;
+    //glsl = false;
     mikep = false;
     blending = true;
     blending = false;
     ghosts = true;
     if(glsl)
     {
-        loadTexture();
+        //loadTexture();
         glsl_program = compileShaders();
     }
     if(ghosts)
