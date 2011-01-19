@@ -10,6 +10,12 @@ RTPSettings::RTPSettings()
     grid = Domain(float4(-5,-.3,0,0), float4(2, 2, 12, 0));
 }
 
+RTPSettings::RTPSettings(SysType system, int max_particles)
+{
+    this->system = system;
+    this->max_particles = max_particles;
+}
+
 RTPSettings::RTPSettings(SysType system, int max_particles, float dt)
 {
     this->system = system;

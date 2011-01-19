@@ -2,7 +2,7 @@
 #include "RTPS.h"
 #include "system/Simple.h"
 #include "system/SPH.h"
-
+#include "system/Swarm.h" 
 
 namespace rtps{
     
@@ -51,6 +51,11 @@ void RTPS::Init()
         system = new SPH(this, settings.max_particles);
     }
     
+    else if (settings.system == RTPSettings::Swarm)
+    {
+        printf("Swarm System\n");
+        system = new Swarm(this, settings.max_particles);
+    }
 
     //pass in the position and color vbo ids to the renderer
     //get the number from the system

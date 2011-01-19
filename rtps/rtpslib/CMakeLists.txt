@@ -18,15 +18,15 @@ message("${CMAKE_MODULE_PATH}\n")
 
 
 ###### SETTING RELATED TO GPU VS CPU IMPLEMENTATIONS ##########################
-SET(WITH_OPENCL TRUE)
+SET(WITH_OPENCL TRUE)  # M.Merced change it to false to try the CPU version of Swarm
 
 ADD_DEFINITIONS(-g )
 #ADD_DEFINITIONS(-DDEBUG)
 IF(WITH_OPENCL)
-    ADD_DEFINITIONS(-DGPU)
+    #ADD_DEFINITIONS(-DGPU)
 ENDIF(WITH_OPENCL)
 #might want to have CPU even if we have OpenCL available
-#ADD_DEFINITIONS(-DCPU)
+ADD_DEFINITIONS(-DCPU)
 
 ##############################################################################
 
@@ -96,7 +96,9 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/sph/DataStructures
     ${rtpslib_SOURCE_DIR}/system/sph/Neighbors
 	
-    #${rtpslib_SOURCE_DIR}/particle
+    ${rtpslib_SOURCE_DIR}/system/Swarm.cpp
+    ${rtpslib_SOURCE_DIR}/system/swarm/FlockIt_CPU.cpp
+
     )
 
 IF(WITH_OPENCL)
@@ -126,7 +128,6 @@ TARGET_LINK_LIBRARIES (rtps
 
 
 #Doxygen
-#find_package(Doxygen REQUIRED)
 find_package(Doxygen)
 set(DOXYGEN_INPUT   ${rtpslib_SOURCE_DIR}/doc/doxyfile)
 set(DOXYGEN_OUTPUT  ${rtpslib_BINARY_DIR}/html/index.html)
