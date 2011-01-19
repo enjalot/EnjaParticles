@@ -4,13 +4,13 @@ from pygame.locals import *
 
 from kernels import *
 class Particle:
-    def __init__(self, x, y, radius, color, surface):
+    def __init__(self, x, y, radius, scale, color, surface):
         #physics stuff
         self.x = x
         self.y = y
         self.pos = [self.x, self.y]
         self.radius = radius
-        self.scale = 40.
+        self.scale = scale
 
         #pygame stuff
         self.col = color
@@ -27,9 +27,9 @@ class Particle:
         mj = 1 #mass = 1 for now
         for pj in particles:
             r = dist(self.pos, pj.pos)
-            r = [i/(2*self.scale) for i in r]
+            r = [i/(self.scale) for i in r]
             #print r
-            self.dens += mj*Wpoly6(1, r)
+            self.dens += mj*Wpoly6(self.radius, r)
 
     def force(self, particles):
         rest_dens = 1000.
@@ -41,14 +41,14 @@ class Particle:
             if pj == self:
                 continue
             r = dist(self.pos, pj.pos)
-            r = [i/(2*self.scale) for i in r]
+            r = [i/(self.scale) for i in r]
 
             di = self.dens
             dj = pj.dens
             Pi = K*(di - rest_dens)
             Pj = K*(dj - rest_dens)
 
-            kern = -.5 * (Pi + Pj) * dWspiky(1, r)
+            kern = -.5 * (Pi + Pj) * dWspiky(self.radius, r)
             #f = [r[0]*kern, r[1]*kern]
             f = [i*kern for i in r]    #i*kern is physical force
             vec = [self.x - f[0]*fdraw/fscale, self.y - f[1]*fdraw/fscale]
@@ -64,27 +64,28 @@ class Particle:
 
 
 
-        print "dens", self.dens
+        #print "dens", self.dens
 
     def draw(self):
         #draw circle representing particle smoothing radius
-        pygame.draw.circle(self.surface, self.col, self.pos, self.radius, 1)
+        pygame.draw.circle(self.surface, self.col, self.pos, self.radius*self.scale, 1)
         #draw filled circle representing density
         pygame.draw.circle(self.surface, self.col, self.pos, self.dens*5, 0)
 
 
 def init_particles(surface):
     particles = []
-    radius = 40
-    particles += [ Particle(100,100, radius, [255,0,0], surface) ] 
-    particles += [ Particle(200,200, radius, [0,0,255], surface) ] 
-    particles += [ Particle(240,200, radius, [0,255,0], surface) ] 
-    particles += [ Particle(200,240, radius, [0,255,255], surface) ] 
+    radius = 1.
+    scale = 80.
+    particles += [ Particle(100,100, radius, scale, [255,0,0], surface) ] 
+    particles += [ Particle(400,400, radius, scale, [0,0,255], surface) ] 
+    particles += [ Particle(479,400, radius, scale, [0,205,0], surface) ] 
+    particles += [ Particle(400,479, radius, scale, [0,205,205], surface) ] 
     return particles
 
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((400, 400))
+    screen = pygame.display.set_mode((800, 800))
     pygame.display.set_caption('SPH Forces')
 
     background = pygame.Surface(screen.get_size())

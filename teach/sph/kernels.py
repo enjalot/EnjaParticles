@@ -36,6 +36,8 @@ def dWspiky(h, r):
     """ still need to multiply this quantity by r """
     #magr = abs(r)
     magr = mag(r)
+    if magr == 0:
+        magr = 1E-6
     coeff = -45./(magr*pi*h**6)
     if magr < h:
         return coeff*(h - magr)**2
