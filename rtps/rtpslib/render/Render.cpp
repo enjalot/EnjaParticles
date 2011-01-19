@@ -39,20 +39,49 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 		fbos.resize(1);
 		glGenFramebuffers(1,&fbos[0]);
 		rbos.resize(1);
-		glGenRenderbuffers(2,&rbos[0]);
+		glGenRenderbuffers(1,&rbos[0]);
 		glBindRenderbuffer(GL_RENDERBUFFER, rbos[0]);
 		glRenderbufferStorage(GL_RENDERBUFFER,GL_RGBA,window_width,window_height);
-		glBindRenderbuffer(GL_RENDERBUFFER, rbos[1]);
+		/*glBindRenderbuffer(GL_RENDERBUFFER, rbos[1]);
 		glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT32,window_width,window_height);
-		//glBindRenderbuffer(GL_RENDERBUFFER,0);
+		glBindRenderbuffer(GL_RENDERBUFFER,0);*/
+
+		glBindTexture(GL_TEXTURE_2D, gl_tex["depth"]);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT32,window_width,window_height,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
+		//glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA8,window_width,window_height,0,GL_RGBA8,GL_UNSIGNED_BYTE,NULL);
 
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,fbos[0]);
 		glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_RENDERBUFFER,rbos[0]);
-		glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER,rbos[1]);
+		//glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER,rbos[1]);
+		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER,gl_tex["depth"],0);
+		GLenum fboStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+		if(fboStatus == GL_FRAMEBUFFER_COMPLETE)
+		{
+			printf("framebuffer is complete\n");
+		}
+		else if(fboStatus == GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT)
+		{
+			printf("framebuffer is incomplete!\n");
+		}
+		else if(fboStatus == GL_FRAMEBUFFER_UNSUPPORTED)
+		{
+			printf("framebuffer unsupported\n");
+		}
+		else
+		{
+			printf("framebuffer status is 0x%4x\n",fboStatus);
+		}
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);
+		//glBindTexture(GL_TEXTURE_2D,NULL);
 
-		cl_depth = Buffer<float>(cli,rbos[1],GL_RENDERBUFFER);
+		//glFinish();
+		cl_depth = Buffer<float>(cli,gl_tex["depth"],1);
 
+		//printf("OpenCL error is %s\n",oclErrorString(cli->err));
 		std::string path(GLSL_BIN_DIR);
 		path += "/curvature_flow.cl";
 		k_curvature_flow = Kernel(cli, path, "curvature_flow");
@@ -63,13 +92,7 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 		k_curvature_flow.setArg(3,40);
 
 
-		/*glGenTextures(1, &gl_tex["depth"]);
-		glBindTexture(GL_TEXTURE_2D, gl_tex["depth"]);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT32,window_width,window_height,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);*/
+		
 
 		//generateCircleTexture(0,0,255,255,32);
 
