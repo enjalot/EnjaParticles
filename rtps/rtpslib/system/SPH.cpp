@@ -223,7 +223,7 @@ void SPH::updateGPU()
     cl_color.acquire();
     
     //sub-intervals
-    int sub_intervals = 15;  //should be a setting
+    int sub_intervals = 10;  //should be a setting
     for(int i=0; i < sub_intervals; i++)
     {
         timers[TI_UPDATE]->start();

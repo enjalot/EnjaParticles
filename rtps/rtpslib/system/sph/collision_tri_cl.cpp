@@ -231,7 +231,7 @@ float4 collisions_triangle(float4 pos,
         if (distance > eps && distance < params->boundary_distance)
         {
 
-            f += calculateRepulsionForce(triangles[j].normal, vel, 1*params->boundary_stiffness, 1*params->boundary_dampening, distance);
+            f += calculateRepulsionForce(triangles[j].normal, vel, 5*params->boundary_stiffness, 5*params->boundary_dampening, distance);
             f += calculateFrictionForce(vel, force, triangles[j].normal, friction_kinetic, friction_static_limit);
             //f += (float4)(110,110,110,1);
 			/*
