@@ -24,10 +24,11 @@ Swarm::Swarm(RTPS *rtps, int n){
 	// filling the data with initial values
 	for(int i=0; i < num; i++){
 		positions[i] = float4((float)rand()/RAND_MAX, (float)rand()/RAND_MAX, (float)rand()/RAND_MAX, 1.f);
+	    velocities[i] = float4((float)rand()/RAND_MAX, (float)rand()/RAND_MAX, (float)rand()/RAND_MAX, 1.f);
 		printf("%d=> %f, %f, %f\n", i, positions[i].x, positions[i].y, positions[i].z);
 	}
-	std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 1.0f));	
-	std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 0.0f));	
+	//std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 1.0f));	
+	std::fill(colors.begin(), colors.end(),float4(1.0f, 0.0f, 0.0f, 1.0f));	
 
 	// setting the VBOs
 	managed = true;
@@ -54,19 +55,17 @@ Swarm::~Swarm(){
 
 void Swarm::update(){
 #ifdef CPU
-	FlockIt_CPU();
+    FlockIt_CPU();
     	
     glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
    	glBufferData(GL_ARRAY_BUFFER, num * sizeof(float4), &positions[0], GL_DYNAMIC_DRAW);
+		
+    printf("%d=> %f, %f, %f\n", 0, positions[0].x, positions[0].y, positions[0].z);
 #endif
 #ifdef GPU
 	printf("GPU implementation COMING SOON!!!!\n");
 #endif
 }
-
-//void Swarm::render(){
-//	renderFlock();
-//}
 
 }
 

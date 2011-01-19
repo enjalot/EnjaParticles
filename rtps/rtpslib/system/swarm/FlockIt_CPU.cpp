@@ -43,7 +43,7 @@ float distanceFrom(float4 p1, float4 p2)
 }
 
 // constants
-#define	MaxSpeed	0.5f
+#define	MaxSpeed	0.1f
 #define MinUrgency	0.05f
 #define	MaxUrgency	0.1f
 #define MaxChangeInAcc	(MaxSpeed * MaxUrgency)
@@ -156,14 +156,18 @@ void Swarm::FlockIt_CPU(){
 
 	// Step 3. If they are flockmates, compute the three rules
 	if(numFlockmates){
-		// Separation
+	printf("initial acc = %f, %f, %f\n", acc.x, acc.y, acc.z);
+        // Separation
 		acc = acc + Separation(i);
+	printf("Separation = %f, %f, %f\n", acc.x, acc.y, acc.z);
 
 		// Alignment
 		acc = acc + Alignment();
+	printf("Alignment = %f, %f, %f\n", acc.x, acc.y, acc.z);
 
 		// Cohesion
 		acc = acc + Cohesion(i);	
+	printf("Cohesion = %f, %f, %f\n", acc.x, acc.y, acc.z);
 	}
 
 	// Step 4. Constrain acceleration
@@ -174,12 +178,12 @@ void Swarm::FlockIt_CPU(){
 
 	// Step 5. Add acceleration to velocity
 	velocities[i] = velocities[i] + acc;
-
-	// Step 6. Constrain velocity
+	
+    // Step 6. Constrain velocity
 	if(magnitude(velocities[i]) > MaxSpeed){
 		// set magnitude to MaxSpeed
 		velocities[i] = times(velocities[i], MaxSpeed);
-	}  	
+	}
   }
 }
 

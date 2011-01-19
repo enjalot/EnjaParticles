@@ -28,7 +28,10 @@ float rotate_y          = 0.0;
 
 // system 
 rtps::RTPS* mbs;
-#define NUM_BOIDS       10
+//#define NUM_BOIDS       1024
+//#define NUM_BOIDS       512
+//#define NUM_BOIDS       256
+#define NUM_BOIDS       128
 
 
 // callbacks functions
@@ -37,6 +40,7 @@ void appKeyboard(unsigned char key, int x, int y);
 void appDestroy();
 void appMouse(int button, int state, int x, int y);
 void appMotion(int x, int y);
+void timerCB(int ms);
 
 // initialize the scene
 void init_gl();
@@ -52,6 +56,7 @@ int main(int argc, char** argv){
 
 	// callbacks
 	glutDisplayFunc(appRender);
+    glutTimerFunc(30, timerCB, 30);
 	glutKeyboardFunc(appKeyboard);
     glutMouseFunc(appMouse);
     glutMotionFunc(appMotion);
@@ -98,9 +103,9 @@ void init_gl(){
 
 void appRender(){
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-       	mbs->update();
-        mbs->render();
+       	
+    mbs->update();
+    mbs->render();
 
 	glutSwapBuffers();
 }
@@ -174,4 +179,8 @@ void appMotion(int x, int y){
             glutPostRedisplay();
 }
 
+void timerCB(int ms){
+    glutTimerFunc(ms, timerCB, ms);
+    glutPostRedisplay();
+}
 
