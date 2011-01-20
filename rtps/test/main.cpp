@@ -225,6 +225,32 @@ void appRender()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
+
+    /*
+    glMatrixMode(GL_PROJECTION);        // switch to projection matrix
+    glPushMatrix();
+    glLoadIdentity();                   // reset modelview matrix
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();                   // reset modelview matrix
+    */
+    glPushMatrix();
+    glTranslatef(0,0,0);
+    glScalef(.005,.005,0);
+    char *p;
+    char *text1 ="enjalot";
+    for (p = text1; *p; p++)
+        glutStrokeCharacter(GLUT_STROKE_ROMAN, *p);
+    glPopMatrix();
+    /*
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);        // switch to projection matrix
+    glPopMatrix();
+    */
+
+
+
     ps->update();
 	
     glEnable(GL_DEPTH_TEST);
