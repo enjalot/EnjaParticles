@@ -192,7 +192,7 @@ void IterateGhosts(
 
                         // Add viscous forces
 
-                        #if 0
+                        #if 1
                         //float vvisc = 1.0f;
                         float visc = 1.01f - casper;
                         float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
