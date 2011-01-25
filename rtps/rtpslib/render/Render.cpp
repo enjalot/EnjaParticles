@@ -38,26 +38,70 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
     {
 		fbos.resize(1);
 		glGenFramebuffers(1,&fbos[0]);
-		rbos.resize(1);
-		glGenRenderbuffers(1,&rbos[0]);
-		glBindRenderbuffer(GL_RENDERBUFFER, rbos[0]);
-		glRenderbufferStorage(GL_RENDERBUFFER,GL_RGBA,window_width,window_height);
+		//rbos.resize(2);
+		//glGenRenderbuffers(2,&rbos[0]);
+		/*glBindRenderbuffer(GL_RENDERBUFFER, rbos[0]);
+		glRenderbufferStorage(GL_RENDERBUFFER,GL_RGBA8,window_width,window_height);
+		glBindRenderbuffer(GL_RENDERBUFFER, rbos[1]);
+		glRenderbufferStorage(GL_RENDERBUFFER,GL_RGBA8,window_width,window_height);*/
 		/*glBindRenderbuffer(GL_RENDERBUFFER, rbos[1]);
 		glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT32,window_width,window_height);
 		glBindRenderbuffer(GL_RENDERBUFFER,0);*/
 
+		glGenTextures(1, &gl_tex["depth"]);
 		glBindTexture(GL_TEXTURE_2D, gl_tex["depth"]);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT32,window_width,window_height,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
+		glGenTextures(1,&gl_tex["color0"]);
+		glBindTexture(GL_TEXTURE_2D, gl_tex["color0"]);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA32F,window_width,window_height,0,GL_RGBA,GL_FLOAT,NULL);
+		glGenTextures(1,&gl_tex["color1"]);
+		glBindTexture(GL_TEXTURE_2D, gl_tex["color1"]);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA32F,window_width,window_height,0,GL_RGBA,GL_FLOAT,NULL);
+		glGenTextures(1,&gl_tex["color2"]);
+		glBindTexture(GL_TEXTURE_2D, gl_tex["color2"]);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA32F,window_width,window_height,0,GL_RGBA,GL_FLOAT,NULL);
+		/*glGenTextures(1, &gl_tex["depth2"]);
+		glBindTexture(GL_TEXTURE_2D, gl_tex["depth2"]);
+		glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT32,window_width,window_height,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);*/
 		//glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA8,window_width,window_height,0,GL_RGBA8,GL_UNSIGNED_BYTE,NULL);
 
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,fbos[0]);
-		glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_RENDERBUFFER,rbos[0]);
+		//glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_RENDERBUFFER,rbos[0]);
+		//glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT1,GL_RENDERBUFFER,rbos[1]);
 		//glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER,rbos[1]);
-		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER,gl_tex["depth"],0);
+		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,gl_tex["color0"],0);
+		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT1,GL_TEXTURE_2D,gl_tex["color1"],0);
+		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT2,GL_TEXTURE_2D,gl_tex["color2"],0);
+		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,gl_tex["depth"],0);
+		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER,fbos[1]);
+		/*glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_RENDERBUFFER,rbos[1]);
+		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,gl_tex["depth2"],0);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);*/
+		//glBindFramebuffer(GL_READ_FRAMEBUFFER,fbos[0]);
+		//glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_RENDERBUFFER,rbos[0]);
+		//glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER,GL_COLOR_ATTACHMENT1,GL_RENDERBUFFER,rbos[1]);
+		//glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER,rbos[1]);
+		//glFramebufferTexture2D(GL_READ_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,gl_tex["depth"],0);
+
+		//printf("fbo 1 = %u fbo 2 = %u\n",fbos[0],fbos[1]);
+		//printf("rbo 1 = %u rbo 2 = %u\n",rbos[0],rbos[1]);
+		//printf("depth = %u depth2 = %u\n",gl_tex["depth"],gl_tex["depth2"]);
 		GLenum fboStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
 		if(fboStatus == GL_FRAMEBUFFER_COMPLETE)
 		{
@@ -76,10 +120,11 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 			printf("framebuffer status is 0x%4x\n",fboStatus);
 		}
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);
+		//glBindFramebuffer(GL_READ_FRAMEBUFFER,0);
 		//glBindTexture(GL_TEXTURE_2D,NULL);
 
 		//glFinish();
-		cl_depth = Buffer<float>(cli,gl_tex["depth"],1);
+		/*cl_depth = Buffer<float>(cli,gl_tex["depth"],1);
 
 		//printf("OpenCL error is %s\n",oclErrorString(cli->err));
 		std::string path(GLSL_BIN_DIR);
@@ -89,7 +134,8 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 		k_curvature_flow.setArg(0,cl_depth.getDevicePtr());
 		k_curvature_flow.setArg(1,window_width);
 		k_curvature_flow.setArg(2,window_height);
-		k_curvature_flow.setArg(3,40);
+		k_curvature_flow.setArg(3,40); 
+		*/ 
 
 
 		
@@ -107,6 +153,19 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 		vert+="/depth_vert.glsl";
 		frag+="/depth_frag.glsl";
         glsl_program[DEPTH_SHADER] = compileShaders(vert.c_str(),frag.c_str());
+		vert = string(GLSL_BIN_DIR);
+		frag = string(GLSL_BIN_DIR);
+		vert+="/gaussian_blur_vert.glsl";
+		frag+="/gaussian_blur_x_frag.glsl";
+        glsl_program[GAUSSIAN_X_SHADER] = compileShaders(vert.c_str(),frag.c_str());
+		frag = string(GLSL_BIN_DIR);
+		frag+="/gaussian_blur_y_frag.glsl";
+        glsl_program[GAUSSIAN_Y_SHADER] = compileShaders(vert.c_str(),frag.c_str());
+		vert = string(GLSL_BIN_DIR);
+		frag = string(GLSL_BIN_DIR);
+		vert+="/normal_vert.glsl";
+		frag+="/normal_frag.glsl";
+        glsl_program[NORMAL_SHADER] = compileShaders(vert.c_str(),frag.c_str()); 
     }
     else if(mikep)
     {  
@@ -222,15 +281,53 @@ void Render::render()
     if(glsl)
     {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,fbos[0]);
-		glDrawBuffer(rbos[0]);
+		glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		glClearColor(0.2f,0.2f,0.8f,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		renderPointsAsSpheres();
-		smoothDepth();
+		//smoothDepth();
+		/*glBindFramebuffer(GL_DRAW_FRAMEBUFFER,fbos[1]);
+		glDrawBuffer(GL_AUX0);
+		glClearColor(0.2f,0.2f,0.8f,1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		renderPointsAsSpheres();*/
+		//glDrawBuffer(GL_COLOR_ATTACHMENT1);
+
+		if(blending)
+		{
+			//glDepthMask(GL_FALSE);
+			glDisable(GL_BLEND);
+		}
+		glDisable(GL_DEPTH_TEST);
+
+		glDrawBuffer(GL_COLOR_ATTACHMENT1);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D,gl_tex["depth"]);
+
+        glUseProgram(glsl_program[GAUSSIAN_X_SHADER]);
+        glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "depth"),0);
+		fullscreenQuad();
+
+		glUseProgram(glsl_program[GAUSSIAN_Y_SHADER]);
+        glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "depth"),0);
+		fullscreenQuad();
+
+		//glDrawBuffer(GL_COLOR_ATTACHMENT2);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);
-		glDrawBuffer(GL_BACK_LEFT);
-		glViewport(0,0,window_width,window_height);
+		glClear(GL_COLOR_BUFFER_BIT);
+		glUseProgram(glsl_program[NORMAL_SHADER]);
+        glUniform1i( glGetUniformLocation(glsl_program[NORMAL_SHADER], "depth"),0);
+		fullscreenQuad();
+
+		glUseProgram(0);
+/*
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);
+		glDrawBuffer(GL_BACK);
+		//glViewport(0,0,window_width,window_height);
 		glBindFramebuffer(GL_READ_FRAMEBUFFER,fbos[0]);
+		glReadBuffer(GL_COLOR_ATTACHMENT2);
 
 		glBlitFramebuffer(0,0,window_width,window_height,
 						  0,0,window_width,window_height,
@@ -238,6 +335,14 @@ void Render::render()
 
 
 		glBindFramebuffer(GL_READ_FRAMEBUFFER,0);
+		glReadBuffer(GL_BACK);*/
+		glEnable(GL_DEPTH_TEST);
+		if(blending)
+		{
+			//glDepthMask(GL_FALSE);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		}
 
     }
     else if(mikep)
@@ -307,11 +412,11 @@ void Render::render()
 
 void Render::smoothDepth()
 {
-	glFinish();
+	/*glFinish();
 	cl_depth.acquire();
 	k_curvature_flow.execute(window_width*window_height,128);
 	cl_depth.release();
-
+	*/
 }
 
 void Render::orthoProjection()
@@ -319,7 +424,7 @@ void Render::orthoProjection()
 	glMatrixMode(GL_PROJECTION);					// Select Projection
 	glPushMatrix();							// Push The Matrix
 	glLoadIdentity();						// Reset The Matrix
-	gluOrtho2D( 0,1,0,1);				// Select Ortho Mode (640x480)
+	gluOrtho2D( 0,1,0,1);
 	glMatrixMode(GL_MODELVIEW);					// Select Modelview Matrix
 	glPushMatrix();							// Push The Matrix
 	glLoadIdentity();						// Reset The Matrix
@@ -336,18 +441,23 @@ void Render::perspectiveProjection()
 void Render::fullscreenQuad()
 {
 	orthoProjection();
+	//glColor3f(1.0f,1.0f,1.0f);
 	glBegin(GL_QUADS);
-			glTexCoord2f(0,1);
-			glVertex2f(0,0);
+			glTexCoord2f(0.f,0.f);
+			//glVertex2f(0,0);
+			glVertex2f(0.f,0.f);
 
-			glTexCoord2f(0,0);
-			glVertex2f(0,window_height);
+			glTexCoord2f(1.f,0.f);
+			//glVertex2f(window_width,0);
+			glVertex2f(1.f,0.f);
 
-			glTexCoord2f(1,0);
-			glVertex2f(window_width,window_height);
+			glTexCoord2f(1.f,1.f);
+			//glVertex2f(window_width,window_height);
+			glVertex2f(1.f,1.f);
 
-			glTexCoord2f(1,1);
-			glVertex2f(window_width,0);
+			glTexCoord2f(0.f,1.f);
+			//glVertex2f(0,window_height);
+			glVertex2f(0.f,1.f);
 	glEnd();
 	perspectiveProjection();
 }

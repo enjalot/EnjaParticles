@@ -29,7 +29,7 @@ public:
 
     //decide which kind of rendering to use
     enum RenderType {POINTS, SPRITES};
-	enum ShaderType {SPHERE_SHADER, DEPTH_SHADER, MIKEP_SHADER};
+	enum ShaderType {SPHERE_SHADER, DEPTH_SHADER, GAUSSIAN_X_SHADER, GAUSSIAN_Y_SHADER, NORMAL_SHADER, MIKEP_SHADER};
 
     void setNum(int nn){num = nn;};
 
