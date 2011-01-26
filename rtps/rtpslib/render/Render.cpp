@@ -161,6 +161,9 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 		frag = string(GLSL_BIN_DIR);
 		frag+="/gaussian_blur_y_frag.glsl";
         glsl_program[GAUSSIAN_Y_SHADER] = compileShaders(vert.c_str(),frag.c_str());
+		frag = string(GLSL_BIN_DIR);
+		frag+="/bilateral_blur_frag.glsl";
+        glsl_program[BILATERAL_GAUSSIAN_SHADER] = compileShaders(vert.c_str(),frag.c_str());
 		vert = string(GLSL_BIN_DIR);
 		frag = string(GLSL_BIN_DIR);
 		vert+="/normal_vert.glsl";
@@ -280,6 +283,7 @@ void Render::render()
     //TODO enable GLSL shading 
     if(glsl)
     {
+		//Render depth and thickness to a textures
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,fbos[0]);
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		glClearColor(0.2f,0.2f,0.8f,1.0f);
@@ -300,34 +304,50 @@ void Render::render()
 		}
 		glDisable(GL_DEPTH_TEST);
 
+		//Smooth the depth texture to emulate a surface.
 		glDrawBuffer(GL_COLOR_ATTACHMENT1);
+		glClearColor(0.2f,0.2f,0.8f,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D,gl_tex["depth"]);
 
-        glUseProgram(glsl_program[GAUSSIAN_X_SHADER]);
-        glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "depth"),0);
+		#if 1
+		#if 0
+		for(int i = 0; i<1; i++)
+		{
+			glUseProgram(glsl_program[GAUSSIAN_X_SHADER]);
+			glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "depthTex"),0);
+			glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "width"),window_width);
+			fullscreenQuad();
+	
+			glUseProgram(glsl_program[GAUSSIAN_Y_SHADER]);
+			glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "depthTex"),0);
+			glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "height"),window_height);
+			fullscreenQuad();
+		}
+		#else
+		glUseProgram(glsl_program[BILATERAL_GAUSSIAN_SHADER]);
+		glUniform1i(glGetUniformLocation(glsl_program[BILATERAL_GAUSSIAN_SHADER],"depthTex"),0);
 		fullscreenQuad();
+		#endif
+		#endif
 
-		glUseProgram(glsl_program[GAUSSIAN_Y_SHADER]);
-        glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "depth"),0);
-		fullscreenQuad();
-
-		//glDrawBuffer(GL_COLOR_ATTACHMENT2);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);
+		//Render the normals for the new "surface".
+		glDrawBuffer(GL_COLOR_ATTACHMENT2);
+		glClearColor(0.2f,0.2f,0.8f,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glUseProgram(glsl_program[NORMAL_SHADER]);
-        glUniform1i( glGetUniformLocation(glsl_program[NORMAL_SHADER], "depth"),0);
+        glUniform1i( glGetUniformLocation(glsl_program[NORMAL_SHADER], "depthTex"),0);
 		fullscreenQuad();
 
 		glUseProgram(0);
-/*
+
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);
 		glDrawBuffer(GL_BACK);
 		//glViewport(0,0,window_width,window_height);
 		glBindFramebuffer(GL_READ_FRAMEBUFFER,fbos[0]);
-		glReadBuffer(GL_COLOR_ATTACHMENT2);
+		glReadBuffer(GL_COLOR_ATTACHMENT1);
 
 		glBlitFramebuffer(0,0,window_width,window_height,
 						  0,0,window_width,window_height,
@@ -335,7 +355,7 @@ void Render::render()
 
 
 		glBindFramebuffer(GL_READ_FRAMEBUFFER,0);
-		glReadBuffer(GL_BACK);*/
+		glReadBuffer(GL_BACK);
 		glEnable(GL_DEPTH_TEST);
 		if(blending)
 		{
