@@ -28,10 +28,10 @@ float rotate_y          = 0.0;
 
 // system 
 rtps::RTPS* mbs;
-//#define NUM_BOIDS       1024
+#define NUM_BOIDS       1024
 //#define NUM_BOIDS       512
 //#define NUM_BOIDS       256
-#define NUM_BOIDS       128
+//#define NUM_BOIDS       128
 
 
 // callbacks functions
