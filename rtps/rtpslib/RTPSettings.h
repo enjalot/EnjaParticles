@@ -16,7 +16,7 @@ public:
     RTPSettings(SysType system, int max_particles);
     RTPSettings(SysType system, int max_particles, float dt);
     RTPSettings(SysType system, int max_particles, float dt, Domain grid);
-    RTPSettings(int max_particles, float maxspeed, float separationdist, float perceptionrange, float color[]);
+    RTPSettings(int max_particles, float maxspeed, float separationdist, float searchradius, float color[]);
 
     //maximum number of particles a system can hold
     int max_particles;
@@ -25,6 +25,14 @@ public:
 
     //time step per iteration
     float dt;
+
+    // boids attributes
+    float maxspeed;
+    float separationdist;
+    float searchradius;
+    float4 color;
+
+
 
 };
 

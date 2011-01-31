@@ -15,17 +15,22 @@ public:
         Swarm(RTPS *rtps, int n);
         ~Swarm();
        
-	    RTPS *ps;	
+   	RTPS *ps;	
  
-	    std::vector<float4> positions;
+	std::vector<float4> positions;
         std::vector<float4> velocities;
         std::vector<float4> colors;
 
-	    rtps::Buffer<float4> cl_position;
+	rtps::Buffer<float4> cl_position;
     	rtps::Buffer<float4> cl_color;
 	
         void update();
-	    void FlockIt_CPU();
+	void FlockIt_CPU();
+
+protected:
+       float separationdist;
+       float searchradius;
+       float maxspeed;
 
 private:
 	int* flockmates;	// array with flockmates

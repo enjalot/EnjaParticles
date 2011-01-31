@@ -48,30 +48,31 @@ void init_gl();
 int main(int argc, char** argv){
 
 	// initiaze GLUT
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-    glutInitWindowSize(window_width, window_height);
-    glutInitWindowPosition (glutGet(GLUT_SCREEN_WIDTH)/2 - window_width/2, glutGet(GLUT_SCREEN_HEIGHT)/2 - window_height/2);
+    	glutInit(&argc, argv);
+    	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+    	glutInitWindowSize(window_width, window_height);
+    	glutInitWindowPosition (glutGet(GLUT_SCREEN_WIDTH)/2 - window_width/2, glutGet(GLUT_SCREEN_HEIGHT)/2 - window_height/2);
 	glutWindowHandle = glutCreateWindow("Swarm System");
 
 	// callbacks
 	glutDisplayFunc(appRender);
-    glutTimerFunc(30, timerCB, 30);
+    	glutTimerFunc(30, timerCB, 30);
 	glutKeyboardFunc(appKeyboard);
-    glutMouseFunc(appMouse);
-    glutMotionFunc(appMotion);
+    	glutMouseFunc(appMouse);
+    	glutMotionFunc(appMotion);
 
 	// initialize OpenGL extensions
 	glewInit();
 	GLboolean bGLEW = glewIsSupported("GL_VERSION_2_0 GL_ARB_pixel_buffer_object");
-    printf("GLEW supported?: %d\n", bGLEW);
+    	printf("GLEW supported?: %d\n", bGLEW);
 
 	// initialize OpenGL scene
 	init_gl();
 
 	// Swarm system
-	rtps::RTPSettings settings(rtps::RTPSettings::Swarm, NUM_BOIDS); 
-    mbs = new rtps::RTPS(settings);
+	float color[4] = {1.f, 0.f, 0.f, 0.f};
+	rtps::RTPSettings settings(NUM_BOIDS, 0.1, 0.3, 0.5, color); 
+    	mbs = new rtps::RTPS(settings);
 
 	// main loop
 	glutMainLoop();

@@ -43,14 +43,14 @@ float distanceFrom(float4 p1, float4 p2)
 }
 
 // constants
-#define	MaxSpeed	0.3f
+//#define	MaxSpeed	0.3f
 #define MinUrgency	0.05f
 #define	MaxUrgency	0.1f
-#define MaxChangeInAcc	(MaxSpeed * MaxUrgency)
+//#define MaxChangeInAcc	(MaxSpeed * MaxUrgency)
 
-#define	DesireSpeed	(MaxSpeed/2)
-#define	SeparationDist	.1f
-#define SearchRadius	.5f
+//#define	DesireSpeed	(MaxSpeed/2)
+//#define	SeparationDist	.1f
+//#define SearchRadius	.5f
 
 
 //****************************************************************
@@ -58,14 +58,14 @@ float distanceFrom(float4 p1, float4 p2)
 int Swarm::SearchFlockmates(int i){
 	int numFlockmates=0;
 	float4 p1, p2;	
-	float d, dmin=SearchRadius;
+	float d, dmin=searchradius;
 		
 	int MaxFlockmates = num/2;	 	
 
 	flockmates = new int[MaxFlockmates];
 
 	p1 = positions[i];
-	d_closestFlockmate = SearchRadius;	
+	d_closestFlockmate = searchradius;	
 //printf("inside SearchFlockmates\n");
 	// loop over all boids
 	for(int j=0; j < num; j++){
@@ -74,7 +74,7 @@ int Swarm::SearchFlockmates(int i){
 		d = distanceFrom(p1, p2);
 		
 		// is boid j a flockmate?
-		if(d < SearchRadius){
+		if(d < searchradius){
 //printf("boid %d has %d as a flockmate\n", i, j);  
 		  	flockmates[numFlockmates] = j;
 			numFlockmates++;
@@ -97,15 +97,15 @@ int Swarm::SearchFlockmates(int i){
 //****************************************************************
 // Separation
 float4 Swarm::Separation(int i){
-	float r = d_closestFlockmate / SeparationDist;	// TODO: compute the distance of the closest flockmate,  don't need the variable
+	float r = d_closestFlockmate / separationdist;	// TODO: compute the distance of the closest flockmate,  don't need the variable
 
 	float4 separation = positions[ID_closestFlockmate] - positions[i];
 	separation = normalize(separation);
 	
-	if(d_closestFlockmate > SeparationDist){
+	if(d_closestFlockmate > separationdist){
 		separation = times(separation, r);
 	}
-	else if(d_closestFlockmate < SeparationDist){
+	else if(d_closestFlockmate < separationdist){
 		separation = times(separation, -r);
 	}
 	else{
@@ -163,7 +163,7 @@ void Swarm::FlockIt_CPU(){
 
 		// Alignment
 		acc = acc + Alignment();
-	printf("Alignment = %f, %f, %f\n", acc.x, acc.y, acc.z);
+//	printf("Alignment = %f, %f, %f\n", acc.x, acc.y, acc.z);
 
 		// Cohesion
 		acc = acc + Cohesion(i);	
@@ -171,18 +171,18 @@ void Swarm::FlockIt_CPU(){
 	}
 
 	// Step 4. Constrain acceleration
-	if(magnitude(acc) > MaxChangeInAcc){
+	if(magnitude(acc) > maxspeed*MaxUrgency){
 		// set magnitude to MaxChangeInAcc
-		acc = times(acc, MaxChangeInAcc);
+		acc = times(acc, maxspeed*MaxUrgency);
 	}
 
 	// Step 5. Add acceleration to velocity
 	velocities[i] = velocities[i] + acc;
 	
     // Step 6. Constrain velocity
-	if(magnitude(velocities[i]) > MaxSpeed){
+	if(magnitude(velocities[i]) > maxspeed){
 		// set magnitude to MaxSpeed
-		velocities[i] = times(velocities[i], MaxSpeed);
+		velocities[i] = times(velocities[i], maxspeed);
 	}
   }
 }

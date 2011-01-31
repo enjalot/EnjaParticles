@@ -34,8 +34,10 @@ public:
     virtual void addForceField(ForceField ff){};
     virtual void printTimers(){};
     
-    // transformation
+    // transformation and color
     float4 transformation[4];    
+    float4 color;
+
 
 protected:
     //number of particles
@@ -43,8 +45,10 @@ protected:
     //maximum number of particles (for array allocation)
     int max_num;
 
+    // VBO
     GLuint pos_vbo;
     GLuint col_vbo;
+
     //flag is true if the system's constructor creates the VBOs for the system
     bool managed;
 

@@ -32,8 +32,25 @@ RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain gri
     this->grid = grid;
 }
 
-RTPSettings::RTPSettings(int max_particles, float maxspeed, float separationdist, float perceptionrange, float color[])
+RTPSettings::RTPSettings(int max_particles, float maxspeed, float separationdist, float searchradius, float color_b[])
 {
+    this->system = Swarm;
+    this->max_particles = max_particles;
+    this->maxspeed = maxspeed;
+    this->separationdist = separationdist;
+    this->searchradius = searchradius;
+
+    if((color_b[0] || color_b[1] || color_b[2]) > 1.0f){
+        color_b[0] /= 255;
+        color_b[1] /= 255;
+        color_b[2] /= 255;
+    }
+
+    this->color.x = color_b[0];
+    this->color.y = color_b[1];
+    this->color.z = color_b[2];
+    this->color.w = 0.f;
+
 }
 
 }

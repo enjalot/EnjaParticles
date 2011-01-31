@@ -44,6 +44,8 @@ public:
 
     //will be instanciated as a specific subclass like SPH or Boids
     System *system;
+
+    RTPSettings getRTPSettings() { return settings; }
     //std::vector<System> systems;
 
     //initial value helper
