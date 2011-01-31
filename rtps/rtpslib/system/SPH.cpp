@@ -108,8 +108,8 @@ SPH::SPH(RTPS *psfr, int n)
     //// really this should be setup by the user
     //int nn = 1024;
     int nn = 3333;
-    nn = 8192;
-    //nn = 2048;
+    //nn = 8192;
+    nn = 2048;
     //nn = 1024;
     //float4 min = float4(.4, .4, .1, 0.0f);
     //float4 max = float4(.6, .6, .4, 0.0f);
@@ -118,9 +118,9 @@ SPH::SPH(RTPS *psfr, int n)
     //float4 min   = float4(-559., -15., 0.5, 1.);
 	//float4 max   = float4(-400., 225., 1050., 1);
     //grid = Domain(float4(-560,-30,0,0), float4(256, 256, 1276, 0));
-    float4 min   = float4(100./sd, -15./sd, 0.5/sd, 1.);
+    //float4 min   = float4(100./sd, -15./sd, 0.5/sd, 1.);
     //float4 min   = float4(100., -15., 550, 1.);
-	float4 max   = float4(255./sd, 225./sd, 1250./sd, 1);
+	//float4 max   = float4(255./sd, 225./sd, 1250./sd, 1);
 
 
 
@@ -129,10 +129,11 @@ SPH::SPH(RTPS *psfr, int n)
 
     //addBox(nn, min, max, false);
     
-    nn = 512;
-    min = float4(-125, 75, 475, 0.0f);
-    max = float4(-75, 127, 525, 0.0f);
-    //addBox(nn, min, max, false);
+    //nn = 512;
+    /*nn = 512;
+    float4 min = float4(.1, .1, .1, 1.0f);
+	float4 max = float4(.9, .5, .9, 1.0f);
+    addBox(nn, min, max, false);*/
     //addBox(nn, min, max, false);
    
     //float4 center = float4(.1/scale, .15/scale, .3/scale, 0.0f);
