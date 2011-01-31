@@ -34,6 +34,8 @@ public:
     virtual void addForceField(ForceField ff){};
     virtual void printTimers(){};
     
+    // transformation
+    float4 transformation[4];    
 
 protected:
     //number of particles

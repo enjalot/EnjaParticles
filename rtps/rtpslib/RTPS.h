@@ -49,6 +49,14 @@ public:
     //initial value helper
     //IV iv;
 
+    // setters for point size and transformation
+    void SetPointScale(float p) { renderer->pointscale = p; }
+
+     void SetTransformation(float4 t[4]) {
+         for(int i=0; i < 4; i++)
+             system->transformation[i] = t[i];
+    }
+
     void update();
     void render();
     

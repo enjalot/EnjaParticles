@@ -37,6 +37,9 @@ public:
     void printTimers();
 
     //void compileShaders();
+    
+    // size of the points inside Blender
+    float pointscale;
 
 private:
     //number of particles
