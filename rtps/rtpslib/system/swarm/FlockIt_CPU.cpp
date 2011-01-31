@@ -8,7 +8,6 @@ float4 times (float4 v, float a)
     v.x *= a;
     v.y *= a;
     v.z *= a;
-//    v.w *= a;
     
     return v;
 }
@@ -19,7 +18,6 @@ float4 divides(float4 v, float a)
     v.x /= a;
     v.y /= a;
     v.z /= a;
-//    v.w /= a;
 
     return v;
 }
@@ -31,7 +29,6 @@ float4 normalize(float4 v){
     v.x /= n;
     v.y /= n;
     v.z /= n;
-//    v.w /= n;
 
     return v;
 }
@@ -56,7 +53,10 @@ float distanceFrom(float4 p1, float4 p2)
 //****************************************************************
 // Search for flockmates
 int Swarm::SearchFlockmates(int i){
-	int numFlockmates=0;
+
+    //printf("inside SearchFlockmates\n");
+	
+    int numFlockmates=0;
 	float4 p1, p2;	
 	float d, dmin=searchradius;
 		
@@ -66,31 +66,32 @@ int Swarm::SearchFlockmates(int i){
 
 	p1 = positions[i];
 	d_closestFlockmate = searchradius;	
-//printf("inside SearchFlockmates\n");
+
 	// loop over all boids
 	for(int j=0; j < num; j++){
 	     if(j != i){
-		p2 = positions[j];
-		d = distanceFrom(p1, p2);
+		    p2 = positions[j];
+		    d = distanceFrom(p1, p2);
 		
-		// is boid j a flockmate?
-		if(d < searchradius){
-//printf("boid %d has %d as a flockmate\n", i, j);  
-		  	flockmates[numFlockmates] = j;
-			numFlockmates++;
+		    // is boid j a flockmate?
+		    if(d < searchradius){
+//printf("BOID %d has %d as a flockmate\n", i, j);  
+		  	    flockmates[numFlockmates] = j;
+			    numFlockmates++;
 			
-			// is boid j the closest flockmate?
-			if(d < dmin){
-			   dmin = d;
-			   d_closestFlockmate = d;
-			   ID_closestFlockmate = j;
-			}
+			    // is boid j the closest flockmate?
+			    if(d < dmin){
+			        dmin = d;
+			        d_closestFlockmate = d;
+			        ID_closestFlockmate = j;
+			    }
 	
-			// did I find the max num of flockmates already?
-			if(numFlockmates == MaxFlockmates) break;
-		}
+			    // did I find the max num of flockmates already?
+			    if(numFlockmates == MaxFlockmates) break;
+		    }
 	     }		
 	}
+//printf("the TOTAL of flockmates is %d\n", numFlockmates);
 	return numFlockmates;
 }
 
@@ -126,10 +127,13 @@ float4 Swarm::Alignment(){
 //****************************************************************
 // Cohesion
 float4 Swarm::Cohesion(int i){
-	float4 flockCenter, cohesion;
-	
-	for(int k; k < numFlockmates; k++){
-		flockCenter = flockCenter + positions[flockmates[k]];
+	float4 flockCenter= float4(0.f,0.f,0.f,0.f), cohesion;
+	float4 pos;
+
+	for(int k=0; k < numFlockmates; k++){
+//        printf("the INDEX of flockmate %d is %d\n", k, flockmates[k]);
+        pos = positions[flockmates[k]];
+		flockCenter = flockCenter + pos;
 	}
 	flockCenter = divides(flockCenter, numFlockmates);
 
@@ -155,7 +159,7 @@ void Swarm::FlockIt_CPU(){
 	numFlockmates = SearchFlockmates(i);
 
 	// Step 3. If they are flockmates, compute the three rules
-	if(numFlockmates){
+	if(numFlockmates > 0){
 //	printf("initial acc = %f, %f, %f\n", acc.x, acc.y, acc.z);
         // Separation
 		acc = acc + Separation(i);
@@ -185,6 +189,7 @@ void Swarm::FlockIt_CPU(){
 		velocities[i] = times(velocities[i], maxspeed);
 	}
   }
+
 }
 
 }

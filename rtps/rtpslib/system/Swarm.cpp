@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <time.h>
 #include <GL/glew.h>
 
 #include "Swarm.h"
@@ -26,7 +26,7 @@ Swarm::Swarm(RTPS *rtps, int n){
         this->color = ps->getRTPSettings().color;
 
 	
-	srand(1973);
+	srand(time(0));
 
 	// filling the data with initial values
 	for(int i=0; i < num; i++){
