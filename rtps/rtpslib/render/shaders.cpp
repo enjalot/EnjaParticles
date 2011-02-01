@@ -47,7 +47,7 @@ const char* fragment_shader_source = STRINGIFY(
 uniform float pointRadius;  // point size in world space
 //varying float pointRadius;  // point size in world space
 varying vec3 posEye;        // position of center in eye space
-uniform sampler2D col;
+//uniform sampler2D col;
 
 void main()
 {
@@ -73,27 +73,13 @@ void main()
 	float specular = pow(max(0.0, dot(n, h)), shininess); */
 	
     
-    vec4 tex = texture2D(col, gl_TexCoord[0].st);
-    //gl_FragColor = gl_Color * diffuse + specular;
-    //gl_FragColor = gl_Color * diffuse + specular;
-	if(tex.a>0.0)
-	{
-		//float d = (2.0 * gl_DepthRange.near) / (gl_DepthRange.far + gl_DepthRange.near - gl_FragCoord.z * (gl_DepthRange.diff));
-		//float d = (2.0 * 0.1) / (100.0 + 0.1 - gl_FragCoord.z * (99.9));
-		//gl_FragColor = vec4(d,d,d,tex.a);
-		gl_FragColor = vec4(gl_FragCoord.zzz,tex.a);
-	}
-    else
-	{
-		gl_FragColor = vec4(0.0);
-	}
+    gl_FragColor = gl_Color * diffuse + specular;
     /*
-    gl_FragColor.x = tex.x;
-    gl_FragColor.y = tex.y;
-    gl_FragColor.z = tex.z;
-    */
+    vec4 tex = texture2D(col, gl_TexCoord[0].st);
+    gl_FragColor = tex;
     //gl_FragColor.w = gl_Color.w * (tex.x + tex.y + tex.z)/3.;
-    //gl_FragColor.w = (tex.x + tex.y + tex.z)/3.;
+    gl_FragColor.w = (tex.x + tex.y + tex.z)/3.;
+    */
 }
 
 

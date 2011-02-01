@@ -33,8 +33,8 @@ public:
     virtual int addBox(int nn, float4 min, float4 max, bool scaled){ return 0;}
     virtual void addBall(int nn, float4 center, float radius, bool scaled){}
 
-    virtual void addForceField(ForceField ff){}
-    
+    virtual void addForceField(ForceField ff){};
+    virtual void printTimers(){};
 
 protected:
     //number of particles

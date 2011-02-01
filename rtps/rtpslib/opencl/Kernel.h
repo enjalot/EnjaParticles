@@ -23,7 +23,8 @@ class Kernel
 {
 public:
     Kernel(){cli = NULL;};
-    Kernel(CL *cli, std::string name, std::string source);
+    Kernel(CL *cli, std::string source, std::string name);
+    Kernel(CL *cli, cl::Program program, std::string name);
 
     //we will want to access buffers by name when going accross systems
     std::string name;

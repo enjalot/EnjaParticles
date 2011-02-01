@@ -49,6 +49,7 @@ public:
     enum {TI_RENDER=0, TI_GLSL}; //2
     GE::Time* timers[2];
     int setupTimers();
+    void printTimers();
 
     //void compileShaders();
 

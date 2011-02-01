@@ -30,8 +30,8 @@ float translate_y = 0.f;//-200.0f;//300.f;
 float translate_z = 1.5f;//200.f;
 */
 float translate_x = -1.00;
-float translate_y = -2.00f;//300.f;
-float translate_z = 2.00f;
+float translate_y = -1.00f;//300.f;
+float translate_z = -2.00f;
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -66,11 +66,15 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 rtps::RTPS* ps;
+//#define NUM_PARTICLES 524288
+//#define NUM_PARTICLES 262144
+//#define NUM_PARTICLES 65536
 #define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 8192
 //#define NUM_PARTICLES 4096
 //#define NUM_PARTICLES 2048
 //#define NUM_PARTICLES 1024
+//#define NUM_PARTICLES 256
 #define DT .001f
 
 //timers
@@ -154,8 +158,8 @@ void init_gl()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+    glTranslatef(translate_x, translate_y, translate_z);
     glRotatef(-90, 1.0, 0.0, 0.0);
-    glTranslatef(translate_x, translate_z, translate_y);
     //glTranslatef(0, 10, 0);
     /*
     gluLookAt(  0,10,0,
@@ -173,28 +177,39 @@ void init_gl()
 
 void appKeyboard(unsigned char key, int x, int y)
 {
-	keys_pressed[key]=true;
+    int nn;
+    float4 min;
+    float4 max;
     switch(key) 
     {
         case '\033': // escape quits
         case '\015': // Enter quits    
+        case 'd': //dam break
+            nn = 16384;
+            min = float4(.1, .1, .1, 1.0f);
+            max = float4(3.9, 3.9, 3.9, 1.0f);
+            ps->system->addBox(nn, min, max, false);
+            break;
+        case 'p': //print timers
+            ps->printTimers();
+            break;
         case 'Q':    // Q quits
         case 'q':    // q (or escape) quits
             // Cleanup up and quit
             appDestroy();
 			return;
-		case 'r': //drop a rectangle
-		{
-				int nn = 2048;
+	case 'r': //drop a rectangle
+	{
+			int nn = 2048;
 
-				int sd = 100;
-				//float4 min = float4(-150/sd, 50/sd, 675/sd, 0.0f);
-				//float4 max = float4(-50/sd, 150/sd, 975/sd, 0.0f);
-				float4 min = float4(.1, .1, .1, 1.0f);
-				float4 max = float4(2., 2., 2., 1.0f);
-				ps->system->addBox(nn, min, max, false);
-				return;
-		}
+			int sd = 100;
+			//float4 min = float4(-150/sd, 50/sd, 675/sd, 0.0f);
+			//float4 max = float4(-50/sd, 150/sd, 975/sd, 0.0f);
+			float4 min = float4(.1, .1, .1, 1.0f);
+			float4 max = float4(2., 2., 2., 1.0f);
+			ps->system->addBox(nn, min, max, false);
+			return;
+	}
 	case 'w':
 		translate_z -= 0.1;
 		break;
@@ -318,6 +333,7 @@ void appMotion(int x, int y)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+    glTranslatef(translate_x, translate_y, translate_z);
     glRotatef(-90, 1.0, 0.0, 0.0);
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z

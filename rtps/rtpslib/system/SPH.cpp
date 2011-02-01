@@ -8,9 +8,6 @@
 #include "Domain.h"
 #include "IV.h"
 
-#include "oclSortingNetworks_common.h"
-extern "C" void closeBitonicSort(void);
-
 //for random
 #include<time.h>
 
@@ -172,9 +169,6 @@ SPH::~SPH()
         col_vbo = 0;
     }
 
-    //Needed while bitonic sort is still C interface
-    printf("close bitonic sort\n");
-    closeBitonicSort();
 }
 
 void SPH::update()
@@ -325,6 +319,14 @@ int SPH::setupTimers()
     timers[TI_COLLISION_WALL]     = new GE::Time("collision_wall", time_offset, print_freq);
     timers[TI_EULER]     = new GE::Time("euler", time_offset, print_freq);
     timers[TI_LEAPFROG]     = new GE::Time("leapfrog", time_offset, print_freq);
+}
+
+void SPH::printTimers()
+{
+    for(int i = 0; i < 10; i++) //switch to vector of timers and use size()
+    {
+        timers[i]->print();
+    }
 }
 
 void SPH::calculateSPHSettings()

@@ -55,6 +55,7 @@ public:
     //should this be private?
     void updateNum(int num);
     
+    void printTimers();
 
 
 };
