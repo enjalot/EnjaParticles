@@ -31,7 +31,7 @@ float translate_z = 1.5f;//200.f;
 */
 float translate_x = -1.00;
 float translate_y = -1.00f;//300.f;
-float translate_z = -2.00f;
+float translate_z = 2.00f;
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -157,9 +157,9 @@ void init_gl()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glTranslatef(translate_x, translate_y, translate_z);
     glRotatef(-90, 1.0, 0.0, 0.0);
     //glTranslatef(0, 10, 0);
+    glTranslatef(translate_x, translate_z, translate_y);
     /*
     gluLookAt(  0,10,0,
                 0,0,0,
@@ -189,12 +189,6 @@ void appKeyboard(unsigned char key, int x, int y)
         case 'g':
             ps->render_ghosts = !ps->render_ghosts;
             break;
-        case 'd': //dam break
-            nn = 16384;
-            min = float4(.1, .1, .1, 1.0f);
-            max = float4(3.9, 3.9, 3.9, 1.0f);
-            ps->system->addBox(nn, min, max, false);
-            break;
         case 'p': //print timers
             ps->printTimers();
             break;
@@ -204,6 +198,7 @@ void appKeyboard(unsigned char key, int x, int y)
             appDestroy();
             break;
         case 'r': //drop a rectangle
+        {
             int nn = 32;
             int sd = 100;
             //float4 min = float4(-150/sd, 50/sd, 675/sd, 0.0f);
@@ -216,9 +211,37 @@ void appKeyboard(unsigned char key, int x, int y)
             float4 max = float4(1.4, 1.4, 1.2, 1.0f);
             ps->system->addBox(nn, min, max, false);
             break;
-               
+        }
+        case 'w':
+            translate_z -= 0.1;
+            break;
+        case 'a':
+            translate_x += 0.1;
+            break;
+        case 's':
+            translate_z += 0.1;
+            break;
+        case 'd':
+            translate_x -= 0.1;
+            break;
+        case 'z':
+            translate_y += 0.1;
+            break;
+        case 'x':
+            translate_y -= 0.1;
+            break;
+
 
     }
+    // set view matrix
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glRotatef(-90, 1.0, 0.0, 0.0);
+    glRotatef(rotate_x, 1.0, 0.0, 0.0);
+    glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
+    glTranslatef(translate_x, translate_z, translate_y);
+
 }
 
 void appRender()
@@ -316,11 +339,11 @@ void appMotion(int x, int y)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glTranslatef(translate_x, translate_y, translate_z);
     glRotatef(-90, 1.0, 0.0, 0.0);
     //glTranslatef(0, translate_z, translate_y);
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
+    glTranslatef(translate_x, translate_z, translate_y);
     //glutPostRedisplay();
 }
 
