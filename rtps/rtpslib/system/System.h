@@ -34,7 +34,7 @@ public:
     virtual void addBall(int nn, float4 center, float radius, bool scaled){}
 
     virtual void addForceField(ForceField ff){};
-    virtual void printTimers(){};
+    virtual void printTimers(){ renderer->printTimers();};
 
 protected:
     //number of particles

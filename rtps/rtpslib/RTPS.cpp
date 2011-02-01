@@ -94,7 +94,6 @@ void RTPS::updateNum(int num)
 void RTPS::printTimers()
 {
     system->printTimers();
-    renderer->printTimers();
 }
 
 }

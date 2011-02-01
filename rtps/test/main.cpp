@@ -36,7 +36,6 @@ float translate_z = -2.00f;
 // mouse controls
 int mouse_old_x, mouse_old_y;
 int mouse_buttons = 0;
-bool keys_pressed[256] = {false};
 float rotate_x = 0.0, rotate_y = 0.0;
 //std::vector<Triangle> triangles;
 //std::vector<Box> boxes;
@@ -109,7 +108,6 @@ int main(int argc, char** argv)
     glutDisplayFunc(appRender); //main rendering function
     glutTimerFunc(30, timerCB, 30); //determin a minimum time between frames
     glutKeyboardFunc(appKeyboard);
-    glutKeyboardUpFunc(keyUp);
     glutMouseFunc(appMouse);
     glutMotionFunc(appMotion);
 
@@ -158,8 +156,8 @@ void init_gl()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glTranslatef(translate_x, translate_y, translate_z);
     glRotatef(-90, 1.0, 0.0, 0.0);
+    glTranslatef(translate_x, translate_y, translate_z);
     //glTranslatef(0, 10, 0);
     /*
     gluLookAt(  0,10,0,
@@ -184,31 +182,31 @@ void appKeyboard(unsigned char key, int x, int y)
     {
         case '\033': // escape quits
         case '\015': // Enter quits    
-        case 'd': //dam break
+        case 'e': //dam break
             nn = 16384;
             min = float4(.1, .1, .1, 1.0f);
             max = float4(3.9, 3.9, 3.9, 1.0f);
             ps->system->addBox(nn, min, max, false);
-            break;
+	    return;
         case 'p': //print timers
             ps->printTimers();
-            break;
+            return;
         case 'Q':    // Q quits
         case 'q':    // q (or escape) quits
             // Cleanup up and quit
             appDestroy();
-			return;
+	    return;
 	case 'r': //drop a rectangle
 	{
-			int nn = 2048;
+		int nn = 2048;
 
-			int sd = 100;
-			//float4 min = float4(-150/sd, 50/sd, 675/sd, 0.0f);
-			//float4 max = float4(-50/sd, 150/sd, 975/sd, 0.0f);
-			float4 min = float4(.1, .1, .1, 1.0f);
-			float4 max = float4(2., 2., 2., 1.0f);
-			ps->system->addBox(nn, min, max, false);
-			return;
+		int sd = 100;
+		//float4 min = float4(-150/sd, 50/sd, 675/sd, 0.0f);
+		//float4 max = float4(-50/sd, 150/sd, 975/sd, 0.0f);
+		float4 min = float4(.1, .1, .1, 1.0f);
+		float4 max = float4(2., 2., 2., 1.0f);
+		ps->system->addBox(nn, min, max, false);
+		return;
 	}
 	case 'w':
 		translate_z -= 0.1;
@@ -240,11 +238,6 @@ void appKeyboard(unsigned char key, int x, int y)
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
     glTranslatef(translate_x, translate_z, translate_y);
-}
-
-void keyUp(unsigned char key, int x, int y)
-{
-	keys_pressed[key]=false;
 }
 
 void appRender()
@@ -309,23 +302,6 @@ void appMotion(int x, int y)
         translate_z -= dy * 0.1;
     }
 
-	if(keys_pressed['w'])
-	{
-		translate_z += 0.1;
-	}
-	else if(keys_pressed['a'])
-	{
-		translate_x -= 0.1;
-	}
-	else if(keys_pressed['s'])
-	{
-		translate_z -= 0.1;
-	}
-	else if(keys_pressed['d'])
-	{
-		translate_x += 0.1;
-	}
-
     mouse_old_x = x;
     mouse_old_y = y;
 
@@ -333,7 +309,7 @@ void appMotion(int x, int y)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glTranslatef(translate_x, translate_y, translate_z);
+    //glTranslatef(-translate_x, -translate_y, -translate_z);
     glRotatef(-90, 1.0, 0.0, 0.0);
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z

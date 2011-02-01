@@ -327,6 +327,7 @@ void SPH::printTimers()
     {
         timers[i]->print();
     }
+    System::printTimers();
 }
 
 void SPH::calculateSPHSettings()
