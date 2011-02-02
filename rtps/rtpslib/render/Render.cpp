@@ -47,6 +47,7 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT1,GL_TEXTURE_2D,gl_tex["depthColor"],0);
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT2,GL_TEXTURE_2D,gl_tex["normalColor"],0);
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT3,GL_TEXTURE_2D,gl_tex["lightColor"],0);
+		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT4,GL_TEXTURE_2D,gl_tex["Color"],0);
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,gl_tex["depth"],0);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);
 
@@ -178,9 +179,11 @@ void Render::render()
     //TODO enable GLSL shading 
     if(glsl)
     {
+		GLenum buffers[] = {GL_COLOR_ATTACHMENT0,GL_COLOR_ATTACHMENT4};
 		//Render depth and thickness to a textures
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,fbos[0]);
-		glDrawBuffer(GL_COLOR_ATTACHMENT0);
+		glDrawBuffers(2,buffers);
+		//glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		glClearColor(0.2f,0.2f,0.8f,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		renderPointsAsSpheres();
@@ -200,6 +203,7 @@ void Render::render()
 		
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,gl_tex["depth2"],0);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D,gl_tex["depth"]);
 
 		smoothDepth();
@@ -212,17 +216,22 @@ void Render::render()
 		//glCopyTexSubImage2D(GL_TEXTURE_2D,0,0,0,0,0,800,600);
 
 		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER,fbos[0]);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D,gl_tex["Color"]);
 		//Render the normals for the new "surface".
 		glDrawBuffer(GL_COLOR_ATTACHMENT2);
 		glClearColor(0.2f,0.2f,0.8f,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glUseProgram(glsl_program[NORMAL_SHADER]);
         glUniform1i( glGetUniformLocation(glsl_program[NORMAL_SHADER], "depthTex"),0);
+		glUniform1i( glGetUniformLocation(glsl_program[NORMAL_SHADER], "colorTex"),1);
         glUniform1f( glGetUniformLocation(glsl_program[NORMAL_SHADER], "del_x"),1.0/((float)window_width));
         glUniform1f( glGetUniformLocation(glsl_program[NORMAL_SHADER], "del_y"),1.0/((float)window_height));
 		fullscreenQuad();
 
 		glUseProgram(0);
+		glBindTexture(GL_TEXTURE_2D,0);
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D,0);
 
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);
@@ -754,6 +763,7 @@ void Render::deleteFramebufferTextures()
 	glDeleteTextures(1,&gl_tex["depthColor"]);
 	glDeleteTextures(1,&gl_tex["normalColor"]);
 	glDeleteTextures(1,&gl_tex["lightColor"]);
+	glDeleteTextures(1,&gl_tex["Color"]);
 }
 
 void Render::createFramebufferTextures()
@@ -803,7 +813,13 @@ void Render::createFramebufferTextures()
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,window_width,window_height,0,GL_RGBA,GL_UNSIGNED_BYTE,NULL);
-		
+		glGenTextures(1,&gl_tex["Color"]);
+		glBindTexture(GL_TEXTURE_2D, gl_tex["Color"]);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,window_width,window_height,0,GL_RGBA,GL_UNSIGNED_BYTE,NULL);
 }
 
 void Render::setWindowDimensions(GLuint width, GLuint height)
@@ -817,6 +833,7 @@ void Render::setWindowDimensions(GLuint width, GLuint height)
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT1,GL_TEXTURE_2D,gl_tex["depthColor"],0);
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT2,GL_TEXTURE_2D,gl_tex["normalColor"],0);
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT3,GL_TEXTURE_2D,gl_tex["lightColor"],0);
+		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT4,GL_TEXTURE_2D,gl_tex["Color"],0);
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,gl_tex["depth"],0);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);
 }

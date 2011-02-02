@@ -17,14 +17,7 @@ void main()
 	vec4 clipSpacePos = gl_ProjectionMatrix*spherePosEye;
 	gl_FragDepth = clipSpacePos.z/clipSpacePos.w;
 
-    // calculate lighting
-    /*float diffuse = max(0.0, dot(lightDir, n));
-    vec3 v = normalize(-spherePosEye);
-    vec3 h = normalize(lightDir + v);
-    float specular = pow(max(0.0, dot(n, h)), shininess);*/
 
-	//gl_FragColor.rgb = vec3(gl_FragDepth);
-    //gl_FragData[0] = gl_Color * diffuse;
-    gl_FragData[0] = gl_Color;//vec4(vec3(1.0)-gl_Color.rgb,gl_Color.a); //Thickness rendering
-    //gl_FragColor = gl_Color * diffuse + specular;
+    gl_FragData[0] = gl_Color*vec4(1.0,1.0,1.0,0.1);//vec4(vec3(1.0)-gl_Color.rgb,gl_Color.a); //Thickness rendering
+	gl_FragData[1] = gl_Color;//Save the color
 }
