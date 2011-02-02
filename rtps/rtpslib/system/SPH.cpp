@@ -54,8 +54,8 @@ SPH::SPH(RTPS *psfr, int n)
     //set up the grid
     setupDomain();
 
-    sph_settings.integrator = LEAPFROG;
-    //sph_settings.integrator = EULER;
+    //sph_settings.integrator = LEAPFROG;
+    sph_settings.integrator = EULER;
 
     //*** end Initialization
 

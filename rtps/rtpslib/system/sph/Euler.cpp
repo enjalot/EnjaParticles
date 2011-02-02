@@ -10,12 +10,15 @@ void SPH::loadEuler()
     path += "/euler_cl.cl";
     k_euler = Kernel(ps->cli, path, "euler");
   
-    //TODO: fix the way we are wrapping buffers
-    k_euler.setArg(0, cl_position.getDevicePtr());
-    k_euler.setArg(1, cl_velocity.getDevicePtr());
-    k_euler.setArg(2, cl_force.getDevicePtr());
-    k_euler.setArg(3, ps->settings.dt); //time step
-    k_euler.setArg(4, cl_SPHParams.getDevicePtr());
+    int iargs = 0;
+    k_euler.setArg(iargs++, cl_sort_indices.getDevicePtr());
+    k_euler.setArg(iargs++, cl_vars_unsorted.getDevicePtr());
+    k_euler.setArg(iargs++, cl_vars_sorted.getDevicePtr());
+    k_euler.setArg(iargs++, cl_position.getDevicePtr());
+    k_euler.setArg(iargs++, cl_SPHParams.getDevicePtr());
+    k_euler.setArg(iargs++, ps->settings.dt); //time step
+
+
 
 } 
 

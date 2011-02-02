@@ -207,9 +207,6 @@ void appKeyboard(unsigned char key, int x, int y)
 	{
 		int nn = 2048;
 
-		int sd = 100;
-		//float4 min = float4(-150/sd, 50/sd, 675/sd, 0.0f);
-		//float4 max = float4(-50/sd, 150/sd, 975/sd, 0.0f);
 		float4 min = float4(.1, .1, .1, 1.0f);
 		float4 max = float4(2., 2., 2., 1.0f);
 		ps->system->addBox(nn, min, max, false);
