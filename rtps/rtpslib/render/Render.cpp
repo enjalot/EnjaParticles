@@ -28,8 +28,8 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 	window_width=800;
 
     printf("GL VERSION %s\n", glGetString(GL_VERSION));
-    glsl = true;
-    //glsl = false;
+    //glsl = true;
+    glsl = false;
     //mikep = true;
     mikep = false;
     blending = true;
@@ -824,6 +824,8 @@ void Render::createFramebufferTextures()
 
 void Render::setWindowDimensions(GLuint width, GLuint height)
 {
+    if(glsl)
+    {
 		deleteFramebufferTextures();
 		window_width = width;
 		window_height = height;
@@ -836,6 +838,7 @@ void Render::setWindowDimensions(GLuint width, GLuint height)
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT4,GL_TEXTURE_2D,gl_tex["Color"],0);
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,gl_tex["depth"],0);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);
+    }
 }
 
 
