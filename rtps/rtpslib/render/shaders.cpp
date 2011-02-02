@@ -16,8 +16,8 @@ varying vec3 posEye;        // position of center in eye space
 void main()
 {
 
-    posEye = vec3(gl_ModelViewMatrix * vec4(gl_Vertex.xyz, 1.0));
-    float dist = length(posEye);
+    //posEye = vec3(gl_ModelViewMatrix * vec4(gl_Vertex.xyz, 1.0));
+    //float dist = length(posEye);
     //we packed radius in the 4th component of vertex
     //pointRadius = gl_Vertex.w;
     //gl_PointSize = pointRadius * (pointScale / dist);
@@ -25,14 +25,16 @@ void main()
     //gl_PointSize = pointRadius * (1.0 / dist);
 
     gl_TexCoord[0] = gl_MultiTexCoord0;
-    gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz, 1.0);
+    //gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz, 1.0);
+	gl_Position = ftransform();
+	gl_Position.z = gl_Position.z*gl_Position.w/5.0;
 
-    gl_FrontColor = gl_Color;
+    /*gl_FrontColor = gl_Color;
 
     if(!blending)
     {
         gl_FrontColor.w = 1.0;
-    }
+    }*/
 
     
 }
@@ -49,7 +51,7 @@ varying vec3 posEye;        // position of center in eye space
 
 void main()
 {
-    const vec3 lightDir = vec3(0.577, 0.577, 0.577);
+    /*const vec3 lightDir = vec3(0.577, 0.577, 0.577);
     const float shininess = 40.0;
 
     // calculate normal from texture coordinates
@@ -68,7 +70,8 @@ void main()
     
     vec3 v = normalize(-spherePosEye);
     vec3 h = normalize(lightDir + v);
-    float specular = pow(max(0.0, dot(n, h)), shininess);
+	float specular = pow(max(0.0, dot(n, h)), shininess); */
+	
     
     gl_FragColor = gl_Color * diffuse + specular;
     /*

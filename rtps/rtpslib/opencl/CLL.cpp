@@ -27,8 +27,9 @@ cl::Program CL::loadProgram(std::string path, std::string options)
      // Program Setup
 
     int length;
-    const char* src = file_contents(path.c_str(), &length);
+    char* src = file_contents(path.c_str(), &length);
     std::string kernel_source(src);
+    free(src);
 
 
     //printf("kernel size: %d\n", pl);

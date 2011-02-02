@@ -62,6 +62,8 @@ typedef struct SPHParams
 	float shear;
 	float attraction;
 	float spring;
+	//float surface_threshold;
+
     
     //Kernel Coefficients
     float wpoly6_coef;
@@ -126,6 +128,7 @@ public:
     int addBox(int nn, float4 min, float4 max, bool scaled);
     //wrapper around IV.h addSphere
     void addBall(int nn, float4 center, float radius, bool scaled);
+	virtual void render();
     
     void loadTriangles(std::vector<Triangle> triangles);
     
@@ -273,6 +276,7 @@ private:
     //OpenCL helper functions, should probably be part of the OpenCL classes
     void loadScopy();
 	void scopy(int n, cl_mem xsrc, cl_mem ydst); 
+	
 	//void sset_int(int n, int val, cl_mem xdst);
    
 };

@@ -81,6 +81,7 @@ Simple::Simple(RTPS *psfr, int n)
 
 #endif
 
+	renderer = new Render(pos_vbo,col_vbo,n,ps->cli);
    }
 
 Simple::~Simple()

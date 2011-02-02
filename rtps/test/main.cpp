@@ -23,15 +23,16 @@ using namespace rtps;
 
 int window_width = 800;
 int window_height = 600;
+float fov = 65.;
 int glutWindowHandle = 0;
 /*
 float translate_x = -.5f;
 float translate_y = 0.f;//-200.0f;//300.f;
 float translate_z = 1.5f;//200.f;
 */
-float translate_x = -1.00;
-float translate_y = -1.00f;//300.f;
-float translate_z = -2.00f;
+float translate_x = -2.00f;
+float translate_y = -3.00f;//300.f;
+float translate_z = 3.00f;
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -51,11 +52,13 @@ std::vector<Triangle> triangles;
 void init_gl();
 
 void appKeyboard(unsigned char key, int x, int y);
+void keyUp(unsigned char key, int x, int y);
 void appRender();
 void appDestroy();
 
 void appMouse(int button, int state, int x, int y);
 void appMotion(int x, int y);
+void resizeWindow(int w, int h);
 
 void timerCB(int ms);
 
@@ -109,6 +112,7 @@ int main(int argc, char** argv)
     glutKeyboardFunc(appKeyboard);
     glutMouseFunc(appMouse);
     glutMotionFunc(appMotion);
+	glutReshapeFunc(resizeWindow);
 
 	//define_lights_and_materials();
 
@@ -117,8 +121,6 @@ int main(int argc, char** argv)
     GLboolean bGLEW = glewIsSupported("GL_VERSION_2_0 GL_ARB_pixel_buffer_object"); 
     printf("GLEW supported?: %d\n", bGLEW);
 
-    //initialize the OpenGL scene for rendering
-    init_gl();
 
     printf("before we call enjas functions\n");
 
@@ -126,9 +128,12 @@ int main(int argc, char** argv)
     //default constructor
     //rtps::RTPSettings settings;
     //rtps::Domain grid = Domain(float4(-5,-.3,0,0), float4(2, 2, 12, 0));
-    rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
+    rtps::Domain grid = Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
     rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
     ps = new rtps::RTPS(settings);
+
+    //initialize the OpenGL scene for rendering
+    init_gl();
 
     glutMainLoop();
     return 0;
@@ -139,7 +144,6 @@ int main(int argc, char** argv)
 void init_gl()
 {
     // default initialization
-    glClearColor(0.0, 0.0, 0.0, 1.0);
     //glDisable(GL_DEPTH_TEST);
 
     // viewport
@@ -148,15 +152,19 @@ void init_gl()
     // projection
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 100.0);
+    //gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 100.0);
+    gluPerspective(fov, (GLfloat)window_width / (GLfloat) window_height, 0.3, 100.0);
     //gluPerspective(90.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 10000.0); //for lorentz
 
     // set view matrix
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glTranslatef(translate_x, translate_y, translate_z);
     glRotatef(-90, 1.0, 0.0, 0.0);
+    glRotatef(rotate_x, 1.0, 0.0, 0.0);
+    glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
+    glTranslatef(translate_x, translate_z, translate_y);
+	ps->system->getRenderer()->setWindowDimensions(window_width,window_height);
     //glTranslatef(0, 10, 0);
     /*
     gluLookAt(  0,10,0,
@@ -179,30 +187,24 @@ void appKeyboard(unsigned char key, int x, int y)
     float4 max;
     switch(key) 
     {
-        case '\033': // escape quits
-        case '\015': // Enter quits    
-        case 'd': //dam break
-            //nn = 16384;
-            nn = 65536;
+        case 'e': //dam break
+            nn = 16384;
             min = float4(.1, .1, .1, 1.0f);
             max = float4(3.9, 3.9, 3.9, 1.0f);
             ps->system->addBox(nn, min, max, false);
-            break;
+	    return;
         case 'p': //print timers
             ps->printTimers();
-            break;
+            return;
+        case '\033': // escape quits
+        case '\015': // Enter quits    
         case 'Q':    // Q quits
         case 'q':    // q (or escape) quits
             // Cleanup up and quit
             appDestroy();
-            break;
-        case 'r': //drop a rectangle
-            nn = 512;
-            min = float4(.1, .1, .1, 1.0f);
-            max = float4(.9, .5, .9, 1.0f);
-            ps->system->addBox(nn, min, max, false);
-            break;
+            return;
         case 't': //place a cube for collision
+        {
             nn = 512;
             float cw = .25;
             float4 cen = float4(cw, cw, cw-.1, 1.0f);
@@ -212,11 +214,52 @@ void appKeyboard(unsigned char key, int x, int y)
             cen = float4(1+3*cw, 1+3*cw, cw-.1, 1.0f);
             make_cube(triangles, cen, cw);
             ps->system->loadTriangles(triangles);
+            return;
+        }
+        case 'r': //drop a rectangle
+        {
+            nn = 2048;
+            min = float4(.1, .1, .1, 1.0f);
+            max = float4(2., 2., 2., 1.0f);
+            ps->system->addBox(nn, min, max, false);
+            return;
+        }
+        case 'c':
+            ps->system->getRenderer()->setDepthSmoothing(Render::NO_SHADER);
             break;
- 
-               
-
+        case 'C':
+            ps->system->getRenderer()->setDepthSmoothing(Render::BILATERAL_GAUSSIAN_SHADER);
+            break;
+        case 'w':
+            translate_z -= 0.1;
+            break;
+        case 'a':
+            translate_x += 0.1;
+            break;
+        case 's':
+            translate_z += 0.1;
+            break;
+        case 'd':
+            translate_x -= 0.1;
+            break;
+        case 'z':
+            translate_y += 0.1;
+            break;
+        case 'x':
+            translate_y -= 0.1;
+            break;
+        default:
+            return;
     }
+
+    // set view matrix
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glRotatef(-90, 1.0, 0.0, 0.0);
+    glRotatef(rotate_x, 1.0, 0.0, 0.0);
+    glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
+    glTranslatef(translate_x, translate_z, translate_y);
 }
 
 void appRender()
@@ -228,10 +271,9 @@ void appRender()
     glEnable(GL_DEPTH_TEST);
 
     ps->render();
-
     glColor4f(0,0,1,.5);
 
-    glDepthMask(GL_FALSE);
+    //glDepthMask(GL_FALSE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -279,7 +321,7 @@ void appMouse(int button, int state, int x, int y)
         mouse_buttons |= 1<<button;
     } else if (state == GLUT_UP) {
         mouse_buttons = 0;
-    }
+    } 
 
     mouse_old_x = x;
     mouse_old_y = y;
@@ -307,11 +349,12 @@ void appMotion(int x, int y)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glTranslatef(translate_x, translate_y, translate_z);
+    //glTranslatef(-translate_x, -translate_y, -translate_z);
     glRotatef(-90, 1.0, 0.0, 0.0);
-    //glTranslatef(0, translate_z, translate_y);
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
+    glTranslatef(translate_x, translate_z, translate_y);
+    //glTranslatef(0, translate_z, translate_y);
     //glutPostRedisplay();
 }
 
@@ -375,3 +418,29 @@ void showFPS(float fps, std::string* report)
     glPopMatrix();                      // restore to previous modelview matrix
 }
 //----------------------------------------------------------------------
+void resizeWindow(int w, int h)
+{
+	if(h==0)
+	{
+		h=1;
+	}
+	glViewport(0, 0, w, h);
+
+    // projection
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(fov, (GLfloat)w / (GLfloat) h, 0.3, 100.0);
+
+    // set view matrix
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glRotatef(-90, 1.0, 0.0, 0.0);
+    glRotatef(rotate_x, 1.0, 0.0, 0.0);
+    glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
+    glTranslatef(translate_x, translate_z, translate_y);
+	ps->system->getRenderer()->setWindowDimensions(w,h);
+	window_width = w;
+	window_height = h;
+	glutPostRedisplay();
+}

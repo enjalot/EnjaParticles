@@ -24,7 +24,7 @@ public:
     Buffer(CL *cli, const std::vector<T> &data, unsigned int memtype);
     //create a OpenCL BufferGL from a vbo_id
     //if managed is true then the destructor will delete the VBO
-    Buffer(CL *cli, GLuint vbo_id);
+    Buffer(CL *cli, GLuint vbo_id, int type);
     ~Buffer();
 
 	cl_mem getDevicePtr() { return cl_buffer[0](); }

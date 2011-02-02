@@ -106,8 +106,8 @@ SPH::SPH(RTPS *psfr, int n)
     //// really this should be setup by the user
     //int nn = 1024;
     int nn = 3333;
-    nn = 8192;
-    //nn = 2048;
+    //nn = 8192;
+    nn = 2048;
     //nn = 1024;
     //float4 min = float4(.4, .4, .1, 0.0f);
     //float4 max = float4(.6, .6, .4, 0.0f);
@@ -116,9 +116,9 @@ SPH::SPH(RTPS *psfr, int n)
     //float4 min   = float4(-559., -15., 0.5, 1.);
 	//float4 max   = float4(-400., 225., 1050., 1);
     //grid = Domain(float4(-560,-30,0,0), float4(256, 256, 1276, 0));
-    float4 min   = float4(100./sd, -15./sd, 0.5/sd, 1.);
+    //float4 min   = float4(100./sd, -15./sd, 0.5/sd, 1.);
     //float4 min   = float4(100., -15., 550, 1.);
-	float4 max   = float4(255./sd, 225./sd, 1250./sd, 1);
+	//float4 max   = float4(255./sd, 225./sd, 1250./sd, 1);
 
 
 
@@ -127,10 +127,11 @@ SPH::SPH(RTPS *psfr, int n)
 
     //addBox(nn, min, max, false);
     
-    nn = 512;
-    min = float4(-125, 75, 475, 0.0f);
-    max = float4(-75, 127, 525, 0.0f);
-    //addBox(nn, min, max, false);
+    //nn = 512;
+    /*nn = 512;
+    float4 min = float4(.1, .1, .1, 1.0f);
+	float4 max = float4(.9, .5, .9, 1.0f);
+    addBox(nn, min, max, false);*/
     //addBox(nn, min, max, false);
    
     //float4 center = float4(.1/scale, .15/scale, .3/scale, 0.0f);
@@ -148,6 +149,8 @@ SPH::SPH(RTPS *psfr, int n)
     
     
 #endif
+
+	renderer = new Render(pos_vbo,col_vbo,num,ps->cli);
 
 }
 
@@ -331,6 +334,7 @@ void SPH::printTimers()
     {
         timers[i]->print();
     }
+    System::printTimers();
 }
 
 void SPH::calculateSPHSettings()
@@ -369,6 +373,7 @@ void SPH::calculateSPHSettings()
     params.PI = 3.14159265f;
     params.K = 20.0f;
     params.num = num;
+//    params.surface_threshold = 2.0 * params.simulation_scale; //0.01;
     params.viscosity = .001f;
     //params.viscosity = 1.0f;
     params.gravity = -9.8f;
@@ -567,7 +572,8 @@ void SPH::pushParticles(vector<float4> pos)
     if (num + nn > max_num) {return;}
     float rr = (rand() % 255)/255.0f;
     float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
-    printf("random: %f\n", rr);
+    //printf("random: %f\n", rr);
+	//float4 color(0.0f,0.0f,0.1f,0.1f);
 
     std::vector<float4> cols(nn);
     std::vector<float4> vels(nn);
@@ -619,6 +625,14 @@ void SPH::pushParticles(vector<float4> pos)
 #else
     num += nn;  //keep track of number of particles we use
 #endif
+	renderer->setNum(num);
+}
+
+void SPH::render()
+{
+	System::render();
+	renderer->render_box(grid.getBndMin(), grid.getBndMax());
+    renderer->render_table(grid.getBndMin(), grid.getBndMax());
 }
 
 

@@ -32,6 +32,7 @@
 #define neigh(i, j)  index_neigh[j+50*i] // max of 50 neighbors
 
 #define density(i) 			vars_sorted[i+DENS*numParticles].x
+//#define surface(i) 			vars_sorted[i+COL*numParticles]
 #define pos(i) 				vars_sorted[i+POS*numParticles]
 #define vel(i) 				vars_sorted[i+VEL*numParticles]
 #define veleval(i)    		vars_sorted[i+VELEVAL*numParticles]

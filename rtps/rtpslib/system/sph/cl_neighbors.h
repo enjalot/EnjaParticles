@@ -13,6 +13,8 @@ void zeroPoint(PointData* pt)
 	pt->surf_tens = (float4)(0.,0.,0.,0.);
 	pt->color_lapl = 0.;
 	pt->xsph = (float4)(0.,0.,0.,0.);
+//	pt->center_of_mass = (float4)(0.,0.,0.,0.);
+//	pt->num_neighbors = 0;
 }
 //----------------------------------------------------------------------
 inline void ForNeighbor(__global float4*  vars_sorted,
@@ -49,6 +51,10 @@ inline void ForNeighbor(__global float4*  vars_sorted,
 	if (sphp->choice == 3) {
 		//#include "density_denom_update.cl"
 	} 
+/*	
+	if (sphp->choice == 4) {
+		#include "cl_surface_extraction.h"
+	}*/
 }
 //--------------------------------------------------
 inline void ForPossibleNeighbor(__global float4* vars_sorted, 
