@@ -4,3 +4,4 @@ build/
 *.so
 *.a
 *_cl.cl
+*.pyc

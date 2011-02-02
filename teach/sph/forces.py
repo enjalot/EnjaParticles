@@ -1,4 +1,3 @@
-import os, sys
 import pygame
 from pygame.locals import *
 
@@ -11,6 +10,9 @@ class Particle:
         self.pos = [self.x, self.y]
         self.radius = radius
         self.scale = scale
+        self.mass = 1
+
+        self.dens = 0
 
         #pygame stuff
         self.col = color
@@ -73,54 +75,54 @@ class Particle:
         pygame.draw.circle(self.surface, self.col, self.pos, self.dens*5, 0)
 
 
-def init_particles(surface):
-    particles = []
-    radius = 1.
-    scale = 80.
-    particles += [ Particle(100,100, radius, scale, [255,0,0], surface) ] 
-    particles += [ Particle(400,400, radius, scale, [0,0,255], surface) ] 
-    particles += [ Particle(479,400, radius, scale, [0,205,0], surface) ] 
-    particles += [ Particle(400,479, radius, scale, [0,205,205], surface) ] 
-    return particles
+def density_update(particles):
+    #brute force
+    for pi in particles:
+        pi.dens = 0.
+        for pj in particles:
+            r = dist(pi.pos, pj.pos)
+            r = [i/(pi.scale) for i in r]
+            #print r
+            pi.dens += pj.mass*Wpoly6(pi.radius, r)
 
-def main():
-    pygame.init()
-    screen = pygame.display.set_mode((800, 800))
-    pygame.display.set_caption('SPH Forces')
+def force_update(particles):
+    #brute force
+    rest_dens = 1000.
+    K = 20.
+    fscale = 100000 #arbitrary. about how big the force gets in this example
+    fdraw = 100     #how big we scale the vector to draw
 
-    background = pygame.Surface(screen.get_size())
-    background = background.convert()
-    background.fill((250, 250, 250))
+    for pi in particles:
+        pi.force = [0,0]
+        di = pi.dens
+        Pi = K*(di - rest_dens)
+        for pj in particles:
+            if pj == pi:
+                continue
+            r = dist(pi.pos, pj.pos)
+            r = [i/(pi.scale) for i in r]
 
-    clock = pygame.time.Clock()
+            dj = pj.dens
+            Pj = K*(dj - rest_dens)
 
-    particles = init_particles(screen)
+            kern = -.5 * (Pi + Pj) * dWspiky(pi.radius, r)
+            #f = [r[0]*kern, r[1]*kern]
+            f = [i*kern for i in r]    #i*kern is physical force
+            pi.force[0] += f[0]
+            pi.force[1] += f[1]
+            """
+            vec = [self.x - f[0]*fdraw/fscale, self.y - f[1]*fdraw/fscale]
+            pygame.draw.line(self.surface, pj.col, self.pos, vec)
+            tot[0] += f[0]*fdraw/fscale
+            tot[1] += f[1]*fdraw/fscale
+            """
+
+        #tot[0] = self.x - tot[0]
+        #tot[1] = self.y - tot[1]
+  
+def euler_update(particles):
+    dt = .001
 
 
-    mouse_down = False
-    while 1:
-        clock.tick(60)
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                return
-            elif event.type == KEYDOWN and (event.key == K_ESCAPE or event.key == 113): #q
-                return
-            elif event.type == MOUSEBUTTONDOWN:
-                mouse_down = True
-            elif event.type == MOUSEMOTION:
-                if(mouse_down):
-                    particles[0].move(event.pos[0], event.pos[1])
-            elif event.type == MOUSEBUTTONUP:
-                mouse_down = False
 
-        
-        screen.blit(background, (0, 0))
-        for p in particles:
-            p.density(particles)
-        particles[0].force(particles);
-        for p in particles:
-            p.draw()
-        pygame.display.flip()
 
-if __name__ == "__main__":
-    main()
