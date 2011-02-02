@@ -29,10 +29,12 @@ public:
 
     //decide which kind of rendering to use
     enum RenderType {POINTS, SPRITES};
-	enum ShaderType {SPHERE_SHADER, DEPTH_SHADER, GAUSSIAN_X_SHADER, GAUSSIAN_Y_SHADER, BILATERAL_GAUSSIAN_SHADER, NORMAL_SHADER, MIKEP_SHADER};
+	enum ShaderType {NO_SHADER,SPHERE_SHADER, DEPTH_SHADER, GAUSSIAN_X_SHADER, GAUSSIAN_Y_SHADER, BILATERAL_GAUSSIAN_SHADER, NORMAL_SHADER, CURVATURE_FLOW_SHADER, MIKEP_SHADER};
 
-    void setNum(int nn){num = nn;};
-
+    void setNum(int nn){num = nn;}
+	void setDepthSmoothing(ShaderType shade){ smoothing = shade;}
+	void setWindowDimensions(GLuint width,GLuint height);
+	
     void render();
     void drawArrays();
 
@@ -61,6 +63,7 @@ private:
     bool glsl;
     bool mikep;
     bool blending;
+	ShaderType smoothing;
     std::map<ShaderType,GLuint> glsl_program;    
     std::map<std::string,GLuint> gl_tex;
 	std::vector<GLuint> fbos;
@@ -76,6 +79,8 @@ private:
     GLuint compileShaders(const char* vertex_file, const char* fragment_file, const char* geometry_file = NULL, GLenum* geom_param=NULL, GLint* geom_value=NULL, int geom_param_len=0);
     int loadTexture();
 	int generateCircleTexture(GLubyte r, GLubyte g, GLubyte b, GLubyte alpha, int diameter);
+	void deleteFramebufferTextures();
+	void createFramebufferTextures();
 };	
 
 

@@ -23,15 +23,16 @@ using namespace rtps;
 
 int window_width = 800;
 int window_height = 600;
+float fov = 65.;
 int glutWindowHandle = 0;
 /*
 float translate_x = -.5f;
 float translate_y = 0.f;//-200.0f;//300.f;
 float translate_z = 1.5f;//200.f;
 */
-float translate_x = -1.00;
-float translate_y = -1.00f;//300.f;
-float translate_z = -2.00f;
+float translate_x = -2.00f;
+float translate_y = -3.00f;//300.f;
+float translate_z = 3.00f;
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -57,6 +58,7 @@ void appDestroy();
 
 void appMouse(int button, int state, int x, int y);
 void appMotion(int x, int y);
+void resizeWindow(int w, int h);
 
 void timerCB(int ms);
 
@@ -110,6 +112,7 @@ int main(int argc, char** argv)
     glutKeyboardFunc(appKeyboard);
     glutMouseFunc(appMouse);
     glutMotionFunc(appMotion);
+	glutReshapeFunc(resizeWindow);
 
 	//define_lights_and_materials();
 
@@ -118,8 +121,6 @@ int main(int argc, char** argv)
     GLboolean bGLEW = glewIsSupported("GL_VERSION_2_0 GL_ARB_pixel_buffer_object"); 
     printf("GLEW supported?: %d\n", bGLEW);
 
-    //initialize the OpenGL scene for rendering
-    init_gl();
 
     printf("before we call enjas functions\n");
 
@@ -130,6 +131,9 @@ int main(int argc, char** argv)
     rtps::Domain grid = Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
     rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
     ps = new rtps::RTPS(settings);
+
+    //initialize the OpenGL scene for rendering
+    init_gl();
 
     glutMainLoop();
     return 0;
@@ -149,7 +153,7 @@ void init_gl()
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     //gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 100.0);
-    gluPerspective(65.0, (GLfloat)window_width / (GLfloat) window_height, 0.3, 100.0);
+    gluPerspective(fov, (GLfloat)window_width / (GLfloat) window_height, 0.3, 100.0);
     //gluPerspective(90.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 10000.0); //for lorentz
 
     // set view matrix
@@ -157,7 +161,10 @@ void init_gl()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glRotatef(-90, 1.0, 0.0, 0.0);
-    glTranslatef(translate_x, translate_y, translate_z);
+    glRotatef(rotate_x, 1.0, 0.0, 0.0);
+    glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
+    glTranslatef(translate_x, translate_z, translate_y);
+	ps->system->getRenderer()->setWindowDimensions(window_width,window_height);
     //glTranslatef(0, 10, 0);
     /*
     gluLookAt(  0,10,0,
@@ -208,6 +215,12 @@ void appKeyboard(unsigned char key, int x, int y)
 		ps->system->addBox(nn, min, max, false);
 		return;
 	}
+	case 'c':
+		ps->system->getRenderer()->setDepthSmoothing(Render::NO_SHADER);
+		break;
+	case 'C':
+		ps->system->getRenderer()->setDepthSmoothing(Render::BILATERAL_GAUSSIAN_SHADER);
+		break;
 	case 'w':
 		translate_z -= 0.1;
 		break;
@@ -378,3 +391,29 @@ void showFPS(float fps, std::string* report)
     glPopMatrix();                      // restore to previous modelview matrix
 }
 //----------------------------------------------------------------------
+void resizeWindow(int w, int h)
+{
+	if(h==0)
+	{
+		h=1;
+	}
+	glViewport(0, 0, w, h);
+
+    // projection
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(fov, (GLfloat)w / (GLfloat) h, 0.3, 100.0);
+
+    // set view matrix
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glRotatef(-90, 1.0, 0.0, 0.0);
+    glRotatef(rotate_x, 1.0, 0.0, 0.0);
+    glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
+    glTranslatef(translate_x, translate_z, translate_y);
+	ps->system->getRenderer()->setWindowDimensions(w,h);
+	window_width = w;
+	window_height = h;
+	glutPostRedisplay();
+}

@@ -1,4 +1,6 @@
 uniform sampler2D depthTex;
+uniform float del_x;
+uniform float del_y;
 //varying float w;
 
 vec3 uvToEye(vec2 texCoord,float z)
@@ -33,8 +35,6 @@ void main()
 		discard;
 		//return;
 	}	
-	float del_x = 1.0/800.0;
-	float del_y = 1.0/600.0;
 
 	vec3 posEye = uvToEye(gl_TexCoord[0].xy,depth);
 	vec2 texCoord1 = vec2(gl_TexCoord[0].x+del_x,gl_TexCoord[0].y);

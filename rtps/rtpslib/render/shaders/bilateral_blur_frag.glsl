@@ -6,9 +6,9 @@ const float pi = 3.141592654;
 //float kernel[KERNEL_SIZE];
 
 uniform sampler2D depthTex;
+uniform float del_x;
+uniform float del_y;
 
-float step_w = 1.0/800.;
-float step_h = 1.0/600.;
 //vec2 offset[KERNEL_SIZE];
 
 void main(void)
@@ -26,9 +26,9 @@ void main(void)
    {
 	   for(int j=0; j<KERNEL_DIAMETER; j++ )
 	   {
-			float tmp = texture2D(depthTex,gl_TexCoord[0].st+vec2(float(i-(KERNEL_DIAMETER/2))*step_w,float(j-(KERNEL_DIAMETER/2))*step_h)).x;//texture2D(depthTex, gl_TexCoord[0].st + offset[(i*KERNEL_DIAMETER)+j]).x;
-			if(abs(tmp-depth)>threshold)
-				tmp=depth;//continue;
+			float tmp = texture2D(depthTex,gl_TexCoord[0].st+vec2(float(i-(KERNEL_DIAMETER/2))*del_x,float(j-(KERNEL_DIAMETER/2))*del_y)).x;//texture2D(depthTex, gl_TexCoord[0].st + offset[(i*KERNEL_DIAMETER)+j]).x;
+			if(tmp-depth>threshold)
+				tmp=depth;//+(sign(tmp-depth))*threshold;//continue;
 			sum += tmp * (1./(2.*pi*sigmasq))*exp(-(pow(float(i-(KERNEL_DIAMETER/2)),2.)+pow(float(j-(KERNEL_DIAMETER/2)),2.))/(2.*sigmasq));
 		}
    }

@@ -35,6 +35,12 @@ public:
 
     virtual void addForceField(ForceField ff){};
     virtual void printTimers(){ renderer->printTimers();};
+	virtual void setRenderer(Render* render)
+	{
+		delete renderer;
+		renderer = render;
+	}
+	virtual Render* getRenderer(){return renderer;}
 
 protected:
     //number of particles
