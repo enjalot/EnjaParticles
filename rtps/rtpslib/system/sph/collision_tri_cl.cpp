@@ -22,6 +22,11 @@ float4 cross_product(float4 a, float4 b)
     return (float4)(a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x, 0);
 }
 //----------------------------------------------------------------------
+float magnitude(float4 a)
+{
+    float mag = sqrt(a.x*a.x + a.y*a.y + a.z*a.z); //store the magnitude of the velocity
+    return mag;
+}
 float4 v3normalize(float4 a)
 {
     float mag = sqrt(a.x*a.x + a.y*a.y + a.z*a.z); //store the magnitude of the velocity
@@ -164,12 +169,65 @@ float intersect_triangle_ge(float4 pos, float4 vel, __local Triangle* tri, float
     t = dot(edge2, qvec) * inv_det;
 
     //if(t > eps and t < dist)
-    if(t < dist)
+    if(t > -2*dist and t < dist)
         return t;
 
     return 2*dist;
 }
 #endif
+
+float intersect_triangle_segment(float4 pos, float4 vel, __local Triangle* tri, float dist, float eps, float scale)
+{
+    /* 
+     * Ericson: Real Time Collision Detection. pp 191-192
+     */
+    float4 a = tri->verts[0] * scale;
+    float4 b = tri->verts[1] * scale;
+    float4 c = tri->verts[2] * scale;
+
+    float4 ab = b - a;
+    float4 ac = c - a;
+
+    //dist /= scale;
+    //pos /= scale;
+    float4 vn = v3normalize(vel);
+    float4 p = pos - vn*dist;
+    float4 q = pos + vn*dist;
+    float4 qp = p - q;
+
+    //float4 n = tri->normal;
+    float4 n = cross_product(ab, ac);
+    tri->normal = v3normalize(n);
+
+    float d = dot(qp, n);
+    if ( d <= 0.0f) return 2*dist;
+
+    float4 ap = p - a;
+    float t = dot(ap, n);
+    if (t < 0.0f || t > d) return 2*dist;
+
+    float4 e = cross_product(qp, ap);
+    float v = dot(ac, e);
+    if(v < 0.0f || v > d) return 2*dist;
+    float w = -dot(ab, e);
+    if ( w < 0.0f || v + w > d) return 2*dist;
+
+    //intersection
+    float ood = 1.0f / d;
+    t *= ood;
+    v *= ood;
+    w *= ood;
+    float u = 1.0f - v - w;
+    float4 tp = u*a + v*b + w*c;
+    float distance = magnitude(pos - tp);
+    return distance;// * scale;
+
+    //return dist - 2.*t*dist;
+
+
+
+}
+
 //----------------------------------------------------------------------
 #if 1
 bool intersect_box_ge(float4 pos, float4 vel, __local Box* box, float dt)
@@ -224,9 +282,11 @@ float4 collisions_triangle(float4 pos,
     float eps = .000001;
     float distance = 0.0f;
     float4 f = (float4)(0,0,0,0); //returning the force
+    int tc = 0;
     for (int j=0; j < (last-first); j++)
     {
-        distance = intersect_triangle_ge(pos, vel, &triangles[j], params->boundary_distance, eps, params->simulation_scale);
+        //distance = intersect_triangle_ge(pos, vel, &triangles[j], params->boundary_distance, eps, params->simulation_scale);
+        distance = intersect_triangle_segment(pos, vel, &triangles[j], params->boundary_distance, eps, params->simulation_scale);
         //distance = intersect_triangle_ge(pos, vel, &triangles[j], dt, eps);
         //if ( distance != -1)
         distance = params->boundary_distance - distance;
@@ -248,9 +308,9 @@ float4 collisions_triangle(float4 pos,
 			vel = vel*damping;
            */
         }
+        f.w += 1;
     }
     #endif
-
 	return f;
 }
 #endif
@@ -320,18 +380,20 @@ __kernel void collision_triangle(    __global float4* vars_sorted,
                                     int n_triangles, 
                                     float dt, 
 		                            __constant struct SPHParams* params,
-                                    __local Triangle* triangles)
+                                    __local Triangle* triangles
+				                    DEBUG_ARGS
+                                    )
 {
 #if 1
     unsigned int i = get_global_id(0);
 	int num = params->num;
-    if(i > num) return;
 
     float4 p = pos(i);
     float4 v = vel(i);
     float4 f = force(i);
 
 
+    int tc = 0; //triangle count
 	int max_tri = 220;
 	//int max_box = 600;
     
@@ -358,7 +420,26 @@ __kernel void collision_triangle(    __global float4* vars_sorted,
     //rf = (float4)(11.,11.,11.,1);
 	}
 
+    if(i > num) return;
+
+
+    clf[i] = rf;
+    clf[i].w = pos(i).z / params->simulation_scale;
+    cli[i].x = (int)rf.w;
+    cli[i].y = params->num;
+    cli[i].z = get_local_size(0);
+    
+    /*
+    float mag = sqrt(rf.x*rf.x + rf.y*rf.y + rf.z*rf.z); //store the magnitude of the velocity
+    if (mag > 0){
+        vel(i) = (float4)(0,0,0,0);
+        force(i) = (float4)(0,0,0,0);
+    }
+    else{
+    */
     force(i) += rf;
+    //}
+    
 /*
     vel[i].x = v.x;
     vel[i].y = v.y;

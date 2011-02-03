@@ -25,9 +25,6 @@ __kernel void datastructures(
 	//int num = get_global_size(0);
 
 
-	// particle index	
-	if (index >= num) return;
-
 	uint hash = sort_hashes[index];
 
 	// Load hash data into shared memory so that we can look 
@@ -81,6 +78,10 @@ __kernel void datastructures(
 		vars_sorted[index+j*numParticles]	= vars_unsorted[sorted_index+j*numParticles];
 	}
 	#endif
+
+	// particle index	
+	if (index >= num) return;
+
 
 	// Variables to sort could change for different types of simulations 
 	// SHOULD I divide by simulation scale upon return? do not think so

@@ -221,6 +221,7 @@ void SPH::updateCPU()
 void SPH::updateGPU()
 {
 
+    timers[TI_UPDATE]->start();
     glFinish();
     cl_position.acquire();
     cl_color.acquire();
@@ -229,7 +230,6 @@ void SPH::updateGPU()
     int sub_intervals = 10;  //should be a setting
     for(int i=0; i < sub_intervals; i++)
     {
-        timers[TI_UPDATE]->start();
         /*
         k_density.execute(num);
         k_pressure.execute(num);
@@ -269,12 +269,12 @@ void SPH::updateGPU()
         //
         //Andrew's rendering emporium
         //neighborSearch(4);
-        timers[TI_UPDATE]->end();
     }
 
     cl_position.release();
     cl_color.release();
 
+    timers[TI_UPDATE]->end();
 
 }
 
@@ -378,7 +378,7 @@ void SPH::calculateSPHSettings()
     //params.viscosity = 1.0f;
     params.gravity = -9.8f;
     //params.gravity = 0.0f;
-    params.velocity_limit = 600.0f;
+    params.velocity_limit = 100.0f;
     params.xsph_factor = .05f;
 
 	float h = params.smoothing_distance;
@@ -498,6 +498,11 @@ void SPH::prepareSorted()
 	cl_sort_output_hashes = Buffer<int>(ps->cli, keys);
 	cl_sort_output_indices = Buffer<int>(ps->cli, keys);
 
+
+    std::vector<Triangle> maxtri(2048);
+    cl_triangles = Buffer<Triangle>(ps->cli, maxtri);
+
+
 }
 
 void SPH::setupDomain()
@@ -579,7 +584,8 @@ void SPH::pushParticles(vector<float4> pos)
     std::vector<float4> vels(nn);
 
     std::fill(cols.begin(), cols.end(),color);
-    float v = .5f;
+    //float v = .5f;
+    float v = 0.0f;
     //float4 iv = float4(v, v, -v, 0.0f);
     float4 iv = float4(0, v, -.1, 0.0f);
     std::fill(vels.begin(), vels.end(),iv);
@@ -631,7 +637,7 @@ void SPH::pushParticles(vector<float4> pos)
 void SPH::render()
 {
 	System::render();
-	//renderer->render_box(grid.getBndMin(), grid.getBndMax());
+	renderer->render_box(grid.getBndMin(), grid.getBndMax());
     //renderer->render_table(grid.getBndMin(), grid.getBndMax());
 }
 

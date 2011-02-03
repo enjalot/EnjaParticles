@@ -363,7 +363,7 @@ void Render::render()
 		// draws circles instead of squares
         glEnable(GL_POINT_SMOOTH); 
         //TODO make the point size a setting
-        glPointSize(15.0f);
+        glPointSize(5.0f);
 
         drawArrays();
     }
@@ -702,7 +702,7 @@ GLuint Render::compileShaders(const char* vertex_file, const char* fragment_file
 int Render::setupTimers()
 {
     //int print_freq = 20000;
-    int print_freq = 1000; //one second
+    int print_freq = 100; //one second
     int time_offset = 5;
 
     timers[TI_RENDER]     = new GE::Time("render", time_offset, print_freq);
