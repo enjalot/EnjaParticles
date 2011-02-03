@@ -16,6 +16,11 @@ public:
     RTPSettings();
     RTPSettings(SysType system, int max_particles, float dt);
     RTPSettings(SysType system, int max_particles, float dt, Domain grid);
+    
+    //collision
+    RTPSettings(SysType system, int max_particles, float dt, Domain grid, bool tri_collision);
+
+    //flock
     RTPSettings(int max_particles, float maxspeed, float separationdist, float perceptionrange, float color[]);
 
     //maximum number of particles a system can hold
@@ -25,6 +30,9 @@ public:
 
     //time step per iteration
     float dt;
+
+    //triangle collision?
+    bool tri_collision;
 
 };
 

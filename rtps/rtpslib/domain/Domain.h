@@ -2,8 +2,11 @@
 #define DOMAIN_H_INCLUDED
 
 #include "../structs.h"
+#include <vector>
 
 namespace rtps {
+
+
 
 class Domain
 {

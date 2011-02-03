@@ -28,13 +28,16 @@ public:
     virtual void setNum(int nn){num = nn;};//should this be public
     virtual GLuint getPosVBO() { return pos_vbo; }
     virtual GLuint getColVBO() { return col_vbo; }
+
 	virtual void render(){renderer->render();}
 
-    virtual int addBox(int nn, float4 min, float4 max, bool scaled){ return 0;}
-    virtual void addBall(int nn, float4 center, float radius, bool scaled){}
-
+    virtual int addBox(int nn, float4 min, float4 max, bool scaled){ return 0;};
+    virtual void addBall(int nn, float4 center, float radius, bool scaled){};
+    
+    virtual void loadTriangles(std::vector<Triangle> triangles){};
     virtual void addForceField(ForceField ff){};
     virtual void printTimers(){ renderer->printTimers();};
+
 	virtual void setRenderer(Render* render)
 	{
 		delete renderer;

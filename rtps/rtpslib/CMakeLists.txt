@@ -76,7 +76,6 @@ set (rtpslib_SOURCES
 
     ${rtpslib_SOURCE_DIR}/domain/Domain
     ${rtpslib_SOURCE_DIR}/domain/IV
-
     
     ${rtpslib_SOURCE_DIR}/system/Simple.cpp
     ${rtpslib_SOURCE_DIR}/system/simple/ForceField
@@ -90,6 +89,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/sph/Viscosity
     ${rtpslib_SOURCE_DIR}/system/sph/XSPH
     ${rtpslib_SOURCE_DIR}/system/sph/Collision_wall
+    ${rtpslib_SOURCE_DIR}/system/sph/Collision_triangle
     
     ${rtpslib_SOURCE_DIR}/system/sph/Prep
     ${rtpslib_SOURCE_DIR}/system/sph/Hash

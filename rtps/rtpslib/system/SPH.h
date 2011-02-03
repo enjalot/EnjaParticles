@@ -130,9 +130,14 @@ public:
     void addBall(int nn, float4 center, float radius, bool scaled);
 	virtual void render();
     
+    void loadTriangles(std::vector<Triangle> triangles);
+    
+
+
     enum {TI_HASH=0, TI_BITONIC_SORT, TI_BUILD, TI_NEIGH, 
-          TI_DENS, TI_FORCE, TI_EULER, TI_LEAPFROG, TI_UPDATE, TI_COLLISION_WALL
-          }; //10
+          TI_DENS, TI_FORCE, TI_EULER, TI_LEAPFROG, TI_UPDATE, TI_COLLISION_WALL,
+          TI_COLLISION_TRI
+          }; //11
     GE::Time* timers[30];
     int setupTimers();
     void printTimers();
@@ -150,6 +155,8 @@ private:
 
     int nb_var;
 
+    bool triangles_loaded; //keep track if we've loaded triangles yet
+
     //needs to be called when particles are added
     void calculateSPHSettings();
     void setupDomain();
@@ -159,6 +166,7 @@ private:
 
     Kernel k_density, k_pressure, k_viscosity;
     Kernel k_collision_wall;
+    Kernel k_collision_tri;
     Kernel k_euler, k_leapfrog;
     Kernel k_xsph;
 
@@ -197,6 +205,8 @@ private:
 	Buffer<int> 		cl_sort_indices;
 	Buffer<int> 		cl_unsort;
 	Buffer<int> 		cl_sort;
+
+    Buffer<Triangle>    cl_triangles;
 	
     //Two arrays for bitonic sort (sort not done in place)
 	Buffer<int>         cl_sort_output_hashes;
@@ -225,6 +235,7 @@ private:
     void loadViscosity();
     void loadXSPH();
     void loadCollision_wall();
+    void loadCollision_tri();
     void loadEuler();
     void loadLeapFrog();
 
@@ -255,6 +266,7 @@ private:
     void buildDataStructures();
     void neighborSearch(int choice);
     void collision();
+    void collide_triangles();
     void integrate();
 
     float Wpoly6(float4 r, float h);
