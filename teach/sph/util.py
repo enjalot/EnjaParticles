@@ -5,6 +5,7 @@
 #TODO: generalize to 3 and 4 dimensions
 
 import numpy as np
+import math
 
 class Vec(np.ndarray):
 
@@ -34,7 +35,7 @@ class Vec(np.ndarray):
         #out_arr is the output (resulting) array
         out_arr.x = out_arr[0]
         out_arr.y = out_arr[1]
-        #print "array wrap:", out_arr
+        #print "array wrap:", out_arr, out_arr.shape
         return np.ndarray.__array_wrap__(self, out_arr, context)
 
     def __repr__(self):
@@ -43,6 +44,9 @@ class Vec(np.ndarray):
 
 
     def __setitem__(self, ind, val):
+        #print "SETITEM", self.shape, ind, val
+        if self.shape == ():    #dirty hack for dot product
+            return
         if ind == 0:
             dict.__setattr__(self, 'x', val)
         elif ind == 1:
@@ -68,3 +72,9 @@ if __name__ == "__main__":
     v1.y = 6
     print "v1.y, v1[1]:", v1.y, v1[1]
     print "v1:", repr(v1)
+
+    print "====================="
+    print "v1.shape", v1.shape
+    print "multiply(v1,v1):", np.multiply(v1,v1)
+    print "dot(v1,v1):", np.dot(v1, v1)
+    

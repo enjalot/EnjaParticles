@@ -1,17 +1,13 @@
+from util import Vec
+
 from math import *
+import numpy as np
 from numpy import pi
 
 def mag(x):
-    #non-pythonic way to calculate magnitude of a vector
-    sum = 0
-    for xi in x:
-        sum += xi**2
-    return sqrt(sum)
+    return sqrt(np.dot(x, x))
 
 def dist(ri, rj):
-    ret = zip(ri,rj)
-    for i,r in enumerate(ret):
-        ret[i] = r[0] - r[1]
     return ret
 
 def Wpoly6(h, r):

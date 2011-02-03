@@ -2,12 +2,13 @@ import pygame
 from pygame.locals import *
 
 from kernels import *
+from util import Vec
+
+
 class Particle:
-    def __init__(self, x, y, radius, scale, color, surface):
+    def __init__(self, pos, radius, scale, color, surface):
         #physics stuff
-        self.x = x
-        self.y = y
-        self.pos = [self.x, self.y]
+        self.pos = pos
         self.radius = radius
         self.scale = scale
         self.mass = 1
@@ -18,53 +19,8 @@ class Particle:
         self.col = color
         self.surface = surface
 
-    def move(self, x,y):
-        self.x = x
-        self.y = y
-        self.pos = [self.x, self.y]
-
-    def density(self, particles):
-        self.dens = 0
-
-        mj = 1 #mass = 1 for now
-        for pj in particles:
-            r = dist(self.pos, pj.pos)
-            r = [i/(self.scale) for i in r]
-            #print r
-            self.dens += mj*Wpoly6(self.radius, r)
-
-    def force(self, particles):
-        rest_dens = 1000.
-        K = 20.
-        fscale = 100000 #arbitrary. about how big the force gets in this example
-        fdraw = 100     #how big we scale the vector to draw
-        tot = [0,0] #total force vector
-        for pj in particles:
-            if pj == self:
-                continue
-            r = dist(self.pos, pj.pos)
-            r = [i/(self.scale) for i in r]
-
-            di = self.dens
-            dj = pj.dens
-            Pi = K*(di - rest_dens)
-            Pj = K*(dj - rest_dens)
-
-            kern = -.5 * (Pi + Pj) * dWspiky(self.radius, r)
-            #f = [r[0]*kern, r[1]*kern]
-            f = [i*kern for i in r]    #i*kern is physical force
-            vec = [self.x - f[0]*fdraw/fscale, self.y - f[1]*fdraw/fscale]
-            pygame.draw.line(self.surface, pj.col, self.pos, vec)
-            tot[0] += f[0]*fdraw/fscale
-            tot[1] += f[1]*fdraw/fscale
-
-        tot[0] = self.x - tot[0]
-        tot[1] = self.y - tot[1]
-        pygame.draw.line(self.surface, self.col, self.pos, tot)
-
-
-
-
+    def move(self, pos):
+        self.pos = pos
 
         #print "dens", self.dens
 
