@@ -133,7 +133,7 @@ float intersect_triangle_ge(float4 pos, float4 vel, __local Triangle* tri, float
     if(det > -eps && det < eps) {    // <<<<< if
     //culling
     //if(det < eps){
-        return -1;
+        return 2*dist;
         //return false;
 	}
 
@@ -147,7 +147,7 @@ float intersect_triangle_ge(float4 pos, float4 vel, __local Triangle* tri, float
     u = dot(tvec, pvec) * inv_det;
     if (u < 0.0 || u > 1.0) {     // <<<<< if
         //return false;
-        return -1;
+        return 2*dist;
 	}
 
     float4 qvec;
@@ -157,16 +157,17 @@ float intersect_triangle_ge(float4 pos, float4 vel, __local Triangle* tri, float
     v = dot(vel, qvec) * inv_det;
     if (v < 0.0 || (u + v) > 1.0f) { // <<<< if
         //return false;
-        return -1;
+        return 2*dist;
 	}
 
     float t;
     t = dot(edge2, qvec) * inv_det;
 
-    if(t > eps and t < dist)
+    //if(t > eps and t < dist)
+    if(t < dist)
         return t;
 
-    return -1;
+    return 2*dist;
 }
 #endif
 //----------------------------------------------------------------------
@@ -225,15 +226,16 @@ float4 collisions_triangle(float4 pos,
     float4 f = (float4)(0,0,0,0); //returning the force
     for (int j=0; j < (last-first); j++)
     {
-        distance = intersect_triangle_ge(pos, vel, &triangles[j], params->boundary_distance, eps,params->simulation_scale);
+        distance = intersect_triangle_ge(pos, vel, &triangles[j], params->boundary_distance, eps, params->simulation_scale);
         //distance = intersect_triangle_ge(pos, vel, &triangles[j], dt, eps);
         //if ( distance != -1)
-        if (distance > eps && distance < params->boundary_distance)
+        distance = params->boundary_distance - distance;
+        if (distance > eps)// && distance < params->boundary_distance)
         {
 
-            f += calculateRepulsionForce(triangles[j].normal, vel, 5*params->boundary_stiffness, 5*params->boundary_dampening, distance);
+            f += calculateRepulsionForce(triangles[j].normal, vel, 1*params->boundary_stiffness, 1*params->boundary_dampening, distance);
             f += calculateFrictionForce(vel, force, triangles[j].normal, friction_kinetic, friction_static_limit);
-            //f += (float4)(110,110,110,1);
+            //f += (float4)(1100,1100,1100,1);
 			/*
             //lets do some specular reflection
             float s = 2.0f*(dot(triangles[j].normal, vel));

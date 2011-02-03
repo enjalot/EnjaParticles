@@ -32,7 +32,7 @@ void SPH::loadTriangles(std::vector<Triangle> triangles)
     k_collision_tri.setArg(1, cl_triangles.getDevicePtr());     //triangles
     k_collision_tri.setArg(2, n_triangles);                     //number of triangles
 
-    printf("sizeof(Triangle) = %d\n", (int) sizeof(Triangle));
+    //printf("sizeof(Triangle) = %d\n", (int) sizeof(Triangle));
 
 
     //TODO: get local mem size from opencl

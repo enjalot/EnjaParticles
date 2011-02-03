@@ -28,8 +28,8 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 	window_width=800;
 
     printf("GL VERSION %s\n", glGetString(GL_VERSION));
-    //glsl = false;
-    glsl = true;
+    glsl = false;
+    //glsl = true;
     //mikep = true;
     mikep = false;
     blending = false;
@@ -177,16 +177,18 @@ void Render::render()
     int glheight = xywh[3];
     if(glwidth != window_width || glheight != window_height)
     {
-        printf("SETTING DIMENSIONS\n");
+        //printf("SETTING DIMENSIONS\n");
         setWindowDimensions(glwidth, glheight);
     }
+    /*
     printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
     printf("w: %d h: %d\n", window_width, window_height);
     printf("x: %d y: %d w: %d h: %d\n", xywh[0], xywh[1], xywh[2], xywh[3]);
-
+    
     int whatbuffer;
     glGetIntegerv(GL_DRAW_BUFFER0, &whatbuffer);
     printf("What buffer? %d, GL_BACK: %d\n", whatbuffer, GL_BACK);
+    */
 
     // Render the particles with OpenGL
 //printf("window width = %d window height = %d",window_width,window_height);
