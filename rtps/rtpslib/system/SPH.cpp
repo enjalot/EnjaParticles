@@ -631,8 +631,8 @@ void SPH::pushParticles(vector<float4> pos)
 void SPH::render()
 {
 	System::render();
-	renderer->render_box(grid.getBndMin(), grid.getBndMax());
-    renderer->render_table(grid.getBndMin(), grid.getBndMax());
+	//renderer->render_box(grid.getBndMin(), grid.getBndMax());
+    //renderer->render_table(grid.getBndMin(), grid.getBndMax());
 }
 
 

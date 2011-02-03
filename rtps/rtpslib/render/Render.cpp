@@ -29,7 +29,7 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 
     printf("GL VERSION %s\n", glGetString(GL_VERSION));
     glsl = false;
-    //glsl = false;
+    //glsl = true;
     //mikep = true;
     mikep = false;
     blending = false;
@@ -39,6 +39,7 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 		fbos.resize(1);
 		glGenFramebuffers(1,&fbos[0]);
 		smoothing = BILATERAL_GAUSSIAN_SHADER;
+		smoothing = NO_SHADER;
 
 		createFramebufferTextures();
 
@@ -92,6 +93,13 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 		vert+="/normal_vert.glsl";
 		frag+="/normal_frag.glsl";
         glsl_program[NORMAL_SHADER] = compileShaders(vert.c_str(),frag.c_str()); 
+        
+        vert = string(GLSL_BIN_DIR);
+		frag = string(GLSL_BIN_DIR);
+		vert+="/copy_vert.glsl";
+		frag+="/copy_frag.glsl";
+        glsl_program[COPY_TO_FB] = compileShaders(vert.c_str(),frag.c_str()); 
+
     }
     else if(mikep)
     {  
@@ -163,16 +171,22 @@ void Render::drawArrays()
 void Render::render()
 {
     //TODO: do this properly
-    float xywh[4];
-    glGetFloatv(GL_VIEWPORT, xywh);
-    float glwidth = xywh[2];
-    float glheight = xywh[3];
+    int xywh[4];
+    glGetIntegerv(GL_VIEWPORT, xywh);
+    int glwidth = xywh[2];
+    int glheight = xywh[3];
     if(glwidth != window_width || glheight != window_height)
     {
+        printf("SETTING DIMENSIONS\n");
         setWindowDimensions(glwidth, glheight);
     }
-    //printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
-    //printf("x: %f y: %f w: %f h: %f\n", xywh[0], xywh[1], xywh[2], xywh[3]);
+    printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
+    printf("w: %d h: %d\n", window_width, window_height);
+    printf("x: %d y: %d w: %d h: %d\n", xywh[0], xywh[1], xywh[2], xywh[3]);
+
+    int whatbuffer;
+    glGetIntegerv(GL_DRAW_BUFFER0, &whatbuffer);
+    printf("What buffer? %d, GL_BACK: %d\n", whatbuffer, GL_BACK);
 
     // Render the particles with OpenGL
 //printf("window width = %d window height = %d",window_width,window_height);
@@ -191,6 +205,12 @@ void Render::render()
     //TODO enable GLSL shading 
     if(glsl)
     {
+        
+        glViewport(0, 0, window_width, window_height);
+        glScissor(0, 0, window_width, window_height);
+        //glViewport(0, 0, window_width-xywh[0], window_height-xywh[1]);
+
+
 		GLenum buffers[] = {GL_COLOR_ATTACHMENT0,GL_COLOR_ATTACHMENT4};
 		//Render depth and thickness to a textures
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,fbos[0]);
@@ -241,25 +261,62 @@ void Render::render()
         glUniform1f( glGetUniformLocation(glsl_program[NORMAL_SHADER], "del_y"),1.0/((float)window_height));
 		fullscreenQuad();
 
+        /*
 		glUseProgram(0);
 		glBindTexture(GL_TEXTURE_2D,0);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D,0);
+        */
+
 
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);
+        glDrawBuffer(GL_BACK);
+
+		glViewport(xywh[0],xywh[1],window_width,window_height);
+        glScissor(xywh[0], xywh[1], window_width, window_height);
+
+
+		glActiveTexture(GL_TEXTURE0);
+		if(smoothing!=NO_SHADER)
+        {
+		    glBindTexture(GL_TEXTURE_2D,gl_tex["normalColor"]);
+		    glActiveTexture(GL_TEXTURE1);
+		    glBindTexture(GL_TEXTURE_2D,gl_tex["depth2"]);
+        } else {
+		    glBindTexture(GL_TEXTURE_2D,gl_tex["Color"]);
+		    glActiveTexture(GL_TEXTURE1);
+		    glBindTexture(GL_TEXTURE_2D,gl_tex["depth"]);
+        }
+        glUseProgram(glsl_program[COPY_TO_FB]);
+        glUniform1i( glGetUniformLocation(glsl_program[COPY_TO_FB], "normalTex"),0);
+        glUniform1i( glGetUniformLocation(glsl_program[COPY_TO_FB], "depthTex"),1);
+        fullscreenQuad();
+
+
+        glUseProgram(0);
+		glBindTexture(GL_TEXTURE_2D,0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D,0);
+
+
+        /*
+        //selfish way of rendering
 		glDrawBuffer(GL_BACK);
-		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+		//glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		//glViewport(0,0,window_width,window_height);
 		glBindFramebuffer(GL_READ_FRAMEBUFFER,fbos[0]);
 		glReadBuffer(GL_COLOR_ATTACHMENT2);
 
 		glBlitFramebuffer(0,0,window_width,window_height,
 						  0,0,window_width,window_height,
+						  //xywh[0],xywh[1],window_width,window_height,
 						  GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT,GL_LINEAR);
 
 
 		glBindFramebuffer(GL_READ_FRAMEBUFFER,0);
 		glReadBuffer(GL_BACK);
+        */
+
 		//glEnable(GL_DEPTH_TEST);
 		if(blending)
 		{
