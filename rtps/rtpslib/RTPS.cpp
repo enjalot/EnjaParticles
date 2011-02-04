@@ -2,6 +2,7 @@
 #include "RTPS.h"
 #include "system/Simple.h"
 #include "system/SPH.h"
+#include "system/FLOCK.h"
 
 
 namespace rtps{
@@ -50,6 +51,12 @@ void RTPS::Init()
         printf("sph system\n");
         system = new SPH(this, settings.max_particles);
     }
+    else if (settings.system == RTPSettings::FLOCK)
+    {
+        printf("flock system\n");
+        system = new FLOCK(this, settings.max_particles);
+    }
+    
     
 
     //pass in the position and color vbo ids to the renderer
