@@ -1,0 +1,212 @@
+#include "../FLOCK.h"
+//#include "../sph/Collision_wall.cpp"
+
+
+namespace rtps {
+
+float dot2(float4 a, float4 b)
+{
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+
+//from Krog '10
+float4 calculateRepulsionForce2(float4 normal, float4 vel, float boundary_stiffness, float boundary_dampening, float boundary_distance)
+{
+    vel.w = 0.0f;
+    float coeff = boundary_stiffness * boundary_distance - boundary_dampening * dot2(normal, vel);
+    float4 repulsion_force = float4(coeff * normal.x, coeff * normal.y, coeff*normal.z, 0.0f);
+    return repulsion_force;
+}
+
+
+//from Krog '10
+float4 calculateFrictionForce2(float4 vel, float4 force, float4 normal, float friction_kinetic, float friction_static_limit)
+{
+	float4 friction_force = float4(0.0f,0.0f,0.0f,0.0f);
+
+	// the normal part of the force vector (ie, the part that is going "towards" the boundary
+    float4 f_n = force;
+	f_n.x *= dot2(normal, force);
+	f_n.y *= dot2(normal, force);
+	f_n.z *= dot2(normal, force);
+	// tangent on the terrain along the force direction (unit vector of tangential force)
+	float4 f_t = force;
+    f_t.x -= f_n.x;
+    f_t.y -= f_n.y;
+    f_t.z -= f_n.z;
+
+	// the normal part of the velocity vector (ie, the part that is going "towards" the boundary
+	float4 v_n = vel;
+    v_n.x *= dot2(normal, vel);
+    v_n.y *= dot2(normal, vel);
+    v_n.z *= dot2(normal, vel);
+	// tangent on the terrain along the velocity direction (unit vector of tangential velocity)
+	float4 v_t = vel;
+    v_t.x -= v_n.x;
+    v_t.y -= v_n.y;
+    v_t.z -= v_n.z;
+
+	if((v_t.x + v_t.y + v_t.z)/3.0f > friction_static_limit)
+    {
+		friction_force.x = -v_t.x;
+		friction_force.y = -v_t.y;
+		friction_force.z = -v_t.z;
+    }
+	else
+    {
+		friction_force.x = friction_kinetic * -v_t.x;
+		friction_force.y = friction_kinetic * -v_t.y;
+		friction_force.z = friction_kinetic * -v_t.z;
+    }
+
+	// above static friction limit?
+//  	friction_force.x = f_t.x > friction_static_limit ? friction_kinetic * -v_t.x : -v_t.x;
+//  	friction_force.y = f_t.y > friction_static_limit ? friction_kinetic * -v_t.y : -v_t.y;
+//  	friction_force.z = f_t.z > friction_static_limit ? friction_kinetic * -v_t.z : -v_t.z;
+
+	//TODO; friction should cause energy/heat in contact particles!
+	//friction_force = friction_kinetic * -v_t;
+
+	return friction_force;
+
+}
+
+
+void FLOCK::loadCollision_wall()
+{
+    printf("create collision wall kernel\n");
+
+    std::string path(FLOCK_CL_SOURCE_DIR);
+    path += "/collision_wall_cl.cl";
+    k_collision_wall = Kernel(ps->cli, path, "collision_wall");
+  
+    int iargs = 0;
+    k_collision_wall.setArg(iargs++, cl_vars_sorted.getDevicePtr());
+    k_collision_wall.setArg(iargs++, cl_GridParamsScaled.getDevicePtr());
+    k_collision_wall.setArg(iargs++, cl_FLOCKParams.getDevicePtr());
+
+}
+ 
+void FLOCK::cpuCollision_wall()
+{
+
+    float4* vel;
+    if(flock_settings.integrator == EULER2)
+    {
+        vel = &velocities[0];
+    }
+    else if(flock_settings.integrator == LEAPFROG2)
+    {
+        vel = &veleval[0];
+    }
+    for(int i = 0; i < num; i++)
+    {
+        
+        float scale = params.simulation_scale;
+        float4 p = positions[i];
+        float4 v = vel[i];
+        float4 f = forces[i];
+        /*
+        v.x *= scale;
+        v.y *= scale;
+        v.z *= scale;
+        */
+        float4 r_f = float4(0.f, 0.f, 0.f, 0.f);
+        float4 f_f = float4(0.f, 0.f, 0.f, 0.f);
+        float4 crf = float4(0.f, 0.f, 0.f, 0.f);
+        float4 cff = float4(0.f, 0.f, 0.f, 0.f);
+
+        float friction_kinetic = 0.0f;
+        float friction_static_limit = 0.0f;
+
+        //bottom wall
+        float diff = params.boundary_distance - (p.z - params.grid_min.z) * params.simulation_scale;
+        if (diff > params.EPSILON)
+        {
+            //printf("colliding with the bottom! %d\n", i);
+            float4 normal = float4(0.0f, 0.0f, 1.0f, 0.0f);
+            crf = calculateRepulsionForce2(normal, v, params.boundary_stiffness, params.boundary_dampening, params.boundary_distance);
+            r_f.x += crf.x;
+            r_f.y += crf.y;
+            r_f.z += crf.z;
+            cff = calculateFrictionForce2(v, f, normal, friction_kinetic, friction_static_limit);
+            f_f.x += cff.x;
+            f_f.y += cff.y;
+            f_f.z += cff.z;
+
+            //printf("crf %f %f %f \n", crf.x, crf.y, crf.z);
+        }
+
+        //Y walls
+        diff = params.boundary_distance - (p.y - params.grid_min.y) * params.simulation_scale;
+        if (diff > params.EPSILON)
+        {
+            float4 normal = float4(0.0f, 1.0f, 0.0f, 0.0f);
+            crf = calculateRepulsionForce2(normal, v, params.boundary_stiffness, params.boundary_dampening, params.boundary_distance);
+            r_f.x += crf.x;
+            r_f.y += crf.y;
+            r_f.z += crf.z;
+            cff = calculateFrictionForce2(v, f, normal, friction_kinetic, friction_static_limit);
+            f_f.x += cff.x;
+            f_f.y += cff.y;
+            f_f.z += cff.z;
+
+        }
+        diff = params.boundary_distance - (params.grid_max.y - p.y) * params.simulation_scale;
+        if (diff > params.EPSILON)
+        {
+            float4 normal = float4(0.0f, -1.0f, 0.0f, 0.0f);
+            crf = calculateRepulsionForce2(normal, v, params.boundary_stiffness, params.boundary_dampening, params.boundary_distance);
+            r_f.x += crf.x;
+            r_f.y += crf.y;
+            r_f.z += crf.z;
+            cff = calculateFrictionForce2(v, f, normal, friction_kinetic, friction_static_limit);
+            f_f.x += cff.x;
+            f_f.y += cff.y;
+            f_f.z += cff.z;
+
+        }
+        //X walls
+        diff = params.boundary_distance - (p.x - params.grid_min.x) * params.simulation_scale;
+        if (diff > params.EPSILON)
+        {
+            float4 normal = float4(1.0f, 0.0f, 0.0f, 0.0f);
+            crf = calculateRepulsionForce2(normal, v, params.boundary_stiffness, params.boundary_dampening, params.boundary_distance);
+            r_f.x += crf.x;
+            r_f.y += crf.y;
+            r_f.z += crf.z;
+            cff = calculateFrictionForce2(v, f, normal, friction_kinetic, friction_static_limit);
+            f_f.x += cff.x;
+            f_f.y += cff.y;
+            f_f.z += cff.z;
+
+        }
+        diff = params.boundary_distance - (params.grid_max.x - p.x) * params.simulation_scale;
+        if (diff > params.EPSILON)
+        {
+            float4 normal = float4(-1.0f, 0.0f, 0.0f, 0.0f);
+            crf = calculateRepulsionForce2(normal, v, params.boundary_stiffness, params.boundary_dampening, params.boundary_distance);
+            r_f.x += crf.x;
+            r_f.y += crf.y;
+            r_f.z += crf.z;
+            cff = calculateFrictionForce2(v, f, normal, friction_kinetic, friction_static_limit);
+            f_f.x += cff.x;
+            f_f.y += cff.y;
+            f_f.z += cff.z;
+
+        }
+
+
+        //TODO add friction forces
+
+        forces[i].x += r_f.x + f_f.x;
+        forces[i].y += r_f.y + f_f.y;
+        forces[i].z += r_f.z + f_f.z;
+    }
+
+}
+
+
+
+}
