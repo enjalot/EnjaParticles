@@ -249,6 +249,10 @@ void Render::render()
 		}
 		//glCopyTexSubImage2D(GL_TEXTURE_2D,0,0,0,0,0,800,600);
 
+
+        glDisable(GL_DEPTH_TEST);
+
+
 		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER,fbos[0]);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D,gl_tex["Color"]);
@@ -270,6 +274,7 @@ void Render::render()
 		glBindTexture(GL_TEXTURE_2D,0);
         */
 
+		glEnable(GL_DEPTH_TEST);
 
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);
         glDrawBuffer(GL_BACK);
@@ -279,14 +284,13 @@ void Render::render()
 
 
 		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D,gl_tex["normalColor"]);
+		glActiveTexture(GL_TEXTURE1);
 		if(smoothing!=NO_SHADER)
         {
-		    glBindTexture(GL_TEXTURE_2D,gl_tex["normalColor"]);
-		    glActiveTexture(GL_TEXTURE1);
 		    glBindTexture(GL_TEXTURE_2D,gl_tex["depth2"]);
-        } else {
-		    glBindTexture(GL_TEXTURE_2D,gl_tex["Color"]);
-		    glActiveTexture(GL_TEXTURE1);
+        } else 
+        {
 		    glBindTexture(GL_TEXTURE_2D,gl_tex["depth"]);
         }
         glUseProgram(glsl_program[COPY_TO_FB]);
@@ -319,7 +323,6 @@ void Render::render()
 		glReadBuffer(GL_BACK);
         */
 
-		//glEnable(GL_DEPTH_TEST);
 		if(blending)
 		{
 			//glDepthMask(GL_FALSE);

@@ -14,7 +14,7 @@ uniform float del_y;
 void main(void)
 {
 	float depth=texture2D(depthTex, gl_TexCoord[0].st).x;
-	float maxDepth=0.95;
+	float maxDepth=0.999;
 	float threshold=0.2;
 	if(depth>maxDepth)
 	{
