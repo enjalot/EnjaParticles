@@ -22,7 +22,7 @@ void main()
 
     // calculate lighting
     float diffuse = max(0.0, dot(lightDir, n));
-    vec3 v = normalize(-spherePosEye);
+    vec3 v = normalize(-spherePosEye).xyz;
     vec3 h = normalize(lightDir + v);
     float specular = pow(max(0.0, dot(n, h)), shininess);
 
