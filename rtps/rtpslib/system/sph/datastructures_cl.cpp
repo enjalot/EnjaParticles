@@ -23,7 +23,7 @@ __kernel void datastructures(
 	uint index = get_global_id(0);
     int num = sphp->num;
 	//int num = get_global_size(0);
-
+	//if (index >= num) return;
 
 	uint hash = sort_hashes[index];
 
@@ -61,12 +61,14 @@ __kernel void datastructures(
 	}
 	//return;
 
-	if (index == numParticles - 1) {
+	//if (index == numParticles - 1) {
+	if (index == num - 1) {
 		cell_indices_end[hash] = index + 1;
 	}
+	// particle index	
+	if (index >= num) return;
 
     //cell_indices_end[index] = 42;
-
 	uint sorted_index = sort_indices[index];
     //uint sorted_index = index;
 
@@ -78,9 +80,6 @@ __kernel void datastructures(
 		vars_sorted[index+j*numParticles]	= vars_unsorted[sorted_index+j*numParticles];
 	}
 	#endif
-
-	// particle index	
-	if (index >= num) return;
 
 
 	// Variables to sort could change for different types of simulations 

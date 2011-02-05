@@ -280,9 +280,10 @@ void SPH::updateGPU()
 
 void SPH::collision()
 {
+    int local_size = 128;
     //when implemented other collision routines can be chosen here
     timers[TI_COLLISION_WALL]->start();
-    k_collision_wall.execute(num, 128);
+    k_collision_wall.execute(num, local_size);
     timers[TI_COLLISION_WALL]->end();
 
     timers[TI_COLLISION_TRI]->start();
@@ -293,20 +294,34 @@ void SPH::collision()
 
 void SPH::integrate()
 {
+    int local_size = 128;
     if(sph_settings.integrator == EULER)
     {
         //k_euler.execute(max_num);
         timers[TI_EULER]->start();
-        k_euler.execute(num, 128);
+        k_euler.execute(num, local_size);
         timers[TI_EULER]->end();
     }
     else if(sph_settings.integrator == LEAPFROG)
     {
         //k_leapfrog.execute(max_num);
         timers[TI_LEAPFROG]->start();
-        k_leapfrog.execute(num, 128);
+        k_leapfrog.execute(num, local_size);
         timers[TI_LEAPFROG]->end();
     }
+
+#if 0
+    if(num > 0)
+    {
+        std::vector<float4> pos = cl_position.copyToHost(num);
+        for(int i = 0; i < num; i++)
+        {
+            printf("pos[%d] = %f %f %f\n", i, pos[i].x, pos[i].y, pos[i].z);
+        }
+    }
+#endif
+
+
 }
 
 int SPH::setupTimers()
@@ -378,7 +393,7 @@ void SPH::calculateSPHSettings()
     //params.viscosity = 1.0f;
     params.gravity = -9.8f;
     //params.gravity = 0.0f;
-    params.velocity_limit = 100.0f;
+    params.velocity_limit = 600.0f;
     params.xsph_factor = .05f;
 
 	float h = params.smoothing_distance;
