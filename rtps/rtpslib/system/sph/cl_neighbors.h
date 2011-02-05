@@ -84,12 +84,12 @@ inline void ForPossibleNeighbor(__global float4* vars_sorted,
 		// |r|
 		float rlen = length(r);
 
-        clf[index_i].x = rlen;
+        //clf[index_i].x = rlen;
 
         //This shouldn't be happening!?
         //two particles shouldn't be able to be in the same place at same time
         //must be some other bug?
-        if (rlen == 0.0) return;
+        if (rlen == 0.0 && sphp->choice != 0) return;
 
 		// is this particle within cutoff?
 
