@@ -47,7 +47,8 @@
 			for(uint index_j=startIndex; index_j < endIndex; index_j++) {			
 #if 1
 				//***** UPDATE pt (sum)
-				ForPossibleNeighbor(vars_sorted, pt, num, index_i, index_j, position_i, gp, /*fp,*/ sphp DEBUG_ARGV);
+				//ForPossibleNeighbor(vars_sorted, pt, num, index_i, index_j, position_i, gp, /*fp,*/ sphp DEBUG_ARGV);
+				ForNeighbor(vars_sorted, pt, index_i, index_j, position_i, gp, /*fp,*/ sphp DEBUG_ARGV);
 #endif
 			}
 		}
@@ -140,7 +141,7 @@ __kernel void neighbors(
         //clf[index].xyz = pt.force.xyz;
 		xsph(index) = sphp->wpoly6_coef * pt.xsph;
 	}
-
+#if 0
 	if (sphp->choice == 2) { // update surface tension (NOT DEBUGGED)
     	IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, /*fp,*/ sphp DEBUG_ARGV);
 		float norml = length(pt.color_normal);
@@ -167,6 +168,7 @@ __kernel void neighbors(
 		else
 			surface(index) = (float4){0.0,0.0,0.0,0.0};
 	}*/
+#endif
 }
 
 /*-------------------------------------------------------------- */

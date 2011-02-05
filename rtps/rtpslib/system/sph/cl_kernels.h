@@ -52,6 +52,7 @@ float Wspiky(float rlen, float h, __constant struct SPHParams* params)
 	float Wij = alpha * hr2*hr2*hr2;
 	return Wij;
 }
+
 //----------------------------------------------------------------------
 float Wspiky_dr(float rlen, float h, __constant struct SPHParams* params)
 {
@@ -68,6 +69,7 @@ float Wspiky_dr(float rlen, float h, __constant struct SPHParams* params)
 	return -hr2*hr2/rlen;
 #endif
 }
+
 //----------------------------------------------------------------------
 float Wvisc(float rlen, float h, __constant struct SPHParams* params)
 {
