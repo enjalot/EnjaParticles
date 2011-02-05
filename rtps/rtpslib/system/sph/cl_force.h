@@ -3,6 +3,8 @@
 
 	// gradient
     // need to be careful, this kernel divides by rlen which could be 0
+    // once two particles assume the same position we will get a lot of branching
+    // and they won't split... how can we account for this?
     if(rlen == 0.0)
     {
         rlen = 1.0;
