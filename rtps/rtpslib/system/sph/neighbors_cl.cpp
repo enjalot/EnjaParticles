@@ -14,9 +14,6 @@
 //Contains all of the Smoothing Kernels for SPH
 #include "cl_kernels.h"
 
-//Contains Iterate...Cells methods and ZeroPoint
-#include "cl_neighbors.h"
-
    
 
 //----------------------------------------------------------------------
@@ -80,6 +77,9 @@ inline void ForNeighbor(__global float4*  vars_sorted,
     //}
 }
 
+
+//Contains Iterate...Cells methods and ZeroPoint
+#include "cl_neighbors.h"
 
 
 //--------------------------------------------------------------
