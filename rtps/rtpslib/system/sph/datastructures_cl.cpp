@@ -52,6 +52,10 @@ __kernel void datastructures(
 	// As it isn't the first particle, it must also be the cell end of
 	// the previous particle's cell
 
+    //Having this check here is important! Can't quit before local threads are done
+    //but we can't keep going if our index goes out of bounds of the number of particles
+	if (index >= num) return;
+
 	if ((index == 0 || hash != sharedHash[tid]) )
 	{
 		cell_indices_start[hash] = index; // ERROR
@@ -66,7 +70,7 @@ __kernel void datastructures(
 		cell_indices_end[hash] = index + 1;
 	}
 	// particle index	
-	if (index >= num) return;
+	//if (index >= num) return;
 
     //cell_indices_end[index] = 42;
 	uint sorted_index = sort_indices[index];

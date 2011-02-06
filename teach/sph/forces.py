@@ -2,83 +2,155 @@ import pygame
 from pygame.locals import *
 
 from kernels import *
-from util import Vec
+from vector import Vec
 
 
-class Particle:
-    def __init__(self, pos, radius, scale, color, surface):
-        #physics stuff
-        self.pos = pos
-        self.radius = radius
-        self.scale = scale
-        self.mass = 1
 
-        self.dens = 0
-
-        #pygame stuff
-        self.col = color
-        self.surface = surface
-
-    def move(self, pos):
-        self.pos = pos
-
-        #print "dens", self.dens
-
-    def draw(self):
-        #draw circle representing particle smoothing radius
-        pygame.draw.circle(self.surface, self.col, self.pos, self.radius*self.scale, 1)
-        #draw filled circle representing density
-        pygame.draw.circle(self.surface, self.col, self.pos, self.dens*5, 0)
-
-
-def density_update(particles):
+def density_update(sphp, particles):
     #brute force
     for pi in particles:
         pi.dens = 0.
         for pj in particles:
-            r = dist(pi.pos, pj.pos)
-            r = [i/(pi.scale) for i in r]
+            r = pi.pos - pj.pos
             #print r
-            pi.dens += pj.mass*Wpoly6(pi.radius, r)
+            pi.dens += pj.mass*Wpoly6(pi.h, r)
 
-def force_update(particles):
+def force_update(sphp, particles):
     #brute force
-    rest_dens = 1000.
-    K = 20.
-    fscale = 100000 #arbitrary. about how big the force gets in this example
-    fdraw = 100     #how big we scale the vector to draw
+    rho0 = sphp.rho0
+    K = sphp.K
 
     for pi in particles:
-        pi.force = [0,0]
+        pi.force = Vec([0.,0.])
+        pi.xsph = Vec([0.,0.])
         di = pi.dens
-        Pi = K*(di - rest_dens)
+        #print "di", di
+        Pi = K*(di - rho0)
+        #print "Pi", Pi
+        #print "pi.h", pi.h
         for pj in particles:
             if pj == pi:
                 continue
-            r = dist(pi.pos, pj.pos)
-            r = [i/(pi.scale) for i in r]
+            r = pi.pos - pj.pos
+            #print "r", r
 
             dj = pj.dens
-            Pj = K*(dj - rest_dens)
+            Pj = K*(dj - rho0)
 
-            kern = -.5 * (Pi + Pj) * dWspiky(pi.radius, r)
-            #f = [r[0]*kern, r[1]*kern]
-            f = [i*kern for i in r]    #i*kern is physical force
-            pi.force[0] += f[0]
-            pi.force[1] += f[1]
-            """
-            vec = [self.x - f[0]*fdraw/fscale, self.y - f[1]*fdraw/fscale]
-            pygame.draw.line(self.surface, pj.col, self.pos, vec)
-            tot[0] += f[0]*fdraw/fscale
-            tot[1] += f[1]*fdraw/fscale
-            """
+            #print "dWspiky", dWspiky(pi.h, r)
+            kern = .5 * (Pi + Pj) * dWspiky(pi.h, r)
+            f = r*kern
+            #does not account for variable mass
+            f *= pi.mass / (di + dj)
 
-        #tot[0] = self.x - tot[0]
-        #tot[1] = self.y - tot[1]
+            #print "force", f
+            pi.force += f
+
+            #XSPH
+            #float4 xsph = (2.f * sphp->mass * Wijpol6 * (velj-veli)/(di.x+dj.x));
+            xsph = pj.veleval - pi.veleval
+            xsph *= 2. * pi.mass * Wpoly6(pi.h, r) / (di + dj) 
+            pi.xsph += xsph
+
+
+        #print "pi.force", pi.force
   
-def euler_update(particles):
+
+
+def calcRepulsionForce(normal, vel, sphp, distance):
+    repulsion_force = (sphp.boundary_stiffness * distance - sphp.boundary_dampening * np.dot(normal, vel))*normal;
+    return repulsion_force;
+
+def calcFrictionForce(v, f, normal, friction_kinetic, friction_static_limit):
+    pass
+
+
+def collision_wall(sphp, domain, particles):
+    
+    dmin = domain.dmin * sphp.sim_scale
+    dmax = domain.dmax * sphp.sim_scale
+    bnd_dist = sphp.boundary_distance
+    #float diff = params->boundary_distance - (p.z - gp->bnd_min.z);
+    #if (diff > params->EPSILON)
+    #r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
+    #f_f += calculateFrictionForce(v, f, normal, friction_kinetic, friction_static_limit);
+   
+
+    for pi in particles:
+        f = Vec([0.,0.])
+        p = pi.pos
+        #X Min
+        diff = bnd_dist - (p.x - dmin.x)
+        if diff > 0:
+            normal = Vec([1.,0.])
+            f += calcRepulsionForce(normal, pi.vel, sphp, diff)
+            #calcFrictionForce(pi.v, pi.f, normal, friction_kinetic, friction_static_limit)
+        #X Max
+        diff = bnd_dist - (dmax.x - p.x)
+        if diff > 0:
+            normal = Vec([-1.,0.])
+            f += calcRepulsionForce(normal, pi.vel, sphp, diff)
+            #calcFrictionForce(pi.v, pi.f, normal, friction_kinetic, friction_static_limit)
+        #Y Min
+        diff = bnd_dist - (p.y - dmin.y)
+        if diff > 0:
+            normal = Vec([0.,1.])
+            f += calcRepulsionForce(normal, pi.vel, sphp, diff)
+            #calcFrictionForce(pi.v, pi.f, normal, friction_kinetic, friction_static_limit)
+        #Y Max
+        diff = bnd_dist - (dmax.y - p.y)
+        if diff > 0:
+            normal = Vec([0.,-1.])
+            f += calcRepulsionForce(normal, pi.vel, sphp, diff)
+            #calcFrictionForce(pi.v, pi.f, normal, friction_kinetic, friction_static_limit)
+
+        #print "collision force", f
+        pi.force += f
+
+
+
+
+def euler_update(sphp, particles):
     dt = .001
 
+    for pi in particles:
+        f = pi.force
+
+        f.y += -9.8
+
+        speed = mag(f);
+        #print "speed", speed
+        if speed > sphp.velocity_limit:
+            f *= sphp.velocity_limit/speed;
+
+        
+    
+        #print "force", f
+        pi.vel += f * dt
+        pi.pos += pi.vel * dt
+
+
+def leapfrog_update(sphp, particles):
+    dt = .001
+
+    for pi in particles:
+        f = pi.force
+
+        f.y += -9.8
+
+        speed = mag(f);
+        #print "speed", speed
+        if speed > sphp.velocity_limit:
+            f *= sphp.velocity_limit/speed;
+    
+        #print "force", f
+        vnext = pi.vel + f * dt
+        vnext += sphp.xsph_factor * pi.xsph
+        pi.pos += pi.vel * dt
+
+        veval = .5 * (pi.vel + vnext)
+        pi.vel = vnext
+        pi.veleval = veval
 
 
 

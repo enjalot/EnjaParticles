@@ -10,90 +10,78 @@
 
 #include "cl_macros.h"
 #include "cl_structs.h"
+
+//Contains all of the Smoothing Kernels for SPH
+#include "cl_kernels.h"
+
+   
+
+//----------------------------------------------------------------------
+inline void ForNeighbor(__global float4*  vars_sorted,
+				PointData* pt,
+				uint index_i,
+				uint index_j,
+				float4 position_i,
+	  			__constant struct GridParams* gp,
+	  			__constant struct SPHParams* sphp
+                DEBUG_ARGS
+				)
+{
+    int num = sphp->num;
+	
+    //if (sphp->choice == 0 || (index_j != index_i)) 
+    //{
+		// get the particle info (in the current grid) to test against
+		float4 position_j = pos(index_j); 
+
+		float4 r = (position_i - position_j); 
+		r.w = 0.f; // I stored density in 4th component
+		// |r|
+		float rlen = length(r);
+
+		// is this particle within cutoff?
+		if (rlen <= sphp->smoothing_distance) 
+        {
+
+            if (sphp->choice == 0) {
+                // update density
+                // return density.x for single neighbor
+                #include "cl_density.h"
+            }
+
+            if (sphp->choice == 1) {
+
+                //iej is 0 when we are looking at same particle
+                //we allow calculations and just multiply force and xsph
+                //by iej to avoid branching
+                int iej = index_i != index_j;
+                
+                
+                // update pressure
+                #include "cl_force.h"
+            }
+
+            if (sphp->choice == 2) {
+                // update color normal and color Laplacian
+                //#include "cl_surface_tension.h"
+            }
+
+            if (sphp->choice == 3) {
+                //#include "density_denom_update.cl"
+            } 
+        /*	
+            if (sphp->choice == 4) {
+                #include "cl_surface_extraction.h"
+            }*/
+        }
+    //}
+}
+
+
+//Contains Iterate...Cells methods and ZeroPoint
 #include "cl_neighbors.h"
-#include "cl_hash.h"
 
 
-	/*--------------------------------------------------------------*/
-	/* Iterate over particles found in the nearby cells (including cell of position_i)
-	*/
-	void IterateParticlesInCell(
-		__global float4*    vars_sorted,
-		PointData* pt,
-        uint num,
-		int4 	cellPos,
-		uint 	index_i,
-		float4 	position_i,
-		__global int* 		cell_indexes_start,
-		__global int* 		cell_indexes_end,
-		__constant struct GridParams* gp,
-		//__constant struct FluidParams* fp,
-		__constant struct SPHParams* sphp
-		DEBUG_ARGS
-    )
-	{
-		// get hash (of position) of current cell
-		uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
-
-		/* get start/end positions for this cell/bucket */
-		uint startIndex = FETCH(cell_indexes_start,cellHash);
-		/* check cell is not empty
-		 * WHERE IS 0xffffffff SET?  NO IDEA ************************
-		 */
-		if (startIndex != 0xffffffff) {	   
-			uint endIndex = FETCH(cell_indexes_end, cellHash);
-
-			/* iterate over particles in this cell */
-			for(uint index_j=startIndex; index_j < endIndex; index_j++) {			
-#if 1
-				//***** UPDATE pt (sum)
-				ForPossibleNeighbor(vars_sorted, pt, num, index_i, index_j, position_i, gp, /*fp,*/ sphp DEBUG_ARGV);
-#endif
-			}
-		}
-	}
-
-	/*--------------------------------------------------------------*/
-	/* Iterate over particles found in the nearby cells (including cell of position_i) 
-	 */
-	void IterateParticlesInNearbyCells(
-		__global float4* vars_sorted,
-		PointData* pt,
-        uint num,
-		int 	index_i, 
-		float4   position_i, 
-		__global int* 		cell_indices_start,
-		__global int* 		cell_indices_end,
-		__constant struct GridParams* gp,
-		//__constant struct FluidParams* fp,
-		__constant struct SPHParams* sphp
-		DEBUG_ARGS
-		)
-	{
-		// initialize force on particle (collisions)
-
-		// get cell in grid for the given position
-		//int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_inv_delta);
-		int4 cell = calcGridCell(position_i, gp->grid_min, gp->grid_delta);
-
-		// iterate through the 3^3 cells in and around the given position
-		// can't unroll these loops, they are not innermost 
-		for(int z=cell.z-1; z<=cell.z+1; ++z) {
-			for(int y=cell.y-1; y<=cell.y+1; ++y) {
-				for(int x=cell.x-1; x<=cell.x+1; ++x) {
-					int4 ipos = (int4) (x,y,z,1);
-
-					// **** SUMMATION/UPDATE
-					IterateParticlesInCell(vars_sorted, pt, num, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp,/* fp,*/ sphp DEBUG_ARGV);
-
-				//barrier(CLK_LOCAL_MEM_FENCE); // DEBUG
-				// SERIOUS PROBLEM: Results different than results with cli = 5 (bottom of this file)
-				}
-			}
-		}
-	}
-
-	//----------------------------------------------------------------------
 //--------------------------------------------------------------
 // compute forces on particles
 
@@ -102,7 +90,6 @@ __kernel void neighbors(
         		__global int*    cell_indexes_start,
         		__global int*    cell_indexes_end,
 				__constant struct GridParams* gp,
-				//__constant struct FluidParams* fp, 
 				__constant struct SPHParams* sphp 
 				DEBUG_ARGS
 				)
@@ -113,16 +100,14 @@ __kernel void neighbors(
     //int numParticles = get_global_size(0);
     //int num = get_global_size(0);
 
-
 	int index = get_global_id(0);
     if (index >= num) return;
 
     float4 position_i = pos(index);
 
     //debuging
-    clf[index] = (float4)(0,0,0,0);
-    cli[index].w = 0;
-
+    //clf[index] = (float4)(0,0,0,0);
+    //cli[index].w = 0;
 
     // Do calculations on particles in neighboring cells
 	PointData pt;
@@ -131,8 +116,7 @@ __kernel void neighbors(
 	if (sphp->choice == 0) { // update density
     	IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
 		density(index) = sphp->wpoly6_coef * pt.density.x;
-        clf[index].w = density(index);
-		// code reaches this point on first call
+        //clf[index].w = density(index);
 	}
 	if (sphp->choice == 1) { // update force
     	IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
@@ -140,7 +124,7 @@ __kernel void neighbors(
         //clf[index].xyz = pt.force.xyz;
 		xsph(index) = sphp->wpoly6_coef * pt.xsph;
 	}
-
+#if 0
 	if (sphp->choice == 2) { // update surface tension (NOT DEBUGGED)
     	IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, /*fp,*/ sphp DEBUG_ARGV);
 		float norml = length(pt.color_normal);
@@ -167,6 +151,7 @@ __kernel void neighbors(
 		else
 			surface(index) = (float4){0.0,0.0,0.0,0.0};
 	}*/
+#endif
 }
 
 /*-------------------------------------------------------------- */

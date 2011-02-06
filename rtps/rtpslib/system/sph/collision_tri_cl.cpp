@@ -197,6 +197,8 @@ float intersect_triangle_segment(float4 pos, float4 vel, __local Triangle* tri, 
 
     //float4 n = tri->normal;
     float4 n = cross_product(ab, ac);
+    //something seems to be wrong with Blender's normals
+    //so to be safe we calculate here
     tri->normal = v3normalize(n);
 
     float d = dot(qp, n);

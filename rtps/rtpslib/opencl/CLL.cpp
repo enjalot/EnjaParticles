@@ -51,10 +51,11 @@ cl::Program CL::loadProgram(std::string path, std::string options)
     try
     {
         printf("build program\n");
-#ifdef DEBUG
+//#ifdef DEBUG
+#if 0
         srand(time(NULL));
         int rnd = rand() % 200 + 100;
-        char dgboptions[100];
+        char dbgoptions[100];
         //should really check for NVIDIA platform before doing this
         sprintf(dbgoptions, "%s -cl-nv-verbose -cl-nv-maxrregcount=%d", options.c_str(), rnd);
         //sprintf(options, "-D rand=%d -D DEBUG", rnd);

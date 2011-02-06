@@ -71,7 +71,7 @@ void SPH::neighborSearch(int choice)
 #endif
 
 	size_t global = (size_t) num;
-	int local = 32;
+	int local = 64;
 
     try{
  	k_neighbors.execute(num, local);

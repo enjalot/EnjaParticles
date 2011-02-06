@@ -129,6 +129,7 @@ int main(int argc, char** argv)
     //rtps::RTPSettings settings;
     //rtps::Domain grid = Domain(float4(-5,-.3,0,0), float4(2, 2, 12, 0));
     rtps::Domain grid = Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
+    //rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
     rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
     ps = new rtps::RTPS(settings);
 
@@ -221,7 +222,7 @@ void appKeyboard(unsigned char key, int x, int y)
         case 'r': //drop a rectangle
         {
             nn = 2048;
-            min = float4(.1, .1, .1, 1.0f);
+            min = float4(.2, .2, .2, 1.0f);
             max = float4(2., 2., 2., 1.0f);
             ps->system->addBox(nn, min, max, false);
             return;
