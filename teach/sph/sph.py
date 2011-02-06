@@ -48,7 +48,7 @@ class SPH:
         self.boundary_stiffness = 20000.
         self.boundary_dampening = 256.
 
-        self.velocity_limit = 600.
+        self.velocity_limit = 200.
         self.xsph_factor = .05
 
 

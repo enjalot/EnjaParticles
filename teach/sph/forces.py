@@ -38,7 +38,7 @@ def force_update(sphp, particles):
             Pj = K*(dj - rho0)
 
             #print "dWspiky", dWspiky(pi.h, r)
-            kern = -.5 * (Pi + Pj) * dWspiky(pi.h, r)
+            kern = .5 * (Pi + Pj) * dWspiky(pi.h, r)
             f = r*kern
             #does not account for variable mass
             f *= pi.mass / (di + dj)
@@ -104,7 +104,7 @@ def collision_wall(sphp, domain, particles):
             f += calcRepulsionForce(normal, pi.vel, sphp, diff)
             #calcFrictionForce(pi.v, pi.f, normal, friction_kinetic, friction_static_limit)
 
-        print "collision force", f
+        #print "collision force", f
         pi.force += f
 
 
