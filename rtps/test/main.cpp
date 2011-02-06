@@ -213,6 +213,8 @@ void appKeyboard(unsigned char key, int x, int y)
             make_cube(triangles, cen, cw);
             cen = float4(1+3*cw, 1+3*cw, cw-.1, 1.0f);
             make_cube(triangles, cen, cw);
+            cen = float4(3.5, 3.5, cw-.1, 1.0f);
+            make_cube(triangles, cen, cw);
             ps->system->loadTriangles(triangles);
             return;
         }

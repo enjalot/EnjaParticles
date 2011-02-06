@@ -71,7 +71,7 @@ void SPH::neighborSearch(int choice)
 #endif
 
 	size_t global = (size_t) num;
-	int local = 128;
+	int local = 32;
 
     try{
  	k_neighbors.execute(num, local);
@@ -87,15 +87,23 @@ void SPH::neighborSearch(int choice)
 	printf("============================================\n");
 	printf("which == %d *** \n", choice);
 	printf("***** PRINT neighbors diagnostics ******\n");
-    cli = cli_debug.copyToHost(num);
-    std::vector<float4> clf = clf_debug.copyToHost(num);
 
-	//for (int i=0; i < num; i++) {  
-	for (int i=0; i < 10; i++) 
+    std::vector<int4> cli;
+    std::vector<float4> clf;
+    printf("num %d\n", num);
+    if(num > 0)
+    {
+        cli = cli_debug.copyToHost(num);
+        clf = clf_debug.copyToHost(num);
+    }
+
+	for (int i=0; i < num; i++)
+	//for (int i=0; i < 10; i++) 
     {  
 		printf("-----\n");
 		printf("clf_debug: %f, %f, %f, %f\n", clf[i].x, clf[i].y, clf[i].z, clf[i].w);
-		printf("cli_debug: %d, %d, %d, %d\n", cli[i].x, cli[i].y, cli[i].z, cli[i].w);
+        //if(clf[i].w == 0.0) exit(0);
+		//printf("cli_debug: %d, %d, %d, %d\n", cli[i].x, cli[i].y, cli[i].z, cli[i].w);
 //		printf("pos : %f, %f, %f, %f\n", pos[i].x, pos[i].y, pos[i].z, pos[i].w);
     }
 #endif

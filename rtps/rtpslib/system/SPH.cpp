@@ -221,6 +221,7 @@ void SPH::updateCPU()
 void SPH::updateGPU()
 {
 
+    timers[TI_UPDATE]->start();
     glFinish();
     cl_position.acquire();
     cl_color.acquire();
@@ -229,7 +230,6 @@ void SPH::updateGPU()
     int sub_intervals = 10;  //should be a setting
     for(int i=0; i < sub_intervals; i++)
     {
-        timers[TI_UPDATE]->start();
         /*
         k_density.execute(num);
         k_pressure.execute(num);
@@ -269,20 +269,21 @@ void SPH::updateGPU()
         //
         //Andrew's rendering emporium
         //neighborSearch(4);
-        timers[TI_UPDATE]->end();
     }
 
     cl_position.release();
     cl_color.release();
 
+    timers[TI_UPDATE]->end();
 
 }
 
 void SPH::collision()
 {
+    int local_size = 128;
     //when implemented other collision routines can be chosen here
     timers[TI_COLLISION_WALL]->start();
-    k_collision_wall.execute(num, 128);
+    k_collision_wall.execute(num, local_size);
     timers[TI_COLLISION_WALL]->end();
 
     timers[TI_COLLISION_TRI]->start();
@@ -293,20 +294,34 @@ void SPH::collision()
 
 void SPH::integrate()
 {
+    int local_size = 128;
     if(sph_settings.integrator == EULER)
     {
         //k_euler.execute(max_num);
         timers[TI_EULER]->start();
-        k_euler.execute(num, 128);
+        k_euler.execute(num, local_size);
         timers[TI_EULER]->end();
     }
     else if(sph_settings.integrator == LEAPFROG)
     {
         //k_leapfrog.execute(max_num);
         timers[TI_LEAPFROG]->start();
-        k_leapfrog.execute(num, 128);
+        k_leapfrog.execute(num, local_size);
         timers[TI_LEAPFROG]->end();
     }
+
+#if 0
+    if(num > 0)
+    {
+        std::vector<float4> pos = cl_position.copyToHost(num);
+        for(int i = 0; i < num; i++)
+        {
+            printf("pos[%d] = %f %f %f\n", i, pos[i].x, pos[i].y, pos[i].z);
+        }
+    }
+#endif
+
+
 }
 
 int SPH::setupTimers()
@@ -498,6 +513,11 @@ void SPH::prepareSorted()
 	cl_sort_output_hashes = Buffer<int>(ps->cli, keys);
 	cl_sort_output_indices = Buffer<int>(ps->cli, keys);
 
+
+    std::vector<Triangle> maxtri(2048);
+    cl_triangles = Buffer<Triangle>(ps->cli, maxtri);
+
+
 }
 
 void SPH::setupDomain()
@@ -579,7 +599,8 @@ void SPH::pushParticles(vector<float4> pos)
     std::vector<float4> vels(nn);
 
     std::fill(cols.begin(), cols.end(),color);
-    float v = .5f;
+    //float v = .5f;
+    float v = 0.0f;
     //float4 iv = float4(v, v, -v, 0.0f);
     float4 iv = float4(0, v, -.1, 0.0f);
     std::fill(vels.begin(), vels.end(),iv);
@@ -631,7 +652,7 @@ void SPH::pushParticles(vector<float4> pos)
 void SPH::render()
 {
 	System::render();
-	//renderer->render_box(grid.getBndMin(), grid.getBndMax());
+	renderer->render_box(grid.getBndMin(), grid.getBndMax());
     //renderer->render_table(grid.getBndMin(), grid.getBndMax());
 }
 
