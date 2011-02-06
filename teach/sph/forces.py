@@ -36,8 +36,10 @@ def density_update(particles):
     for pi in particles:
         pi.dens = 0.
         for pj in particles:
-            r = dist(pi.pos, pj.pos)
-            r = [i/(pi.scale) for i in r]
+            r = pi.pos - pj.pos
+            #r = dist(pi.pos, pj.pos)
+            #r = [i/(pi.scale) for i in r]
+            r /= pi.scale
             #print r
             pi.dens += pj.mass*Wpoly6(pi.radius, r)
 
@@ -55,17 +57,19 @@ def force_update(particles):
         for pj in particles:
             if pj == pi:
                 continue
-            r = dist(pi.pos, pj.pos)
-            r = [i/(pi.scale) for i in r]
+            r = pi.pos - pj.pos
+            #r = dist(pi.pos, pj.pos)
+            #r = [i/(pi.scale) for i in r]
+            r /= pi.scale
 
             dj = pj.dens
             Pj = K*(dj - rest_dens)
 
             kern = -.5 * (Pi + Pj) * dWspiky(pi.radius, r)
             #f = [r[0]*kern, r[1]*kern]
-            f = [i*kern for i in r]    #i*kern is physical force
-            pi.force[0] += f[0]
-            pi.force[1] += f[1]
+            #f = [i*kern for i in r]    #i*kern is physical force
+            f = r*kern
+            pi.force = f
             """
             vec = [self.x - f[0]*fdraw/fscale, self.y - f[1]*fdraw/fscale]
             pygame.draw.line(self.surface, pj.col, self.pos, vec)
