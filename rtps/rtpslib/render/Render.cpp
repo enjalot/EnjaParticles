@@ -577,6 +577,8 @@ GLuint Render::compileShaders(const char* vertex_file, const char* fragment_file
     //this may not be the cleanest implementation
     //#include "shaders.cpp"
 
+    printf("vertex_file: %s\n", vertex_file);
+    printf("fragment_file: %s\n", fragment_file);
     //printf("vertex shader:\n%s\n", vertex_shader_source);
     //printf("fragment shader:\n%s\n", fragment_shader_source);
 	char *vertex_shader_source = NULL,*fragment_shader_source= NULL,*geometry_shader_source=NULL;
