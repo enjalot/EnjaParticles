@@ -4,8 +4,9 @@ from pygame.locals import *
 from kernels import *
 from vector import Vec
 
+from timing import print_timing
 
-
+@print_timing
 def density_update(sphp, particles):
     #brute force
     for pi in particles:
@@ -15,6 +16,7 @@ def density_update(sphp, particles):
             #print r
             pi.dens += pj.mass*Wpoly6(pi.h, r)
 
+@print_timing
 def force_update(sphp, particles):
     #brute force
     rho0 = sphp.rho0
@@ -41,7 +43,7 @@ def force_update(sphp, particles):
             kern = .5 * (Pi + Pj) * dWspiky(pi.h, r)
             f = r*kern
             #does not account for variable mass
-            f *= pi.mass / (di + dj)
+            f *= pi.mass / (di * dj)
 
             #print "force", f
             pi.force += f
@@ -64,7 +66,7 @@ def calcRepulsionForce(normal, vel, sphp, distance):
 def calcFrictionForce(v, f, normal, friction_kinetic, friction_static_limit):
     pass
 
-
+@print_timing
 def collision_wall(sphp, domain, particles):
     
     dmin = domain.dmin * sphp.sim_scale
@@ -109,7 +111,7 @@ def collision_wall(sphp, domain, particles):
 
 
 
-
+@print_timing
 def euler_update(sphp, particles):
     dt = .001
 
@@ -124,17 +126,18 @@ def euler_update(sphp, particles):
             f *= sphp.velocity_limit/speed;
 
         
-    
         #print "force", f
         pi.vel += f * dt
         pi.pos += pi.vel * dt
 
-
+@print_timing
 def leapfrog_update(sphp, particles):
-    dt = .001
+    dt = .005
 
+    #print "LEAPFROG++++++++++++++++++++++"
     for pi in particles:
         f = pi.force
+        #print "f", f
 
         f.y += -9.8
 
@@ -146,7 +149,7 @@ def leapfrog_update(sphp, particles):
         #print "force", f
         vnext = pi.vel + f * dt
         vnext += sphp.xsph_factor * pi.xsph
-        pi.pos += pi.vel * dt
+        pi.pos += vnext * dt
 
         veval = .5 * (pi.vel + vnext)
         pi.vel = vnext

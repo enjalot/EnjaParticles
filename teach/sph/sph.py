@@ -10,13 +10,14 @@ class SPH:
     def __init__(self, max_num, domain):
         self.max_num = max_num
 
-        rho0 = 1000.                  #rest density [ kg/m^3 ]
+        rho0 = 1000.                #rest density [ kg/m^3 ]
         V0 = 0.000005547            #initial volume [ m^3 ]
+        V0 = 0.000313357            #initial volume [ m^3 ]
         n = 27                      #number of particles to occupy V0
         VP = V0 / n                 #particle volume [ m^3 ]
-        m = rho0 * VP                 #particle mass [ kg ]
+        m = rho0 * VP               #particle mass [ kg ]
         VF = VP * max_num           #fluid volume [ m^3 ]
-        re = (m/rho0)**(1/3.)         #particle radius [ m ]
+        re = (m/rho0)**(1/3.)       #particle radius [ m ]
         rest_distance = .87 * re    #rest distance between particles [ m ]
 
         smoothing_radius = 2.0 * rest_distance      #smoothing radius for SPH Kernels
@@ -84,7 +85,7 @@ class Particle:
         dp = toscreen(self.pos / self.scale, self.surface)
         pygame.draw.circle(self.surface, self.col, dp, self.h / self.scale, 1)
         #draw filled circle representing density
-        pygame.draw.circle(self.surface, self.col, dp, self.dens / 50., 0)
+        pygame.draw.circle(self.surface, self.col, dp, self.dens / 40., 0)
 
         #TODO draw force vector (make optional)
         #vec = [self.x - f[0]*fdraw/fscale, self.y - f[1]*fdraw/fscale]
@@ -94,7 +95,7 @@ class Particle:
 def addRect(num, pmin, pmax, sphp):
     #Create a rectangle with at most num particles in it.  The size of the return
     #vector will be the actual number of particles used to fill the rectangle
-    spacing = 1.1 * sphp.rest_distance / sphp.sim_scale;
+    spacing = 1.5 * sphp.rest_distance / sphp.sim_scale;
 
     xmin = pmin.x# * scale
     xmax = pmax.x# * scale
@@ -108,18 +109,19 @@ def addRect(num, pmin, pmax, sphp):
             if i >= num: break
             rvec += [ Vec([x,y]) * sphp.sim_scale];
             i+=1;
+    print "%d particles added" % i
     return rvec;
 
 
 
-def init_particles(sphp, domain, surface):
+def init_particles(num, sphp, domain, surface):
     particles = []
-    p1 = Vec([100., 100.]) * sphp.sim_scale
+    p1 = Vec([100., 400.]) * sphp.sim_scale
     particles += [ Particle(p1, sphp, [255,0,0], surface) ] 
 
     pmin = Vec([100., 100.])
-    pmax = Vec([200., 150.])
-    ps = addRect(20, pmin, pmax, sphp)
+    pmax = Vec([200., 200.])
+    ps = addRect(num, pmin, pmax, sphp)
     for p in ps:
         particles += [ Particle(p, sphp, [0,0,255], surface) ] 
 

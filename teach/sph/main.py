@@ -11,6 +11,11 @@ def fromscreen(p, surface):
     p.y = surface.get_height() - p.y
     return p
 
+@print_timing
+def draw_particles(ps):
+    for p in ps:
+        p.draw()
+
 
 def main():
     pygame.init()
@@ -32,7 +37,7 @@ def main():
     domain = Domain(dmin, dmax)
     system = sph.SPH(max_num, domain)
 
-    particles = sph.init_particles(system, domain, screen)
+    particles = sph.init_particles(100, system, domain, screen)
 
 
 
@@ -64,8 +69,7 @@ def main():
         #euler_update(system, particles)
         leapfrog_update(system, particles)
 
-        for p in particles:
-            p.draw()
+        draw_particles(particles)
         pygame.display.flip()
 
 if __name__ == "__main__":
