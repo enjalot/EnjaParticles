@@ -95,7 +95,7 @@ class Particle:
 def addRect(num, pmin, pmax, sphp):
     #Create a rectangle with at most num particles in it.  The size of the return
     #vector will be the actual number of particles used to fill the rectangle
-    spacing = 1.5 * sphp.rest_distance / sphp.sim_scale;
+    spacing = 1.9 * sphp.rest_distance / sphp.sim_scale;
 
     xmin = pmin.x# * scale
     xmax = pmax.x# * scale
@@ -116,11 +116,11 @@ def addRect(num, pmin, pmax, sphp):
 
 def init_particles(num, sphp, domain, surface):
     particles = []
-    p1 = Vec([100., 400.]) * sphp.sim_scale
+    p1 = Vec([100., 500.]) * sphp.sim_scale
     particles += [ Particle(p1, sphp, [255,0,0], surface) ] 
 
     pmin = Vec([100., 100.])
-    pmax = Vec([200., 200.])
+    pmax = Vec([500., 500.])
     ps = addRect(num, pmin, pmax, sphp)
     for p in ps:
         particles += [ Particle(p, sphp, [0,0,255], surface) ] 

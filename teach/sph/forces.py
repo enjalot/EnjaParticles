@@ -34,6 +34,8 @@ def force_update(sphp, particles):
             if pj == pi:
                 continue
             r = pi.pos - pj.pos
+            #temporary optimization until we do efficient neighbor search
+            if mag(r) > pi.h: continue
             #print "r", r
 
             dj = pj.dens

@@ -37,7 +37,7 @@ def main():
     domain = Domain(dmin, dmax)
     system = sph.SPH(max_num, domain)
 
-    particles = sph.init_particles(100, system, domain, screen)
+    particles = sph.init_particles(50, system, domain, screen)
 
 
 
