@@ -81,11 +81,19 @@ if __name__ == "__main__":
     va.y = 9
     va.z = 5
     print "va: ", repr(va)
-    vb = Vec([1,1,1])
+    vb = Vec([1.,1.,1.])
     vc = va + vb
-    print "v3: ", repr(vc)
+    print "vc: ", repr(vc)
     print "dot(va, vb):", np.dot(va, vb)
 
+    vb += va
+    print "vb:", repr(vb)
+    vb *= .1
+    print "vb:", repr(vb)
+    vb += vc*.1
+    print "vb:", repr(vb)
+
+    
 
 
 

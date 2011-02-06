@@ -11,7 +11,6 @@ def Wpoly6(h, r):
     coeff = 315./(64*pi*h**9)
     #magr = abs(r)
     magr = mag(r)
-    print magr
 
     if magr < h:
         return coeff*(h**2 - magr**2)**3
@@ -30,11 +29,16 @@ def dWspiky(h, r):
     """ still need to multiply this quantity by r """
     #magr = abs(r)
     magr = mag(r)
+    #print "magr", magr
     if magr == 0:
         magr = 1E-6
-    coeff = -45./(magr*pi*h**6)
+
+    den = magr * pi * h**6
+    coeff = -45./den
+    hr2 = h - magr
+
     if magr < h:
-        return coeff*(h - magr)**2
+        return coeff*hr2*hr2
     return 0
 
 def main():

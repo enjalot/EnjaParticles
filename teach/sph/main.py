@@ -3,16 +3,14 @@ from pygame.locals import *
 
 from forces import *
 from vector import Vec
+import sph
+from domain import Domain
 
-def init_particles(surface):
-    particles = []
-    radius = 1.
-    scale = 80.
-    particles += [ Particle(Vec([100,100]), radius, scale, [255,0,0], surface) ] 
-    particles += [ Particle(Vec([400,400]), radius, scale, [0,0,255], surface) ] 
-    particles += [ Particle(Vec([479,400]), radius, scale, [0,205,0], surface) ] 
-    particles += [ Particle(Vec([400,479]), radius, scale, [0,205,205], surface) ] 
-    return particles
+def fromscreen(p, surface):
+    #v.x
+    p.y = surface.get_height() - p.y
+    return p
+
 
 def main():
     pygame.init()
@@ -25,7 +23,18 @@ def main():
 
     clock = pygame.time.Clock()
 
-    particles = init_particles(screen)
+    max_num = 2**10 #1024
+    max_num = 2**8 #256
+    #max_num = 2**7 #128
+    
+    dmin = Vec([0,0,0])
+    dmax = Vec([800,800,1])
+    domain = Domain(dmin, dmax)
+    system = sph.SPH(max_num, domain)
+
+    particles = sph.init_particles(system, domain, screen)
+
+
 
 
     mouse_down = False
@@ -41,18 +50,20 @@ def main():
             elif event.type == MOUSEMOTION:
                 if(mouse_down):
                     v = Vec([event.pos[0], event.pos[1]])
+                    v = fromscreen(v, screen)
                     particles[0].move(v)
             elif event.type == MOUSEBUTTONUP:
                 mouse_down = False
 
         
         screen.blit(background, (0, 0))
-        #for p in particles:
-        #    p.density(particles)
-        density_update(particles)
-        force_update(particles)
-        #euler_update(particles)
-        #particles[0].force(particles);
+
+        density_update(system, particles)
+        force_update(system, particles)
+        collision_wall(system, domain, particles)
+        #euler_update(system, particles)
+        leapfrog_update(system, particles)
+
         for p in particles:
             p.draw()
         pygame.display.flip()
