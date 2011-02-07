@@ -1,4 +1,4 @@
-from util import Vec
+from vector import Vec
 
 from math import *
 import numpy as np
@@ -6,9 +6,6 @@ from numpy import pi
 
 def mag(x):
     return sqrt(np.dot(x, x))
-
-def dist(ri, rj):
-    return ret
 
 def Wpoly6(h, r):
     coeff = 315./(64*pi*h**9)
@@ -32,17 +29,21 @@ def dWspiky(h, r):
     """ still need to multiply this quantity by r """
     #magr = abs(r)
     magr = mag(r)
+    #print "magr", magr
     if magr == 0:
         magr = 1E-6
-    coeff = -45./(magr*pi*h**6)
+
+    den = magr * pi * h**6
+    coeff = -45./den
+    hr2 = h - magr
+
     if magr < h:
-        return coeff*(h - magr)**2
+        return coeff*hr2*hr2
     return 0
 
 def main():
     import numpy as np
     import pylab
-
 
     h = 1
 

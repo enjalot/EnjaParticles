@@ -2,6 +2,18 @@
 #define _PRESSURE_UPDATE_CL_
 
 	// gradient
+    // need to be careful, this kernel divides by rlen which could be 0
+    // once two particles assume the same position we will get a lot of branching
+    // and they won't split... how can we account for this?
+    //
+    // FIXED? I added 10E-6 to rlen during the division in Wspiky_dr kernel -IJ
+    /*
+    if(rlen == 0.0)
+    {
+        rlen = 1.0;
+        iej = 0;
+    }
+    */
 	float dWijdr = Wspiky_dr(rlen, sphp->smoothing_distance, sphp);
 
 	float4 di = density(index_i);  // should not repeat di=
@@ -40,10 +52,12 @@
     */
 	float Wijpol6 = Wpoly6(r, sphp->smoothing_distance, sphp);
 	//float Wijpol6 = sphp->wpoly6_coef * Wpoly6(rlen, sphp->smoothing_distance, sphp);
-	pt->xsph +=  (2.f * sphp->mass * Wijpol6 * (velj-veli)/(di.x+dj.x));
+    float4 xsph = (2.f * sphp->mass * Wijpol6 * (velj-veli)/(di.x+dj.x));
+	pt->xsph += xsph * iej;
 	pt->xsph.w = 0.f;
 	#endif
 
-	pt->force += stress;
+	pt->force += stress * iej;
+
 
 #endif
