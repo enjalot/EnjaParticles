@@ -34,19 +34,6 @@ SPH::SPH(RTPS *psfr, int n)
     //seed random
     srand ( time(NULL) );
 
-   
-    //float sd = 100;
-    float sd = 80;
-    //init sph stuff
-    //sph_settings.simulation_scale = .001;
-    sph_settings.simulation_scale = .001f*sd;
-    float scale = sph_settings.simulation_scale;
-
-    //grid = Domain(float4(0,0,0,0), float4(.25/scale, .5/scale, .5/scale, 0));
-    //grid = Domain(float4(0,0,0,0), float4(1/scale, 1/scale, 1/scale, 0));
-    //grid = Domain(float4(0,0,0,0), float4(1/scale, 1/scale, 1/scale, 0));
-    //grid = Domain(float4(0,0,0,0), float4(30, 30, 30, 0));
-    //grid = Domain(float4(-560/sd,-30/sd,0,0), float4(256/sd, 256/sd, 1276/sd, 0));
     grid = ps->settings.grid;
 
     //SPH settings depend on number of particles used
@@ -280,9 +267,10 @@ void SPH::updateGPU()
 
 void SPH::collision()
 {
+    int local_size = 128;
     //when implemented other collision routines can be chosen here
     timers[TI_COLLISION_WALL]->start();
-    k_collision_wall.execute(num, 128);
+    k_collision_wall.execute(num, local_size);
     timers[TI_COLLISION_WALL]->end();
 
     timers[TI_COLLISION_TRI]->start();
@@ -293,20 +281,34 @@ void SPH::collision()
 
 void SPH::integrate()
 {
+    int local_size = 128;
     if(sph_settings.integrator == EULER)
     {
         //k_euler.execute(max_num);
         timers[TI_EULER]->start();
-        k_euler.execute(num, 128);
+        k_euler.execute(num, local_size);
         timers[TI_EULER]->end();
     }
     else if(sph_settings.integrator == LEAPFROG)
     {
         //k_leapfrog.execute(max_num);
         timers[TI_LEAPFROG]->start();
-        k_leapfrog.execute(num, 128);
+        k_leapfrog.execute(num, local_size);
         timers[TI_LEAPFROG]->end();
     }
+
+#if 0
+    if(num > 0)
+    {
+        std::vector<float4> pos = cl_position.copyToHost(num);
+        for(int i = 0; i < num; i++)
+        {
+            printf("pos[%d] = %f %f %f\n", i, pos[i].x, pos[i].y, pos[i].z);
+        }
+    }
+#endif
+
+
 }
 
 int SPH::setupTimers()
@@ -342,18 +344,32 @@ void SPH::calculateSPHSettings()
     /*!
     * The Particle Mass (and hence everything following) depends on the MAXIMUM number of particles in the system
     */
+
+    float4 dmin = grid.getBndMin();
+    float4 dmax = grid.getBndMax();
+    //printf("dmin: %f %f %f\n", dmin.x, dmin.y, dmin.z);
+    //printf("dmax: %f %f %f\n", dmax.x, dmax.y, dmax.z);
+    float domain_vol = (dmax.x - dmin.x) * (dmax.y - dmin.y) * (dmax.z - dmin.z);
+    printf("domain volume: %f\n", domain_vol);
+
     sph_settings.rest_density = 1000;
     //sph_settings.rest_density = 2000;
 
     sph_settings.particle_mass = (128*1024.0)/max_num * .0002;
     printf("particle mass: %f\n", sph_settings.particle_mass);
+
+    float particle_vol = sph_settings.particle_mass / sph_settings.rest_density;
+
     //constant .87 is magic
-    sph_settings.particle_rest_distance = .87 * pow(sph_settings.particle_mass / sph_settings.rest_density, 1./3.);
+    sph_settings.particle_rest_distance = .87 * pow(particle_vol, 1./3.);
     printf("particle rest distance: %f\n", sph_settings.particle_rest_distance);
     
     //messing with smoothing distance, making it really small to remove interaction still results in weird force values
     sph_settings.smoothing_distance = 2.0f * sph_settings.particle_rest_distance;
     sph_settings.boundary_distance = .5f * sph_settings.particle_rest_distance;
+
+    sph_settings.simulation_scale = pow(particle_vol * max_num / domain_vol, 1./3.); 
+    printf("simulation scale: %f\n", sph_settings.simulation_scale);
 
     sph_settings.spacing = sph_settings.particle_rest_distance/ sph_settings.simulation_scale;
 
@@ -378,7 +394,7 @@ void SPH::calculateSPHSettings()
     //params.viscosity = 1.0f;
     params.gravity = -9.8f;
     //params.gravity = 0.0f;
-    params.velocity_limit = 100.0f;
+    params.velocity_limit = 600.0f;
     params.xsph_factor = .05f;
 
 	float h = params.smoothing_distance;

@@ -1,0 +1,38 @@
+#2D SPH implementation in Python for instructional purposes
+#Author - Ian Johnson | enjalot@gmail.com
+#Co-Author - Gordon Erlebacher | gerlebacher@fsu.edu
+
+Execute:
+    python main.py
+
+dependencies:
+    pygame
+    numpy
+
+Files:
+
+    main.py
+        loads the pygame window and has the main event loop
+
+    sph.py
+        SPH class defines the fluid parameters
+        Particle class handles each particles info and has drawing function
+        init_particles function and addRect to distribute particles
+
+    forces.py
+        routines for calculating density, force and integration updates
+
+    domain.py
+        Domain class for handling the physical domain
+        will also contain grid functions for optimized neighbor search
+
+    kernels.py
+        the various Smoothing Kernels used for the SPH formulations
+
+    vector.py
+        Vec class for wrapping numpy.ndarray. gives convenient access to elements like
+        v.x and all numpy ufuncs so you can do v3 = np.dot(v1, v2)
+
+    timing.py
+        Timer class and print_timing decorator for timing functions
+

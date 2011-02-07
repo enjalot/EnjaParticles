@@ -2,16 +2,20 @@ import pygame
 from pygame.locals import *
 
 from forces import *
+from vector import Vec
+import sph
+from domain import Domain
 
-def init_particles(surface):
-    particles = []
-    radius = 1.
-    scale = 80.
-    particles += [ Particle(100,100, radius, scale, [255,0,0], surface) ] 
-    particles += [ Particle(400,400, radius, scale, [0,0,255], surface) ] 
-    particles += [ Particle(479,400, radius, scale, [0,205,0], surface) ] 
-    particles += [ Particle(400,479, radius, scale, [0,205,205], surface) ] 
-    return particles
+def fromscreen(p, surface):
+    #v.x
+    p.y = surface.get_height() - p.y
+    return p
+
+@print_timing
+def draw_particles(ps):
+    for p in ps:
+        p.draw()
+
 
 def main():
     pygame.init()
@@ -24,35 +28,48 @@ def main():
 
     clock = pygame.time.Clock()
 
-    particles = init_particles(screen)
+    max_num = 2**10 #1024
+    max_num = 2**8 #256
+    #max_num = 2**7 #128
+    
+    dmin = Vec([0,0,0])
+    dmax = Vec([800,800,1])
+    domain = Domain(dmin, dmax)
+    system = sph.SPH(max_num, domain)
+
+    particles = sph.init_particles(50, system, domain, screen)
+
+
 
 
     mouse_down = False
     while 1:
         clock.tick(60)
+        key = pygame.key.get_pressed()
         for event in pygame.event.get():
-            if event.type == QUIT:
-                return
-            elif event.type == KEYDOWN and (event.key == K_ESCAPE or event.key == 113): #q
+            if event.type == QUIT or key[K_ESCAPE] or key[K_q]:
+                print "quit!"
                 return
             elif event.type == MOUSEBUTTONDOWN:
                 mouse_down = True
             elif event.type == MOUSEMOTION:
                 if(mouse_down):
-                    particles[0].move(event.pos[0], event.pos[1])
+                    v = Vec([event.pos[0], event.pos[1]])
+                    v = fromscreen(v, screen)
+                    particles[0].move(v)
             elif event.type == MOUSEBUTTONUP:
                 mouse_down = False
 
         
         screen.blit(background, (0, 0))
-        #for p in particles:
-        #    p.density(particles)
-        density_update(particles)
-        force_update(particles)
-        #euler_update(particles)
-        #particles[0].force(particles);
-        for p in particles:
-            p.draw()
+
+        density_update(system, particles)
+        force_update(system, particles)
+        collision_wall(system, domain, particles)
+        #euler_update(system, particles)
+        leapfrog_update(system, particles)
+
+        draw_particles(particles)
         pygame.display.flip()
 
 if __name__ == "__main__":

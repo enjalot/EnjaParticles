@@ -62,11 +62,12 @@ void SPH::loadTriangles(std::vector<Triangle> triangles)
 void SPH::collide_triangles()
 {
     
+    int local_size = 32;
     //printf("triangles loaded? %d\n", triangles_loaded);
     if(triangles_loaded)
     {
         //printf("execute!\n");
-        k_collision_tri.execute(num, 128);
+        k_collision_tri.execute(num, local_size);
 
  #if 0 //printouts    
     //DEBUGING
@@ -111,7 +112,6 @@ void SPH::collide_triangles()
 
 #endif
 
-        
 
     }
 }
