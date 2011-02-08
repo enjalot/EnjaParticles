@@ -73,6 +73,8 @@ private:
 	Kernel	k_curvature_flow;
 	GLuint window_height,window_width;
 	float particle_radius;
+	float near_depth;
+	float far_depth;
 
     GLuint pos_vbo;
     GLuint col_vbo;

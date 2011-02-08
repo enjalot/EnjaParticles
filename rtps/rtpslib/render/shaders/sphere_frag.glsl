@@ -1,4 +1,6 @@
 uniform float pointRadius;  // point size in world space
+uniform float near;
+uniform float far;
 varying vec3 posEye;        // position of center in eye space
 
 void main()
@@ -18,7 +20,7 @@ void main()
 
 	vec4 clipSpacePos = gl_ProjectionMatrix*spherePosEye;
 	float normDepth = clipSpacePos.z/clipSpacePos.w;
-    gl_FragDepth = ((1./2.)*normDepth)+(1./2.);
+    gl_FragDepth = (((far-near)/2.)*normDepth)+((far+near)/2.);
 
 
     gl_FragData[0] = gl_Color*vec4(1.0,1.0,1.0,0.1);//vec4(vec3(1.0)-gl_Color.rgb,gl_Color.a); //Thickness rendering

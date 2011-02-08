@@ -57,7 +57,7 @@ void main()
 
 	vec3 n = cross(ddx,ddy);
 	n = normalize(n);
-	const vec3 lightDir = vec3(-.577, -1., 2.);
+	const vec3 lightDir = vec3(-0.5, -0.5, 2.);
 	//const vec3 lightDir = vec3(-1.0,.0,-2.0);
 	const float shininess = 40.0;
 	float diffuse = max(0.0,dot(lightDir,n));

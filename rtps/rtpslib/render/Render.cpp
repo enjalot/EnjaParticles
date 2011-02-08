@@ -26,6 +26,8 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
     num = n;
 	window_height=600;
 	window_width=800;
+	near_depth=0.;
+	far_depth=1.;
 
     printf("GL VERSION %s\n", glGetString(GL_VERSION));
     //glsl = false;
@@ -181,6 +183,10 @@ void Render::render()
         //printf("SETTING DIMENSIONS\n");
         setWindowDimensions(glwidth, glheight);
     }
+	float nf[2];
+	glGetFloatv(GL_DEPTH_RANGE,nf);
+	near_depth = nf[0];
+	far_depth = nf[1];
     /*
     printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
     printf("w: %d h: %d\n", window_width, window_height);
@@ -491,6 +497,8 @@ void Render::renderPointsAsSpheres()
         //float particle_radius = 0.125f * 0.5f;
         glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "pointScale"), ((float)window_width) / tanf(65. * (0.5f * 3.1415926535f/180.0f)));
         glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "pointRadius"), particle_radius );
+        glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "near"), near_depth );
+        glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "far"), far_depth );
 
         glColor3f(1., 1., 1.);
 
