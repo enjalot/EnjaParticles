@@ -40,6 +40,7 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 		glGenFramebuffers(1,&fbos[0]);
 		smoothing = BILATERAL_GAUSSIAN_SHADER;
 		//smoothing = NO_SHADER;
+		particle_radius = 0.0125f*0.5f;
 
 		createFramebufferTextures();
 
@@ -487,7 +488,7 @@ void Render::renderPointsAsSpheres()
         glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
         glUseProgram(glsl_program[SPHERE_SHADER]);
-        float particle_radius = 0.125f * 0.5f;
+        //float particle_radius = 0.125f * 0.5f;
         glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "pointScale"), ((float)window_width) / tanf(65. * (0.5f * 3.1415926535f/180.0f)));
         glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "pointRadius"), particle_radius );
 
@@ -917,5 +918,9 @@ void Render::setWindowDimensions(GLuint width, GLuint height)
     }
 }
 
+void Render::setParticleRadius(float pradius)
+{
+	particle_radius = pradius;
+}
 
 }

@@ -34,6 +34,7 @@ public:
     void setNum(int nn){num = nn;}
 	void setDepthSmoothing(ShaderType shade){ smoothing = shade;}
 	void setWindowDimensions(GLuint width,GLuint height);
+	void setParticleRadius(float pradius);
 	
     void render();
     void drawArrays();
@@ -71,6 +72,7 @@ private:
 	Buffer<float>	cl_depth;
 	Kernel	k_curvature_flow;
 	GLuint window_height,window_width;
+	float particle_radius;
 
     GLuint pos_vbo;
     GLuint col_vbo;
