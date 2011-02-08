@@ -26,10 +26,12 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
     num = n;
 	window_height=600;
 	window_width=800;
+	near_depth=0.;
+	far_depth=1.;
 
     printf("GL VERSION %s\n", glGetString(GL_VERSION));
-    glsl = false;
-    //glsl = true;
+    //glsl = false;
+    glsl = true;
     //mikep = true;
     mikep = false;
     blending = false;
@@ -40,6 +42,7 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 		glGenFramebuffers(1,&fbos[0]);
 		smoothing = BILATERAL_GAUSSIAN_SHADER;
 		//smoothing = NO_SHADER;
+		particle_radius = 0.0125f*0.5f;
 
 		createFramebufferTextures();
 
@@ -180,6 +183,10 @@ void Render::render()
         //printf("SETTING DIMENSIONS\n");
         setWindowDimensions(glwidth, glheight);
     }
+	float nf[2];
+	glGetFloatv(GL_DEPTH_RANGE,nf);
+	near_depth = nf[0];
+	far_depth = nf[1];
     /*
     printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
     printf("w: %d h: %d\n", window_width, window_height);
@@ -249,6 +256,10 @@ void Render::render()
 		}
 		//glCopyTexSubImage2D(GL_TEXTURE_2D,0,0,0,0,0,800,600);
 
+
+        glDisable(GL_DEPTH_TEST);
+
+
 		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER,fbos[0]);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D,gl_tex["Color"]);
@@ -270,6 +281,7 @@ void Render::render()
 		glBindTexture(GL_TEXTURE_2D,0);
         */
 
+		glEnable(GL_DEPTH_TEST);
 
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);
         glDrawBuffer(GL_BACK);
@@ -279,14 +291,13 @@ void Render::render()
 
 
 		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D,gl_tex["normalColor"]);
+		glActiveTexture(GL_TEXTURE1);
 		if(smoothing!=NO_SHADER)
         {
-		    glBindTexture(GL_TEXTURE_2D,gl_tex["normalColor"]);
-		    glActiveTexture(GL_TEXTURE1);
 		    glBindTexture(GL_TEXTURE_2D,gl_tex["depth2"]);
-        } else {
-		    glBindTexture(GL_TEXTURE_2D,gl_tex["Color"]);
-		    glActiveTexture(GL_TEXTURE1);
+        } else 
+        {
 		    glBindTexture(GL_TEXTURE_2D,gl_tex["depth"]);
         }
         glUseProgram(glsl_program[COPY_TO_FB]);
@@ -319,7 +330,6 @@ void Render::render()
 		glReadBuffer(GL_BACK);
         */
 
-		//glEnable(GL_DEPTH_TEST);
 		if(blending)
 		{
 			//glDepthMask(GL_FALSE);
@@ -484,9 +494,11 @@ void Render::renderPointsAsSpheres()
         glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
         glUseProgram(glsl_program[SPHERE_SHADER]);
-        float particle_radius = 0.125f * 0.5f;
+        //float particle_radius = 0.125f * 0.5f;
         glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "pointScale"), ((float)window_width) / tanf(65. * (0.5f * 3.1415926535f/180.0f)));
         glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "pointRadius"), particle_radius );
+        glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "near"), near_depth );
+        glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "far"), far_depth );
 
         glColor3f(1., 1., 1.);
 
@@ -574,6 +586,8 @@ GLuint Render::compileShaders(const char* vertex_file, const char* fragment_file
     //this may not be the cleanest implementation
     //#include "shaders.cpp"
 
+    printf("vertex_file: %s\n", vertex_file);
+    printf("fragment_file: %s\n", fragment_file);
     //printf("vertex shader:\n%s\n", vertex_shader_source);
     //printf("fragment shader:\n%s\n", fragment_shader_source);
 	char *vertex_shader_source = NULL,*fragment_shader_source= NULL,*geometry_shader_source=NULL;
@@ -912,5 +926,9 @@ void Render::setWindowDimensions(GLuint width, GLuint height)
     }
 }
 
+void Render::setParticleRadius(float pradius)
+{
+	particle_radius = pradius;
+}
 
 }
