@@ -38,7 +38,7 @@ float translate_z = 3.00f;
 int mouse_old_x, mouse_old_y;
 int mouse_buttons = 0;
 float rotate_x = 0.0, rotate_y = 0.0;
-//std::vector<Triangle> triangles;
+std::vector<Triangle> triangles;
 //std::vector<Box> boxes;
 
 // offsets into the triangle list. tri_offsets[i] corresponds to the 
@@ -46,7 +46,7 @@ float rotate_x = 0.0, rotate_y = 0.0;
 //    tri_offsets[i+1]-tri_offsets[i]
 // Add one more offset so that the number of triangles in 
 //   boxes[boxes.size()-1] is tri_offsets[boxes.size()]-tri_offsets[boxes.size()-1]
-std::vector<int> tri_offsets;
+//std::vector<int> tri_offsets;
 
 
 void init_gl();
@@ -129,6 +129,7 @@ int main(int argc, char** argv)
     //rtps::RTPSettings settings;
     //rtps::Domain grid = Domain(float4(-5,-.3,0,0), float4(2, 2, 12, 0));
     rtps::Domain grid = Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
+    //rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
     rtps::RTPSettings settings(rtps::RTPSettings::FLOCK, NUM_PARTICLES, DT, grid);
     ps = new rtps::RTPS(settings);
 
@@ -185,10 +186,10 @@ void appKeyboard(unsigned char key, int x, int y)
     int nn;
     float4 min;
     float4 max;
+    float4 center;
+    float radius;
     switch(key) 
     {
-        case '\033': // escape quits
-        case '\015': // Enter quits    
         case 'e': //dam break
             nn = 16384;
             min = float4(.1, .1, .1, 1.0f);
@@ -198,46 +199,70 @@ void appKeyboard(unsigned char key, int x, int y)
         case 'p': //print timers
             ps->printTimers();
             return;
+        case '\033': // escape quits
+        case '\015': // Enter quits    
         case 'Q':    // Q quits
         case 'q':    // q (or escape) quits
             // Cleanup up and quit
             appDestroy();
-	    return;
-	case 'r': //drop a rectangle
-	{
-		int nn = 2048;
-
-		float4 min = float4(.1, .1, .1, 1.0f);
-		float4 max = float4(2., 2., 2., 1.0f);
-		ps->system->addBox(nn, min, max, false);
-		return;
-	}
-	case 'c':
-		ps->system->getRenderer()->setDepthSmoothing(Render::NO_SHADER);
-		break;
-	case 'C':
-		ps->system->getRenderer()->setDepthSmoothing(Render::BILATERAL_GAUSSIAN_SHADER);
-		break;
-	case 'w':
-		translate_z -= 0.1;
-		break;
-	case 'a':
-		translate_x += 0.1;
-		break;
-	case 's':
-		translate_z += 0.1;
-		break;
-	case 'd':
-		translate_x -= 0.1;
-		break;
-	case 'z':
-		translate_y += 0.1;
-		break;
-	case 'x':
-		translate_y -= 0.1;
-		break;
-	default:
-		return;
+            return;
+        case 't': //place a cube for collision
+        {
+            nn = 512;
+            float cw = .25;
+            float4 cen = float4(cw, cw, cw-.1, 1.0f);
+            make_cube(triangles, cen, cw);
+            cen = float4(1+cw, 1+cw, cw-.1, 1.0f);
+            make_cube(triangles, cen, cw);
+            cen = float4(1+3*cw, 1+3*cw, cw-.1, 1.0f);
+            make_cube(triangles, cen, cw);
+            cen = float4(3.5, 3.5, cw-.1, 1.0f);
+            make_cube(triangles, cen, cw);
+            ps->system->loadTriangles(triangles);
+            return;
+        }
+        case 'r': //drop a rectangle
+        {
+            nn = 2048;
+            min = float4(.2, .2, .2, 1.0f);
+            max = float4(2., 2., 2., 1.0f);
+            ps->system->addBox(nn, min, max, false);
+            return;
+        }
+        case 'R': //add a sphere
+        {
+	    nn = 2048;
+            center = float4(2.5f, 2.5f, 2.5f, 1.0f);
+	    radius = 1.f;
+            ps->system->addBall(nn, center, radius, false);
+            return;
+        }
+        case 'c':
+            ps->system->getRenderer()->setDepthSmoothing(Render::NO_SHADER);
+            break;
+        case 'C':
+            ps->system->getRenderer()->setDepthSmoothing(Render::BILATERAL_GAUSSIAN_SHADER);
+            break;
+        case 'w':
+            translate_z -= 0.1;
+            break;
+        case 'a':
+            translate_x += 0.1;
+            break;
+        case 's':
+            translate_z += 0.1;
+            break;
+        case 'd':
+            translate_x -= 0.1;
+            break;
+        case 'z':
+            translate_y += 0.1;
+            break;
+        case 'x':
+            translate_y -= 0.1;
+            break;
+        default:
+            return;
     }
 
     // set view matrix
@@ -259,7 +284,25 @@ void appRender()
     glEnable(GL_DEPTH_TEST);
 
     ps->render();
+    glColor4f(0,0,1,.5);
 
+    //glDepthMask(GL_FALSE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glBegin(GL_TRIANGLES);
+    //printf("num triangles %zd\n", triangles.size());
+    for (int i=0; i < triangles.size(); i++) {
+    //for (int i=0; i < 20; i++) {
+        Triangle& tria = triangles[i];
+        glNormal3fv(&tria.normal.x);
+        glVertex3f(tria.verts[0].x, tria.verts[0].y, tria.verts[0].z);
+        glVertex3f(tria.verts[1].x, tria.verts[1].y, tria.verts[1].z);
+        glVertex3f(tria.verts[2].x, tria.verts[2].y, tria.verts[2].z);
+    }
+    glEnd();
+
+    glDisable(GL_BLEND);
     //showFPS(enjas->getFPS(), enjas->getReport());
     glutSwapBuffers();
 

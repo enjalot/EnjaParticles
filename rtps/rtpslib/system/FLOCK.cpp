@@ -34,19 +34,6 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     //seed random
     srand ( time(NULL) );
 
-   
-    //float sd = 100;
-    float sd = 80;
-    //init flock stuff
-    //flock_settings.simulation_scale = .001;
-    flock_settings.simulation_scale = .001f*sd;
-    float scale = flock_settings.simulation_scale;
-
-    //grid = Domain(float4(0,0,0,0), float4(.25/scale, .5/scale, .5/scale, 0));
-    //grid = Domain(float4(0,0,0,0), float4(1/scale, 1/scale, 1/scale, 0));
-    //grid = Domain(float4(0,0,0,0), float4(1/scale, 1/scale, 1/scale, 0));
-    //grid = Domain(float4(0,0,0,0), float4(30, 30, 30, 0));
-    //grid = Domain(float4(-560/sd,-30/sd,0,0), float4(256/sd, 256/sd, 1276/sd, 0));
     grid = ps->settings.grid;
 
     //FLOCK settings depend on number of particles used
@@ -54,7 +41,7 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     //set up the grid
     setupDomain();
 
-    //flock_settings.integrator = LEAPFROG;
+    //flock_settings.integrator = LEAPFROG2;
     flock_settings.integrator = EULER2;
 
     //*** end Initialization
@@ -82,6 +69,7 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     //loadStep2();
 
     loadCollision_wall();
+    loadCollision_tri();
 
     //could generalize this to other integration methods later (leap frog, RK4)
     if(flock_settings.integrator == LEAPFROG2)
@@ -220,15 +208,15 @@ void FLOCK::updateCPU()
 void FLOCK::updateGPU()
 {
 
+    timers[TI_UPDATE]->start();
     glFinish();
     cl_position.acquire();
     cl_color.acquire();
     
     //sub-intervals
-    int sub_intervals = 5;  //should be a setting
+    int sub_intervals = 10;  //should be a setting
     for(int i=0; i < sub_intervals; i++)
     {
-        timers[TI_UPDATE]->start();
         /*
         k_density.execute(num);
         k_pressure.execute(num);
@@ -251,11 +239,11 @@ void FLOCK::updateGPU()
         timers[TI_NEIGH]->start();
         //printf("density\n");
         timers[TI_DENS]->start();
-        neighborSearch(0);  //density
+        neighborSearch(0);  //density => flockmates
         timers[TI_DENS]->end();
         //printf("forces\n");
         timers[TI_FORCE]->start();
-        neighborSearch(1);  //forces
+        neighborSearch(1);  //forces => velocities
         timers[TI_FORCE]->end();
         //exit(0);
         timers[TI_NEIGH]->end();
@@ -263,44 +251,64 @@ void FLOCK::updateGPU()
         //printf("collision\n");
         collision();
         //printf("integrate\n");
-        integrate();
+//        integrate();
         //exit(0);
         //
         //Andrew's rendering emporium
         //neighborSearch(4);
-        timers[TI_UPDATE]->end();
     }
 
     cl_position.release();
     cl_color.release();
 
+    timers[TI_UPDATE]->end();
 
 }
 
 void FLOCK::collision()
 {
+    int local_size = 128;
     //when implemented other collision routines can be chosen here
     timers[TI_COLLISION_WALL]->start();
-    k_collision_wall.execute(num, 128);
+    k_collision_wall.execute(num, local_size);
     timers[TI_COLLISION_WALL]->end();
+
+    timers[TI_COLLISION_TRI]->start();
+    collide_triangles();
+    timers[TI_COLLISION_TRI]->end();
+
 }
 
 void FLOCK::integrate()
 {
+    int local_size = 128;
     if(flock_settings.integrator == EULER2)
     {
         //k_euler.execute(max_num);
         timers[TI_EULER]->start();
-        k_euler.execute(num, 128);
+        k_euler.execute(num, local_size);
         timers[TI_EULER]->end();
     }
     else if(flock_settings.integrator == LEAPFROG2)
     {
         //k_leapfrog.execute(max_num);
         timers[TI_LEAPFROG]->start();
-        k_leapfrog.execute(num, 128);
+        k_leapfrog.execute(num, local_size);
         timers[TI_LEAPFROG]->end();
     }
+
+#if 0
+    if(num > 0)
+    {
+        std::vector<float4> pos = cl_position.copyToHost(num);
+        for(int i = 0; i < num; i++)
+        {
+            printf("pos[%d] = %f %f %f\n", i, pos[i].x, pos[i].y, pos[i].z);
+        }
+    }
+#endif
+
+
 }
 
 int FLOCK::setupTimers()
@@ -317,13 +325,14 @@ int FLOCK::setupTimers()
     timers[TI_DENS]     = new GE::Time("dens", time_offset, print_freq);
     timers[TI_FORCE]     = new GE::Time("force", time_offset, print_freq);
     timers[TI_COLLISION_WALL]     = new GE::Time("collision_wall", time_offset, print_freq);
+    timers[TI_COLLISION_TRI]     = new GE::Time("collision_triangle", time_offset, print_freq);
     timers[TI_EULER]     = new GE::Time("euler", time_offset, print_freq);
     timers[TI_LEAPFROG]     = new GE::Time("leapfrog", time_offset, print_freq);
 }
 
 void FLOCK::printTimers()
 {
-    for(int i = 0; i < 10; i++) //switch to vector of timers and use size()
+    for(int i = 0; i < 11; i++) //switch to vector of timers and use size()
     {
         timers[i]->print();
     }
@@ -335,18 +344,32 @@ void FLOCK::calculateFLOCKSettings()
     /*!
     * The Particle Mass (and hence everything following) depends on the MAXIMUM number of particles in the system
     */
+
+    float4 dmin = grid.getBndMin();
+    float4 dmax = grid.getBndMax();
+    //printf("dmin: %f %f %f\n", dmin.x, dmin.y, dmin.z);
+    //printf("dmax: %f %f %f\n", dmax.x, dmax.y, dmax.z);
+    float domain_vol = (dmax.x - dmin.x) * (dmax.y - dmin.y) * (dmax.z - dmin.z);
+    printf("domain volume: %f\n", domain_vol);
+
     flock_settings.rest_density = 1000;
     //flock_settings.rest_density = 2000;
 
     flock_settings.particle_mass = (128*1024.0)/max_num * .0002;
     printf("particle mass: %f\n", flock_settings.particle_mass);
+
+    float particle_vol = flock_settings.particle_mass / flock_settings.rest_density;
+
     //constant .87 is magic
-    flock_settings.particle_rest_distance = .87 * pow(flock_settings.particle_mass / flock_settings.rest_density, 1./3.);
+    flock_settings.particle_rest_distance = .87 * pow(particle_vol, 1./3.);
     printf("particle rest distance: %f\n", flock_settings.particle_rest_distance);
     
     //messing with smoothing distance, making it really small to remove interaction still results in weird force values
     flock_settings.smoothing_distance = 2.0f * flock_settings.particle_rest_distance;
     flock_settings.boundary_distance = .5f * flock_settings.particle_rest_distance;
+
+    flock_settings.simulation_scale = pow(particle_vol * max_num / domain_vol, 1./3.); 
+    printf("simulation scale: %f\n", flock_settings.simulation_scale);
 
     flock_settings.spacing = flock_settings.particle_rest_distance/ flock_settings.simulation_scale;
 
@@ -491,6 +514,11 @@ void FLOCK::prepareSorted()
 	cl_sort_output_hashes = Buffer<int>(ps->cli, keys);
 	cl_sort_output_indices = Buffer<int>(ps->cli, keys);
 
+
+    std::vector<Triangle> maxtri(2048);
+    cl_triangles = Buffer<Triangle>(ps->cli, maxtri);
+
+
 }
 
 void FLOCK::setupDomain()
@@ -543,6 +571,7 @@ int FLOCK::addBox(int nn, float4 min, float4 max, bool scaled)
     {
         scale = flock_settings.simulation_scale;
     }
+printf("\n\n ADDING A CUBE \n\n");
     vector<float4> rect = addRect(nn, min, max, flock_settings.spacing, scale);
     pushParticles(rect);
     return rect.size();
@@ -555,6 +584,7 @@ void FLOCK::addBall(int nn, float4 center, float radius, bool scaled)
     {
         scale = flock_settings.simulation_scale;
     }
+printf("\n\n ADDING A SPHERE \n\n");
     vector<float4> flockere = addSphere(nn, center, radius, flock_settings.spacing, scale);
     pushParticles(flockere);
 }
@@ -572,8 +602,10 @@ void FLOCK::pushParticles(vector<float4> pos)
     std::vector<float4> vels(nn);
 
     std::fill(cols.begin(), cols.end(),color);
-    float v = 1.0f;
-    float4 iv = float4(v, v, -v, 0.0f);
+    //float v = .5f;
+    float v = 0.0f;
+    //float4 iv = float4(v, v, -v, 0.0f);
+    float4 iv = float4(0, v, -.1, 0.0f);
     std::fill(vels.begin(), vels.end(),iv);
 
 #ifdef GPU
@@ -624,7 +656,7 @@ void FLOCK::render()
 {
 	System::render();
 	renderer->render_box(grid.getBndMin(), grid.getBndMax());
-    renderer->render_table(grid.getBndMin(), grid.getBndMax());
+    //renderer->render_table(grid.getBndMin(), grid.getBndMax());
 }
 
 

@@ -1,49 +1,92 @@
-#ifndef _PRESSURE_UPDATE_CL_
-#define _PRESSURE_UPDATE_CL_
+#ifndef _FORCE_CL_
+#define _FORCE_CL_
 
-	// gradient
-	float dWijdr = Wspiky_dr(rlen, flockp->smoothing_distance, flockp);
+	// TODO: NEED TO DEFINE MY SMALL FUNCTIONS SOMEWHERE (times, devides, normalize, distanceFrom)
 
-	float4 di = density(index_i);  // should not repeat di=
-	float4 dj = density(index_j);
 
-	//form simple FLOCK in Krog's thesis
+	#define	separationdist	0.2f
+	#define	searchradius	0.5f
+	#define	maxspeed	0.3f
+	#define MinUrgency      0.05f
+	#define MaxUrgency      0.1f
 
-	float rest_density = 1000.f;
-	float Pi = flockp->K*(di.x - rest_density);
-	float Pj = flockp->K*(dj.x - rest_density);
+	// index of closest flockmate
+	int index_c = (int) density(index_i).x;
 
-	float kern = -dWijdr * (Pi + Pj)*0.5 * flockp->wspiky_d_coef;
-	float4 stress = kern*r; // correct version
+	// positions
+	float4 pi = pos(index_i);
+	float4 pj = pos(index_j);
+	float4 pc = pos(index_c);
 
-	float4 veli = veleval(index_i); // sorted
-	float4 velj = veleval(index_j);
+	// velocities
+	float4 vi = force(index_i);
+	float4 vj = force(index_j);
+	float4 vc = force(index_c);
 
-	// Add viscous forces
+	// initialize acc to zero
+        float4 acc = float4(0.f, 0.f, 0.f, 0.f);
 
-	#if 1
-	float vvisc = flockp->viscosity;
-	float dWijlapl = Wvisc_lapl(rlen, flockp->smoothing_distance, flockp);
-	stress += vvisc * (velj-veli) * dWijlapl;
-	#endif
+        // Step 1. Update position
+	// REMEMBER THAT MY VELOCITIES ARE GOING TO BE STORED IN THE FORCE VECTOR FROM NOW ON
+        pi += vi;
 
-	stress *=  flockp->mass/(di.x*dj.x);  // original
+        // Step 2. Search for neighbors
+        //numFlockmates = SearchFlockmates(i);
 
-	#if 1
-	// Add XFLOCK stabilization term
-    // the poly6 kernel calculation seems to be wrong, using rlen as a vector when it is a float...
-	//float Wijpol6 = Wpoly6(r, flockp->smoothing_distance, flockp) * flockp->wpoly6_coeff;
-    /*
-    float h = flockp->smoothing_distance;
-    float hr2 = (h*h - rlen*rlen);
-	float Wijpol6 = hr2*hr2*hr2;// * flockp->wpoly6_coeff;
-    */
-	float Wijpol6 = Wpoly6(r, flockp->smoothing_distance, flockp);
-	//float Wijpol6 = flockp->wpoly6_coef * Wpoly6(rlen, flockp->smoothing_distance, flockp);
-	pt->xflock +=  (2.f * flockp->mass * Wijpol6 * (velj-veli)/(di.x+dj.x));
-	pt->xflock.w = 0.f;
-	#endif
+	// flockmates
+	int closestFlockmate = (int)density(index_i).x;
+	int numFlockmates = (int)density(index_i).y;
 
-	pt->force += stress;
+        // Step 3. Compute the three rules
+	
+	// RULE 1. Separation
+	d = distance(pi,pc);
+	float r = d / separationdist;  				// TODO: NEED THE CLOSEST FLOCKMATE (ID OR POSITION), AND THE DISTANTCE FROM IT TO THE CURRENT BOID
+
+        float4 separation = pc - pi;
+        separation /= normalize(separation);			// TODO: search for normalization in OpenCL Specification
+
+        if(d > separationdist){
+               	separation *=  r;
+        }
+       	else if(d_closestFlockmate < separationdist){
+               	separation *= -r;
+        }
+        else{
+               	separation *= 0;
+        }
+        
+	acc += separation;
+                
+	// RULE 2. Alignment
+	float4 alignment = vc;
+        alignment /= normalize(alignment);
+
+        acc += alignment;
+
+      	// RULE 3. Cohesion
+      	float4 flockCenter= xflock(index_i);
+	float4 cohesion;
+
+        flockCenter /= numFlockmates;
+        cohesion = flockCenter - pi;
+        cohesion /= normalize(cohesion);
+
+	acc += cohesion;
+
+        // Step 4. Constrain acceleration
+        if(length(acc) > maxspeed*MaxUrgency){
+                // set magnitude to MaxChangeInAcc
+                acc *= (maxspeed*MaxUrgency);
+        }
+
+        // Step 5. Add acceleration to velocity
+        vi += acc;
+
+    	// Step 6. Constrain velocity
+        if(length(vi) > maxspeed){
+                // set magnitude to MaxSpeed
+                vi *= maxspeed;
+        }
 
 #endif

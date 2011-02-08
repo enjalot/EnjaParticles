@@ -52,6 +52,7 @@ float Wspiky(float rlen, float h, __constant struct FLOCKParams* params)
 	float Wij = alpha * hr2*hr2*hr2;
 	return Wij;
 }
+
 //----------------------------------------------------------------------
 float Wspiky_dr(float rlen, float h, __constant struct FLOCKParams* params)
 {
@@ -65,9 +66,11 @@ float Wspiky_dr(float rlen, float h, __constant struct FLOCKParams* params)
 	return Wij;
 #else
 	float hr2 = h - rlen;
-	return -hr2*hr2/rlen;
+	//return -hr2*hr2/rlen;
+	return -hr2*hr2/(rlen + params->EPSILON);
 #endif
 }
+
 //----------------------------------------------------------------------
 float Wvisc(float rlen, float h, __constant struct FLOCKParams* params)
 {

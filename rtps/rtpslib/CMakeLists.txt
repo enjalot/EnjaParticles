@@ -108,6 +108,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/flock/Viscosity
     ${rtpslib_SOURCE_DIR}/system/flock/XFLOCK
     ${rtpslib_SOURCE_DIR}/system/flock/Collision_wall
+    ${rtpslib_SOURCE_DIR}/system/flock/Collision_triangle
     
     ${rtpslib_SOURCE_DIR}/system/flock/Prep
     ${rtpslib_SOURCE_DIR}/system/flock/Hash

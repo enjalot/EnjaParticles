@@ -23,10 +23,7 @@ __kernel void datastructures(
 	uint index = get_global_id(0);
     int num = flockp->num;
 	//int num = get_global_size(0);
-
-
-	// particle index	
-	if (index >= num) return;
+	//if (index >= num) return;
 
 	uint hash = sort_hashes[index];
 
@@ -55,6 +52,10 @@ __kernel void datastructures(
 	// As it isn't the first particle, it must also be the cell end of
 	// the previous particle's cell
 
+    //Having this check here is important! Can't quit before local threads are done
+    //but we can't keep going if our index goes out of bounds of the number of particles
+	if (index >= num) return;
+
 	if ((index == 0 || hash != sharedHash[tid]) )
 	{
 		cell_indices_start[hash] = index; // ERROR
@@ -64,12 +65,14 @@ __kernel void datastructures(
 	}
 	//return;
 
-	if (index == numParticles - 1) {
+	//if (index == numParticles - 1) {
+	if (index == num - 1) {
 		cell_indices_end[hash] = index + 1;
 	}
+	// particle index	
+	//if (index >= num) return;
 
     //cell_indices_end[index] = 42;
-
 	uint sorted_index = sort_indices[index];
     //uint sorted_index = index;
 
@@ -81,6 +84,7 @@ __kernel void datastructures(
 		vars_sorted[index+j*numParticles]	= vars_unsorted[sorted_index+j*numParticles];
 	}
 	#endif
+
 
 	// Variables to sort could change for different types of simulations 
 	// SHOULD I divide by simulation scale upon return? do not think so
