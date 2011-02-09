@@ -11,7 +11,7 @@
 	#define MaxUrgency      0.1f
 
 	// index of closest flockmate
-	int index_c = (int) density(index_i).x;
+	int index_c = (int) density(index_i);
 
 	// positions
 	float4 pi = pos(index_i);
@@ -24,23 +24,23 @@
 	float4 vc = force(index_c);
 
 	// initialize acc to zero
-        float4 acc = float4(0.f, 0.f, 0.f, 0.f);
+        float4 acc = {0.f, 0.f, 0.f, 0.f};
 
         // Step 1. Update position
 	// REMEMBER THAT MY VELOCITIES ARE GOING TO BE STORED IN THE FORCE VECTOR FROM NOW ON
-        pi += vi;
+//        pt->position += vi;
 
         // Step 2. Search for neighbors
         //numFlockmates = SearchFlockmates(i);
 
 	// flockmates
-	int closestFlockmate = (int)density(index_i).x;
-	int numFlockmates = (int)density(index_i).y;
+	int closestFlockmate = index_c;
+	int numFlockmates = index_c;	// TODO: is the y component but Im getting error: make sure that density is a float4
 
         // Step 3. Compute the three rules
 	
 	// RULE 1. Separation
-	d = distance(pi,pc);
+	float d = distance(pi,pc);
 	float r = d / separationdist;  				// TODO: NEED THE CLOSEST FLOCKMATE (ID OR POSITION), AND THE DISTANTCE FROM IT TO THE CURRENT BOID
 
         float4 separation = pc - pi;
@@ -49,7 +49,7 @@
         if(d > separationdist){
                	separation *=  r;
         }
-       	else if(d_closestFlockmate < separationdist){
+       	else if(closestFlockmate < separationdist){
                	separation *= -r;
         }
         else{
@@ -65,7 +65,7 @@
         acc += alignment;
 
       	// RULE 3. Cohesion
-      	float4 flockCenter= xflock(index_i);
+      	float4 flockCenter= vel(index_i);
 	float4 cohesion;
 
         flockCenter /= numFlockmates;
@@ -81,12 +81,12 @@
         }
 
         // Step 5. Add acceleration to velocity
-        vi += acc;
+        pt->force += acc;
 
     	// Step 6. Constrain velocity
         if(length(vi) > maxspeed){
                 // set magnitude to MaxSpeed
-                vi *= maxspeed;
+                pt->force *= maxspeed;
         }
 
 #endif

@@ -5,9 +5,9 @@
 	// TODO: set dmin = searchradius initialy somewhere
 	
 	if(rlen < dmin){
-		pt->density.x = index_j; //TODO: get the index
+		pt->density.x = index_j; // nearest flockmate
 	}	
-	pt->density.y += pt->density.y;
-	pt->xflock += pt->pos(index_j); 
+	pt->density.y += 1;		// number of flockmates
+	pt->xflock += position_j; 	// center of the flock
 //----------------------------------------------------------------------
 #endif

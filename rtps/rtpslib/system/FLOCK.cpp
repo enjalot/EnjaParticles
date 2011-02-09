@@ -138,6 +138,7 @@ FLOCK::FLOCK(RTPS *psfr, int n)
 #endif
 
 	renderer = new Render(pos_vbo,col_vbo,num,ps->cli);
+        renderer->setParticleRadius(flock_settings.spacing*0.25);
 
 }
 
@@ -251,7 +252,7 @@ void FLOCK::updateGPU()
         //printf("collision\n");
         collision();
         //printf("integrate\n");
-//        integrate();
+        integrate();
         //exit(0);
         //
         //Andrew's rendering emporium

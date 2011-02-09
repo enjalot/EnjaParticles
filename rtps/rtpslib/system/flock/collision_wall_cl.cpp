@@ -2,7 +2,7 @@
 #include "cl_structs.h"
 
 //from Krog '10
-float4 calculateRepulsionForce(float4 normal, float4 vel, float boundary_stiffness, float boundary_dampening, float distance)
+float4 calculateRepulsionForce2(float4 normal, float4 vel, float boundary_stiffness, float boundary_dampening, float distance)
 {
     vel.w = 0.0f;
     float4 repulsion_force = (boundary_stiffness * distance - boundary_dampening * dot(normal, vel))*normal;
@@ -11,7 +11,7 @@ float4 calculateRepulsionForce(float4 normal, float4 vel, float boundary_stiffne
 }
 
 //from Krog '10
-float4 calculateFrictionForce(float4 vel, float4 force, float4 normal, float friction_kinetic, float friction_static_limit)
+float4 calculateFrictionForce2(float4 vel, float4 force, float4 normal, float friction_kinetic, float friction_static_limit)
 {
 	float4 friction_force = (float4)(0.0f,0.0f,0.0f,0.0f);
     force.w = 0.0f;
@@ -72,17 +72,17 @@ __kernel void collision_wall(
     if (diff > params->EPSILON)
     {
         float4 normal = (float4)(0.0f, 0.0f, 1.0f, 0.0f);
-        r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
-        f_f += calculateFrictionForce(v, f, normal, friction_kinetic, friction_static_limit);
-        //r_f += calculateRepulsionForce(normal, v, boundary_stiffness, boundary_dampening, boundary_distance);
+        r_f += calculateRepulsionForce2(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
+        f_f += calculateFrictionForce2(v, f, normal, friction_kinetic, friction_static_limit);
+        //r_f += calculateRepulsionForce2(normal, v, boundary_stiffness, boundary_dampening, boundary_distance);
     }
     diff = params->boundary_distance - (gp->bnd_max.z - p.z);
     if (diff > params->EPSILON)
     {
         float4 normal = (float4)(0.0f, 0.0f, -1.0f, 0.0f);
-        r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
-        f_f += calculateFrictionForce(v, f, normal, friction_kinetic, friction_static_limit);
-        //r_f += calculateRepulsionForce(normal, v, boundary_stiffness, boundary_dampening, boundary_distance);
+        r_f += calculateRepulsionForce2(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
+        f_f += calculateFrictionForce2(v, f, normal, friction_kinetic, friction_static_limit);
+        //r_f += calculateRepulsionForce2(normal, v, boundary_stiffness, boundary_dampening, boundary_distance);
     }
 
 
@@ -92,30 +92,30 @@ __kernel void collision_wall(
     if (diff > params->EPSILON)
     {
         float4 normal = (float4)(0.0f, 1.0f, 0.0f, 0.0f);
-        r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
-        f_f += calculateFrictionForce(v, f, normal, friction_kinetic, friction_static_limit);
+        r_f += calculateRepulsionForce2(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
+        f_f += calculateFrictionForce2(v, f, normal, friction_kinetic, friction_static_limit);
     }
     diff = params->boundary_distance - (gp->bnd_max.y - p.y);
     if (diff > params->EPSILON)
     {
         float4 normal = (float4)(0.0f, -1.0f, 0.0f, 0.0f);
-        r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
-        f_f += calculateFrictionForce(v, f, normal, friction_kinetic, friction_static_limit);
+        r_f += calculateRepulsionForce2(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
+        f_f += calculateFrictionForce2(v, f, normal, friction_kinetic, friction_static_limit);
     }
     //X walls
     diff = params->boundary_distance - (p.x - gp->bnd_min.x);
     if (diff > params->EPSILON)
     {
         float4 normal = (float4)(1.0f, 0.0f, 0.0f, 0.0f);
-        r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
-        f_f += calculateFrictionForce(v, f, normal, friction_kinetic, friction_static_limit);
+        r_f += calculateRepulsionForce2(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
+        f_f += calculateFrictionForce2(v, f, normal, friction_kinetic, friction_static_limit);
     }
     diff = params->boundary_distance - (gp->bnd_max.x - p.x);
     if (diff > params->EPSILON)
     {
         float4 normal = (float4)(-1.0f, 0.0f, 0.0f, 0.0f);
-        r_f += calculateRepulsionForce(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
-        f_f += calculateFrictionForce(v, f, normal, friction_kinetic, friction_static_limit);
+        r_f += calculateRepulsionForce2(normal, v, params->boundary_stiffness, params->boundary_dampening, diff);
+        f_f += calculateFrictionForce2(v, f, normal, friction_kinetic, friction_static_limit);
     }
 
 

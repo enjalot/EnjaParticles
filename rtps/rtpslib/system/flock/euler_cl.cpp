@@ -16,36 +16,38 @@ __kernel void euler(
 		float dt)
 {
     unsigned int i = get_global_id(0);
-	int num = params->num;
-    if(i >= num) return;
-
-
+    int num = params->num;
+    
+    if(i >= num) 
+	return;
 
     float4 p = pos(i);
-    float4 v = vel(i);
+//  float4 v = vel(i);  mymese
     float4 f = force(i);
 
     //external force is gravity
-    f.z += -9.8f;
+//  f.z += -9.8f;	mymese
 
-    float speed = magnitude(f);
-    if(speed > 600.0f) //velocity limit, need to pass in as struct
-    {
-        f *= 600.0f/speed;
-    }
+//  float speed = magnitude(f);	mymese
+//  if(speed > 600.0f) 		mymese //velocity limit, need to pass in as struct
+//  {					mymese
+//      f *= 600.0f/speed;		mymese
+//  }					mymese
 
-    v += dt*f;
+//  v += dt*f;			mymese
     //p += dt*v / params->simulation_scale;
-    p += dt*v;
+//  p += dt*v;			mymese
+    p += dt*f; // change it to force for my boids
     p.w = 1.0f; //just in case
-	p.xyz /= params->simulation_scale;
+    p.xyz /= params->simulation_scale;
 
-	uint originalIndex = sort_indices[i];
+    uint originalIndex = sort_indices[i];
 
-    unsorted_vel(originalIndex) = v;
+//  unsorted_vel(originalIndex) = v;	mymese
     //unsorted_veleval(originalIndex) = v;
-    float dens = density(i);
-	unsorted_pos(originalIndex) = (float4)(p.xyz, dens);
-	positions[originalIndex] = (float4)(p.xyz, 1.);  // for plotting
+//  float dens = density(i);		mymese
+//  unsorted_pos(originalIndex) = (float4)(p.xyz, dens);	mymese
+    unsorted_pos(originalIndex) = (float4)(p.xyz, 1.f); // change the last component to 1 for my boids, im not using density
+    positions[originalIndex] = (float4)(p.xyz, 1.f);  // for plotting
 
 }
