@@ -1,5 +1,5 @@
-#ifndef _FORCE_CL_
-#define _FORCE_CL_
+#ifndef _PRESSURE_UPDATE_CL_
+#define _PRESSURE_UPDATE_CL_
 
 	// TODO: NEED TO DEFINE MY SMALL FUNCTIONS SOMEWHERE (times, devides, normalize, distanceFrom)
 
@@ -11,7 +11,7 @@
 	#define MaxUrgency      0.1f
 
 	// index of closest flockmate
-	int index_c = (int) density(index_i);
+	int index_c = (int) den(index_i).x;
 
 	// positions
 	float4 pi = pos(index_i);
@@ -24,7 +24,7 @@
 	float4 vc = force(index_c);
 
 	// initialize acc to zero
-        float4 acc = {0.f, 0.f, 0.f, 0.f};
+        float4 acc = (float4)(0.f, 0.f, 0.f, 0.f);
 
         // Step 1. Update position
 	// REMEMBER THAT MY VELOCITIES ARE GOING TO BE STORED IN THE FORCE VECTOR FROM NOW ON
@@ -34,8 +34,8 @@
         //numFlockmates = SearchFlockmates(i);
 
 	// flockmates
-	int closestFlockmate = index_c;
-	int numFlockmates = index_c;	// TODO: is the y component but Im getting error: make sure that density is a float4
+	//int closestFlockmate = pc;
+	int numFlockmates = (int) den(index_i).y;	// TODO: is the y component but Im getting error: make sure that density is a float4
 
         // Step 3. Compute the three rules
 	
@@ -44,18 +44,19 @@
 	float r = d / separationdist;  				// TODO: NEED THE CLOSEST FLOCKMATE (ID OR POSITION), AND THE DISTANTCE FROM IT TO THE CURRENT BOID
 
         float4 separation = pc - pi;
-        separation /= normalize(separation);			// TODO: search for normalization in OpenCL Specification
 
         if(d > separationdist){
                	separation *=  r;
         }
-       	else if(closestFlockmate < separationdist){
+       	else if(d < separationdist){
                	separation *= -r;
         }
         else{
                	separation *= 0;
         }
         
+        separation /= normalize(separation);			// TODO: search for normalization in OpenCL Specification
+
 	acc += separation;
                 
 	// RULE 2. Alignment
@@ -65,7 +66,7 @@
         acc += alignment;
 
       	// RULE 3. Cohesion
-      	float4 flockCenter= vel(index_i);
+      	float4 flockCenter= xflock(index_i);
 	float4 cohesion;
 
         flockCenter /= numFlockmates;

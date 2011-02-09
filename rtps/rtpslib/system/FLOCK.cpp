@@ -189,15 +189,15 @@ void FLOCK::updateCPU()
         cpuLeapFrog();
     }
     //printf("positions[0].z %f\n", positions[0].z);
-    /*
+#if 0
     for(int i = 0; i < 100; i++)
     {
         //if(xflocks[i].z != 0.0)
         //printf("force: %f %f %f  \n", veleval[i].x, veleval[i].y, veleval[i].z);
-        printf("force: %f %f %f  \n", xflocks[i].x, xflocks[i].y, xflocks[i].z);
+        printf("force: %f %f %f  \n", forces[i].x, forces[i].y, forces[i].z);
         //printf("force: %f %f %f  \n", velocities[i].x, velocities[i].y, velocities[i].z);
     }
-    */
+#endif
     //printf("cpu execute!\n");
 
     glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
@@ -298,16 +298,23 @@ void FLOCK::integrate()
         timers[TI_LEAPFROG]->end();
     }
 
-#if 0
+
+//#if 0
     if(num > 0)
     {
         std::vector<float4> pos = cl_position.copyToHost(num);
+        std::vector<float4> f = cl_force.copyToHost(num);
+        std::vector<float> d = cl_density.copyToHost(num);
+        std::vector<float4> xf = cl_xflock.copyToHost(num);
         for(int i = 0; i < num; i++)
         {
-            printf("pos[%d] = %f %f %f\n", i, pos[i].x, pos[i].y, pos[i].z);
+            printf("pos   [%d] = %f %f %f\n", i, pos[i].x, pos[i].y, pos[i].z);
+            printf("vel   [%d] = %f %f %f\n", i, f[i].x, f[i].y, f[i].z);
+            printf("ne flo[%d] = %f \n", i, d[i]);
+            printf("ce flo[%d] = %f %f %f\n", i, xf[i].w, xf[i].y, xf[i].z);
         }
     }
-#endif
+//#endif
 
 
 }
@@ -421,7 +428,7 @@ void FLOCK::prepareSorted()
     //for reading back different values from the kernel
     std::vector<float4> error_check(max_num);
  
-    std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 1.0f, 0.0f));
+    std::fill(forces.begin(), forces.end(),float4(0.0f, 1.0f, 0.0f, 0.0f));
     std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     std::fill(veleval.begin(), veleval.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
 
