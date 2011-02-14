@@ -53,11 +53,11 @@
 	float Wijpol6 = Wpoly6(r, sphp->smoothing_distance, sphp);
 	//float Wijpol6 = sphp->wpoly6_coef * Wpoly6(rlen, sphp->smoothing_distance, sphp);
     float4 xsph = (2.f * sphp->mass * Wijpol6 * (velj-veli)/(di.x+dj.x));
-	pt->xsph += xsph * iej;
+	pt->xsph += xsph * (float)iej;
 	pt->xsph.w = 0.f;
 	#endif
 
-	pt->force += stress * iej;
+	pt->force += stress * (float)iej;
 
 
 #endif
