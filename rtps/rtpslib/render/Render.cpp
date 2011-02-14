@@ -30,8 +30,8 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 	far_depth=1.;
 
     printf("GL VERSION %s\n", glGetString(GL_VERSION));
-    //glsl = false;
-    glsl = true;
+    glsl = false;
+    //glsl = true;
     //mikep = true;
     mikep = false;
     blending = false;

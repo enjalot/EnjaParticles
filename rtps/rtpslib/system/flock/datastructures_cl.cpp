@@ -88,7 +88,7 @@ __kernel void datastructures(
 
 	// Variables to sort could change for different types of simulations 
 	// SHOULD I divide by simulation scale upon return? do not think so
-	pos(index)     = unsorted_pos(sorted_index) * flockp->simulation_scale;
+	pos(index)     = unsorted_pos(sorted_index);// * flockp->simulation_scale;
 	//pos(index)     = unsorted_pos(index) * flockp->simulation_scale;
 	vel(index)     = unsorted_vel(sorted_index);
 	veleval(index) = unsorted_veleval(sorted_index); // not sure if needed

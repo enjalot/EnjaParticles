@@ -18,6 +18,10 @@ void FLOCK::loadEuler()
     k_euler.setArg(iargs++, cl_FLOCKParams.getDevicePtr());
     k_euler.setArg(iargs++, ps->settings.dt); //time step
 
+	// ONLY IF DEBUGGING
+	k_euler.setArg(iargs++, clf_debug.getDevicePtr());
+	k_euler.setArg(iargs++, cli_debug.getDevicePtr());
+
 
 
 } 

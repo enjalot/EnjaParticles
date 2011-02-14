@@ -106,6 +106,7 @@ void FLOCK::neighborSearch(int choice)
 		//printf("cli_debug: %d, %d, %d, %d\n", cli[i].x, cli[i].y, cli[i].z, cli[i].w);
 //		printf("pos : %f, %f, %f, %f\n", pos[i].x, pos[i].y, pos[i].z, pos[i].w);
     }
+	printf("============================================\n");
 #endif
 
 }

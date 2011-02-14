@@ -38,11 +38,20 @@ inline void ForNeighbor(__global float4*  vars_sorted,
 	r.w = 0.f; // I stored density in 4th component
 	// |r|
 	float rlen = length(r);
+    if(index_j == 0)
+        clf[index_i].x = rlen;
+    if(index_j == 1)
+        clf[index_i].y = rlen;
+    if(index_j == 2)
+        clf[index_i].z = rlen;
+    if(index_j == 3)
+        clf[index_i].w = rlen;
+
 	
 	float dmin = 0.3; // separation distance TODO: remove hard coded parameter
 
 	// is this particle within cutoff?
-	if (rlen <= flockp->smoothing_distance) 
+	if (rlen <= dmin) 
         {
 
             if (flockp->choice == 0) {
@@ -115,16 +124,18 @@ __kernel void neighbors(
 	PointData pt;
 	zeroPoint(&pt);
 
-	if (flockp->choice == 0) { // update density
+	//if (flockp->choice == 0) { // update density
     	IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ flockp DEBUG_ARGV);
-		density(index) = flockp->wpoly6_coef * pt.density.x;
+		den(index) = pt.density;
+		xflock(index) = pt.xflock;
+        //density(index) = 5;
+        //xflock(index) = (float4)(1., 1., 1., 1.);
         //clf[index].w = density(index);
-	}
+	//}
 	if (flockp->choice == 1) { // update force
     	IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ flockp DEBUG_ARGV);
 		force(index) = pt.force; // Does not seem to maintain value into euler.cl
         //clf[index].xyz = pt.force.xyz;
-		xflock(index) = flockp->wpoly6_coef * pt.xflock;
 	}
 #if 0
 	if (flockp->choice == 2) { // update surface tension (NOT DEBUGGED)

@@ -243,9 +243,9 @@ void FLOCK::updateGPU()
         neighborSearch(0);  //density => flockmates
         timers[TI_DENS]->end();
         //printf("forces\n");
-        timers[TI_FORCE]->start();
-        neighborSearch(1);  //forces => velocities
-        timers[TI_FORCE]->end();
+        //timers[TI_FORCE]->start();
+        //neighborSearch(1);  //forces => velocities
+        //timers[TI_FORCE]->end();
         //exit(0);
         timers[TI_NEIGH]->end();
         
@@ -299,22 +299,26 @@ void FLOCK::integrate()
     }
 
 
-//#if 0
+#if 0
     if(num > 0)
     {
         std::vector<float4> pos = cl_position.copyToHost(num);
-        std::vector<float4> f = cl_force.copyToHost(num);
-        std::vector<float> d = cl_density.copyToHost(num);
-        std::vector<float4> xf = cl_xflock.copyToHost(num);
+        //std::vector<float4> vel = cl_velocity.copyToHost(num);
+        std::vector<int4> cli = cli_debug.copyToHost(num);
+        std::vector<float4> clf = clf_debug.copyToHost(num);
+
+        //std::vector<float4> f = cl_force.copyToHost(num);
+        //std::vector<float4> d = cl_density.copyToHost(num);
+        //std::vector<float4> xf = cl_xflock.copyToHost(num);
         for(int i = 0; i < num; i++)
         {
             printf("pos   [%d] = %f %f %f\n", i, pos[i].x, pos[i].y, pos[i].z);
-            printf("vel   [%d] = %f %f %f\n", i, f[i].x, f[i].y, f[i].z);
-            printf("ne flo[%d] = %f \n", i, d[i]);
-            printf("ce flo[%d] = %f %f %f\n", i, xf[i].w, xf[i].y, xf[i].z);
+            //printf("vel   [%d] = %f %f %f\n", i, vel[i].x, vel[i].y, vel[i].z);
+            printf("ne flo[%d] = %d %d \n", i, cli[i].x, cli[i].y);
+            printf("ce flo[%d] = %f %f %f\n", i, clf[i].w, clf[i].y, clf[i].z);
         }
     }
-//#endif
+#endif
 
 
 }
@@ -360,6 +364,8 @@ void FLOCK::calculateFLOCKSettings()
     float domain_vol = (dmax.x - dmin.x) * (dmax.y - dmin.y) * (dmax.z - dmin.z);
     printf("domain volume: %f\n", domain_vol);
 
+
+//////
     flock_settings.rest_density = 1000;
     //flock_settings.rest_density = 2000;
 
@@ -367,19 +373,33 @@ void FLOCK::calculateFLOCKSettings()
     printf("particle mass: %f\n", flock_settings.particle_mass);
 
     float particle_vol = flock_settings.particle_mass / flock_settings.rest_density;
+/////
 
+    
     //constant .87 is magic
-    flock_settings.particle_rest_distance = .87 * pow(particle_vol, 1./3.);
+    //flock_settings.particle_rest_distance = .87 * pow(particle_vol, 1./3.);
+    flock_settings.particle_rest_distance = .05;
     printf("particle rest distance: %f\n", flock_settings.particle_rest_distance);
     
     //messing with smoothing distance, making it really small to remove interaction still results in weird force values
     flock_settings.smoothing_distance = 2.0f * flock_settings.particle_rest_distance;
-    flock_settings.boundary_distance = .5f * flock_settings.particle_rest_distance;
 
-    flock_settings.simulation_scale = pow(particle_vol * max_num / domain_vol, 1./3.); 
+    ////
+    flock_settings.boundary_distance = .5f * flock_settings.particle_rest_distance;
+    ////
+
+
+
+
+
+
+
+    //flock_settings.simulation_scale = pow(particle_vol * max_num / domain_vol, 1./3.); 
+    flock_settings.simulation_scale = 1.0f;
     printf("simulation scale: %f\n", flock_settings.simulation_scale);
 
     flock_settings.spacing = flock_settings.particle_rest_distance/ flock_settings.simulation_scale;
+    //flock_settings.spacing = .05;
 
     float particle_radius = flock_settings.spacing;
     printf("particle radius: %f\n", particle_radius);
@@ -429,7 +449,7 @@ void FLOCK::prepareSorted()
     std::vector<float4> error_check(max_num);
  
     std::fill(forces.begin(), forces.end(),float4(0.0f, 1.0f, 0.0f, 0.0f));
-    std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
+    std::fill(velocities.begin(), velocities.end(),float4(0.1f, 0.1f, 0.1f, 0.0f));
     std::fill(veleval.begin(), veleval.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
 
     std::fill(densities.begin(), densities.end(), 0.0f);
@@ -611,7 +631,7 @@ void FLOCK::pushParticles(vector<float4> pos)
 
     std::fill(cols.begin(), cols.end(),color);
     //float v = .5f;
-    float v = 0.0f;
+    float v = 0.1f;
     //float4 iv = float4(v, v, -v, 0.0f);
     float4 iv = float4(0, v, -.1, 0.0f);
     std::fill(vels.begin(), vels.end(),iv);
