@@ -60,11 +60,11 @@ __kernel void euler(
 	// velocities
 	//float4 vi = force(index_i);
 	//float4 vj = force(index_j);
-    float4 v = vel(i);
+    	float4 v = vel(i);
 	float4 vc = vel(index_c);
 
 	// initialize acc to zero
-    float4 acc = (float4)(0.f, 0.f, 0.f, 0.f);
+    	float4 acc = (float4)(0.f, 0.f, 0.f, 0.f);
 
         // Step 1. Update position
 	// REMEMBER THAT MY VELOCITIES ARE GOING TO BE STORED IN THE FORCE VECTOR FROM NOW ON
@@ -92,7 +92,7 @@ __kernel void euler(
             separation *= -r;
     }
     else{
-            separation *= 0;
+            separation *= 0.f;
     }
     
     separation = normalize(separation);			// TODO: search for normalization in OpenCL Specification

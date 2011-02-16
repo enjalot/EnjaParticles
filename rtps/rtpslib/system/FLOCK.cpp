@@ -252,7 +252,7 @@ void FLOCK::updateGPU()
         //printf("collision\n");
         collision();
         //printf("integrate\n");
-        integrate();
+        integrate();		// compute the rules and itegrate
         //exit(0);
         //
         //Andrew's rendering emporium
@@ -315,7 +315,7 @@ void FLOCK::integrate()
             printf("pos   [%d] = %f %f %f\n", i, pos[i].x, pos[i].y, pos[i].z);
             //printf("vel   [%d] = %f %f %f\n", i, vel[i].x, vel[i].y, vel[i].z);
             printf("ne flo[%d] = %d %d \n", i, cli[i].x, cli[i].y);
-            printf("ce flo[%d] = %f %f %f\n", i, clf[i].w, clf[i].y, clf[i].z);
+            printf("ve flo[%d] = %f %f %f\n", i, clf[i].w, clf[i].y, clf[i].z);
         }
     }
 #endif
@@ -384,9 +384,9 @@ void FLOCK::calculateFLOCKSettings()
     //messing with smoothing distance, making it really small to remove interaction still results in weird force values
     flock_settings.smoothing_distance = 2.0f * flock_settings.particle_rest_distance;
 
-    ////
+////
     flock_settings.boundary_distance = .5f * flock_settings.particle_rest_distance;
-    ////
+////
 
 
 

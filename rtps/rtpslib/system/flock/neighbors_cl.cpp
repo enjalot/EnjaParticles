@@ -38,6 +38,8 @@ inline void ForNeighbor(__global float4*  vars_sorted,
 	r.w = 0.f; // I stored density in 4th component
 	// |r|
 	float rlen = length(r);
+
+#if 0
     if(index_j == 0)
         clf[index_i].x = rlen;
     if(index_j == 1)
@@ -46,12 +48,13 @@ inline void ForNeighbor(__global float4*  vars_sorted,
         clf[index_i].z = rlen;
     if(index_j == 3)
         clf[index_i].w = rlen;
-
+#endif
 	
-	float dmin = 0.3; // separation distance TODO: remove hard coded parameter
+	float searchradius = 0.5f; 	// search radius TODO: remove hard coded parameter
+	float mindist = searchradius;	// minimum distance -> to find the closest flockmate
 
 	// is this particle within cutoff?
-	if (rlen <= dmin) 
+	if (rlen <= searchradius) 
         {
 
             if (flockp->choice == 0) {
@@ -111,7 +114,7 @@ __kernel void neighbors(
     //int numParticles = get_global_size(0);
     //int num = get_global_size(0);
 
-	int index = get_global_id(0);
+    int index = get_global_id(0);
     if (index >= num) return;
 
     float4 position_i = pos(index);
@@ -124,20 +127,21 @@ __kernel void neighbors(
 	PointData pt;
 	zeroPoint(&pt);
 
-	//if (flockp->choice == 0) { // update density
+	if (flockp->choice == 0) { // update density
     	IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ flockp DEBUG_ARGV);
 		den(index) = pt.density;
 		xflock(index) = pt.xflock;
         //density(index) = 5;
         //xflock(index) = (float4)(1., 1., 1., 1.);
         //clf[index].w = density(index);
-	//}
+	}
+#if 0
 	if (flockp->choice == 1) { // update force
     	IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ flockp DEBUG_ARGV);
 		force(index) = pt.force; // Does not seem to maintain value into euler.cl
         //clf[index].xyz = pt.force.xyz;
 	}
-#if 0
+
 	if (flockp->choice == 2) { // update surface tension (NOT DEBUGGED)
     	IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, /*fp,*/ flockp DEBUG_ARGV);
 		float norml = length(pt.color_normal);

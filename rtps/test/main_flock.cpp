@@ -223,17 +223,17 @@ void appKeyboard(unsigned char key, int x, int y)
         }
         case 'r': //drop a rectangle
         {
-            nn = 4;
-            min = float4(.2, .2, .2, 1.0f);
-            max = float4(1., 1., 1., 1.0f);
+            nn = 2048;
+            max = float4(2.5, 2.5, 2.5, 1.0f);
+            min = float4(2., 2., 2., 1.0f);
             ps->system->addBox(nn, min, max, false);
             return;
         }
         case 'R': //add a sphere
         {
-	    nn = 64;
+	    nn = 2048;
             center = float4(2.5f, 2.5f, 2.5f, 1.0f);
-	    radius = 1.f;
+	    radius = .3f;
             ps->system->addBall(nn, center, radius, false);
             return;
         }
