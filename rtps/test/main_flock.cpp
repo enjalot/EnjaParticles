@@ -76,7 +76,7 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 2048
 //#define NUM_PARTICLES 1024
 //#define NUM_PARTICLES 256
-#define DT .001f
+#define DT .01f
 
 //timers
 //GE::Time *ts[3];
