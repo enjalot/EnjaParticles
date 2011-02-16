@@ -77,6 +77,8 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/domain/Domain
     ${rtpslib_SOURCE_DIR}/domain/IV
     
+    ${rtpslib_SOURCE_DIR}/system/common/Hose
+
     ${rtpslib_SOURCE_DIR}/system/Simple.cpp
     ${rtpslib_SOURCE_DIR}/system/simple/ForceField
     ${rtpslib_SOURCE_DIR}/system/simple/Euler
