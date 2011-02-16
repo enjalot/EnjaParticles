@@ -145,19 +145,7 @@ SPH::SPH(RTPS *psfr, int n)
 	renderer = new Render(pos_vbo,col_vbo,num,ps->cli);
     renderer->setParticleRadius(sph_settings.spacing*0.5);
 
-    printf("about to make hose\n");
-    float4 center(2, 2, 2, 1);
-    float4 velocity(0, 0, -1, 0);
-    float spacing = sph_settings.spacing;
-    Hose hose1 = Hose(ps, 2048, center, velocity, 10*spacing, spacing);
-    printf("about to spray\n");
-    std::vector<float4> parts = hose1.spray();
-    printf("hose parts.size() %d\n", parts.size());
-    printf("part 0 %f %f %f %f\n", parts[0].x, parts[0].y, parts[0].z, parts[0].w);
-    if (parts.size() > 0)
-        pushParticles(parts);
-
-
+    
 
 
 }
@@ -231,11 +219,21 @@ void SPH::updateGPU()
 
     timers[TI_UPDATE]->start();
     glFinish();
+
+    int sub_intervals = 10;  //should be a setting
+    //this should go in the loop but avoiding acquiring and releasing each sub
+    //interval for all the other calls.
+    //this does end up acquire/release everytime sprayHoses calls pushparticles
+    //should just do try/except?
+    for(int i=0; i < sub_intervals; i++)
+    {
+        sprayHoses();
+    }
+
     cl_position.acquire();
     cl_color.acquire();
     
     //sub-intervals
-    int sub_intervals = 10;  //should be a setting
     for(int i=0; i < sub_intervals; i++)
     {
         /*
@@ -593,7 +591,8 @@ int SPH::addBox(int nn, float4 min, float4 max, bool scaled)
         scale = sph_settings.simulation_scale;
     }
     vector<float4> rect = addRect(nn, min, max, sph_settings.spacing, scale);
-    pushParticles(rect);
+    float4 velo(0, 0, 0, 0);
+    pushParticles(rect, velo);
     return rect.size();
 }
 
@@ -605,11 +604,31 @@ void SPH::addBall(int nn, float4 center, float radius, bool scaled)
         scale = sph_settings.simulation_scale;
     }
     vector<float4> sphere = addSphere(nn, center, radius, sph_settings.spacing, scale);
-    pushParticles(sphere);
+    float4 velo(0, 0, 0, 0);
+    pushParticles(sphere,velo);
 }
 
+void SPH::addHose(int total_n, float4 center, float4 velocity, float radius, float spacing)
+{
+    //in sph we just use sph spacing
+    spacing = sph_settings.spacing;
+    radius *= spacing;
+    Hose hose = Hose(ps, total_n, center, velocity, radius, spacing);
+    hoses.push_back(hose);
+}
 
-void SPH::pushParticles(vector<float4> pos)
+void SPH::sprayHoses()
+{
+    std::vector<float4> parts;
+    for(int i = 0; i < hoses.size(); i++)
+    {
+        parts = hoses[i].spray();
+        if (parts.size() > 0)
+            pushParticles(parts, hoses[i].getVelocity());
+    }
+}
+
+void SPH::pushParticles(vector<float4> pos, float4 velo)
 {
     int nn = pos.size();
     if (num + nn > max_num) {return;}
@@ -623,10 +642,12 @@ void SPH::pushParticles(vector<float4> pos)
 
     std::fill(cols.begin(), cols.end(),color);
     //float v = .5f;
-    float v = 0.0f;
+    //float v = 0.0f;
     //float4 iv = float4(v, v, -v, 0.0f);
-    float4 iv = float4(0, v, -.1, 0.0f);
-    std::fill(vels.begin(), vels.end(),iv);
+    //float4 iv = float4(0, v, -.1, 0.0f);
+    //std::fill(vels.begin(), vels.end(),iv);
+    std::fill(vels.begin(), vels.end(),velo);
+    
 
 #ifdef GPU
     glFinish();

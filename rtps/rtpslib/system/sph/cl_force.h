@@ -7,6 +7,7 @@
     // and they won't split... how can we account for this?
     //
     // FIXED? I added 10E-6 to rlen during the division in Wspiky_dr kernel -IJ
+    // hacks, need to find the original cause (besides adding particles too fast)
     /*
     if(rlen == 0.0)
     {
@@ -14,6 +15,10 @@
         iej = 0;
     }
     */
+    //this should 0 force between two particles if they get the same position
+    int rlencheck = rlen != 0.;
+    iej *= rlencheck;
+
 	float dWijdr = Wspiky_dr(rlen, sphp->smoothing_distance, sphp);
 
 	float4 di = density(index_i);  // should not repeat di=

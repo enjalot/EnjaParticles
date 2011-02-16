@@ -3,17 +3,18 @@
 
 #include <string>
 
-#include "../RTPS.h"
-#include "System.h"
-#include "../opencl/Kernel.h"
-#include "../opencl/Buffer.h"
+#include <RTPS.h>
+#include <System.h>
+#include <Kernel.h>
+#include <Buffer.h>
 
-#include "BitonicSort.h"
+#include <BitonicSort.h>
 
 //#include "../util.h"
-#include "../domain/Domain.h"
+#include <Domain.h>
+#include <Hose.h>
 
-#include "timege.h"
+#include <timege.h>
 
 
 namespace rtps {
@@ -128,6 +129,10 @@ public:
     int addBox(int nn, float4 min, float4 max, bool scaled);
     //wrapper around IV.h addSphere
     void addBall(int nn, float4 center, float radius, bool scaled);
+    //wrapper around Hose.h 
+    void addHose(int total_n, float4 center, float4 velocity, float radius, float spacing);
+    void sprayHoses();
+
 	virtual void render();
     
     void loadTriangles(std::vector<Triangle> triangles);
@@ -143,6 +148,7 @@ public:
     void printTimers();
 
 
+    void pushParticles(vector<float4> pos, float4 velo);
     
 private:
     //the particle system framework
@@ -156,12 +162,14 @@ private:
     int nb_var;
 
     bool triangles_loaded; //keep track if we've loaded triangles yet
+    
+    //keep track of hoses
+    std::vector<Hose> hoses;
 
     //needs to be called when particles are added
     void calculateSPHSettings();
     void setupDomain();
     void prepareSorted();
-    void pushParticles(vector<float4> pos);
     //void popParticles();
 
     Kernel k_density, k_pressure, k_viscosity;

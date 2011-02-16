@@ -54,6 +54,7 @@ set (rtpslib_INCLUDES
     ${BASE_DIR}/opencl10
     ${rtpslib_SOURCE_DIR}
     ${rtpslib_SOURCE_DIR}/system
+    ${rtpslib_SOURCE_DIR}/system/common
     ${rtpslib_SOURCE_DIR}/render
     ${rtpslib_SOURCE_DIR}/domain
     ${rtpslib_SOURCE_DIR}/opencl

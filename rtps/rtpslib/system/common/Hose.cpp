@@ -13,6 +13,8 @@ Hose::Hose(RTPS *ps, int total_n, float4 center, float4 velocity, float radius, 
     this->velocity = velocity;
     this->radius = radius;
     this->spacing = spacing;
+    em_count = 0;
+    n_count = total_n;
     calc_vectors();
 }
 
@@ -61,20 +63,28 @@ void Hose::calc_em()
  * em = (int) (1 + spacing/dt/mag(v))
  * count every call to spray, emit when count == em, restart counter
  */
-    em = 0;
-    em_count = 0;
+    //em = 0;
+    //em_count = 0;
+    float dt = ps->settings.dt;
+    float magv = magnitude(velocity);
+    //printf("magv: %f\n", magv);
+    em = (int) (1 + spacing/dt/magv/8.);
+    //printf("em: %d\n", em);
 }
 
 
 
 std::vector<float4> Hose::spray()
 {
+    em_count++;
     calc_em();
     std::vector<float4> particles;
-    if(em_count == em)
+    if(em_count >= em && n_count > 0)
     {
         //std::vector<float4> addDisc(int num, float4 center, float4 u, float4 v, float radius, float spacing);
         particles = addDisc(n_count, center, u, w, radius, spacing);
+        n_count -= particles.size();
+        em_count = 0;
     }
     return particles;
 }
