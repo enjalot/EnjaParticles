@@ -43,7 +43,7 @@ __kernel void euler(
 
 
 
-
+#if 1
 	#define	separationdist	0.2f
 	#define	searchradius	0.5f
 	#define	maxspeed	0.3f
@@ -83,7 +83,8 @@ __kernel void euler(
 	float d = distance(pi,pc);
 	float r = d / separationdist;  				// TODO: NEED THE CLOSEST FLOCKMATE (ID OR POSITION), AND THE DISTANTCE FROM IT TO THE CURRENT BOID
 
-    float4 separation = pc - pi;
+    float4 separation = pi - pc;
+    separation = normalize(separation);			// TODO: search for normalization in OpenCL Specification
 
     if(d > separationdist){
             separation *=  r;
@@ -95,12 +96,10 @@ __kernel void euler(
             separation *= 0.f;
     }
     
-    separation = normalize(separation);			// TODO: search for normalization in OpenCL Specification
-
 	acc += separation;
                 
 	// RULE 2. Alignment
-	float4 alignment = vc;
+	float4 alignment = vc - v;
     alignment = normalize(alignment);
 
     acc += alignment;
@@ -110,7 +109,7 @@ __kernel void euler(
 	float4 cohesion;
 
     flockCenter /= numFlockmates;
-    cohesion = flockCenter - pi;
+    cohesion = pi - flockCenter;
     cohesion = normalize(cohesion);
 
 	acc += cohesion;
@@ -132,9 +131,15 @@ __kernel void euler(
         v *= maxspeed/speed;
     }
 
+#endif
 
+#if 0
+	// positions
+	float4 pi = pos(i);
 
-
+	// velocities
+    	float4 v = vel(i);
+#endif 
 
     pi += dt*v; // change it to force for my boids
     //pi.xyz /= params->simulation_scale;
