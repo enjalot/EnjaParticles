@@ -40,7 +40,7 @@ std::vector<float4> addSphere(int num, float4 center, float radius, float spacin
  * Create a rectangle with at most num particles in it.
  *  The size of the return vector will be the actual number of particles used to fill the rectangle
  */
-    spacing *= 1.1f;
+    spacing *= 1.9f;
     float xmin = (center.x - radius) / scale;
     float xmax = (center.x + radius) / scale;
     float ymin = (center.y - radius) / scale;
