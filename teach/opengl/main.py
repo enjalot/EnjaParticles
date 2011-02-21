@@ -155,9 +155,9 @@ def distribute_disc(p, u, v, r, n, spacing):
         r is a scalar radius
 
     """
-    umin = p - u*r
+    umin = -u*r
     #umax = p + u*r
-    vmin = p - v*r
+    vmin = -v*r
     #umax = p + v*r
     particles = []
     count = 0
@@ -187,11 +187,11 @@ def draw():
 
     glColor3f(1,1,1)
     glPointSize(5)
-    glBegin(GL_POINTS)
-    glVertex3f(0,0,0)
-    glVertex3f(1,1,1)
-    glVertex3f(0, 1, 0)
-    glEnd()
+    #glBegin(GL_POINTS)
+    #glVertex3f(0,0,0)
+    #glVertex3f(1,1,1)
+    #glVertex3f(0, 1, 0)
+    #glEnd()
 
     #origin
     o = Vec([0.,0.,0.])
@@ -205,6 +205,7 @@ def draw():
     #print v
     #print w
 
+
     glColor3f(.5, 1, 0)
     gl.draw_line(o, u)
     glColor3f(0, 1, .5)
@@ -212,9 +213,12 @@ def draw():
     glColor3f(.5, 0, .5)
     gl.draw_line(o, w)
 
-    particles = distribute_disc(o, v, w, 1, 300, .1)
+    particles = distribute_disc(u, v, w, 1, 300, .1)
     print len(particles)
     glBegin(GL_POINTS)
+    glColor3f(1, 1, 1)
+    glVertex3f(u.x, u.y, u.z)
+    glColor3f(.5, .5, .5)
     for p in particles:
         glVertex3f(p.x, p.y, p.z)
     glEnd()
