@@ -75,7 +75,7 @@ __kernel void euler(
 
 	// flockmates
 	//int closestFlockmate = pc;
-	int numFlockmates = (int) den(i).y;	// TODO: is the y component but Im getting error: make sure that density is a float4
+	float numFlockmates = den(i).y;	// TODO: is the y component but Im getting error: make sure that density is a float4
 
         // Step 3. Compute the three rules
 	

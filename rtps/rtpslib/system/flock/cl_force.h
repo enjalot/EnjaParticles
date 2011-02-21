@@ -35,7 +35,7 @@
 
 	// flockmates
 	//int closestFlockmate = pc;
-	int numFlockmates = (int) den(index_i).y;	// TODO: is the y component but Im getting error: make sure that density is a float4
+	float numFlockmates =  den(index_i).y;	// TODO: is the y component but Im getting error: make sure that density is a float4
 
         // Step 3. Compute the three rules
 	
@@ -52,7 +52,7 @@
                	separation *= -r;
         }
         else{
-               	separation *= 0;
+               	separation *= 0.f;
         }
         
         separation /= normalize(separation);			// TODO: search for normalization in OpenCL Specification
