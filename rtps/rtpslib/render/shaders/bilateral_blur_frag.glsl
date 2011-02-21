@@ -1,6 +1,6 @@
 //#define KERNEL_SIZE 10000
 #define KERNEL_DIAMETER 60 
-const float sigmasq = 64 ;//0.84089642*0.84089642;
+const float sigmasq = 64. ;//0.84089642*0.84089642;
 const float pi = 3.141592654;
 
 //float kernel[KERNEL_SIZE];
