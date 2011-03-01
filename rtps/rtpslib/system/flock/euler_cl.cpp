@@ -43,13 +43,14 @@ __kernel void euler(
 
 
 
-#if 1
+
 	#define	separationdist	0.2f
 	#define	searchradius	0.5f
-	#define	maxspeed	0.3f
+	#define	maxspeed	3.f
 	#define MinUrgency      0.05f
 	#define MaxUrgency      0.1f
 
+#if 0
 	// index of closest flockmate
 	int index_c = (int) den(i).x;
 
@@ -133,32 +134,97 @@ __kernel void euler(
 
 #endif
 
-#if 0
+#if 1
 	// positions
 	float4 pi = pos(i);
 
 	// velocities
     	float4 v = vel(i);
-#endif 
 
-    pi += dt*v; // change it to force for my boids
-    //pi.xyz /= params->simulation_scale;
+	// acceleration vector
+    	float4 acc = (float4)(0.f, 0.f, 0.f, 0.f);
 
-    uint originalIndex = sort_indices[i];
-
-    int4 iden = (int4)((int)den(i).x, (int)den(i).y, 0, 0);
-    cli[originalIndex] = iden;
-    //clf[originalIndex] = xflock(i);
-    clf[originalIndex] = v;
+	float4 separation = force(i);
+	float4 alignment = surface(i);
+	float4 cohesion = xflock(i);
+	
+	float numFlockmates = den(i).x;
 
 
+	// RULE 1. SEPARATION
+	
+	// already computed in cl_density.h
+	// it is stored in pt->force
+	//separation = normalize(separation);	
+	acc += separation;
 
-    unsorted_vel(originalIndex) = v;	//mymese
-    //unsorted_vel(originalIndex) = (float4)(4., 4., 4., 4.);	//mymese
-    //unsorted_veleval(originalIndex) = v;
-//  float dens = density(i);		mymese
-//  unsorted_pos(originalIndex) = (float4)(p.xyz, dens);	mymese
-    unsorted_pos(originalIndex) = (float4)(pi.xyz, 1.f); // change the last component to 1 for my boids, im not using density
-    positions[originalIndex] = (float4)(pi.xyz, 1.f);  // for plotting
+	
+	// RULE 2. ALIGNMENT
 
+	// desired velocity computed in cl_density.h
+	// it is stored in pt->surf_tens
+
+	// steering towards the average velocity
+	alignment -= v;
+	alignment = normalize(alignment);
+	acc += alignment;
+
+
+	// RULE 3. COHESION
+	
+	// average position already computed in cl_density.h
+	// it is stored in pt->xflock
+
+	// number of flockmates calculated in cl_density.h
+	// it is stored in pt->density.x
+
+	// dividing by the number of flockmates to get the actual average
+	cohesion /= numFlockmates;
+
+	// steering towards the average position
+	cohesion = pi - cohesion;
+	cohesion = normalize(cohesion);
+	acc += cohesion;
+    
+
+	// Step 4. Constrain acceleration
+    	float accspeed = length(acc);
+    	if(accspeed > maxspeed*MaxUrgency){
+            	// set magnitude to MaxChangeInAcc
+            	acc *= (maxspeed*MaxUrgency)/accspeed;
+    	}
+
+    	// Step 5. Add acceleration to velocity
+    	v += acc;
+
+    	// Step 6. Constrain velocity
+    	float speed = length(v);
+    	if(speed > maxspeed){
+            	// set magnitude to MaxSpeed
+        	v *= maxspeed/speed;
+    	}
+
+#endif
+
+	// INTEGRATION
+ 
+    	pi += dt*v; 	// euler integration, add the velocity times the timestep
+    	//pi.xyz /= params->simulation_scale;
+
+
+	// SORT STUFF FOR THE NEIGHBOR SEARCH
+    	uint originalIndex = sort_indices[i];
+
+    	int4 iden = (int4)((int)den(i).x, (int)den(i).y, 0, 0);
+    	cli[originalIndex] = iden;
+    	//clf[originalIndex] = xflock(i);
+    	clf[originalIndex] = v;
+
+    	unsorted_vel(originalIndex) = v;	//mymese
+    	//unsorted_vel(originalIndex) = (float4)(4., 4., 4., 4.);	//mymese
+    	//unsorted_veleval(originalIndex) = v;	//enja
+	//float dens = density(i);		//mymese
+	//unsorted_pos(originalIndex) = (float4)(p.xyz, dens);	//mymese
+    	unsorted_pos(originalIndex) = (float4)(pi.xyz, 1.f); // change the last component to 1 for my boids, im not using density
+    	positions[originalIndex] = (float4)(pi.xyz, 1.f);  // for plotting
 }

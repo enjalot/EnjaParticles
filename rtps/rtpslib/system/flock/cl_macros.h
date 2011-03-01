@@ -33,10 +33,10 @@
 
 #define density(i) 			vars_sorted[i+DENS*numParticles].x
 #define den(i) 				vars_sorted[i+DENS*numParticles]	// added by mymese for more generality
-//#define surface(i) 			vars_sorted[i+COL*numParticles]
+#define surface(i) 			vars_sorted[i+COL*numParticles]
 #define pos(i) 				vars_sorted[i+POS*numParticles]
 #define vel(i) 				vars_sorted[i+VEL*numParticles]
-#define veleval(i)    		vars_sorted[i+VELEVAL*numParticles]
+#define veleval(i)    			vars_sorted[i+VELEVAL*numParticles]
 #define force(i) 			vars_sorted[i+FOR*numParticles]
 #define xflock(i)    			vars_sorted[i+XFLOCK*numParticles]
 // accessing density and color requires two memory access. 

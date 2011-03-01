@@ -51,7 +51,7 @@ inline void ForNeighbor(__global float4*  vars_sorted,
 #endif
 	
 	float searchradius = 0.5f; 	// search radius TODO: remove hard coded parameter
-	float mindist = searchradius;	// minimum distance -> to find the closest flockmate
+	float mindist = 0.2;		// minimum distance -> desired separation distance
 
 	// is this particle within cutoff?
 	if (rlen <= searchradius) 
