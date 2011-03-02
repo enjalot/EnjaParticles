@@ -173,6 +173,32 @@ def distribute_disc(p, u, v, r, n, spacing):
     
     return particles
 
+def explicit_count(p, u, v, r1, r2, n, spacing):
+    """ distribute maximum of n points in a disc on the u, v plane within radius r
+        spaced evenly every spacing units
+        p is a 3D point
+        u and v should be normal vectors
+        r is a scalar radius
+
+    """
+    umin = -u*r
+    #umax = p + u*r
+    vmin = -v*r
+    #umax = p + v*r
+    particles = []
+    count = 0
+    for du in numpy.arange(0, 2.*r, spacing):
+        for dv in numpy.arange(0, 2.*r, spacing):
+            if count > n: break
+            x = umin + u*du
+            y = vmin + v*dv
+            part = p + x + y
+            if sqrt(numpy.dot(part-p, part-p)) <= r:
+                count += 1
+                particles += [ part ]
+    
+    return particles
+
 
 
 def draw():

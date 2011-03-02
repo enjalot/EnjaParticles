@@ -8,7 +8,7 @@ def mag(x):
     return sqrt(np.dot(x, x))
 
 def Wpoly6(h, r):
-    coeff = 315./(64*pi*h**9)
+    coeff = 315./(64.*pi*h**9)
     #magr = abs(r)
     magr = mag(r)
 

@@ -368,11 +368,13 @@ void SPH::calculateSPHSettings()
     //messing with smoothing distance, making it really small to remove interaction still results in weird force values
     sph_settings.smoothing_distance = 2.0f * sph_settings.particle_rest_distance;
     sph_settings.boundary_distance = .5f * sph_settings.particle_rest_distance;
+    printf("particle smoothing distance: %f\n", sph_settings.smoothing_distance);
 
     sph_settings.simulation_scale = pow(particle_vol * max_num / domain_vol, 1./3.); 
     printf("simulation scale: %f\n", sph_settings.simulation_scale);
 
     sph_settings.spacing = sph_settings.particle_rest_distance/ sph_settings.simulation_scale;
+    printf("spacing: %f\n", sph_settings.spacing);
 
     float particle_radius = sph_settings.spacing;
     printf("particle radius: %f\n", particle_radius);
