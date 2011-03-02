@@ -165,8 +165,9 @@ __kernel void euler(
 	// it is stored in pt->surf_tens
 
 	// steering towards the average velocity
+	alignment /= numFlockmates;
 	alignment -= v;
-	alignment = normalize(alignment);
+	//alignment = normalize(alignment);
 	acc += alignment;
 
 
@@ -183,7 +184,7 @@ __kernel void euler(
 
 	// steering towards the average position
 	cohesion = pi - cohesion;
-	cohesion = normalize(cohesion);
+	//cohesion = normalize(cohesion);
 	acc += cohesion;
     
 
@@ -222,7 +223,7 @@ __kernel void euler(
 
     	unsorted_vel(originalIndex) = v;	//mymese
     	//unsorted_vel(originalIndex) = (float4)(4., 4., 4., 4.);	//mymese
-    	//unsorted_veleval(originalIndex) = v;	//enja
+    	//unsorted_veleval(originalIndex) = v;	
 	//float dens = density(i);		//mymese
 	//unsorted_pos(originalIndex) = (float4)(p.xyz, dens);	//mymese
     	unsorted_pos(originalIndex) = (float4)(pi.xyz, 1.f); // change the last component to 1 for my boids, im not using density
