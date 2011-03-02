@@ -8,16 +8,19 @@
 # 
 
 IF (WIN32)
+    message("FIND GLEW: $ENV{CUDA_SDK}")
     FIND_PATH( GLEW_INCLUDE_PATH GL/glew.h
         $ENV{PROGRAMFILES}/GLEW/include
         ${PROJECT_SOURCE_DIR}/src/nvgl/glew/include
 	~/glew-1.5.8/include
+        $ENV{CUDA_SDK}/shared/inc
         DOC "The directory where GL/glew.h resides")
     FIND_LIBRARY( GLEW_LIBRARY
         NAMES glew GLEW glew32 glew32s 
         PATHS
 	~/glew-1.5.8/bin
 	~/glew-1.5.8/lib
+        $ENV{CUDA_SDK}/OpenCL/bin/Win64/Release
         $ENV{PROGRAMFILES}/GLEW/lib
         ${PROJECT_SOURCE_DIR}/src/nvgl/glew/bin
         ${PROJECT_SOURCE_DIR}/src/nvgl/glew/lib

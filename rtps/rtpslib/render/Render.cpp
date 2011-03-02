@@ -39,13 +39,15 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
     if(glsl)
     {
 		fbos.resize(1);
+/* windows
 		glGenFramebuffers(1,&fbos[0]);
+*/
 		smoothing = BILATERAL_GAUSSIAN_SHADER;
 		//smoothing = NO_SHADER;
 		particle_radius = 0.0125f*0.5f;
 
 		createFramebufferTextures();
-
+/* windows
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,fbos[0]);
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,gl_tex["thickness"],0);
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT1,GL_TEXTURE_2D,gl_tex["depthColor"],0);
@@ -55,7 +57,7 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,gl_tex["depth"],0);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);
 
-
+*/
 		//glFinish();
 		/*cl_depth = Buffer<float>(cli,gl_tex["depth"],1);
 
@@ -137,14 +139,14 @@ Render::~Render()
 	//{
 	if(rbos.size())
 	{
-		glDeleteRenderbuffers(rbos.size() ,&rbos[0]);
+//windows		glDeleteRenderbuffers(rbos.size() ,&rbos[0]);
 	}
 	//}
 	//for(vector<GLuint>::iterator i=fbos.begin(); i!=fbos.end();i++)
 	//{
 	if(fbos.size())
 	{
-		glDeleteFramebuffers(fbos.size(),&fbos[0]);
+//windows		glDeleteFramebuffers(fbos.size(),&fbos[0]);
 	}
 	//}
 }
@@ -219,7 +221,8 @@ void Render::render()
         glScissor(0, 0, window_width, window_height);
         //glViewport(0, 0, window_width-xywh[0], window_height-xywh[1]);
 
-
+#if 0 
+//windows
 		GLenum buffers[] = {GL_COLOR_ATTACHMENT0,GL_COLOR_ATTACHMENT4};
 		//Render depth and thickness to a textures
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,fbos[0]);
@@ -336,6 +339,7 @@ void Render::render()
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
+#endif //windows
     }
     else if(mikep)
     {
@@ -911,6 +915,8 @@ void Render::setWindowDimensions(GLuint width, GLuint height)
 {
     if(glsl)
     {
+#if 0 
+//windows
 		deleteFramebufferTextures();
 		window_width = width;
 		window_height = height;
@@ -923,6 +929,7 @@ void Render::setWindowDimensions(GLuint width, GLuint height)
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT4,GL_TEXTURE_2D,gl_tex["Color"],0);
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,gl_tex["depth"],0);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);
+#endif //windows
     }
 }
 
