@@ -138,7 +138,7 @@ SPH::SPH(RTPS *psfr, int n)
 #endif
 
 	renderer = new Render(pos_vbo,col_vbo,num,ps->cli);
-        renderer->setParticleRadius(sph_settings.spacing*0.5);
+        renderer->setParticleRadius(sph_settings.spacing*0.25);
 
 }
 
