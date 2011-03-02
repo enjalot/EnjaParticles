@@ -613,17 +613,10 @@ void SPH::pushParticles(vector<float4> pos)
 {
     int nn = pos.size();
     if (num + nn > max_num) {return;}
-<<<<<<< HEAD
    // float rr = (rand() % 255)/255.0f;
     //float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
     //printf("random: %f\n", rr);
     float4 color(0.05f,0.0f,0.0f,0.05f);
-=======
-    float rr = (rand() % 255)/255.0f;
-    //float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
-    //printf("random: %f\n", rr);
-	float4 color(1.0f,0.0f,0.0f,0.1f);
->>>>>>> 72996f02f688ae129c4c455fc96c1f3105f42ec7
 
     std::vector<float4> cols(nn);
     std::vector<float4> vels(nn);

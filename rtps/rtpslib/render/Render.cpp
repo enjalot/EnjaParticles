@@ -448,9 +448,14 @@ void Render::writeFramebufferTextures()
 
 void Render::convertDepthToRGB(const GLfloat* depth, GLuint size, GLuint* rgb) const
 {
+	float minimum = 1.0f;
+	for(int i = 0;i<size;i++)
+			if(minimum>depth[i])
+				minimum = depth[i];
+	float one_minus_min = 1.f-minimum;
 	for(int i = 0;i<size;i++)
 		for(int j = 0;j<3;j++)
-			rgb[(i*3)+j]=(GLuint)(depth[i]*255);
+			rgb[(i*3)+j]=(GLuint)((depth[i]-minimum)/one_minus_min *255);
 }
 
 int Render::writeTexture( GLuint tex, const char* filename) const
