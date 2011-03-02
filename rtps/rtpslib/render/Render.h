@@ -48,6 +48,11 @@ public:
 
     void render_box(float4 min, float4 max);
     void render_table(float4 min, float4 max);
+	
+
+	void writeBuffersToDisk();
+	void writeFramebufferTextures();
+	int writeTexture(GLuint tex, const char* filename) const;
 
     enum {TI_RENDER=0, TI_GLSL}; //2
     GE::Time* timers[2];
@@ -64,6 +69,7 @@ private:
     bool glsl;
     bool mikep;
     bool blending;
+    bool write_framebuffers;
 	ShaderType smoothing;
     std::map<ShaderType,GLuint> glsl_program;    
     std::map<std::string,GLuint> gl_tex;
@@ -85,6 +91,7 @@ private:
 	int generateCircleTexture(GLubyte r, GLubyte g, GLubyte b, GLubyte alpha, int diameter);
 	void deleteFramebufferTextures();
 	void createFramebufferTextures();
+	void convertDepthToRGB(const GLfloat* depth, GLuint size, GLuint* rgb) const;
 };	
 
 
