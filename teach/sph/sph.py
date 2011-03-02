@@ -11,12 +11,15 @@ class SPH:
         self.max_num = max_num
 
         rho0 = 1000.                #rest density [ kg/m^3 ]
-        V0 = 0.000005547            #initial volume [ m^3 ]
-        V0 = 0.000313357            #initial volume [ m^3 ]
-        n = 1.                      #number of particles to occupy V0
-        VP = V0 / n                 #particle volume [ m^3 ]
+        #V0 = 0.000005547            #initial volume [ m^3 ]
+        #V0 = 0.000313357            #initial volume [ m^3 ]
+        V0 = .001728                #from fluidsv2
+        n = 27.                      #number of particles to occupy V0
+        #VP = V0 / n                 #particle volume [ m^3 ]
+        VP = V0 / max_num
         m = rho0 * VP               #particle mass [ kg ]
-        VF = VP * max_num           #fluid volume [ m^3 ]
+        #VF = VP * max_num           #fluid volume [ m^3 ]
+        VF = VP
         re = (m/rho0)**(1/3.)       #particle radius [ m ]
         print "re, m, VP, n", re, m, VP, n
         rest_distance = .87 * re    #rest distance between particles [ m ]

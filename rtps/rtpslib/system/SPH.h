@@ -21,21 +21,6 @@ namespace rtps {
 
 enum Integrator {EULER, LEAPFROG};
 
-//keep track of the fluid settings
-typedef struct SPHSettings
-{
-    float rest_density;
-    float simulation_scale;
-    float particle_mass;
-    float particle_rest_distance;
-    float smoothing_distance;
-    float boundary_distance;
-    float spacing;
-    float grid_cell_size;
-    Integrator integrator;
-
-} SPHSettings;
-
 //pass parameters to OpenCL routines
 typedef struct SPHParams
 {
@@ -154,10 +139,10 @@ private:
     //the particle system framework
     RTPS *ps;
 
-    SPHSettings sph_settings;
-    SPHParams params;
+    SPHParams sphp;
     GridParams grid_params;
     GridParams grid_params_scaled;
+    Integrator integrator;
 
     int nb_var;
 
@@ -265,6 +250,9 @@ private:
 
     void updateCPU();
     void updateGPU();
+
+    //copy the SPH parameter struct to the GPU
+    void SPH::updateSPHP();
 
     //Nearest Neighbors search related functions
     void prep(int stage);
