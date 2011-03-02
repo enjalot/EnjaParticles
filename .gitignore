@@ -5,3 +5,5 @@ build/
 *.a
 *_cl.cl
 *.pyc
+*.blend1
+*.blend2

@@ -285,18 +285,23 @@ float4 collisions_triangle(float4 pos,
     float distance = 0.0f;
     float4 f = (float4)(0,0,0,0); //returning the force
     int tc = 0;
+    float dtdt = 1.0/dt;
+    dtdt *= dtdt;
     for (int j=0; j < (last-first); j++)
     {
         //distance = intersect_triangle_ge(pos, vel, &triangles[j], params->boundary_distance, eps, params->simulation_scale);
         distance = intersect_triangle_segment(pos, vel, &triangles[j], params->boundary_distance, eps, params->simulation_scale);
         //distance = intersect_triangle_ge(pos, vel, &triangles[j], dt, eps);
         //if ( distance != -1)
-        distance = params->boundary_distance - distance;
+        //distance = params->boundary_distance - distance;
+        distance = params->rest_distance - distance;
         if (distance > eps)// && distance < params->boundary_distance)
         {
-
-            f += calculateRepulsionForce(triangles[j].normal, vel, 1*params->boundary_stiffness, 1*params->boundary_dampening, distance);
-            f += calculateFrictionForce(vel, force, triangles[j].normal, friction_kinetic, friction_static_limit);
+            //Krog boundary forces
+            //f += calculateRepulsionForce(triangles[j].normal, vel, 1*params->boundary_stiffness, 1*params->boundary_dampening, distance);
+            //f += calculateFrictionForce(vel, force, triangles[j].normal, friction_kinetic, friction_static_limit);
+            //Harada boundary wall forces
+            f += distance * triangles[j].normal * dtdt;
             //f += (float4)(1100,1100,1100,1);
 			/*
             //lets do some specular reflection
