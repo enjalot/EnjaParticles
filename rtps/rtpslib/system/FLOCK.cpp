@@ -250,7 +250,7 @@ void FLOCK::updateGPU()
         timers[TI_NEIGH]->end();
         
         //printf("collision\n");
-        collision();
+//        collision();
         //printf("integrate\n");
         integrate();		// compute the rules and itegrate
         //exit(0);
@@ -404,8 +404,8 @@ void FLOCK::calculateFLOCKSettings()
     float particle_radius = flock_settings.spacing;
     printf("particle radius: %f\n", particle_radius);
  
-    params.grid_min = grid.getMin();
-    params.grid_max = grid.getMax();
+    params.grid_min = dmin;
+    params.grid_max = dmax;
     params.mass = flock_settings.particle_mass;
     params.rest_distance = flock_settings.particle_rest_distance;
     params.smoothing_distance = flock_settings.smoothing_distance;
@@ -438,6 +438,14 @@ void FLOCK::calculateFLOCKSettings()
 	params.wvisc_coef = 15./(2.*pi*h3);
 	params.wvisc_d_coef = 15./(2.*pi*h3);
 	params.wvisc_dd_coef = 45./(pi*h6);
+
+// debug mymese
+float4 gmin = params.grid_min;
+float4 gmax = params.grid_max;
+float bd = params.boundary_distance;
+printf("\n *************** \n boundary distance: %f\n", bd); 
+printf("min grid: %f, %f, %f\n", gmin.x, gmin.y, gmin.z);
+printf("max grid: %f, %f, %f\n ************** \n", gmax.x,gmax.y, gmax.z);
 
 }
 
@@ -566,6 +574,15 @@ void FLOCK::setupDomain()
     printf("gp nb_cells: %d\n", grid_params.nb_cells);
 
 
+// debug mymese
+float4 gmin = grid_params.bnd_min;
+float4 gmax = grid_params.bnd_max;
+float4 bd = grid_params.grid_size;
+printf("\n *************** \n grid size: %f, %f, %f\n", bd.x, bd.y, bd.z); 
+printf("min boundary: %f, %f, %f\n", gmin.x, gmin.y, gmin.z);
+printf("max boundary: %f, %f, %f\n ************** \n", gmax.x,gmax.y, gmax.z);
+
+
     /*
 	grid_params.grid_inv_delta.x = 1. / grid_params.grid_delta.x;
 	grid_params.grid_inv_delta.y = 1. / grid_params.grid_delta.y;
@@ -600,7 +617,7 @@ int FLOCK::addBox(int nn, float4 min, float4 max, bool scaled)
         scale = flock_settings.simulation_scale;
     }
 printf("\n\n ADDING A CUBE \n\n");
-    vector<float4> rect = addRect(nn, min, max, flock_settings.spacing, scale);
+    vector<float4> rect = addRandRect(nn, min, max, flock_settings.spacing, scale, params.grid_min, params.grid_max);
     pushParticles(rect);
     return rect.size();
 }
@@ -613,7 +630,7 @@ void FLOCK::addBall(int nn, float4 center, float radius, bool scaled)
         scale = flock_settings.simulation_scale;
     }
 printf("\n\n ADDING A SPHERE \n\n");
-    vector<float4> flockere = addSphere(nn, center, radius, flock_settings.spacing, scale);
+    vector<float4> flockere = addRandSphere(nn, center, radius, flock_settings.spacing, scale, params.grid_min, params.grid_max);
     pushParticles(flockere);
 }
 
@@ -631,9 +648,9 @@ void FLOCK::pushParticles(vector<float4> pos)
 
     std::fill(cols.begin(), cols.end(),color);
     //float v = .5f;
-    float v = 0.1f;
+    float v = rand()/RAND_MAX;
     //float4 iv = float4(v, v, -v, 0.0f);
-    float4 iv = float4(0, v, -.1, 0.0f);
+    float4 iv = float4(v, 0, -v, 0.0f);
     std::fill(vels.begin(), vels.end(),iv);
 
 #ifdef GPU

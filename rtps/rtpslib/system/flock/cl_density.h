@@ -19,7 +19,7 @@
 	float4 vj = vel(index_j);
 
 	// setup for rule 1. Separation
-	float4 s = pi - pj;
+	float4 s = pj - pi;
 	float  d = distance(pi,pj);
 	float  r = d / mindist;
 	
@@ -45,7 +45,7 @@
 
 
 	// setup for rule 3. cohesion
-	pt->density.x += 1;		// number of flockmates
+	pt->density.x += 1.f;		// number of flockmates
 
 	pt->xflock += pj; 		// center of the flock
 	pt->xflock.w = 1.f;

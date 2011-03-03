@@ -50,8 +50,8 @@ inline void ForNeighbor(__global float4*  vars_sorted,
         clf[index_i].w = rlen;
 #endif
 	
-	float searchradius = 0.5f; 	// search radius TODO: remove hard coded parameter
-	float mindist = 0.2;		// minimum distance -> desired separation distance
+	float searchradius = 8.f; 	// search radius TODO: remove hard coded parameter
+	float mindist = 3.f;		// minimum distance -> desired separation distance
 
 	// is this particle within cutoff?
 	if (rlen <= searchradius) 
@@ -72,7 +72,7 @@ inline void ForNeighbor(__global float4*  vars_sorted,
                 
                 
                 // update pressure
-                #include "cl_force.h"
+         //       #include "cl_force.h"
             }
 
             if (flockp->choice == 2) {

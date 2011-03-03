@@ -44,9 +44,11 @@ __kernel void euler(
 
 
 
-	#define	separationdist	0.2f
-	#define	searchradius	0.5f
-	#define	maxspeed	3.f
+//	#define	separationdist	0.2f
+//	#define	searchradius	0.8f
+	#define	maxspeed	1.f
+	#define desiredspeed	0.5f
+	#define maxchange	0.1f
 	#define MinUrgency      0.05f
 	#define MaxUrgency      0.1f
 
@@ -149,7 +151,12 @@ __kernel void euler(
 	float4 cohesion = xflock(i);
 	
 	float numFlockmates = den(i).x;
-
+	//if(numFlockmates == 0){
+	//	numFlockmates = 1;
+	//}
+		
+	float4 bndMax = params->grid_max/2;// - params->boundary_distance;
+	float4 bndMin = -bndMax; //params->grid_min;// + params->boundary_distance;
 
 	// RULE 1. SEPARATION
 	
@@ -167,7 +174,7 @@ __kernel void euler(
 	// steering towards the average velocity
 	alignment /= numFlockmates;
 	alignment -= v;
-	//alignment = normalize(alignment);
+	alignment = normalize(alignment);
 	acc += alignment;
 
 
@@ -183,26 +190,29 @@ __kernel void euler(
 	cohesion /= numFlockmates;
 
 	// steering towards the average position
-	cohesion = pi - cohesion;
-	//cohesion = normalize(cohesion);
+	cohesion -= pi;
+	cohesion = normalize(cohesion);
 	acc += cohesion;
     
+//acc = normalize(acc);
 
 	// Step 4. Constrain acceleration
     	float accspeed = length(acc);
-    	if(accspeed > maxspeed*MaxUrgency){
+    	if(accspeed > maxchange){
             	// set magnitude to MaxChangeInAcc
-            	acc *= (maxspeed*MaxUrgency)/accspeed;
+            	acc *= maxchange; ///accspeed;
     	}
 
     	// Step 5. Add acceleration to velocity
     	v += acc;
 
+	v.y = MaxUrgency;
+
     	// Step 6. Constrain velocity
     	float speed = length(v);
     	if(speed > maxspeed){
             	// set magnitude to MaxSpeed
-        	v *= maxspeed/speed;
+        	v *= maxspeed; ///speed;
     	}
 
 #endif
@@ -212,6 +222,27 @@ __kernel void euler(
     	pi += dt*v; 	// euler integration, add the velocity times the timestep
     	//pi.xyz /= params->simulation_scale;
 
+#if 1
+	// apply periodic boundary conditions
+	if(pi.x > bndMax.x){
+		pi.x = bndMin.x; 
+	}
+	else if(pi.x < bndMin.x){
+		pi.x = bndMax.x;
+	}
+	else if(pi.y > bndMax.y){
+		pi.y = bndMin.y; 
+	}
+	else if(pi.y < bndMin.y){
+		pi.y = bndMax.y;
+	}
+	else if(pi.z > bndMax.z){
+		pi.z = bndMin.z;
+	}
+	else if(pi.z < bndMin.z){
+		pi.z = bndMax.z;
+	}
+#endif
 
 	// SORT STUFF FOR THE NEIGHBOR SEARCH
     	uint originalIndex = sort_indices[i];
