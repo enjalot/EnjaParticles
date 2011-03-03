@@ -21,7 +21,7 @@
 //#include "timege.h"
 using namespace rtps;
 
-int window_width = 800;
+int window_width = 1200;
 int window_height = 600;
 float fov = 65.;
 int glutWindowHandle = 0;
@@ -145,7 +145,7 @@ int main(int argc, char** argv)
     float4 velocity(.6, -.6, -.6, 0);
   
     //sph sets spacing and multiplies by radius value
-    ps->system->addHose(2048, center, velocity, 5, 0);
+    ps->system->addHose(2048, center, velocity, 5);
     
     
 
