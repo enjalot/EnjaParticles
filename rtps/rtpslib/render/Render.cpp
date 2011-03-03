@@ -30,8 +30,8 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 	far_depth=1.;
 
     printf("GL VERSION %s\n", glGetString(GL_VERSION));
-    glsl = false;
-    //glsl = true;
+    //glsl = false;
+    glsl = true;
     //mikep = true;
     mikep = false;
     blending = false;
@@ -40,9 +40,9 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
     {
 		fbos.resize(1);
 		glGenFramebuffers(1,&fbos[0]);
-		smoothing = BILATERAL_GAUSSIAN_SHADER;
-		//smoothing = NO_SHADER;
-		particle_radius = 0.0125f*0.5f;
+		//smoothing = BILATERAL_GAUSSIAN_SHADER;
+		smoothing = NO_SHADER;
+		//particle_radius = 0.0125f*0.5f;
 
 		createFramebufferTextures();
 
