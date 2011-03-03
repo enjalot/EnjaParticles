@@ -134,7 +134,7 @@ def euler_update(sphp, particles):
 
 #@print_timing
 def leapfrog_update(sphp, particles):
-    dt = .005
+    dt = .001
 
     #print "LEAPFROG++++++++++++++++++++++"
     for pi in particles:

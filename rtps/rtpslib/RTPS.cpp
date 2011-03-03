@@ -80,16 +80,7 @@ void RTPS::render()
     }*/
 }
 
-void RTPS::updateNum(int num)
-{
-    printf("about to test for renderer\n");
-    /*if(renderer)
-    {
-        renderer->setNum(num);
-    }*/
-    //this segfaults for some reason
-    //system->setNum(num);
-}
+
 
 void RTPS::printTimers()
 {

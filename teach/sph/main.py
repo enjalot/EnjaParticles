@@ -28,8 +28,9 @@ def main():
 
     clock = pygame.time.Clock()
 
-    max_num = 2**10 #1024
-    max_num = 2**8 #256
+    max_num = 2**12 #4096
+    #max_num = 2**10 #1024
+    #max_num = 2**8 #256
     #max_num = 2**7 #128
     
     dmin = Vec([0,0,0])

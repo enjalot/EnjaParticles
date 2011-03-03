@@ -25,7 +25,7 @@ void SPH::loadPressure()
 float SPH::Wspiky(float4 r, float h)
 {
     float h6 = h*h*h * h*h*h;
-    float alpha = -45.f/params.PI/h6;
+    float alpha = -45.f/sphp.PI/h6;
     float rlen = magnitude(r);
     float hr2 = (h - rlen);
     float Wij = alpha * hr2*hr2/rlen;
@@ -33,7 +33,7 @@ float SPH::Wspiky(float4 r, float h)
 }
 /*
     //stuff from Tim's code (need to match #s to papers)
-    //float alpha = 315.f/208.f/params->PI/h/h/h;
+    //float alpha = 315.f/208.f/sphp->PI/h/h/h;
     //float R = sqrt(r2/re2);
     //float Wij = alpha*(-2.25f + 2.375f*R - .625f*R*R);
 
@@ -42,8 +42,8 @@ float SPH::Wspiky(float4 r, float h)
 void SPH::cpuPressure()
 {
 
-    float scale = params.simulation_scale;
-    float h = params.smoothing_distance;
+    float scale = sphp.simulation_scale;
+    float h = sphp.smoothing_distance;
 
     for(int i = 0; i < num; i++)
     {
@@ -74,15 +74,15 @@ void SPH::cpuPressure()
                     /*
                     float Pi = 1.013E5*(pow(density[i]/1000.0f, 7.0f) - 1.0f);
                     float Pj = 1.013E5*(pow(density[j]/1000.0f, 7.0f) - 1.0f);
-                    float kern = params->mass * Wij * (Pi + Pj) / (density[i] * density[j]);
+                    float kern = sphp->mass * Wij * (Pi + Pj) / (density[i] * density[j]);
                     */
                     //from simple SPH in Krog's thesis
-                    float Pi = params.K*(densities[i] - 1000.0f); //rest density
-                    float Pj = params.K*(densities[j] - 1000.0f); //rest density
-                    //float kern = params->mass * -1.0f * Wij * (Pi + Pj) / (2.0f * density[j]);
+                    float Pi = sphp.K*(densities[i] - 1000.0f); //rest density
+                    float Pj = sphp.K*(densities[j] - 1000.0f); //rest density
+                    //float kern = sphp->mass * -1.0f * Wij * (Pi + Pj) / (2.0f * density[j]);
                     float Wij = Wspiky(r, h);
-                    float kern = params.mass * -.5f * Wij * (Pi + Pj) / (densities[i] * densities[j]);
-                    //float kern = params.mass * -.5f * Wij * (Pi/(densities[i]*densities[i]) + Pj/(densities[j]*densities[j]));
+                    float kern = sphp.mass * -.5f * Wij * (Pi + Pj) / (densities[i] * densities[j]);
+                    //float kern = sphp.mass * -.5f * Wij * (Pi/(densities[i]*densities[i]) + Pj/(densities[j]*densities[j]));
                     f.x += kern * r.x;
                     f.y += kern * r.y;
                     f.z += kern * r.z;

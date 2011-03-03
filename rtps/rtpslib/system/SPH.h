@@ -3,37 +3,23 @@
 
 #include <string>
 
-#include "../RTPS.h"
-#include "System.h"
-#include "../opencl/Kernel.h"
-#include "../opencl/Buffer.h"
+#include <RTPS.h>
+#include <System.h>
+#include <Kernel.h>
+#include <Buffer.h>
 
-#include "BitonicSort.h"
+#include <BitonicSort.h>
 
 //#include "../util.h"
-#include "../domain/Domain.h"
+#include <Domain.h>
+#include <Hose.h>
 
-#include "timege.h"
+#include <timege.h>
 
 
 namespace rtps {
 
 enum Integrator {EULER, LEAPFROG};
-
-//keep track of the fluid settings
-typedef struct SPHSettings
-{
-    float rest_density;
-    float simulation_scale;
-    float particle_mass;
-    float particle_rest_distance;
-    float smoothing_distance;
-    float boundary_distance;
-    float spacing;
-    float grid_cell_size;
-    Integrator integrator;
-
-} SPHSettings;
 
 //pass parameters to OpenCL routines
 typedef struct SPHParams
@@ -83,7 +69,13 @@ typedef struct SPHParams
     
     void print() {
 		printf("----- SPHParams ----\n");
+        printf("mass: %f\n", mass);
 		printf("simulation_scale: %f\n", simulation_scale);
+        printf("rest distance: %f\n", rest_distance);
+        printf("smoothing distance: %f\n", smoothing_distance);
+        printf("--------------------\n");
+
+        /*
 		printf("friction_coef: %f\n", friction_coef);
 		printf("restitution_coef: %f\n", restitution_coef);
 		printf("damping: %f\n", boundary_dampening);
@@ -92,29 +84,9 @@ typedef struct SPHParams
 		printf("spring: %f\n", spring);
 		printf("gravity: %f\n", gravity);
 		printf("choice: %d\n", choice);
+        */
 	}
 } SPHParams __attribute__((aligned(16)));
-
-//----------------------------------------------------------------------
-// GORDON Datastructure for Fluid parameters.
-// struct for fluid parameters
-struct FluidParams
-{
-	float smoothing_length; // SPH radius
-	float scale_to_simulation;
-	//float mass;
-	//float dt;
-	float friction_coef;
-	float restitution_coef;
-	float damping;
-	float shear;
-	float attraction;
-	float spring;
-	float gravity; // -9.8 m/sec^2
-	int   choice; // which kind of calculation to invoke
-
-};
-
 
 
 class SPH : public System
@@ -128,6 +100,10 @@ public:
     int addBox(int nn, float4 min, float4 max, bool scaled);
     //wrapper around IV.h addSphere
     void addBall(int nn, float4 center, float radius, bool scaled);
+    //wrapper around Hose.h 
+    void addHose(int total_n, float4 center, float4 velocity, float radius, float spacing);
+    void sprayHoses();
+
 	virtual void render();
     
     void loadTriangles(std::vector<Triangle> triangles);
@@ -143,25 +119,29 @@ public:
     void printTimers();
 
 
+    void pushParticles(vector<float4> pos, float4 velo);
     
 private:
     //the particle system framework
     RTPS *ps;
 
-    SPHSettings sph_settings;
-    SPHParams params;
+    SPHParams sphp;
     GridParams grid_params;
     GridParams grid_params_scaled;
+    Integrator integrator;
+    float spacing; //Particle rest distance in world coordinates
 
     int nb_var;
 
     bool triangles_loaded; //keep track if we've loaded triangles yet
+    
+    //keep track of hoses
+    std::vector<Hose> hoses;
 
     //needs to be called when particles are added
     void calculateSPHSettings();
     void setupDomain();
     void prepareSorted();
-    void pushParticles(vector<float4> pos);
     //void popParticles();
 
     Kernel k_density, k_pressure, k_viscosity;
@@ -257,6 +237,9 @@ private:
 
     void updateCPU();
     void updateGPU();
+
+    //copy the SPH parameter struct to the GPU
+    void updateSPHP();
 
     //Nearest Neighbors search related functions
     void prep(int stage);
