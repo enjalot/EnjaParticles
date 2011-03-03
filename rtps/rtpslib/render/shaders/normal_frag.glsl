@@ -57,16 +57,17 @@ void main()
 
 	vec3 n = cross(ddx,ddy);
 	n = normalize(n);
-	const vec3 lightDir = vec3(-0.5, -0.5, 2.);
+	const vec3 lightDir = vec3(-0.5, 1.5, 5.);
+	//const vec3 lightDir = vec3(-0.5, -0.5, 2.);
 	//const vec3 lightDir = vec3(-1.0,.0,-2.0);
-	const float shininess = 40.0;
+	const float shininess = 50.0;
 	float diffuse = max(0.0,dot(lightDir,n));
 
 	vec3 v = normalize(-posEye);
     vec3 h = normalize(lightDir + v);
     float specular = pow(max(0.0, dot(n, h)), shininess);
 	
-    gl_FragData[0] = vec4(1.,0.0,0.0,1.0)*diffuse+specular;
+    gl_FragData[0] = vec4(1.,0.0,0.0,0.5)*diffuse+specular;
 	//gl_FragData[0] = texture2D(colorTex,gl_TexCoord[0].xy)*diffuse+specular;
 	//gl_FragData[0] = vec4((n+vec3(1.0))/2.,1.0);
 	//gl_FragData[0] = vec4(depth,depth,depth,1.0);

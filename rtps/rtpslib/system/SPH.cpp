@@ -8,6 +8,8 @@
 #include "Domain.h"
 #include "IV.h"
 
+#include "common/Hose.h"
+
 //for random
 #include<time.h>
 
@@ -126,6 +128,9 @@ SPH::SPH(RTPS *psfr, int n)
     //addBall(nn, center, .1/scale);
     ////////////////// Done with setup particles
 
+    /////TEST HOSE
+    //Hose(RTPS *ps, int total_n, float4 center, float4 velocity, float radius, float spacing)
+    
     ////DEBUG STUFF
     printf("positions 0: \n");
     positions[0].print();
@@ -138,7 +143,19 @@ SPH::SPH(RTPS *psfr, int n)
 #endif
 
 	renderer = new Render(pos_vbo,col_vbo,num,ps->cli);
-        renderer->setParticleRadius(sph_settings.spacing*0.25);
+    renderer->setParticleRadius(sph_settings.spacing*0.5);
+
+    printf("about to make hose\n");
+    float4 center(2, 2, 2, 1);
+    float4 velocity(0, 0, -1, 0);
+    float spacing = sph_settings.spacing;
+    Hose hose1 = Hose(ps, 2048, center, velocity, 10*spacing, spacing);
+    printf("about to spray\n");
+    std::vector<float4> parts = hose1.spray();
+    printf("hose parts.size() %d\n", parts.size());
+    printf("part 0 %f %f %f %f\n", parts[0].x, parts[0].y, parts[0].z, parts[0].w);
+    if (parts.size() > 0)
+        pushParticles(parts);
 
 }
 
@@ -590,14 +607,15 @@ void SPH::addBall(int nn, float4 center, float radius, bool scaled)
     pushParticles(sphere);
 }
 
+
 void SPH::pushParticles(vector<float4> pos)
 {
     int nn = pos.size();
     if (num + nn > max_num) {return;}
-    float rr = (rand() % 255)/255.0f;
-    float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
+   // float rr = (rand() % 255)/255.0f;
+    //float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
     //printf("random: %f\n", rr);
-	//float4 color(0.0f,0.0f,0.1f,0.1f);
+    float4 color(0.05f,0.0f,0.0f,0.05f);
 
     std::vector<float4> cols(nn);
     std::vector<float4> vels(nn);

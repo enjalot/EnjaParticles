@@ -1,0 +1,82 @@
+#include "Hose.h"
+
+
+
+namespace rtps
+{
+
+Hose::Hose(RTPS *ps, int total_n, float4 center, float4 velocity, float radius, float spacing)
+{
+    this->ps = ps;
+    this->total_n = total_n;
+    this->center = center;
+    this->velocity = velocity;
+    this->radius = radius;
+    this->spacing = spacing;
+    calc_vectors();
+}
+
+void Hose::update(float4 center, float4 velocity, float radius, float spacing)
+{
+    this->center = center;
+    this->velocity = velocity;
+    this->radius = radius;
+    this->spacing = spacing;
+    calc_vectors();
+}
+
+void Hose::calc_vectors()
+{
+    /*
+    v = Vec([1., -u.x/u.y, 0.])
+    b = 1.
+    a = b*u.x/u.y
+    c = -b*(u.x**2 + u.y**2)/(u.y*u.z)
+    w = Vec([a, b, c])
+    */
+
+    printf("IN CALC VECTORS\n");
+    printf("velocity %f %f %f %f\n", velocity.x, velocity.y, velocity.z, velocity.w);
+    //Need to deal with divide by zero if velocity.y or velocity.z is 0
+    //can do this properly by switching things around
+    //for now we do my new trusty hack ;)
+    if (velocity.y == 0.) velocity.y = .0000001;
+    if (velocity.z == 0.) velocity.z = .0000001;
+    u = float4(1., -(velocity.x/velocity.y), 0., 1.);
+    float b = 1.;
+    float a = b*velocity.x/velocity.y;
+    float c = -b*(velocity.x*velocity.x + velocity.y*velocity.y)/(velocity.y*velocity.z);
+    w = float4(a, b, c, 1.);
+    u = normalize(u);
+    w = normalize(w);
+    printf("u %f %f %f %f\n", u.x, u.y, u.z, u.w);
+    printf("w %f %f %f %f\n", w.x, w.y, w.z, w.w);
+}
+
+void Hose::calc_em()
+{
+/*
+ * rate = dt*mag(v) < spacing ?
+ * emit every [spacing / (dt*v)] calls 
+ * em = (int) (1 + spacing/dt/mag(v))
+ * count every call to spray, emit when count == em, restart counter
+ */
+    em = 0;
+    em_count = 0;
+}
+
+
+
+std::vector<float4> Hose::spray()
+{
+    calc_em();
+    std::vector<float4> particles;
+    if(em_count == em)
+    {
+        //std::vector<float4> addDisc(int num, float4 center, float4 u, float4 v, float radius, float spacing);
+        particles = addDisc(n_count, center, u, w, radius, spacing);
+    }
+    return particles;
+}
+
+}

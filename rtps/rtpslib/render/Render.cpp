@@ -10,6 +10,12 @@
     //OpenCL stuff
 #endif
 
+#ifdef USE_IL
+	  #include <il.h>
+	  #include <ilu.h>
+	  #include <ilut.h>
+#endif
+
 #include "Render.h"
 #include "util.h"
 
@@ -28,13 +34,14 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 	window_width=800;
 	near_depth=0.;
 	far_depth=1.;
+	write_framebuffers = false;
 
     printf("GL VERSION %s\n", glGetString(GL_VERSION));
     glsl = false;
     //glsl = true;
     //mikep = true;
     mikep = false;
-    blending = false;
+    blending = true;
     //blending = false;
     if(glsl)
     {
@@ -52,6 +59,7 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT2,GL_TEXTURE_2D,gl_tex["normalColor"],0);
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT3,GL_TEXTURE_2D,gl_tex["lightColor"],0);
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT4,GL_TEXTURE_2D,gl_tex["Color"],0);
+		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT5,GL_TEXTURE_2D,gl_tex["depthColorSmooth"],0);
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,gl_tex["depth"],0);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);
 
@@ -118,6 +126,11 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
         glsl_program[MIKEP_SHADER] = compileShaders(vert.c_str(),frag.c_str(),geom.c_str(),param,value,3);
     }
     setupTimers();
+	#ifdef USE_IL
+		ilInit();
+		iluInit();
+		ilutRenderer(ILUT_OPENGL);
+	#endif
 }
 
 Render::~Render()
@@ -208,7 +221,8 @@ void Render::render()
     {
         //glDepthMask(GL_FALSE);
         glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     }
 
     //TODO enable GLSL shading 
@@ -220,27 +234,39 @@ void Render::render()
         //glViewport(0, 0, window_width-xywh[0], window_height-xywh[1]);
 
 
-		GLenum buffers[] = {GL_COLOR_ATTACHMENT0,GL_COLOR_ATTACHMENT4};
-		//Render depth and thickness to a textures
+
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,fbos[0]);
-		glDrawBuffers(2,buffers);
-		//glDrawBuffer(GL_COLOR_ATTACHMENT0);
-		glClearColor(0.2f,0.2f,0.8f,1.0f);
+		//glDrawBuffers(2,buffers);
+		glDisable(GL_DEPTH_TEST);
+		glDepthMask(GL_FALSE);
+		glDrawBuffer(GL_COLOR_ATTACHMENT0);
+		glClearColor(0.0f,0.0f,0.0f,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		renderPointsAsSpheres();
-		//smoothDepth();
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
 
 		if(blending)
 		{
 			//glDepthMask(GL_FALSE);
 			glDisable(GL_BLEND);
 		}
+		//GLenum buffers[] = {GL_COLOR_ATTACHMENT4,GL_COLOR_ATTACHMENT5};
+		//Render depth and thickness to a textures
+		//glDrawBuffers(2,buffers);
+		glDrawBuffer(GL_COLOR_ATTACHMENT4);
+		glClearColor(0.2f,0.2f,0.8f,1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		renderPointsAsSpheres();
+		//smoothDepth();
+
+
 		//glDisable(GL_DEPTH_TEST);
 
 		//Smooth the depth texture to emulate a surface.
 		//glDrawBuffer(GL_COLOR_ATTACHMENT1);
 		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);
-		glDrawBuffer(GL_COLOR_ATTACHMENT1);
+		glDrawBuffer(GL_COLOR_ATTACHMENT5);
 		
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,gl_tex["depth2"],0);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -393,9 +419,74 @@ void Render::render()
 
     //make sure rendering timing is accurate
     glFinish();
+
     //printf("done rendering\n");
     timers[TI_RENDER]->end();
+	if(write_framebuffers)
+	{
+		writeFramebufferTextures();
+		write_framebuffers = false;
+	}
 
+}
+
+void Render::writeBuffersToDisk()
+{
+	write_framebuffers = true;
+}
+
+
+void Render::writeFramebufferTextures() 
+{
+	for(map<string,GLuint>::iterator i = gl_tex.begin();i!=gl_tex.end();i++)
+	{
+		string s(i->first);
+		s+=".png";
+		writeTexture(i->second, s.c_str());
+	}
+}
+
+void Render::convertDepthToRGB(const GLfloat* depth, GLuint size, GLuint* rgb) const
+{
+	float minimum = 1.0f;
+	for(int i = 0;i<size;i++)
+			if(minimum>depth[i])
+				minimum = depth[i];
+	float one_minus_min = 1.f-minimum;
+	for(int i = 0;i<size;i++)
+		for(int j = 0;j<3;j++)
+			rgb[(i*3)+j]=(GLuint)((depth[i]-minimum)/one_minus_min *255);
+}
+
+int Render::writeTexture( GLuint tex, const char* filename) const
+{
+	#ifdef USE_IL
+		printf("writing %s texture to disc.\n",filename);
+		glBindTexture(GL_TEXTURE_2D,tex);
+		ILuint img = ilGenImage();
+		ilBindImage(img);
+		ilEnable(IL_FILE_OVERWRITE);
+		GLuint* image;
+    	if(!strcmp(filename,"depth.png") || !strcmp(filename,"depth2.png"))
+		{
+			GLfloat img[window_width*window_height];
+			image=new GLuint[window_width*window_height*3];
+			glGetTexImage(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT32,GL_FLOAT,img);
+			convertDepthToRGB(img,window_width*window_height,image);
+			ilTexImage(window_width,window_height,0,3,IL_RGB, IL_UNSIGNED_BYTE, image);
+		}
+		else
+		{
+			image=new GLuint[window_width*window_height*4];
+			glGetTexImage(GL_TEXTURE_2D,0,GL_RGBA,GL_UNSIGNED_BYTE,image);
+			ilTexImage(window_width,window_height,0,4,IL_RGBA, IL_UNSIGNED_BYTE, image);
+		}
+		glBindTexture(GL_TEXTURE_2D,0);
+		ilSave(IL_PNG,filename);
+		ilDeleteImage(img);
+	#endif //USE_IL
+
+	return 0;
 }
 
 void Render::smoothDepth()
@@ -846,6 +937,7 @@ void Render::deleteFramebufferTextures()
 	glDeleteTextures(1,&gl_tex["depth2"]);
 	glDeleteTextures(1,&gl_tex["thickness"]);
 	glDeleteTextures(1,&gl_tex["depthColor"]);
+	glDeleteTextures(1,&gl_tex["depthColorSmooth"]);
 	glDeleteTextures(1,&gl_tex["normalColor"]);
 	glDeleteTextures(1,&gl_tex["lightColor"]);
 	glDeleteTextures(1,&gl_tex["Color"]);
@@ -877,6 +969,13 @@ void Render::createFramebufferTextures()
 		//glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA32F,window_width,window_height,0,GL_RGBA,GL_FLOAT,NULL);
 		glGenTextures(1,&gl_tex["depthColor"]);
 		glBindTexture(GL_TEXTURE_2D, gl_tex["depthColor"]);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,window_width,window_height,0,GL_RGBA,GL_UNSIGNED_BYTE,NULL);
+		glGenTextures(1,&gl_tex["depthColorSmooth"]);
+		glBindTexture(GL_TEXTURE_2D, gl_tex["depthColorSmooth"]);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

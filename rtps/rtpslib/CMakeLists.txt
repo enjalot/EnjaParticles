@@ -45,6 +45,13 @@ ADD_DEFINITIONS(-DGLSL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/render/")
 FIND_PACKAGE (OpenGL)
 FIND_PACKAGE (OPENCL)
 FIND_PACKAGE (GLEW)
+SET(WITH_IMAGE_LIB TRUE)
+IF(WITH_IMAGE_LIB)
+	FIND_PACKAGE (DEVIL)
+	IF(DEVIL_FOUND)
+		ADD_DEFINITIONS(-DUSE_IL)
+	ENDIF(DEVIL_FOUND)
+ENDIF(WITH_IMAGE_LIB)
 
 
 set (rtpslib_INCLUDES
@@ -77,6 +84,8 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/domain/Domain
     ${rtpslib_SOURCE_DIR}/domain/IV
     
+    ${rtpslib_SOURCE_DIR}/system/common/Hose
+
     ${rtpslib_SOURCE_DIR}/system/Simple.cpp
     ${rtpslib_SOURCE_DIR}/system/simple/ForceField
     ${rtpslib_SOURCE_DIR}/system/simple/Euler
@@ -113,6 +122,11 @@ SET(rtpslib_SOURCES ${rtpslib_SOURCES}
     #${rtpslib_SOURCE_DIR}/system/sph/SetInt
     )
 ENDIF(WITH_OPENCL)
+SET(OPTIONAL_LIBS)
+IF(WITH_IMAGE_LIB AND DEVIL_FOUND)
+	SET(rtpslib_INCLUDES ${rtpslib_INCLUDES} ${DEVIL_INCLUDE_DIR})
+	SET(OPTIONAL_LIBS ${OPTIONAL_LIBS} ${DEVIL_LIBRARIES})
+ENDIF(WITH_IMAGE_LIB AND DEVIL_FOUND)
 
 
 INCLUDE_DIRECTORIES(${rtpslib_INCLUDES})
@@ -122,6 +136,7 @@ TARGET_LINK_LIBRARIES (rtps
     #${GLUT_LIBRARIES}
    ${OPENGL_LIBRARIES}
    ${OPENCL_LIBRARIES}
+   ${OPTIONAL_LIBS}
    ${GLEW_LIBRARY}
 )
 
