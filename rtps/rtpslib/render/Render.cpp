@@ -898,7 +898,7 @@ int Render::loadTexture()
 {
 
     std::string path(GLSL_SOURCE_DIR);
-    path += "../../../sprites/tomek_crop.jpg";
+    path += "../../../sprites/tomek.jpg";
     //path += "../../../sprites/enjalot.jpg";
     printf("LOAD TEXTURE!!!!!!!!!!!!!!\n");
     printf("path: %s\n", path.c_str());
