@@ -11,9 +11,9 @@
 #endif
 
 #ifdef USE_IL
-	  #include <il.h>
-	  #include <ilu.h>
-	  #include <ilut.h>
+	  #include <IL/il.h>
+	  #include <IL/ilu.h>
+	  #include <IL/ilut.h>
 #endif
 
 #include "Render.h"
@@ -37,18 +37,18 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 	write_framebuffers = false;
 
     printf("GL VERSION %s\n", glGetString(GL_VERSION));
-    glsl = false;
-    //glsl = true;
+    //glsl = false;
+    glsl = true;
     //mikep = true;
-    mikep = false;
+    //mikep = false;
     blending = true;
     //blending = false;
     if(glsl)
     {
 		fbos.resize(1);
 		glGenFramebuffers(1,&fbos[0]);
-		smoothing = BILATERAL_GAUSSIAN_SHADER;
-		//smoothing = NO_SHADER;
+		//smoothing = BILATERAL_GAUSSIAN_SHADER;
+		smoothing = NO_SHADER;
 		particle_radius = 0.0125f*0.5f;
 
 		createFramebufferTextures();
@@ -81,7 +81,16 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 		string vert(GLSL_BIN_DIR);
 		string frag(GLSL_BIN_DIR);
 		vert+="/sphere_vert.glsl";
-		frag+="/sphere_frag.glsl";
+        if(smoothing == NO_SHADER)
+        {
+            //******* for loading textures as sprites
+            loadTexture();
+            frag+="/sphere_tex_frag.glsl";
+            //*******
+        }else
+        {
+		    frag+="/sphere_frag.glsl";
+        }
         glsl_program[SPHERE_SHADER] = compileShaders(vert.c_str(),frag.c_str());
 		vert = string(GLSL_BIN_DIR);
 		frag = string(GLSL_BIN_DIR);
@@ -102,7 +111,13 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 		vert = string(GLSL_BIN_DIR);
 		frag = string(GLSL_BIN_DIR);
 		vert+="/normal_vert.glsl";
-		frag+="/normal_frag.glsl";
+        if(smoothing == NO_SHADER)
+        {
+		    frag+="/normal_tex_frag.glsl";
+        }else
+        {
+		    frag+="/normal_frag.glsl";
+        }
         glsl_program[NORMAL_SHADER] = compileShaders(vert.c_str(),frag.c_str()); 
         
         vert = string(GLSL_BIN_DIR);
@@ -128,8 +143,8 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
     setupTimers();
 	#ifdef USE_IL
 		ilInit();
-		iluInit();
-		ilutRenderer(ILUT_OPENGL);
+		//iluInit();
+		//ilutRenderer(ILUT_OPENGL);
 	#endif
 }
 
@@ -584,12 +599,25 @@ void Render::renderPointsAsSpheres()
         glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
         glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
+        if(smoothing == NO_SHADER)
+        {
+            //FOR FACE TEXTURES
+            glEnable(GL_TEXTURE_2D);
+            glActiveTexture(GL_TEXTURE0);
+        }
+
         glUseProgram(glsl_program[SPHERE_SHADER]);
         //float particle_radius = 0.125f * 0.5f;
         glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "pointScale"), ((float)window_width) / tanf(65. * (0.5f * 3.1415926535f/180.0f)));
         glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "pointRadius"), particle_radius );
         glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "near"), near_depth );
         glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "far"), far_depth );
+        
+        if(smoothing == NO_SHADER)
+        {
+            //FOR FACE TEXTURES
+            glBindTexture(GL_TEXTURE_2D, gl_tex["texture"]);
+        }
 
         glColor3f(1., 1., 1.);
 
@@ -867,8 +895,6 @@ int Render::generateCircleTexture(GLubyte r, GLubyte g, GLubyte b, GLubyte alpha
 int Render::loadTexture()
 {
 
-
-
 /*
     //load the image with OpenCV
     std::string path(GLSL_SOURCE_DIR);
@@ -906,8 +932,8 @@ int Render::loadTexture()
     int w = 32;
     int h = 32;
     //#include "../../sprites/particle.txt"
-    #include "../../sprites/blue.txt"
-    //#include "../../sprites/reddit.txt"
+    //#include "../../sprites/blue.txt"
+    #include "../../sprites/reddit.txt"
 /*
     w=100;
     h=100;
