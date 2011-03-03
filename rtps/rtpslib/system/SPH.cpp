@@ -86,8 +86,8 @@ SPH::SPH(RTPS *psfr, int n)
 	renderer = new Render(pos_vbo,col_vbo,num,ps->cli);
     printf("spacing for radius %f\n", spacing);
     //renderer->setParticleRadius(spacing*0.5);
-    renderer->setParticleRadius(spacing*0.5);
-    //renderer->setParticleRadius(spacing);
+    //renderer->setParticleRadius(spacing*0.5);
+    renderer->setParticleRadius(spacing);
 
 }
 
@@ -349,7 +349,7 @@ void SPH::calculateSPHSettings()
     sphp.gravity = -9.8f;
     //sphp.gravity = 0.0f;
     sphp.velocity_limit = 600.0f;
-    sphp.xsph_factor = .05f;
+    sphp.xsph_factor = .1f;
 
 	float h = sphp.smoothing_distance;
 	float h9 = pow(h,9.);
@@ -559,10 +559,8 @@ void SPH::addHose(int total_n, float4 center, float4 velocity, float radius)
 void SPH::sprayHoses()
 {
     std::vector<float4> parts;
-    printf("sph sprayHoses\n");
     for(int i = 0; i < hoses.size(); i++)
     {
-        printf("hose i: %d\n", i);
         parts = hoses[i].spray();
         if (parts.size() > 0)
             pushParticles(parts, hoses[i].getVelocity());
