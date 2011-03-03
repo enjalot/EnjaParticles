@@ -45,6 +45,14 @@ ADD_DEFINITIONS(-DGLSL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/render/")
 FIND_PACKAGE (OpenGL)
 FIND_PACKAGE (OPENCL)
 FIND_PACKAGE (GLEW)
+SET(WITH_IMAGE_LIB FALSE)
+IF(WITH_IMAGE_LIB)
+	FIND_PACKAGE (DEVIL)
+    message("DEVIL FOUND: ${DEVIL_FOUND}")
+	IF(DEVIL_FOUND)
+		ADD_DEFINITIONS(-DUSE_IL)
+	ENDIF(DEVIL_FOUND)
+ENDIF(WITH_IMAGE_LIB)
 
 
 set (rtpslib_INCLUDES
@@ -56,6 +64,7 @@ set (rtpslib_INCLUDES
     ${rtpslib_SOURCE_DIR}/system
     ${rtpslib_SOURCE_DIR}/system/common
     ${rtpslib_SOURCE_DIR}/render
+    ${rtpslib_SOURCE_DIR}/render/util
     ${rtpslib_SOURCE_DIR}/domain
     ${rtpslib_SOURCE_DIR}/opencl
     ${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src
@@ -74,6 +83,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/timege
 
     ${rtpslib_SOURCE_DIR}/render/Render
+    ${rtpslib_SOURCE_DIR}/render/util/stb_image.c
 
     ${rtpslib_SOURCE_DIR}/domain/Domain
     ${rtpslib_SOURCE_DIR}/domain/IV
@@ -120,6 +130,11 @@ SET(rtpslib_SOURCES ${rtpslib_SOURCES}
     #${rtpslib_SOURCE_DIR}/system/sph/SetInt
     )
 ENDIF(WITH_OPENCL)
+SET(OPTIONAL_LIBS)
+IF(WITH_IMAGE_LIB AND DEVIL_FOUND)
+	SET(rtpslib_INCLUDES ${rtpslib_INCLUDES} ${DEVIL_INCLUDE_DIR})
+	SET(OPTIONAL_LIBS ${OPTIONAL_LIBS} ${DEVIL_LIBRARIES})
+ENDIF(WITH_IMAGE_LIB AND DEVIL_FOUND)
 
 
 INCLUDE_DIRECTORIES(${rtpslib_INCLUDES})
@@ -129,6 +144,7 @@ TARGET_LINK_LIBRARIES (rtps
     #${GLUT_LIBRARIES}
    ${OPENGL_LIBRARIES}
    ${OPENCL_LIBRARIES}
+   ${OPTIONAL_LIBS}
    ${GLEW_LIBRARY}
 )
 
