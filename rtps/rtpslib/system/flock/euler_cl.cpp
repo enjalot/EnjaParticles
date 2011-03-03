@@ -155,7 +155,7 @@ __kernel void euler(
 	//	numFlockmates = 1;
 	//}
 		
-	float4 bndMax = params->grid_max/2;// - params->boundary_distance;
+	float4 bndMax = params->grid_max/2.f;// - params->boundary_distance;
 	float4 bndMin = -bndMax; //params->grid_min;// + params->boundary_distance;
 
 	// RULE 1. SEPARATION
