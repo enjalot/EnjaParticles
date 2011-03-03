@@ -18,6 +18,7 @@
 
 #include "Render.h"
 #include "util.h"
+#include "stb_image.h" 
 
 using namespace std;
 
@@ -47,8 +48,8 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
     {
 		fbos.resize(1);
 		glGenFramebuffers(1,&fbos[0]);
-		//smoothing = BILATERAL_GAUSSIAN_SHADER;
-		smoothing = NO_SHADER;
+		smoothing = BILATERAL_GAUSSIAN_SHADER;
+		//smoothing = NO_SHADER;
 		particle_radius = 0.0125f*0.5f;
 
 		createFramebufferTextures();
@@ -929,19 +930,54 @@ int Render::loadTexture()
     }
     printf("\n charstring over\n");
   */  
+       /*
     int w = 32;
     int h = 32;
     //#include "../../sprites/particle.txt"
     //#include "../../sprites/blue.txt"
     #include "../../sprites/reddit.txt"
-/*
-    w=100;
-    h=100;
+    */
+    int w=100;
+    int h=100;
     #include "../../sprites/fsu_seal.txt"
+/*
     w = 96;
     h = 96;
     #include "../../sprites/enjalot.txt"
 */
+
+
+    std::string path(GLSL_SOURCE_DIR);
+    //path += "/tex/particle.jpg";
+    //path += "/tex/enjalot.jpg";
+    path += "../../../sprites/fsu_seal.jpg";
+    printf("LOAD TEXTURE!!!!!!!!!!!!!!\n");
+    printf("path: %s\n", path.c_str());
+
+    //Load an image with stb_image
+    int *width;
+    int *height;
+    int *channels;
+    int force_channels = 0;
+    
+    //unsigned char *im = stbi_load_from_memory(image, 100*100, width, height, channels, force_channels);
+
+    unsigned char *im = stbi_load( path.c_str(), width, height, channels, force_channels );
+    printf("after load\n");
+    if(im == NULL)
+    {
+        printf("WTF\n");
+    }
+
+    //printf("image: %s\n", image);
+
+    /*
+    int w_stb = *width;
+    int h_stb = *height;
+    printf("w: %d h: %d\n", w_stb, h_stb);
+    */
+    printf("%d %d %d %d %d %d %d\n", im[0], im[1], im[2], im[3], im[4], im[5], im[6]);
+
     //load as gl texture
     glGenTextures(1, &gl_tex["texture"]);
     glBindTexture(GL_TEXTURE_2D, gl_tex["texture"]);
@@ -952,7 +988,8 @@ int Render::loadTexture()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
-    GL_BGR_EXT, GL_UNSIGNED_BYTE, &image[0]);
+    //GL_BGR_EXT, GL_UNSIGNED_BYTE, &image[0]);
+    GL_BGR_EXT, GL_UNSIGNED_BYTE, &im[0]);
 
 	return 0; //success
 }

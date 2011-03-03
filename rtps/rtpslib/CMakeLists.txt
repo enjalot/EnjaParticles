@@ -64,6 +64,7 @@ set (rtpslib_INCLUDES
     ${rtpslib_SOURCE_DIR}/system
     ${rtpslib_SOURCE_DIR}/system/common
     ${rtpslib_SOURCE_DIR}/render
+    ${rtpslib_SOURCE_DIR}/render/util
     ${rtpslib_SOURCE_DIR}/domain
     ${rtpslib_SOURCE_DIR}/opencl
     ${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src
@@ -82,6 +83,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/timege
 
     ${rtpslib_SOURCE_DIR}/render/Render
+    ${rtpslib_SOURCE_DIR}/render/util/stb_image.c
 
     ${rtpslib_SOURCE_DIR}/domain/Domain
     ${rtpslib_SOURCE_DIR}/domain/IV
