@@ -87,10 +87,14 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/SPH.cpp
     ${rtpslib_SOURCE_DIR}/system/sph/Euler
     ${rtpslib_SOURCE_DIR}/system/sph/LeapFrog
+    
+    #### these are CPU only
     ${rtpslib_SOURCE_DIR}/system/sph/Density
     ${rtpslib_SOURCE_DIR}/system/sph/Pressure
     ${rtpslib_SOURCE_DIR}/system/sph/Viscosity
     ${rtpslib_SOURCE_DIR}/system/sph/XSPH
+    ####
+
     ${rtpslib_SOURCE_DIR}/system/sph/Collision_wall
     ${rtpslib_SOURCE_DIR}/system/sph/Collision_triangle
     

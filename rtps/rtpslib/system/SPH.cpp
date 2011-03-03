@@ -43,8 +43,8 @@ SPH::SPH(RTPS *psfr, int n)
     //set up the grid
     setupDomain();
 
-    sph_settings.integrator = LEAPFROG;
-    //sph_settings.integrator = EULER;
+    integrator = LEAPFROG;
+    //integrator = EULER;
 
     //*** end Initialization
 
@@ -79,54 +79,6 @@ SPH::SPH(RTPS *psfr, int n)
     loadBitonicSort();
     loadDataStructures();
     loadNeighbors();
-
-    ////////////////// Setup some initial particles
-    //// really this should be setup by the user
-    //int nn = 1024;
-    int nn = 3333;
-    //nn = 8192;
-    nn = 2048;
-    //nn = 1024;
-    //float4 min = float4(.4, .4, .1, 0.0f);
-    //float4 max = float4(.6, .6, .4, 0.0f);
-
-
-    //float4 min   = float4(-559., -15., 0.5, 1.);
-	//float4 max   = float4(-400., 225., 1050., 1);
-    //grid = Domain(float4(-560,-30,0,0), float4(256, 256, 1276, 0));
-    //float4 min   = float4(100./sd, -15./sd, 0.5/sd, 1.);
-    //float4 min   = float4(100., -15., 550, 1.);
-	//float4 max   = float4(255./sd, 225./sd, 1250./sd, 1);
-
-
-
-    //float4 min = float4(.1, .1, .1, 0.0f);
-    //float4 max = float4(.3, .3, .4, 0.0f);
-
-    //addBox(nn, min, max, false);
-    
-    //nn = 512;
-    /*nn = 512;
-    float4 min = float4(.1, .1, .1, 1.0f);
-	float4 max = float4(.9, .5, .9, 1.0f);
-    addBox(nn, min, max, false);*/
-    //addBox(nn, min, max, false);
-   
-    //float4 center = float4(.1/scale, .15/scale, .3/scale, 0.0f);
-    //addBall(nn, center, .06/scale);
-    //addBall(nn, center, .1/scale);
-    ////////////////// Done with setup particles
-
-    /////TEST HOSE
-    //Hose(RTPS *ps, int total_n, float4 center, float4 velocity, float radius, float spacing)
-    
-    ////DEBUG STUFF
-    printf("positions 0: \n");
-    positions[0].print();
-    
-    //////////////
-
-
     
     
 #endif
@@ -168,6 +120,7 @@ void SPH::update()
 
 void SPH::updateCPU()
 {
+#ifdef CPU
     cpuDensity();
     cpuPressure();
     cpuViscosity();
@@ -182,8 +135,8 @@ void SPH::updateCPU()
     {
         cpuLeapFrog();
     }
+#if 0
     //printf("positions[0].z %f\n", positions[0].z);
-    /*
     for(int i = 0; i < 100; i++)
     {
         //if(xsphs[i].z != 0.0)
@@ -191,13 +144,12 @@ void SPH::updateCPU()
         printf("force: %f %f %f  \n", xsphs[i].x, xsphs[i].y, xsphs[i].z);
         //printf("force: %f %f %f  \n", velocities[i].x, velocities[i].y, velocities[i].z);
     }
-    */
     //printf("cpu execute!\n");
-
+#endif
     glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
     glBufferData(GL_ARRAY_BUFFER, num * sizeof(float4), &positions[0], GL_DYNAMIC_DRAW);
 
-
+#endif
 }
 
 void SPH::updateGPU()
@@ -350,74 +302,46 @@ void SPH::calculateSPHSettings()
     * The Particle Mass (and hence everything following) depends on the MAXIMUM number of particles in the system
     */
 
-    /*
-    rho0 = 1000.                #rest density [ kg/m^3 ]
-    V0 = 0.000005547            #initial volume [ m^3 ]
-    V0 = 0.000313357            #initial volume [ m^3 ]
-    n = 1.                      #number of particles to occupy V0
-    VP = V0 / n                 #particle volume [ m^3 ]
-    m = rho0 * VP               #particle mass [ kg ]
-    VF = VP * max_num           #fluid volume [ m^3 ]
-    re = (m/rho0)**(1/3.)       #particle radius [ m ]
-    print "re, m, VP, n", re, m, VP, n
-    rest_distance = .87 * re    #rest distance between particles [ m ]
-
-    smoothing_radius = 2.0 * rest_distance      #smoothing radius for SPH Kernels
-    boundary_distance = .5 * rest_distance      #for calculating collision with boundary
-    */
-
-    //sph_settings.rest_density = 1000;
-    //sph_settings.rest_density = 2000;
-    float rho0 = 1000;
-    float mass = (128*1024.0)/max_num * .0002;  //krog's way
-    float V0 = 
-
-    sph_settings.particle_mass = (128*1024.0)/max_num * .0002;
-    printf("particle mass: %f\n", sph_settings.particle_mass);
-
-    float particle_vol = sph_settings.particle_mass / sph_settings.rest_density;
-
+    float rho0 = 1000;                              //rest density [kg/m^3 ]
+    //float mass = (128*1024.0)/max_num * .0002;    //krog's way
+    float VP = .0262144 / max_num;                  //Particle Volume [ m^3 ]
+    float mass = rho0 * VP;                         //Particle Mass [ kg ]
     //constant .87 is magic
-    sph_settings.particle_rest_distance = .87 * pow(particle_vol, 1./3.);
-    printf("particle rest distance: %f\n", sph_settings.particle_rest_distance);
-    
-    //messing with smoothing distance, making it really small to remove interaction still results in weird force values
-    sph_settings.smoothing_distance = 2.0f * sph_settings.particle_rest_distance;
-    sph_settings.boundary_distance = .5f * sph_settings.particle_rest_distance;
-    printf("particle smoothing distance: %f\n", sph_settings.smoothing_distance);
-
+    float rest_distance = .87 * pow(VP, 1./3.);     //rest distance between particles [ m ]
+        
+    float smoothing_distance = 2.0f * rest_distance;//interaction radius
+    float boundary_distance = .5f * rest_distance;
 
     float4 dmin = grid.getBndMin();
     float4 dmax = grid.getBndMax();
     //printf("dmin: %f %f %f\n", dmin.x, dmin.y, dmin.z);
     //printf("dmax: %f %f %f\n", dmax.x, dmax.y, dmax.z);
     float domain_vol = (dmax.x - dmin.x) * (dmax.y - dmin.y) * (dmax.z - dmin.z);
-    printf("domain volume: %f\n", domain_vol);
+    //printf("domain volume: %f\n", domain_vol);
 
-    sph_settings.simulation_scale = pow(particle_vol * max_num / domain_vol, 1./3.); 
-    printf("simulation scale: %f\n", sph_settings.simulation_scale);
+    //ratio between particle radius in simulation coords and world coords
+    float simulation_scale = pow(VP * max_num / domain_vol, 1./3.); 
 
-    sph_settings.spacing = sph_settings.particle_rest_distance/ sph_settings.simulation_scale;
-    printf("spacing: %f\n", sph_settings.spacing);
+    spacing = rest_distance/ simulation_scale;
 
-    float particle_radius = sph_settings.spacing;
-    printf("particle radius: %f\n", particle_radius);
+    float particle_radius = spacing;
+	float pi = acos(-1.0);
  
     sphp.grid_min = grid.getMin();
     sphp.grid_max = grid.getMax();
-    sphp.mass = sph_settings.particle_mass;
-    sphp.rest_distance = sph_settings.particle_rest_distance;
-    sphp.smoothing_distance = sph_settings.smoothing_distance;
-    sphp.simulation_scale = sph_settings.simulation_scale;
+    sphp.mass = mass;
+    sphp.rest_distance = rest_distance;
+    sphp.smoothing_distance = smoothing_distance;
+    sphp.simulation_scale = simulation_scale;
     sphp.boundary_stiffness = 20000.0f;
     sphp.boundary_dampening = 256.0f;
-    sphp.boundary_distance = sph_settings.particle_rest_distance * .5f;
+    sphp.boundary_distance = boundary_distance;
     sphp.EPSILON = .00001f;
-    sphp.PI = 3.14159265f;
+    sphp.PI = pi;
     sphp.K = 20.0f;
     sphp.num = num;
     //sphp.surface_threshold = 2.0 * sphp.simulation_scale; //0.01;
-    sphp.viscosity = .001f;
+    sphp.viscosity = .01f;
     //sphp.viscosity = 1.0f;
     sphp.gravity = -9.8f;
     //sphp.gravity = 0.0f;
@@ -425,7 +349,6 @@ void SPH::calculateSPHSettings()
     sphp.xsph_factor = .05f;
 
 	float h = sphp.smoothing_distance;
-	float pi = acos(-1.0);
 	float h9 = pow(h,9.);
 	float h6 = pow(h,6.);
 	float h3 = pow(h,3.);
@@ -433,10 +356,13 @@ void SPH::calculateSPHSettings()
     sphp.wpoly6_d_coef = -945.f/(32.0f*pi*h9);
     sphp.wpoly6_dd_coef = -945.f/(32.0f*pi*h9);
     sphp.wspiky_coef = 15.f/pi/h6;
-    sphp.wspiky_d_coef = 45.f/(pi*h6);
+    sphp.wspiky_d_coef = -45.f/(pi*h6);
     sphp.wvisc_coef = 15./(2.*pi*h3);
     sphp.wvisc_d_coef = 15./(2.*pi*h3);
     sphp.wvisc_dd_coef = 45./(pi*h6);
+
+    printf("spacing: %f\n", spacing);
+    sphp.print();
 
 }
 
@@ -479,7 +405,7 @@ void SPH::prepareSorted()
 
     //TODO make a helper constructor for buffer to make a cl_mem from a struct
     std::vector<SPHParams> vparams(0);
-    vparams.push_back(params);
+    vparams.push_back(sphp);
     cl_SPHParams = Buffer<SPHParams>(ps->cli, vparams);
 
     //Setup Grid Parameter structs
@@ -550,7 +476,7 @@ void SPH::prepareSorted()
 
 void SPH::setupDomain()
 {
-    grid.calculateCells(sph_settings.smoothing_distance / sph_settings.simulation_scale);
+    grid.calculateCells(sphp.smoothing_distance / sphp.simulation_scale);
 
 
 	grid_params.grid_min = grid.getMin();
@@ -562,7 +488,7 @@ void SPH::setupDomain()
 	grid_params.grid_delta = grid.getDelta();
 	grid_params.nb_cells = (int) (grid_params.grid_res.x*grid_params.grid_res.y*grid_params.grid_res.z);
 
-    printf("gp nb_cells: %d\n", grid_params.nb_cells);
+    //printf("gp nb_cells: %d\n", grid_params.nb_cells);
 
 
     /*
@@ -572,7 +498,7 @@ void SPH::setupDomain()
 	grid_params.grid_inv_delta.w = 1.;
     */
 
-    float ss = sph_settings.simulation_scale;
+    float ss = sphp.simulation_scale;
 
 	grid_params_scaled.grid_min = grid_params.grid_min * ss;
 	grid_params_scaled.grid_max = grid_params.grid_max * ss;
@@ -586,8 +512,8 @@ void SPH::setupDomain()
     //grid_params_scaled.grid_inv_delta = grid_params.grid_inv_delta / ss;
     //grid_params_scaled.grid_inv_delta.w = 1.0f;
 
-    grid_params.print();
-    grid_params_scaled.print();
+    //grid_params.print();
+    //grid_params_scaled.print();
     
 }
 
@@ -596,9 +522,9 @@ int SPH::addBox(int nn, float4 min, float4 max, bool scaled)
     float scale = 1.0f;
     if(scaled)
     {
-        scale = sph_settings.simulation_scale;
+        scale = sphp.simulation_scale;
     }
-    vector<float4> rect = addRect(nn, min, max, sph_settings.spacing, scale);
+    vector<float4> rect = addRect(nn, min, max, spacing, scale);
     float4 velo(0, 0, 0, 0);
     pushParticles(rect, velo);
     return rect.size();
@@ -609,9 +535,9 @@ void SPH::addBall(int nn, float4 center, float radius, bool scaled)
     float scale = 1.0f;
     if(scaled)
     {
-        scale = sph_settings.simulation_scale;
+        scale = sphp.simulation_scale;
     }
-    vector<float4> sphere = addSphere(nn, center, radius, sph_settings.spacing, scale);
+    vector<float4> sphere = addSphere(nn, center, radius, spacing, scale);
     float4 velo(0, 0, 0, 0);
     pushParticles(sphere,velo);
 }
@@ -619,7 +545,6 @@ void SPH::addBall(int nn, float4 center, float radius, bool scaled)
 void SPH::addHose(int total_n, float4 center, float4 velocity, float radius, float spacing)
 {
     //in sph we just use sph spacing
-    spacing = sph_settings.spacing;
     radius *= spacing;
     Hose hose = Hose(ps, total_n, center, velocity, radius, spacing);
     hoses.push_back(hose);

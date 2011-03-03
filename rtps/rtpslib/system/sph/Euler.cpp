@@ -48,7 +48,7 @@ void SPH::cpuEuler()
             f.z *= 600.0f/speed;
         }
 
-        float scale = params.simulation_scale;
+        float scale = sphp.simulation_scale;
         v.x += h*f.x / scale;
         v.y += h*f.y / scale;
         v.z += h*f.z / scale;

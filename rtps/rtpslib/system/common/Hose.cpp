@@ -37,8 +37,8 @@ void Hose::calc_vectors()
     w = Vec([a, b, c])
     */
 
-    printf("IN CALC VECTORS\n");
-    printf("velocity %f %f %f %f\n", velocity.x, velocity.y, velocity.z, velocity.w);
+    //printf("IN CALC VECTORS\n");
+    //printf("velocity %f %f %f %f\n", velocity.x, velocity.y, velocity.z, velocity.w);
     //Need to deal with divide by zero if velocity.y or velocity.z is 0
     //can do this properly by switching things around
     //for now we do my new trusty hack ;)
@@ -51,8 +51,8 @@ void Hose::calc_vectors()
     w = float4(a, b, c, 1.);
     u = normalize(u);
     w = normalize(w);
-    printf("u %f %f %f %f\n", u.x, u.y, u.z, u.w);
-    printf("w %f %f %f %f\n", w.x, w.y, w.z, w.w);
+    //printf("u %f %f %f %f\n", u.x, u.y, u.z, u.w);
+    //printf("w %f %f %f %f\n", w.x, w.y, w.z, w.w);
 }
 
 void Hose::calc_em()

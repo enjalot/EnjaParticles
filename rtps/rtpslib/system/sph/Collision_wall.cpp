@@ -86,18 +86,18 @@ void SPH::cpuCollision_wall()
 {
 
     float4* vel;
-    if(sph_settings.integrator == EULER)
+    if(integrator == EULER)
     {
         vel = &velocities[0];
     }
-    else if(sph_settings.integrator == LEAPFROG)
+    else if(integrator == LEAPFROG)
     {
         vel = &veleval[0];
     }
     for(int i = 0; i < num; i++)
     {
         
-        float scale = params.simulation_scale;
+        float scale = sphp.simulation_scale;
         float4 p = positions[i];
         float4 v = vel[i];
         float4 f = forces[i];
@@ -115,12 +115,12 @@ void SPH::cpuCollision_wall()
         float friction_static_limit = 0.0f;
 
         //bottom wall
-        float diff = params.boundary_distance - (p.z - params.grid_min.z) * params.simulation_scale;
-        if (diff > params.EPSILON)
+        float diff = sphp.boundary_distance - (p.z - sphp.grid_min.z) * sphp.simulation_scale;
+        if (diff > sphp.EPSILON)
         {
             //printf("colliding with the bottom! %d\n", i);
             float4 normal = float4(0.0f, 0.0f, 1.0f, 0.0f);
-            crf = calculateRepulsionForce(normal, v, params.boundary_stiffness, params.boundary_dampening, params.boundary_distance);
+            crf = calculateRepulsionForce(normal, v, sphp.boundary_stiffness, sphp.boundary_dampening, sphp.boundary_distance);
             r_f.x += crf.x;
             r_f.y += crf.y;
             r_f.z += crf.z;
@@ -133,11 +133,11 @@ void SPH::cpuCollision_wall()
         }
 
         //Y walls
-        diff = params.boundary_distance - (p.y - params.grid_min.y) * params.simulation_scale;
-        if (diff > params.EPSILON)
+        diff = sphp.boundary_distance - (p.y - sphp.grid_min.y) * sphp.simulation_scale;
+        if (diff > sphp.EPSILON)
         {
             float4 normal = float4(0.0f, 1.0f, 0.0f, 0.0f);
-            crf = calculateRepulsionForce(normal, v, params.boundary_stiffness, params.boundary_dampening, params.boundary_distance);
+            crf = calculateRepulsionForce(normal, v, sphp.boundary_stiffness, sphp.boundary_dampening, sphp.boundary_distance);
             r_f.x += crf.x;
             r_f.y += crf.y;
             r_f.z += crf.z;
@@ -147,11 +147,11 @@ void SPH::cpuCollision_wall()
             f_f.z += cff.z;
 
         }
-        diff = params.boundary_distance - (params.grid_max.y - p.y) * params.simulation_scale;
-        if (diff > params.EPSILON)
+        diff = sphp.boundary_distance - (sphp.grid_max.y - p.y) * sphp.simulation_scale;
+        if (diff > sphp.EPSILON)
         {
             float4 normal = float4(0.0f, -1.0f, 0.0f, 0.0f);
-            crf = calculateRepulsionForce(normal, v, params.boundary_stiffness, params.boundary_dampening, params.boundary_distance);
+            crf = calculateRepulsionForce(normal, v, sphp.boundary_stiffness, sphp.boundary_dampening, sphp.boundary_distance);
             r_f.x += crf.x;
             r_f.y += crf.y;
             r_f.z += crf.z;
@@ -162,11 +162,11 @@ void SPH::cpuCollision_wall()
 
         }
         //X walls
-        diff = params.boundary_distance - (p.x - params.grid_min.x) * params.simulation_scale;
-        if (diff > params.EPSILON)
+        diff = sphp.boundary_distance - (p.x - sphp.grid_min.x) * sphp.simulation_scale;
+        if (diff > sphp.EPSILON)
         {
             float4 normal = float4(1.0f, 0.0f, 0.0f, 0.0f);
-            crf = calculateRepulsionForce(normal, v, params.boundary_stiffness, params.boundary_dampening, params.boundary_distance);
+            crf = calculateRepulsionForce(normal, v, sphp.boundary_stiffness, sphp.boundary_dampening, sphp.boundary_distance);
             r_f.x += crf.x;
             r_f.y += crf.y;
             r_f.z += crf.z;
@@ -176,11 +176,11 @@ void SPH::cpuCollision_wall()
             f_f.z += cff.z;
 
         }
-        diff = params.boundary_distance - (params.grid_max.x - p.x) * params.simulation_scale;
-        if (diff > params.EPSILON)
+        diff = sphp.boundary_distance - (sphp.grid_max.x - p.x) * sphp.simulation_scale;
+        if (diff > sphp.EPSILON)
         {
             float4 normal = float4(-1.0f, 0.0f, 0.0f, 0.0f);
-            crf = calculateRepulsionForce(normal, v, params.boundary_stiffness, params.boundary_dampening, params.boundary_distance);
+            crf = calculateRepulsionForce(normal, v, sphp.boundary_stiffness, sphp.boundary_dampening, sphp.boundary_distance);
             r_f.x += crf.x;
             r_f.y += crf.y;
             r_f.z += crf.z;

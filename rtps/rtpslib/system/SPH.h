@@ -69,7 +69,13 @@ typedef struct SPHParams
     
     void print() {
 		printf("----- SPHParams ----\n");
+        printf("mass: %f\n", mass);
 		printf("simulation_scale: %f\n", simulation_scale);
+        printf("rest distance: %f\n", rest_distance);
+        printf("smoothing distance: %f\n", smoothing_distance);
+        printf("--------------------\n");
+
+        /*
 		printf("friction_coef: %f\n", friction_coef);
 		printf("restitution_coef: %f\n", restitution_coef);
 		printf("damping: %f\n", boundary_dampening);
@@ -78,29 +84,9 @@ typedef struct SPHParams
 		printf("spring: %f\n", spring);
 		printf("gravity: %f\n", gravity);
 		printf("choice: %d\n", choice);
+        */
 	}
 } SPHParams __attribute__((aligned(16)));
-
-//----------------------------------------------------------------------
-// GORDON Datastructure for Fluid parameters.
-// struct for fluid parameters
-struct FluidParams
-{
-	float smoothing_length; // SPH radius
-	float scale_to_simulation;
-	//float mass;
-	//float dt;
-	float friction_coef;
-	float restitution_coef;
-	float damping;
-	float shear;
-	float attraction;
-	float spring;
-	float gravity; // -9.8 m/sec^2
-	int   choice; // which kind of calculation to invoke
-
-};
-
 
 
 class SPH : public System
@@ -143,6 +129,7 @@ private:
     GridParams grid_params;
     GridParams grid_params_scaled;
     Integrator integrator;
+    float spacing; //Particle rest distance in world coordinates
 
     int nb_var;
 
@@ -252,7 +239,7 @@ private:
     void updateGPU();
 
     //copy the SPH parameter struct to the GPU
-    void SPH::updateSPHP();
+    void updateSPHP();
 
     //Nearest Neighbors search related functions
     void prep(int stage);

@@ -34,7 +34,7 @@ void SPH::loadDensity()
 float SPH::Wpoly6(float4 r, float h)
 {
     float h9 = h*h*h * h*h*h * h*h*h;
-    float alpha = 315.f/64.0f/params.PI/h9;
+    float alpha = 315.f/64.0f/sphp.PI/h9;
     float r2 = dist_squared(r);
     float hr2 = (h*h - r2);
     float Wij = alpha * hr2*hr2*hr2;
@@ -44,7 +44,7 @@ float SPH::Wpoly6(float4 r, float h)
 
 void SPH::cpuDensity()
 {
-    float h = params.smoothing_distance;
+    float h = sphp.smoothing_distance;
     //stuff from Tim's code (need to match #s to papers)
     //float alpha = 315.f/208.f/params.PI/h/h/h;
     //
@@ -54,7 +54,7 @@ void SPH::cpuDensity()
 
     //sooo slow t.t
 
-    float scale = params.simulation_scale;
+    float scale = sphp.simulation_scale;
     float sum_densities = 0.0f;
 
     for(int i = 0; i < num; i++)
@@ -95,7 +95,7 @@ void SPH::cpuDensity()
                     }
                     */
                    //printf("%f ", Wij);
-                    densities[i] += params.mass * Wij;
+                    densities[i] += sphp.mass * Wij;
                 }
             }
      
