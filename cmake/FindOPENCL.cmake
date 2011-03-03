@@ -9,11 +9,26 @@
 
 IF (WIN32)
 
-    FIND_PATH(OPENCL_INCLUDE_DIR CL/cl.h )
+	IF(NOT ${GPU_COMPUTING_TOOLKIT})
+		# CYGWIN: 
+		SET (GPU_COMPUTING_TOOLKIT "/cygdrive/c/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v3.2/")
+	ENDIF (NOT ${GPU_COMPUTING_TOOLKIT}) 
+
+    FIND_PATH(OPENCL_INCLUDE_DIR CL/cl.h 
+		$ENV{GPU_COMPUTING_TOOLKIT}/include
+	)
 
     # TODO this is only a hack assuming the 64 bit library will
     # not be found on 32 bit system
-    FIND_LIBRARY(OPENCL_LIBRARIES opencl )
+	set(CMAKE_FIND_LIBRARY_PREFIXES "" ${CMAKE_FIND_LIBRARY_PREFIXES})
+    FIND_LIBRARY(OPENCL_LIBRARIES 
+		NAMES OpenCL opencl opencl32 opencl64 OpenCL.dll
+		PATHS
+		${GPU_COMPUTING_TOOLKIT}/lib/x64
+		${GPU_COMPUTING_TOOLKIT}/lib/Win32
+		/cygdrive/c/Windows/System32
+		/cygdrive/c/Windows/SysWOW64
+	)
 
 ELSE (WIN32)
 
@@ -22,7 +37,7 @@ ELSE (WIN32)
     #SET(OPENCL_INCLUDE_DIR  "$ENV{OPENCL_HOME}/common/inc"
     #   CACHE PATH "path to Opencl Include files")
 
-    #message(***** OPENCL_INCLUDE_DIR: "${OPENCL_INCLUDE_DIR}" ********)
+    message(***** OPENCL_INCLUDE_DIR: "${OPENCL_INCLUDE_DIR}" ********)
 
 	# does not work. WHY? 
     #SET(inc  $ENV{CUDA_LOCAL}/../OpenCL/common/inc /usr/include)
@@ -30,7 +45,7 @@ ELSE (WIN32)
 
     FIND_LIBRARY(OPENCL_LIBRARIES OpenCL ENV LD_LIBRARY_PATH)
 
-    #message(***** OPENCL ENV: "$ENV{GPU_SDK}" ********)
+    message(***** OPENCL ENV: "$ENV{GPU_SDK}" ********)
 
 #~/NVIDIA_GPU_Computing_SDK/OpenCL/common/inc/ 
 
