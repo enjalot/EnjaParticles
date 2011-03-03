@@ -48,8 +48,8 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
     {
 		fbos.resize(1);
 		glGenFramebuffers(1,&fbos[0]);
-		//smoothing = BILATERAL_GAUSSIAN_SHADER;
-		smoothing = NO_SHADER;
+		smoothing = BILATERAL_GAUSSIAN_SHADER;
+		//smoothing = NO_SHADER;
 		particle_radius = 0.0125f*0.5f;
 
 		createFramebufferTextures();
@@ -897,7 +897,7 @@ int Render::loadTexture()
 {
 
     std::string path(GLSL_SOURCE_DIR);
-    path += "../../../sprites/tomek_crop.jpg";
+    path += "../../../sprites/tomek.jpg";
     //path += "../../../sprites/enjalot.jpg";
     printf("LOAD TEXTURE!!!!!!!!!!!!!!\n");
     printf("path: %s\n", path.c_str());
