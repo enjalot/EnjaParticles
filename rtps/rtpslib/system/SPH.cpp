@@ -134,9 +134,6 @@ SPH::SPH(RTPS *psfr, int n)
 	renderer = new Render(pos_vbo,col_vbo,num,ps->cli);
     renderer->setParticleRadius(spacing*0.5);
 
-    
-
-
 }
 
 SPH::~SPH()
@@ -353,15 +350,27 @@ void SPH::calculateSPHSettings()
     * The Particle Mass (and hence everything following) depends on the MAXIMUM number of particles in the system
     */
 
-    float4 dmin = grid.getBndMin();
-    float4 dmax = grid.getBndMax();
-    //printf("dmin: %f %f %f\n", dmin.x, dmin.y, dmin.z);
-    //printf("dmax: %f %f %f\n", dmax.x, dmax.y, dmax.z);
-    float domain_vol = (dmax.x - dmin.x) * (dmax.y - dmin.y) * (dmax.z - dmin.z);
-    printf("domain volume: %f\n", domain_vol);
+    /*
+    rho0 = 1000.                #rest density [ kg/m^3 ]
+    V0 = 0.000005547            #initial volume [ m^3 ]
+    V0 = 0.000313357            #initial volume [ m^3 ]
+    n = 1.                      #number of particles to occupy V0
+    VP = V0 / n                 #particle volume [ m^3 ]
+    m = rho0 * VP               #particle mass [ kg ]
+    VF = VP * max_num           #fluid volume [ m^3 ]
+    re = (m/rho0)**(1/3.)       #particle radius [ m ]
+    print "re, m, VP, n", re, m, VP, n
+    rest_distance = .87 * re    #rest distance between particles [ m ]
 
-    sph_settings.rest_density = 1000;
+    smoothing_radius = 2.0 * rest_distance      #smoothing radius for SPH Kernels
+    boundary_distance = .5 * rest_distance      #for calculating collision with boundary
+    */
+
+    //sph_settings.rest_density = 1000;
     //sph_settings.rest_density = 2000;
+    float rho0 = 1000;
+    float mass = (128*1024.0)/max_num * .0002;  //krog's way
+    float V0 = 
 
     sph_settings.particle_mass = (128*1024.0)/max_num * .0002;
     printf("particle mass: %f\n", sph_settings.particle_mass);
@@ -375,49 +384,59 @@ void SPH::calculateSPHSettings()
     //messing with smoothing distance, making it really small to remove interaction still results in weird force values
     sph_settings.smoothing_distance = 2.0f * sph_settings.particle_rest_distance;
     sph_settings.boundary_distance = .5f * sph_settings.particle_rest_distance;
+    printf("particle smoothing distance: %f\n", sph_settings.smoothing_distance);
+
+
+    float4 dmin = grid.getBndMin();
+    float4 dmax = grid.getBndMax();
+    //printf("dmin: %f %f %f\n", dmin.x, dmin.y, dmin.z);
+    //printf("dmax: %f %f %f\n", dmax.x, dmax.y, dmax.z);
+    float domain_vol = (dmax.x - dmin.x) * (dmax.y - dmin.y) * (dmax.z - dmin.z);
+    printf("domain volume: %f\n", domain_vol);
 
     sph_settings.simulation_scale = pow(particle_vol * max_num / domain_vol, 1./3.); 
     printf("simulation scale: %f\n", sph_settings.simulation_scale);
 
     sph_settings.spacing = sph_settings.particle_rest_distance/ sph_settings.simulation_scale;
+    printf("spacing: %f\n", sph_settings.spacing);
 
     float particle_radius = sph_settings.spacing;
     printf("particle radius: %f\n", particle_radius);
  
-    params.grid_min = grid.getMin();
-    params.grid_max = grid.getMax();
-    params.mass = sph_settings.particle_mass;
-    params.rest_distance = sph_settings.particle_rest_distance;
-    params.smoothing_distance = sph_settings.smoothing_distance;
-    params.simulation_scale = sph_settings.simulation_scale;
-    params.boundary_stiffness = 20000.0f;
-    params.boundary_dampening = 256.0f;
-    params.boundary_distance = sph_settings.particle_rest_distance * .5f;
-    params.EPSILON = .00001f;
-    params.PI = 3.14159265f;
-    params.K = 20.0f;
-    params.num = num;
-//    params.surface_threshold = 2.0 * params.simulation_scale; //0.01;
-    params.viscosity = .001f;
-    //params.viscosity = 1.0f;
-    params.gravity = -9.8f;
-    //params.gravity = 0.0f;
-    params.velocity_limit = 600.0f;
-    params.xsph_factor = .05f;
+    sphp.grid_min = grid.getMin();
+    sphp.grid_max = grid.getMax();
+    sphp.mass = sph_settings.particle_mass;
+    sphp.rest_distance = sph_settings.particle_rest_distance;
+    sphp.smoothing_distance = sph_settings.smoothing_distance;
+    sphp.simulation_scale = sph_settings.simulation_scale;
+    sphp.boundary_stiffness = 20000.0f;
+    sphp.boundary_dampening = 256.0f;
+    sphp.boundary_distance = sph_settings.particle_rest_distance * .5f;
+    sphp.EPSILON = .00001f;
+    sphp.PI = 3.14159265f;
+    sphp.K = 20.0f;
+    sphp.num = num;
+    //sphp.surface_threshold = 2.0 * sphp.simulation_scale; //0.01;
+    sphp.viscosity = .001f;
+    //sphp.viscosity = 1.0f;
+    sphp.gravity = -9.8f;
+    //sphp.gravity = 0.0f;
+    sphp.velocity_limit = 600.0f;
+    sphp.xsph_factor = .05f;
 
-	float h = params.smoothing_distance;
+	float h = sphp.smoothing_distance;
 	float pi = acos(-1.0);
 	float h9 = pow(h,9.);
 	float h6 = pow(h,6.);
 	float h3 = pow(h,3.);
-    params.wpoly6_coef = 315.f/64.0f/pi/h9;
-	params.wpoly6_d_coef = -945.f/(32.0f*pi*h9);
-	params.wpoly6_dd_coef = -945.f/(32.0f*pi*h9);
-	params.wspiky_coef = 15.f/pi/h6;
-    params.wspiky_d_coef = 45.f/(pi*h6);
-	params.wvisc_coef = 15./(2.*pi*h3);
-	params.wvisc_d_coef = 15./(2.*pi*h3);
-	params.wvisc_dd_coef = 45./(pi*h6);
+    sphp.wpoly6_coef = 315.f/64.0f/pi/h9;
+    sphp.wpoly6_d_coef = -945.f/(32.0f*pi*h9);
+    sphp.wpoly6_dd_coef = -945.f/(32.0f*pi*h9);
+    sphp.wspiky_coef = 15.f/pi/h6;
+    sphp.wspiky_d_coef = 45.f/(pi*h6);
+    sphp.wvisc_coef = 15./(2.*pi*h3);
+    sphp.wvisc_d_coef = 15./(2.*pi*h3);
+    sphp.wvisc_dd_coef = 45./(pi*h6);
 
 }
 
@@ -658,14 +677,8 @@ void SPH::pushParticles(vector<float4> pos, float4 velo)
     cl_velocity.copyToDevice(vels, num);
     //cl_vars_unsorted.copyToDevice(vels, max_num*8+num);
 
-    params.num = num+nn;
-    std::vector<SPHParams> vparams(0);
-    vparams.push_back(params);
-    cl_SPHParams.copyToDevice(vparams);
-
-
-    printf("about to updateNum\n");
-    ps->updateNum(params.num);
+    sphp.num = num+nn;
+    updateSPHP();
 
     num += nn;  //keep track of number of particles we use
 
@@ -680,6 +693,13 @@ void SPH::pushParticles(vector<float4> pos, float4 velo)
     num += nn;  //keep track of number of particles we use
 #endif
 	renderer->setNum(num);
+}
+
+void SPH::updateSPHP()
+{
+    std::vector<SPHParams> vparams(0);
+    vparams.push_back(sphp);
+    cl_SPHParams.copyToDevice(vparams);
 }
 
 void SPH::render()

@@ -72,7 +72,11 @@ void Hose::calc_em()
     //printf("em: %d\n", em);
 }
 
-
+/*
+ * randomly space the particles on a grid, rather than evenly
+ * randomize the velocity within some bounds 
+ * so each particle needs its own velocity
+ */
 
 std::vector<float4> Hose::spray()
 {
