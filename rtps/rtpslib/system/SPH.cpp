@@ -59,26 +59,15 @@ SPH::SPH(RTPS *psfr, int n)
     //setup the sorted and unsorted arrays
     prepareSorted();
 
-    //replace these with the 2 steps
-    /*
-    loadDensity();
-    loadPressure();
-    loadViscosity();
-    loadXSPH();
-    */
-
-    //loadStep1();
-    //loadStep2();
-
     loadCollision_wall();
     loadCollision_tri();
 
     //could generalize this to other integration methods later (leap frog, RK4)
-    if(sph_settings.integrator == LEAPFROG)
+    if(integrator == LEAPFROG)
     {
         loadLeapFrog();
     }
-    else if(sph_settings.integrator == EULER)
+    else if(integrator == EULER)
     {
         loadEuler();
     }
@@ -143,7 +132,7 @@ SPH::SPH(RTPS *psfr, int n)
 #endif
 
 	renderer = new Render(pos_vbo,col_vbo,num,ps->cli);
-    renderer->setParticleRadius(sph_settings.spacing*0.5);
+    renderer->setParticleRadius(spacing*0.5);
 
     
 
@@ -188,11 +177,11 @@ void SPH::updateCPU()
     cpuXSPH();
     cpuCollision_wall();
 
-    if(sph_settings.integrator == EULER)
+    if(integrator == EULER)
     {
         cpuEuler();
     }
-    else if(sph_settings.integrator == LEAPFROG)
+    else if(integrator == LEAPFROG)
     {
         cpuLeapFrog();
     }
@@ -301,14 +290,14 @@ void SPH::collision()
 void SPH::integrate()
 {
     int local_size = 128;
-    if(sph_settings.integrator == EULER)
+    if(integrator == EULER)
     {
         //k_euler.execute(max_num);
         timers[TI_EULER]->start();
         k_euler.execute(num, local_size);
         timers[TI_EULER]->end();
     }
-    else if(sph_settings.integrator == LEAPFROG)
+    else if(integrator == LEAPFROG)
     {
         //k_leapfrog.execute(max_num);
         timers[TI_LEAPFROG]->start();
