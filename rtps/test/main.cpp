@@ -21,7 +21,7 @@
 //#include "timege.h"
 using namespace rtps;
 
-int window_width = 800;
+int window_width = 1200;
 int window_height = 600;
 float fov = 65.;
 int glutWindowHandle = 0;
