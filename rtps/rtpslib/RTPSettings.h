@@ -34,6 +34,15 @@ public:
     //triangle collision?
     bool tri_collision;
 
+// Added by GE
+private:
+	float render_radius_scale;
+public:
+	float getRadiusScale() { return render_radius_scale; }
+	void setRadiusScale(float scale) {
+		render_radius_scale = scale;
+	}
+
 };
 
 }

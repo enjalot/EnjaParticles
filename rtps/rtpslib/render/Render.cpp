@@ -24,8 +24,16 @@ using namespace std;
 
 namespace rtps{
 
-Render::Render(GLuint pos, GLuint col, int n, CL* cli)
+//----------------------------------------------------------------------
+//Render::Render(GLuint pos, GLuint col, int n, CL* cli, RTPSettings& _settings) :
+	//settings(_settings)
+//{
+//}
+//----------------------------------------------------------------------
+Render::Render(GLuint pos, GLuint col, int n, CL* cli, RTPSettings* _settings)
 {
+	this->settings = _settings;
+
     rtype = POINTS;
     pos_vbo = pos;
     col_vbo = col;
@@ -150,6 +158,7 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 	#endif
 }
 
+//----------------------------------------------------------------------
 Render::~Render()
 {
     printf("Render destructor\n");
