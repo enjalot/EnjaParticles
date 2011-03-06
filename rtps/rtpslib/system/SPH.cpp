@@ -161,7 +161,8 @@ void SPH::updateGPU()
     timers[TI_UPDATE]->start();
     glFinish();
 
-    int sub_intervals = 10;  //should be a setting
+	//GE
+    int sub_intervals = 3;  //should be a setting
     //this should go in the loop but avoiding acquiring and releasing each sub
     //interval for all the other calls.
     //this does end up acquire/release everytime sprayHoses calls pushparticles

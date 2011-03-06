@@ -92,6 +92,9 @@ private:
 	void deleteFramebufferTextures();
 	void createFramebufferTextures();
 	void convertDepthToRGB(const GLfloat* depth, GLuint size, GLuint* rgb) const;
+
+	//GE
+	float getParticleRadius() {return particle_radius;}
 };	
 
 
