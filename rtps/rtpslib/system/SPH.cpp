@@ -83,7 +83,8 @@ SPH::SPH(RTPS *psfr, int n)
     
 #endif
 
-	renderer = new Render(pos_vbo,col_vbo,num,ps->cli);
+	// settings defaults to 0
+	renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
     printf("spacing for radius %f\n", spacing);
     //renderer->setParticleRadius(spacing*0.5);
     //renderer->setParticleRadius(spacing*0.5);
