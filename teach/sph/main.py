@@ -5,13 +5,26 @@ from forces import *
 from vector import Vec
 import sph
 from domain import Domain
+#from timing import Timing, timing_collector
+from timing import Timing
 
+#timings = {}
+#timing_coroutine = timing_collector(timings)
+#timing_coroutine.next()
+
+#@Timing(timing_coroutine)
+timings = Timing()
+
+@timings
 def fromscreen(p, surface):
     #v.x
     p.y = surface.get_height() - p.y
     return p
 
+
 #@print_timing
+#@Timing(timing_coroutine)
+@timings
 def draw_particles(ps):
     for p in ps:
         p.draw()
@@ -51,6 +64,8 @@ def main():
             if event.type == QUIT or key[K_ESCAPE] or key[K_q]:
                 print "quit!"
                 return
+            elif key[K_t]:
+                print timings
             elif event.type == MOUSEBUTTONDOWN:
                 mouse_down = True
             elif event.type == MOUSEMOTION:
