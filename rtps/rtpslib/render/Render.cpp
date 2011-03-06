@@ -52,12 +52,22 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli, RTPSettings* _settings)
     //mikep = false;
     //blending = true;
     blending = false;
+
+	// 0: particles
+	// 1: textures
+	// 2: blurring
+	int render_type = settings->getRenderType();
+
     if(glsl)
     {
 		fbos.resize(1);
 		glGenFramebuffers(1,&fbos[0]);
-		//smoothing = BILATERAL_GAUSSIAN_SHADER;
-		smoothing = NO_SHADER;
+		printf("**** RENDER **** render_type = %d\n", render_type);
+		if (render_type == 2) {
+			smoothing = BILATERAL_GAUSSIAN_SHADER;
+		} else {
+			smoothing = NO_SHADER;
+		}
 		//particle_radius = 0.0125f*0.5f;
 		particle_radius = 0.0125f*0.5f;
 
@@ -100,8 +110,8 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli, RTPSettings* _settings)
         }else
         {
 		    frag+="/sphere_frag.glsl";
-        }
-        glsl_program[SPHERE_SHADER] = compileShaders(vert.c_str(),frag.c_str());
+		}
+		glsl_program[SPHERE_SHADER] = compileShaders(vert.c_str(),frag.c_str());
 		vert = string(GLSL_BIN_DIR);
 		frag = string(GLSL_BIN_DIR);
 		vert+="/depth_vert.glsl";
@@ -206,7 +216,6 @@ void Render::drawArrays()
 
     glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
-
 }
 
 //----------------------------------------------------------------------

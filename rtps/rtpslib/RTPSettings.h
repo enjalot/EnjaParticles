@@ -37,11 +37,25 @@ public:
 // Added by GE
 private:
 	float render_radius_scale;
+	float render_blur_scale;
+	int render_type;
+
 public:
 	float getRadiusScale() { return render_radius_scale; }
 	void setRadiusScale(float scale) {
 		render_radius_scale = scale;
 	}
+
+	float getBlurScale() { return render_blur_scale; }
+	void setBlurScale(float scale) {
+		render_blur_scale = scale;
+	}
+
+	int getRenderType() { return render_type; }
+	void setRenderType(int type) {
+		render_type = type;
+	}
+
 
 };
 
