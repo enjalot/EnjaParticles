@@ -44,7 +44,7 @@ __kernel void euler(
 
 
 
-	#define	separationdist	0.003f	// 3.f
+//	#define	separationdist	0.005f	// 3.f
 //	#define	searchradius	0.8f
 	#define	maxspeed	3.f	// 1.f
 	#define desiredspeed	1.5f	// .5f
@@ -151,9 +151,13 @@ __kernel void euler(
 	float4 cohesion = xflock(i);
 	
 	float numFlockmates = den(i).x;
-	//if(numFlockmates == 0){
-	//	numFlockmates = 1;
-	//}
+//	if(numFlockmates == 0){
+//		numFlockmates = 1;
+//	}
+
+	float w_sep = .75f;
+	float w_aln = 1.f;
+	float w_coh = .01f;
 		
 	float4 bndMax = params->grid_max;// - params->boundary_distance;
 	float4 bndMin = params->grid_min;// + params->boundary_distance;
@@ -166,7 +170,7 @@ __kernel void euler(
 	//if(length(separation) < separationdist){
 	//	separation *= 2;
 	//}	
-	acc += separation;
+	acc += separation * w_sep;
 
 	
 	// RULE 2. ALIGNMENT
@@ -178,7 +182,7 @@ __kernel void euler(
 	alignment /= numFlockmates;
 	alignment -= v;
 	alignment = normalize(alignment);
-	acc += alignment;
+	acc += alignment * w_aln;
 
 
 	// RULE 3. COHESION
@@ -195,7 +199,7 @@ __kernel void euler(
 	// steering towards the average position
 	cohesion -= pi;
 	cohesion = normalize(cohesion);
-	acc += cohesion;
+	acc += cohesion * w_coh;
     
 
 	// Step 4. Constrain acceleration
@@ -208,7 +212,7 @@ __kernel void euler(
     	// Step 5. Add acceleration to velocity
     	v += acc;
 
-	v.x = MaxUrgency;
+	v.x += MinUrgency;
 
     	// Step 6. Constrain velocity
     	float speed = length(v);
