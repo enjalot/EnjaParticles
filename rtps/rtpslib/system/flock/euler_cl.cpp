@@ -44,13 +44,13 @@ __kernel void euler(
 
 
 
-//	#define	separationdist	0.2f
+	#define	separationdist	0.003f	// 3.f
 //	#define	searchradius	0.8f
-	#define	maxspeed	1.f
-	#define desiredspeed	0.5f
-	#define maxchange	0.1f
-	#define MinUrgency      0.05f
-	#define MaxUrgency      0.1f
+	#define	maxspeed	3.f	// 1.f
+	#define desiredspeed	1.5f	// .5f
+	#define maxchange	0.1f	// .1f
+	#define MinUrgency      0.05f	// .05f
+	#define MaxUrgency      0.1f	// .1f
 
 #if 0
 	// index of closest flockmate
@@ -155,14 +155,17 @@ __kernel void euler(
 	//	numFlockmates = 1;
 	//}
 		
-	float4 bndMax = params->grid_max/2;// - params->boundary_distance;
-	float4 bndMin = -bndMax; //params->grid_min;// + params->boundary_distance;
+	float4 bndMax = params->grid_max;// - params->boundary_distance;
+	float4 bndMin = params->grid_min;// + params->boundary_distance;
 
 	// RULE 1. SEPARATION
 	
 	// already computed in cl_density.h
 	// it is stored in pt->force
-	//separation = normalize(separation);	
+	//separation = normalize(separation);
+	//if(length(separation) < separationdist){
+	//	separation *= 2;
+	//}	
 	acc += separation;
 
 	
@@ -194,52 +197,54 @@ __kernel void euler(
 	cohesion = normalize(cohesion);
 	acc += cohesion;
     
-//acc = normalize(acc);
 
 	// Step 4. Constrain acceleration
     	float accspeed = length(acc);
     	if(accspeed > maxchange){
             	// set magnitude to MaxChangeInAcc
-            	acc *= maxchange; ///accspeed;
+            	acc *= maxchange/accspeed;
     	}
 
     	// Step 5. Add acceleration to velocity
     	v += acc;
 
-	v.y = MaxUrgency;
+	v.x = MaxUrgency;
 
     	// Step 6. Constrain velocity
     	float speed = length(v);
     	if(speed > maxspeed){
             	// set magnitude to MaxSpeed
-        	v *= maxspeed; ///speed;
+        	v *= maxspeed/speed;
     	}
 
 #endif
 
 	// INTEGRATION
+//v.x=.1f;
+//v.y=.1f;
+//v.z=.1f;
  
     	pi += dt*v; 	// euler integration, add the velocity times the timestep
     	//pi.xyz /= params->simulation_scale;
 
 #if 1
 	// apply periodic boundary conditions
-	if(pi.x > bndMax.x){
+	if(pi.x >= bndMax.x){
 		pi.x = bndMin.x; 
 	}
-	else if(pi.x < bndMin.x){
+	else if(pi.x <= bndMin.x){
 		pi.x = bndMax.x;
 	}
-	else if(pi.y > bndMax.y){
+	else if(pi.y >= bndMax.y){
 		pi.y = bndMin.y; 
 	}
-	else if(pi.y < bndMin.y){
+	else if(pi.y <= bndMin.y){
 		pi.y = bndMax.y;
 	}
-	else if(pi.z > bndMax.z){
+	else if(pi.z >= bndMax.z){
 		pi.z = bndMin.z;
 	}
-	else if(pi.z < bndMin.z){
+	else if(pi.z <= bndMin.z){
 		pi.z = bndMax.z;
 	}
 #endif
