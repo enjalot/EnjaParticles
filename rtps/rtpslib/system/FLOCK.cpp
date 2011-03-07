@@ -190,11 +190,11 @@ void FLOCK::updateCPU()
     }
     //printf("positions[0].z %f\n", positions[0].z);
 #if 0
-    for(int i = 0; i < 100; i++)
+    for(int i = 0; i < 10; i+=15)
     {
         //if(xflocks[i].z != 0.0)
-        //printf("force: %f %f %f  \n", veleval[i].x, veleval[i].y, veleval[i].z);
-        printf("force: %f %f %f  \n", forces[i].x, forces[i].y, forces[i].z);
+        printf("particle %d, positions: %f %f %f  \n", positions[i].x, positions[i].y, positions[i].z);
+        //printf("force: %f %f %f  \n", forces[i].x, forces[i].y, forces[i].z);
         //printf("force: %f %f %f  \n", velocities[i].x, velocities[i].y, velocities[i].z);
     }
 #endif
@@ -310,15 +310,17 @@ void FLOCK::integrate()
         //std::vector<float4> f = cl_force.copyToHost(num);
         //std::vector<float4> d = cl_density.copyToHost(num);
         //std::vector<float4> xf = cl_xflock.copyToHost(num);
-        for(int i = 0; i < num; i++)
+        for(int i = 0; i < num; i+=128)
         {
             printf("pos   [%d] = %f %f %f\n", i, pos[i].x, pos[i].y, pos[i].z);
             //printf("vel   [%d] = %f %f %f\n", i, vel[i].x, vel[i].y, vel[i].z);
-            printf("ne flo[%d] = %d %d \n", i, cli[i].x, cli[i].y);
-            printf("ve flo[%d] = %f %f %f\n", i, clf[i].w, clf[i].y, clf[i].z);
+            //printf("ne flo[%d] = %d %d \n", i, cli[i].x, cli[i].y);
+            //printf("ve flo[%d] = %f %f %f\n", i, clf[i].w, clf[i].y, clf[i].z);
         }
+
     }
 #endif
+
 
 
 }
