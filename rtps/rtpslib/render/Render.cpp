@@ -55,7 +55,7 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli, RTPSettings* _settings)
 
 	// 0: particles
 	// 1: textures
-	// 2: blurring
+	// 2: blurring  (works ok)
 	int render_type = settings->getRenderType();
 
     if(glsl)
@@ -85,7 +85,8 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli, RTPSettings* _settings)
 
 
 		//glFinish();
-		/*cl_depth = Buffer<float>(cli,gl_tex["depth"],1);
+		/*
+		cl_depth = Buffer<float>(cli,gl_tex["depth"],1);
 
 		//printf("OpenCL error is %s\n",oclErrorString(cli->err));
 		std::string path(GLSL_BIN_DIR);

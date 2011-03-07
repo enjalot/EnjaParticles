@@ -39,6 +39,8 @@ private:
 	float render_radius_scale;
 	float render_blur_scale;
 	int render_type;
+	bool use_glsl;
+	bool use_alpha_blending;
 
 public:
 	float getRadiusScale() { return render_radius_scale; }
@@ -56,7 +58,12 @@ public:
 		render_type = type;
 	}
 
+	int getUseAlphaBlending() { return use_alpha_blending; }
+	int setUseAlphaBlending(bool use_alpha) { use_alpha_blending = use_alpha; }
 
+	int getUseGLSL() { return use_glsl; }
+	int setUseGLSL(bool use_glsl) { 
+		this->use_glsl = use_glsl; }
 };
 
 }
