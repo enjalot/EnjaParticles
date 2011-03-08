@@ -28,43 +28,200 @@ void FLOCK::loadEuler()
 
 void FLOCK::cpuEuler()
 {
+    #define searchradius 	0.008f
+    #define separationdist  	0.003f
+    #define maxspeed        	3.f     // 1.f
+    #define desiredspeed    	1.5f    // .5f
+    #define maxchange       	0.1f    // .1f
+    #define MinUrgency      	0.05f   // .05f
+    #define MaxUrgency      	0.1f    // .1f
+
     float h = ps->settings.dt;
+
+    float4 acc;
+    int numFlockmates=0;
+    float4 p1, p2, v1, v2;
+    float d, r;
+
+    int MaxFlockmates = num/2;
+    int flockmates[MaxFlockmates];
+
+    float4 separation, alignment, cohesion;
+    float4 acc_separation, acc_alignment, acc_cohesion;
+
+    float w_sep = 0.75f;
+    float w_aln = 1.f;
+    float w_coh = 0.01f;
+
+    float4 bndMax = params.grid_max;// - params->boundary_distance;
+    float4 bndMin = params.grid_min;// + params->boundary_distance;
+
+    // loop over all boids
     for(int i = 0; i < num; i++)
     {
-        float4 p = positions[i];
-        float4 v = velocities[i];
-        float4 f = forces[i];
+	// boid in case
+	p1 = positions[i];
+        v1 = velocities[i];
 
+	// initialize acc to zero
+        acc = float4(0.f, 0.f, 0.f, 0.f);
+
+	#if 1
+	// print boid info
 		if (i == 0) {
-			printf("==================================\n");
-			printf("Euler: p[%d]= %f, %f, %f, %f\n", i, p.x, p.y, p.z, p.w);
-			printf("       v[%d]= %f, %f, %f, %f\n", i, v.x, v.y, v.z, v.w);
+			printf("================= Starting position ==============\n");
+			printf("Euler: p[%d]= %f, %f, %f, %f\n", i, p1.x, p1.y, p1.z, p1.w);
+			printf("       v[%d]= %f, %f, %f, %f\n", i, v1.x, v1.y, v1.z, v1.w);
+			printf("       h    = %f\n",h);
+		}
+	#endif
+
+        // Step 2. Search for neighbors
+	// loop over all boids
+        for(int j=0; j < num; j++){
+             if(j != i){
+                    p2 = positions[j];
+//p2.print("p2");
+                    d = sqrt((p2.x-p1.x)*(p2.x-p1.x) + (p2.y-p1.y)*(p2.y-p1.y) + (p2.z-p1.z)*(p2.z-p1.z));
+
+                    // is boid j a flockmate?
+                    if(d < searchradius){
+                            flockmates[numFlockmates] = j;
+                            numFlockmates++;
+
+                            // did I find the max num of flockmates already?
+                            if(numFlockmates == MaxFlockmates) break;
+                    }
+             }
+        }
+//printf("search for neighbors done\n");
+	// Step 3. If they are flockmates, compute the three rules
+        if(numFlockmates > 0){
+		acc_separation = float4(0.f, 0.f, 0.f, 0.f);
+		acc_alignment = float4(0.f, 0.f, 0.f, 0.f);
+		acc_cohesion = float4(0.f, 0.f, 0.f, 0.f);
+
+		for(int j=0; j < numFlockmates; j++){
+        		// Separation
+                    	p2 = positions[flockmates[j]];
+                    	d = sqrt((p2.x-p1.x)*(p2.x-p1.x) + (p2.y-p1.y)*(p2.y-p1.y) + (p2.z-p1.z)*(p2.z-p1.z));
+			
+                        r = d / separationdist;  
+
+        		separation = p2- p1;
+        		separation = normalize(separation);
+
+        		if(d > separationdist){
+                		separation = separation * r;
+        		}
+        		else if(d < separationdist){
+                		separation = separation * -r;
+        		}
+        		else{
+                		separation = separation * 0.f;
+        		}
+
+			acc_separation += separation;
+			acc_separation.w = 1.f;
+
+			// Alignment
+			v2 = velocities[flockmates[j]];
+			acc_alignment += v2;
+			acc_alignment.w = 1.f;
+
+			// Cohesion
+			acc_cohesion += p2;
+			acc_cohesion.w = 1.f;
+//p1.print("p1: ");
+//p2.print("p2: ");
+//exit(0);
 		}
 
-        //external force is gravity
-        f.z += -9.8f;
+//printf("acc: %f, %f, %f, %f\n", )	
+		// adding the rules to the acceleration vector
+//exit(0);
+		// Separation
+		acc += acc_separation * w_sep;
 
-        float speed = magnitude(f);
-        if(speed > 600.0f) //velocity limit, need to pass in as struct
-        {
-            f.x *= 600.0f/speed;
-            f.y *= 600.0f/speed;
-            f.z *= 600.0f/speed;
+		// Alignment
+		acc_alignment = acc_alignment / numFlockmates;
+		acc_alignment = acc_alignment - v1;
+		acc_alignment = normalize(alignment);
+		
+		acc += acc_alignment;
+
+		// Cohesion
+		acc_cohesion = acc_cohesion / numFlockmates;
+		acc_cohesion = acc_cohesion - p1;
+		acc_cohesion = normalize(acc_cohesion);
+
+		acc += acc_cohesion;
+	}
+
+        // Step 4. Constrain acceleration
+        float accspeed = magnitude(acc);
+        if(accspeed > maxchange){
+                // set magnitude to MaxChangeInAcc
+                acc = acc * (maxchange/accspeed);
         }
 
-        float scale = params.simulation_scale;
-        v.x += h*f.x / scale;
-        v.y += h*f.y / scale;
-        v.z += h*f.z / scale;
-        
-        p.x += h*v.x;
-        p.y += h*v.y;
-        p.z += h*v.z;
-        p.w = 1.0f; //just in case
+        // Step 5. Add acceleration to velocity
+        v1 += acc;
 
-        velocities[i] = v;
-        positions[i] = p;
+        v1.x += MinUrgency;
+
+        // Step 6. Constrain velocity
+        float speed = magnitude(v1);
+        if(speed > maxspeed){
+                // set magnitude to MaxSpeed
+                v1 = v1 * (maxspeed/speed);
+        }
+	 
+        //float scale = params.simulation_scale;
+        //v.x += h*f.x / scale;
+        //v.y += h*f.y / scale;
+        //v.z += h*f.z / scale;
+	
+	// Step 7. Integrate        
+        p1.x += h*v1.x;
+        p1.y += h*v1.y;
+        p1.z += h*v1.z;
+        p1.w = 1.0f; //just in case
+
+	// Step 8. Check boundary conditions
+        if(p1.x >= bndMax.x){
+                p1.x = bndMin.x;
+        }
+        else if(p1.x <= bndMin.x){
+                p1.x = bndMax.x;
+        }
+        else if(p1.y >= bndMax.y){
+                p1.y = bndMin.y;
+        }
+        else if(p1.y <= bndMin.y){
+                p1.y = bndMax.y;
+        }
+        else if(p1.z >= bndMax.z){
+                p1.z = bndMin.z;
+        }
+        else if(p1.z <= bndMin.z){
+                p1.z = bndMax.z;
+        }
+
+		if (i == 0) {
+			printf("================= Final position ==============\n");
+			printf("Euler: p[%d]= %f, %f, %f, %f\n", i, p1.x, p1.y, p1.z, p1.w);
+			printf("       v[%d]= %f, %f, %f, %f\n", i, v1.x, v1.y, v1.z, v1.w);
+			printf("       h    = %f\n",h);
+		}
+//printf("%d\n",i);
+//printf("vs: %d\n",velocities.size());
+//printf("ps: %d\n",positions.size());
+	// write values
+        velocities[i] = v1;
+        positions[i] = p1;
     }
+
     //printf("v.z %f p.z %f \n", velocities[0].z, positions[0].z);
 }
 

@@ -48,14 +48,16 @@ FLOCK::FLOCK(RTPS *psfr, int n)
 
     setupTimers();
 
+    //setup the sorted and unsorted arrays
+    prepareSorted();
+
 #ifdef CPU
     printf("RUNNING ON THE CPU\n");
 #endif
 #ifdef GPU
     printf("RUNNING ON THE GPU\n");
 
-    //setup the sorted and unsorted arrays
-    prepareSorted();
+
 
     //replace these with the 2 steps
     /*
@@ -174,11 +176,11 @@ void FLOCK::update()
 
 void FLOCK::updateCPU()
 {
-    cpuDensity();
-    cpuPressure();
-    cpuViscosity();
-    cpuXFLOCK();
-    cpuCollision_wall();
+    //cpuDensity();
+    //cpuPressure();
+    //cpuViscosity();
+    //cpuXFLOCK();
+    //cpuCollision_wall();
 
     if(flock_settings.integrator == EULER2)
     {
@@ -451,6 +453,8 @@ printf("max grid: %f, %f, %f\n ************** \n", gmax.x,gmax.y, gmax.z);
 
 }
 
+
+
 void FLOCK::prepareSorted()
 {
     #include "flock/cl_macros.h"
@@ -475,6 +479,7 @@ void FLOCK::prepareSorted()
     printf("col vbo: %d\n", col_vbo);
     // end VBO creation
 
+#ifdef GPU
     //vbo buffers
     cl_position = Buffer<float4>(ps->cli, pos_vbo);
     cl_color = Buffer<float4>(ps->cli, col_vbo);
@@ -502,7 +507,6 @@ void FLOCK::prepareSorted()
     sgparams.push_back(grid_params_scaled);
     cl_GridParamsScaled = Buffer<GridParams>(ps->cli, sgparams);
 
-
     //setup debug arrays
     std::vector<float4> clfv(max_num);
     std::fill(clfv.begin(), clfv.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -510,8 +514,6 @@ void FLOCK::prepareSorted()
     std::fill(cliv.begin(), cliv.end(),int4(0.0f, 0.0f, 0.0f, 0.0f));
     clf_debug = Buffer<float4>(ps->cli, clfv);
     cli_debug = Buffer<int4>(ps->cli, cliv);
-
-
 
     //sorted and unsorted arrays
     std::vector<float4> unsorted(max_num*nb_var);
@@ -544,18 +546,15 @@ void FLOCK::prepareSorted()
 	cl_cell_indices_end   = Buffer<int>(ps->cli, gcells);
 	//printf("gp.nb_points= %d\n", gp.nb_points); exit(0);
 
-
-
 	// For bitonic sort. Remove when bitonic sort no longer used
 	// Currently, there is an error in the Radix Sort (just run both
 	// sorts and compare outputs visually
 	cl_sort_output_hashes = Buffer<int>(ps->cli, keys);
 	cl_sort_output_indices = Buffer<int>(ps->cli, keys);
 
-
     std::vector<Triangle> maxtri(2048);
     cl_triangles = Buffer<Triangle>(ps->cli, maxtri);
-
+#endif
 
 }
 
@@ -642,7 +641,7 @@ void FLOCK::pushParticles(vector<float4> pos)
     if (num + nn > max_num) {return;}
     float rr = (rand() % 255)/255.0f;
     float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
-    //printf("random: %f\n", rr);
+    printf("random color: %f %f %f\n", rr, 0.f, 1.0f-rr, 1.f);
 	//float4 color(0.0f,0.0f,0.1f,0.1f);
 
     std::vector<float4> cols(nn);
@@ -654,6 +653,11 @@ void FLOCK::pushParticles(vector<float4> pos)
     //float4 iv = float4(v, v, -v, 0.0f);
     float4 iv = float4(v, 0, -v, 0.0f);
     std::fill(vels.begin(), vels.end(),iv);
+#ifdef CPU
+ std::copy(pos.begin(), pos.end(), positions.begin()+num);
+//printf("pushParticles nn = %d\n", nn);
+//exit(0);
+#endif
 
 #ifdef GPU
     glFinish();
@@ -694,6 +698,10 @@ void FLOCK::pushParticles(vector<float4> pos)
     printf("done with prep\n");
     cl_position.release();
 #else
+    //glFinish();
+    //params.num = num+nn;
+    //printf("about to updateNum CPU\n");
+    //ps->updateNum(params.num);
     num += nn;  //keep track of number of particles we use
 #endif
 	renderer->setNum(num);
