@@ -21,6 +21,14 @@ def fromscreen(p, surface):
     return p
 
 
+def toscreen(p, surface, screen_scale):
+    translate = Vec([0,0])
+    p.x = translate.x + p.x*screen_scale
+    p.y = surface.get_height() - (translate.y + p.y*screen_scale)
+    return p
+
+
+
 #@print_timing
 #@Timing(timing_coroutine)
 @timings

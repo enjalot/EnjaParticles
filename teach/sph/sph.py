@@ -3,7 +3,8 @@ from pygame.locals import *
 import numpy as np
 
 from vector import Vec
-from domain import Domain
+from hash import Domain
+from kernels import Kernel
 
 screen_scale = 160
 
@@ -57,6 +58,8 @@ class SPH:
 
         self.domain = domain
         self.domain.setup(self.smoothing_radius / self.sim_scale)
+
+        self.kernels = Kernel(self.smoothing_radius)
 
 
 def toscreen(p, surface, screen_scale):

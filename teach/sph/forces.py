@@ -19,7 +19,9 @@ def density_update(sphp, particles):
         for pj in particles:
             r = pi.pos - pj.pos
             #print r
-            pi.dens += pj.mass*Wpoly6(pi.h, r)
+            if mag(r) > pi.h: continue
+            #pi.dens += pj.mass*Wpoly6(pi.h, r)
+            pi.dens += pj.mass * sphp.kernels.poly6(r)
 
 #@print_timing
 @timings
@@ -48,7 +50,8 @@ def force_update(sphp, particles):
             Pj = K*(dj - rho0)
 
             #print "dWspiky", dWspiky(pi.h, r)
-            kern = .5 * (Pi + Pj) * dWspiky(pi.h, r)
+            #kern = .5 * (Pi + Pj) * dWspiky(pi.h, r)
+            kern = .5 * (Pi + Pj) * sphp.kernels.dspiky(r)
             f = r*kern
             #does not account for variable mass
             f *= pi.mass / (di * dj)
@@ -59,7 +62,7 @@ def force_update(sphp, particles):
             #XSPH
             #float4 xsph = (2.f * sphp->mass * Wijpol6 * (velj-veli)/(di.x+dj.x));
             xsph = pj.veleval - pi.veleval
-            xsph *= 2. * pi.mass * Wpoly6(pi.h, r) / (di + dj) 
+            xsph *= 2. * pi.mass * sphp.kernels.poly6(r) / (di + dj) 
             pi.xsph += xsph
 
 
