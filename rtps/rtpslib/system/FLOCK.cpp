@@ -641,12 +641,13 @@ void FLOCK::pushParticles(vector<float4> pos)
     if (num + nn > max_num) {return;}
     float rr = (rand() % 255)/255.0f;
     float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
-    printf("random color: %f %f %f\n", rr, 0.f, 1.0f-rr, 1.f);
+
 	//float4 color(0.0f,0.0f,0.1f,0.1f);
 
     std::vector<float4> cols(nn);
     std::vector<float4> vels(nn);
 
+    printf("random color: %f %f %f\n", rr, 0.f, 1.0f-rr, 1.f);
     std::fill(cols.begin(), cols.end(),color);
     //float v = .5f;
     float v = rand()/RAND_MAX;
