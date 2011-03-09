@@ -5,25 +5,22 @@ import numpy as np
 from vector import Vec
 from domain import Domain
 
+screen_scale = 160
 
 class SPH:
     def __init__(self, max_num, domain):
         self.max_num = max_num
 
         rho0 = 1000.                #rest density [ kg/m^3 ]
-        V0 = 0.000005547            #initial volume [ m^3 ]
-        V0 = 0.000313357            #initial volume [ m^3 ]
-        n = 1.                      #number of particles to occupy V0
-        VP = V0 / n                 #particle volume [ m^3 ]
+        VF = .0262144               #simulation volume [ m^3 ]
+        VP = VF / max_num           #particle volume [ m^3 ]
         m = rho0 * VP               #particle mass [ kg ]
-        VF = VP * max_num           #fluid volume [ m^3 ]
-        re = (m/rho0)**(1/3.)       #particle radius [ m ]
-        print "re, m, VP, n", re, m, VP, n
+        re = (VP)**(1/3.)           #particle radius [ m ]
+        print "re, m, VP", re, m, VP
         rest_distance = .87 * re    #rest distance between particles [ m ]
 
         smoothing_radius = 2.0 * rest_distance      #smoothing radius for SPH Kernels
         boundary_distance = .5 * rest_distance      #for calculating collision with boundary
-        
         
         #the ratio between the particle radius in simulation space and world space
         print "VF", VF
@@ -33,10 +30,9 @@ class SPH:
         sim_scale = (VF / domain.V)**(1/3.)     #[m^3 / world m^3 ]
 
         self.rho0 = rho0
-        self.V0 = V0
-        self.n = n
-        self.m = m
         self.VF = VF
+        self.m = m
+        self.VP = VP
         self.re = re
         self.rest_distance = rest_distance
         self.smoothing_radius = smoothing_radius
@@ -56,15 +52,16 @@ class SPH:
         self.boundary_stiffness = 20000.
         self.boundary_dampening = 256.
 
-        self.velocity_limit = 200.
+        self.velocity_limit = 600.
         self.xsph_factor = .05
 
+        self.domain = domain
 
-def toscreen(p, surface):
+
+def toscreen(p, surface, screen_scale):
     translate = Vec([0,0])
-    scale = 160 #this hsould be a parameter, scale of domain to screen coords
-    p.x = translate.x + p.x*scale
-    p.y = surface.get_height() - (translate.y + p.y*scale)
+    p.x = translate.x + p.x*screen_scale
+    p.y = surface.get_height() - (translate.y + p.y*screen_scale)
     return p
 
 class Particle:
@@ -81,6 +78,7 @@ class Particle:
         #pygame stuff
         self.col = color
         self.surface = surface
+        self.screen_scale = self.surface.get_width() / sphp.domain.width
 
     def move(self, pos):
         self.pos = pos * self.scale
@@ -90,8 +88,8 @@ class Particle:
     def draw(self):
         #draw circle representing particle smoothing radius
 
-        dp = toscreen(self.pos / self.scale, self.surface)
-        pygame.draw.circle(self.surface, self.col, dp, self.h / self.scale, 1)
+        dp = toscreen(self.pos / self.scale, self.surface, self.screen_scale)
+        pygame.draw.circle(self.surface, self.col, dp, self.screen_scale * self.h / self.scale, 1)
         #draw filled circle representing density
         pygame.draw.circle(self.surface, self.col, dp, self.dens / 40., 0)
 
@@ -106,7 +104,7 @@ def addRect(num, pmin, pmax, sphp):
     print "**** addRect ****"
     print "rest dist:", sphp.rest_distance
     print "sim_scale:", sphp.sim_scale
-    spacing = 1.1 * sphp.rest_distance / sphp.sim_scale;
+    spacing = 1.5 * sphp.rest_distance / sphp.sim_scale;
     print "spacing", spacing
 
     xmin = pmin.x# * scale
@@ -134,7 +132,7 @@ def init_particles(num, sphp, domain, surface):
     particles += [ Particle(p1, sphp, [255,0,0], surface) ] 
 
     pmin = Vec([.5, .5])
-    pmax = Vec([2., 2.])
+    pmax = Vec([2., 3.])
     ps = addRect(num, pmin, pmax, sphp)
     for p in ps:
         particles += [ Particle(p, sphp, [0,0,255], surface) ] 

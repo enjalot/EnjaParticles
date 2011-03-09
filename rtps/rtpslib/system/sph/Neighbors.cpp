@@ -57,10 +57,10 @@ void SPH::neighborSearch(int choice)
     */
 
     //Copy choice to SPHParams
-	params.choice = choice;
-    std::vector<SPHParams> vparams(0);
-    vparams.push_back(params);
-    cl_SPHParams.copyToDevice(vparams);
+	sphp.choice = choice;
+    std::vector<SPHParams> vsphp(0);
+    vsphp.push_back(sphp);
+    cl_SPHParams.copyToDevice(vsphp);
 
 #if 0
     std::vector<int4> cli = cli_debug.copyToHost(2);

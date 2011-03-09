@@ -67,7 +67,7 @@ float Wspiky_dr(float rlen, float h, __constant struct SPHParams* params)
 #else
 	float hr2 = h - rlen;
 	//return -hr2*hr2/rlen;
-	return -hr2*hr2/(rlen + params->EPSILON);
+	return hr2*hr2/(rlen + params->EPSILON);
 #endif
 }
 

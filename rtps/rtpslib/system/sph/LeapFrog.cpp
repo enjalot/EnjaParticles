@@ -62,7 +62,7 @@ void SPH::cpuLeapFrog()
         vnext.y += xsphfactor * xsphs[i].y;
         vnext.z += xsphfactor * xsphs[i].z;
        
-        float scale = params.simulation_scale;
+        float scale = sphp.simulation_scale;
         p.x += h*vnext.x / scale;
         p.y += h*vnext.y / scale;
         p.z += h*vnext.z / scale;
