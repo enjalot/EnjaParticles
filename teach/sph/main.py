@@ -4,18 +4,17 @@ from pygame.locals import *
 from forces import *
 from vector import Vec
 import sph
-from domain import Domain
+from hash import Domain
+#from domain import Domain
 #from timing import Timing, timing_collector
-from timing import Timing
 
 #timings = {}
 #timing_coroutine = timing_collector(timings)
 #timing_coroutine.next()
 
 #@Timing(timing_coroutine)
-timings = Timing()
 
-@timings
+#@timings
 def fromscreen(p, surface):
     #v.x
     p.y = surface.get_height() - p.y
@@ -48,7 +47,7 @@ def main():
     
     dmin = Vec([0,0,0])
     dmax = Vec([5,5,5])
-    domain = Domain(dmin, dmax)
+    domain = Domain(dmin, dmax, screen)
     system = sph.SPH(max_num, domain)
 
     particles = sph.init_particles(50, system, domain, screen)

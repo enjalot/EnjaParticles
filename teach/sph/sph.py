@@ -56,6 +56,7 @@ class SPH:
         self.xsph_factor = .05
 
         self.domain = domain
+        self.domain.setup(self.smoothing_radius / self.sim_scale)
 
 
 def toscreen(p, surface, screen_scale):
