@@ -212,7 +212,7 @@ __kernel void euler(
     	// Step 5. Add acceleration to velocity
     	v += acc;
 
-	v.x += MinUrgency;
+	v.x += MaxUrgency;
 
     	// Step 6. Constrain velocity
     	float speed = length(v);
