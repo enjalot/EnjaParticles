@@ -46,8 +46,8 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli, RTPSettings* _settings)
 	write_framebuffers = false;
 
     printf("GL VERSION %s\n", glGetString(GL_VERSION));
-    //glsl = false;
-    glsl = true;
+    glsl = false;
+    //glsl = true;
     //mikep = true;
     //mikep = false;
     //blending = true;

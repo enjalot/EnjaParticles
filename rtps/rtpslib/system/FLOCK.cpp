@@ -138,9 +138,15 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     
     
 #endif
-
-	renderer = new Render(pos_vbo,col_vbo,num,ps->cli);
-        renderer->setParticleRadius(flock_settings.spacing*0.25);
+     // settings defaults to 0
+     renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+     printf("spacing for radius %f\n", flock_settings.spacing);
+     //renderer->setParticleRadius(spacing*0.5);
+     //renderer->setParticleRadius(spacing*0.5);
+     renderer->setParticleRadius(flock_settings.spacing);
+	 
+     //renderer = new Render(pos_vbo,col_vbo,num,ps->cli);
+     //renderer->setParticleRadius(flock_settings.spacing*0.25);
 
 }
 
@@ -641,13 +647,12 @@ void FLOCK::pushParticles(vector<float4> pos)
     if (num + nn > max_num) {return;}
     float rr = (rand() % 255)/255.0f;
     float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
-
+    printf("random color: %f %f %f\n", rr, 0.f, 1.0f-rr, 1.f);
 	//float4 color(0.0f,0.0f,0.1f,0.1f);
 
     std::vector<float4> cols(nn);
     std::vector<float4> vels(nn);
 
-    printf("random color: %f %f %f\n", rr, 0.f, 1.0f-rr, 1.f);
     std::fill(cols.begin(), cols.end(),color);
     //float v = .5f;
     float v = rand()/RAND_MAX;
@@ -680,14 +685,16 @@ void FLOCK::pushParticles(vector<float4> pos)
     cl_velocity.copyToDevice(vels, num);
     //cl_vars_unsorted.copyToDevice(vels, max_num*8+num);
 
+    //params.num = num+nn;
+    //std::vector<FLOCKParams> vparams(0);
+    //vparams.push_back(params);
+    //cl_FLOCKParams.copyToDevice(vparams);
+
+    //printf("about to updateNum\n");
+    //ps->updateNum(params.num);
+
     params.num = num+nn;
-    std::vector<FLOCKParams> vparams(0);
-    vparams.push_back(params);
-    cl_FLOCKParams.copyToDevice(vparams);
-
-
-    printf("about to updateNum\n");
-    ps->updateNum(params.num);
+    updateFLOCKP();
 
     num += nn;  //keep track of number of particles we use
 
@@ -706,6 +713,12 @@ void FLOCK::pushParticles(vector<float4> pos)
     num += nn;  //keep track of number of particles we use
 #endif
 	renderer->setNum(num);
+}
+void FLOCK::updateFLOCKP()
+{
+    std::vector<FLOCKParams> vparams(0);
+    vparams.push_back(params);
+    cl_FLOCKParams.copyToDevice(vparams);
 }
 
 void FLOCK::render()

@@ -259,6 +259,9 @@ private:
     void updateCPU();
     void updateGPU();
 
+    //copy the SPH parameter struct to the GPU
+    void updateFLOCKP();
+
     //Nearest Neighbors search related functions
     void prep(int stage);
     void hash();
