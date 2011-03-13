@@ -12,49 +12,56 @@
 
 #include "CLL.h"
 
-namespace rtps {
-
-template <class T>
-class Buffer
+namespace rtps
 {
-public:
-    Buffer(){ cli=NULL; vbo_id=0; };
-    //create an OpenCL buffer from existing data
-    Buffer(CL *cli, const std::vector<T> &data);
-    Buffer(CL *cli, const std::vector<T> &data, unsigned int memtype);
-    //create a OpenCL BufferGL from a vbo_id
-    //if managed is true then the destructor will delete the VBO
-    Buffer(CL *cli, GLuint vbo_id, int type);
-    ~Buffer();
 
-	cl_mem getDevicePtr() { return cl_buffer[0](); }
-   
-    //need to acquire and release arrays from OpenGL context if we have a VBO
-    void acquire();
-    void release();
+    template <class T>
+    class Buffer
+    {
+    public:
+        Buffer()
+        {
+            cli=NULL; vbo_id=0;
+        };
+        //create an OpenCL buffer from existing data
+        Buffer(CL *cli, const std::vector<T> &data);
+        Buffer(CL *cli, const std::vector<T> &data, unsigned int memtype);
+        //create a OpenCL BufferGL from a vbo_id
+        //if managed is true then the destructor will delete the VBO
+        Buffer(CL *cli, GLuint vbo_id, int type);
+        ~Buffer();
 
-    void copyToDevice(const std::vector<T> &data);
-    //pastes the data over the current array starting at [start]
-    void copyToDevice(const std::vector<T> &data, int start);
-    std::vector<T> copyToHost(int num);
+        cl_mem getDevicePtr()
+        {
+            return cl_buffer[0]();
+        }
 
-    void set(T val);
-    void set(const std::vector<T> &data);
+        //need to acquire and release arrays from OpenGL context if we have a VBO
+        void acquire();
+        void release();
 
-private:
-     //we will want to access buffers by name when going across systems
-    //std::string name;
-    //the actual buffer handled by the Khronos OpenCL c++ header
-    //cl::Memory cl_buffer;
-    std::vector<cl::Memory> cl_buffer;
+        void copyToDevice(const std::vector<T> &data);
+        //pastes the data over the current array starting at [start]
+        void copyToDevice(const std::vector<T> &data, int start);
+        std::vector<T> copyToHost(int num);
 
-    CL *cli;
+        void set(T val);
+        void set(const std::vector<T> &data);
 
-    //if this is a VBO we store its id
-    GLuint vbo_id;
+    private:
+        //we will want to access buffers by name when going across systems
+        //std::string name;
+        //the actual buffer handled by the Khronos OpenCL c++ header
+        //cl::Memory cl_buffer;
+        std::vector<cl::Memory> cl_buffer;
+
+        CL *cli;
+
+        //if this is a VBO we store its id
+        GLuint vbo_id;
 
 
-};
+    };
 
 #include "Buffer.cpp"
 

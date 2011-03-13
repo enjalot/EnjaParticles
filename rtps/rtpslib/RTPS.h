@@ -24,39 +24,40 @@
 //defines a few handy utility functions
 #include "util.h"
 
-namespace rtps {
-
-class RTPS
+namespace rtps
 {
-public:
-    //default constructor
-    RTPS();
-    //Setup CL, Render, initial values and System based on settings
-    RTPS(RTPSettings s);
 
-    ~RTPS();
+    class RTPS
+    {
+    public:
+        //default constructor
+        RTPS();
+        //Setup CL, Render, initial values and System based on settings
+        RTPS(RTPSettings s);
 
-    void Init();
+        ~RTPS();
 
-    //Keep track of settings
-    RTPSettings settings;
-    
-    //OpenCL abstraction instance
-    CL *cli;
-    //Render *renderer;
+        void Init();
 
-    //will be instanciated as a specific subclass like SPH or Boids
-    System *system;
-    //std::vector<System> systems;
+        //Keep track of settings
+        RTPSettings settings;
 
-    //initial value helper
-    //IV iv;
+        //OpenCL abstraction instance
+        CL *cli;
+        //Render *renderer;
 
-    void update();
-    void render();
-    
-    void printTimers();
-};
+        //will be instanciated as a specific subclass like SPH or Boids
+        System *system;
+        //std::vector<System> systems;
+
+        //initial value helper
+        //IV iv;
+
+        void update();
+        void render();
+
+        void printTimers();
+    };
 
 }
 

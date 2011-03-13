@@ -14,7 +14,7 @@
     #include <GLUT/glut.h>
 #else
     #include <GL/glut.h>
-    //OpenCL stuff
+//OpenCL stuff
 #endif
 
 #include <RTPS.h>
@@ -93,8 +93,8 @@ rtps::RTPS* ps;
 //----------------------------------------------------------------------
 float rand_float(float mn, float mx)
 {
-	float r = random() / (float) RAND_MAX;
-	return mn + (mx-mn)*r;
+    float r = random() / (float) RAND_MAX;
+    return mn + (mx-mn)*r;
 }
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
@@ -108,7 +108,7 @@ int main(int argc, char** argv)
     glutInitWindowPosition (glutGet(GLUT_SCREEN_WIDTH)/2 - window_width/2, 
                             glutGet(GLUT_SCREEN_HEIGHT)/2 - window_height/2);
 
-    
+
     std::stringstream ss;
     ss << "Real-Time Particle System: " << NUM_PARTICLES << std::ends;
     glutWindowHandle = glutCreateWindow(ss.str().c_str());
@@ -118,9 +118,9 @@ int main(int argc, char** argv)
     glutKeyboardFunc(appKeyboard);
     glutMouseFunc(appMouse);
     glutMotionFunc(appMotion);
-	glutReshapeFunc(resizeWindow);
+    glutReshapeFunc(resizeWindow);
 
-	//define_lights_and_materials();
+    //define_lights_and_materials();
 
     // initialize necessary OpenGL extensions
     glewInit();
@@ -130,7 +130,7 @@ int main(int argc, char** argv)
 
     printf("before we call enjas functions\n");
 
-        
+
     //default constructor
     //rtps::RTPSettings settings;
     //rtps::Domain grid = Domain(float4(-5,-.3,0,0), float4(2, 2, 12, 0));
@@ -142,18 +142,18 @@ int main(int argc, char** argv)
     settings.setBlurScale(1);
     settings.setUseGLSL(0);
     settings.setUseAlphaBlending(0);    
-    
+
     ps = new rtps::RTPS(settings);
 
 
     printf("about to make hose\n");
     float4 center(2., 2., 2., 1.);
     float4 velocity(.6, -.6, -.6, 0);
-  
+
     //sph sets spacing and multiplies by radius value
     ps->system->addHose(2048, center, velocity, 5);
-    
-    
+
+
 
 
     //initialize the OpenGL scene for rendering
@@ -188,7 +188,7 @@ void init_gl()
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
     glTranslatef(translate_x, translate_z, translate_y);
-	ps->system->getRenderer()->setWindowDimensions(window_width,window_height);
+    ps->system->getRenderer()->setWindowDimensions(window_width,window_height);
     //glTranslatef(0, 10, 0);
     /*
     gluLookAt(  0,10,0,
@@ -209,14 +209,14 @@ void appKeyboard(unsigned char key, int x, int y)
     int nn;
     float4 min;
     float4 max;
-    switch(key) 
+    switch (key)
     {
         case 'e': //dam break
             nn = 16384;
             min = float4(.1, .1, .1, 1.0f);
             max = float4(3.9, 3.9, 3.9, 1.0f);
             ps->system->addBox(nn, min, max, false);
-	    return;
+            return;
         case 'p': //print timers
             ps->printTimers();
             return;
@@ -235,31 +235,31 @@ void appKeyboard(unsigned char key, int x, int y)
 
 
         case 't': //place a cube for collision
-        {
-            nn = 512;
-            float cw = .25;
-            float4 cen = float4(cw, cw, cw-.1, 1.0f);
-            make_cube(triangles, cen, cw);
-            cen = float4(1+cw, 1+cw, cw-.1, 1.0f);
-            make_cube(triangles, cen, cw);
-            cen = float4(1+3*cw, 1+3*cw, cw-.1, 1.0f);
-            make_cube(triangles, cen, cw);
-            cen = float4(3.5, 3.5, cw-.1, 1.0f);
-            make_cube(triangles, cen, cw);
-            ps->system->loadTriangles(triangles);
-            return;
-        }
+            {
+                nn = 512;
+                float cw = .25;
+                float4 cen = float4(cw, cw, cw-.1, 1.0f);
+                make_cube(triangles, cen, cw);
+                cen = float4(1+cw, 1+cw, cw-.1, 1.0f);
+                make_cube(triangles, cen, cw);
+                cen = float4(1+3*cw, 1+3*cw, cw-.1, 1.0f);
+                make_cube(triangles, cen, cw);
+                cen = float4(3.5, 3.5, cw-.1, 1.0f);
+                make_cube(triangles, cen, cw);
+                ps->system->loadTriangles(triangles);
+                return;
+            }
         case 'r': //drop a rectangle
-        {
-            nn = 2048;
-            min = float4(.2, .2, .2, 1.0f);
-            max = float4(2., 2., 2., 1.0f);
-            ps->system->addBox(nn, min, max, false);
+            {
+                nn = 2048;
+                min = float4(.2, .2, .2, 1.0f);
+                max = float4(2., 2., 2., 1.0f);
+                ps->system->addBox(nn, min, max, false);
+                return;
+            }
+        case 'o':
+            ps->system->getRenderer()->writeBuffersToDisk();
             return;
-        }
-		case 'o':
-			ps->system->getRenderer()->writeBuffersToDisk();
-			return;
         case 'c':
             ps->system->getRenderer()->setDepthSmoothing(Render::NO_SHADER);
             return;
@@ -303,7 +303,7 @@ void appRender()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     ps->update();
-	
+
     glEnable(GL_DEPTH_TEST);
 
     ps->render();
@@ -315,8 +315,9 @@ void appRender()
 
     glBegin(GL_TRIANGLES);
     //printf("num triangles %zd\n", triangles.size());
-    for (int i=0; i < triangles.size(); i++) {
-    //for (int i=0; i < 20; i++) {
+    for (int i=0; i < triangles.size(); i++)
+    {
+        //for (int i=0; i < 20; i++) {
         Triangle& tria = triangles[i];
         glNormal3fv(&tria.normal.x);
         glVertex3f(tria.verts[0].x, tria.verts[0].y, tria.verts[0].z);
@@ -329,7 +330,7 @@ void appRender()
     //showFPS(enjas->getFPS(), enjas->getReport());
     glutSwapBuffers();
 
-	//glDisable(GL_DEPTH_TEST);
+    //glDisable(GL_DEPTH_TEST);
 }
 
 void appDestroy()
@@ -338,7 +339,7 @@ void appDestroy()
     delete ps;
 
 
-    if(glutWindowHandle)glutDestroyWindow(glutWindowHandle);
+    if (glutWindowHandle)glutDestroyWindow(glutWindowHandle);
     printf("about to exit!\n");
 
     exit(0);
@@ -353,11 +354,14 @@ void timerCB(int ms)
 
 void appMouse(int button, int state, int x, int y)
 {
-    if (state == GLUT_DOWN) {
+    if (state == GLUT_DOWN)
+    {
         mouse_buttons |= 1<<button;
-    } else if (state == GLUT_UP) {
+    }
+    else if (state == GLUT_UP)
+    {
         mouse_buttons = 0;
-    } 
+    }
 
     mouse_old_x = x;
     mouse_old_y = y;
@@ -371,10 +375,13 @@ void appMotion(int x, int y)
     dx = x - mouse_old_x;
     dy = y - mouse_old_y;
 
-    if (mouse_buttons & 1) {
+    if (mouse_buttons & 1)
+    {
         rotate_x += dy * 0.2;
         rotate_y += dx * 0.2;
-    } else if (mouse_buttons & 4) {
+    }
+    else if (mouse_buttons & 4)
+    {
         translate_z -= dy * 0.1;
     }
 
@@ -408,7 +415,7 @@ void drawString(const char *str, int x, int y, float color[4], void *font)
     glRasterPos2i(x, y);        // place text position
 
     // loop all characters in the string
-    while(*str)
+    while (*str)
     {
         glutBitmapCharacter(font, *str);
         ++str;
@@ -456,11 +463,11 @@ void showFPS(float fps, std::string* report)
 //----------------------------------------------------------------------
 void resizeWindow(int w, int h)
 {
-	if(h==0)
-	{
-		h=1;
-	}
-	glViewport(0, 0, w, h);
+    if (h==0)
+    {
+        h=1;
+    }
+    glViewport(0, 0, w, h);
 
     // projection
     glMatrixMode(GL_PROJECTION);
@@ -475,8 +482,8 @@ void resizeWindow(int w, int h)
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
     glTranslatef(translate_x, translate_z, translate_y);
-	ps->system->getRenderer()->setWindowDimensions(w,h);
-	window_width = w;
-	window_height = h;
-	glutPostRedisplay();
+    ps->system->getRenderer()->setWindowDimensions(w,h);
+    window_width = w;
+    window_height = h;
+    glutPostRedisplay();
 }

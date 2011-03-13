@@ -9,12 +9,12 @@ float dist_squared(float4 vec)
     return vec.x*vec.x + vec.y*vec.y + vec.z*vec.z;
 }
 
-       
+
 __kernel void viscosity(__global float4* pos, __global float4* veleval, __global float* density, __global float4* force, __constant struct SPHParams* params)
 {
     unsigned int i = get_global_id(0);
     int num = params->num;
-    if(i > num) return;
+    if (i > num) return;
 
 
     float4 p = pos[i] * params->simulation_scale;
@@ -35,19 +35,19 @@ __kernel void viscosity(__global float4* pos, __global float4* veleval, __global
 
     //super slow way, we need to use grid + sort method to get nearest neighbors
     //this code should never see the light of day on a GPU... just sayin
-    for(int j = 0; j < num; j++)
+    for (int j = 0; j < num; j++)
     {
-        if(j == i) continue;
+        if (j == i) continue;
         float4 pj = pos[j] * params->simulation_scale;
         float4 r = p - pj;
         float rlen = magnitude(r);
-        if(rlen < h)
+        if (rlen < h)
         {
             float r2 = rlen*rlen;
             float re2 = h*h;
-            if(r2/re2 <= 4.f)
+            if (r2/re2 <= 4.f)
             {
-               
+
                 float dj = density[j];
                 float4 vj = veleval[j];// * params->simulation_scale;
                 //float4 vj = vel[j] * params->simulation_scale;

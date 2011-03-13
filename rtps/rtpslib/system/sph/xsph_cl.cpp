@@ -9,18 +9,18 @@ float dist_squared(float4 vec)
     return vec.x*vec.x + vec.y*vec.y + vec.z*vec.z;
 }
 
-       
+
 __kernel void xsph(__global float4* pos, __global float4* veleval, __global float* density, __global float4* force, __global float4* xsph, __constant struct SPHParams* params)
 {
     unsigned int i = get_global_id(0);
     int num = params->num;
-    if(i > num) return;
+    if (i > num) return;
 
     float sadf = 5;
     float4 p = pos[i] * params->simulation_scale;
     float4 v = veleval[i];
     float di = density[i];
- 
+
     float h = params->smoothing_distance;
 
     //stuff from Tim's code (need to match #s to papers)
@@ -32,17 +32,17 @@ __kernel void xsph(__global float4* pos, __global float4* veleval, __global floa
 
     //super slow way, we need to use grid + sort method to get nearest neighbors
     //this code should never see the light of day on a GPU... just sayin
-    for(int j = 0; j < num; j++)
+    for (int j = 0; j < num; j++)
     {
-        if(j == i) continue;
+        if (j == i) continue;
         float4 pj = pos[j] * params->simulation_scale;
         float4 r = p - pj;
         float rlen = magnitude(r);
-        if(rlen < h)
+        if (rlen < h)
         {
             float r2 = rlen*rlen;
             float re2 = h*h;
-            if(r2/re2 <= 4.f)
+            if (r2/re2 <= 4.f)
             {
                 float4 vj = veleval[j];
                 float dj = density[j];
