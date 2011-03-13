@@ -446,16 +446,30 @@ void Render::writeFramebufferTextures()
 	}
 }
 
-void Render::convertDepthToRGB(const GLfloat* depth, GLuint size, GLuint* rgb) const
+void Render::convertDepthToRGB(const GLfloat* depth, GLuint size, GLuint* rgba) const
 {
-	float minimum = 1.0f;
-	for(int i = 0;i<size;i++)
+	GLfloat minimum = 1.0f;
+	for(GLint i = 0;i<size;i++)
+	{
+		//printf("depth[%d] %f\n",i,depth[i]);
 			if(minimum>depth[i])
+			{
 				minimum = depth[i];
-	float one_minus_min = 1.f-minimum;
-	for(int i = 0;i<size;i++)
-		for(int j = 0;j<3;j++)
-			rgb[(i*3)+j]=(GLuint)((depth[i]-minimum)/one_minus_min *255);
+			}
+	}
+	GLfloat one_minus_min = 1.f-minimum;
+	printf("depth 0 %f\n",depth[0]);
+	printf("minimum %f \n",minimum);
+	for(GLuint i = 0;i<size;i++)
+	{
+		for(GLuint j = 0;j<4;j++)
+		{
+			rgba[(i*4)+j]=(GLuint)((depth[i]-minimum)/one_minus_min *255);
+			//printf("index = %d i = %d j = %d \n",(i*4)+j,i,j);
+		}
+	}
+	printf("rgba[0] = %d rgba[1] = %d rgba[2] = %d rgba[3] = %d\n",rgba[0],rgba[1],rgba[2],rgba[3]);
+	printf("rgba[4] = %d rgba[1] = %d rgba[2] = %d rgba[3] = %d\n",rgba[0],rgba[1],rgba[2],rgba[3]);
 }
 
 int Render::writeTexture( GLuint tex, const char* filename) const
@@ -466,24 +480,23 @@ int Render::writeTexture( GLuint tex, const char* filename) const
 		ILuint img = ilGenImage();
 		ilBindImage(img);
 		ilEnable(IL_FILE_OVERWRITE);
-		GLuint* image;
+		GLuint* image = new GLuint[window_width*window_height*4];
     	if(!strcmp(filename,"depth.png") || !strcmp(filename,"depth2.png"))
 		{
-			GLfloat img[window_width*window_height];
-			image=new GLuint[window_width*window_height*3];
-			glGetTexImage(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT32,GL_FLOAT,img);
-			convertDepthToRGB(img,window_width*window_height,image);
-			ilTexImage(window_width,window_height,0,3,IL_RGB, IL_UNSIGNED_BYTE, image);
+			GLfloat fimg[window_width*window_height];
+			glGetTexImage(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,GL_FLOAT,fimg);
+			convertDepthToRGB(fimg,window_width*window_height,image);
+			//ilTexImage(window_width,window_height,0,4,IL_LUMINANCE, IL_FLOAT, fimg);
 		}
 		else
 		{
-			image=new GLuint[window_width*window_height*4];
 			glGetTexImage(GL_TEXTURE_2D,0,GL_RGBA,GL_UNSIGNED_BYTE,image);
-			ilTexImage(window_width,window_height,0,4,IL_RGBA, IL_UNSIGNED_BYTE, image);
 		}
+		ilTexImage(window_width,window_height,0,4,IL_RGBA, IL_UNSIGNED_BYTE, image);
 		glBindTexture(GL_TEXTURE_2D,0);
 		ilSave(IL_PNG,filename);
 		ilDeleteImage(img);
+		delete[] image;
 	#endif //USE_IL
 
 	return 0;
