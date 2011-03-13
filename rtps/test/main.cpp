@@ -227,12 +227,15 @@ void appKeyboard(unsigned char key, int x, int y)
             ps->system->addBox(nn, min, max, false);
             return;
         }
+		case 'o':
+			ps->system->getRenderer()->writeBuffersToDisk();
+			return;
         case 'c':
             ps->system->getRenderer()->setDepthSmoothing(Render::NO_SHADER);
-            break;
+            return;
         case 'C':
             ps->system->getRenderer()->setDepthSmoothing(Render::BILATERAL_GAUSSIAN_SHADER);
-            break;
+            return;
         case 'w':
             translate_z -= 0.1;
             break;
