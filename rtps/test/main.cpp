@@ -21,7 +21,7 @@
 //#include "timege.h"
 using namespace rtps;
 
-int window_width = 800;
+int window_width = 1200;
 int window_height = 600;
 float fov = 65.;
 int glutWindowHandle = 0;
@@ -137,6 +137,12 @@ int main(int argc, char** argv)
     rtps::Domain grid = Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
     //rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
     rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
+    settings.setRadiusScale(1.);
+    settings.setRenderType(0);
+    settings.setBlurScale(1);
+    settings.setUseGLSL(0);
+    settings.setUseAlphaBlending(0);    
+    
     ps = new rtps::RTPS(settings);
 
 
@@ -145,7 +151,7 @@ int main(int argc, char** argv)
     float4 velocity(.6, -.6, -.6, 0);
   
     //sph sets spacing and multiplies by radius value
-    ps->system->addHose(2048, center, velocity, 5, 0);
+    ps->system->addHose(2048, center, velocity, 5);
     
     
 

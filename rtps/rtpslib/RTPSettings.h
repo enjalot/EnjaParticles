@@ -34,6 +34,36 @@ public:
     //triangle collision?
     bool tri_collision;
 
+// Added by GE
+private:
+	float render_radius_scale;
+	float render_blur_scale;
+	int render_type;
+	bool use_glsl;
+	bool use_alpha_blending;
+
+public:
+	float getRadiusScale() { return render_radius_scale; }
+	void setRadiusScale(float scale) {
+		render_radius_scale = scale;
+	}
+
+	float getBlurScale() { return render_blur_scale; }
+	void setBlurScale(float scale) {
+		render_blur_scale = scale;
+	}
+
+	int getRenderType() { return render_type; }
+	void setRenderType(int type) {
+		render_type = type;
+	}
+
+	int getUseAlphaBlending() { return use_alpha_blending; }
+	int setUseAlphaBlending(bool use_alpha) { use_alpha_blending = use_alpha; }
+
+	int getUseGLSL() { return use_glsl; }
+	int setUseGLSL(bool use_glsl) { 
+		this->use_glsl = use_glsl; }
 };
 
 }

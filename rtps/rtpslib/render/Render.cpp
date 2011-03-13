@@ -24,8 +24,16 @@ using namespace std;
 
 namespace rtps{
 
-Render::Render(GLuint pos, GLuint col, int n, CL* cli)
+//----------------------------------------------------------------------
+//Render::Render(GLuint pos, GLuint col, int n, CL* cli, RTPSettings& _settings) :
+	//settings(_settings)
+//{
+//}
+//----------------------------------------------------------------------
+Render::Render(GLuint pos, GLuint col, int n, CL* cli, RTPSettings* _settings)
 {
+	this->settings = _settings;
+
     rtype = POINTS;
     pos_vbo = pos;
     col_vbo = col;
@@ -42,14 +50,25 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
     glsl = true;
     //mikep = true;
     //mikep = false;
-    blending = true;
-    //blending = false;
+    //blending = true;
+    blending = false;
+
+	// 0: particles
+	// 1: textures
+	// 2: blurring  (works ok)
+	int render_type = settings->getRenderType();
+
     if(glsl)
     {
 		fbos.resize(1);
 		glGenFramebuffers(1,&fbos[0]);
-		smoothing = BILATERAL_GAUSSIAN_SHADER;
-		//smoothing = NO_SHADER;
+		printf("**** RENDER **** render_type = %d\n", render_type);
+		if (render_type == 2) {
+			smoothing = BILATERAL_GAUSSIAN_SHADER;
+		} else {
+			smoothing = NO_SHADER;
+		}
+		//particle_radius = 0.0125f*0.5f;
 		particle_radius = 0.0125f*0.5f;
 
 		createFramebufferTextures();
@@ -66,7 +85,8 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 
 
 		//glFinish();
-		/*cl_depth = Buffer<float>(cli,gl_tex["depth"],1);
+		/*
+		cl_depth = Buffer<float>(cli,gl_tex["depth"],1);
 
 		//printf("OpenCL error is %s\n",oclErrorString(cli->err));
 		std::string path(GLSL_BIN_DIR);
@@ -91,8 +111,8 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
         }else
         {
 		    frag+="/sphere_frag.glsl";
-        }
-        glsl_program[SPHERE_SHADER] = compileShaders(vert.c_str(),frag.c_str());
+		}
+		glsl_program[SPHERE_SHADER] = compileShaders(vert.c_str(),frag.c_str());
 		vert = string(GLSL_BIN_DIR);
 		frag = string(GLSL_BIN_DIR);
 		vert+="/depth_vert.glsl";
@@ -149,6 +169,7 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 	#endif
 }
 
+//----------------------------------------------------------------------
 Render::~Render()
 {
     printf("Render destructor\n");
@@ -196,7 +217,6 @@ void Render::drawArrays()
 
     glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
-
 }
 
 //----------------------------------------------------------------------
@@ -216,11 +236,13 @@ void Render::render()
 	glGetFloatv(GL_DEPTH_RANGE,nf);
 	near_depth = nf[0];
 	far_depth = nf[1];
+
     /*
     printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
     printf("w: %d h: %d\n", window_width, window_height);
     printf("x: %d y: %d w: %d h: %d\n", xywh[0], xywh[1], xywh[2], xywh[3]);
-    
+    */
+    /*
     int whatbuffer;
     glGetIntegerv(GL_DRAW_BUFFER0, &whatbuffer);
     printf("What buffer? %d, GL_BACK: %d\n", whatbuffer, GL_BACK);
@@ -623,7 +645,11 @@ void Render::renderPointsAsSpheres()
         glUseProgram(glsl_program[SPHERE_SHADER]);
         //float particle_radius = 0.125f * 0.5f;
         glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "pointScale"), ((float)window_width) / tanf(65. * (0.5f * 3.1415926535f/180.0f)));
-        glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "pointRadius"), particle_radius );
+
+		//GE PUT particle_radius in the panel (as a test)
+		float radius_scale = settings->getRadiusScale(); //GE
+        //glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "pointRadius"), particle_radius );
+        glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "pointRadius"), particle_radius*radius_scale ); //GE
         glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "near"), near_depth );
         glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "far"), far_depth );
         
@@ -985,15 +1011,7 @@ void Render::createFramebufferTextures()
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,window_width,window_height,0,GL_RGBA,GL_UNSIGNED_BYTE,NULL);
-		glGenTextures(1,&gl_tex["depthColorSmooth"]);
-		glBindTexture(GL_TEXTURE_2D, gl_tex["depthColorSmooth"]);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,window_width,window_height,0,GL_RGBA,GL_UNSIGNED_BYTE,NULL);
-		//glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA32F,window_width,window_height,0,GL_RGBA,GL_FLOAT,NULL);
-		glGenTextures(1,&gl_tex["normalColor"]);
+			glGenTextures(1,&gl_tex["normalColor"]);
 		glBindTexture(GL_TEXTURE_2D, gl_tex["normalColor"]);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -1015,6 +1033,18 @@ void Render::createFramebufferTextures()
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,window_width,window_height,0,GL_RGBA,GL_UNSIGNED_BYTE,NULL);
+
+
+
+    	glGenTextures(1,&gl_tex["depthColorSmooth"]);
+		glBindTexture(GL_TEXTURE_2D, gl_tex["depthColorSmooth"]);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,window_width,window_height,0,GL_RGBA,GL_UNSIGNED_BYTE,NULL);
+		//glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA32F,window_width,window_height,0,GL_RGBA,GL_FLOAT,NULL);
+
 }
 
 void Render::setWindowDimensions(GLuint width, GLuint height)
@@ -1043,3 +1073,7 @@ void Render::setParticleRadius(float pradius)
 }
 
 }
+
+
+
+		

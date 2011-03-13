@@ -101,7 +101,7 @@ public:
     //wrapper around IV.h addSphere
     void addBall(int nn, float4 center, float radius, bool scaled);
     //wrapper around Hose.h 
-    void addHose(int total_n, float4 center, float4 velocity, float radius, float spacing);
+    void addHose(int total_n, float4 center, float4 velocity, float radius);
     void sprayHoses();
 
 	virtual void render();

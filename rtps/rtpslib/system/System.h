@@ -33,6 +33,7 @@ public:
 
     virtual int addBox(int nn, float4 min, float4 max, bool scaled){ return 0;};
     virtual void addBall(int nn, float4 center, float radius, bool scaled){};
+    virtual void addHose(int total_n, float4 center, float4 velocity, float radius){};
     virtual void addHose(int total_n, float4 center, float4 velocity, float radius, float spacing){};
     virtual void sprayHoses(){};
 

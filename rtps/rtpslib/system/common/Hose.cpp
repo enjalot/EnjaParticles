@@ -7,6 +7,7 @@ namespace rtps
 
 Hose::Hose(RTPS *ps, int total_n, float4 center, float4 velocity, float radius, float spacing)
 {
+    printf("Constructor!\n");
     this->ps = ps;
     this->total_n = total_n;
     this->center = center;
@@ -80,8 +81,10 @@ void Hose::calc_em()
 
 std::vector<float4> Hose::spray()
 {
+    printf("SPRAY!\n");
     em_count++;
     calc_em();
+    printf("em_count %d em %d n_count %d\n", em_count, em, n_count);
     std::vector<float4> particles;
     if(em_count >= em && n_count > 0)
     {

@@ -11,6 +11,7 @@
     #include <GL/gl.h>
 #endif
 
+#include "RTPSettings.h"
 #include "../structs.h"
 #include "../timege.h"
 #include "../opencl/CLL.h"
@@ -24,7 +25,8 @@ enum Shaders {SHADER_DEPTH=0,SHADER_CURVATURE_FLOW,SHADER_FRESNEL};
 class Render
 {
 public:
-    Render(GLuint pos_vbo, GLuint vel_vbo, int num, CL *cli);
+    Render(GLuint pos_vbo, GLuint vel_vbo, int num, CL *cli, RTPSettings* _settings=0);
+    //Render(GLuint pos_vbo, GLuint vel_vbo, int num, CL *cli, RTPSettings& _settings);
     ~Render();
 
     //decide which kind of rendering to use
@@ -86,12 +88,23 @@ private:
     GLuint col_vbo;
 	CL *cli;
 
+	// Added by GE, March 6, 2011
+	// reference guarantees the location pointed to cannot be changed
+	// But that is creating problems because one cannot have a default 
+	// property for a reference
+	RTPSettings* settings; 
+
+
+
     GLuint compileShaders(const char* vertex_file, const char* fragment_file, const char* geometry_file = NULL, GLenum* geom_param=NULL, GLint* geom_value=NULL, int geom_param_len=0);
     int loadTexture();
 	int generateCircleTexture(GLubyte r, GLubyte g, GLubyte b, GLubyte alpha, int diameter);
 	void deleteFramebufferTextures();
 	void createFramebufferTextures();
 	void convertDepthToRGB(const GLfloat* depth, GLuint size, GLuint* rgb) const;
+
+	//GE
+	float getParticleRadius() {return particle_radius;}
 };	
 
 

@@ -83,7 +83,9 @@ SPH::SPH(RTPS *psfr, int n)
     
 #endif
 
-	renderer = new Render(pos_vbo,col_vbo,num,ps->cli);
+	// settings defaults to 0
+	renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+    printf("spacing for radius %f\n", spacing);
     //renderer->setParticleRadius(spacing*0.5);
     renderer->setParticleRadius(spacing);
 
@@ -159,14 +161,15 @@ void SPH::updateGPU()
     timers[TI_UPDATE]->start();
     glFinish();
 
-    int sub_intervals = 10;  //should be a setting
+	//GE
+    int sub_intervals = 3;  //should be a setting
     //this should go in the loop but avoiding acquiring and releasing each sub
     //interval for all the other calls.
     //this does end up acquire/release everytime sprayHoses calls pushparticles
     //should just do try/except?
     for(int i=0; i < sub_intervals; i++)
     {
-        sprayHoses();
+        //sprayHoses();
     }
 
     cl_position.acquire();
@@ -347,7 +350,7 @@ void SPH::calculateSPHSettings()
     sphp.gravity = -9.8f;
     //sphp.gravity = 0.0f;
     sphp.velocity_limit = 600.0f;
-    sphp.xsph_factor = .05f;
+    sphp.xsph_factor = .1f;
 
 	float h = sphp.smoothing_distance;
 	float h9 = pow(h,9.);
@@ -543,12 +546,15 @@ void SPH::addBall(int nn, float4 center, float radius, bool scaled)
     pushParticles(sphere,velo);
 }
 
-void SPH::addHose(int total_n, float4 center, float4 velocity, float radius, float spacing)
+void SPH::addHose(int total_n, float4 center, float4 velocity, float radius)
 {
+    printf("wtf for real\n");
     //in sph we just use sph spacing
     radius *= spacing;
     Hose hose = Hose(ps, total_n, center, velocity, radius, spacing);
+    printf("wtf\n");
     hoses.push_back(hose);
+    printf("size of hoses: %d\n", hoses.size());
 }
 
 void SPH::sprayHoses()
@@ -569,7 +575,7 @@ void SPH::pushParticles(vector<float4> pos, float4 velo)
    // float rr = (rand() % 255)/255.0f;
     //float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
     //printf("random: %f\n", rr);
-    float4 color(0.05f,0.0f,0.0f,0.05f);
+    float4 color(1.0f,0.0f,0.0f,1.0f);
 
     std::vector<float4> cols(nn);
     std::vector<float4> vels(nn);
