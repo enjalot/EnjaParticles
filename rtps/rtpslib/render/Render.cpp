@@ -11,13 +11,14 @@
 #endif
 
 #ifdef USE_IL
-	  #include <il.h>
-	  #include <ilu.h>
-	  #include <ilut.h>
+	  #include <IL/il.h>
+	  #include <IL/ilu.h>
+	  #include <IL/ilut.h>
 #endif
 
 #include "Render.h"
 #include "util.h"
+#include "stb_image.h" 
 
 using namespace std;
 
@@ -40,7 +41,7 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
     //glsl = false;
     glsl = true;
     //mikep = true;
-    mikep = false;
+    //mikep = false;
     blending = true;
     //blending = false;
     if(glsl)
@@ -81,7 +82,16 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 		string vert(GLSL_BIN_DIR);
 		string frag(GLSL_BIN_DIR);
 		vert+="/sphere_vert.glsl";
-		frag+="/sphere_frag.glsl";
+        if(smoothing == NO_SHADER)
+        {
+            //******* for loading textures as sprites
+            loadTexture();
+            frag+="/sphere_tex_frag.glsl";
+            //*******
+        }else
+        {
+		    frag+="/sphere_frag.glsl";
+        }
         glsl_program[SPHERE_SHADER] = compileShaders(vert.c_str(),frag.c_str());
 		vert = string(GLSL_BIN_DIR);
 		frag = string(GLSL_BIN_DIR);
@@ -102,7 +112,13 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
 		vert = string(GLSL_BIN_DIR);
 		frag = string(GLSL_BIN_DIR);
 		vert+="/normal_vert.glsl";
-		frag+="/normal_frag.glsl";
+        if(smoothing == NO_SHADER)
+        {
+		    frag+="/normal_tex_frag.glsl";
+        }else
+        {
+		    frag+="/normal_frag.glsl";
+        }
         glsl_program[NORMAL_SHADER] = compileShaders(vert.c_str(),frag.c_str()); 
         
         vert = string(GLSL_BIN_DIR);
@@ -128,8 +144,8 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli)
     setupTimers();
 	#ifdef USE_IL
 		ilInit();
-		iluInit();
-		ilutRenderer(ILUT_OPENGL);
+		//iluInit();
+		//ilutRenderer(ILUT_OPENGL);
 	#endif
 }
 
@@ -597,12 +613,25 @@ void Render::renderPointsAsSpheres()
         glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
         glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
+        if(smoothing == NO_SHADER)
+        {
+            //FOR FACE TEXTURES
+            glEnable(GL_TEXTURE_2D);
+            glActiveTexture(GL_TEXTURE0);
+        }
+
         glUseProgram(glsl_program[SPHERE_SHADER]);
         //float particle_radius = 0.125f * 0.5f;
         glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "pointScale"), ((float)window_width) / tanf(65. * (0.5f * 3.1415926535f/180.0f)));
         glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "pointRadius"), particle_radius );
         glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "near"), near_depth );
         glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "far"), far_depth );
+        
+        if(smoothing == NO_SHADER)
+        {
+            //FOR FACE TEXTURES
+            glBindTexture(GL_TEXTURE_2D, gl_tex["texture"]);
+        }
 
         glColor3f(1., 1., 1.);
 
@@ -880,55 +909,24 @@ int Render::generateCircleTexture(GLubyte r, GLubyte g, GLubyte b, GLubyte alpha
 int Render::loadTexture()
 {
 
-
-
-/*
-    //load the image with OpenCV
     std::string path(GLSL_SOURCE_DIR);
-    //path += "/tex/particle.jpg";
-    //path += "/tex/enjalot.jpg";
-    path += "/../../sprites/blue.jpg";
-    Mat img = imread(path, 1);
-    //Mat img = imread("tex/enjalot.jpg", 1);
-    //convert from BGR to RGB colors
-    //cvtColor(img, img, CV_BGR2RGB);
-    //this is ugly but it makes an iterator over our image data
-    //MatIterator_<Vec<uchar, 3> > it = img.begin<Vec<uchar,3> >(), it_end = img.end<Vec<uchar,3> >();
-    MatIterator_<Vec<uchar, 3> > it = img.begin<Vec<uchar,3> >(), it_end = img.end<Vec<uchar,3> >();
-    int w = img.size().width;
-    int h = img.size().height;
-    int n = w * h;
-    std::vector<unsigned char> image;//there are n bgr values 
+    path += "../../../sprites/tomek.jpg";
+    //path += "../../../sprites/enjalot.jpg";
+    printf("LOAD TEXTURE!!!!!!!!!!!!!!\n");
+    printf("path: %s\n", path.c_str());
 
-    printf("read image data %d \n", n);
-    for(; it != it_end; ++it)
+    //Load an image with stb_image
+    int w,h,channels;
+    int force_channels = 0;
+    
+    unsigned char *im = stbi_load( path.c_str(), &w, &h, &channels, force_channels );
+    printf("after load w: %d h: %d channels: %d\n", w, h, channels);
+    if(im == NULL)
     {
-   //     printf("asdf: %d\n", it[0][0]);
-        image.push_back(it[0][0]);
-        image.push_back(it[0][1]);
-        image.push_back(it[0][2]);
+        printf("fail!: %s\n", stbi_failure_reason());
+        printf("WTF\n");
     }
-    unsigned char* asdf = &image[0];
-    printf("char string:\n");
-    for(int i = 0; i < 3*n; i++)
-    {
-        printf("%d,", asdf[i]);
-    }
-    printf("\n charstring over\n");
-  */  
-    int w = 32;
-    int h = 32;
-    //#include "../../sprites/particle.txt"
-    #include "../../sprites/blue.txt"
-    //#include "../../sprites/reddit.txt"
-/*
-    w=100;
-    h=100;
-    #include "../../sprites/fsu_seal.txt"
-    w = 96;
-    h = 96;
-    #include "../../sprites/enjalot.txt"
-*/
+
     //load as gl texture
     glGenTextures(1, &gl_tex["texture"]);
     glBindTexture(GL_TEXTURE_2D, gl_tex["texture"]);
@@ -938,8 +936,8 @@ int Render::loadTexture()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
-    GL_BGR_EXT, GL_UNSIGNED_BYTE, &image[0]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0,
+    GL_RGB, GL_UNSIGNED_BYTE, &im[0]);
 
 	return 0; //success
 }
@@ -1033,6 +1031,7 @@ void Render::setWindowDimensions(GLuint width, GLuint height)
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT2,GL_TEXTURE_2D,gl_tex["normalColor"],0);
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT3,GL_TEXTURE_2D,gl_tex["lightColor"],0);
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT4,GL_TEXTURE_2D,gl_tex["Color"],0);
+		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT5,GL_TEXTURE_2D,gl_tex["depthColorSmooth"],0);
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,gl_tex["depth"],0);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);
     }

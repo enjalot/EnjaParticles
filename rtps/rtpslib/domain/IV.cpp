@@ -71,12 +71,12 @@ std::vector<float4> addSphere(int num, float4 center, float radius, float spacin
 std::vector<float4> addDisc(int num, float4 center, float4 u, float4 v, float radius, float spacing)
 {
 
-    spacing *= 1.99f; //should probably just figure out whats up with my spacing
+    spacing *= 1.999f; //should probably just figure out whats up with my spacing
 
     float4 umin = -radius*u;
     float4 vmin = -radius*v;
-    printf("umin %f %f %f %f\n", umin.x, umin.y, umin.z, umin.w);
-    printf("vmin %f %f %f %f\n", vmin.x, vmin.y, vmin.z, vmin.w);
+    //printf("umin %f %f %f %f\n", umin.x, umin.y, umin.z, umin.w);
+    //printf("vmin %f %f %f %f\n", vmin.x, vmin.y, vmin.z, vmin.w);
 
     std::vector<float4> rvec;
     int i = 0;

@@ -11,10 +11,13 @@ IF (WIN32)
     FIND_PATH( GLEW_INCLUDE_PATH GL/glew.h
         $ENV{PROGRAMFILES}/GLEW/include
         ${PROJECT_SOURCE_DIR}/src/nvgl/glew/include
+	~/glew-1.5.8/include
         DOC "The directory where GL/glew.h resides")
     FIND_LIBRARY( GLEW_LIBRARY
-        NAMES glew GLEW glew32 glew32s
+        NAMES glew GLEW glew32 glew32s 
         PATHS
+	~/glew-1.5.8/bin
+	~/glew-1.5.8/lib
         $ENV{PROGRAMFILES}/GLEW/lib
         ${PROJECT_SOURCE_DIR}/src/nvgl/glew/bin
         ${PROJECT_SOURCE_DIR}/src/nvgl/glew/lib

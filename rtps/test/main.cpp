@@ -17,7 +17,7 @@
     //OpenCL stuff
 #endif
 
-#include "RTPS.h"
+#include <RTPS.h>
 //#include "timege.h"
 using namespace rtps;
 
@@ -67,16 +67,22 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 rtps::RTPS* ps;
+
 //#define NUM_PARTICLES 524288
 //#define NUM_PARTICLES 262144
 //#define NUM_PARTICLES 65536
 #define NUM_PARTICLES 16384
+//#define NUM_PARTICLES 10000
 //#define NUM_PARTICLES 8192
 //#define NUM_PARTICLES 4096
 //#define NUM_PARTICLES 2048
 //#define NUM_PARTICLES 1024
 //#define NUM_PARTICLES 256
 #define DT .001f
+
+
+
+
 
 //timers
 //GE::Time *ts[3];
@@ -132,6 +138,17 @@ int main(int argc, char** argv)
     //rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
     rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
     ps = new rtps::RTPS(settings);
+
+
+    printf("about to make hose\n");
+    float4 center(2., 2., 2., 1.);
+    float4 velocity(.6, -.6, -.6, 0);
+  
+    //sph sets spacing and multiplies by radius value
+    ps->system->addHose(2048, center, velocity, 5, 0);
+    
+    
+
 
     //initialize the OpenGL scene for rendering
     init_gl();
@@ -204,6 +221,13 @@ void appKeyboard(unsigned char key, int x, int y)
             // Cleanup up and quit
             appDestroy();
             return;
+        case 'm':
+            //spray hose
+            printf("about to spray\n");
+            ps->system->sprayHoses();
+            return;
+
+
         case 't': //place a cube for collision
         {
             nn = 512;

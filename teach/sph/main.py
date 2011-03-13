@@ -11,7 +11,7 @@ def fromscreen(p, surface):
     p.y = surface.get_height() - p.y
     return p
 
-@print_timing
+#@print_timing
 def draw_particles(ps):
     for p in ps:
         p.draw()
@@ -28,12 +28,13 @@ def main():
 
     clock = pygame.time.Clock()
 
-    max_num = 2**10 #1024
-    max_num = 2**8 #256
+    max_num = 2**12 #4096
+    #max_num = 2**10 #1024
+    #max_num = 2**8 #256
     #max_num = 2**7 #128
     
     dmin = Vec([0,0,0])
-    dmax = Vec([800,800,1])
+    dmax = Vec([5,5,5])
     domain = Domain(dmin, dmax)
     system = sph.SPH(max_num, domain)
 

@@ -54,6 +54,12 @@ class Vec(np.ndarray):
         self[Vec.props.index(item)] = val
 
 
+    ###
+    #math utilities
+    ###
+
+def normalize(u):
+    return u / (math.sqrt(np.dot(u, u)))
 
 
 if __name__ == "__main__":

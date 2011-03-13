@@ -6,7 +6,7 @@ from vector import Vec
 
 from timing import print_timing
 
-@print_timing
+#@print_timing
 def density_update(sphp, particles):
     #brute force
     for pi in particles:
@@ -16,7 +16,7 @@ def density_update(sphp, particles):
             #print r
             pi.dens += pj.mass*Wpoly6(pi.h, r)
 
-@print_timing
+#@print_timing
 def force_update(sphp, particles):
     #brute force
     rho0 = sphp.rho0
@@ -68,7 +68,7 @@ def calcRepulsionForce(normal, vel, sphp, distance):
 def calcFrictionForce(v, f, normal, friction_kinetic, friction_static_limit):
     pass
 
-@print_timing
+#@print_timing
 def collision_wall(sphp, domain, particles):
     
     dmin = domain.dmin * sphp.sim_scale
@@ -113,7 +113,7 @@ def collision_wall(sphp, domain, particles):
 
 
 
-@print_timing
+#@print_timing
 def euler_update(sphp, particles):
     dt = .001
 
@@ -132,9 +132,9 @@ def euler_update(sphp, particles):
         pi.vel += f * dt
         pi.pos += pi.vel * dt
 
-@print_timing
+#@print_timing
 def leapfrog_update(sphp, particles):
-    dt = .005
+    dt = .001
 
     #print "LEAPFROG++++++++++++++++++++++"
     for pi in particles:

@@ -176,6 +176,8 @@
 
 #if defined(linux) || defined(__APPLE__) || defined(__MACOSX)
 # include <alloca.h>
+#else 
+# include <stdlib.h>
 #endif // linux
 
 #include <cstring>
