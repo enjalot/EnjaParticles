@@ -79,7 +79,8 @@ std::vector<float4> addRandRect(int num, float4 min, float4 max, float spacing, 
     srand(time(NULL));	
 
     spacing *= 1.1f;
-
+min.print("Box min: ");
+max.print("Box max: ");
     float xmin = min.x  / scale;
     float xmax = max.x  / scale;
     float ymin = min.y  / scale;
