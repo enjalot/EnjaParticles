@@ -50,8 +50,8 @@ inline void ForNeighbor(__global float4*  vars_sorted,
         clf[index_i].w = rlen;
 #endif
 	
-	float searchradius = 0.06f;  //8.f; 	// search radius TODO: remove hard coded parameter
-	float mindist = .05f;//3.f		// minimum distance -> desired separation distance
+	float searchradius = 0.08f;  //8.f; 	// search radius TODO: remove hard coded parameter
+	float mindist = .03f;//3.f		// minimum distance -> desired separation distance
 
 	// is this particle within cutoff?
 	if (rlen <= searchradius) 

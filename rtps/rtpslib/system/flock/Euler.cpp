@@ -28,8 +28,8 @@ void FLOCK::loadEuler()
 
 void FLOCK::cpuEuler()
 {
-    #define searchradius 	0.008f
-    #define separationdist  	0.003f
+    #define searchradius 	0.08f
+    #define separationdist  	0.03f
     #define maxspeed        	3.f     // 1.f
     #define desiredspeed    	1.5f    // .5f
     #define maxchange       	0.1f    // .1f
@@ -65,7 +65,7 @@ void FLOCK::cpuEuler()
 
 	// initialize acc to zero
         acc = float4(0.f, 0.f, 0.f, 0.f);
-
+    numFlockmates = 0;
 	#if 1
 	// print boid info
 		if (i == 0) {
@@ -95,6 +95,7 @@ void FLOCK::cpuEuler()
              }
         }
 //printf("search for neighbors done\n");
+             //printf("============== numFlockmates: %d ==============\n", numFlockmates); 
 	// Step 3. If they are flockmates, compute the three rules
         if(numFlockmates > 0){
 		acc_separation = float4(0.f, 0.f, 0.f, 0.f);
