@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-SET(SRC main.cpp structs.cpp domain/IV.cpp boids.cpp)
+SET(SRC main.cpp structs.cpp domain/IV.cpp boids.cpp Vec3i.cpp)
 INCLUDE_DIRECTORIES(. domain ian utilities)
 
 
