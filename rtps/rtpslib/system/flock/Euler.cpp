@@ -50,7 +50,7 @@ void FLOCK::cpuEuler()
     float4 acc_separation, acc_alignment, acc_cohesion;
 
     float w_sep = 0.0f;
-    float w_aln = .000f;
+    float w_aln = 0.0f;
     float w_coh = 0.0f;
 
     float4 bndMax = params.grid_max;// - params->boundary_distance;
@@ -67,7 +67,7 @@ void FLOCK::cpuEuler()
         acc = float4(0.f, 0.f, 0.f, 0.f);
         numFlockmates = 0;
 
-	#if 1 
+	#if 0 
 	// print boid info
 		if (i == 0 || i == 1) {
 			printf("================= Position boid %d ==============\n", i);
@@ -147,13 +147,14 @@ void FLOCK::cpuEuler()
 
 		    // Separation
 		    acc += acc_separation * w_sep;
-
+//acc_separation.print("separation: ");
 		    // Alignment
 		    acc_alignment = acc_alignment / numFlockmates;
 		    acc_alignment = acc_alignment - v1;
 		    acc_alignment = normalize(acc_alignment);
 		
 		    acc += acc_alignment * w_aln;
+//acc_alignment.print("alignment: ");
 
 		    // Cohesion
 		    acc_cohesion = acc_cohesion / numFlockmates;
@@ -161,6 +162,7 @@ void FLOCK::cpuEuler()
 		    acc_cohesion = normalize(acc_cohesion);
 
 		    acc += acc_cohesion * w_coh;
+//acc_cohesion.print("cohesion: ");
 	    }
 
         // Step 4. Constrain acceleration
@@ -169,6 +171,7 @@ void FLOCK::cpuEuler()
                 // set magnitude to MaxChangeInAcc
                 acc = acc * (maxchange/accspeed);
         }
+acc.print("acceleration: ");
 
         // Step 5. Add acceleration to velocity
         v1 += acc;
@@ -181,7 +184,7 @@ void FLOCK::cpuEuler()
                 // set magnitude to MaxSpeed
                 v1 = v1 * (maxspeed/speed);
         }
-	 
+v1.print("velocity: "); 
         //float scale = params.simulation_scale;
         //v.x += h*f.x / scale;
         //v.y += h*f.y / scale;
