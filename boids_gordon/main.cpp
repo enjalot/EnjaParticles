@@ -2,7 +2,7 @@
 
 #include <vector>
 #include "glincludes.h"
-#include "struct.h"
+//#include "struct.h"
 #include <domain/IV.h>
 #include "boids.h"
 
