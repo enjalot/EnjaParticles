@@ -4,7 +4,7 @@
 Boids::Boids(VF& pos_) : pos(pos_)
 {
 	DESIRED_SEPARATION = 20.;
-	NEIGHBOR_RADIUS = 15.;
+	NEIGHBOR_RADIUS = 5.;
 	MAX_FORCE = 10.;
 	MAX_SPEED = 0.7; 
 
@@ -18,7 +18,7 @@ Boids::Boids(VF& pos_) : pos(pos_)
 	wcoh = 0.007; // makes particles implode (must be a mistake?)
 
 	// not quite correct. There is some asymmetry
-	wsep = 1.; // must be very strong compared to wcoh
+	wsep = 0.1; // must be very strong compared to wcoh
 
 	// might be slight error: lower left corner
 	walign = .10;  // particles end in a steady configuration
@@ -80,7 +80,7 @@ float4 Boids::avg_separ(VI& neigh, VF& pos, int i)
 		//pos[neigh[k]].print("neighbor");
 		//float4 diff = pos[neigh[k]] - pos[i];
 		float d = diff.length();
-		printf("sep= %f, desired sep= %f\n", d, desired_separ);
+		//printf("sep= %f, desired sep= %f\n", d, desired_separ);
 		if (d < desired_separ) {
 			diff = normalize3(diff);
 			diff = diff / d;
@@ -119,13 +119,15 @@ void Boids::update()
 		float4 sep = avg_separ(neigh, pos, i);
 		//printf("size= %d\n", neigh.size()); // nb neighbors sometimes reaches 30!
 		float4 coh = avg_value(neigh, pos) - pos[i];
+		coh = normalize3(coh);
 
 		float4 align = avg_value(neigh, vel) - vel[i];
 		float align_mag = align.length();
-		float4 align_norm = normalize3(align);
-		if (align_mag > MAX_FORCE) {
-			align = align_norm*MAX_FORCE;
-		}
+		//float4 align_norm = normalize3(align);
+		//if (align_mag > MAX_FORCE) {
+			//align = align_norm*MAX_FORCE;
+		//}
+		align = normalize3(align);
 
 		//printf("------\n");
 		//sep.print("sep");
@@ -148,15 +150,15 @@ void Boids::update()
 
 		//vel[i] = vel[i] + acc[i];
 		float4 v = float4(-pos[i].y, pos[i].x, 0, 0.);
-		v = v*.02;
+		v = v*.00;
 		vel[i] = v + acc[i];
 		pos[i] = pos[i] + vel[i];
 		//pos[i] = pos[i] + acc[i] + vel[i];
 		//acc[i].print("acc");
-		if (pos[i].x > dim)  pos[i].x = -dim;
-		if (pos[i].x < -dim) pos[i].x =  dim;
-		if (pos[i].y > dim)  pos[i].y = -dim;
-		if (pos[i].y < -dim) pos[i].y =  dim;
+		if (pos[i].x >= dim)  pos[i].x = -dim;
+		if (pos[i].x <= -dim) pos[i].x =  dim;
+		if (pos[i].y >= dim)  pos[i].y = -dim;
+		if (pos[i].y <= -dim) pos[i].y =  dim;
 	}
 	//exit(0);
 }
