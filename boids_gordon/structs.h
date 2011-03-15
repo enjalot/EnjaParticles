@@ -78,6 +78,10 @@ typedef struct float4
 		printf("%s: %e, %e, %e, %f\n", msg, x, y, z, w);
 	}
 
+    void printd(const char* msg=0) {
+		printf("%s: %18.11e, %18.11e, %18.11e, %f\n", msg, x, y, z, w);
+	}
+
 	friend float4 operator-(float4& a, float4& b) {
 		float4 c = float4(a.x-b.x, a.y-b.y, a.z-b.z, a.w-b.w);
 		return c;

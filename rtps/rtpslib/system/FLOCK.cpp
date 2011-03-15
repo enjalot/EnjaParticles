@@ -470,7 +470,8 @@ void FLOCK::prepareSorted()
  
     std::fill(forces.begin(), forces.end(),float4(0.0f, 1.0f, 0.0f, 0.0f));
     //std::fill(velocities.begin(), velocities.end(),float4(rand(), rand(), rand(), 0.0f));
-    std::fill(velocities.begin(), velocities.end(), float4(0.1f, 0.1f, 0.1f, 0.f));
+    //std::fill(velocities.begin(), velocities.end(), float4(0.1f, 0.1f, 0.1f, 0.f));
+    std::fill(velocities.begin(), velocities.end(), float4(1.f, 0.0f, 0.0f, 0.f));
     std::fill(veleval.begin(), veleval.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
 
     std::fill(densities.begin(), densities.end(), 0.0f);
