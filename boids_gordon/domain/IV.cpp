@@ -21,7 +21,10 @@ std::vector<float4> addRect(int num, float4 min, float4 max, float spacing, floa
     float zmin = min.z / scale;
     float zmax = max.z / scale;
 
-    std::vector<float4> rvec(num);
+    std::vector<float4>* rvec_p = new std::vector<float4>;; 
+    std::vector<float4>& rvec = *rvec_p;
+	rvec.resize(num);
+
     int i=0;
     for (float z = zmin; z <= zmax; z+=spacing) {
     for (float y = ymin; y <= ymax; y+=spacing) {
