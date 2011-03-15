@@ -28,15 +28,17 @@ Boids* initBoids()
 {
 	float4 center = float4(-75.,0.,0.,1.);
 	float radius = 30.;
-	float spacing = 3.0f;
+	float spacing = 10.0f;
 	float scale = 1.f;
 
-	float edge = 20.f;
-	float4 min = float4(-edge+50.f, -edge+50.f, 0., 0.);
-	float4 max = float4( edge+50.f,  edge+50.f, 0., 0.);
+	float edge = 100.f;
+	float offsetx = 0.f;
+	float offsety = 0.f;
+	float4 min = float4(-edge+offsetx, -edge+offsety, 0., 0.);
+	float4 max = float4( edge+offsetx,  edge+offsety, 0., 0.);
 
-	//int num = 2024;
-	int num = 4;
+	//int num = 4;// 2024;
+	int num = 2024;
 	VF pos(num);
 	//pos = addCircle(num, center, radius, spacing, scale);
 	GE_addRect(num, min, max, spacing, scale, pos);
@@ -69,7 +71,8 @@ void display()
 
    boids->update();
    count++;
-   //if (count > 1) exit(0);
+   //if (count > 1) for (;;) ;
+      //exit(0);
 
    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -114,7 +117,7 @@ void idleFunc()
 //----------------------------------------------------------------------
 void reshapeFunc(int w, int h) 
 {
-  float dim = 200.;
+  float dim = 300.;
 
   glViewport (0, 0, w, h);
 

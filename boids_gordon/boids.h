@@ -1,5 +1,6 @@
 
 #include <vector>
+#include "ArrayT.h"
 #include "structs.h"
 using namespace std;
 using namespace rtps;
@@ -17,6 +18,11 @@ private:
 
 	float dim;  // dimension of domain (a square)
 
+	float xmin, xmax;
+	float ymin, ymax;
+	int nx, ny; // nb cells in x,y
+	float dx, dy;
+
 	float DESIRED_SEPARATION; // 2.;
 	float NEIGHBOR_RADIUS; // 2.;
 	float MAX_FORCE; // 10.;
@@ -25,7 +31,6 @@ private:
 	VF pos;
 	VF vel;
 	VF acc;
-
 
 public:
 	Boids(VF& pos);
@@ -38,6 +43,8 @@ public:
 	void setDomainSize(float dim) {this->dim = dim;}
 	float getDomainSize() { return dim; }
 	float getDesiredSeparation() { return DESIRED_SEPARATION; }
+
+	VI* neigh_list; 
 
 	VF& getPos() { return pos; }
 	VF& getVel() { return vel; }

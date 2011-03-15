@@ -23,13 +23,14 @@ void GE_addRect(int num, float4 min, float4 max, float spacing, float scale, std
 	rvec.resize(num);
 
     int i=0;
-    for (float z = zmin; z <= zmax+.5*(zmax-zmin); z+=spacing) {
-    for (float y = ymin; y <= ymax+.5*(ymax-ymin); y+=spacing) {
-    for (float x = xmin; x <= xmax+.5*(xmax-xmin); x+=spacing) {
+//    for (float z = zmin; z <= zmax+.5*(zmax-zmin); z+=spacing) {
+	float z = 0.f;
+    for (float y = ymin; y <= ymax+.0*(ymax-ymin); y+=spacing) {
+    for (float x = xmin; x <= xmax+.0*(xmax-xmin); x+=spacing) {
         if (i >= num) break;				
         rvec[i] = float4(x,y,z,1.0f);
         i++;
-    }}}
+    }} //}
     rvec.resize(i);
 
 }
