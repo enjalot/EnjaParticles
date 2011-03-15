@@ -26,34 +26,35 @@ Boids* boids;
 //----------------------------------------------------------------------
 Boids* initBoids()
 {
-	float4 center = float4(-150.,0.,0.,1.);
+	float4 center = float4(-75.,0.,0.,1.);
 	float radius = 30.;
 	float spacing = 3.0f;
-	float scale = 1.;
-	//float avg_vel = 00.00025;
-	float avg_vel = 250.;
+	float scale = 1.f;
 
-	//float wcoh = 1.;
-	//float wsep = 1.;
-	//float walign = 1.;
-
-	float edge = 50;
-	float4 min = float4(-edge+50, -edge+50, 0., 0.);
-	float4 max = float4( edge+50,  edge+50, 0., 0.);
+	float edge = 20.f;
+	float4 min = float4(-edge+50.f, -edge+50.f, 0., 0.);
+	float4 max = float4( edge+50.f,  edge+50.f, 0., 0.);
 
 	int num = 2024;
 	VF pos(num);
 	//pos = addCircle(num, center, radius, spacing, scale);
-	pos = addRect(num, min, max, spacing, scale);
+	pos = GE_addRect(num, min, max, spacing, scale);
+	#if 0
+	pos[0] = float4(-edge, -edge, 0., 1.);
+	pos[1] = float4( edge, -edge, 0., 1.);
+	pos[2] = float4( edge,  edge, 0., 1.);
+	pos[3] = float4(-edge,  edge, 0., 1.);
+	#endif
 
 	VF vel, acc;
 	acc.resize(pos.size());
 	vel.resize(pos.size());
 
+	//printf("before constructor: pos.size= %d\n", pos.size());
 	Boids* boids = new Boids(pos);
 
 	for (int i=0; i < vel.size(); i++) {
-		vel[i] = float4(avg_vel,0.,0.,1.);
+		vel[i] = float4(0.,0.,0.,1.);
 		acc[i] = float4(0.,0.,0.,1.);
 	}
 
@@ -63,14 +64,38 @@ Boids* initBoids()
 //----------------------------------------------------------------------
 void display()
 {
+	static int count=0;
+
    boids->update();
+   count++;
+   //if (count > 1) exit(0);
+
    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+   // grid overlay based on desired min boid separation
+   glBegin(GL_LINES);
+   	glColor3f(.2,.2,.2);
+	float dim = boids->getDomainSize();
+	float sep = boids->getDesiredSeparation();
+	int nb = 2*dim/sep;
+	for (int j=0; j < nb; j++) {
+	for (int i=0; i < nb; i++) {
+		glVertex2f(-dim+i*sep, -dim+j*sep);
+		glVertex2f(-dim+(i+1)*sep, -dim+j*sep);
+	}}
+	for (int i=0; i < nb; i++) {
+	for (int j=0; j < nb; j++) {
+		glVertex2f(-dim+i*sep, -dim+j*sep);
+		glVertex2f(-dim+i*sep, -dim+(j+1)*sep);
+	}}
+   glEnd();
+
    VF& pos = boids->getPos();
    glBegin(GL_POINTS);
+   	  glColor3f(1.,1.,1.);
    	  for (int i=0; i < pos.size(); i++) {
-	  	glVertex2d(pos[i].x, pos[i].y);
+	  	glVertex2f(pos[i].x, pos[i].y);
 	  }
    glEnd();
 

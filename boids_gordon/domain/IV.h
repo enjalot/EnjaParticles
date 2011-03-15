@@ -10,6 +10,7 @@ namespace rtps
 {
 
 
+vector<float4> GE_addRect(int num, float4 min, float4 max, float spacing, float scale);
 vector<float4> addRect(int num, float4 min, float4 max, float spacing, float scale);
 vector<float4> addSphere(int num, float4 center, float radius, float spacing, float scale);
 vector<float4> addCircle(int num, float4 center, float radius, float spacing, float scale);

@@ -30,12 +30,14 @@ private:
 public:
 	Boids(VF& pos);
 	~Boids();
-	VI neighbors(vector<float4>& pos, int which);
+	void neighbors(vector<float4>& pos, int which, VI& neighbors);
 	float4 avg_value(VI& neigh, VF& val); 
 	float4 avg_separ(VI& neigh, VF& pos, int i);
 	void set_ic(VF pos, VF vel, VF acc);
 	void update();
 	void setDomainSize(float dim) {this->dim = dim;}
+	float getDomainSize() { return dim; }
+	float getDesiredSeparation() { return DESIRED_SEPARATION; }
 
 	VF& getPos() { return pos; }
 	VF& getVel() { return vel; }

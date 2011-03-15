@@ -4,38 +4,47 @@
 Boids::Boids(VF& pos_) : pos(pos_)
 {
 	DESIRED_SEPARATION = 20.;
-	NEIGHBOR_RADIUS = 20.;
+	NEIGHBOR_RADIUS = 15.;
 	MAX_FORCE = 10.;
-	MAX_SPEED = .1;
+	MAX_SPEED = 0.7; 
 
 	wcoh = 0.;
 	wsep = 0.;
 	walign = 0.;
 
-	wcoh = 0.0;
-	wsep = 1.;
-	walign = 1.;
+	// pure separation
+	// with particles on a rectangle, upper right corner separates. That must be an error
+	// probably correct: symmetries are maintained
+	wcoh = 0.007; // makes particles implode (must be a mistake?)
+
+	// not quite correct. There is some asymmetry
+	wsep = 1.; // must be very strong compared to wcoh
+
+	// might be slight error: lower left corner
+	walign = .10;  // particles end in a steady configuration
+
+	//printf("constructor: pos.size= %d\n", pos.size());
 }
 //----------------------------------------------------------------------
 Boids::~Boids()
 {
 }
 //----------------------------------------------------------------------
-vector<int> Boids::neighbors(vector<float4>& pos, int which) 
+void Boids::neighbors(vector<float4>& pos, int which, VI& neigh) 
 // h is the search radius
 {
-	VI neigh;
+	//printf("neigh size= %d\n", neigh.size());
 	float dist;
 	float h = NEIGHBOR_RADIUS;
 
 		for (int j=0; j < pos.size(); j++) {
 			if (which == j) continue;
 			float4 d = pos[which] - pos[j];
-			dist = d.length();
-			if (dist < h) neigh.push_back(j);
+			dist = d.length(); // uses a sqrt (inefficient)
+			if (dist <= h) neigh.push_back(j);
 		}
 	//printf("sz= %d\n", neigh.size());
-	return neigh;
+	//return neigh;
 }
 //----------------------------------------------------------------------
 float4 Boids::avg_value(VI& neigh, VF& val) //, float4& posi)
@@ -56,25 +65,32 @@ float4 Boids::avg_separ(VI& neigh, VF& pos, int i)
 	float4 steer = float4(0.,0.,0.,1.);
 	int count = 0;
 
-	//printf("neigh size= %d\n", neigh.size());
+	// The way this works: only edge particles should expand outward, and then 
+	// the flock slowly expands
+
+	pos[i].print("***** pos *****");
+	pos[i].printd("***** pos_d *****");
+
+	printf("neigh size= %d\n", neigh.size());
 	//if (neigh.size() > 10) exit(0);
 
 	for (int k=0; k < neigh.size(); k++) {
 		// vector pointing from neighbor to local boid
 		float4 diff = pos[i] - pos[neigh[k]];
+		//pos[neigh[k]].print("neighbor");
 		//float4 diff = pos[neigh[k]] - pos[i];
 		float d = diff.length();
-		//printf("d= %f, desired sep= %f\n", d, desired_separ);
+		printf("sep= %f, desired sep= %f\n", d, desired_separ);
 		if (d < desired_separ) {
 			diff = normalize3(diff);
 			diff = diff / d;
 			steer = steer + diff;
 			count++;
 		}
-		if (count > 0) {
-			//printf("count= %d\n", count);
-			steer = steer / count;
-		}
+	}
+	if (count > 0) {
+		//printf("count= %d\n", count);
+		steer = steer / count;
 	}
 	//steer.print("st");
 	return steer;
@@ -93,10 +109,15 @@ void Boids::update()
 	float desired_sep = DESIRED_SEPARATION;
 
 
+	printf("========== ENTER UPDATE ===============\n");
+	printf("pos.size= %d\n", pos.size());
 	for (int i=0; i < pos.size(); i++) {
-		VI neigh = neighbors(pos, i);
+		VI neigh;
+		neighbors(pos, i, neigh); 
+		//VI neigh = neighbors(pos, i); // return might have error on linux!
 
 		float4 sep = avg_separ(neigh, pos, i);
+		//printf("size= %d\n", neigh.size()); // nb neighbors sometimes reaches 30!
 		float4 coh = avg_value(neigh, pos) - pos[i];
 
 		float4 align = avg_value(neigh, vel) - vel[i];
@@ -114,8 +135,10 @@ void Boids::update()
 		acc[i] = acc[i] + wcoh*coh +wsep*sep + walign*align;
 		float acc_mag = acc[i].length();
 		float4 acc_norm = normalize3(acc[i]);
+		// MAX_SPEED is crucial
 		if (acc_mag > MAX_SPEED) { 
 			acc[i] = acc_norm*MAX_SPEED;
+			;
 		}
 		acc[i].w = 1.;
 
@@ -125,7 +148,7 @@ void Boids::update()
 
 		//vel[i] = vel[i] + acc[i];
 		float4 v = float4(-pos[i].y, pos[i].x, 0, 0.);
-		v = v*.01;
+		v = v*.02;
 		vel[i] = v + acc[i];
 		pos[i] = pos[i] + vel[i];
 		//pos[i] = pos[i] + acc[i] + vel[i];
