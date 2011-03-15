@@ -18,7 +18,7 @@ Boids::Boids(VF& pos_) : pos(pos_)
 	wcoh = 0.030; //0.015; // makes particles implode (must be a mistake?)
 
 	// not quite correct. There is some asymmetry
-	wsep = .08; // must be very strong compared to wcoh
+	wsep = .3; // must be very strong compared to wcoh
 
 	// might be slight error: lower left corner
 	walign = 0.3; //.03;  // particles end in a steady configuration
@@ -96,7 +96,6 @@ float4 Boids::avg_separ(VI& neigh, VF& pos, int i)
 		//diff.print("diff");
 		//float4 diff = pos[neigh[k]] - pos[i];
 		float d = diff.length();
-        printf("dddddd %f\n", d);
 		//printf("sep= %f, desired sep= %f\n", d, desired_separ);
 		if (d < desired_separ) {
 			diff = normalize3(diff);
@@ -154,7 +153,7 @@ void Boids::update()
 
 		acc[i] = acc[i] + wcoh*coh +wsep*sep + walign*align;
 		float acc_mag = acc[i].length();
-		acc[i].print("acc");
+		//acc[i].print("acc");
 		float4 acc_norm = normalize3(acc[i]);
 		// MAX_SPEED is crucial
 		if (acc_mag > MAX_SPEED) { 
