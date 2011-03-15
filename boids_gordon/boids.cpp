@@ -80,6 +80,7 @@ float4 Boids::avg_separ(VI& neigh, VF& pos, int i)
 		//pos[neigh[k]].print("neighbor");
 		//float4 diff = pos[neigh[k]] - pos[i];
 		float d = diff.length();
+        printf("dddddd %f\n", d);
 		//printf("sep= %f, desired sep= %f\n", d, desired_separ);
 		if (d < desired_separ) {
 			diff = normalize3(diff);

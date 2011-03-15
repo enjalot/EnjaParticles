@@ -7,7 +7,7 @@ namespace rtps
 {
 
 //----------------------------------------------------------------------
-std::vector<float4> GE_addRect(int num, float4 min, float4 max, float spacing, float scale)
+void GE_addRect(int num, float4 min, float4 max, float spacing, float scale, std::vector<float4>& rvec)
 {
 /*!
  * Create a rectangle with at most num particles in it.
@@ -20,8 +20,6 @@ std::vector<float4> GE_addRect(int num, float4 min, float4 max, float spacing, f
     float zmin = min.z / scale;
     float zmax = max.z / scale;
 
-    std::vector<float4>* rvec_p = new std::vector<float4>;; 
-    std::vector<float4>& rvec = *rvec_p;
 	rvec.resize(num);
 
     int i=0;
@@ -33,11 +31,10 @@ std::vector<float4> GE_addRect(int num, float4 min, float4 max, float spacing, f
         i++;
     }}}
     rvec.resize(i);
-    return rvec;
 
 }
 //----------------------------------------------------------------------
-std::vector<float4> addRect(int num, float4 min, float4 max, float spacing, float scale)
+void addRect(int num, float4 min, float4 max, float spacing, float scale, std::vector<float4>& rvec)
 {
 /*!
  * Create a rectangle with at most num particles in it.
@@ -52,8 +49,6 @@ std::vector<float4> addRect(int num, float4 min, float4 max, float spacing, floa
     float zmin = min.z / scale;
     float zmax = max.z / scale;
 
-    std::vector<float4>* rvec_p = new std::vector<float4>;; 
-    std::vector<float4>& rvec = *rvec_p;
 	rvec.resize(num);
 
     int i=0;
@@ -65,13 +60,12 @@ std::vector<float4> addRect(int num, float4 min, float4 max, float spacing, floa
         i++;
     }}}
     rvec.resize(i);
-    return rvec;
 
 }
 
 
 //----------------------------------------------------------------------
-std::vector<float4> addCircle(int num, float4 center, float radius, float spacing, float scale)
+void addCircle(int num, float4 center, float radius, float spacing, float scale, std::vector<float4>& rvec)
 {
 /*!
  * Create a rectangle with at most num particles in it.
@@ -87,7 +81,7 @@ std::vector<float4> addCircle(int num, float4 center, float radius, float spacin
     float r2 = radius*radius;
     float d2 = 0.0f;
 
-    std::vector<float4> rvec(num);
+    rvec.resize(num);
     int i=0;
 	float z = 0.0f;
 	center.z = 0.0f;
@@ -102,10 +96,9 @@ std::vector<float4> addCircle(int num, float4 center, float radius, float spacin
         i++;
     }}
     rvec.resize(i);
-    return rvec;
 }
 //----------------------------------------------------------------------
-std::vector<float4> addSphere(int num, float4 center, float radius, float spacing, float scale)
+void addSphere(int num, float4 center, float radius, float spacing, float scale, std::vector<float4>& rvec)
 {
 /*!
  * Create a rectangle with at most num particles in it.
@@ -121,7 +114,7 @@ std::vector<float4> addSphere(int num, float4 center, float radius, float spacin
     float r2 = radius*radius;
     float d2 = 0.0f;
 
-    std::vector<float4> rvec(num);
+    rvec.resize(num);
     int i=0;
     for (float z = zmin; z <= zmax; z+=spacing) {
     for (float y = ymin; y <= ymax; y+=spacing) {
@@ -133,11 +126,10 @@ std::vector<float4> addSphere(int num, float4 center, float radius, float spacin
         i++;
     }}}
     rvec.resize(i);
-    return rvec;
 }
 //----------------------------------------------------------------------
 
-std::vector<float4> addRandRect(int num, float4 min, float4 max, float spacing, float scale, float4 dmin, float4 dmax)
+void addRandRect(int num, float4 min, float4 max, float spacing, float scale, float4 dmin, float4 dmax, std::vector<float4>& rvec)
 {
 /*!
  * Create a rectangle with at most num particles in it.
@@ -156,7 +148,7 @@ max.print("Box max: ");
     float zmin = min.z  / scale;
     float zmax = max.z  / scale;
 
-    std::vector<float4> rvec(num);
+    rvec.resize(num);
     int i=0;
     for (float z = zmin; z <= zmax; z+=spacing) {
     for (float y = ymin; y <= ymax; y+=spacing) {
@@ -167,12 +159,11 @@ max.print("Box max: ");
         i++;
     }}}
     rvec.resize(i);
-    return rvec;
 
 }
 
 
-std::vector<float4> addRandSphere(int num, float4 center, float radius, float spacing, float scale, float4 dmin, float4 dmax)
+void addRandSphere(int num, float4 center, float radius, float spacing, float scale, float4 dmin, float4 dmax, std::vector<float4>& rvec)
 {
 /*!
  * Create a rectangle with at most num particles in it.
@@ -192,7 +183,7 @@ std::vector<float4> addRandSphere(int num, float4 center, float radius, float sp
     float r2 = radius*radius;
     float d2 = 0.0f;
 
-    std::vector<float4> rvec(num);
+    rvec.resize(num);
     int i=0;
     for (float z = zmin; z <= zmax; z+=spacing) {
     for (float y = ymin; y <= ymax; y+=spacing) {
@@ -204,15 +195,13 @@ std::vector<float4> addRandSphere(int num, float4 center, float radius, float sp
         i++;
     }}}
     rvec.resize(i);
-    return rvec;
 }
 
-std::vector<float4> addRandArrangement(int num, float scale, float4 dmin, float4 dmax)
+void addRandArrangement(int num, float scale, float4 dmin, float4 dmax, std::vector<float4>& rvec)
 {
-
-    	srand(time(NULL));	
+    srand(time(NULL));	
 	
-    	std::vector<float4> rvec(num);
+    rvec.resize(num);
 	int i=0;
 
 	for(int z=dmin.z/scale; z <= dmax.z/scale; z+=0.3){
@@ -223,10 +212,9 @@ std::vector<float4> addRandArrangement(int num, float scale, float4 dmin, float4
 		i++;
 	}}}
 	rvec.resize(i);
-	return rvec;
 }
 
-std::vector<float4> addDisc(int num, float4 center, float4 u, float4 v, float radius, float spacing)
+void addDisc(int num, float4 center, float4 u, float4 v, float radius, float spacing, std::vector<float4>& rvec)
 {
 
     printf("num: %d\n", num);
@@ -240,7 +228,6 @@ std::vector<float4> addDisc(int num, float4 center, float4 u, float4 v, float ra
     printf("umin %f %f %f %f\n", umin.x, umin.y, umin.z, umin.w);
     printf("vmin %f %f %f %f\n", vmin.x, vmin.y, vmin.z, vmin.w);
 
-    std::vector<float4> rvec;
     int i = 0;
     float d2 = 0.;
     float r2 = radius*radius;
@@ -259,7 +246,6 @@ std::vector<float4> addDisc(int num, float4 center, float4 u, float4 v, float ra
         }
     }
     }
-    return rvec;
 
 }
 

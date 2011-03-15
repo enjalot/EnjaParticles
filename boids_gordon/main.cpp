@@ -35,10 +35,11 @@ Boids* initBoids()
 	float4 min = float4(-edge+50.f, -edge+50.f, 0., 0.);
 	float4 max = float4( edge+50.f,  edge+50.f, 0., 0.);
 
-	int num = 2024;
+	//int num = 2024;
+	int num = 4;
 	VF pos(num);
 	//pos = addCircle(num, center, radius, spacing, scale);
-	pos = GE_addRect(num, min, max, spacing, scale);
+	GE_addRect(num, min, max, spacing, scale, pos);
 	#if 0
 	pos[0] = float4(-edge, -edge, 0., 1.);
 	pos[1] = float4( edge, -edge, 0., 1.);
@@ -99,6 +100,10 @@ void display()
 	  }
    glEnd();
 
+   if( count > 2)
+   {
+    exit(0);
+   }
    glutSwapBuffers();
 }
 //----------------------------------------------------------------------
