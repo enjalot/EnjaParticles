@@ -36,7 +36,12 @@ void FLOCK::cpuEuler()
     #define MinUrgency      	0.05f   // .05f
     #define MaxUrgency      	0.1f    // .1f
 
+	static int count = 0;
+
     float h = ps->settings.dt;
+
+	printf("enter CPUEuler: count= %d\n", count);
+	count++;
 
     float4 acc;
     int numFlockmates=0;
@@ -51,7 +56,7 @@ void FLOCK::cpuEuler()
 
     float w_sep = 0.0f;
     float w_aln = .000f;
-    float w_coh = 0.0f;
+    float w_coh = 0.01f;
 
     float4 bndMax = params.grid_max;// - params->boundary_distance;
     float4 bndMin = params.grid_min;// + params->boundary_distance;
@@ -61,6 +66,11 @@ void FLOCK::cpuEuler()
     {
 	    // boid in case
 	    p1 = positions[i];
+		if (p1.x != p1.x || p1.y != p1.y || p1.z != p1.z || p1.w != p1.w) {
+			printf("BEFORE, p1 = nan\n");
+			p1.print("BEFORE p1");
+			exit(0);
+		}
         v1 = velocities[i];
 
 	    // initialize acc to zero
@@ -110,19 +120,17 @@ void FLOCK::cpuEuler()
         		
                 // Separation
         		separation = p2- p1;
-               	d = sqrt((p2.x-p1.x)*(p2.x-p1.x) + (p2.y-p1.y)*(p2.y-p1.y) + (p2.z-p1.z)*(p2.z-p1.z));
+               	//d = sqrt((p2.x-p1.x)*(p2.x-p1.x) + (p2.y-p1.y)*(p2.y-p1.y) + (p2.z-p1.z)*(p2.z-p1.z));
+				d = separation.length();
                 r = d / separationdist;  
 
-        		separation = normalize(separation);
+        		separation = normalize3(separation);
 
         		if(d >= separationdist){
                 		separation = separation * r;
         		}
-        		else if(d <= separationdist){
+        		else if(d < separationdist){
                 		separation = separation * -r;
-        		}
-        		else{
-                		separation = separation * 0.f;
         		}
 
 			    acc_separation += separation;
@@ -146,37 +154,47 @@ void FLOCK::cpuEuler()
             // adding the rules to the acceleration vector
 
 		    // Separation
+			acc_separation.print("acc_separation");
 		    acc += acc_separation * w_sep;
 
 		    // Alignment
+			acc_alignment.print("1 acc_alignment"); // nan
 		    acc_alignment = acc_alignment / numFlockmates;
+			acc_alignment.print("2 acc_alignment"); // nan
+			printf("numFlockmakes= %d\n", numFlockmates);
+			//v1.print("v1");
 		    acc_alignment = acc_alignment - v1;
-		    acc_alignment = normalize(acc_alignment);
+			acc_alignment.print("2.5 acc_alignment"); // nan
+		    acc_alignment = normalize3(acc_alignment);
+			acc_alignment.print("3 acc_alignment"); // nan
 		
 		    acc += acc_alignment * w_aln;
 
 		    // Cohesion
 		    acc_cohesion = acc_cohesion / numFlockmates;
 		    acc_cohesion = acc_cohesion - p1;
-		    acc_cohesion = normalize(acc_cohesion);
+		    acc_cohesion = normalize3(acc_cohesion);
+			acc_cohesion.print("acc_cohesion");
 
 		    acc += acc_cohesion * w_coh;
 	    }
 
         // Step 4. Constrain acceleration
-        float accspeed = magnitude(acc);
+        float accspeed = magnitude3(acc);
         if(accspeed > maxchange){
                 // set magnitude to MaxChangeInAcc
                 acc = acc * (maxchange/accspeed);
         }
 
         // Step 5. Add acceleration to velocity
+		acc.print("acc");
         v1 += acc;
 
-        v1.x += MinUrgency;
+		// remove for debugging
+        //v1.x += MinUrgency;
 
         // Step 6. Constrain velocity
-        float speed = magnitude(v1);
+        float speed = magnitude3(v1);
         if(speed > maxspeed){
                 // set magnitude to MaxSpeed
                 v1 = v1 * (maxspeed/speed);
@@ -192,6 +210,11 @@ void FLOCK::cpuEuler()
         p1.y += h*v1.y;
         p1.z += h*v1.z;
         p1.w = 1.0f; //just in case
+
+		if (p1.x != p1.x || p1.y != p1.y || p1.z != p1.z || p1.w != p1.w) {
+			printf("h= %f\n", (float) h);
+			v1.print("v1");
+		}
 
 	    // Step 8. Check boundary conditions
         if(p1.x >= bndMax.x){
@@ -230,6 +253,12 @@ void FLOCK::cpuEuler()
         // write values
         velocities[i] = v1;
         positions[i] = p1;
+		if (p1.x != p1.x || p1.y != p1.y || p1.z != p1.z || p1.w != p1.w) {
+			printf("GE i= %d\n", i);
+			printf("AFTER nan\n");
+			p1.print("AFTER p1");
+			exit(1);
+		}
     }
 
     //printf("v.z %f p.z %f \n", velocities[0].z, positions[0].z);
