@@ -156,7 +156,7 @@ max.print("Box max: ");
     for (float x = xmin; x <= xmax; x+=spacing) {
         if (i >= num) break;	
 //printf("adding particles: %f, %f, %f\n", x, y, z);			
-        rvec[i] = float4(x-rand()/RAND_MAX,y-rand()/RAND_MAX,z-rand()/RAND_MAX,1.0f);
+        rvec[i] = float4(x-(float) rand()/RAND_MAX,y-(float) rand()/RAND_MAX,z-(float) rand()/RAND_MAX,1.0f);
         i++;
     }}}
     rvec.resize(i);

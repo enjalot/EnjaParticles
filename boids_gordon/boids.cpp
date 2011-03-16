@@ -3,25 +3,21 @@
 //----------------------------------------------------------------------
 Boids::Boids(VF& pos_) : pos(pos_)
 {
-	DESIRED_SEPARATION = 10.;
-	NEIGHBOR_RADIUS = 15.;  // search grid
+	DESIRED_SEPARATION = 20.;
+	NEIGHBOR_RADIUS = 45.;  // search grid
 	MAX_FORCE = 10.;
-	MAX_SPEED = 1.; 
-
-	wcoh = 0.;
-	wsep = 0.;
-	walign = 0.;
+	MAX_SPEED = 3.; 
 
 	// pure separation
 	// with particles on a rectangle, upper right corner separates. That must be an error
 	// probably correct: symmetries are maintained
-	wcoh = 0.1*0.030; //0.015; // makes particles implode (must be a mistake?)
+	wcoh = 0.8*0.030; //0.015; // makes particles implode (must be a mistake?)
 
 	// not quite correct. There is some asymmetry
-	wsep = 0* .3; // must be very strong compared to wcoh
+	wsep = 0.1* .03; // must be very strong compared to wcoh
 
 	// might be slight error: lower left corner
-	walign = 1*0.3; //.03;  // particles end in a steady configuration
+	walign = 0.1*0.1; //.03;  // particles end in a steady configuration
 
 	//printf("constructor: pos.size= %d\n", pos.size());
 
@@ -119,6 +115,8 @@ float4 Boids::avg_separ(VI& neigh, VF& pos, int i)
 		steer = steer / count;
 		steer = normalize3(steer);
 	}
+	//float steer_lg = steer.length();
+	//if (steer_lg > 1.e-6) steer.print("st");
 	//steer.print("st");
 	return steer;
 }
@@ -136,14 +134,15 @@ void Boids::update()
 	float desired_sep = DESIRED_SEPARATION;
 
 
-	printf("========== ENTER UPDATE ===============\n");
-	printf("pos.size= %d\n", pos.size());
+	//printf("========== ENTER UPDATE ===============\n");
+	//printf("pos.size= %d\n", pos.size());
 	for (int i=0; i < pos.size(); i++) {
 		VI neigh;
 		neighbors(pos_real, i, neigh); 
 		//VI neigh = neighbors(pos, i); // return might have error on linux!
 
 		float4 sep = avg_separ(neigh, pos_real, i);
+		//sep.print("sep");
 		//printf("size= %d\n", neigh.size()); // nb neighbors sometimes reaches 30!
 		float4 coh = avg_value(neigh, pos_real) - pos[i];
 		coh = normalize3(coh);
@@ -165,7 +164,10 @@ void Boids::update()
 		vel_sep[i] = wsep*sep;
 		vel_align[i] = walign*align;
 
-		acc[i] = acc[i] + vel_coh[i] + vel_sep[i] + vel_align[i];
+		//float mag = vel_sep[i].length();
+		//if (mag > 1.e-8) vel_sep[i].print("sep");
+
+		acc[i] = vel[i] + vel_coh[i] + vel_sep[i] + vel_align[i];
 		//acc[i] = acc[i] + wcoh*coh +wsep*sep + walign*align;
 		float acc_mag = acc[i].length();
 		//acc[i].print("acc");
@@ -186,6 +188,7 @@ void Boids::update()
 		float4 v = float4(-3.*pos[i].y, pos[i].x, 0, 0.);
 		v = v*.00;
 		vel[i] = v + acc[i];
+		vel[i].print("vel[i]");
 	}
 
 	for (int i=0; i < pos.size(); i++) {
