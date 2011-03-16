@@ -40,18 +40,17 @@ void FLOCK::cpuEuler()
 
     float4 acc;
     int numFlockmates=0;
-    float4 p1, p2, v1, v2;
-    float d, r;
+    float4 pi, pj, vi, vj;
+    float dist, r;
 
-    int MaxFlockmates = num/2;
-    int flockmates[MaxFlockmates];
+    vector<int>* flockmates;
 
     float4 separation, alignment, cohesion;
     float4 acc_separation, acc_alignment, acc_cohesion;
 
-    float w_sep = 0.75f;
-    float w_aln = 1.f;
-    float w_coh = 0.01f;
+    float w_sep = 0.0f;
+    float w_aln = 0.0f;
+    float w_coh = 0.0f;
 
     float4 bndMax = params.grid_max;// - params->boundary_distance;
     float4 bndMin = params.grid_min;// + params->boundary_distance;
@@ -60,12 +59,12 @@ void FLOCK::cpuEuler()
     for(int i = 0; i < num; i++)
     {
 	// boid in case
-	p1 = positions[i];
-        v1 = velocities[i];
+	pi = positions[i];
+        vi = velocities[i];
 
 	// initialize acc to zero
         acc = float4(0.f, 0.f, 0.f, 0.f);
-    numFlockmates = 0;
+    	numFlockmates = 0;
 	#if 1
 	// print boid info
 		if (i == 0) {
@@ -79,20 +78,18 @@ void FLOCK::cpuEuler()
         // Step 2. Search for neighbors
 	// loop over all boids
         for(int j=0; j < num; j++){
-             if(j != i){
-                    p2 = positions[j];
-//p2.print("p2");
-                    d = sqrt((p2.x-p1.x)*(p2.x-p1.x) + (p2.y-p1.y)*(p2.y-p1.y) + (p2.z-p1.z)*(p2.z-p1.z));
+             	if(j == i)
+			continue;
 
-                    // is boid j a flockmate?
-                    if(d < searchradius){
-                            flockmates[numFlockmates] = j;
-                            numFlockmates++;
+	     	pj = positions[j];
 
-                            // did I find the max num of flockmates already?
-                            if(numFlockmates == MaxFlockmates) break;
-                    }
-             }
+              	float4 d = pi - pj;
+		dist = d.length();
+
+                // is boid j a flockmate?
+                if(dist <= searchradius){
+                    	flockmates.push_back(j);
+             	}
         }
 //printf("search for neighbors done\n");
              //printf("============== numFlockmates: %d ==============\n", numFlockmates); 

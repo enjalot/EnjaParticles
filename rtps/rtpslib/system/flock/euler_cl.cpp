@@ -155,13 +155,13 @@ __kernel void euler(
 //		numFlockmates = 1;
 //	}
 
-	float w_sep = .75f;
+	float w_sep = 1.f;
 	float w_aln = 1.f;
-	float w_coh = .01f;
+	float w_coh = 1.f;
 		
 	float4 bndMax = params->grid_max;// - params->boundary_distance;
 	float4 bndMin = params->grid_min;// + params->boundary_distance;
-
+	
 	// RULE 1. SEPARATION
 	
 	// already computed in cl_density.h
@@ -212,7 +212,7 @@ __kernel void euler(
     	// Step 5. Add acceleration to velocity
     	v += acc;
 
-	v.x += MaxUrgency;
+	v.x += MinUrgency;
 
     	// Step 6. Constrain velocity
     	float speed = length(v);
