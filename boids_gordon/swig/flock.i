@@ -12,7 +12,14 @@
 %include "std_vector.i"
 %include "cstring.i"
 
-/** Import decl details for float4 */
+/** Import decl details for float4 
+ * These are necessary because we cant map
+ *  "friend operator" routines to python's 
+ * __add__, __mul__, etc.
+ * using automatic aspects of swig. We manually
+ * extend the type to have those operators completed
+ * In this file: 
+ */ 
 %include "float4.i"
 
 /** Swig cant provide std::vector of any type. We need to
@@ -25,25 +32,4 @@ namespace std
 }
 
 %include "domain/IV.h"
-
-/** Grabbed from boids.h. Note I removed definitions. */
-using namespace std;
-class Boids
-{
-	typedef vector<rtps::float4> VF;
-	typedef vector<int> VI;
-public:
-	Boids(VF& pos, int dim=300, float wcoh=.03, float wsep=.3, float walign=.1);
-	~Boids();
-	void neighbors(vector<rtps::float4>& pos, int which, VI& neighbors);
-	rtps::float4 avg_value(VI& neigh, VF& val); 
-	rtps::float4 avg_separ(VI& neigh, VF& pos, int i);
-	void set_ic(VF pos, VF vel, VF acc);
-	void update();
-	void setDomainSize(float dim);
-	float getDomainSize();
-	float getDesiredSeparation();
-	VF& getPos();
-	VF& getVel();
-	VF& getAcc();
-};
+%include "boids.h"
