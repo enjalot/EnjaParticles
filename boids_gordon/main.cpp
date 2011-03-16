@@ -65,6 +65,16 @@ Boids* initBoids()
 	return boids;
 }
 //----------------------------------------------------------------------
+void vector_field(VF& pos, VF& vel, float scale)
+{
+	glBegin(GL_LINES);
+		for (int i=0; i < pos.size(); i++) {
+			glVertex2f(pos[i].x, pos[i].y);
+			glVertex2f(pos[i].x+scale*vel[i].x, pos[i].y+scale*vel[i].y);
+		}
+	glEnd();
+}
+//----------------------------------------------------------------------
 void display()
 {
 	static int count=0;
@@ -76,6 +86,9 @@ void display()
 
    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+   glPushMatrix();
+   //glScalef(2.,2.,1.);
 
    // grid overlay based on desired min boid separation
    glBegin(GL_LINES);
@@ -103,6 +116,24 @@ void display()
 	  }
    glEnd();
 
+	#if 1
+   // Draw velocity field
+
+   VF& vc = boids->vel_coh;
+   glColor3f(1., 0., 0.);
+   //vector_field(pos, boids->vel_coh, 100.); // vel, scale
+   glColor3f(0., 1., 0.);
+   //vector_field(pos, boids->vel_sep, 100.); // vel, scale
+   glColor3f(1.,1.,0.);
+   VF& va = boids->vel_align;
+   //vector_field(pos, va, 100.); // vel, scale
+   //for (int i=0; i < va.size(); i++) {
+   	 //va[i].print("va");
+   //}
+
+   #endif
+
+   glPopMatrix();
    glutSwapBuffers();
 }
 //----------------------------------------------------------------------

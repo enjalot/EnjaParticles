@@ -29,8 +29,14 @@ private:
 	float MAX_SPEED; // 10.;
 
 	VF pos;
+	VF pos_real; // no adjustment for periodic Boundary-Conditions (BC)
 	VF vel;
 	VF acc;
+
+public:
+	VF vel_coh;
+	VF vel_sep;
+	VF vel_align;
 
 public:
 	Boids(VF& pos);
