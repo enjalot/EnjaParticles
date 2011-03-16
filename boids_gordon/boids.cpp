@@ -140,7 +140,7 @@ void Boids::update()
 		VI neigh;
 		//neighbors(pos_real, i, neigh); 
 		neighbors(pos, i, neigh); 
-		//VI neigh = neighbors(pos, i); // return might have error on linux!
+		//neigh = neighbors(pos, i); // return might have error on linux!
 
 		//float4 sep = avg_separ(neigh, pos_real, i);
 		float4 sep = avg_separ(neigh, pos, i);

@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 2.8)
 SET (MODULE_NAME flock)
 
 FIND_PACKAGE(SWIG REQUIRED)
