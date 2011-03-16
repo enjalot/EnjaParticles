@@ -61,7 +61,7 @@ typedef struct float4
         v.w = $self->w * d; 
         return v;
     }
-
+/*
     float4 __rdiv__(float r) {
         float4 v; 
         float d = 1./r; 
@@ -71,7 +71,7 @@ typedef struct float4
         v.w = $self->w * d; 
         return v;
     }
-
+*/
     float4 __div__(float r) {
         float4 v; 
         float d = 1./r; 
