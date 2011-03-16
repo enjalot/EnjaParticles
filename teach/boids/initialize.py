@@ -37,9 +37,9 @@ def boids(max_num):
     bmax = Vec([100., 100., 0.])
     spacing = 2.
     num, pos = addRect(max_num, bmin, bmax, spacing)
-    col = np.zeros((max_num, 4), dtype=np.float32)
-    vel = np.zeros((max_num, 4), dtype=np.float32)
-    acc = np.zeros((max_num, 4), dtype=np.float32)
+    col = np.zeros((num, 4), dtype=np.float32)
+    vel = np.zeros((num, 4), dtype=np.float32)
+    acc = np.zeros((num, 4), dtype=np.float32)
     col[:,0] = 1.
     col[:,3] = 1.
 
