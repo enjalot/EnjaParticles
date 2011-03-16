@@ -37,6 +37,7 @@ void FLOCK::cpuEuler()
     #define MinUrgency      	0.05f   // .05f
     #define MaxUrgency      	0.1f    // .1f
 
+
     //static int count = 0;
 
     float h = ps->settings.dt;
@@ -54,12 +55,21 @@ void FLOCK::cpuEuler()
     float w_sep = 0.0f;
     float w_aln = 0.0f;
     float w_coh = 0.0f;
+printf("10\n");//GE
 
     float4 bndMax = params.grid_max;// - params->boundary_distance;
     float4 bndMin = params.grid_min;// + params->boundary_distance;
+printf("11\n");//GE
+bndMax.print("bndMax");
+bndMin.print("bndMin");
+printf("h= %f\n", h);
 
+	// ARE YOU SURE nb_CELLS WILL BE CORRECT? 
+	// what about rounding errors because we dealing with floats? 
     int nb_cells = (int)((bndMax.x-bndMin.x)/h) * (int)((bndMax.y-bndMin.y)/h) * (int)((bndMax.z-bndMin.z)/h);
     vector<int>* flockmates = new vector<int>[nb_cells];
+printf("12\n");//GE 
+exit(0);
 //   int MaxFlockmates = num / 2;
 //   int flockmates[MaxFlockmates];
 //   int numFlockmates = 0;
@@ -91,6 +101,7 @@ printf("flockmates size: %d\n", (*flockmates).size());
         acc = float4(0.f, 0.f, 0.f, 0.f);
         //numFlockmates = 0;
 
+printf("11\n");//GE
 	#if 0 
 	// print boid info
 		if (i == 0 || i == 1) {
@@ -127,6 +138,7 @@ printf("flockmates size: %d\n", (*flockmates).size());
 		int count = 0;
 
                 // Separation
+printf("12\n");//GE
 		for(int j=0; j < (*flockmates).size(); j++){
                 	//pj = positions[flockmates[j]];
 			//vj = velocities[flockmates[j]];
@@ -149,6 +161,7 @@ printf("flockmates size: %d\n", (*flockmates).size());
         		}
 		}
 
+printf("13\n");//GE
 		if(count > 0){
 			acc_separation = acc_separation / count;
 			acc_separation = normalize3(acc_separation);
@@ -183,6 +196,7 @@ printf("flockmates size: %d\n", (*flockmates).size());
 	}   
 
 
+printf("\n");//GE
 	vel_sep = acc_separation * w_sep;
 	vel_aln = acc_alignment  * w_aln;
 	vel_coh = acc_cohesion   * w_coh;
@@ -227,6 +241,7 @@ printf("flockmates size: %d\n", (*flockmates).size());
 acc.print("acceleration: ");
 
 
+printf("4\n");//GE
         // Step 4. Constrain acceleration
         float  acc_mag  = acc.length();
 	float4 acc_norm = normalize3(acc);
@@ -250,6 +265,7 @@ acc.print("acceleration: ");
                 // set magnitude to MaxSpeed
                 v1 = v1 * (maxspeed/speed);
         }
+printf("3\n");//GE
 v1.print("velocity: "); 
 #endif
         //float scale = params.simulation_scale;
@@ -264,6 +280,7 @@ v1.print("velocity: ");
 	positions[i] = positions[i] + velocities[i];
         positions[i].w = 1.0f; //just in case
 
+printf("2\n");//GE
 #if 0
 		if (p1.x != p1.x || p1.y != p1.y || p1.z != p1.z || p1.w != p1.w) {
 			printf("h= %f\n", (float) h);
@@ -315,6 +332,7 @@ v1.print("velocity: ");
 			exit(1);
 		}
 #endif
+printf("1\n");exit(0);  //GE
     }
 
     //printf("v.z %f p.z %f \n", velocities[0].z, positions[0].z);
