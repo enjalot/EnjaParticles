@@ -20,7 +20,7 @@
 namespace std
 {
     %template(intvec) vector<int>; 
-    %template(float4vec) vector<float4>; 
+    %template(float4vec) vector<rtps::float4>; 
     %template(vecvec) vector<vector<int> >; 
 }
 
@@ -30,14 +30,14 @@ namespace std
 using namespace std;
 class Boids
 {
-	typedef vector<float4> VF;
+	typedef vector<rtps::float4> VF;
 	typedef vector<int> VI;
 public:
 	Boids(VF& pos);
 	~Boids();
-	void neighbors(vector<float4>& pos, int which, VI& neighbors);
-	float4 avg_value(VI& neigh, VF& val); 
-	float4 avg_separ(VI& neigh, VF& pos, int i);
+	void neighbors(vector<rtps::float4>& pos, int which, VI& neighbors);
+	rtps::float4 avg_value(VI& neigh, VF& val); 
+	rtps::float4 avg_separ(VI& neigh, VF& pos, int i);
 	void set_ic(VF pos, VF vel, VF acc);
 	void update();
 	void setDomainSize(float dim);
