@@ -1,3 +1,9 @@
+import flock
+
+print("*********  ALL METHODS FROM flock **********")
+print(dir(flock))
+print("*********  END METHODS FROM flock **********")
+
 from flock import *
 
 a = vecvec(10)

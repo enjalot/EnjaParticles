@@ -5,6 +5,7 @@
 #define SWIG_FILE_WITH_INIT
 #include "boids.h"
 #include "structs.h"
+#include "domain/IV.h"
 %}
 
 %include "typemaps.i"
@@ -22,6 +23,8 @@ namespace std
     %template(float4vec) vector<float4>; 
     %template(vecvec) vector<vector<int> >; 
 }
+
+%include "domain/IV.h"
 
 /** Grabbed from boids.h. Note I removed definitions. */
 using namespace std;
