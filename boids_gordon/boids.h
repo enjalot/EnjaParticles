@@ -39,7 +39,7 @@ public:
 	VF vel_align;
 
 public:
-	Boids(VF& pos);
+	Boids(VF& pos, int dim=300, float wcoh=.03, float wsep=.3, float walign=.1);
 	~Boids();
 	void neighbors(vector<float4>& pos, int which, VI& neighbors);
 	float4 avg_value(VI& neigh, VF& val); 

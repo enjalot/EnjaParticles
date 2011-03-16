@@ -62,7 +62,7 @@ Boids* initBoids()
 		acc[i] = float4(0.,0.,0.,1.);
 	}
 
-	#if 1
+	#if 0
 	// random velocities
 	float rscale = 5.;
 	for (int i=0; i < vel.size(); i++) {
@@ -168,6 +168,32 @@ void reshapeFunc(int w, int h)
   boids->setDomainSize(dim);
 }
 //----------------------------------------------------------------------
+
+void timerCB(int ms)
+{
+    //this makes sure the appRender function is called every ms miliseconds
+    glutTimerFunc(ms, timerCB, ms);
+    glutPostRedisplay();
+}
+
+
+//----------------------------------------------------------------------
+void appKeyboard(unsigned char key, int x, int y)
+{
+    //this way we can exit the program cleanly
+    switch(key)
+    {
+        case '\033': // escape quits
+        case '\015': // Enter quits    
+        case 'Q':    // Q quits
+        case 'q':    // q (or escape) quits
+            exit(0);
+            break;
+    }
+}
+
+
+//----------------------------------------------------------------------
 int main(int argc, char** argv)
 {
 	// initialize GL graphics
@@ -181,10 +207,11 @@ int main(int argc, char** argv)
    glutCreateWindow("Gordon's Flocking");
 
    glutDisplayFunc(display);
-   //glutKeyboardFunc(KeyboardFunc);
+   glutKeyboardFunc(appKeyboard);
    //glutSpecialFunc(KeyboardSpecialFunc);
    glutReshapeFunc(reshapeFunc);
-   glutIdleFunc(idleFunc);
+   glutTimerFunc(30, timerCB, 30);
+   //glutIdleFunc(timerCB);
   
    boids = initBoids();
 

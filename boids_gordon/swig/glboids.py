@@ -17,8 +17,8 @@ class window(object):
         #mouse handling for transforming scene
         self.mouse_down = False
 
-        self.width = 640
-        self.height = 480
+        self.width = 512 
+        self.height = 512
 
         glutInit(sys.argv)
         glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH)
@@ -46,6 +46,7 @@ class window(object):
         #create our OpenCL instance
         #self.boids = boids.Boids(num, dt, self.dim)
         #self.boids.loadData(pos_vbo, col_vbo, vel, acc)
+        self.boids.setDomainSize(self.dim)
 
         self.posnp = np.ndarray((self.num, 4), dtype=np.float32)
         glutMainLoop()
@@ -70,6 +71,12 @@ class window(object):
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
         
+        glBegin(GL_POINTS)
+        glColor3f(1.,1.,1.)
+        for p in self.posnp:
+            glVertex2f(p[0], p[1]);
+        glEnd()
+
 
         glEnable(GL_POINT_SMOOTH)
         glPointSize(2)
@@ -119,19 +126,17 @@ def boids(max_num):
     bmax = float4(100., 100., 0.,0.)
     spacing = 10.
     #num, pos_tmp = addRect(max_num, bmin, bmax, spacing)
-    pos_tmp = float4vec(max_num)
-    addRect(max_num, bmin, bmax, spacing, 1., pos_tmp)
-    num = pos_tmp.size()
+    pos = float4vec(max_num)
+    GE_addRect(max_num, bmin, bmax, spacing, 1., pos)
+    num = pos.size()
     print num
 
 
-    pos = float4vec(num)
     posnp = np.zeros((num, 4), dtype=np.float32)
 
     for i in xrange(0, num):
-        pos[i] = pos_tmp[i]
-        posnp[i,0] = pos_tmp[i].x
-        posnp[i,1] = pos_tmp[i].y
+        posnp[i,0] = pos[i].x
+        posnp[i,1] = pos[i].y
         posnp[i,2] = 0.
         posnp[i,3] = 1.
 

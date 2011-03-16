@@ -33,7 +33,7 @@ class Boids
 	typedef vector<rtps::float4> VF;
 	typedef vector<int> VI;
 public:
-	Boids(VF& pos);
+	Boids(VF& pos, int dim=300, float wcoh=.03, float wsep=.3, float walign=.1);
 	~Boids();
 	void neighbors(vector<rtps::float4>& pos, int which, VI& neighbors);
 	rtps::float4 avg_value(VI& neigh, VF& val); 

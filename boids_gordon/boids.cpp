@@ -1,7 +1,7 @@
 #include "boids.h"
 
 //----------------------------------------------------------------------
-Boids::Boids(VF& pos_) : pos(pos_)
+Boids::Boids(VF& pos_, int dim_, float wcoh_, float wsep_, float walign_) : pos(pos_), dim(dim_), wcoh(wcoh_), wsep(wsep_), walign(walign_)
 {
 	DESIRED_SEPARATION = 20.;
 	NEIGHBOR_RADIUS = 30.;  // search grid
@@ -11,17 +11,17 @@ Boids::Boids(VF& pos_) : pos(pos_)
 	// pure separation
 	// with particles on a rectangle, upper right corner separates. That must be an error
 	// probably correct: symmetries are maintained
-	wcoh = 0.030; //0.015; // makes particles implode (must be a mistake?)
+	//wcoh = 0.030; //0.015; // makes particles implode (must be a mistake?)
 
 	// not quite correct. There is some asymmetry
-	wsep = .03; // must be very strong compared to wcoh
+	//wsep = .3; // must be very strong compared to wcoh
 
 	// might be slight error: lower left corner
-	walign = 0.3; //.03;  // particles end in a steady configuration
+	//walign = 0.3; //.03;  // particles end in a steady configuration
 
 	//printf("constructor: pos.size= %d\n", pos.size());
 
-	dim = getDomainSize();
+	//dim = getDomainSize(); //how you gonna call this in a constructor yo? //HYUNYA
 	xmin = -dim;
 	xmax =  dim;
 	ymin = -dim;
@@ -138,13 +138,16 @@ void Boids::update()
 	//printf("pos.size= %d\n", pos.size());
 	for (int i=0; i < pos.size(); i++) {
 		VI neigh;
-		neighbors(pos_real, i, neigh); 
+		//neighbors(pos_real, i, neigh); 
+		neighbors(pos, i, neigh); 
 		//VI neigh = neighbors(pos, i); // return might have error on linux!
 
-		float4 sep = avg_separ(neigh, pos_real, i);
+		//float4 sep = avg_separ(neigh, pos_real, i);
+		float4 sep = avg_separ(neigh, pos, i);
 		//sep.print("sep");
 		//printf("size= %d\n", neigh.size()); // nb neighbors sometimes reaches 30!
-		float4 coh = avg_value(neigh, pos_real) - pos[i];
+		//float4 coh = avg_value(neigh, pos_real) - pos[i];
+		float4 coh = avg_value(neigh, pos) - pos[i];
 		coh = normalize3(coh);
 
 		float4 align = avg_value(neigh, vel) - vel[i];
