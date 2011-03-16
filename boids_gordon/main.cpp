@@ -41,7 +41,7 @@ Boids* initBoids()
 	int num = 2024;
 	VF pos(num);
 	//pos = addCircle(num, center, radius, spacing, scale);
-	pos = GE_addRect(num, min, max, spacing, scale);
+	GE_addRect(num, min, max, spacing, scale, pos);
 	#if 0
 	pos[0] = float4(-edge, -edge, 0., 1.);
 	pos[1] = float4( edge, -edge, 0., 1.);

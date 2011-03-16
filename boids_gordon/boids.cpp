@@ -18,7 +18,7 @@ Boids::Boids(VF& pos_) : pos(pos_)
 	wcoh = 0.1*0.030; //0.015; // makes particles implode (must be a mistake?)
 
 	// not quite correct. There is some asymmetry
-	wsep = 0*.08; // must be very strong compared to wcoh
+	wsep = 0* .3; // must be very strong compared to wcoh
 
 	// might be slight error: lower left corner
 	walign = 1*0.3; //.03;  // particles end in a steady configuration
