@@ -64,12 +64,16 @@ bndMax.print("bndMax");
 bndMin.print("bndMin");
 printf("h= %f\n", h);
 
+	float hh = flock_settings.spacing;
+	hh /= 2;
+
 	// ARE YOU SURE nb_CELLS WILL BE CORRECT? 
 	// what about rounding errors because we dealing with floats? 
-    int nb_cells = (int)((bndMax.x-bndMin.x)/h) * (int)((bndMax.y-bndMin.y)/h) * (int)((bndMax.z-bndMin.z)/h);
-    vector<int>* flockmates = new vector<int>[nb_cells];
+    int nb_cells = (int)((bndMax.x-bndMin.x)/hh) * (int)((bndMax.y-bndMin.y)/hh) * (int)((bndMax.z-bndMin.z)/hh);
 printf("12\n");//GE 
-exit(0);
+printf("nb_cells= %d\n", nb_cells);
+    vector<int>* flockmates = new vector<int>[nb_cells];
+printf("13\n");//GE 
 //   int MaxFlockmates = num / 2;
 //   int flockmates[MaxFlockmates];
 //   int numFlockmates = 0;
@@ -332,7 +336,7 @@ printf("2\n");//GE
 			exit(1);
 		}
 #endif
-printf("1\n");exit(0);  //GE
+//printf("1\n");exit(0);  //GE
     }
 
     //printf("v.z %f p.z %f \n", velocities[0].z, positions[0].z);
