@@ -469,7 +469,9 @@ void FLOCK::prepareSorted()
     std::vector<float4> error_check(max_num);
  
     std::fill(forces.begin(), forces.end(),float4(0.0f, 1.0f, 0.0f, 0.0f));
-    std::fill(velocities.begin(), velocities.end(),float4(0.1f, 0.1f, 0.1f, 0.0f));
+    //std::fill(velocities.begin(), velocities.end(),float4(rand(), rand(), rand(), 0.0f));
+    //std::fill(velocities.begin(), velocities.end(), float4(0.1f, 0.1f, 0.1f, 0.f));
+    std::fill(velocities.begin(), velocities.end(), float4(1.f, 0.0f, 0.0f, 0.f));
     std::fill(veleval.begin(), veleval.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
 
     std::fill(densities.begin(), densities.end(), 0.0f);
@@ -647,7 +649,8 @@ void FLOCK::pushParticles(vector<float4> pos)
     if (num + nn > max_num) {return;}
     float rr = (rand() % 255)/255.0f;
     float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
-    printf("random color: %f %f %f\n", rr, 0.f, 1.0f-rr, 1.f);
+    
+    //printf("random color: %f %f %f\n", rr, 0.f, 1.0f-rr, 1.f);
 	//float4 color(0.0f,0.0f,0.1f,0.1f);
 
     std::vector<float4> cols(nn);
@@ -659,6 +662,7 @@ void FLOCK::pushParticles(vector<float4> pos)
     //float4 iv = float4(v, v, -v, 0.0f);
     float4 iv = float4(v, 0, -v, 0.0f);
     std::fill(vels.begin(), vels.end(),iv);
+
 #ifdef CPU
  std::copy(pos.begin(), pos.end(), positions.begin()+num);
 //printf("pushParticles nn = %d\n", nn);
@@ -674,7 +678,6 @@ void FLOCK::pushParticles(vector<float4> pos)
     prep(0);
     //printf("done with prep 0\n");
 
-   
     cl_position.copyToDevice(pos, num);
     cl_color.copyToDevice(cols, num);
 
