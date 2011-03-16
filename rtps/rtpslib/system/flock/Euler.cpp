@@ -41,15 +41,14 @@ void FLOCK::cpuEuler()
 
     float h = ps->settings.dt;
 
+    printf("enter CPUEuler\n");
     //printf("enter CPUEuler: count= %d\n", count);
     //count++;
 
     float4 acc;
     float dist;
 
-
-
-    float4 separationi, vel_sep, vel_aln, vel_coh;
+    float4 vel_sep, vel_aln, vel_coh;
     float4 acc_separation, acc_alignment, acc_cohesion;
 
     float w_sep = 0.0f;
@@ -58,12 +57,22 @@ void FLOCK::cpuEuler()
 
     float4 bndMax = params.grid_max;// - params->boundary_distance;
     float4 bndMin = params.grid_min;// + params->boundary_distance;
+
     int nb_cells = (int)((bndMax.x-bndMin.x)/h) * (int)((bndMax.y-bndMin.y)/h) * (int)((bndMax.z-bndMin.z)/h);
     vector<int>* flockmates = new vector<int>[nb_cells];
+//   int MaxFlockmates = num / 2;
+//   int flockmates[MaxFlockmates];
+//   int numFlockmates = 0;
+
+printf("loop over all boids\n");
+printf("nb_cells: %d\n", nb_cells);
+printf("flockmates size: %d\n", (*flockmates).size()); 
+//exit(0);
 
     // loop over all boids
     for(int i = 0; i < num; i++)
     {
+	printf("boid %d\n", i);
 	// boid in case
 	//pi = positions[i];
         //vi = velocities[i];
