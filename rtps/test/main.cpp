@@ -137,8 +137,8 @@ int main(int argc, char** argv)
     rtps::Domain grid = Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
     //rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
     rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
-    settings.setRadiusScale(1.);
-    settings.setRenderType(0);
+    settings.setRadiusScale(.5);
+    settings.setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
     settings.setBlurScale(1);
     settings.setUseGLSL(0);
     settings.setUseAlphaBlending(0);    

@@ -10,6 +10,7 @@
 
 #include "common/Hose.h"
 
+
 //for random
 #include<time.h>
 
@@ -85,10 +86,8 @@ namespace rtps
 #endif
 
         // settings defaults to 0
-        renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
-        printf("spacing for radius %f\n", spacing);
-        //renderer->setParticleRadius(spacing*0.5);
-        renderer->setParticleRadius(spacing);
+        //renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+        setRenderer();
 
     }
 
@@ -640,11 +639,33 @@ namespace rtps
 
     void SPH::render()
     {
-        System::render();
         renderer->render_box(grid.getBndMin(), grid.getBndMax());
-        //renderer->render_table(grid.getBndMin(), grid.getBndMax());
+        renderer->render_table(grid.getBndMin(), grid.getBndMax());
+        System::render();
     }
-
+    void SPH::setRenderer()
+    {
+        switch(ps->settings.getRenderType())
+        {
+            case RTPSettings::SPRITE_RENDER:
+                renderer = new SpriteRender(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+                printf("spacing for radius %f\n", spacing);
+                break;
+            case RTPSettings::SCREEN_SPACE_RENDER:
+                //renderer = new ScreenSpaceRender();
+                renderer = new SSFRender(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+                break;
+            case RTPSettings::RENDER:
+                renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+                break;
+            default:
+                //should be an error
+                renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+                break;
+        }
+        //renderer->setParticleRadius(spacing*0.5);
+        renderer->setParticleRadius(spacing);
+    }
 
 
 } //end namespace

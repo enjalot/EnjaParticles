@@ -83,12 +83,14 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/timege
 
     ${rtpslib_SOURCE_DIR}/render/Render
+    ${rtpslib_SOURCE_DIR}/render/SpriteRender
+    ${rtpslib_SOURCE_DIR}/render/SSFRender
     ${rtpslib_SOURCE_DIR}/render/util/stb_image.c
+    ${rtpslib_SOURCE_DIR}/render/util/stb_image_write.h
 
     ${rtpslib_SOURCE_DIR}/domain/Domain
     ${rtpslib_SOURCE_DIR}/domain/IV
     
-    ${rtpslib_SOURCE_DIR}/system/common/Hose
 
     ${rtpslib_SOURCE_DIR}/system/Simple.cpp
     ${rtpslib_SOURCE_DIR}/system/simple/ForceField
@@ -98,6 +100,8 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/sph/Euler
     ${rtpslib_SOURCE_DIR}/system/sph/LeapFrog
     
+    ${rtpslib_SOURCE_DIR}/system/common/Hose
+
     #### these are CPU only
     ${rtpslib_SOURCE_DIR}/system/sph/Density
     ${rtpslib_SOURCE_DIR}/system/sph/Pressure

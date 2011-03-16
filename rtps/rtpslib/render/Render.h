@@ -21,10 +21,10 @@
 namespace rtps
 {
 
-    enum Shaders
+    /*enum Shaders
     {
         SHADER_DEPTH=0,SHADER_CURVATURE_FLOW,SHADER_FRESNEL
-    };
+    };*/
 
     class Render
     {
@@ -51,10 +51,8 @@ namespace rtps
         {
             smoothing = shade;
         }
-        void setWindowDimensions(GLuint width,GLuint height);
         void setParticleRadius(float pradius);
 
-        void render();
         void drawArrays();
 
         void renderPointsAsSpheres();
@@ -64,8 +62,8 @@ namespace rtps
         void perspectiveProjection();
         void fullscreenQuad();
 
-        void render_box(float4 min, float4 max);
-        void render_table(float4 min, float4 max);
+        void render_box(float4 min, float4 max); //put in render utils
+        void render_table(float4 min, float4 max); //put in render utils
 
 
         void writeBuffersToDisk();
@@ -80,9 +78,24 @@ namespace rtps
         int setupTimers();
         void printTimers();
 
-        //void compileShaders();
+        virtual void render();
+        virtual void setWindowDimensions(GLuint width,GLuint height);
 
-    private:
+    protected:
+        int loadTexture(std::string texture_file, std::string texture_name);
+        GLuint compileShaders(const char* vertex_file, const char* fragment_file, const char* geometry_file = NULL, GLenum* geom_param=NULL, GLint* geom_value=NULL, int geom_param_len=0);
+        std::map<ShaderType,GLuint> glsl_program;    
+        std::map<std::string,GLuint> gl_framebuffer_texs;
+        std::map<std::string,GLuint> gl_textures;
+        virtual void deleteFramebufferTextures();
+        virtual void createFramebufferTextures();
+        GLuint window_height,window_width;
+        GLuint pos_vbo;
+        GLuint col_vbo;
+        CL *cli;
+        float particle_radius;
+        float near_depth;
+        float far_depth;
         //number of particles
         int num;
 
@@ -92,20 +105,11 @@ namespace rtps
         bool blending;
         bool write_framebuffers;
         ShaderType smoothing;
-        std::map<ShaderType,GLuint> glsl_program;    
-        std::map<std::string,GLuint> gl_tex;
         std::vector<GLuint> fbos;
         std::vector<GLuint> rbos;
         Buffer<float>   cl_depth;
         Kernel  k_curvature_flow;
-        GLuint window_height,window_width;
-        float particle_radius;
-        float near_depth;
-        float far_depth;
 
-        GLuint pos_vbo;
-        GLuint col_vbo;
-        CL *cli;
 
         // Added by GE, March 6, 2011
         // reference guarantees the location pointed to cannot be changed
@@ -115,12 +119,9 @@ namespace rtps
 
 
 
-        GLuint compileShaders(const char* vertex_file, const char* fragment_file, const char* geometry_file = NULL, GLenum* geom_param=NULL, GLint* geom_value=NULL, int geom_param_len=0);
-        int loadTexture();
         int generateCircleTexture(GLubyte r, GLubyte g, GLubyte b, GLubyte alpha, int diameter);
-        void deleteFramebufferTextures();
-        void createFramebufferTextures();
-        void convertDepthToRGB(const GLfloat* depth, GLuint size, GLuint* rgb) const;
+
+        void convertDepthToRGB(const GLfloat* depth, GLuint size, GLubyte* rgb) const;
 
         //GE
         float getParticleRadius()

@@ -1,17 +1,11 @@
 #ifndef RTPS_SYSTEM_H_INCLUDED
 #define RTPS_SYSTEM_H_INCLUDED
 
-#if defined __APPLE__ || defined(MACOSX)
-//OpenGL stuff
-    #include <OpenGL/gl.h>
-#else
-//OpenGL stuff
-    #include <GL/gl.h>
-#endif
-
 #include "../domain/Domain.h"
 #include "ForceField.h"
 #include "../render/Render.h"
+#include "../render/SpriteRender.h"
+#include "../render/SSFRender.h"
 
 #include<stdio.h>
 namespace rtps
@@ -84,11 +78,6 @@ namespace rtps
             renderer->printTimers();
         };
 
-        virtual void setRenderer(Render* render)
-        {
-            delete renderer;
-            renderer = render;
-        }
         virtual Render* getRenderer()
         {
             return renderer;
@@ -108,6 +97,12 @@ namespace rtps
         Domain grid;
 
         Render* renderer;
+
+        virtual void setRenderer()
+        {
+            //delete renderer;
+            //renderer = render;
+        }
 
     };
 

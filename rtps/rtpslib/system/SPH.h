@@ -128,6 +128,8 @@ namespace rtps
 
         void pushParticles(vector<float4> pos, float4 velo);
 
+    protected:
+        virtual void setRenderer();
     private:
         //the particle system framework
         RTPS *ps;

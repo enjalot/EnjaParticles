@@ -16,6 +16,11 @@ namespace rtps
         };
         SysType system;
 
+        enum RenderType
+        {
+            RENDER = 0, SPRITE_RENDER, SCREEN_SPACE_RENDER
+        };
+
 
         RTPSettings();
         RTPSettings(SysType system, int max_particles, float dt);
@@ -42,7 +47,7 @@ namespace rtps
     private:
         float render_radius_scale;
         float render_blur_scale;
-        int render_type;
+        RenderType render_type;
         bool use_glsl;
         bool use_alpha_blending;
 
@@ -69,7 +74,7 @@ namespace rtps
         {
             return render_type;
         }
-        void setRenderType(int type)
+        void setRenderType(RenderType type)
         {
             render_type = type;
         }
