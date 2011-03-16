@@ -42,6 +42,7 @@ Boids* initBoids()
 	VF pos(num);
 	//pos = addCircle(num, center, radius, spacing, scale);
 	GE_addRect(num, min, max, spacing, scale, pos);
+	//addRandRect(num, min, max, spacing, scale, min, max, pos);
 	#if 0
 	pos[0] = float4(-edge, -edge, 0., 1.);
 	pos[1] = float4( edge, -edge, 0., 1.);
@@ -61,8 +62,28 @@ Boids* initBoids()
 		acc[i] = float4(0.,0.,0.,1.);
 	}
 
+	#if 1
+	// random velocities
+	float rscale = 5.;
+	for (int i=0; i < vel.size(); i++) {
+        vel[i] = float4((float) rand()/RAND_MAX, (float) rand()/RAND_MAX,0.f,1.0f);
+		vel[i] = rscale*vel[i];
+	}
+	#endif
+
+
 	boids->set_ic(pos, vel, acc);
 	return boids;
+}
+//----------------------------------------------------------------------
+void vector_field(VF& pos, VF& vel, float scale)
+{
+	glBegin(GL_LINES);
+		for (int i=0; i < pos.size(); i++) {
+			glVertex2f(pos[i].x, pos[i].y);
+			glVertex2f(pos[i].x+scale*vel[i].x, pos[i].y+scale*vel[i].y);
+		}
+	glEnd();
 }
 //----------------------------------------------------------------------
 void display()
@@ -76,6 +97,9 @@ void display()
 
    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+   glPushMatrix();
+   //glScalef(2.,2.,1.);
 
    // grid overlay based on desired min boid separation
    glBegin(GL_LINES);
@@ -103,6 +127,24 @@ void display()
 	  }
    glEnd();
 
+	#if 1
+   // Draw velocity field
+
+   VF& vc = boids->vel_coh;
+   glColor3f(1., 0., 0.);
+   //vector_field(pos, boids->vel_coh, 100.); // vel, scale
+   glColor3f(0., 1., 0.);
+   //vector_field(pos, boids->vel_sep, 100.); // vel, scale
+   glColor3f(1.,1.,0.);
+   VF& va = boids->vel_align;
+   //vector_field(pos, va, 100.); // vel, scale
+   //for (int i=0; i < va.size(); i++) {
+   	 //va[i].print("va");
+   //}
+
+   #endif
+
+   glPopMatrix();
    glutSwapBuffers();
 }
 //----------------------------------------------------------------------
