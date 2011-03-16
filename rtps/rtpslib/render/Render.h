@@ -11,6 +11,7 @@
     #include <GL/gl.h>
 #endif
 
+#include "RTPSettings.h"
 #include "../structs.h"
 #include "../timege.h"
 #include "../opencl/CLL.h"
@@ -24,7 +25,8 @@ enum Shaders {SHADER_DEPTH=0,SHADER_CURVATURE_FLOW,SHADER_FRESNEL};
 class Render
 {
 public:
-    Render(GLuint pos_vbo, GLuint vel_vbo, int num, CL *cli);
+    Render(GLuint pos_vbo, GLuint vel_vbo, int num, CL *cli, RTPSettings* _settings=0);
+    //Render(GLuint pos_vbo, GLuint vel_vbo, int num, CL *cli, RTPSettings& _settings);
     ~Render();
 
     //decide which kind of rendering to use
@@ -48,6 +50,11 @@ public:
 
     void render_box(float4 min, float4 max);
     void render_table(float4 min, float4 max);
+	
+
+	void writeBuffersToDisk();
+	void writeFramebufferTextures();
+	int writeTexture(GLuint tex, const char* filename) const;
 
     enum {TI_RENDER=0, TI_GLSL}; //2
     GE::Time* timers[2];
@@ -64,6 +71,7 @@ private:
     bool glsl;
     bool mikep;
     bool blending;
+    bool write_framebuffers;
 	ShaderType smoothing;
     std::map<ShaderType,GLuint> glsl_program;    
     std::map<std::string,GLuint> gl_tex;
@@ -80,11 +88,23 @@ private:
     GLuint col_vbo;
 	CL *cli;
 
+	// Added by GE, March 6, 2011
+	// reference guarantees the location pointed to cannot be changed
+	// But that is creating problems because one cannot have a default 
+	// property for a reference
+	RTPSettings* settings; 
+
+
+
     GLuint compileShaders(const char* vertex_file, const char* fragment_file, const char* geometry_file = NULL, GLenum* geom_param=NULL, GLint* geom_value=NULL, int geom_param_len=0);
     int loadTexture();
 	int generateCircleTexture(GLubyte r, GLubyte g, GLubyte b, GLubyte alpha, int diameter);
 	void deleteFramebufferTextures();
 	void createFramebufferTextures();
+	void convertDepthToRGB(const GLfloat* depth, GLuint size, GLuint* rgb) const;
+
+	//GE
+	float getParticleRadius() {return particle_radius;}
 };	
 
 

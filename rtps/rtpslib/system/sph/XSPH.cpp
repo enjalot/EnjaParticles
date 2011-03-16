@@ -11,11 +11,11 @@ void SPH::loadXSPH()
     k_xsph = Kernel(ps->cli, path, "xsph");
   
     k_xsph.setArg(0, cl_position.getDevicePtr());
-    if(sph_settings.integrator == LEAPFROG)
+    if(integrator == LEAPFROG)
     {
         k_xsph.setArg(1, cl_veleval.getDevicePtr());
     }
-    else if(sph_settings.integrator == EULER)
+    else if(integrator == EULER)
     {
         k_xsph.setArg(1, cl_velocity.getDevicePtr());
     }
@@ -30,18 +30,18 @@ void SPH::loadXSPH()
 void SPH::cpuXSPH()
 {
 
-    float scale = params.simulation_scale;
-    float h = params.smoothing_distance;
+    float scale = sphp.simulation_scale;
+    float h = sphp.smoothing_distance;
 
     float h9 = h*h*h * h*h*h * h*h*h;
-    float alpha = 315.f / 64.0f / params.PI / h9;
+    float alpha = 315.f / 64.0f / sphp.PI / h9;
 
     float4* vel;
-    if(sph_settings.integrator == EULER)
+    if(integrator == EULER)
     {
         vel = &velocities[0];
     }
-    else if(sph_settings.integrator == LEAPFROG)
+    else if(integrator == LEAPFROG)
     {
         vel = &veleval[0];
     }
@@ -57,7 +57,7 @@ void SPH::cpuXSPH()
         float4 f = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
         //stuff from Tim's code (need to match #s to papers)
-        //float alpha = 315.f/208.f/params->PI/h/h/h;
+        //float alpha = 315.f/208.f/sphp->PI/h/h/h;
 
         for(int j = 0; j < num; j++)
         {
@@ -80,7 +80,7 @@ void SPH::cpuXSPH()
                     //float Wij = Wpoly6(r, h);
                     float hr2 = (h*h - dist_squared(r));
                     float Wij = alpha * hr2*hr2*hr2;
-                    float fcoeff = 2.0 * params.mass * Wij  / (densities[j] + densities[i]);
+                    float fcoeff = 2.0 * sphp.mass * Wij  / (densities[j] + densities[i]);
                     f.x += fcoeff * (vj.x - v.x); 
                     f.y += fcoeff * (vj.y - v.y); 
                     f.z += fcoeff * (vj.z - v.z); 

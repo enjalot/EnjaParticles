@@ -14,6 +14,46 @@ def print_timing(func):
 
 #----------------------------------------------------------------------
 
+def timing_collector(out):
+    while True:
+        (name, t) = (yield)
+        if name in out:
+            out[name] += [t]
+        else:
+            out[name] = [t]
+
+
+class Timing(object):
+    def __init__(self):#,cor):
+        self.timings = {}
+        self.col = self.__collector()
+        self.col.next()
+
+    def __collector(self):
+        while True:
+            (name, t) = (yield)
+            if name in self.timings:
+                self.timings[name] += [t]
+            else:
+                self.timings[name] = [t]
+
+    def __call__(self, func):
+        def wrapper(*arg, **kwargs):
+            t1 = time.time()
+            res = func(*arg, **kwargs)
+            t2 = time.time()
+            t = (t2-t1)*1000.0  #time in milliseconds
+            data = (func.__name__, t)
+            self.col.send(data)
+            return res
+        return wrapper
+
+    def __str__(self):
+        return "%s" % self.timings
+
+#----------------------------------------------------------------------
+
+
 class Timer:
 	def tic(self):
 		self.time = clk()

@@ -11,11 +11,11 @@ void SPH::loadViscosity()
     k_viscosity = Kernel(ps->cli, path, "viscosity");
   
     k_viscosity.setArg(0, cl_position.getDevicePtr());
-    if(sph_settings.integrator == LEAPFROG)
+    if(integrator == LEAPFROG)
     {
         k_viscosity.setArg(1, cl_veleval.getDevicePtr());
     }
-    else if(sph_settings.integrator == EULER)
+    else if(integrator == EULER)
     {
         k_viscosity.setArg(1, cl_velocity.getDevicePtr());
     }
@@ -30,7 +30,7 @@ float SPH::Wviscosity(float4 r, float h)
 {
     //from simple SPH in Krog's thesis
     float h6 = h*h*h * h*h*h;
-    float alpha = 45.f/params.PI/h6;
+    float alpha = 45.f/sphp.PI/h6;
     float rlen = magnitude(r);
     float Wij = alpha * (h - rlen);
     return Wij;
@@ -40,15 +40,15 @@ float SPH::Wviscosity(float4 r, float h)
 void SPH::cpuViscosity()
 {
 
-    float scale = params.simulation_scale;
-    float h = params.smoothing_distance;
+    float scale = sphp.simulation_scale;
+    float h = sphp.smoothing_distance;
     float mu = 1.001f; //viscosity coefficient (how to select?)
     float4* vel;
-    if(sph_settings.integrator == EULER)
+    if(integrator == EULER)
     {
         vel = &velocities[0];
     }
-    else if(sph_settings.integrator == LEAPFROG)
+    else if(integrator == LEAPFROG)
     {
         vel = &veleval[0];
     }
@@ -64,7 +64,7 @@ void SPH::cpuViscosity()
         float4 f = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
         //stuff from Tim's code (need to match #s to papers)
-        //float alpha = 315.f/208.f/params->PI/h/h/h;
+        //float alpha = 315.f/208.f/sphp->PI/h/h/h;
 
         for(int j = 0; j < num; j++)
         {
@@ -85,7 +85,7 @@ void SPH::cpuViscosity()
                     //float R = sqrt(r2/re2);
                     //float Wij = alpha*(-2.25f + 2.375f*R - .625f*R*R);
                     float Wij = Wviscosity(r, h);
-                    float fcoeff = mu * params.mass * Wij / (densities[j] * densities[i]);
+                    float fcoeff = mu * sphp.mass * Wij / (densities[j] * densities[i]);
                     f.x += fcoeff * (vj.x - v.x); 
                     f.y += fcoeff * (vj.y - v.y); 
                     f.z += fcoeff * (vj.z - v.z); 

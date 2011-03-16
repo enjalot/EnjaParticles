@@ -7,6 +7,7 @@
     // and they won't split... how can we account for this?
     //
     // FIXED? I added 10E-6 to rlen during the division in Wspiky_dr kernel -IJ
+    // hacks, need to find the original cause (besides adding particles too fast)
     /*
     if(rlen == 0.0)
     {
@@ -14,10 +15,16 @@
         iej = 0;
     }
     */
+    //this should 0 force between two particles if they get the same position
+    int rlencheck = rlen != 0.;
+    iej *= rlencheck;
+
 	float dWijdr = Wspiky_dr(rlen, sphp->smoothing_distance, sphp);
 
 	float4 di = density(index_i);  // should not repeat di=
 	float4 dj = density(index_j);
+    float idi = 1.0/di.x;
+    float idj = 1.0/dj.x;
 
 	//form simple SPH in Krog's thesis
 
@@ -25,21 +32,22 @@
 	float Pi = sphp->K*(di.x - rest_density);
 	float Pj = sphp->K*(dj.x - rest_density);
 
-	float kern = -dWijdr * (Pi + Pj)*0.5 * sphp->wspiky_d_coef;
-	float4 stress = kern*r; // correct version
+	float kern = -.5 * dWijdr * (Pi + Pj) * sphp->wspiky_d_coef;
+	//float kern = dWijdr * (Pi * idi * idi + Pj * idj * idj) * sphp->wspiky_d_coef;
+	float4 force = kern*r; 
 
 	float4 veli = veleval(index_i); // sorted
 	float4 velj = veleval(index_j);
 
-	// Add viscous forces
-
 	#if 1
+	// Add viscous forces
 	float vvisc = sphp->viscosity;
 	float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
-	stress += vvisc * (velj-veli) * dWijlapl;
+	force += vvisc * (velj-veli) * dWijlapl;
 	#endif
 
-	stress *=  sphp->mass/(di.x*dj.x);  // original
+	force *=  sphp->mass/(di.x*dj.x);  // original
+	//force *=  sphp->mass;// /(di.x*dj.x); 
 
 	#if 1
 	// Add XSPH stabilization term
@@ -57,7 +65,7 @@
 	pt->xsph.w = 0.f;
 	#endif
 
-	pt->force += stress * (float)iej;
+	pt->force += force * (float)iej;
 
 
 #endif
