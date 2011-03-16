@@ -1,5 +1,6 @@
 #include "../FLOCK.h"
-
+#include <vector>
+using namespace std;
 namespace rtps {
 
 void FLOCK::loadEuler()
@@ -28,29 +29,27 @@ void FLOCK::loadEuler()
 
 void FLOCK::cpuEuler()
 {
-    #define searchradius 	    0.08f
-    #define separationdist  	0.03f
+    #define searchradius 	20.f
+    #define separationdist  	30.f
     #define maxspeed        	3.f     // 1.f
     #define desiredspeed    	1.5f    // .5f
     #define maxchange       	0.1f    // .1f
     #define MinUrgency      	0.05f   // .05f
     #define MaxUrgency      	0.1f    // .1f
 
-	static int count = 0;
+    //static int count = 0;
 
     float h = ps->settings.dt;
 
-	printf("enter CPUEuler: count= %d\n", count);
-	count++;
+    //printf("enter CPUEuler: count= %d\n", count);
+    //count++;
 
     float4 acc;
-    int numFlockmates=0;
-    float4 pi, pj, vi, vj;
-    float dist, r;
+    float dist;
 
-    vector<int>* flockmates;
 
-    float4 separation, alignment, cohesion;
+
+    float4 separationi, vel_sep, vel_aln, vel_coh;
     float4 acc_separation, acc_alignment, acc_cohesion;
 
     float w_sep = 0.0f;
@@ -59,13 +58,15 @@ void FLOCK::cpuEuler()
 
     float4 bndMax = params.grid_max;// - params->boundary_distance;
     float4 bndMin = params.grid_min;// + params->boundary_distance;
+    int nb_cells = (int)((bndMax.x-bndMin.x)/h) * (int)((bndMax.y-bndMin.y)/h) * (int)((bndMax.z-bndMin.z)/h);
+    vector<int>* flockmates = new vector<int>[nb_cells];
 
     // loop over all boids
     for(int i = 0; i < num; i++)
     {
 	// boid in case
-	pi = positions[i];
-        vi = velocities[i];
+	//pi = positions[i];
+        //vi = velocities[i];
 
 #if 0
 	    // boid in case
@@ -79,7 +80,7 @@ void FLOCK::cpuEuler()
 #endif
 	    // initialize acc to zero
         acc = float4(0.f, 0.f, 0.f, 0.f);
-        numFlockmates = 0;
+        //numFlockmates = 0;
 
 	#if 0 
 	// print boid info
@@ -92,67 +93,95 @@ void FLOCK::cpuEuler()
 	#endif
 
         // Step 2. Search for neighbors
-	    // loop over all boids
+	// loop over all boids
         for(int j=0; j < num; j++){
              	if(j == i)
 			continue;
 
-	     	pj = positions[j];
-
-              	float4 d = pi - pj;
+              	float4 d = positions[i] - positions[j];
 		dist = d.length();
 
                 // is boid j a flockmate?
                 if(dist <= searchradius){
-                    	flockmates.push_back(j);
+                    	(*flockmates).push_back(j);
              	}
         }
 //printf("search for neighbors done\n");
 //printf("============== numFlockmates: %d ==============\n", numFlockmates); 
 	
         // Step 3. If they are flockmates, compute the three rules
-        if(numFlockmates > 0){
-		    acc_separation = float4(0.f, 0.f, 0.f, 0.f);
-		    acc_alignment  = float4(0.f, 0.f, 0.f, 0.f);
-		    acc_cohesion   = float4(0.f, 0.f, 0.f, 0.f);
+        if((*flockmates).size() > 0){
+		acc_separation = float4(0.f, 0.f, 0.f, 1.f);
+		acc_alignment  = float4(0.f, 0.f, 0.f, 1.f);
+		acc_cohesion   = float4(0.f, 0.f, 0.f, 1.f);
 
-		    for(int j=0; j < numFlockmates; j++){
-                p2 = positions[flockmates[j]];
-			    v2 = velocities[flockmates[j]];
-        		
+		int count = 0;
+
                 // Separation
-        		separation = p2- p1;
-               	//d = sqrt((p2.x-p1.x)*(p2.x-p1.x) + (p2.y-p1.y)*(p2.y-p1.y) + (p2.z-p1.z)*(p2.z-p1.z));
-				d = separation.length();
-                r = d / separationdist;  
+		for(int j=0; j < (*flockmates).size(); j++){
+                	//pj = positions[flockmates[j]];
+			//vj = velocities[flockmates[j]];
 
-        		separation = normalize3(separation);
+        		float4 separation =  positions[i] - positions[j];
+			float d = separation.length();
+                	//r = d / separationdist;  
 
-        		if(d >= separationdist){
-                		separation = separation * r;
+        		//separation = normalize3(separation);
+
+        		//if(d >= separationdist){
+                	//	separation = separation * r;
+        		//}
+        		if(d < separationdist){
+                		//separation = separation * -r;
+                		separation = normalize3(separation);
+				separation = separation / d;
+				acc_separation = acc_separation + separation;
+				count++;
         		}
-        		else if(d < separationdist){
-                		separation = separation * -r;
-        		}
+		}
 
-			    acc_separation += separation;
-			    acc_separation.w = 1.f;
+		if(count > 0){
+			acc_separation = acc_separation / count;
+			acc_separation = normalize3(acc_separation);
+		}
+		//acc_separation += separation;
+		acc_separation.w = 1.f;
 
-			    // Alignment
-			    acc_alignment += v2;
-			    acc_alignment.w = 1.f;
+		// Alignment
+		float4 avg_a = float4(0.f, 0.f, 0.f, 0.f);
+		for(int j=0; j < (*flockmates).size(); j++){
+                	avg_a = avg_a + positions[(*flockmates)[j]];
+	    	}
+		avg_a = (*flockmates).size() > 0 ? avg_a / (*flockmates).size() : avg_a;
+		acc_alignment = avg_a - velocities[i];
+		acc_alignment = normalize(acc_alignment); 
+		//acc_alignment += v2;
+	   	acc_alignment.w = 1.f;
 
-			    // Cohesion
-			    acc_cohesion += p2;
-			    acc_cohesion.w = 1.f;
+		// Cohesion
+                float4 avg_c = float4(0.f, 0.f, 0.f, 0.f);
+                for(int j=0; j < (*flockmates).size(); j++){
+                        avg_c = avg_c + positions[(*flockmates)[j]];
+                }
+                avg_c = (*flockmates).size() > 0 ? avg_c / (*flockmates).size() : avg_c;
+                acc_cohesion = avg_c - positions[i];
+                acc_cohesion = normalize(acc_cohesion);
+		//acc_cohesion += p2;
+		acc_cohesion.w = 1.f;
 //p1.print("p1: ");
 //p2.print("p2: ");
 //exit(0);
-		    }   
+	}   
+
+
+	vel_sep = acc_separation * w_sep;
+	vel_aln = acc_alignment  * w_aln;
+	vel_coh = acc_cohesion   * w_coh;
+
 
 //printf("acc: %f, %f, %f, %f\n", )	
 //exit(0);
-		
+#if 0
             // adding the rules to the acceleration vector
 
 		    // Separation
@@ -181,23 +210,31 @@ void FLOCK::cpuEuler()
 
 		    acc += acc_cohesion * w_coh;
 //acc_cohesion.print("cohesion: ");
-	    }
+#endif
+//	    }
 
-        // Step 4. Constrain acceleration
-        float accspeed = magnitude3(acc);
-        if(accspeed > maxchange){
-                // set magnitude to MaxChangeInAcc
-                acc = acc * (maxchange/accspeed);
-        }
+
+	acc = velocities[i] + vel_sep + vel_aln + vel_coh;
 acc.print("acceleration: ");
 
-        // Step 5. Add acceleration to velocity
-		acc.print("acc");
-        v1 += acc;
 
-		// remove for debugging
+        // Step 4. Constrain acceleration
+        float  acc_mag  = acc.length();
+	float4 acc_norm = normalize3(acc);
+ 
+        if(acc_mag > maxchange){
+                // set magnitude to MaxChangeInAcc
+                acc = acc_norm * maxchange;
+        }
+
+
+        // Step 5. Add acceleration to velocity
+        velocities[i] = acc;
+
+	// remove for debugging
         //v1.x += MinUrgency;
 
+#if 0
         // Step 6. Constrain velocity
         float speed = magnitude3(v1);
         if(speed > maxspeed){
@@ -205,40 +242,43 @@ acc.print("acceleration: ");
                 v1 = v1 * (maxspeed/speed);
         }
 v1.print("velocity: "); 
+#endif
         //float scale = params.simulation_scale;
         //v.x += h*f.x / scale;
         //v.y += h*f.y / scale;
         //v.z += h*f.z / scale;
 	
-	    // Step 7. Integrate        
-        p1.x += h*v1.x;
-        p1.y += h*v1.y;
-        p1.z += h*v1.z;
-        p1.w = 1.0f; //just in case
+    	// Step 7. Integrate        
+        //p1.x += h*v1.x;
+        //p1.y += h*v1.y;
+        //p1.z += h*v1.z;
+	positions[i] = positions[i] + velocities[i];
+        positions[i].w = 1.0f; //just in case
 
+#if 0
 		if (p1.x != p1.x || p1.y != p1.y || p1.z != p1.z || p1.w != p1.w) {
 			printf("h= %f\n", (float) h);
 			v1.print("v1");
 		}
-
-	    // Step 8. Check boundary conditions
-        if(p1.x >= bndMax.x){
-                p1.x = bndMin.x;
+#endif
+    	// Step 8. Check boundary conditions
+        if(positions[i].x >= bndMax.x){
+                positions[i].x = bndMin.x;
         }
-        else if(p1.x <= bndMin.x){
-                p1.x = bndMax.x;
+        else if(positions[i].x <= bndMin.x){
+                positions[i].x = bndMax.x;
         }
-        else if(p1.y >= bndMax.y){
-                p1.y = bndMin.y;
+        else if(positions[i].y >= bndMax.y){
+                positions[i].y = bndMin.y;
         }
-        else if(p1.y <= bndMin.y){
-                p1.y = bndMax.y;
+        else if(positions[i].y <= bndMin.y){
+                positions[i].y = bndMax.y;
         }
-        else if(p1.z >= bndMax.z){
-                p1.z = bndMin.z;
+        else if(positions[i].z >= bndMax.z){
+                positions[i].z = bndMin.z;
         }
-        else if(p1.z <= bndMin.z){
-                p1.z = bndMax.z;
+        else if(positions[i].z <= bndMin.z){
+                positions[i].z = bndMax.z;
         }
 
 		
@@ -255,6 +295,7 @@ v1.print("velocity: ");
 //printf("vs: %d\n",velocities.size());
 //printf("ps: %d\n",positions.size());
 
+#if 0
         // write values
         velocities[i] = v1;
         positions[i] = p1;
@@ -264,6 +305,7 @@ v1.print("velocity: ");
 			p1.print("AFTER p1");
 			exit(1);
 		}
+#endif
     }
 
     //printf("v.z %f p.z %f \n", velocities[0].z, positions[0].z);

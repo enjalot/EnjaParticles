@@ -190,6 +190,7 @@ void FLOCK::updateCPU()
 
     if(flock_settings.integrator == EULER2)
     {
+	printf("\n\n\ncalling CPU EULER\n\n\n");
         cpuEuler();
     }
     else if(flock_settings.integrator == LEAPFROG2)
