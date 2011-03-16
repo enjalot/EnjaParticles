@@ -80,18 +80,18 @@ __kernel void rules2(__global float4* pos,
     unsigned int num = get_global_size(0);
 
     //HARDCODED
-    float wcoh = 0.03;
-    float wsep = 0.3;
-    float walign = 0.3;
-    float MAX_SPEED = 3.;
+    float wcoh = 0.03f;
+    float wsep = 0.3f;
+    float walign = 0.3f;
+    float MAX_SPEED = 3.f;
 
 
     float4 p = pos[i];
     float4 v = vel[i];
 
-    steer[i].xyz /= steer[i].w > 0. ? steer[i].w : 1.;    //take the average
-    avg_pos[i].xyz /= avg_pos[i].w > 0. ? avg_pos[i].w : 1.;    //take the average
-    avg_vel[i].xyz /= avg_vel[i].w > 0. ? avg_vel[i].w : 1.;    //take the average
+    steer[i].xyz /= steer[i].w > 0.f ? steer[i].w : 1.f;    //take the average
+    avg_pos[i].xyz /= avg_pos[i].w > 0.f ? avg_pos[i].w : 1.f;    //take the average
+    avg_vel[i].xyz /= avg_vel[i].w > 0.f ? avg_vel[i].w : 1.f;    //take the average
 
     float4 sep = normalize3(steer[i]);
 
@@ -109,7 +109,7 @@ __kernel void rules2(__global float4* pos,
     if (acc_mag > MAX_SPEED) { 
         acc[i] = acc_norm*MAX_SPEED;
     }
-    acc[i].w = 1.;
+    acc[i].w = 1.f;
 
     //acc_mag = length3(acc[i]);
     //vel[i] += acc[i]*dt;
@@ -118,7 +118,7 @@ __kernel void rules2(__global float4* pos,
     //vel[i] = acc[i];
 
     float4 vv = (float4)(-3.*pos[i].y, pos[i].x, 0, 0.);
-	vv = vv*.01;
+	vv = vv*.01f;
 	vel[i] = vv + acc[i];
 
     

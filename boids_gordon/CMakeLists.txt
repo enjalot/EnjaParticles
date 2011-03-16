@@ -31,3 +31,7 @@ TARGET_LINK_LIBRARIES( eexec
     ${utilities}
 )
 
+IF (USE_SWIG) 
+    ADD_SUBDIRECTORY (swig)
+    #(${CMAKE_CURRENT_SOURCE_DIR}/swig/SWIGIFY.cmake)
+ENDIF (USE_SWIG)

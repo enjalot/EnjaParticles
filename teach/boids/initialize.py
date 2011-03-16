@@ -35,7 +35,7 @@ def addRect(num, pmin, pmax, spacing):
 def boids(max_num):
     bmin = Vec([-100., -100., 0.])
     bmax = Vec([100., 100., 0.])
-    spacing = 10.
+    spacing = 2.
     num, pos = addRect(max_num, bmin, bmax, spacing)
     col = np.zeros((max_num, 4), dtype=np.float32)
     vel = np.zeros((max_num, 4), dtype=np.float32)
