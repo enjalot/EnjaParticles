@@ -223,7 +223,7 @@ void appKeyboard(unsigned char key, int x, int y)
         }
         case 'r': //drop a rectangle
         {
-            nn = 64;
+            nn = 1024;
             max = float4(2.5, 2.5, 2.5, 1.0f);
             min = float4(2., 2., 2., 1.0f);
             ps->system->addBox(nn, min, max, false);

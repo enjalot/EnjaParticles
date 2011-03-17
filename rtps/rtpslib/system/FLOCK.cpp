@@ -410,8 +410,8 @@ void FLOCK::calculateFLOCKSettings()
     flock_settings.simulation_scale = 1.0f;
     printf("simulation scale: %f\n", flock_settings.simulation_scale);
 
-    flock_settings.spacing = flock_settings.particle_rest_distance/ flock_settings.simulation_scale;
-    //flock_settings.spacing = .05;
+    //flock_settings.spacing = flock_settings.particle_rest_distance/ flock_settings.simulation_scale;
+    flock_settings.spacing = .1;
 
     float particle_radius = flock_settings.spacing;
     printf("particle radius: %f\n", particle_radius);
@@ -473,7 +473,7 @@ void FLOCK::prepareSorted()
     std::fill(forces.begin(), forces.end(),float4(0.0f, 1.0f, 0.0f, 0.0f));
     //std::fill(velocities.begin(), velocities.end(),float4(rand(), rand(), rand(), 0.0f));
     //std::fill(velocities.begin(), velocities.end(), float4(0.1f, 0.1f, 0.1f, 0.f));
-    std::fill(velocities.begin(), velocities.end(), float4(1.f, 0.0f, 0.0f, 0.f));
+    std::fill(velocities.begin(), velocities.end(), float4(0.0f, 0.0f, 0.0f, 1.f));
     std::fill(veleval.begin(), veleval.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
 
     std::fill(densities.begin(), densities.end(), 0.0f);
@@ -628,7 +628,8 @@ int FLOCK::addBox(int nn, float4 min, float4 max, bool scaled)
         scale = flock_settings.simulation_scale;
     }
 printf("\n\n ADDING A CUBE \n\n");
-    vector<float4> rect = addRect(nn, min, max, flock_settings.spacing, scale);
+    vector<float4> rect;
+    MM_addRect3D(nn, min, max, flock_settings.spacing, scale, rect);
     pushParticles(rect);
     return rect.size();
 }

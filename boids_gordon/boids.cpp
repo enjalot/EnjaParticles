@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------
 Boids::Boids(VF& pos_, int dim_, float wcoh_, float wsep_, float walign_) : pos(pos_), dim(dim_), wcoh(wcoh_), wsep(wsep_), walign(walign_)
 {
-	DESIRED_SEPARATION = 20.;
+	DESIRED_SEPARATION = 15.;
 	NEIGHBOR_RADIUS = 30.;  // search grid
 	MAX_FORCE = 10.;
 	MAX_SPEED = 3.; 
@@ -151,14 +151,14 @@ void Boids::update()
 		coh = normalize3(coh);
 
 		float4 align = avg_value(neigh, vel) - vel[i];
-		float align_mag = align.length();
+		//float align_mag = align.length();
 		//float4 align_norm = normalize3(align);
 		//if (align_mag > MAX_FORCE) {
 			//align = align_norm*MAX_FORCE;
 		//}
 		align = normalize3(align);
-
-		//printf("------\n");
+		
+        //printf("------\n");
 		//sep.print("sep");
 		//coh.print("coh");
 		//align.print("align");
@@ -191,7 +191,6 @@ void Boids::update()
 		float4 v = float4(-3.*pos[i].y, pos[i].x, 0, 0.);
 		v = v*.00;
 		vel[i] = v + acc[i];
-		//vel[i].print("vel[i]");
 	}
 
 	for (int i=0; i < pos.size(); i++) {

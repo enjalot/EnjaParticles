@@ -6,6 +6,35 @@
 namespace rtps
 {
 
+void MM_addRect3D(int num, float4 min, float4 max, float spacing, float scale, std::vector<float4>& rvec)
+{
+/*!
+ * Create a rectangle with at most num particles in it.
+ *  The size of the return vector will be the actual number of particles used to fill the rectangle
+ */
+    float xmin = min.x / scale;
+    float xmax = max.x / scale;
+    float ymin = min.y / scale;
+    float ymax = max.y / scale;
+    float zmin = min.z / scale;
+    float zmax = max.z / scale;
+
+	rvec.resize(num);
+
+    int i=0;
+//    for (float z = zmin; z <= zmax+.5*(zmax-zmin); z+=spacing) {
+//	float z = 0.f;
+    for (float z = zmin; z <= zmax+.0*(zmax-zmin); z+=spacing) {
+    for (float y = ymin; y <= ymax+.0*(ymax-ymin); y+=spacing) {
+    for (float x = xmin; x <= xmax+.0*(xmax-xmin); x+=spacing) {
+        if (i >= num) break;				
+        rvec[i] = float4(x,y,z,1.0f);
+        i++;
+    }}}
+    rvec.resize(i);
+
+}
+
 std::vector<float4> addRect(int num, float4 min, float4 max, float spacing, float scale)
 {
 /*!
@@ -27,7 +56,7 @@ std::vector<float4> addRect(int num, float4 min, float4 max, float spacing, floa
     for (float y = ymin; y <= ymax; y+=spacing) {
     for (float x = xmin; x <= xmax; x+=spacing) {
         if (i >= num) break;				
-        rvec[i] = float4(x,y,z,1.0f);
+        rvec[i] = float4(x,z,y,1.0f);
         rvec[i].print("rect pos[i]: ");
         i++;
     }}}
