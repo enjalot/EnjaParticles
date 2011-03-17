@@ -190,7 +190,6 @@ void FLOCK::updateCPU()
 
     if(flock_settings.integrator == EULER2)
     {
-	printf("\n\ncalling CPU EULER\n\n");
         cpuEuler();
     }
     else if(flock_settings.integrator == LEAPFROG2)
@@ -627,7 +626,7 @@ int FLOCK::addBox(int nn, float4 min, float4 max, bool scaled)
         scale = flock_settings.simulation_scale;
     }
 printf("\n\n ADDING A CUBE \n\n");
-    vector<float4> rect = addRandRect(nn, min, max, flock_settings.spacing, scale, params.grid_min, params.grid_max);
+    vector<float4> rect = addRect(nn, min, max, flock_settings.spacing, scale);
     pushParticles(rect);
     return rect.size();
 }
@@ -640,7 +639,7 @@ void FLOCK::addBall(int nn, float4 center, float radius, bool scaled)
         scale = flock_settings.simulation_scale;
     }
 printf("\n\n ADDING A SPHERE \n\n");
-    vector<float4> flockere = addRandSphere(nn, center, radius, flock_settings.spacing, scale, params.grid_min, params.grid_max);
+    vector<float4> flockere = addSphere(nn, center, radius, flock_settings.spacing, scale);
     pushParticles(flockere);
 }
 

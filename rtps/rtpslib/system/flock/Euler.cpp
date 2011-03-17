@@ -29,10 +29,10 @@ void FLOCK::loadEuler()
 
 void FLOCK::cpuEuler()
 {
-    #define searchradius 	20.f
-    #define separationdist  	30.f
-    #define maxspeed        	3.f     // 1.f
-    #define desiredspeed    	1.5f    // .5f
+    #define searchradius 	    .08f
+    #define separationdist  	.03f
+    #define maxspeed        	1.f     // 1.f
+    #define desiredspeed    	.5f    // .5f
     #define maxchange       	0.1f    // .1f
     #define MinUrgency      	0.05f   // .05f
     #define MaxUrgency      	0.1f    // .1f
@@ -55,25 +55,25 @@ void FLOCK::cpuEuler()
     float w_sep = 0.0f;
     float w_aln = 0.0f;
     float w_coh = 0.0f;
-printf("10\n");//GE
+//printf("10\n");//GE
 
     float4 bndMax = params.grid_max;// - params->boundary_distance;
     float4 bndMin = params.grid_min;// + params->boundary_distance;
-printf("11\n");//GE
+//printf("11\n");//GE
 bndMax.print("bndMax");
 bndMin.print("bndMin");
 printf("h= %f\n", h);
 
 	float hh = flock_settings.spacing;
-	hh /= 2;
+	hh *= 2;
 
 	// ARE YOU SURE nb_CELLS WILL BE CORRECT? 
 	// what about rounding errors because we dealing with floats? 
     int nb_cells = (int)((bndMax.x-bndMin.x)/hh) * (int)((bndMax.y-bndMin.y)/hh) * (int)((bndMax.z-bndMin.z)/hh);
-printf("12\n");//GE 
+//printf("12\n");//GE 
 printf("nb_cells= %d\n", nb_cells);
     vector<int>* flockmates = new vector<int>[nb_cells];
-printf("13\n");//GE 
+//printf("13\n");//GE 
 //   int MaxFlockmates = num / 2;
 //   int flockmates[MaxFlockmates];
 //   int numFlockmates = 0;
@@ -82,11 +82,12 @@ printf("loop over all boids\n");
 printf("nb_cells: %d\n", nb_cells);
 printf("flockmates size: %d\n", (*flockmates).size()); 
 //exit(0);
-
+printf("num: %d\n\n", num);
     // loop over all boids
     for(int i = 0; i < num; i++)
     {
 	printf("boid %d\n", i);
+    positions[i].print("position of the boid");
 	// boid in case
 	//pi = positions[i];
         //vi = velocities[i];
@@ -105,7 +106,7 @@ printf("flockmates size: %d\n", (*flockmates).size());
         acc = float4(0.f, 0.f, 0.f, 0.f);
         //numFlockmates = 0;
 
-printf("11\n");//GE
+//printf("11\n");//GE
 	#if 0 
 	// print boid info
 		if (i == 0 || i == 1) {
@@ -119,15 +120,20 @@ printf("11\n");//GE
         // Step 2. Search for neighbors
 	// loop over all boids
         for(int j=0; j < num; j++){
-             	if(j == i)
-			continue;
+             	if(j == i){
+                    printf("boid %d and %d are the same\n", i, j);
+			        continue;
+                }
 
               	float4 d = positions[i] - positions[j];
-		dist = d.length();
+		        dist = d.length();
 
                 // is boid j a flockmate?
                 if(dist <= searchradius){
+                        printf("boid %d is neighbor of boid %d\n", i, j);
                     	(*flockmates).push_back(j);
+                        printf("neigh index: %d\n", (*flockmates)[(*flockmates).size()-1]);
+                        positions[(*flockmates)[(*flockmates).size()-1]].print("neigh position");
              	}
         }
 //printf("search for neighbors done\n");
@@ -142,13 +148,24 @@ printf("11\n");//GE
 		int count = 0;
 
                 // Separation
-printf("12\n");//GE
+//printf("12\n");//GE
+printf("flockmates size: %d\n", (*flockmates).size()); 
 		for(int j=0; j < (*flockmates).size(); j++){
                 	//pj = positions[flockmates[j]];
 			//vj = velocities[flockmates[j]];
 
-        		float4 separation =  positions[i] - positions[j];
-			float d = separation.length();
+        		float4 separation =  positions[i] - positions[(*flockmates)[j]];
+            positions[i].print("positions[i]: ");
+            positions[(*flockmates)[j]].print("positions[j]: ");
+            separation.print("separation: ");
+
+		if (separation.x != separation.x || separation.y != separation.y || separation.z != separation.z || separation.w != separation.w) {
+            separation.print("separation: ");
+            printf("boid: %d separation\n", i);
+            exit(0);
+        }
+
+			    float d = separation.length();
                 	//r = d / separationdist;  
 
         		//separation = normalize3(separation);
@@ -159,19 +176,38 @@ printf("12\n");//GE
         		if(d < separationdist){
                 		//separation = separation * -r;
                 		separation = normalize3(separation);
-				separation = separation / d;
-				acc_separation = acc_separation + separation;
-				count++;
+				        separation = separation / d;
+				        acc_separation = acc_separation + separation;
+				        count++;
+
+		if (separation.x != separation.x || separation.y != separation.y || separation.z != separation.z || separation.w != separation.w) {
+            separation.print("separation: ");
+            printf("boid: %d inside separation dist statement\n", i);
+            exit(0);
+        }
+
+		if (acc_separation.x != acc_separation.x || acc_separation.y != acc_separation.y || acc_separation.z != acc_separation.z || acc_separation.w != acc_separation.w) {
+            acc_separation.print("acc_separation: ");
+            printf("boid: %d inside separation dist statement\n", i);
+            exit(0);
+        }
+
         		}
 		}
 
-printf("13\n");//GE
+//printf("13\n");//GE
 		if(count > 0){
 			acc_separation = acc_separation / count;
 			acc_separation = normalize3(acc_separation);
 		}
 		//acc_separation += separation;
 		acc_separation.w = 1.f;
+
+		if (acc_separation.x != acc_separation.x || acc_separation.y != acc_separation.y || acc_separation.z != acc_separation.z || acc_separation.w != acc_separation.w) {
+            acc_separation.print("acc_separation: ");
+            printf("boid: %d after computing acc_separation\n", i);
+            exit(0);
+        }
 
 		// Alignment
 		float4 avg_a = float4(0.f, 0.f, 0.f, 0.f);
@@ -184,6 +220,12 @@ printf("13\n");//GE
 		//acc_alignment += v2;
 	   	acc_alignment.w = 1.f;
 
+		if (acc_alignment.x != acc_alignment.x || acc_alignment.y != acc_alignment.y || acc_alignment.z != acc_alignment.z || acc_alignment.w != acc_alignment.w) {
+            acc_alignment.print("acc_alignment: ");
+            printf("boid: %d\n", i);
+            exit(0);
+        }
+
 		// Cohesion
                 float4 avg_c = float4(0.f, 0.f, 0.f, 0.f);
                 for(int j=0; j < (*flockmates).size(); j++){
@@ -194,6 +236,15 @@ printf("13\n");//GE
                 acc_cohesion = normalize(acc_cohesion);
 		//acc_cohesion += p2;
 		acc_cohesion.w = 1.f;
+
+(*flockmates).clear();
+
+		if (acc_cohesion.x != acc_cohesion.x || acc_cohesion.y != acc_cohesion.y || acc_cohesion.z != acc_cohesion.z || acc_cohesion.w != acc_cohesion.w) {
+            acc_cohesion.print("acc_cohesion: ");
+            printf("boid: %d\n", i);
+            exit(0);
+        }
+
 //p1.print("p1: ");
 //p2.print("p2: ");
 //exit(0);
@@ -245,7 +296,7 @@ printf("\n");//GE
 acc.print("acceleration: ");
 
 
-printf("4\n");//GE
+//printf("4\n");//GE
         // Step 4. Constrain acceleration
         float  acc_mag  = acc.length();
 	float4 acc_norm = normalize3(acc);
@@ -284,7 +335,7 @@ v1.print("velocity: ");
 	positions[i] = positions[i] + velocities[i];
         positions[i].w = 1.0f; //just in case
 
-printf("2\n");//GE
+//printf("2\n");//GE
 #if 0
 		if (p1.x != p1.x || p1.y != p1.y || p1.z != p1.z || p1.w != p1.w) {
 			printf("h= %f\n", (float) h);
@@ -293,22 +344,22 @@ printf("2\n");//GE
 #endif
     	// Step 8. Check boundary conditions
         if(positions[i].x >= bndMax.x){
-                positions[i].x = bndMin.x;
+                positions[i].x -= bndMax.x;
         }
         else if(positions[i].x <= bndMin.x){
-                positions[i].x = bndMax.x;
+                positions[i].x += bndMax.x;
         }
         else if(positions[i].y >= bndMax.y){
-                positions[i].y = bndMin.y;
+                positions[i].y -= bndMax.y;
         }
         else if(positions[i].y <= bndMin.y){
-                positions[i].y = bndMax.y;
+                positions[i].y += bndMax.y;
         }
         else if(positions[i].z >= bndMax.z){
-                positions[i].z = bndMin.z;
+                positions[i].z -= bndMax.z;
         }
         else if(positions[i].z <= bndMin.z){
-                positions[i].z = bndMax.z;
+                positions[i].z += bndMax.z;
         }
 
 		
@@ -338,7 +389,7 @@ printf("2\n");//GE
 #endif
 //printf("1\n");exit(0);  //GE
     }
-
+delete [] flockmates;
     //printf("v.z %f p.z %f \n", velocities[0].z, positions[0].z);
 }
 

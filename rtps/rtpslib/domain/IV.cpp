@@ -28,6 +28,7 @@ std::vector<float4> addRect(int num, float4 min, float4 max, float spacing, floa
     for (float x = xmin; x <= xmax; x+=spacing) {
         if (i >= num) break;				
         rvec[i] = float4(x,y,z,1.0f);
+        rvec[i].print("rect pos[i]: ");
         i++;
     }}}
     rvec.resize(i);
@@ -78,6 +79,7 @@ std::vector<float4> addRandRect(int num, float4 min, float4 max, float spacing, 
 
     srand(time(NULL));	
 
+        printf("random num: %f\n", rand()/RAND_MAX);
     spacing *= 1.1f;
 min.print("Box min: ");
 max.print("Box max: ");
@@ -96,6 +98,8 @@ max.print("Box max: ");
         if (i >= num) break;	
 //printf("adding particles: %f, %f, %f\n", x, y, z);			
         rvec[i] = float4(x-rand()/RAND_MAX,y-rand()/RAND_MAX,z-rand()/RAND_MAX,1.0f);
+
+
         i++;
     }}}
     rvec.resize(i);
