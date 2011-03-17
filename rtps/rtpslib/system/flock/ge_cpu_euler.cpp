@@ -1,13 +1,5 @@
-#include "../FLOCK.h"
-#include <vector>
-using namespace std;
-namespace rtps {
-
-
 //----------------------------------------------------------------------
-#include "ge_cpu_euler.cpp"
-//----------------------------------------------------------------------
-void FLOCK::loadEuler()
+void FLOCK::ge_loadEuler()
 {
     printf("create euler kernel\n");
 
@@ -32,7 +24,7 @@ void FLOCK::loadEuler()
 } 
 
 //----------------------------------------------------------------------
-void FLOCK::cpuEuler()
+void FLOCK::ge_cpuEuler()
 {
     #define searchradius 	    .08f
     #define separationdist  	.03f
@@ -398,4 +390,3 @@ delete [] flockmates;
     //printf("v.z %f p.z %f \n", velocities[0].z, positions[0].z);
 }
 
-}

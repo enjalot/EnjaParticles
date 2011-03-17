@@ -238,6 +238,7 @@ private:
     void loadCollision_wall();
     void loadCollision_tri();
     void loadEuler();
+	void ge_loadEuler();
     void loadLeapFrog();
 
     //Nearest Neighbors search related kernels
@@ -254,6 +255,7 @@ private:
     void cpuXFLOCK();
     void cpuCollision_wall();
     void cpuEuler();
+	void ge_cpuEuler();
     void cpuLeapFrog();
 
     void updateCPU();

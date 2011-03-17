@@ -190,7 +190,8 @@ void FLOCK::updateCPU()
 
     if(flock_settings.integrator == EULER2)
     {
-        cpuEuler();
+        //cpuEuler();
+        ge_cpuEuler();
     }
     else if(flock_settings.integrator == LEAPFROG2)
     {
@@ -214,6 +215,7 @@ void FLOCK::updateCPU()
 
 }
 
+//----------------------------------------------------------------------
 void FLOCK::updateGPU()
 {
 
