@@ -1,5 +1,6 @@
 
 #include <vector>
+#include "ArrayT.h"
 #include "structs.h"
 using namespace std;
 using namespace rtps;
@@ -17,18 +18,28 @@ private:
 
 	float dim;  // dimension of domain (a square)
 
+	float xmin, xmax;
+	float ymin, ymax;
+	int nx, ny; // nb cells in x,y
+	float dx, dy;
+
 	float DESIRED_SEPARATION; // 2.;
 	float NEIGHBOR_RADIUS; // 2.;
 	float MAX_FORCE; // 10.;
 	float MAX_SPEED; // 10.;
 
 	VF pos;
+	VF pos_real; // no adjustment for periodic Boundary-Conditions (BC)
 	VF vel;
 	VF acc;
 
+public:
+	VF vel_coh;
+	VF vel_sep;
+	VF vel_align;
 
 public:
-	Boids(VF& pos);
+	Boids(VF& pos, int dim=300, float wcoh=.03, float wsep=.3, float walign=.1);
 	~Boids();
 	void neighbors(vector<float4>& pos, int which, VI& neighbors);
 	float4 avg_value(VI& neigh, VF& val); 
@@ -38,6 +49,8 @@ public:
 	void setDomainSize(float dim) {this->dim = dim;}
 	float getDomainSize() { return dim; }
 	float getDesiredSeparation() { return DESIRED_SEPARATION; }
+
+	VI* neigh_list; 
 
 	VF& getPos() { return pos; }
 	VF& getVel() { return vel; }

@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
+ADD_SUBDIRECTORY(utilities)
 SET(SRC main.cpp structs.cpp domain/IV.cpp boids.cpp)
 INCLUDE_DIRECTORIES(. domain ian utilities)
 
@@ -27,5 +28,9 @@ TARGET_LINK_LIBRARIES( eexec
    	#${GLEW_LIBRARY}
 	#${GLU_LIBRARY}
 	${LB}
+    ${utilities}
 )
 
+IF (USE_SWIG) 
+    ADD_SUBDIRECTORY (swig)
+ENDIF (USE_SWIG)
