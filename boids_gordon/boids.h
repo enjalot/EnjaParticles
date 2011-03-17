@@ -42,7 +42,7 @@ public:
     // wcoh   = 0.03
     // wsep   = 0.30
     // walign = 0.10
-	Boids(VF& pos, int dim=300, float wcoh=.0, float wsep=0., float walign=.10);
+	Boids(VF& pos, int dim=300, float wcoh=.0, float wsep=0.3, float walign=.10);
 	~Boids();
 	void neighbors(vector<float4>& pos, int which, VI& neighbors);
 	float4 avg_value(VI& neigh, VF& val); 

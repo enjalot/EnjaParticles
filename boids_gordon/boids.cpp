@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------
 Boids::Boids(VF& pos_, int dim_, float wcoh_, float wsep_, float walign_) : pos(pos_), dim(dim_), wcoh(wcoh_), wsep(wsep_), walign(walign_)
 {
-	DESIRED_SEPARATION = 15.;
+	DESIRED_SEPARATION = 12.;
 	NEIGHBOR_RADIUS = 30.;  // search grid
 	MAX_FORCE = 10.;
 	MAX_SPEED = 3.; 

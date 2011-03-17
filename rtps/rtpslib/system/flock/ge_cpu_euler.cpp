@@ -26,8 +26,8 @@ void FLOCK::ge_loadEuler()
 //----------------------------------------------------------------------
 void FLOCK::ge_cpuEuler()
 {
-    #define searchradius 	    0.3f         // 0.3
-    #define separationdist  	0.15f       // 0.08
+    #define searchradius 	    0.5f         // 0.3
+    #define separationdist  	0.25f       // 0.08
     #define maxspeed        	0.03f      // 0.003f
     #define desiredspeed    	0.025f     // 0.0025f
     #define maxchange       	0.05f      // 0.005f
