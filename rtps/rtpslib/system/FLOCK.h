@@ -8,6 +8,9 @@
 #include "../opencl/Kernel.h"
 #include "../opencl/Buffer.h"
 
+// Added by GE, March 16, 2011
+#include "boids.h"
+
 #include "BitonicSort.h"
 
 //#include "../util.h"
@@ -32,7 +35,6 @@ typedef struct FLOCKSettings
     float spacing;
     float grid_cell_size;
     Integrator2 integrator;
-
 } FLOCKSettings;
 
 //pass parameters to OpenCL routines
@@ -148,6 +150,7 @@ public:
 private:
     //the particle system framework
     RTPS *ps;
+	Boids *boids;
 
     FLOCKSettings flock_settings;
     FLOCKParams params;

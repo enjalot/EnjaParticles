@@ -126,6 +126,8 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/flock/XFLOCK
     ${rtpslib_SOURCE_DIR}/system/flock/Collision_wall
     ${rtpslib_SOURCE_DIR}/system/flock/Collision_triangle
+	# Added by GE
+    ${rtpslib_SOURCE_DIR}/system/flock/boids
     
     ${rtpslib_SOURCE_DIR}/system/flock/Prep
     ${rtpslib_SOURCE_DIR}/system/flock/Hash

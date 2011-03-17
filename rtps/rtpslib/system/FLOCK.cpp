@@ -180,6 +180,7 @@ void FLOCK::update()
 #endif
 }
 
+//----------------------------------------------------------------------
 void FLOCK::updateCPU()
 {
     //cpuDensity();
@@ -190,8 +191,9 @@ void FLOCK::updateCPU()
 
     if(flock_settings.integrator == EULER2)
     {
-        //cpuEuler();
-        ge_cpuEuler();
+        //cpuEuler();   // Original from Myrna
+		// Modified by Gordon Erlebacher, 
+        ge_cpuEuler();  // based on my boids program
     }
     else if(flock_settings.integrator == LEAPFROG2)
     {
@@ -211,8 +213,6 @@ void FLOCK::updateCPU()
 
     glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
     glBufferData(GL_ARRAY_BUFFER, num * sizeof(float4), &positions[0], GL_DYNAMIC_DRAW);
-
-
 }
 
 //----------------------------------------------------------------------
