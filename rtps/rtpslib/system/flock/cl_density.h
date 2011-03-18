@@ -18,36 +18,42 @@
 	// velocities
 	float4 vj = vel(index_j);
 
-	// setup for rule 1. Separation
-	float4 s = pj - pi;
-	float  d = distance(pi,pj);
-	float  r = d / mindist;
-	
-	s = normalize(s);
+	// number of flockmates
+    pt->density.x += 1.f;
 
-	if(d > mindist){ 
-		s *= r;
+	// setup for rule 1. Separation
+	float4 s = pi - pj;
+	float  d = length(s);
+	//float  r = d / mindist;
+	
+	//s = normalize(s);
+
+	//if(d > mindist){ 
+	//	s *= r;
+	//}
+	if(d < mindist){
+		//s *= -r;
+        s = normalize(s);
+        s /= d;
+	    pt->force += s;         // accumulate the separation vector
+        pt->density.y += 1.f;   // count how many flockmates are with in the separation distance
 	}
-	else if(d < mindist){
-		s *= -r;
-	}
-	else{
-		s *= 0.f;
-	}
+	//else{
+	//	s *= 0.f;
+	//}
 
 	// force is the separation vector
-	pt->force += s;
+    //pt->force += s;         
 
 
 	// setup for rule 2. alignment
 	// surf_tens is the alignment vector
-	pt->surf_tens += vj;
+	pt->surf_tens  += vj;
+	pt->surf_tens.w = 1.f;
 
 
 	// setup for rule 3. cohesion
-	pt->density.x += 1.f;		// number of flockmates
-
-	pt->xflock += pj; 		// center of the flock
+	pt->xflock  += pj; 		// center of the flock
 	pt->xflock.w = 1.f;
      }
 //----------------------------------------------------------------------

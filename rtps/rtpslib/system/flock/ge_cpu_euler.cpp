@@ -27,12 +27,12 @@ void FLOCK::ge_loadEuler()
 void FLOCK::ge_cpuEuler()
 {
     #define searchradius 	    0.5f         // 0.3
-    #define separationdist  	0.25f       // 0.08
-    #define maxspeed        	0.03f      // 0.003f
-    #define desiredspeed    	0.025f     // 0.0025f
-    #define maxchange       	0.05f      // 0.005f
-    #define MinUrgency      	0.025f     // 0.0025f
-    #define MaxUrgency      	0.05f      // 0.005f
+    #define separationdist  	0.4f       // 0.08
+    #define maxspeed        	0.003f      // 0.003f
+    #define desiredspeed    	0.0025f     // 0.0025f
+    #define maxchange       	0.005f      // 0.005f
+    #define MinUrgency      	0.0025f     // 0.0025f
+    #define MaxUrgency      	0.005f      // 0.005f
 
 
     //static int count = 0;
@@ -118,7 +118,7 @@ printf("num: %d\n\n", num);
 	// loop over all boids
         for(int j=0; j < num; j++){
              	if(j == i){
-                    printf("boid %d and %d are the same\n", i, j);
+                //    printf("boid %d and %d are the same\n", i, j);
 			        continue;
                 }
 
@@ -297,6 +297,9 @@ printf("num: %d\n\n", num);
 
 
 	acc = velocities[i] + vel_sep + vel_aln + vel_coh;
+    //velocities[i].print("initial velocity");
+    float4 temp = vel_sep + vel_aln + vel_coh;
+    //temp.print("sum of steers");
 //acc.print("acceleration before constraint");
 
 //acc.z = 0.f;
@@ -315,8 +318,8 @@ printf("num: %d\n\n", num);
 //acc.print("acceleration after constraint");
 
         // Step 5. Add acceleration to velocity
-        float4 v = float4(-positions[i].y, positions[i].x, 0., 0.);
-        v = v*.00;
+        float4 v = float4(-positions[i].z, 0., positions[i].x, 0.);
+        v = v*.0005;
         velocities[i] = v + acc;
 //velocities[i].print("final velocity");
         //velocities[i] = acc;

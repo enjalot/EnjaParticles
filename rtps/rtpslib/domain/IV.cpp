@@ -23,14 +23,16 @@ void MM_addRect3D(int num, float4 min, float4 max, float spacing, float scale, s
 
     int i=0;
 //    for (float z = zmin; z <= zmax+.5*(zmax-zmin); z+=spacing) {
-//	float z = 0.f;
+	float y = 2.5f;
     for (float z = zmin; z <= zmax+.0*(zmax-zmin); z+=spacing) {
-    for (float y = ymin; y <= ymax+.0*(ymax-ymin); y+=spacing) {
+//    for (float y = ymin; y <= ymax+.0*(ymax-ymin); y+=spacing) {
     for (float x = xmin; x <= xmax+.0*(xmax-xmin); x+=spacing) {
         if (i >= num) break;				
         rvec[i] = float4(x,y,z,1.0f);
+//        rvec[i].print("pos[i]");
         i++;
-    }}}
+    }}
+    //}
     rvec.resize(i);
 
 }

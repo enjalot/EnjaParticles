@@ -46,9 +46,9 @@ __kernel void euler(
 
 //	#define	separationdist	0.005f	// 3.f
 //	#define	searchradius	0.8f
-	#define	maxspeed	3.f	// 1.f
+	#define	maxspeed	    3.f	// 1.f
 	#define desiredspeed	1.5f	// .5f
-	#define maxchange	0.1f	// .1f
+	#define maxchange	    0.1f	// .1f
 	#define MinUrgency      0.05f	// .05f
 	#define MaxUrgency      0.1f	// .1f
 
@@ -141,23 +141,27 @@ __kernel void euler(
 	float4 pi = pos(i);
 
 	// velocities
-    	float4 v = vel(i);
+    float4 vi = vel(i);
 
 	// acceleration vector
-    	float4 acc = (float4)(0.f, 0.f, 0.f, 0.f);
+    float4 acc     = (float4)(0.f, 0.f, 0.f, 1.f);
+    float4 acc_sep = (float4)(0.f, 0.f, 0.f, 1.f);
+    float4 acc_aln = (float4)(0.f, 0.f, 0.f, 1.f);
+    float4 acc_coh = (float4)(0.f, 0.f, 0.f, 1.f);
 
 	float4 separation = force(i);
 	float4 alignment = surface(i);
 	float4 cohesion = xflock(i);
 	
 	float numFlockmates = den(i).x;
+    float count =  den(i).y;
 //	if(numFlockmates == 0){
 //		numFlockmates = 1;
 //	}
 
-	float w_sep = 1.f;
-	float w_aln = 1.f;
-	float w_coh = 1.f;
+	float w_sep = 0.f;
+	float w_aln = 0.f;
+	float w_coh = 0.1f;
 		
 	float4 bndMax = params->grid_max;// - params->boundary_distance;
 	float4 bndMin = params->grid_min;// + params->boundary_distance;
@@ -170,7 +174,11 @@ __kernel void euler(
 	//if(length(separation) < separationdist){
 	//	separation *= 2;
 	//}	
-	acc += separation * w_sep;
+    if(count > 0){
+        separation /=count;
+        separation = normalize(separation);
+    }
+	acc_sep += separation * w_sep;
 
 	
 	// RULE 2. ALIGNMENT
@@ -179,10 +187,12 @@ __kernel void euler(
 	// it is stored in pt->surf_tens
 
 	// steering towards the average velocity
-	alignment /= numFlockmates;
-	alignment -= v;
+	alignment = numFlockmates > 0 ? alignment /= numFlockmates : alignment;
+
+	// steering towards the average position
+	alignment -= vi;
 	alignment = normalize(alignment);
-	acc += alignment * w_aln;
+	acc_aln += alignment * w_aln;
 
 
 	// RULE 3. COHESION
@@ -194,32 +204,40 @@ __kernel void euler(
 	// it is stored in pt->density.x
 
 	// dividing by the number of flockmates to get the actual average
-	cohesion /= numFlockmates;
+    cohesion = numFlockmates > 0 ? cohesion /= numFlockmates : cohesion;
 
 	// steering towards the average position
 	cohesion -= pi;
 	cohesion = normalize(cohesion);
-	acc += cohesion * w_coh;
+	acc_coh += cohesion * w_coh;
     
+
+    // Step 3.5 compute acc
+    acc = vi + acc_sep + acc_aln + acc_coh;
 
 	// Step 4. Constrain acceleration
     	float accspeed = length(acc);
+        float4 accnorm = normalize(acc);
     	if(accspeed > maxchange){
             	// set magnitude to MaxChangeInAcc
-            	acc *= maxchange/accspeed;
+            	acc = accnorm * maxchange;
     	}
+
+        // Add circular velocity field
+        float4 v = (float4)(-pi.z, 0.f, pi.x, 0.f);
+        v *= 0.00f;
 
     	// Step 5. Add acceleration to velocity
-    	v += acc;
+    	vi += v + acc;
 
-	v.x += MinUrgency;
+	//v.x += MinUrgency;
 
     	// Step 6. Constrain velocity
-    	float speed = length(v);
-    	if(speed > maxspeed){
+    	//float speed = length(v);
+    	//if(speed > maxspeed){
             	// set magnitude to MaxSpeed
-        	v *= maxspeed/speed;
-    	}
+        //	v *= maxspeed/speed;
+    	//}
 
 #endif
 
@@ -228,28 +246,28 @@ __kernel void euler(
 //v.y=.1f;
 //v.z=.1f;
  
-    	pi += dt*v; 	// euler integration, add the velocity times the timestep
+    	pi += dt*vi; 	// euler integration, add the velocity times the timestep
     	//pi.xyz /= params->simulation_scale;
 
 #if 1
 	// apply periodic boundary conditions
 	if(pi.x >= bndMax.x){
-		pi.x = bndMin.x; 
+		pi.x -= bndMax.x; 
 	}
 	else if(pi.x <= bndMin.x){
-		pi.x = bndMax.x;
+		pi.x += bndMax.x;
 	}
 	else if(pi.y >= bndMax.y){
-		pi.y = bndMin.y; 
+		pi.y -= bndMax.y; 
 	}
 	else if(pi.y <= bndMin.y){
-		pi.y = bndMax.y;
+		pi.y += bndMax.y;
 	}
 	else if(pi.z >= bndMax.z){
-		pi.z = bndMin.z;
+		pi.z -= bndMax.z;
 	}
 	else if(pi.z <= bndMin.z){
-		pi.z = bndMax.z;
+		pi.z += bndMax.z;
 	}
 #endif
 
@@ -259,9 +277,9 @@ __kernel void euler(
     	int4 iden = (int4)((int)den(i).x, (int)den(i).y, 0, 0);
     	cli[originalIndex] = iden;
     	//clf[originalIndex] = xflock(i);
-    	clf[originalIndex] = v;
+    	clf[originalIndex] = vi;
 
-    	unsorted_vel(originalIndex) = v;	//mymese
+    	unsorted_vel(originalIndex) = vi;	//mymese
     	//unsorted_vel(originalIndex) = (float4)(4., 4., 4., 4.);	//mymese
     	//unsorted_veleval(originalIndex) = v;	
 	//float dens = density(i);		//mymese
