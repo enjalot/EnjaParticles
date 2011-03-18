@@ -10,6 +10,7 @@ namespace rtps
     public:
         SSFRender(GLuint pos, GLuint col, int n, CL* cli, RTPSettings* _settings);
         ~SSFRender();
+        void smoothDepth();
         virtual void render();
         virtual void setWindowDimensions(GLuint width,GLuint height);
     protected:

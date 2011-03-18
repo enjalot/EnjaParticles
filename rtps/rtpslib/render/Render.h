@@ -56,7 +56,7 @@ namespace rtps
         void drawArrays();
 
         void renderPointsAsSpheres();
-        void smoothDepth();
+
 
         void orthoProjection();
         void perspectiveProjection();
@@ -100,8 +100,6 @@ namespace rtps
         int num;
 
         RenderType rtype;
-        bool glsl;
-        bool mikep;
         bool blending;
         bool write_framebuffers;
         ShaderType smoothing;
@@ -118,7 +116,7 @@ namespace rtps
         RTPSettings* settings; 
 
 
-
+        int generateCheckerBoardTex(GLubyte* color1,GLubyte* color2,int num_squares, int length);
         int generateCircleTexture(GLubyte r, GLubyte g, GLubyte b, GLubyte alpha, int diameter);
 
         void convertDepthToRGB(const GLfloat* depth, GLuint size, GLubyte* rgb) const;

@@ -84,6 +84,51 @@ namespace rtps
         frag+="/copy_frag.glsl";
         glsl_program[COPY_TO_FB] = compileShaders(vert.c_str(),frag.c_str()); 
     }
+    void SSFRender::smoothDepth()
+    {
+        /*glFinish();
+        cl_depth.acquire();
+        k_curvature_flow.execute(window_width*window_height,128);
+        cl_depth.release();
+        */
+        if (smoothing == NO_SHADER)
+        {
+            return;
+        }
+        else if (smoothing == GAUSSIAN_X_SHADER ||smoothing == GAUSSIAN_X_SHADER)
+        {
+            /*glUseProgram(glsl_program[GAUSSIAN_X_SHADER]);
+            glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "depthTex"),0);
+            glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "width"),window_width);
+            fullscreenQuad();
+
+            glUseProgram(glsl_program[GAUSSIAN_Y_SHADER]);
+            glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "depthTex"),0);
+            glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "height"),window_height);*/
+            return; 
+        }
+        else if (smoothing == BILATERAL_GAUSSIAN_SHADER)
+        {
+            glUseProgram(glsl_program[BILATERAL_GAUSSIAN_SHADER]);
+            glUniform1i(glGetUniformLocation(glsl_program[BILATERAL_GAUSSIAN_SHADER],"depthTex"),0);
+            glUniform1f( glGetUniformLocation(glsl_program[BILATERAL_GAUSSIAN_SHADER], "del_x"),1.0/((float)window_width));
+            glUniform1f( glGetUniformLocation(glsl_program[BILATERAL_GAUSSIAN_SHADER], "del_y"),1.0/((float)window_height));
+            //glUniform1i(glGetUniformLocation(glsl_program[BILATERAL_GAUSSIAN_SHADER],"width"),window_width);
+            //glUniform1i(glGetUniformLocation(glsl_program[BILATERAL_GAUSSIAN_SHADER],"height"),window_height);
+        }
+        else if (smoothing == CURVATURE_FLOW_SHADER)
+        {
+            /*glUseProgram(glsl_program[CURVATURE_FLOW_SHADER]);
+            glUniform1i(glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER],"depthTex"),0);
+            glUniform1i(glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER],"width"),window_width);
+            glUniform1i(glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER],"height"),window_height); 
+            glUniform1i(glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER],"iterations"),40); 
+            */
+            return;
+        }
+        fullscreenQuad();
+    }
+
     void SSFRender::render()
     {
         //TODO: do this properly
