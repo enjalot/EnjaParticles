@@ -31,11 +31,17 @@ namespace rtps
         int3()
         {
         }
-        int3(float x, float y, float z)
+		int3(int x, int y, int z)
         {
             this->x = x;
             this->y = y;
             this->z = z;
+        }
+        int3(float x, float y, float z)
+        {
+            this->x = (int)x;
+            this->y = (int)y;
+            this->z = (int)z;
         }
     } int3;
 
@@ -50,10 +56,10 @@ namespace rtps
         }
         int4(float x, float y, float z, float w=1.)
         {
-            this->x = x;
-            this->y = y;
-            this->z = z;
-            this->w = w;
+            this->x = (int)x;
+            this->y = (int)y;
+            this->z = (int)z;
+            this->w = (int)w;
         }
         int4(int x, int y, int z, int w=1)
         {
@@ -142,7 +148,7 @@ namespace rtps
 
         friend float4 operator/(float4& b, float r)
         {
-            float d = 1./r;
+            float d = 1.f/r;
             float4 m = float4(d*b.x, d*b.y, d*b.z, d*b.w);
             return m;
         }

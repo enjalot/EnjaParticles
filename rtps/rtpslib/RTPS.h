@@ -3,14 +3,15 @@
 
 #include <vector>
 
-//OpenCL API
-#include "opencl/CLL.h"
 
 //Render API
 //#include "render/Render.h"
 
 //System API
 #include "system/System.h"
+
+//OpenCL API
+#include "opencl/CLL.h"
 
 //initial value API
 #include "domain/IV.h"

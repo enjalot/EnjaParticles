@@ -26,7 +26,10 @@ namespace rtps
     };
 
     //pass parameters to OpenCL routines
-    typedef struct SPHParams
+#ifdef WIN32
+#pragma pack(2)
+#endif
+	typedef struct SPHParams
     {
         float4 grid_min;
         float4 grid_max;
@@ -91,7 +94,12 @@ namespace rtps
             printf("choice: %d\n", choice);
             */
         }
-    } SPHParams __attribute__((aligned(16)));
+    } SPHParams
+#ifndef WIN32
+	__attribute__((aligned(16)));
+#else
+		;
+#endif
 
 
     class SPH : public System

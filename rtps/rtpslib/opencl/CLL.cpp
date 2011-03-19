@@ -4,6 +4,8 @@
 //#include <GL/glew.h>
 #if defined __APPLE__ || defined(MACOSX)
 //OpenGL stuff
+#elif defined(WIN32)
+#include <GL/wglext.h>
 #else
 //OpenGL stuff
     #include <GL/glx.h>
