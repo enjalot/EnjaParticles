@@ -51,7 +51,7 @@ inline void ForNeighbor(__global float4*  vars_sorted,
 #endif
 	
 	float searchradius = 0.5f;  //8.f; 	    // search radius TODO: remove hard coded parameter
-	float mindist = 0.4f;       //3.f		// minimum distance -> desired separation distance
+	float mindist = 0.8f;       //3.f		// minimum distance -> desired separation distance
     
     //pt->density.x = 0.f;	
     //pt->density.y = 0.f;

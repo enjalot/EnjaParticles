@@ -292,13 +292,25 @@ void FLOCK::collision()
 
 void FLOCK::integrate()
 {
+	typedef std::vector<float4> VF;
+	//VF vel = cl_velocity
     int local_size = 128;
     if(flock_settings.integrator == EULER2)
     {
+
+		#if 1
+		VF v = cl_velocity.copyToHost(64);
+		for (int i=0; i < 64; i++) {
+			v[i].print("v[i]");
+		}
+		//exit(0);
+		#endif
+
         //k_euler.execute(max_num);
         timers[TI_EULER]->start();
         k_euler.execute(num, local_size);
         timers[TI_EULER]->end();
+
     }
     else if(flock_settings.integrator == LEAPFROG2)
     {

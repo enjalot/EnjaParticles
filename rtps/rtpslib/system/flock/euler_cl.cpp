@@ -159,9 +159,9 @@ __kernel void euler(
 //		numFlockmates = 1;
 //	}
 
-	float w_sep = 0.f;
-	float w_aln = 0.f;
-	float w_coh = 0.1f;
+	float w_sep = 0.1f;
+	float w_aln = 0.0f;
+	float w_coh = 0.0f;
 		
 	float4 bndMax = params->grid_max;// - params->boundary_distance;
 	float4 bndMin = params->grid_min;// + params->boundary_distance;
