@@ -294,7 +294,7 @@ void FLOCK::integrate()
 {
 	typedef std::vector<float4> VF;
 	//VF vel = cl_velocity
-    int local_size = 64;
+    int local_size = 128;
     if(flock_settings.integrator == EULER2)
     {
         //k_euler.execute(max_num);
@@ -304,10 +304,13 @@ void FLOCK::integrate()
 
 		#if 0 
 		VF v(128);
-		v = cl_velocity.copyToHost(12);
+		v = clf_debug.copyToHost(12);
+        std::vector<int4> cli = cli_debug.copyToHost(12);
 		for (int i=0; i < 12; i++) {
-			v[i].print("v[i]");
-		}
+		    printf("boid %d\n", i);
+            printf("numFlockmates: %d and count: %d\n", cli[i].x, cli[i].y);
+            v[i].print("v[i]");
+        }
         printf("\n\n");
 		#endif
     }
@@ -671,11 +674,11 @@ void FLOCK::pushParticles(vector<float4> pos)
     std::vector<float4> vels(nn);
 
     std::fill(cols.begin(), cols.end(),color);
-    //float v = .5f;
+    float v = .5f;
     //float v = rand()/RAND_MAX;    //mymese
     //float4 iv = float4(v, v, -v, 0.0f);
-    //float4 iv = float4(v, 0, -v, 0.0f);   //mymese
-    //std::fill(vels.begin(), vels.end(),iv);   // mymese
+    float4 iv = float4(v, 0, -v, 0.0f);   //mymese
+    std::fill(vels.begin(), vels.end(),iv);   // mymese
 
 #ifdef CPU
  std::copy(pos.begin(), pos.end(), positions.begin()+num);
