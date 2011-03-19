@@ -674,10 +674,10 @@ void FLOCK::pushParticles(vector<float4> pos)
     std::vector<float4> vels(nn);
 
     std::fill(cols.begin(), cols.end(),color);
-    float v = .5f;
+    //float v = .5f;
     //float v = rand()/RAND_MAX;    //mymese
     //float4 iv = float4(v, v, -v, 0.0f);
-    float4 iv = float4(v, 0, -v, 0.0f);   //mymese
+    float4 iv = float4(0.f, 0.f, 0.f, 0.0f);   //mymese
     std::fill(vels.begin(), vels.end(),iv);   // mymese
 
 #ifdef CPU
