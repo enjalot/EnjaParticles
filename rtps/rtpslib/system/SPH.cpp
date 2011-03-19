@@ -200,13 +200,16 @@ void SPH::updateGPU()
         
         timers[TI_NEIGH]->start();
         //printf("density\n");
+
         timers[TI_DENS]->start();
         neighborSearch(0);  //density
         timers[TI_DENS]->end();
+
         //printf("forces\n");
         timers[TI_FORCE]->start();
         neighborSearch(1);  //forces
         timers[TI_FORCE]->end();
+
         //exit(0);
         timers[TI_NEIGH]->end();
         
