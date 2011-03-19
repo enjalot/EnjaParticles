@@ -294,23 +294,22 @@ void FLOCK::integrate()
 {
 	typedef std::vector<float4> VF;
 	//VF vel = cl_velocity
-    int local_size = 128;
+    int local_size = 64;
     if(flock_settings.integrator == EULER2)
     {
-
-		#if 1
-		VF v = cl_velocity.copyToHost(64);
-		for (int i=0; i < 64; i++) {
-			v[i].print("v[i]");
-		}
-		//exit(0);
-		#endif
-
         //k_euler.execute(max_num);
         timers[TI_EULER]->start();
         k_euler.execute(num, local_size);
         timers[TI_EULER]->end();
 
+		#if 1 
+		VF v = cl_velocity.copyToHost(12);
+		for (int i=0; i < 12; i++) {
+			v[i].print("v[i]");
+		}
+        printf("\n\n");
+		//exit(0);
+		#endif
     }
     else if(flock_settings.integrator == LEAPFROG2)
     {
@@ -423,7 +422,7 @@ void FLOCK::calculateFLOCKSettings()
     printf("simulation scale: %f\n", flock_settings.simulation_scale);
 
     //flock_settings.spacing = flock_settings.particle_rest_distance/ flock_settings.simulation_scale;
-    flock_settings.spacing = .2;
+    flock_settings.spacing = 0.2f;
 
     float particle_radius = flock_settings.spacing;
     printf("particle radius: %f\n", particle_radius);
@@ -641,7 +640,7 @@ int FLOCK::addBox(int nn, float4 min, float4 max, bool scaled)
     }
 printf("\n\n ADDING A CUBE \n\n");
     vector<float4> rect;
-    MM_addRect3D(nn, min, max, flock_settings.spacing, scale, rect);
+    addCube(nn, min, max, flock_settings.spacing, scale, rect);
     pushParticles(rect);
     return rect.size();
 }
@@ -673,10 +672,10 @@ void FLOCK::pushParticles(vector<float4> pos)
 
     std::fill(cols.begin(), cols.end(),color);
     //float v = .5f;
-    float v = rand()/RAND_MAX;
+    //float v = rand()/RAND_MAX;    //mymese
     //float4 iv = float4(v, v, -v, 0.0f);
-    float4 iv = float4(v, 0, -v, 0.0f);
-    std::fill(vels.begin(), vels.end(),iv);
+    //float4 iv = float4(v, 0, -v, 0.0f);   //mymese
+    //std::fill(vels.begin(), vels.end(),iv);   // mymese
 
 #ifdef CPU
  std::copy(pos.begin(), pos.end(), positions.begin()+num);
@@ -724,10 +723,6 @@ void FLOCK::pushParticles(vector<float4> pos)
     printf("done with prep\n");
     cl_position.release();
 #else
-    //glFinish();
-    //params.num = num+nn;
-    //printf("about to updateNum CPU\n");
-    //ps->updateNum(params.num);
     num += nn;  //keep track of number of particles we use
 #endif
 	renderer->setNum(num);
@@ -745,7 +740,6 @@ void FLOCK::render()
 	renderer->render_box(grid.getBndMin(), grid.getBndMax());
     //renderer->render_table(grid.getBndMin(), grid.getBndMax());
 }
-
 
 
 } //end namespace

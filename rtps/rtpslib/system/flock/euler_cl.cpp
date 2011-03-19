@@ -23,162 +23,53 @@ __kernel void euler(
     if(i >= num) 
 	return;
 
-//    float4 p = pos(i);
-//  float4 v = vel(i);  mymese
-//    float4 f = force(i);
-
-    //external force is gravity
-//  f.z += -9.8f;	mymese
-
-//  float speed = magnitude(f);	mymese
-//  if(speed > 600.0f) 		mymese //velocity limit, need to pass in as struct
-//  {					mymese
-//      f *= 600.0f/speed;		mymese
-//  }					mymese
-
-//  v += dt*f;			mymese
-    //p += dt*v / params->simulation_scale;
-//  p += dt*v;			mymese
-
-
-
-
-
-//	#define	separationdist	0.005f	// 3.f
-//	#define	searchradius	0.8f
-	#define	maxspeed	    3.f	// 1.f
+    // this parameters will be moved to FLOCKparams
+	#define	maxspeed	    3.f	    // 1.f
 	#define desiredspeed	1.5f	// .5f
 	#define maxchange	    0.1f	// .1f
 	#define MinUrgency      0.05f	// .05f
 	#define MaxUrgency      0.1f	// .1f
 
-#if 0
-	// index of closest flockmate
-	int index_c = (int) den(i).x;
-
-	// positions
-	float4 pi = pos(i);
-	float4 pc = pos(index_c);
-
-	// velocities
-	//float4 vi = force(index_i);
-	//float4 vj = force(index_j);
-    	float4 v = vel(i);
-	float4 vc = vel(index_c);
-
-	// initialize acc to zero
-    	float4 acc = (float4)(0.f, 0.f, 0.f, 0.f);
-
-        // Step 1. Update position
-	// REMEMBER THAT MY VELOCITIES ARE GOING TO BE STORED IN THE FORCE VECTOR FROM NOW ON
-//        pt->position += vi;
-
-        // Step 2. Search for neighbors
-        //numFlockmates = SearchFlockmates(i);
-
-	// flockmates
-	//int closestFlockmate = pc;
-	float numFlockmates = den(i).y;	// TODO: is the y component but Im getting error: make sure that density is a float4
-
-        // Step 3. Compute the three rules
-	
-	// RULE 1. Separation
-	float d = distance(pi,pc);
-	float r = d / separationdist;  				// TODO: NEED THE CLOSEST FLOCKMATE (ID OR POSITION), AND THE DISTANTCE FROM IT TO THE CURRENT BOID
-
-    float4 separation = pi - pc;
-    separation = normalize(separation);			// TODO: search for normalization in OpenCL Specification
-
-    if(d > separationdist){
-            separation *=  r;
-    }
-    else if(d < separationdist){
-            separation *= -r;
-    }
-    else{
-            separation *= 0.f;
-    }
-    
-	acc += separation;
-                
-	// RULE 2. Alignment
-	float4 alignment = vc - v;
-    alignment = normalize(alignment);
-
-    acc += alignment;
-
-    // RULE 3. Cohesion
-    float4 flockCenter= xflock(i);
-	float4 cohesion;
-
-    flockCenter /= numFlockmates;
-    cohesion = pi - flockCenter;
-    cohesion = normalize(cohesion);
-
-	acc += cohesion;
-
-    // Step 4. Constrain acceleration
-    float accspeed = length(acc);
-    if(accspeed > maxspeed*MaxUrgency){
-            // set magnitude to MaxChangeInAcc
-            acc *= (maxspeed*MaxUrgency)/accspeed;
-    }
-
-    // Step 5. Add acceleration to velocity
-    v += acc;
-
-    // Step 6. Constrain velocity
-    float speed = length(v);
-    if(speed > maxspeed){
-            // set magnitude to MaxSpeed
-        v *= maxspeed/speed;
-    }
-
-#endif
-
-#if 1
 	// positions
 	float4 pi = pos(i);
 
 	// velocities
     float4 vi = vel(i);
 
-	// acceleration vector
+	// acceleration vectors
     float4 acc     = (float4)(0.f, 0.f, 0.f, 1.f);
     float4 acc_sep = (float4)(0.f, 0.f, 0.f, 1.f);
     float4 acc_aln = (float4)(0.f, 0.f, 0.f, 1.f);
     float4 acc_coh = (float4)(0.f, 0.f, 0.f, 1.f);
 
+    // getting the values of the rules computed in cl_density
 	float4 separation = force(i);
 	float4 alignment = surface(i);
 	float4 cohesion = xflock(i);
 	
+    // getting number of flockmates and how many flockmates were within the separation dist
 	float numFlockmates = den(i).x;
     float count =  den(i).y;
-//	if(numFlockmates == 0){
-//		numFlockmates = 1;
-//	}
 
-	float w_sep = 0.1f;
+    // weights for the rules
+	float w_sep = 0.0f;
 	float w_aln = 0.0f;
 	float w_coh = 0.0f;
-		
-	float4 bndMax = params->grid_max;// - params->boundary_distance;
-	float4 bndMin = params->grid_min;// + params->boundary_distance;
 	
+    // boundary limits, used to computed boundary conditions    
+	float4 bndMax = params->grid_max;
+	float4 bndMin = params->grid_min;
+
+
 	// RULE 1. SEPARATION
 	
 	// already computed in cl_density.h
 	// it is stored in pt->force
-	//separation = normalize(separation);
-	//if(length(separation) < separationdist){
-	//	separation *= 2;
-	//}	
     if(count > 0){
         separation /=count;
         separation = normalize(separation);
     }
-	acc_sep += separation * w_sep;
+	acc_sep = separation * w_sep;
 
 	
 	// RULE 2. ALIGNMENT
@@ -186,13 +77,13 @@ __kernel void euler(
 	// desired velocity computed in cl_density.h
 	// it is stored in pt->surf_tens
 
-	// steering towards the average velocity
+	// dividing by the number of flockmates to get the actual average
 	alignment = numFlockmates > 0 ? alignment /= numFlockmates : alignment;
 
-	// steering towards the average position
+	// steering towards the average velocity 
 	alignment -= vi;
 	alignment = normalize(alignment);
-	acc_aln += alignment * w_aln;
+	acc_aln = alignment * w_aln;
 
 
 	// RULE 3. COHESION
@@ -209,45 +100,30 @@ __kernel void euler(
 	// steering towards the average position
 	cohesion -= pi;
 	cohesion = normalize(cohesion);
-	acc_coh += cohesion * w_coh;
+	acc_coh = cohesion * w_coh;
     
 
-    // Step 3.5 compute acc
+    // compute acc
     acc = vi + acc_sep + acc_aln + acc_coh;
 
-	// Step 4. Constrain acceleration
-    	float accspeed = length(acc);
-        float4 accnorm = normalize(acc);
-    	if(accspeed > maxchange){
-            	// set magnitude to MaxChangeInAcc
-            	acc = accnorm * maxchange;
-    	}
+	// constrain acceleration
+    float accspeed = length(acc);
+    float4 accnorm = normalize(acc);
+    if(accspeed > maxchange){
+        // set magnitude to MaxChangeInAcc
+        acc = accnorm * maxchange;
+    }
 
-        // Add circular velocity field
-        float4 v = (float4)(-pi.z, 0.f, pi.x, 0.f);
-        v *= 0.00f;
+    // add circular velocity field
+    float4 v = (float4)(-pi.z, 0.f, pi.x, 0.f);
+    v *= 0.00f;
 
-    	// Step 5. Add acceleration to velocity
-    	vi += v + acc;
+    // add acceleration to velocity
+    vi += v + acc;
 
-	//v.x += MinUrgency;
-
-    	// Step 6. Constrain velocity
-    	//float speed = length(v);
-    	//if(speed > maxspeed){
-            	// set magnitude to MaxSpeed
-        //	v *= maxspeed/speed;
-    	//}
-
-#endif
 
 	// INTEGRATION
-//v.x=.1f;
-//v.y=.1f;
-//v.z=.1f;
- 
-    	pi += dt*vi; 	// euler integration, add the velocity times the timestep
-    	//pi.xyz /= params->simulation_scale;
+    pi += dt*vi; 	// euler integration, add the velocity times the timestep
 
 #if 1
 	// apply periodic boundary conditions
@@ -272,18 +148,15 @@ __kernel void euler(
 #endif
 
 	// SORT STUFF FOR THE NEIGHBOR SEARCH
-    	uint originalIndex = sort_indices[i];
+    uint originalIndex = sort_indices[i];
+    unsorted_vel(originalIndex) = vi;	
+    unsorted_pos(originalIndex) = (float4)(pi.xyz, 1.f);    // changed the last component to 1 for my boids, im not using density
+    positions[originalIndex] = (float4)(pi.xyz, 1.f);       // for plotting
+    
+    // debugging vectors
+    int4 iden = (int4)((int)den(i).x, (int)den(i).y, 0, 0);
+    cli[originalIndex] = iden;
+    //clf[originalIndex] = xflock(i);
+    clf[originalIndex] = vi;
 
-    	int4 iden = (int4)((int)den(i).x, (int)den(i).y, 0, 0);
-    	cli[originalIndex] = iden;
-    	//clf[originalIndex] = xflock(i);
-    	clf[originalIndex] = vi;
-
-    	unsorted_vel(originalIndex) = vi;	//mymese
-    	//unsorted_vel(originalIndex) = (float4)(4., 4., 4., 4.);	//mymese
-    	//unsorted_veleval(originalIndex) = v;	
-	//float dens = density(i);		//mymese
-	//unsorted_pos(originalIndex) = (float4)(p.xyz, dens);	//mymese
-    	unsorted_pos(originalIndex) = (float4)(pi.xyz, 1.f); // change the last component to 1 for my boids, im not using density
-    	positions[originalIndex] = (float4)(pi.xyz, 1.f);  // for plotting
 }

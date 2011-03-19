@@ -6,7 +6,7 @@
 namespace rtps
 {
 
-void MM_addRect3D(int num, float4 min, float4 max, float spacing, float scale, std::vector<float4>& rvec)
+void addCube(int num, float4 min, float4 max, float spacing, float scale, std::vector<float4>& rvec)
 {
 /*!
  * Create a rectangle with at most num particles in it.

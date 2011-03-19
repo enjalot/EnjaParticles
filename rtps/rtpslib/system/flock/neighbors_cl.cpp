@@ -14,8 +14,6 @@
 //Contains all of the Smoothing Kernels for FLOCK
 #include "cl_kernels.h"
 
-   
-
 //----------------------------------------------------------------------
 inline void ForNeighbor(__global float4*  vars_sorted,
 				PointData* pt,
@@ -27,71 +25,55 @@ inline void ForNeighbor(__global float4*  vars_sorted,
                 DEBUG_ARGS
 				)
 {
-    	int num = flockp->num;
+    int num = flockp->num;
 	
-    	//if (flockp->choice == 0 || (index_j != index_i)) 
-    	//{
 	// get the particle info (in the current grid) to test against
 	float4 position_j = pos(index_j); 
 
 	float4 r = (position_i - position_j); 
 	r.w = 0.f; // I stored density in 4th component
-	// |r|
+	
+    // |r|
 	float rlen = length(r);
 
-#if 0
-    if(index_j == 0)
-        clf[index_i].x = rlen;
-    if(index_j == 1)
-        clf[index_i].y = rlen;
-    if(index_j == 2)
-        clf[index_i].z = rlen;
-    if(index_j == 3)
-        clf[index_i].w = rlen;
-#endif
-	
+    // parameter that would be moved to FLOCKparams	
 	float searchradius = 0.5f;  //8.f; 	    // search radius TODO: remove hard coded parameter
 	float mindist = 0.8f;       //3.f		// minimum distance -> desired separation distance
     
-    //pt->density.x = 0.f;	
-    //pt->density.y = 0.f;
 
     // is this particle within cutoff?
 	if (rlen <= searchradius) 
-        {
+    {
 
-            if (flockp->choice == 0) {
-                // update density
-                // return density.x for single neighbor
-                #include "cl_density.h"
-            }
-
-            if (flockp->choice == 1) {
-
-                //iej is 0 when we are looking at same particle
-                //we allow calculations and just multiply force and xflock
-                //by iej to avoid branching
-                int iej = index_i != index_j;
-                
-                
-                // update pressure
-         //       #include "cl_force.h"
-            }
-
-            if (flockp->choice == 2) {
-                // update color normal and color Laplacian
-                //#include "cl_surface_tension.h"
-            }
-
-            if (flockp->choice == 3) {
-                //#include "density_denom_update.cl"
-            } 
-        /*	
-            if (flockp->choice == 4) {
-                #include "cl_surface_extraction.h"
-            }*/
+        if (flockp->choice == 0) {
+            // compute the rules 
+            #include "cl_density.h"
         }
-    //}
+
+        if (flockp->choice == 1) {
+            //iej is 0 when we are looking at same particle
+            //we allow calculations and just multiply force and xflock
+            //by iej to avoid branching
+            int iej = index_i != index_j;
+                
+            // update pressure
+            //#include "cl_force.h"
+        }
+
+        if (flockp->choice == 2) {
+            // update color normal and color Laplacian
+            //#include "cl_surface_tension.h"
+        }
+
+        if (flockp->choice == 3) {
+            //#include "density_denom_update.cl"
+        }
+
+        /*	
+        if (flockp->choice == 4) {
+            #include "cl_surface_extraction.h"
+        }*/
+    }
 }
 
 
