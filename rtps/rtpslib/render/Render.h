@@ -4,21 +4,26 @@
 #include <map>
 
 #include <GL/glew.h>
-#if defined __APPLE__ || defined(MACOSX)
+
+/*#if defined __APPLE__ || defined(MACOSX)
     #include <GLUT/glut.h>
 #else
     #include <GL/glut.h>
 //OpenCL stuff
-#endif
+#endif*/
 
 
 #if defined __APPLE__ || defined(MACOSX)
 //OpenGL stuff
+    #include <GLUT/glut.h>
     #include <OpenGL/gl.h>
 #else
 //OpenGL stuff
+    #include <GL/glut.h>
     #include <GL/gl.h>
 #endif
+
+
 
 #include "RTPSettings.h"
 #include "../structs.h"
