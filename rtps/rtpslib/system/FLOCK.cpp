@@ -302,10 +302,11 @@ void FLOCK::integrate()
         k_euler.execute(num, local_size);
         timers[TI_EULER]->end();
 
-		#if 0 
+		#if 1 
 		VF v(128);
 		v = clf_debug.copyToHost(12);
-        std::vector<int4> cli = cli_debug.copyToHost(12);
+        std::vector<int4> cli(128);
+        cli = cli_debug.copyToHost(12);
 		for (int i=0; i < 12; i++) {
 		    printf("boid %d\n", i);
             printf("numFlockmates: %d and count: %d\n", cli[i].x, cli[i].y);

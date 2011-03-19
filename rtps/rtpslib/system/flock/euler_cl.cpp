@@ -54,7 +54,7 @@ __kernel void euler(
     // weights for the rules
 	float w_sep = 0.0f;
 	float w_aln = 0.0f;
-	float w_coh = 0.0f;
+	float w_coh = 1.0f;
 	
     // boundary limits, used to computed boundary conditions    
 	float4 bndMax = params->grid_max;
@@ -78,7 +78,7 @@ __kernel void euler(
 	// it is stored in pt->surf_tens
 
 	// dividing by the number of flockmates to get the actual average
-	alignment = numFlockmates > 0 ? alignment /= numFlockmates : alignment;
+	alignment = numFlockmates > 0 ? alignment/numFlockmates : alignment;
 
 	// steering towards the average velocity 
 	alignment -= vi;
@@ -95,11 +95,12 @@ __kernel void euler(
 	// it is stored in pt->density.x
 
 	// dividing by the number of flockmates to get the actual average
-    cohesion = numFlockmates > 0 ? cohesion /= numFlockmates : cohesion;
+    cohesion = numFlockmates > 0 ? cohesion/numFlockmates : cohesion;
 
 	// steering towards the average position
 	cohesion -= pi;
 	cohesion = normalize(cohesion);
+    clf[sort_indices[i]] = cohesion; 
 	acc_coh = cohesion * w_coh;
     
 
@@ -157,7 +158,6 @@ __kernel void euler(
     // debugging vectors
     int4 iden = (int4)((int)den(i).x, (int)den(i).y, 0, 0);
     cli[originalIndex] = iden;
-    //clf[originalIndex] = xflock(i);
-    clf[originalIndex] = vi;
+    //clf[originalIndex] = cohesion; 
 
 }
