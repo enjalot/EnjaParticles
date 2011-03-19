@@ -147,7 +147,7 @@ __kernel void euler(
     float4 acc     = (float4)(0.f, 0.f, 0.f, 1.f);
     float4 acc_sep = (float4)(0.f, 0.f, 0.f, 1.f);
     float4 acc_aln = (float4)(0.f, 0.f, 0.f, 1.f);
-    float4 acc_coh = (float4)(0.f, 0.f, 0.f, 1.f);
+    float4 acc_coh = (float4)(1.f, 0.f, 0.f, 1.f);
 
 	float4 separation = force(i);
 	float4 alignment = surface(i);
