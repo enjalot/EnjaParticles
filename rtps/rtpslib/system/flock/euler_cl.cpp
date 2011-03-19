@@ -153,6 +153,8 @@ __kernel void euler(
     uint originalIndex = sort_indices[i];
     unsorted_vel(originalIndex) = vi;	
     unsorted_pos(originalIndex) = (float4)(pi.xyz, 1.f);    // changed the last component to 1 for my boids, im not using density
+	clf[i].xyz = pi.xyz;
+	return;
     positions[originalIndex] = (float4)(pi.xyz, 1.f);       // for plotting
     
     // debugging vectors

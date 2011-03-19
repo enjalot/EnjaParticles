@@ -324,7 +324,7 @@ void FLOCK::integrate()
     }
 
 
-#if 0
+#if 1
     if(num > 0)
     {
         std::vector<float4> pos = cl_position.copyToHost(num);
@@ -337,10 +337,10 @@ void FLOCK::integrate()
         //std::vector<float4> xf = cl_xflock.copyToHost(num);
         for(int i = 0; i < num; i+=128)
         {
-            printf("pos   [%d] = %f %f %f\n", i, pos[i].x, pos[i].y, pos[i].z);
+            //printf("pos   [%d] = %f %f %f\n", i, pos[i].x, pos[i].y, pos[i].z);
             //printf("vel   [%d] = %f %f %f\n", i, vel[i].x, vel[i].y, vel[i].z);
             //printf("ne flo[%d] = %d %d \n", i, cli[i].x, cli[i].y);
-            //printf("ve flo[%d] = %f %f %f\n", i, clf[i].w, clf[i].y, clf[i].z);
+            printf("ve flo[%d] = %f %f %f\n", i, clf[i].w, clf[i].y, clf[i].z);
         }
 
     }

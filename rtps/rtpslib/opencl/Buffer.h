@@ -36,8 +36,19 @@ public:
     void copyToDevice(const std::vector<T> &data);
     //pastes the data over the current array starting at [start]
     void copyToDevice(const std::vector<T> &data, int start);
-    std::vector<T> copyToHost(int num);
 
+    //really these should take in a presized vector<T> to be filled
+    //these should be factored out
+    std::vector<T> copyToHost(int num);
+    std::vector<T> copyToHost(int num, int start);
+    //correct way (matches copyToDevice
+    void copyToHost(std::vector<T> &data);
+    void copyToHost(std::vector<T> &data, int start);
+
+
+    
+
+    //these don't appear to be implemented. need to revisit
     void set(T val);
     void set(const std::vector<T> &data);
 
