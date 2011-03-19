@@ -10,7 +10,7 @@ namespace rtps
 {
 
 
-void MM_addRect3D(int num, float4 min, float4 max, float spacing, float scale, std::vector<float4>& rvec);
+void addCube(int num, float4 min, float4 max, float spacing, float scale, std::vector<float4>& rvec);
 vector<float4> addRect(int num, float4 min, float4 max, float spacing, float scale);
 vector<float4> addSphere(int num, float4 center, float radius, float spacing, float scale);
 
