@@ -8,7 +8,7 @@ namespace rtps
         system = SPH;
         max_particles = 2048;
         dt = .001f;
-        grid = Domain(float4(-5,-.3,0,0), float4(2, 2, 12, 0));
+        grid = Domain(float4(-5,-.3f,0,0), float4(2, 2, 12, 0));
     }
 
     RTPSettings::RTPSettings(SysType system, int max_particles, float dt)
@@ -16,7 +16,7 @@ namespace rtps
         this->system = system;
         this->max_particles = max_particles;
         this->dt = dt;
-        grid = Domain(float4(-5,-.3,0,0), float4(2, 2, 12, 0));
+        grid = Domain(float4(-5,-.3f,0,0), float4(2, 2, 12, 0));
     }
 
     RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain grid)

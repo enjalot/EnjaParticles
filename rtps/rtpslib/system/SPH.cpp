@@ -311,7 +311,7 @@ namespace rtps
         float VP = .0262144 / max_num;                  //Particle Volume [ m^3 ]
         float mass = rho0 * VP;                         //Particle Mass [ kg ]
         //constant .87 is magic
-        float rest_distance = .87 * pow(VP, 1./3.);     //rest distance between particles [ m ]
+        float rest_distance = .87 * pow(VP, 1.f/3.f);     //rest distance between particles [ m ]
 
         float smoothing_distance = 2.0f * rest_distance;//interaction radius
         float boundary_distance = .5f * rest_distance;
@@ -324,7 +324,7 @@ namespace rtps
         //printf("domain volume: %f\n", domain_vol);
 
         //ratio between particle radius in simulation coords and world coords
-        float simulation_scale = pow(VP * max_num / domain_vol, 1./3.); 
+        float simulation_scale = pow(VP * max_num / domain_vol, 1.f/3.f); 
 
         spacing = rest_distance/ simulation_scale;
 
@@ -353,9 +353,9 @@ namespace rtps
         sphp.xsph_factor = .1f;
 
         float h = sphp.smoothing_distance;
-        float h9 = pow(h,9.);
-        float h6 = pow(h,6.);
-        float h3 = pow(h,3.);
+        float h9 = pow(h,9.f);
+        float h6 = pow(h,6.f);
+        float h3 = pow(h,3.f);
         sphp.wpoly6_coef = 315.f/64.0f/pi/h9;
         sphp.wpoly6_d_coef = -945.f/(32.0f*pi*h9);
         sphp.wpoly6_dd_coef = -945.f/(32.0f*pi*h9);

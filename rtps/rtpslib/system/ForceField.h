@@ -7,6 +7,9 @@ namespace rtps
 enum FFType{ATTRACTOR, REPELER};
 
 //keep track of the fluid settings
+#ifdef WIN32
+#pragma pack(2)
+#endif
 typedef struct ForceField
 {
     float4 center;
@@ -31,7 +34,14 @@ typedef struct ForceField
         //this->padd = padd;
     }
 
-} ForceField __attribute__((aligned(16)));
+} ForceField 
+#ifndef WIN32
+__attribute__((aligned(16)));
+#else
+;
+#endif
+
+
 
 }
 

@@ -2,14 +2,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <GL/glew.h>
-#if defined __APPLE__ || defined(MACOSX)
-    #include <GLUT/glut.h>
-#else
-    #include <GL/glut.h>
-//OpenCL stuff
-#endif
-
 #include "Render.h"
 #include "util.h"
 #include "stb_image.h" 
@@ -192,9 +184,10 @@ namespace rtps
         GLubyte* image = new GLubyte[window_width*window_height*4];
         if (!strcmp(filename,"depth.png") || !strcmp(filename,"depth2.png"))
         {
-            GLfloat fimg[window_width*window_height];
+            GLfloat* fimg = new GLfloat[window_width*window_height];
             glGetTexImage(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,GL_FLOAT,fimg);
             convertDepthToRGB(fimg,window_width*window_height,image);
+	    delete[] fimg;
         }
         else
         {
@@ -552,7 +545,7 @@ namespace rtps
     {
         unsigned int imageSize = diameter*diameter*4;
         unsigned int radius = diameter/2;
-        GLubyte image[imageSize];
+        GLubyte* image = new GLubyte[imageSize];
         memset(image,0,imageSize);
 
         for (unsigned int i = 0; i<imageSize; i+=4)
@@ -585,7 +578,7 @@ namespace rtps
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, diameter, diameter, 0,
                      GL_RGBA, GL_UNSIGNED_BYTE, image);
-
+        delete[] image;
         return 0; //success
     }
 

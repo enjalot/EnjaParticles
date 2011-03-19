@@ -1,0 +1,24 @@
+# - Try to find OpenCL
+# Once done this will define
+IF (WIN32)
+    FIND_PATH(GLUT_INCLUDE_DIR GL/glut.h 
+		$ENV{NVSDKCOMPUTE_ROOT}/shared/inc
+	)
+
+    FIND_LIBRARY(GLUT_LIBRARIES 
+		NAMES glut32 glut64 glut.dll
+		PATHS
+		$ENV{NVSDKCOMPUTE_ROOT}/shared/lib
+	)
+
+SET( GLUT_FOUND "NO" )
+IF(GLUT_LIBRARIES )
+    SET( GLUT_FOUND "YES" )
+ENDIF(GLUT_LIBRARIES)
+
+MARK_AS_ADVANCED(
+  GLUT_INCLUDE_DIR
+)
+
+ENDIF (WIN32)
+
