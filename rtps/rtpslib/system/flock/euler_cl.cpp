@@ -127,6 +127,7 @@ __kernel void euler(
 
 #if 1
 	// apply periodic boundary conditions
+	// assumes particle cannot move by bndMax.x in one iteration
 	if(pi.x >= bndMax.x){
 		pi.x -= bndMax.x; 
 	}

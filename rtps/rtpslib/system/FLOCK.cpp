@@ -302,13 +302,13 @@ void FLOCK::integrate()
         k_euler.execute(num, local_size);
         timers[TI_EULER]->end();
 
-		#if 1 
-		VF v = cl_velocity.copyToHost(12);
+		#if 0 
+		VF v(128);
+		v = cl_velocity.copyToHost(12);
 		for (int i=0; i < 12; i++) {
 			v[i].print("v[i]");
 		}
         printf("\n\n");
-		//exit(0);
 		#endif
     }
     else if(flock_settings.integrator == LEAPFROG2)
