@@ -10,13 +10,11 @@ namespace rtps {
 //----------------------------------------------------------------------
 void FLOCK::loadNeighbors()
 {
-	printf("enter neighbor\n");
-
     try {
         string path(FLOCK_CL_SOURCE_DIR);
         path = path + "/neighbors_cl.cl";
         k_neighbors = Kernel(ps->cli, path, "neighbors");
-        printf("bigger problem\n");
+        //printf("bigger problem\n");
     } catch(cl::Error er) {
         printf("ERROR(neighborSearch): %s(%s)\n", er.what(), oclErrorString(er.err()));
         exit(1);
@@ -82,7 +80,7 @@ void FLOCK::neighborSearch(int choice)
     }
 	ps->cli->queue.finish();
 
-#if 1 //printouts    
+#if 0 //printouts    
     //DEBUGING
 	printf("============================================\n");
 	printf("which == %d *** \n", choice);
