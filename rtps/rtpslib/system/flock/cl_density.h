@@ -15,8 +15,8 @@
 
 	// setup for rule 1. Separation
 	// force is the separation vector
-    float4 s = pi - pj;
-	float  d = length(s);
+    float4 s = r;       //pi - pj;
+	float  d = rlen;    //length(s);
 	
     if(d < flockp->min_dist){
 		s.w = 0.0f;
@@ -38,7 +38,8 @@
 
     float4 k = pi-pj;
     pt->density = (float4)(5., 5., 5., 5.);
-    //pt->force= (float4)(1., 1., 1., 1.);
-    pt->force= (float4)(pj.xyz, 1.);
+    pt->force= (float4)(k.xyz, 1.);
+    //pt->force= (float4)(index_i, index_j, 1., 1.);
+    //pt->force= (float4)(pj.xyz, 1.);
 //}
 #endif

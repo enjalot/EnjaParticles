@@ -123,7 +123,7 @@ __kernel void neighbors(
         surface(index) = pt.surf_tens;
 
         clf[index].xyz= force(index).xyz;
-        clf[index].w = den(index).x;
+        clf[index].w = (float)index;
 	}
 #if 0
 	if (flockp->choice == 1) { // update force
