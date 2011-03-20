@@ -252,11 +252,13 @@ void FLOCK::updateGPU()
         timers[TI_DENS]->start();
         neighborSearch(0);  //density => flockmates
         timers[TI_DENS]->end();
+
         //printf("forces\n");
         //timers[TI_FORCE]->start();
         //neighborSearch(1);  //forces => velocities
         //timers[TI_FORCE]->end();
         //exit(0);
+
         timers[TI_NEIGH]->end();
         
         //printf("collision\n");
@@ -452,6 +454,7 @@ void FLOCK::calculateFLOCKSettings()
     //params.gravity = 0.0f;
     params.velocity_limit = 600.0f;
     params.xflock_factor = .05f;
+    params.min_dist = 1.1f;
 
 	float h = params.smoothing_distance;
 	float pi = acos(-1.0);

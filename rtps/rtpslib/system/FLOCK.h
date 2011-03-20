@@ -96,6 +96,7 @@ typedef struct FLOCKParams
 		printf("spring: %f\n", spring);
 		printf("gravity: %f\n", gravity);
 		printf("choice: %d\n", choice);
+		printf("min_dist: %f\n", min_dist);
 	}
 } FLOCKParams __attribute__((aligned(16)));
 
