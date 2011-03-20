@@ -310,15 +310,16 @@ void FLOCK::integrate()
 
 		#if 0 
 		VF v(128);
-		v = clf_debug.copyToHost(12);
+		v = clf_debug.copyToHost(100);
         std::vector<int4> cli(128);
         cli = cli_debug.copyToHost(12);
-		for (int i=0; i < 12; i++) {
+		for (int i=0; i < 30; i++) {
 		    printf("boid %d\n", i);
             printf("numFlockmates: %d and count: %d\n", cli[i].x, cli[i].y);
             v[i].print("v[i]");
         }
         printf("\n");
+		exit(0);
 		#endif
     }
    // else if(flock_settings.integrator == LEAPFROG2)
@@ -439,7 +440,7 @@ void FLOCK::calculateFLOCKSettings()
     printf("simulation scale: %f\n", flock_settings.simulation_scale);
 
     //flock_settings.spacing = flock_settings.particle_rest_distance/ flock_settings.simulation_scale;
-    flock_settings.spacing = 0.2f;
+    flock_settings.spacing = 0.05f; // must be less than smoothing_distance
 
     float particle_radius = flock_settings.spacing;
     printf("particle radius: %f\n", particle_radius);
@@ -662,6 +663,13 @@ printf("\n\n ADDING A CUBE \n\n");
     vector<float4> rect;
     addCube(nn, min, max, flock_settings.spacing, scale, rect);
     pushParticles(rect);
+	#if 0
+	// Separation is .2 in all directions, between neighbor boids
+	for (int i=0; i < rect.size(); i++) {
+		rect[i].print("rect");
+	}
+	exit(0);
+	#endif
     return rect.size();
 }
 

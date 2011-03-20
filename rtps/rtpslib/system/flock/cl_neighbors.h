@@ -35,6 +35,9 @@ void IterateParticlesInCell(
     DEBUG_ARGS
 )
 {
+	//clf[index] = position_i; 
+	//clf[index].w = -128.;
+	//return;
     // get hash (of position) of current cell
     uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
 
@@ -54,7 +57,7 @@ void IterateParticlesInCell(
             ForNeighbor(vars_sorted, pt, index_i, index_j, position_i, gp, /*fp,*/ flockp DEBUG_ARGV);
 #endif
         }
-        clf[index_i] = pt->force;
+        //clf[index_i] = pt->force;
     }
 }
 
@@ -75,6 +78,7 @@ void IterateParticlesInNearbyCells(
     DEBUG_ARGS
     )
 {
+	//clf[index_i] = position_i; 
     // initialize force on particle (collisions)
 
     // get cell in grid for the given position
@@ -135,6 +139,8 @@ inline void ForPossibleNeighbor(__global float4* vars_sorted,
         //This shouldn't be happening!?
         //two particles shouldn't be able to be in the same place at same time
         //must be some other bug?
+		// never compare a float against zero!!! Check that rlen < eps, where 
+		// eps is very small
         if (rlen == 0.0 && flockp->choice != 0) return;
 
 		// is this particle within cutoff?
