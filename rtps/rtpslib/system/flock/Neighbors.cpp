@@ -38,8 +38,6 @@ void FLOCK::loadNeighbors()
 	kern.setArg(iarg++, cli_debug.getDevicePtr());
 	//kern.setArg(iarg++, cl_index_neigh->getDevicePtr());
 
-
-
 	}
 //----------------------------------------------------------------------
 
