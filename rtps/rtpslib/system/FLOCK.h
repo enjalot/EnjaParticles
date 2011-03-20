@@ -136,7 +136,7 @@ public:
     void addBall(int nn, float4 center, float radius, bool scaled);
 	virtual void render();
     
-    void loadTriangles(std::vector<Triangle> triangles);
+    //void loadTriangles(std::vector<Triangle> triangles);
     
 
 

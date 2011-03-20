@@ -24,7 +24,7 @@ __kernel void euler(
 	return;
 
     // this parameters will be moved to FLOCKparams
-	#define	maxspeed	    0.3f	    // .003f
+	#define	maxspeed	    0.1f	    // .003f
 	//#define desiredspeed	0.0025f	// .5f
 	//#define MinUrgency      0.0025f	// .05f
 	//#define MaxUrgency      0.005f	// .1f
@@ -51,9 +51,9 @@ __kernel void euler(
     float count =  den(i).y;
 
     // weights for the rules
-	float w_sep = 0.0f;
+	float w_sep = 100.0f;
 	float w_aln = 0.0f;
-	float w_coh = 0.3f;
+	float w_coh = 0.0f;  // 3.f
 	
     // boundary limits, used to computed boundary conditions    
 	float4 bndMax = params->grid_max;
@@ -70,6 +70,7 @@ __kernel void euler(
         separation = normalize(separation);
     }
 	acc_sep = separation * w_sep;
+    //clf[sort_indices[i]]= force(i); 
 
 	
 	// RULE 2. ALIGNMENT
@@ -155,12 +156,12 @@ __kernel void euler(
     uint originalIndex = sort_indices[i];
     unsorted_vel(originalIndex) = vi;	
     unsorted_pos(originalIndex) = (float4)(pi.xyz, 1.f);    // changed the last component to 1 for my boids, im not using density
-	clf[i].xyz = pi.xyz;
+//	clf[i].xyz = pi.xyz;
     positions[originalIndex] = (float4)(pi.xyz, 1.f);       // for plotting
     
     // debugging vectors
     int4 iden = (int4)((int)den(i).x, (int)den(i).y, 0, 0);
     cli[originalIndex] = iden;
-//    clf[originalIndex] = vi; 
+    clf[originalIndex] = vi; 
 
 }

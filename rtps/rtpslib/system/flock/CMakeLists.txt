@@ -3,13 +3,13 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 # List of files to precompile
 SET(FILES
     density_cl
-    pressure_cl
-    viscosity_cl
-    xflock_cl
-    leapfrog_cl
+    #pressure_cl
+    #viscosity_cl
+    #xflock_cl
+    #leapfrog_cl
     euler_cl
-    collision_wall_cl
-    collision_tri_cl
+    #collision_wall_cl
+    #collision_tri_cl
     prep_cl
     hash_cl
     datastructures_cl

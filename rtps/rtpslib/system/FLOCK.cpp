@@ -70,18 +70,18 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     //loadStep1();
     //loadStep2();
 
-    loadCollision_wall();
-    loadCollision_tri();
+//    loadCollision_wall();
+//    loadCollision_tri();
 
     //could generalize this to other integration methods later (leap frog, RK4)
-    if(flock_settings.integrator == LEAPFROG2)
-    {
-        loadLeapFrog();
-    }
-    else if(flock_settings.integrator == EULER2)
-    {
+//    if(flock_settings.integrator == LEAPFROG2)
+//    {
+//        loadLeapFrog();
+//    }
+//    else if(flock_settings.integrator == EULER2)
+//    {
         loadEuler();
-    }
+//    }
 
     loadScopy();
 
@@ -189,16 +189,16 @@ void FLOCK::updateCPU()
     //cpuXFLOCK();
     //cpuCollision_wall();
 
-    if(flock_settings.integrator == EULER2)
-    {
+   // if(flock_settings.integrator == EULER2)
+   // {
         //cpuEuler();   // Original from Myrna
 		// Modified by Gordon Erlebacher, 
         ge_cpuEuler();  // based on my boids program
-    }
-    else if(flock_settings.integrator == LEAPFROG2)
-    {
-        cpuLeapFrog();
-    }
+   // }
+   //else if(flock_settings.integrator == LEAPFROG2)
+   // {
+   //     cpuLeapFrog();
+   // }
     //printf("positions[0].z %f\n", positions[0].z);
 #if 0
     for(int i = 0; i < 10; i+=15)
@@ -283,11 +283,11 @@ void FLOCK::collision()
     int local_size = 128;
     //when implemented other collision routines can be chosen here
     timers[TI_COLLISION_WALL]->start();
-    k_collision_wall.execute(num, local_size);
+  //  k_collision_wall.execute(num, local_size);
     timers[TI_COLLISION_WALL]->end();
 
     timers[TI_COLLISION_TRI]->start();
-    collide_triangles();
+   // collide_triangles();
     timers[TI_COLLISION_TRI]->end();
 
 }
@@ -317,13 +317,13 @@ void FLOCK::integrate()
         printf("\n");
 		#endif
     }
-    else if(flock_settings.integrator == LEAPFROG2)
-    {
+   // else if(flock_settings.integrator == LEAPFROG2)
+   // {
         //k_leapfrog.execute(max_num);
-        timers[TI_LEAPFROG]->start();
-        k_leapfrog.execute(num, local_size);
-        timers[TI_LEAPFROG]->end();
-    }
+     //   timers[TI_LEAPFROG]->start();
+      //  k_leapfrog.execute(num, local_size);
+    //    timers[TI_LEAPFROG]->end();
+   // }
 
 
 #if 1 
@@ -331,18 +331,22 @@ void FLOCK::integrate()
     {
         //std::vector<float4> pos = cl_position.copyToHost(num);
         //std::vector<float4> vel = cl_velocity.copyToHost(num);
-        std::vector<int4> cli = cli_debug.copyToHost(num);
-        std::vector<float4> clf = clf_debug.copyToHost(num);
+        
+        std::vector<int4> cli(num);
+        cli_debug.copyToHost(cli);
 
-        //std::vector<float4> f = cl_force.copyToHost(num);
+        std::vector<float4> clf(num);
+        clf_debug.copyToHost(clf);
+
+        std::vector<float4> f = cl_force.copyToHost(num);
         //std::vector<float4> d = cl_density.copyToHost(num);
         //std::vector<float4> xf = cl_xflock.copyToHost(num);
         for(int i = 0; i < 12; i++)
         {
             //printf("pos   [%d] = %f %f %f\n", i, pos[i].x, pos[i].y, pos[i].z);
-            //printf("vel   [%d] = %f %f %f\n", i, vel[i].x, vel[i].y, vel[i].z);
+            printf("sep[%d] = %f %f %f\n", i, f[i].x, f[i].y, f[i].z);
             printf("numFlockmates = %d and count = %d \n", cli[i].x, cli[i].y);
-            printf("cohesion[%d] = %f %f %f %f\n", i, clf[i].x, clf[i].y, clf[i].z, clf[i].w);
+            printf("clf[%d] = %f %f %f %f\n", i, clf[i].x, clf[i].y, clf[i].z, clf[i].w);
         }
         printf("\n\n");
 

@@ -119,14 +119,15 @@ set (rtpslib_SOURCES
 	# FLOCK
     ${rtpslib_SOURCE_DIR}/system/FLOCK.cpp
     ${rtpslib_SOURCE_DIR}/system/flock/Euler
-    ${rtpslib_SOURCE_DIR}/system/flock/LeapFrog
-    ${rtpslib_SOURCE_DIR}/system/flock/Density
-    ${rtpslib_SOURCE_DIR}/system/flock/Pressure
-    ${rtpslib_SOURCE_DIR}/system/flock/Viscosity
-    ${rtpslib_SOURCE_DIR}/system/flock/XFLOCK
-    ${rtpslib_SOURCE_DIR}/system/flock/Collision_wall
-    ${rtpslib_SOURCE_DIR}/system/flock/Collision_triangle
-	# Added by GE
+    #    ${rtpslib_SOURCE_DIR}/system/flock/LeapFrog
+    #${rtpslib_SOURCE_DIR}/system/flock/Density
+    #${rtpslib_SOURCE_DIR}/system/flock/Pressure
+    #${rtpslib_SOURCE_DIR}/system/flock/Viscosity
+    #${rtpslib_SOURCE_DIR}/system/flock/XFLOCK
+    #${rtpslib_SOURCE_DIR}/system/flock/Collision_wall
+    #${rtpslib_SOURCE_DIR}/system/flock/Collision_triangle
+	
+    # Added by GE
     ${rtpslib_SOURCE_DIR}/system/boids
     
     ${rtpslib_SOURCE_DIR}/system/flock/Prep
