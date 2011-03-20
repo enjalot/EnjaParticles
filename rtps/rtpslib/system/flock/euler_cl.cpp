@@ -103,10 +103,8 @@ __kernel void euler(
 	cohesion -= pi;
     cohesion.w = 0.f;
 	cohesion = normalize(cohesion);
-    clf[sort_indices[i]] = cohesion; 
-
 	acc_coh = cohesion * w_coh;
-    
+    clf[sort_indices[i]] = cohesion; 
 
     // compute acc
     acc = vi + acc_sep + acc_aln + acc_coh;
