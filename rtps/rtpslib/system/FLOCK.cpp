@@ -343,19 +343,19 @@ void FLOCK::integrate()
         //std::vector<float4> pos = cl_position.copyToHost(num);
         //std::vector<float4> vel = cl_velocity.copyToHost(num);
         
-        std::vector<float4> f(num);
-        cl_force.copyToHost(f);
+        //std::vector<float4> f(num);
+        //cl_force.copyToHost(f);
 
-        std::vector<float> d(num);
-        cl_density.copyToHost(d);
+        //std::vector<float> d(num);
+        //cl_density.copyToHost(d);
         //std::vector<float4> xf = cl_xflock.copyToHost(num);
         
         for(int i = 0; i < 12; i++)
         {
             //printf("pos   [%d] = %f %f %f\n", i, pos[i].x, pos[i].y, pos[i].z);
-            printf("sep[%d] = %f %f %f\n", i, f[i].x, f[i].y, f[i].z);
-            printf("numFlockmates = %d\n", d[i]);
-            //printf("numFlockmates = %d and count = %d \n", cli[i].x, cli[i].y);
+            //printf("sep[%d] = %f %f %f\n", i, f[i].x, f[i].y, f[i].z);
+            //printf("numFlockmates = %d\n", d[i]);
+            printf("numFlockmates = %d and count = %d \n", cli[i].x, cli[i].y);
             printf("clf[%d] = %f %f %f %f\n", i, clf[i].x, clf[i].y, clf[i].z, clf[i].w);
         }
         printf("\n\n");
