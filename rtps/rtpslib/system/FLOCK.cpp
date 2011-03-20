@@ -443,7 +443,7 @@ void FLOCK::calculateFLOCKSettings()
     printf("simulation scale: %f\n", flock_settings.simulation_scale);
 
     //flock_settings.spacing = flock_settings.particle_rest_distance/ flock_settings.simulation_scale;
-    flock_settings.spacing = 0.10f; // must be less than smoothing_distance
+    flock_settings.spacing = 0.050f; // must be less than smoothing_distance
 
     float particle_radius = flock_settings.spacing;
     printf("particle radius: %f\n", particle_radius);
@@ -468,7 +468,7 @@ void FLOCK::calculateFLOCKSettings()
     //params.gravity = 0.0f;
     params.velocity_limit = 600.0f;
     params.xflock_factor = .05f;
-    params.min_dist = 1.1f; 
+    params.min_dist = .08f; 
 
 	float h = params.smoothing_distance;
 	float pi = acos(-1.0);

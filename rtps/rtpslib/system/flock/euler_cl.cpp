@@ -54,9 +54,9 @@ __kernel void euler(
 	//return;
 
     // weights for the rules
-	float w_sep = 1.0f;
-	float w_aln = 1.0f;
-	float w_coh = 0.1f;  // 3.f
+	float w_sep = 0.0f;
+	float w_aln = 0.0f;
+	float w_coh = 1.0f;  // 3.f
 	
     // boundary limits, used to computed boundary conditions    
 	float4 bndMax = params->grid_max;
