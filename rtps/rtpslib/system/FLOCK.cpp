@@ -305,13 +305,14 @@ void FLOCK::integrate()
 		#if 0 
 		VF v(128);
 		v = clf_debug.copyToHost(12);
-        std::vector<int4> cli = cli_debug.copyToHost(12);
+        std::vector<int4> cli(128);
+        cli = cli_debug.copyToHost(12);
 		for (int i=0; i < 12; i++) {
 		    printf("boid %d\n", i);
             printf("numFlockmates: %d and count: %d\n", cli[i].x, cli[i].y);
             v[i].print("v[i]");
         }
-        printf("\n\n");
+        printf("\n");
 		#endif
     }
     else if(flock_settings.integrator == LEAPFROG2)
@@ -326,7 +327,7 @@ void FLOCK::integrate()
 #if 0
     if(num > 0)
     {
-        std::vector<float4> pos = cl_position.copyToHost(num);
+        //std::vector<float4> pos = cl_position.copyToHost(num);
         //std::vector<float4> vel = cl_velocity.copyToHost(num);
         std::vector<int4> cli = cli_debug.copyToHost(num);
         std::vector<float4> clf = clf_debug.copyToHost(num);
@@ -334,13 +335,14 @@ void FLOCK::integrate()
         //std::vector<float4> f = cl_force.copyToHost(num);
         //std::vector<float4> d = cl_density.copyToHost(num);
         //std::vector<float4> xf = cl_xflock.copyToHost(num);
-        for(int i = 0; i < num; i+=128)
+        for(int i = 0; i < 12; i++)
         {
             //printf("pos   [%d] = %f %f %f\n", i, pos[i].x, pos[i].y, pos[i].z);
             //printf("vel   [%d] = %f %f %f\n", i, vel[i].x, vel[i].y, vel[i].z);
-            //printf("ne flo[%d] = %d %d \n", i, cli[i].x, cli[i].y);
-            printf("ve flo[%d] = %f %f %f\n", i, clf[i].w, clf[i].y, clf[i].z);
+            printf("numFlockmates = %d and count = %d \n", cli[i].x, cli[i].y);
+            printf("cohesion[%d] = %f %f %f %f\n", i, clf[i].x, clf[i].y, clf[i].z, clf[i].w);
         }
+        printf("\n\n");
 
     }
 #endif
@@ -464,6 +466,8 @@ void FLOCK::calculateFLOCKSettings()
 	params.wvisc_coef = 15./(2.*pi*h3);
 	params.wvisc_d_coef = 15./(2.*pi*h3);
 	params.wvisc_dd_coef = 45./(pi*h6);
+
+	params.min_dist = 1.; // desired separation between boids
 
 // debug mymese
 float4 gmin = params.grid_min;

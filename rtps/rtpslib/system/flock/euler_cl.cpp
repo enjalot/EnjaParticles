@@ -24,8 +24,8 @@ __kernel void euler(
 	return;
 
     // this parameters will be moved to FLOCKparams
-	#define	maxspeed	    3.f	    // 1.f
-	#define desiredspeed	1.5f	// .5f
+	#define	maxspeed	    1.f	    // 1.f
+	#define desiredspeed	0.5f	// .5f
 	#define maxchange	    0.1f	// .1f
 	#define MinUrgency      0.05f	// .05f
 	#define MaxUrgency      0.1f	// .1f
@@ -52,7 +52,7 @@ __kernel void euler(
     float count =  den(i).y;
 
     // weights for the rules
-	float w_sep = 0.1f;
+	float w_sep = 1.1f;
 	float w_aln = 0.0f;
 	float w_coh = 0.0f;
 	
@@ -67,6 +67,7 @@ __kernel void euler(
 	// it is stored in pt->force
     if(count > 0){
         separation /=count;
+        separation.w =0.f;
         separation = normalize(separation);
     }
 	acc_sep = separation * w_sep;
@@ -78,10 +79,11 @@ __kernel void euler(
 	// it is stored in pt->surf_tens
 
 	// dividing by the number of flockmates to get the actual average
-	alignment = numFlockmates > 0 ? alignment /= numFlockmates : alignment;
+	alignment = numFlockmates > 0 ? alignment/numFlockmates : alignment;
 
 	// steering towards the average velocity 
 	alignment -= vi;
+    alignment.w = 0.f;
 	alignment = normalize(alignment);
 	acc_aln = alignment * w_aln;
 
@@ -95,16 +97,18 @@ __kernel void euler(
 	// it is stored in pt->density.x
 
 	// dividing by the number of flockmates to get the actual average
-    cohesion = numFlockmates > 0 ? cohesion /= numFlockmates : cohesion;
+    cohesion = numFlockmates > 0 ? cohesion/numFlockmates : cohesion;
 
 	// steering towards the average position
 	cohesion -= pi;
+    cohesion.w = 0.f;
 	cohesion = normalize(cohesion);
 	acc_coh = cohesion * w_coh;
-    
+    clf[sort_indices[i]] = cohesion; 
 
     // compute acc
     acc = vi + acc_sep + acc_aln + acc_coh;
+	acc.w = 0.0f;
 
 	// constrain acceleration
     float accspeed = length(acc);
@@ -158,7 +162,6 @@ __kernel void euler(
     // debugging vectors
     int4 iden = (int4)((int)den(i).x, (int)den(i).y, 0, 0);
     cli[originalIndex] = iden;
-    //clf[originalIndex] = xflock(i);
-    clf[originalIndex] = vi;
+    //clf[originalIndex] = cohesion; 
 
 }

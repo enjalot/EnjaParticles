@@ -33,6 +33,7 @@ if(index_i != index_j){
 	// setup for rule 3. cohesion
     // xflock is the cohesion vector
 	pt->xflock  += pj; 		// center of the flock
+
 	pt->xflock.w = 1.f;
 }
 #endif

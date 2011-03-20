@@ -81,6 +81,8 @@ typedef struct FLOCKParams
     int num;
     int nb_vars; // for combined variables (vars_sorted, etc.)
 	int choice; // which kind of calculation to invoke
+
+    float min_dist;  // desired separation between boids
  
     
     void print() {
