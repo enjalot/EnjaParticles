@@ -326,7 +326,7 @@ void FLOCK::integrate()
     }
 
 
-#if 0
+#if 1 
     if(num > 0)
     {
         //std::vector<float4> pos = cl_position.copyToHost(num);
