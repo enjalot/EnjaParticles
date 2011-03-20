@@ -50,7 +50,7 @@ __kernel void euler(
 	float numFlockmates = den(i).x;
     float count =  den(i).y;
 	// count = numFlockmates - 1 (true or false)
-	clf[i] = (float4)(numFlockmates,count,3.,4.);
+//	clf[i] = (float4)(numFlockmates,count,3.,4.);
 	//return;
 
     // weights for the rules
@@ -83,7 +83,7 @@ __kernel void euler(
 
 	// dividing by the number of flockmates to get the actual average
 	//alignment = numFlockmates > 0 ? alignment/numFlockmates : alignment;
-	alignment = count > 0 ? alignment/count : alignment;
+	alignment = count > 0 ? alignment/numFlockmates: alignment;
 
 	// steering towards the average velocity 
 	alignment -= vi;
@@ -103,7 +103,7 @@ __kernel void euler(
 	// dividing by the number of flockmates to get the actual average
 	//clf[i] = (float4)(1.,2.,3.,4.);
 	//return;
-    cohesion = count > 0 ? cohesion/count : cohesion;
+    cohesion = count > 0 ? cohesion/numFlockmates: cohesion;
 
 	// steering towards the average position
 	cohesion -= pi;
@@ -170,6 +170,6 @@ __kernel void euler(
     int4 iden = (int4)((int)den(i).x, (int)den(i).y, 0, 0);
     cli[originalIndex] = iden;
     //vi = (float4)(5.f,5.f, 5.f, 5.f);
-//    clf[originalIndex] = vi; 
+    clf[originalIndex] = vi; 
 
 }

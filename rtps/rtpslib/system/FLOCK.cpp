@@ -332,7 +332,7 @@ void FLOCK::integrate()
    // }
 
 
-#if 0 
+#if 1 
     if(num > 0)
     {
         std::vector<int4> cli(num);

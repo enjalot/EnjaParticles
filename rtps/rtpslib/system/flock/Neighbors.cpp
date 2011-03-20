@@ -72,7 +72,7 @@ void FLOCK::neighborSearch(int choice)
 	printf("neighborSearch*** num= %d ****\n", num);
 
     try{
- 	k_neighbors.execute(num, local);
+     	k_neighbors.execute(num, local);
     }
 
     catch (cl::Error er) {

@@ -50,8 +50,8 @@ inline void ForNeighbor(__global float4*  vars_sorted,
 	//return;
 
 	//clf[index_i] = pos(index_i);
-	clf[index_i].z = flockp->min_dist;
-	clf[index_i].w = -123.;
+	//clf[index_i].z = flockp->min_dist;
+	//clf[index_i].w = -123.;
 
     // is this particle within cutoff?
 	//clf[index_i] = position_i; 
