@@ -49,6 +49,9 @@ __kernel void euler(
     // getting number of flockmates and how many flockmates were within the separation dist
 	float numFlockmates = den(i).x;
     float count =  den(i).y;
+	// count = numFlockmates - 1 (true or false)
+	clf[i] = (float4)(numFlockmates,count,3.,4.);
+	//return;
 
     // weights for the rules
 	float w_sep = 000.0f;
@@ -97,6 +100,8 @@ __kernel void euler(
 	// it is stored in pt->density.x
 
 	// dividing by the number of flockmates to get the actual average
+	clf[i] = (float4)(1.,2.,3.,4.);
+	//return;
     cohesion = numFlockmates > 0 ? cohesion/numFlockmates : cohesion;
 
 	// steering towards the average position

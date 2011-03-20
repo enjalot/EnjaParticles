@@ -316,11 +316,11 @@ void FLOCK::integrate()
         cli = cli_debug.copyToHost(12);
 		for (int i=0; i < 30; i++) {
 		    printf("boid %d\n", i);
-            printf("numFlockmates: %d and count: %d\n", cli[i].x, cli[i].y);
+            //printf("numFlockmates: %d and count: %d\n", cli[i].x, cli[i].y);
             v[i].print("v[i]");
         }
         printf("\n");
-		exit(0);
+		//exit(0);
 		#endif
     }
    // else if(flock_settings.integrator == LEAPFROG2)
@@ -664,6 +664,7 @@ int FLOCK::addBox(int nn, float4 min, float4 max, bool scaled)
 printf("\n\n ADDING A CUBE \n\n");
     vector<float4> rect;
     addCube(nn, min, max, flock_settings.spacing, scale, rect);
+	//printf("rect size: %d\n", rect.size()); exit(0);
     pushParticles(rect);
 	#if 0
 	// Separation is .2 in all directions, between neighbor boids

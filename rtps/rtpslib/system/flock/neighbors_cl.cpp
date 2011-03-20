@@ -52,10 +52,9 @@ inline void ForNeighbor(__global float4*  vars_sorted,
 	//clf[index_i] = pos(index_i);
 	clf[index_i].z = flockp->min_dist;
 	clf[index_i].w = -123.;
-	return;
 
     // is this particle within cutoff?
-	clf[index_i] = position_i; 
+	//clf[index_i] = position_i; 
 	if (rlen <= searchradius) 
     {
 		//clf[index_i].x++;
@@ -67,32 +66,35 @@ inline void ForNeighbor(__global float4*  vars_sorted,
 
         if (flockp->choice == 0) {
             // are the boids the same? 
-            int iej = index_i != index_j;
+            //int iej = index_i != index_j;
 
             // compute the rules 
             #include "cl_density.h"
 	// searchradius = 0.8
 			//clf[index_i].w = searchradius;
-	return;
+			//return;
         }
 
         if (flockp->choice == 1) {
             //iej is 0 when we are looking at same particle
             //we allow calculations and just multiply force and xflock
             //by iej to avoid branching
-            int iej = index_i != index_j;
-                
+            //int iej = index_i != index_j;
+
             // update pressure
             //#include "cl_force.h"
+			;
         }
 
         if (flockp->choice == 2) {
             // update color normal and color Laplacian
             //#include "cl_surface_tension.h"
+			;
         }
 
         if (flockp->choice == 3) {
             //#include "density_denom_update.cl"
+			;
         }
 
         /*	
