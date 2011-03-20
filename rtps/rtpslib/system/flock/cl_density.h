@@ -48,7 +48,8 @@
 	if (index_i != index_j) {
 		pt->xflock  += pj; 		// center of the flock
 	}
-	pt->xflock.w = 1.f;
+	// not required 
+	// pt->xflock.w = 1.f;
 
     //float4 k = pi-pj;
     //pt->density = (float4)(5., 5., 5., 5.);

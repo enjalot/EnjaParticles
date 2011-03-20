@@ -54,9 +54,9 @@ __kernel void euler(
 	//return;
 
     // weights for the rules
-	float w_sep = 000.0f;
-	float w_aln = 0.0f;
-	float w_coh = 1.0f;  // 3.f
+	float w_sep = 1.0f;
+	float w_aln = 1.0f;
+	float w_coh = 0.1f;  // 3.f
 	
     // boundary limits, used to computed boundary conditions    
 	float4 bndMax = params->grid_max;
@@ -82,7 +82,8 @@ __kernel void euler(
 	// it is stored in pt->surf_tens
 
 	// dividing by the number of flockmates to get the actual average
-	alignment = numFlockmates > 0 ? alignment/numFlockmates : alignment;
+	//alignment = numFlockmates > 0 ? alignment/numFlockmates : alignment;
+	alignment = count > 0 ? alignment/count : alignment;
 
 	// steering towards the average velocity 
 	alignment -= vi;
@@ -100,19 +101,20 @@ __kernel void euler(
 	// it is stored in pt->density.x
 
 	// dividing by the number of flockmates to get the actual average
-	clf[i] = (float4)(1.,2.,3.,4.);
+	//clf[i] = (float4)(1.,2.,3.,4.);
 	//return;
-    cohesion = numFlockmates > 0 ? cohesion/numFlockmates : cohesion;
+    cohesion = count > 0 ? cohesion/count : cohesion;
 
 	// steering towards the average position
 	cohesion -= pi;
+	//clf[i] = cohesion;
     cohesion.w = 0.f;
 	cohesion = normalize(cohesion);
 	acc_coh = cohesion * w_coh;
 
     // compute acc
     acc = vi + acc_sep + acc_aln + acc_coh;
-	acc.w = 0.0f;
+	//acc.w = (float) numFlockmates;
 
 	// constrain acceleration
     float accspeed = length(acc);

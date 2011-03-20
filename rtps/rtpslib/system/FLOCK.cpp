@@ -351,7 +351,7 @@ void FLOCK::integrate()
         //cl_density.copyToHost(d);
         //std::vector<float4> xf = cl_xflock.copyToHost(num);
         
-        for(int i = 0; i < 12; i++)
+        for(int i = 0; i < 4; i++)
         {
             //printf("pos   [%d] = %f %f %f\n", i, pos[i].x, pos[i].y, pos[i].z);
             //printf("sep[%d] = %f %f %f\n", i, f[i].x, f[i].y, f[i].z);
@@ -359,6 +359,8 @@ void FLOCK::integrate()
             printf("numFlockmates = %d and count = %d \n", cli[i].x, cli[i].y);
             printf("clf[%d] = %f %f %f %f\n", i, clf[i].x, clf[i].y, clf[i].z, clf[i].w);
         }
+		printf("num= %d\n", num);
+		//exit(0);
         printf("\n\n");
     }
 #endif
@@ -441,7 +443,7 @@ void FLOCK::calculateFLOCKSettings()
     printf("simulation scale: %f\n", flock_settings.simulation_scale);
 
     //flock_settings.spacing = flock_settings.particle_rest_distance/ flock_settings.simulation_scale;
-    flock_settings.spacing = 0.05f; // must be less than smoothing_distance
+    flock_settings.spacing = 0.10f; // must be less than smoothing_distance
 
     float particle_radius = flock_settings.spacing;
     printf("particle radius: %f\n", particle_radius);
@@ -666,13 +668,6 @@ printf("\n\n ADDING A CUBE \n\n");
     addCube(nn, min, max, flock_settings.spacing, scale, rect);
 	//printf("rect size: %d\n", rect.size()); exit(0);
     pushParticles(rect);
-	#if 0
-	// Separation is .2 in all directions, between neighbor boids
-	for (int i=0; i < rect.size(); i++) {
-		rect[i].print("rect");
-	}
-	exit(0);
-	#endif
     return rect.size();
 }
 
