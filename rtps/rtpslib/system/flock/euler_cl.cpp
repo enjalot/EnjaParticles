@@ -24,8 +24,8 @@ __kernel void euler(
 	return;
 
     // this parameters will be moved to FLOCKparams
-	#define	maxspeed	    3.f	    // 1.f
-	#define desiredspeed	1.5f	// .5f
+	#define	maxspeed	    1.f	    // 1.f
+	#define desiredspeed	0.5f	// .5f
 	#define maxchange	    0.1f	// .1f
 	#define MinUrgency      0.05f	// .05f
 	#define MaxUrgency      0.1f	// .1f
@@ -67,6 +67,7 @@ __kernel void euler(
 	// it is stored in pt->force
     if(count > 0){
         separation /=count;
+        separation.w =0.f;
         separation = normalize(separation);
     }
 	acc_sep = separation * w_sep;
@@ -82,6 +83,7 @@ __kernel void euler(
 
 	// steering towards the average velocity 
 	alignment -= vi;
+    alignment.w = 0.f;
 	alignment = normalize(alignment);
 	acc_aln = alignment * w_aln;
 
@@ -99,8 +101,10 @@ __kernel void euler(
 
 	// steering towards the average position
 	cohesion -= pi;
+    cohesion.w = 0.f;
 	cohesion = normalize(cohesion);
     clf[sort_indices[i]] = cohesion; 
+
 	acc_coh = cohesion * w_coh;
     
 
@@ -153,8 +157,8 @@ __kernel void euler(
     uint originalIndex = sort_indices[i];
     unsorted_vel(originalIndex) = vi;	
     unsorted_pos(originalIndex) = (float4)(pi.xyz, 1.f);    // changed the last component to 1 for my boids, im not using density
-	clf[i].xyz = pi.xyz;
-	return;
+//	clf[i].xyz = pi.xyz;
+//	return;
     positions[originalIndex] = (float4)(pi.xyz, 1.f);       // for plotting
     
     // debugging vectors
