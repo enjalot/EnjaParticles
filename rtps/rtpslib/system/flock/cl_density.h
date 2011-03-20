@@ -15,7 +15,7 @@ if(index_i != index_j){
 
 	// setup for rule 1. Separation
 	// force is the separation vector
-	float4 s = pi - pj;
+    float4 s = pi - pj;
 	float  d = length(s);
 	
     if(d < flockp->min_dist){

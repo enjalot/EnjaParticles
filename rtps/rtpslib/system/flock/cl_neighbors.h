@@ -54,6 +54,7 @@ void IterateParticlesInCell(
             ForNeighbor(vars_sorted, pt, index_i, index_j, position_i, gp, /*fp,*/ flockp DEBUG_ARGV);
 #endif
         }
+        clf[index_i] = pt->force;
     }
 }
 

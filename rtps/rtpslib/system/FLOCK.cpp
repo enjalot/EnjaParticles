@@ -234,20 +234,25 @@ void FLOCK::updateGPU()
         k_viscosity.execute(num);
         k_xflock.execute(num);
         */
+
         //printf("hash\n");
         timers[TI_HASH]->start();
         hash();
         timers[TI_HASH]->end();
+
         //printf("bitonic_sort\n");
         timers[TI_BITONIC_SORT]->start();
         bitonic_sort();
         timers[TI_BITONIC_SORT]->end();
+
         //printf("data structures\n");
         timers[TI_BUILD]->start();
         buildDataStructures(); //reorder
         timers[TI_BUILD]->end();
         
+        // neighbor list
         timers[TI_NEIGH]->start();
+
         //printf("density\n");
         timers[TI_DENS]->start();
         neighborSearch(0);  //density => flockmates
@@ -257,7 +262,6 @@ void FLOCK::updateGPU()
         //timers[TI_FORCE]->start();
         //neighborSearch(1);  //forces => velocities
         //timers[TI_FORCE]->end();
-        //exit(0);
 
         timers[TI_NEIGH]->end();
         
@@ -330,31 +334,33 @@ void FLOCK::integrate()
 #if 1 
     if(num > 0)
     {
-        //std::vector<float4> pos = cl_position.copyToHost(num);
-        //std::vector<float4> vel = cl_velocity.copyToHost(num);
-        
         std::vector<int4> cli(num);
         cli_debug.copyToHost(cli);
 
         std::vector<float4> clf(num);
         clf_debug.copyToHost(clf);
 
-        std::vector<float4> f = cl_force.copyToHost(num);
-        //std::vector<float4> d = cl_density.copyToHost(num);
+        //std::vector<float4> pos = cl_position.copyToHost(num);
+        //std::vector<float4> vel = cl_velocity.copyToHost(num);
+        
+        std::vector<float4> f(num);
+        cl_force.copyToHost(f);
+
+        std::vector<float> d(num);
+        cl_density.copyToHost(d);
         //std::vector<float4> xf = cl_xflock.copyToHost(num);
+        
         for(int i = 0; i < 12; i++)
         {
             //printf("pos   [%d] = %f %f %f\n", i, pos[i].x, pos[i].y, pos[i].z);
             printf("sep[%d] = %f %f %f\n", i, f[i].x, f[i].y, f[i].z);
-            printf("numFlockmates = %d and count = %d \n", cli[i].x, cli[i].y);
+            printf("numFlockmates = %d\n", d[i]);
+            //printf("numFlockmates = %d and count = %d \n", cli[i].x, cli[i].y);
             printf("clf[%d] = %f %f %f %f\n", i, clf[i].x, clf[i].y, clf[i].z, clf[i].w);
         }
         printf("\n\n");
-
     }
 #endif
-
-
 
 }
 
@@ -496,11 +502,11 @@ void FLOCK::prepareSorted()
     //for reading back different values from the kernel
     std::vector<float4> error_check(max_num);
  
-    std::fill(forces.begin(), forces.end(),float4(0.0f, 1.0f, 0.0f, 0.0f));
+    std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     //std::fill(velocities.begin(), velocities.end(),float4(rand(), rand(), rand(), 0.0f));
     //std::fill(velocities.begin(), velocities.end(), float4(0.1f, 0.1f, 0.1f, 0.f));
     std::fill(velocities.begin(), velocities.end(), float4(0.0f, 0.0f, 0.0f, 1.f));
-    std::fill(veleval.begin(), veleval.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
+    //std::fill(veleval.begin(), veleval.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
 
     std::fill(densities.begin(), densities.end(), 0.0f);
     std::fill(xflocks.begin(), xflocks.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));

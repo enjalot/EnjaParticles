@@ -31,7 +31,7 @@ inline void ForNeighbor(__global float4*  vars_sorted,
 	float4 position_j = pos(index_j); 
 
 	float4 r = (position_i - position_j); 
-	r.w = 0.f; // I stored density in 4th component
+	r.w = 0.f; 
 	
     // |r|
 	float rlen = length(r);
@@ -118,9 +118,12 @@ __kernel void neighbors(
     	IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ flockp DEBUG_ARGV);
 		den(index) = pt.density;
 		xflock(index) = pt.xflock;
-        //density(index) = 5;
-        //xflock(index) = (float4)(1., 1., 1., 1.);
-        //clf[index].w = density(index);
+        force(index) = pt.force;
+        surface(index) = pt.surf_tens;
+  //      density(index) = 5;
+  //      force(index) = (float4)(1., 1., 1., 1.);
+  //      clf[index]= pt.force;
+  //      clf[index].w = density(index);
 	}
 #if 0
 	if (flockp->choice == 1) { // update force
