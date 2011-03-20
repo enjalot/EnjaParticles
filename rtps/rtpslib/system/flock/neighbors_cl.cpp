@@ -31,6 +31,9 @@ inline void ForNeighbor(__global float4*  vars_sorted,
 	float4 position_j = pos(index_j); 
 
 	float4 r = (position_i - position_j); 
+	//clf[index_i] = pos(index_i);
+	//clf[index_i].w = -123.;
+	//return;
 	r.w = 0.f; 
 	
     // |r|
@@ -39,13 +42,32 @@ inline void ForNeighbor(__global float4*  vars_sorted,
     // parameter that would be moved to FLOCKparams	
 	float searchradius = 0.8f;  //8.f; 	    // search radius TODO: remove hard coded parameter
 
+	//clf[index_i] = position_i; 
+	//clf[index_i].w = -129.;
+	//return;
+
+	//clf[index_i].x = rlen;
+	//clf[index_i].y = searchradius;
+	//clf[index_i] = r;
+	//clf[index_i].w = -125.;
+	//return;
+
     // is this particle within cutoff?
 	if (rlen <= searchradius) 
     {
+		//clf[index_i].x++;
+		//clf[index_i].x = 13.;
+		//clf[index_i].y += rlen;
+		//clf[index_i].z = searchradius;
+		//clf[index_i].w = flockp->smoothing_distance;
+		//return;
 
         if (flockp->choice == 0) {
             // compute the rules 
             #include "cl_density.h"
+	//clf[index_i] = position_i; 
+	//clf[index_i].w = -130.;
+	//return;
         }
 
         if (flockp->choice == 1) {
@@ -100,11 +122,10 @@ __kernel void neighbors(
     int index = get_global_id(0);
     if (index >= num) return;
 
-    float4 position_i = pos(index);
+	clf[index] = (float4)(0.,0.,0.,0.);
+	cli[index] = (int4)(0.,0.,0.,0.);
 
-	clf[index] = position_i; 
-	clf[index].w = -127.;
-	return;
+    float4 position_i = pos(index);
 
     //debuging
     //clf[index] = (float4)(0,0,0,0);
@@ -115,6 +136,10 @@ __kernel void neighbors(
 	zeroPoint(&pt);
 
 	if (flockp->choice == 0) { // update density
+	//clf[index] = position_i; 
+	//clf[index].w = -127.;
+	//return;
+
     	IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ flockp DEBUG_ARGV);
 		den(index) = pt.density;
 		xflock(index) = pt.xflock;

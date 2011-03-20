@@ -81,7 +81,7 @@ void FLOCK::neighborSearch(int choice)
     }
 	ps->cli->queue.finish();
 
-#if 0 //printouts    
+#if 1 //printouts    
     //DEBUGING
 	printf("============================================\n");
 	printf("which == %d *** \n", choice);
@@ -96,7 +96,7 @@ void FLOCK::neighborSearch(int choice)
         clf = clf_debug.copyToHost(num);
     }
 
-	for (int i=0; i < num; i++)
+	for (int i=0; i < num; i+=10)
 	//for (int i=0; i < 10; i++) 
     {  
 		printf("-----\n");

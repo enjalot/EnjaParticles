@@ -6,6 +6,9 @@ if(index_i != index_j){
 	// positions
 	float4 pi = pos(index_i);
 	float4 pj = pos(index_j);
+	clf[index_i] = position_i; 
+	clf[index_i].w = -131.;
+	return;
 
 	// velocities
 	float4 vj = vel(index_j);

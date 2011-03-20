@@ -440,7 +440,7 @@ void FLOCK::calculateFLOCKSettings()
     printf("simulation scale: %f\n", flock_settings.simulation_scale);
 
     //flock_settings.spacing = flock_settings.particle_rest_distance/ flock_settings.simulation_scale;
-    flock_settings.spacing = 0.2f;
+    flock_settings.spacing = 0.05f; // must be less than smoothing_distance
 
     float particle_radius = flock_settings.spacing;
     printf("particle radius: %f\n", particle_radius);
