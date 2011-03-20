@@ -51,9 +51,9 @@ __kernel void euler(
     float count =  den(i).y;
 
     // weights for the rules
-	float w_sep = 100.0f;
+	float w_sep = 000.0f;
 	float w_aln = 0.0f;
-	float w_coh = 0.0f;  // 3.f
+	float w_coh = 1.0f;  // 3.f
 	
     // boundary limits, used to computed boundary conditions    
 	float4 bndMax = params->grid_max;

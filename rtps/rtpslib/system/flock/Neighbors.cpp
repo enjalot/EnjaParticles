@@ -70,6 +70,7 @@ void FLOCK::neighborSearch(int choice)
 
 	size_t global = (size_t) num;
 	int local = 64;
+	printf("neighborSearch*** num= %d ****\n", num);
 
     try{
  	k_neighbors.execute(num, local);

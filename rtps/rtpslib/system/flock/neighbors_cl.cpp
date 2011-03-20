@@ -102,6 +102,10 @@ __kernel void neighbors(
 
     float4 position_i = pos(index);
 
+	clf[index] = position_i; 
+	clf[index].w = -127.;
+	return;
+
     //debuging
     //clf[index] = (float4)(0,0,0,0);
     //cli[index].w = 0;
