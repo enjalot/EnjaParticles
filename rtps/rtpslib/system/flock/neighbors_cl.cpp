@@ -44,6 +44,9 @@ inline void ForNeighbor(__global float4*  vars_sorted,
     {
 
         if (flockp->choice == 0) {
+            // are the boids the same? 
+            int iej = index_i != index_j;
+
             // compute the rules 
             #include "cl_density.h"
         }
@@ -94,8 +97,6 @@ __kernel void neighbors(
     // particle index
 	int nb_vars = flockp->nb_vars;
 	int num = flockp->num;
-    //int numParticles = get_global_size(0);
-    //int num = get_global_size(0);
 
     int index = get_global_id(0);
     if (index >= num) return;
@@ -112,14 +113,17 @@ __kernel void neighbors(
 
 	if (flockp->choice == 0) { // update density
     	IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ flockp DEBUG_ARGV);
-		den(index) = pt.density;
+        
+        //pt.density = (float4)(5., 5., 5., 5.);
+        //pt.force= (float4)(1., 1., 1., 1.);
+		
+        den(index) = pt.density;
 		xflock(index) = pt.xflock;
         force(index) = pt.force;
         surface(index) = pt.surf_tens;
-  //      density(index) = 5;
-  //      force(index) = (float4)(1., 1., 1., 1.);
-  //      clf[index]= pt.force;
-  //      clf[index].w = density(index);
+
+        clf[index].xyz= force(index).xyz;
+        clf[index].w = den(index).x;
 	}
 #if 0
 	if (flockp->choice == 1) { // update force
