@@ -49,9 +49,9 @@ void FLOCK::ge_cpuEuler()
     float4 vel_sep, vel_aln, vel_coh;
     float4 acc_separation, acc_alignment, acc_cohesion;
 
-    float w_sep = 0.0003f;  //.0005f;
-    float w_aln = 0.0001f;  //0.0005f;
-    float w_coh = 0.00003f;  //0.00001f;
+    float w_sep = 0.000f;  //.0003f;
+    float w_aln = 0.000f;  //0.0001f;
+    float w_coh = 0.00003f;  //0.00003f;
 //printf("10\n");//GE
 
     float4 bndMax = params.grid_max;// - params->boundary_distance;
@@ -319,7 +319,7 @@ printf("num: %d\n\n", num);
 
         // Step 5. Add acceleration to velocity
         float4 v = float4(-positions[i].z, 0., positions[i].x, 0.);
-        v = v*.0005;
+        v = v*.000; // 0.0005
         velocities[i] = v + acc;
 //velocities[i].print("final velocity");
         //velocities[i] = acc;

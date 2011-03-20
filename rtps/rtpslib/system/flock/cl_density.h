@@ -18,7 +18,7 @@ if(index_i != index_j){
 	float4 s = pi - pj;
 	float  d = length(s);
 	
-    if(d < mindist){
+    if(d <  mindist){
         s = normalize(s);
         s /= d;
 	    pt->force += s;         // accumulate the separation vector
@@ -33,7 +33,6 @@ if(index_i != index_j){
 	// setup for rule 3. cohesion
     // xflock is the cohesion vector
 	pt->xflock  += pj; 		// center of the flock
-
 	pt->xflock.w = 1.f;
 }
 #endif

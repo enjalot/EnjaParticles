@@ -24,11 +24,10 @@ __kernel void euler(
 	return;
 
     // this parameters will be moved to FLOCKparams
-	#define	maxspeed	    1.f	    // 1.f
-	#define desiredspeed	0.5f	// .5f
-	#define maxchange	    0.1f	// .1f
-	#define MinUrgency      0.05f	// .05f
-	#define MaxUrgency      0.1f	// .1f
+	#define	maxspeed	    0.003f	    // .003f
+	//#define desiredspeed	0.0025f	// .5f
+	//#define MinUrgency      0.0025f	// .05f
+	//#define MaxUrgency      0.005f	// .1f
 
 	// positions
 	float4 pi = pos(i);
@@ -54,7 +53,7 @@ __kernel void euler(
     // weights for the rules
 	float w_sep = 0.0f;
 	float w_aln = 0.0f;
-	float w_coh = 1.0f;
+	float w_coh = 0.00003f;
 	
     // boundary limits, used to computed boundary conditions    
 	float4 bndMax = params->grid_max;
@@ -104,17 +103,18 @@ __kernel void euler(
     cohesion.w = 0.f;
 	cohesion = normalize(cohesion);
 	acc_coh = cohesion * w_coh;
-    clf[sort_indices[i]] = cohesion; 
 
     // compute acc
     acc = vi + acc_sep + acc_aln + acc_coh;
+    acc.w = 0.f;
+
 
 	// constrain acceleration
     float accspeed = length(acc);
     float4 accnorm = normalize(acc);
-    if(accspeed > maxchange){
-        // set magnitude to MaxChangeInAcc
-        acc = accnorm * maxchange;
+    if(accspeed > maxspeed){
+        // set magnitude to Max Speed
+        acc = accnorm * maxspeed;
     }
 
     // add circular velocity field
@@ -122,7 +122,8 @@ __kernel void euler(
     v *= 0.00f;
 
     // add acceleration to velocity
-    vi += v + acc;
+    vi = v + acc;
+    vi.w =0.f;
 
 
 	// INTEGRATION
@@ -162,6 +163,6 @@ __kernel void euler(
     // debugging vectors
     int4 iden = (int4)((int)den(i).x, (int)den(i).y, 0, 0);
     cli[originalIndex] = iden;
-    //clf[originalIndex] = cohesion; 
+    clf[originalIndex] = vi; 
 
 }
