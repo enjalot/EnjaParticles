@@ -37,8 +37,9 @@ inline void ForNeighbor(__global float4*  vars_sorted,
 	float rlen = length(r);
 
     // parameter that would be moved to FLOCKparams	
-	float searchradius = 0.5f;  //8.f; 	    // search radius TODO: remove hard coded parameter
-	float mindist = 0.25f;       //3.f		// minimum distance -> desired separation distance
+	float searchradius = 0.8f;  //8.f; 	    // search radius TODO: remove hard coded parameter
+//	float mindist = 0.4f;  //8.f; 	  // desired separation
+	//float mindist = flockp->min_dist;
     
 
     // is this particle within cutoff?

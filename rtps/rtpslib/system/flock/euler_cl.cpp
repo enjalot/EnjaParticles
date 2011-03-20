@@ -51,7 +51,7 @@ __kernel void euler(
     float count =  den(i).y;
 
     // weights for the rules
-	float w_sep = 0.0f;
+	float w_sep = 1.1f;
 	float w_aln = 0.0f;
 	float w_coh = 0.00003f;
 	
@@ -106,8 +106,7 @@ __kernel void euler(
 
     // compute acc
     acc = vi + acc_sep + acc_aln + acc_coh;
-    acc.w = 0.f;
-
+	acc.w = 0.0f;
 
 	// constrain acceleration
     float accspeed = length(acc);
@@ -156,8 +155,7 @@ __kernel void euler(
     uint originalIndex = sort_indices[i];
     unsorted_vel(originalIndex) = vi;	
     unsorted_pos(originalIndex) = (float4)(pi.xyz, 1.f);    // changed the last component to 1 for my boids, im not using density
-//	clf[i].xyz = pi.xyz;
-//	return;
+	//clf[i].xyz = pi.xyz;
     positions[originalIndex] = (float4)(pi.xyz, 1.f);       // for plotting
     
     // debugging vectors

@@ -18,7 +18,7 @@ if(index_i != index_j){
 	float4 s = pi - pj;
 	float  d = length(s);
 	
-    if(d <  mindist){
+    if(d < flockp->min_dist){
         s = normalize(s);
         s /= d;
 	    pt->force += s;         // accumulate the separation vector

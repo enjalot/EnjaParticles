@@ -81,6 +81,8 @@ typedef struct FLOCKParams
     int num;
     int nb_vars; // for combined variables (vars_sorted, etc.)
 	int choice; // which kind of calculation to invoke
+
+    float min_dist;  // desired separation between boids
  
     
     void print() {
@@ -94,6 +96,7 @@ typedef struct FLOCKParams
 		printf("spring: %f\n", spring);
 		printf("gravity: %f\n", gravity);
 		printf("choice: %d\n", choice);
+		printf("min_dist: %f\n", min_dist);
 	}
 } FLOCKParams __attribute__((aligned(16)));
 
