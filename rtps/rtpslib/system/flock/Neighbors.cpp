@@ -60,6 +60,7 @@ void FLOCK::neighborSearch(int choice)
     vparams.push_back(params);
     cl_FLOCKParams.copyToDevice(vparams);
 
+
 #if 0
     std::vector<int4> cli = cli_debug.copyToHost(2);
     for (int i=0; i < 2; i++) 

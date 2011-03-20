@@ -31,9 +31,6 @@ inline void ForNeighbor(__global float4*  vars_sorted,
 	float4 position_j = pos(index_j); 
 
 	float4 r = (position_i - position_j); 
-	//clf[index_i] = pos(index_i);
-	//clf[index_i].w = -123.;
-	//return;
 	r.w = 0.f; 
 	
     // |r|
@@ -52,7 +49,13 @@ inline void ForNeighbor(__global float4*  vars_sorted,
 	//clf[index_i].w = -125.;
 	//return;
 
+	//clf[index_i] = pos(index_i);
+	clf[index_i].z = flockp->min_dist;
+	clf[index_i].w = -123.;
+	return;
+
     // is this particle within cutoff?
+	clf[index_i] = position_i; 
 	if (rlen <= searchradius) 
     {
 		//clf[index_i].x++;
@@ -68,9 +71,9 @@ inline void ForNeighbor(__global float4*  vars_sorted,
 
             // compute the rules 
             #include "cl_density.h"
-	//clf[index_i] = position_i; 
-	//clf[index_i].w = -130.;
-	//return;
+	// searchradius = 0.8
+			//clf[index_i].w = searchradius;
+	return;
         }
 
         if (flockp->choice == 1) {
@@ -123,7 +126,7 @@ __kernel void neighbors(
     int index = get_global_id(0);
     if (index >= num) return;
 
-	clf[index] = (float4)(0.,0.,0.,0.);
+	clf[index] = (float4)(0.,0.,0.,10.);
 	cli[index] = (int4)(0.,0.,0.,0.);
 
     float4 position_i = pos(index);
@@ -151,8 +154,8 @@ __kernel void neighbors(
         force(index) = pt.force;
         surface(index) = pt.surf_tens;
 
-        clf[index].xyz= force(index).xyz;
-        clf[index].w = den(index).x;
+        //clf[index].xyz= force(index).xyz;
+        //clf[index].w = den(index).x;
 	}
 #if 0
 	if (flockp->choice == 1) { // update force

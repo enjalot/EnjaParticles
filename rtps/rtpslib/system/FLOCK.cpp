@@ -37,6 +37,7 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     grid = ps->settings.grid;
 
     //FLOCK settings depend on number of particles used
+	// Must be called before load kernel methods!
     calculateFLOCKSettings();
     //set up the grid
     setupDomain();
@@ -465,7 +466,7 @@ void FLOCK::calculateFLOCKSettings()
     //params.gravity = 0.0f;
     params.velocity_limit = 600.0f;
     params.xflock_factor = .05f;
-    params.min_dist = 1.1f;
+    params.min_dist = 1.1f; 
 
 	float h = params.smoothing_distance;
 	float pi = acos(-1.0);
@@ -652,6 +653,7 @@ printf("max boundary: %f, %f, %f\n ************** \n", gmax.x,gmax.y, gmax.z);
     
 }
 
+//----------------------------------------------------------------------
 int FLOCK::addBox(int nn, float4 min, float4 max, bool scaled)
 {
     float scale = 1.0f;
@@ -673,6 +675,7 @@ printf("\n\n ADDING A CUBE \n\n");
     return rect.size();
 }
 
+//----------------------------------------------------------------------
 void FLOCK::addBall(int nn, float4 center, float radius, bool scaled)
 {
     float scale = 1.0f;
@@ -685,6 +688,7 @@ printf("\n\n ADDING A SPHERE \n\n");
     pushParticles(flockere);
 }
 
+//----------------------------------------------------------------------
 void FLOCK::pushParticles(vector<float4> pos)
 {
     int nn = pos.size();
@@ -755,6 +759,7 @@ void FLOCK::pushParticles(vector<float4> pos)
 #endif
 	renderer->setNum(num);
 }
+//----------------------------------------------------------------------
 void FLOCK::updateFLOCKP()
 {
     std::vector<FLOCKParams> vparams(0);
@@ -762,6 +767,7 @@ void FLOCK::updateFLOCKP()
     cl_FLOCKParams.copyToDevice(vparams);
 }
 
+//----------------------------------------------------------------------
 void FLOCK::render()
 {
 	System::render();

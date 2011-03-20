@@ -6,9 +6,9 @@
 	// positions
 	float4 pi = pos(index_i);
 	float4 pj = pos(index_j);
-	clf[index_i] = position_i; 
-	clf[index_i].w = -131.;
-	return;
+	//clf[index_i] = position_i; 
+	//clf[index_i].x++;
+	//clf[index_i].w = -131.;
 
 	// velocities
 	float4 vj = vel(index_j);
@@ -21,7 +21,11 @@
     float4 s = pi - pj;
 	float  d = length(s);
 	
-    if(d < flockp->min_dist){
+    if(d < flockp->min_dist) {
+		clf[index_i].x = clf[index_i].x + 1;
+		clf[index_i].y = flockp->min_dist;
+		clf[index_i].z = 0;
+		clf[index_i].w = 97;
 		s.w = 0.0f;
         s = normalize(s);
         s /= d;

@@ -44,7 +44,7 @@ typedef struct FLOCKParams
     int nb_vars; // for combined variables (vars_sorted, etc.)
 	int choice; // which kind of calculation to invoke
 
-	int min_dist; // separation distance
+	float min_dist; // separation distance
  
 } FLOCKParams;
 
