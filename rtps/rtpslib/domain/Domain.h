@@ -3,12 +3,13 @@
 
 #include "../structs.h"
 #include <vector>
+#include "../rtps_common.h"
 
 namespace rtps {
 
 
 
-class Domain
+class RTPS_EXPORT Domain
 {
 public:
     /**
