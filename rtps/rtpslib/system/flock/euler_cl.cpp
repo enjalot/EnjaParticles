@@ -54,9 +54,9 @@ __kernel void euler(
 	//return;
 
     // weights for the rules
-	float w_sep = 0.0f;  // 0.3f
-	float w_aln = 0.0f;
-	float w_coh = 0.005f;  // 3.f
+	float w_sep = 0.003f;  // 0.3f
+	float w_aln = 0.001f;
+	float w_coh = 0.0003f;  // 3.f
 	
     // boundary limits, used to computed boundary conditions    
 	float4 bndMax = params->grid_max;
@@ -134,7 +134,8 @@ __kernel void euler(
 
 
 	// INTEGRATION
-    pi += dt*vi; 	// euler integration, add the velocity times the timestep
+    pi += vi; 	// euler integration, add the velocity times the timestep
+    //pi += dt*vi; 	// euler integration, add the velocity times the timestep
 
 #if 1
 	// apply periodic boundary conditions
