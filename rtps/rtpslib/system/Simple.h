@@ -3,11 +3,11 @@
 
 #include <string>
 
-#include "../RTPS.h"
+#include "RTPS.h"
 #include "System.h"
 #include "ForceField.h"
-#include "../opencl/Kernel.h"
-#include "../opencl/Buffer.h"
+#include "Kernel.h"
+#include "Buffer.h"
 //#include "../util.h"
 
 namespace rtps

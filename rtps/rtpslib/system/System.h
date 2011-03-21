@@ -1,11 +1,11 @@
 #ifndef RTPS_SYSTEM_H_INCLUDED
 #define RTPS_SYSTEM_H_INCLUDED
 
-#include "../domain/Domain.h"
+#include "Domain.h"
 #include "ForceField.h"
-#include "../render/Render.h"
-#include "../render/SpriteRender.h"
-#include "../render/SSFRender.h"
+#include "Render.h"
+#include "SpriteRender.h"
+#include "SSFRender.h"
 
 #include<stdio.h>
 namespace rtps
