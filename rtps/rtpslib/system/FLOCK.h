@@ -56,8 +56,6 @@ typedef struct FLOCKParams
     float velocity_limit;
     float xflock_factor;
 
-
-
 	float gravity; // -9.8 m/sec^2
     float friction_coef;
 	float restitution_coef;
@@ -65,7 +63,6 @@ typedef struct FLOCKParams
 	float attraction;
 	float spring;
 	//float surface_threshold;
-
     
     //Kernel Coefficients
     float wpoly6_coef;

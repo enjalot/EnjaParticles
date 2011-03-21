@@ -21,7 +21,7 @@ if(index_i != index_j){
     float4 s = r;       //pi - pj;
 	float  d = rlen;    //length(s);
 	
-    if(flockp->smoothing_distance >= flockp->min_dist && d <= flockp->min_dist){
+    if(smooth_dist >= min_dist && d <= min_dist){
     //if(d < flockp->min_dist && (index_i != index_j)) {
 		//clf[index_i].x = clf[index_i].x + 1;
 		//clf[index_i].y = flockp->min_dist;

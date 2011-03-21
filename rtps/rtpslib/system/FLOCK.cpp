@@ -487,7 +487,7 @@ void FLOCK::calculateFLOCKSettings()
 
     // Boids parameters
 	params.min_dist     = 0.5f * params.smoothing_distance * ps->settings.min_dist; // desired separation between boids
-    params.search_radius= 0.8f * params.smoothing_distance * ps->settings.search_radius  ;
+    params.search_radius= 0.8f * params.smoothing_distance * ps->settings.search_radius;
     params.max_speed    = 1.0f * ps->settings.max_speed;
 
     // debug mymese
