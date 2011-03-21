@@ -27,7 +27,7 @@ void FLOCK::ge_loadEuler()
 void FLOCK::ge_cpuEuler()
 {
     #define searchradius 	    0.5f         // 0.3
-    #define separationdist  	0.4f       // 0.08
+    #define separationdist  	0.1f       // 0.08
     #define maxspeed        	0.003f      // 0.003f
     #define desiredspeed    	0.0025f     // 0.0025f
     #define maxchange       	0.005f      // 0.005f
@@ -49,8 +49,8 @@ void FLOCK::ge_cpuEuler()
     float4 vel_sep, vel_aln, vel_coh;
     float4 acc_separation, acc_alignment, acc_cohesion;
 
-    float w_sep = 0.000f;  //.0003f;
-    float w_aln = 0.000f;  //0.0001f;
+    float w_sep = 0.0003f;  //.0003f;
+    float w_aln = 0.0001f;  //0.0001f;
     float w_coh = 0.00003f;  //0.00003f;
 //printf("10\n");//GE
 
