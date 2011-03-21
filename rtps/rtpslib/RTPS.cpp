@@ -81,11 +81,5 @@ void RTPS::render()
 }
 
 
-
-void RTPS::printTimers()
-{
-    system->printTimers();
-}
-
 }
 
