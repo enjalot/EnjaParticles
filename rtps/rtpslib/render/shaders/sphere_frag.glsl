@@ -24,8 +24,15 @@ void main()
 	float normDepth = clipSpacePos.z/clipSpacePos.w;
     gl_FragDepth = (((far-near)/2.)*normDepth)+((far+near)/2.);
 
+    const vec3 lightDir = vec3(-0.5, 1.5, 5.);
+    // calculate lighting
+    float diffuse = max(0.0, dot(lightDir, n));
 
-    //gl_FragData[0] = gl_Color*vec4(1.0,1.0,1.0,0.1);//vec4(vec3(1.0)-gl_Color.rgb,gl_Color.a); //Thickness rendering
-	gl_FragData[0] = vec4(1.0,.0,.0,0.1);//Save the color
-    //gl_FragData[1] = gl_Color * diffuse + specular;
+    vec3 v = normalize(-spherePosEye);
+    vec3 h = normalize(lightDir + v);
+    float specular = pow(max(0.0, dot(n, h)), 40.0); 
+
+    gl_FragData[0] = gl_Color;//*vec4(1.0,1.0,1.0,0.1);//vec4(vec3(1.0)-gl_Color.rgb,gl_Color.a); //Thickness rendering
+	//gl_FragData[0] = vec4(1.0,.0,.0,0.1);//Save the color
+    //gl_FragData[0] = gl_Color * diffuse + specular;
 }

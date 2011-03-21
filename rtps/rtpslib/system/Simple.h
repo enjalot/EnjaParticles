@@ -3,56 +3,57 @@
 
 #include <string>
 
-#include "../RTPS.h"
+#include "RTPS.h"
 #include "System.h"
 #include "ForceField.h"
-#include "../opencl/Kernel.h"
-#include "../opencl/Buffer.h"
+#include "Kernel.h"
+#include "Buffer.h"
 //#include "../util.h"
 
-namespace rtps {
-
-
-class Simple : public System
+namespace rtps
 {
-public:
-    Simple(RTPS *ps, int num);
-    ~Simple();
-
-    void update();
-
-    bool forcefields_enabled;
-    int max_forcefields;
-
-    //the particle system framework
-    RTPS *ps;
-
-    std::vector<float4> positions;
-    std::vector<float4> colors;
-    std::vector<float4> velocities;
-    std::vector<float4> forces;
-    std::vector<ForceField> forcefields;
 
 
-    Kernel k_forcefield;
-    Kernel k_euler;
+    class Simple : public System
+    {
+    public:
+        Simple(RTPS *ps, int num);
+        ~Simple();
 
-    Buffer<float4> cl_position;
-    Buffer<float4> cl_color;
-    Buffer<float4> cl_force;
-    Buffer<float4> cl_velocity;
-    Buffer<ForceField> cl_forcefield;
-    
+        void update();
 
-    void loadForceField();
-    void loadForceFields(std::vector<ForceField> ff);
-    void loadEuler();
+        bool forcefields_enabled;
+        int max_forcefields;
 
-    void cpuForceField();
-    void cpuEuler();
+        //the particle system framework
+        RTPS *ps;
 
-    
-};
+        std::vector<float4> positions;
+        std::vector<float4> colors;
+        std::vector<float4> velocities;
+        std::vector<float4> forces;
+        std::vector<ForceField> forcefields;
+
+
+        Kernel k_forcefield;
+        Kernel k_euler;
+
+        Buffer<float4> cl_position;
+        Buffer<float4> cl_color;
+        Buffer<float4> cl_force;
+        Buffer<float4> cl_velocity;
+        Buffer<ForceField> cl_forcefield;
+
+
+        void loadForceField();
+        void loadForceFields(std::vector<ForceField> ff);
+        void loadEuler();
+
+        void cpuForceField();
+        void cpuEuler();
+
+
+    };
 
 }
 

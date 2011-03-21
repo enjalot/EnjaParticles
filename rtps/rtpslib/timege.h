@@ -5,7 +5,14 @@
 // irrespective of CPU/system/threads, etc.
 
 #include <string>
+#ifdef WIN32
+#include <time.h>
+#include <Windows.h>
+#include "gtod_windows.h"
+#else
 #include <sys/time.h>
+#endif
+
 #include <vector>
 //#include "time.h"
 

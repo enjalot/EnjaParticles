@@ -13,7 +13,7 @@ __kernel void pressure(__global float4* pos, __global float* density, __global f
 {
     unsigned int i = get_global_id(0);
     int num = params->num;
-    if(i > num) return;
+    if (i > num) return;
 
 
     float4 f = (float4)(0.0f, 0.0f, 0.0f, 0.0f);
@@ -31,17 +31,17 @@ __kernel void pressure(__global float4* pos, __global float* density, __global f
 
     //super slow way, we need to use grid + sort method to get nearest neighbors
     //this code should never see the light of day on a GPU... just sayin
-    for(int j = 0; j < num; j++)
+    for (int j = 0; j < num; j++)
     {
-        if(j == i) continue;
+        if (j == i) continue;
         float4 pj = pos[j] * params->simulation_scale;
         float4 r = p - pj;
         float rlen = magnitude(r);
-        if(rlen < h)
+        if (rlen < h)
         {
             float r2 = rlen*rlen;
             float re2 = h*h;
-            if(r2/re2 <= 4.f)
+            if (r2/re2 <= 4.f)
             {
                 //float R = sqrt(r2/re2);
                 //float Wij = alpha*(-2.25f + 2.375f*R - .625f*R*R);
@@ -51,7 +51,7 @@ __kernel void pressure(__global float4* pos, __global float* density, __global f
                 //float Pi = 1.013E5*(pow(density[i]/1000.0f, 7.0f) - 1.0f);
                 //float Pj = 1.013E5*(pow(density[j]/1000.0f, 7.0f) - 1.0f);
                 //float kern = params->mass * Wij * (Pi + Pj) / (density[i] * density[j]);
-                
+
                 float dj = density[j];
                 //form simple SPH in Krog's thesis
                 float Pi = params->K*(di - 1000.0f); //rest density

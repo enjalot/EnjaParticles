@@ -1,4 +1,4 @@
-#include "../Simple.h"
+#include "Simple.h"
 #include <math.h>
 
 namespace rtps {

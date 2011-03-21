@@ -8,7 +8,7 @@
 # WIN32 should work, but is untested
 
 IF (WIN32)
-
+message(*****Opencl for windows: "$ENV{GPU_COMPUTING_TOOLKIT}" ******)
 	IF(NOT ${GPU_COMPUTING_TOOLKIT})
 		# CYGWIN: 
 		SET (GPU_COMPUTING_TOOLKIT "/cygdrive/c/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v3.2/")
@@ -24,8 +24,8 @@ IF (WIN32)
     FIND_LIBRARY(OPENCL_LIBRARIES 
 		NAMES OpenCL opencl opencl32 opencl64 OpenCL.dll
 		PATHS
-		${GPU_COMPUTING_TOOLKIT}/lib/x64
-		${GPU_COMPUTING_TOOLKIT}/lib/Win32
+		$ENV{GPU_COMPUTING_TOOLKIT}/lib/x64
+		$ENV{GPU_COMPUTING_TOOLKIT}/lib/Win32
 		/cygdrive/c/Windows/System32
 		/cygdrive/c/Windows/SysWOW64
 	)

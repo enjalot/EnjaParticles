@@ -25,27 +25,27 @@
 // comes from K_Grid_Hash
 // CANNOT USE references to structures/classes as arguments!
 __kernel void hash(
-           int num,
-           __global float4* vars_unsorted,
-           __global uint* sort_hashes,
-           __global uint* sort_indexes,
-           //__global uint* cell_indices_start,
-           __constant struct GridParams* gp
-           DEBUG_ARGS
-           //__global float4* fdebug,
-           //__global int4* idebug
-		   )
+                  int num,
+                  __global float4* vars_unsorted,
+                  __global uint* sort_hashes,
+                  __global uint* sort_indexes,
+                  //__global uint* cell_indices_start,
+                  __constant struct GridParams* gp
+                  DEBUG_ARGS
+                  //__global float4* fdebug,
+                  //__global int4* idebug
+                  )
 {
     // particle index
     uint index = get_global_id(0);
-	//int num = get_global_size(0);
+    //int num = get_global_size(0);
     if (index >= num) return;
 
-	// initialize to -1 (used in kernel datastructures in build_datastructures_wrap.cpp
-	//int grid_size = (int) (gp->grid_res.x*gp->grid_res.y*gp->grid_res.z);
-	//if (index < grid_size) {   // grid_size: 1400
-		//cell_indices_start[index] = 0xffffffff; 
-	//}
+    // initialize to -1 (used in kernel datastructures in build_datastructures_wrap.cpp
+    //int grid_size = (int) (gp->grid_res.x*gp->grid_res.y*gp->grid_res.z);
+    //if (index < grid_size) {   // grid_size: 1400
+    //cell_indices_start[index] = 0xffffffff; 
+    //}
 
     // particle position
     float4 p = unsorted_pos(index); // macro
@@ -65,7 +65,7 @@ __kernel void hash(
     //fdebug[index] = gp->grid_inv_delta;
     //fdebug[index] = (float4)((p.x - gp->grid_min.x) * gp->grid_inv_delta.x, p.x, 0,0);
     clf[index] = (float4)((p.x - gp->grid_min.x) * gp->grid_delta.x, p.x, 0,0);
-	cli[index] = gridPos;
+    cli[index] = gridPos;
     cli[index].w = num;
 }
 //----------------------------------------------------------------------
