@@ -59,19 +59,40 @@ namespace rtps
 
         ps->cli->queue.finish();
 
-#if 0 
-        //printouts
-        int nbc = 0;
-        printf("start cell indices\n");
-        printf("end cell indices\n");
-        nbc = grid_params.nb_cells;
-        std::vector<int> is = cl_cell_indices_start.copyToHost(nbc);
-        std::vector<int> ie = cl_cell_indices_end.copyToHost(nbc);
+#if 0
+    //printouts
+    int nbc = 10;
+    printf("start cell indices\n");
+    printf("end cell indices\n");
+    //nbc = grid_params.nb_cells;
+    //std::vector<int> is = cl_cell_indices_start.copyToHost(nbc);
+    //std::vector<int> ie = cl_cell_indices_end.copyToHost(nbc);
 
-        /*
-        for(int i = 0; i < nbc; i++)
-        {
-            printf("sci[%d] %d eci[%d] %d\n", i, is[i], i, ie[i]);
+    std::vector<int> is(nbc);
+    std::vector<int> ie(nbc);
+    
+    cl_cell_indices_end.copyToHost(is);
+    cl_cell_indices_start.copyToHost(ie, 100);
+
+
+    /*
+    for(int i = 0; i < nbc; i++)
+    {
+        printf("sci[%d] %d eci[%d] %d\n", i, is[i], i, ie[i]);
+    }
+    */
+
+    int nb_particles = 0;
+    int nb;
+    int asdf = 0;
+    for (int i=0; i < nbc; i++) {
+    //for (int i=0; i < 100; i++) {
+        printf("is,ie[%d]= %d, %d\n", i, is[i], ie[i]);
+        // ie[i] SHOULD NEVER BE ZERO 
+        //printf("is[%d] %d ie[%d] %d\n", i, is[i], i, ie[i]);
+        if (is[i] != -1 && ie[i] != 0) {
+            nb = ie[i] - is[i];
+            nb_particles += nb;
         }
         */
 

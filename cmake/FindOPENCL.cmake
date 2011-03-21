@@ -20,12 +20,13 @@ message(*****Opencl for windows: "$ENV{GPU_COMPUTING_TOOLKIT}" ******)
 
     # TODO this is only a hack assuming the 64 bit library will
     # not be found on 32 bit system
+
 	set(CMAKE_FIND_LIBRARY_PREFIXES "" ${CMAKE_FIND_LIBRARY_PREFIXES})
     FIND_LIBRARY(OPENCL_LIBRARIES 
 		NAMES OpenCL opencl opencl32 opencl64 OpenCL.dll
 		PATHS
-		$ENV{GPU_COMPUTING_TOOLKIT}/lib/x64
 		$ENV{GPU_COMPUTING_TOOLKIT}/lib/Win32
+		$ENV{GPU_COMPUTING_TOOLKIT}/lib/x64
 		/cygdrive/c/Windows/System32
 		/cygdrive/c/Windows/SysWOW64
 	)

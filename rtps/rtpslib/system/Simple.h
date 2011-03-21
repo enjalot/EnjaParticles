@@ -3,11 +3,12 @@
 
 #include <string>
 
-#include "../RTPS.h"
+#include "RTPS.h"
 #include "System.h"
 #include "ForceField.h"
-#include "../opencl/Kernel.h"
-#include "../opencl/Buffer.h"
+#include "Kernel.h"
+#include "Buffer.h"
+
 #ifdef WIN32
     #if defined(rtps_EXPORTS)
         #define RTPS_EXPORT __declspec(dllexport)
