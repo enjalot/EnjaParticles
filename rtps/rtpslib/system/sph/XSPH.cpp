@@ -8,7 +8,7 @@ namespace rtps
         printf("create xsph kernel\n");
 
         std::string path(SPH_CL_SOURCE_DIR);
-        path += "/xsph_cl.cl";
+        path += "/xsph.cl";
         k_xsph = Kernel(ps->cli, path, "xsph");
 
         k_xsph.setArg(0, cl_position.getDevicePtr());

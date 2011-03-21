@@ -9,7 +9,7 @@ namespace rtps
     {
         printf("create hash kernel\n");
         std::string path(SPH_CL_SOURCE_DIR);
-        path = path + "/hash_cl.cl";
+        path = path + "/hash.cl";
         k_hash = Kernel(ps->cli, path, "hash");
 
         printf("kernel made, set args\n");

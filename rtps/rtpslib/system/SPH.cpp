@@ -61,6 +61,10 @@ namespace rtps
         //setup the sorted and unsorted arrays
         prepareSorted();
 
+
+        std::string cl_includes(SPH_CL_SOURCE_DIR);
+        ps->cli->setIncludeDir(cl_includes);
+
         loadCollision_wall();
         loadCollision_tri();
 
@@ -373,7 +377,7 @@ namespace rtps
 
     void SPH::prepareSorted()
     {
-#include "sph/cl_macros.h"
+#include "sph/cl_src/cl_macros.h"
 
         //for reading back different values from the kernel
         std::vector<float4> error_check(max_num);

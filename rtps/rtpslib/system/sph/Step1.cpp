@@ -22,7 +22,7 @@ namespace rtps
         printf("create step1 kernel\n");
 
         std::string path(SPH_CL_SOURCE_DIR);
-        path += "/step1_cl.cl";
+        path += "/step1.cl";
         k_step1 = Kernel(ps->cli, path, "step1");
 
         //TODO: fix the way we are wrapping buffers

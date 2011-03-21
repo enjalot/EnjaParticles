@@ -9,7 +9,9 @@ namespace rtps
     {
         printf("create datastructures kernel\n");
         std::string path(SPH_CL_SOURCE_DIR);
-        path = path + "/datastructures_cl.cl";
+        path = path + "/datastructures.cl";
+        //std::string filepath = path + "/datastructures.cl";
+        //k_datastructures = Kernel(ps->cli, path, filepath, "datastructures");
         k_datastructures = Kernel(ps->cli, path, "datastructures");
 
         int iarg = 0;

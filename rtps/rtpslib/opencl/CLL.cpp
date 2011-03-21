@@ -23,6 +23,11 @@ namespace rtps
         setup_gl_cl();
     }
 
+    void CL::setIncludeDir(std::string path)
+    {
+        this->inc_dir = " -I" + path;
+    }
+
     //----------------------------------------------------------------------
     cl::Program CL::loadProgram(std::string path, std::string options)
     {
@@ -64,6 +69,11 @@ namespace rtps
             //sprintf(options, "-D rand=%d -D DEBUG", rnd);
             err = program.build(devices, dbgoptions);
 #else
+
+            options += this->inc_dir;
+            printf("OPTIONS: %s\n", options.c_str());
+            
+
             err = program.build(devices, options.c_str());
 #endif
         }

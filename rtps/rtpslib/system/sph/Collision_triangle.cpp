@@ -8,7 +8,7 @@ void SPH::loadCollision_tri()
     printf("create collision wall kernel\n");
 
     std::string path(SPH_CL_SOURCE_DIR);
-    path += "/collision_tri_cl.cl";
+    path += "/collision_tri.cl";
     k_collision_tri = Kernel(ps->cli, path, "collision_triangle");
   
     k_collision_tri.setArg(0, cl_vars_sorted.getDevicePtr());

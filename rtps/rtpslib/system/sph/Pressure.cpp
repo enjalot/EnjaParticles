@@ -11,7 +11,7 @@ namespace rtps
         printf("create pressure kernel\n");
 
         std::string path(SPH_CL_SOURCE_DIR);
-        path += "/pressure_cl.cl";
+        path += "/pressure.cl";
         k_pressure = Kernel(ps->cli, path, "pressure");
 
         //TODO: fix the way we are wrapping buffers

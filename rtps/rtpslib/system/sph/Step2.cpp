@@ -8,7 +8,8 @@ namespace rtps
 
     void SPH::loadPressure()
     {
-#include "pressure.cl"
+        //TODO this is old style of importing
+#include "cl_src/pressure.cl"
         //printf("%s\n", euler_program_source.c_str());
         k_pressure = Kernel(ps->cli, pressure_program_source, "pressure");
 

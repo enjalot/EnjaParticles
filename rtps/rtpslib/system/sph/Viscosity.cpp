@@ -8,7 +8,7 @@ namespace rtps
         printf("create viscosity kernel\n");
 
         std::string path(SPH_CL_SOURCE_DIR);
-        path += "/viscosity_cl.cl";
+        path += "/viscosity.cl";
         k_viscosity = Kernel(ps->cli, path, "viscosity");
 
         k_viscosity.setArg(0, cl_position.getDevicePtr());
