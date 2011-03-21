@@ -62,14 +62,14 @@ namespace rtps
         //{
         if (rbos.size())
         {
-            glDeleteRenderbuffers(rbos.size() ,&rbos[0]);
+            glDeleteRenderbuffersEXT(rbos.size() ,&rbos[0]);
         }
         //}
         //for(vector<GLuint>::iterator i=fbos.begin(); i!=fbos.end();i++)
         //{
         if (fbos.size())
         {
-            glDeleteFramebuffers(fbos.size(),&fbos[0]);
+            glDeleteFramebuffersEXT(fbos.size(),&fbos[0]);
         }
         //}
     }
@@ -357,7 +357,7 @@ namespace rtps
     int Render::generateCheckerBoardTex(GLubyte* color1,GLubyte* color2,int num_squares, int length)
     {
         unsigned int imageSize = length*length;
-        GLubyte image[imageSize*4];
+        GLubyte* image = new GLubyte[imageSize*4];
         memset(image,0,imageSize);
         int sq_size = length/num_squares;
         GLubyte* col;
@@ -387,7 +387,7 @@ namespace rtps
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, length, length, 0,
                      GL_RGBA, GL_UNSIGNED_BYTE, image);
-
+		delete[] image;
         return 0; //success
     }
 
@@ -533,6 +533,7 @@ namespace rtps
         int time_offset = 5;
 
         timers[TI_RENDER]     = new GE::Time("render", time_offset, print_freq);
+		return 0;
     }
 
     void Render::printTimers()

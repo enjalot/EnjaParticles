@@ -72,6 +72,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/util
     ${rtpslib_SOURCE_DIR}/structs
     ${rtpslib_SOURCE_DIR}/timege
+    ${rtpslib_SOURCE_DIR}/gtod_windows
 
     ${rtpslib_SOURCE_DIR}/render/Render
     ${rtpslib_SOURCE_DIR}/render/SpriteRender
