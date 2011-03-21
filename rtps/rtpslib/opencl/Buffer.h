@@ -12,12 +12,23 @@
 #include <vector>
 
 #include "CLL.h"
+#ifdef WIN32
+    //#if defined(rtps_EXPORTS)
+	//This needs to be handled better. For some reason the above ifdef works
+    // in all the other include files except this one.
+        #define RTPS_EXPORT __declspec(dllexport)
+    //#else
+    //    #define RTPS_EXPORT __declspec(dllimport)
+	//#endif 
+#else
+    #define RTPS_EXPORT
+#endif
 
 namespace rtps
 {
     
     template <class T>
-    class Buffer
+    class RTPS_EXPORT Buffer
     {
     public:
         Buffer(){ cli=NULL; vbo_id=0; };

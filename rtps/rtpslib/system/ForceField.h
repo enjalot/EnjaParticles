@@ -1,6 +1,8 @@
 #ifndef RTPS_FORCEFIELD_H_INCLUDED
 #define RTPS_FORCEFIELD_H_INCLUDED
 
+//#include "../rtps_common.h"
+#include "structs.h"
 namespace rtps
 {
 

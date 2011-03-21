@@ -2,11 +2,12 @@
 #define UNIFORMGRID_H_INCLUDED
 
 #include "../structs.h"
+#include "../rtps_common.h"
 
 namespace rtps
 {
 
-    class UniformGrid
+    class RTPS_EXPORT UniformGrid
     {
     public:
         UniformGrid()

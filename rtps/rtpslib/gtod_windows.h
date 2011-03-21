@@ -5,6 +5,16 @@
 #include <windows.h>
 #include <iostream>
 
+#ifdef WIN32
+    #if defined(rtps_EXPORTS)
+        #define RTPS_EXPORT __declspec(dllexport)
+    #else
+        #define RTPS_EXPORT __declspec(dllimport)
+	#endif 
+#else
+    #define RTPS_EXPORT
+#endif
+
 //using namespace System;
 using namespace std;
  
@@ -22,6 +32,6 @@ struct timezone
  
 // Definition of a gettimeofday function
  
-int gettimeofday(struct timeval *tv, struct timezone *tz);
+RTPS_EXPORT int gettimeofday(struct timeval *tv, struct timezone *tz);
 
 #endif

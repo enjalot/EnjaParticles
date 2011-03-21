@@ -93,7 +93,7 @@ rtps::RTPS* ps;
 //----------------------------------------------------------------------
 float rand_float(float mn, float mx)
 {
-    float r = random() / (float) RAND_MAX;
+    float r = rand() / (float) RAND_MAX;
     return mn + (mx-mn)*r;
 }
 //----------------------------------------------------------------------

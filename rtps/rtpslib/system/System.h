@@ -7,11 +7,21 @@
 #include "SpriteRender.h"
 #include "SSFRender.h"
 
+#ifdef WIN32
+    #if defined(rtps_EXPORTS)
+        #define RTPS_EXPORT __declspec(dllexport)
+    #else
+        #define RTPS_EXPORT __declspec(dllimport)
+	#endif 
+#else
+    #define RTPS_EXPORT
+#endif
+
 #include<stdio.h>
 namespace rtps
 {
 
-    class System
+    class RTPS_EXPORT System
     {
     public:
         virtual void update() = 0;
