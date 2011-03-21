@@ -24,7 +24,7 @@ __kernel void euler(
 	return;
 
     // this parameters will be moved to FLOCKparams
-	#define	maxspeed	    0.1f	    // .003f
+	#define	maxspeed	    3.00f	    // .003f
 	//#define desiredspeed	0.0025f	// .5f
 	//#define MinUrgency      0.0025f	// .05f
 	//#define MaxUrgency      0.005f	// .1f
@@ -54,9 +54,9 @@ __kernel void euler(
 	//return;
 
     // weights for the rules
-	float w_sep = 0.0f;
+	float w_sep = 0.0f;  // 0.3f
 	float w_aln = 0.0f;
-	float w_coh = 1.0f;  // 3.f
+	float w_coh = 0.005f;  // 3.f
 	
     // boundary limits, used to computed boundary conditions    
 	float4 bndMax = params->grid_max;
@@ -83,7 +83,7 @@ __kernel void euler(
 
 	// dividing by the number of flockmates to get the actual average
 	//alignment = numFlockmates > 0 ? alignment/numFlockmates : alignment;
-	alignment = count > 0 ? alignment/numFlockmates: alignment;
+	alignment = numFlockmates > 0 ? alignment/numFlockmates: alignment;
 
 	// steering towards the average velocity 
 	alignment -= vi;
@@ -103,7 +103,7 @@ __kernel void euler(
 	// dividing by the number of flockmates to get the actual average
 	//clf[i] = (float4)(1.,2.,3.,4.);
 	//return;
-    cohesion = count > 0 ? cohesion/numFlockmates: cohesion;
+    cohesion = numFlockmates > 0 ? cohesion/numFlockmates: cohesion;
 
 	// steering towards the average position
 	cohesion -= pi;
