@@ -127,7 +127,6 @@ namespace rtps
 
     void SPH::updateCPU()
     {
-#ifdef CPU
         cpuDensity();
         cpuPressure();
         cpuViscosity();
@@ -155,8 +154,6 @@ namespace rtps
 #endif
         glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
         glBufferData(GL_ARRAY_BUFFER, num * sizeof(float4), &positions[0], GL_DYNAMIC_DRAW);
-
-#endif
     }
 
     void SPH::updateGPU()

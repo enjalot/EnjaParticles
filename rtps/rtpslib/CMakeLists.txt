@@ -61,8 +61,6 @@ set (rtpslib_INCLUDES
     ${rtpslib_SOURCE_DIR}/opencl
     ${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src
     
-    ${OpenCV_INCLUDE_DIRS}
-
 )
 
 
