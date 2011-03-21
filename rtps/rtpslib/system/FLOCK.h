@@ -95,6 +95,7 @@ typedef struct FLOCKParams
 		printf("spring: %f\n", spring);
 		printf("gravity: %f\n", gravity);
 		printf("choice: %d\n", choice);
+        printf("Boids params\n");
 		printf("min_dist: %f\n", min_dist);
 		printf("search_radius: %f\n", search_radius);
 		printf("max_speed: %f\n", max_speed);

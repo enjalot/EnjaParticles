@@ -12,7 +12,6 @@
 #include<time.h>
 
 namespace rtps {
-//
 
 FLOCK::FLOCK(RTPS *psfr, int n)
 {

@@ -45,7 +45,8 @@ typedef struct FLOCKParams
 	int choice; // which kind of calculation to invoke
 
 	float min_dist; // separation distance
- 
+    float search_radius;
+    float max_speed; 
 } FLOCKParams;
 
 
