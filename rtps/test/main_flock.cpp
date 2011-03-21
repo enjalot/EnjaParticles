@@ -77,7 +77,7 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 1024
 //#define NUM_PARTICLES 256
 #define DT .01f
-#define maxspeed        0.003f
+#define maxspeed        0.1f
 #define mindist         1.f
 #define searchradius    1.f
 //timers
@@ -228,11 +228,11 @@ void appKeyboard(unsigned char key, int x, int y)
         }
         case 'r': //drop a rectangle
         {
-            nn = 1024;
+            nn = 4096;
             //nn = 4;
             //max = float4(2.5, 2.5, 2.5, 1.0f);
             //min = float4(2., 2., 2., 1.0f);
-            max = float4(2.,1.5,2., 1.0f);
+            max = float4(2.5, 2.,2.5, 1.0f);
             min = float4(1.5, 1.5, 1.5, 1.0f);
             //max = float4(1.1,1.1, 1.1, 1.0f);
             //min = float4(1., 1., 1., 1.0f);

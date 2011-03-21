@@ -225,7 +225,7 @@ void FLOCK::updateGPU()
     cl_color.acquire();
     
     //sub-intervals
-    int sub_intervals = 10;  //should be a setting
+    int sub_intervals = 1;  //should be a setting
     for(int i=0; i < sub_intervals; i++)
     {
         /*
@@ -331,7 +331,7 @@ void FLOCK::integrate()
    // }
 
 
-#if 1 
+#if 0 
     if(num > 0)
     {
         std::vector<int4> cli(num);
