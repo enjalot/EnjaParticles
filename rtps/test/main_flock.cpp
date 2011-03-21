@@ -77,7 +77,9 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 1024
 //#define NUM_PARTICLES 256
 #define DT .01f
-
+#define maxspeed        0.003f
+#define mindist         1.f
+#define searchradius    1.f
 //timers
 //GE::Time *ts[3];
 
@@ -125,12 +127,15 @@ int main(int argc, char** argv)
     printf("before we call enjas functions\n");
 
         
+    float color[4] = {1.f, 0.f, 0.f, 0.f};
+
     //default constructor
     //rtps::RTPSettings settings;
     //rtps::Domain grid = Domain(float4(-5,-.3,0,0), float4(2, 2, 12, 0));
     rtps::Domain grid = Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
     //rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
-    rtps::RTPSettings settings(rtps::RTPSettings::FLOCK, NUM_PARTICLES, DT, grid);
+    rtps::RTPSettings settings(rtps::RTPSettings::FLOCK, NUM_PARTICLES, DT, grid, maxspeed, mindist, searchradius, color);
+    //rtps::RTPSettings settings(rtps::RTPSettings::FLOCK, NUM_PARTICLES, DT, grid);
     ps = new rtps::RTPS(settings);
 
     //initialize the OpenGL scene for rendering

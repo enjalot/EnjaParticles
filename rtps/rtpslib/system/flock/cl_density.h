@@ -3,8 +3,8 @@
 
 if(index_i != index_j){
 	
+//	clf[index_i] = xflock(index_i); 
 	// positions
-	float4 pi = pos(index_i);
 	float4 pj = pos(index_j);
 	//clf[index_i] = position_i; 
 	//clf[index_i].x++;
@@ -21,7 +21,7 @@ if(index_i != index_j){
     float4 s = r;       //pi - pj;
 	float  d = rlen;    //length(s);
 	
-    if(d < flockp->min_dist){
+    if(flockp->smoothing_distance >= flockp->min_dist && d <= flockp->min_dist){
     //if(d < flockp->min_dist && (index_i != index_j)) {
 		//clf[index_i].x = clf[index_i].x + 1;
 		//clf[index_i].y = flockp->min_dist;

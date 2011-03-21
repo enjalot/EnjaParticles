@@ -426,6 +426,7 @@ void FLOCK::calculateFLOCKSettings()
     printf("particle rest distance: %f\n", flock_settings.particle_rest_distance);
     
     //messing with smoothing distance, making it really small to remove interaction still results in weird force values
+    //flock_settings.smoothing_distance = .50f;
     flock_settings.smoothing_distance = 2.0f * flock_settings.particle_rest_distance;
 
 ////
@@ -468,7 +469,7 @@ void FLOCK::calculateFLOCKSettings()
     //params.gravity = 0.0f;
     params.velocity_limit = 600.0f;
     params.xflock_factor = .05f;
-    params.min_dist = .08f; 
+    //params.min_dist = .08f; 
 
 	float h = params.smoothing_distance;
 	float pi = acos(-1.0);
@@ -484,15 +485,18 @@ void FLOCK::calculateFLOCKSettings()
 	params.wvisc_d_coef = 15./(2.*pi*h3);
 	params.wvisc_dd_coef = 45./(pi*h6);
 
-	params.min_dist = 1.; // desired separation between boids
+    // Boids parameters
+	params.min_dist     = 0.5f * params.smoothing_distance * ps->settings.min_dist; // desired separation between boids
+    params.search_radius= 0.8f * params.smoothing_distance * ps->settings.search_radius  ;
+    params.max_speed    = 1.0f * ps->settings.max_speed;
 
-// debug mymese
-float4 gmin = params.grid_min;
-float4 gmax = params.grid_max;
-float bd = params.boundary_distance;
-printf("\n *************** \n boundary distance: %f\n", bd); 
-printf("min grid: %f, %f, %f\n", gmin.x, gmin.y, gmin.z);
-printf("max grid: %f, %f, %f\n ************** \n", gmax.x,gmax.y, gmax.z);
+    // debug mymese
+    float4 gmin = params.grid_min;
+    float4 gmax = params.grid_max;
+    float bd = params.boundary_distance;
+    printf("\n *************** \n boundary distance: %f\n", bd); 
+    printf("min grid: %f, %f, %f\n", gmin.x, gmin.y, gmin.z);
+    printf("max grid: %f, %f, %f\n ************** \n", gmax.x,gmax.y, gmax.z);
 
 }
 

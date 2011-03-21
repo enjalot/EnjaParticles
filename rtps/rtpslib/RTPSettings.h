@@ -21,10 +21,11 @@ public:
     RTPSettings(SysType system, int max_particles, float dt, Domain grid, bool tri_collision);
 
     //flock
-    RTPSettings(int max_particles, float maxspeed, float separationdist, float perceptionrange, float color[]);
+    RTPSettings(SysType system, int max_particles, float dt, Domain grid, float maxspeed, float mindist, float searchradius, float color[]);
 
     //maximum number of particles a system can hold
     int max_particles;
+    
     //the bounding domain of the system
     Domain grid;
 
@@ -33,6 +34,18 @@ public:
 
     //triangle collision?
     bool tri_collision;
+
+    // max speed of the boids
+    float max_speed;
+
+    // desired separation distance of the boids
+    float min_dist;
+
+    // radius to search for flockmates
+    float search_radius;
+
+    // color of the flock
+    float4 color;
 
 // Added by GE
 private:

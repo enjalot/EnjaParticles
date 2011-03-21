@@ -13,7 +13,10 @@ void FLOCK::ge_loadEuler()
     k_euler.setArg(iargs++, cl_vars_sorted.getDevicePtr());
     k_euler.setArg(iargs++, cl_position.getDevicePtr());
     k_euler.setArg(iargs++, cl_FLOCKParams.getDevicePtr());
-    k_euler.setArg(iargs++, ps->settings.dt); //time step
+    k_euler.setArg(iargs++, ps->settings.dt);           //time step
+    k_euler.setArg(iargs++, ps->settings.min_dist);     //desired separation distance
+    k_euler.setArg(iargs++, ps->settings.search_radius);//searching radius for neighbors
+    k_euler.setArg(iargs++, ps->settings.max_speed);    //max speed for the boids
 
 	// ONLY IF DEBUGGING
 	k_euler.setArg(iargs++, clf_debug.getDevicePtr());
@@ -26,18 +29,17 @@ void FLOCK::ge_loadEuler()
 //----------------------------------------------------------------------
 void FLOCK::ge_cpuEuler()
 {
-    #define searchradius 	    0.5f         // 0.3
-    #define separationdist  	0.1f       // 0.08
-    #define maxspeed        	0.003f      // 0.003f
-    #define desiredspeed    	0.0025f     // 0.0025f
-    #define maxchange       	0.005f      // 0.005f
-    #define MinUrgency      	0.0025f     // 0.0025f
-    #define MaxUrgency      	0.005f      // 0.005f
+//    #define searchradius 	    0.1f         // 0.3
+//    #define separationdist  	0.08f       // 0.08
+//    #define maxspeed        	0.003f      // 0.003f
+//    #define desiredspeed    	0.0025f     // 0.0025f
+//    #define maxchange       	0.005f      // 0.005f
+//    #define MinUrgency      	0.0025f     // 0.0025f
+//    #define MaxUrgency      	0.005f      // 0.005f
 
 
     //static int count = 0;
 
-    float h = ps->settings.dt;
 
     printf("enter CPUEuler\n");
     //printf("enter CPUEuler: count= %d\n", count);
@@ -49,7 +51,7 @@ void FLOCK::ge_cpuEuler()
     float4 vel_sep, vel_aln, vel_coh;
     float4 acc_separation, acc_alignment, acc_cohesion;
 
-    float w_sep = 0.0003f;  //.0003f;
+    float w_sep = 0.0001f;  //.0003f;
     float w_aln = 0.0001f;  //0.0001f;
     float w_coh = 0.00003f;  //0.00003f;
 //printf("10\n");//GE
@@ -59,14 +61,14 @@ void FLOCK::ge_cpuEuler()
 //printf("11\n");//GE
 bndMax.print("bndMax");
 bndMin.print("bndMin");
-printf("h= %f\n", h);
+//printf("h= %f\n", h);
 
-	float hh = flock_settings.spacing;
-	hh *= 2;
+	float spacing = flock_settings.spacing;
+	spacing *= 2;
 
 	// ARE YOU SURE nb_CELLS WILL BE CORRECT? 
 	// what about rounding errors because we dealing with floats? 
-    int nb_cells = (int)((bndMax.x-bndMin.x)/hh) * (int)((bndMax.y-bndMin.y)/hh) * (int)((bndMax.z-bndMin.z)/hh);
+    int nb_cells = (int)((bndMax.x-bndMin.x)/spacing) * (int)((bndMax.y-bndMin.y)/spacing) * (int)((bndMax.z-bndMin.z)/spacing);
 //printf("12\n");//GE 
 printf("nb_cells= %d\n", nb_cells);
     vector<int>* flockmates = new vector<int>[nb_cells];
@@ -126,7 +128,7 @@ printf("num: %d\n\n", num);
 		        dist = d.length();
 
                 // is boid j a flockmate?
-                if(dist <= searchradius){
+                if(dist <= ps->settings.search_radius){
     //                    printf("boid %d is neighbor of boid %d\n", i, j);
                     	(*flockmates).push_back(j);
       //                  printf("neigh index: %d\n", (*flockmates)[(*flockmates).size()-1]);
@@ -170,7 +172,7 @@ printf("num: %d\n\n", num);
         		//if(d >= separationdist){
                 	//	separation = separation * r;
         		//}
-        		if(d < separationdist){
+        		if(d < ps->settings.min_dist){
                 		//separation = separation * -r;
                 		separation = normalize3(separation);
 				        separation = separation / d;
@@ -310,9 +312,9 @@ printf("num: %d\n\n", num);
         float  acc_mag  = acc.length();
 	    float4 acc_norm = normalize3(acc);
  
-        if(acc_mag > maxchange){
+        if(acc_mag > ps->settings.max_speed){
                 // set magnitude to MaxChangeInAcc
-                acc = acc_norm * maxchange;
+                acc = acc_norm * ps->settings.max_speed;
         }
 
 //acc.print("acceleration after constraint");
@@ -346,7 +348,7 @@ v1.print("velocity: ");
         //p1.x += h*v1.x;
         //p1.y += h*v1.y;
         //p1.z += h*v1.z;
-	    positions[i] = positions[i] + velocities[i];
+	    positions[i] = positions[i] + ps->settings.dt*velocities[i];
         positions[i].w = 1.0f; //just in case
 
 //printf("2\n");//GE

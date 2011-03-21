@@ -81,9 +81,11 @@ typedef struct FLOCKParams
     int num;
     int nb_vars; // for combined variables (vars_sorted, etc.)
 	int choice; // which kind of calculation to invoke
-
+    
+    // Boids
     float min_dist;  // desired separation between boids
- 
+    float search_radius;
+    float max_speed; 
     
     void print() {
 		printf("----- FLOCKParams ----\n");
@@ -97,6 +99,8 @@ typedef struct FLOCKParams
 		printf("gravity: %f\n", gravity);
 		printf("choice: %d\n", choice);
 		printf("min_dist: %f\n", min_dist);
+		printf("search_radius: %f\n", search_radius);
+		printf("max_speed: %f\n", max_speed);
 	}
 } FLOCKParams __attribute__((aligned(16)));
 
@@ -153,7 +157,7 @@ public:
 private:
     //the particle system framework
     RTPS *ps;
-	Boids *boids;
+	//Boids *boids;
 
     FLOCKSettings flock_settings;
     FLOCKParams params;

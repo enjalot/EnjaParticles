@@ -148,6 +148,7 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli, RTPSettings* _settings)
         glsl_program[COPY_TO_FB] = compileShaders(vert.c_str(),frag.c_str()); 
 
     }
+#if 0
     else if(mikep)
     {  
         loadTexture();
@@ -161,6 +162,7 @@ Render::Render(GLuint pos, GLuint col, int n, CL* cli, RTPSettings* _settings)
 		geom+="/mpgeometry.glsl";
         glsl_program[MIKEP_SHADER] = compileShaders(vert.c_str(),frag.c_str(),geom.c_str(),param,value,3);
     }
+#endif
     setupTimers();
 	#ifdef USE_IL
 		ilInit();

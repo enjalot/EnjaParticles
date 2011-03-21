@@ -37,7 +37,7 @@ inline void ForNeighbor(__global float4*  vars_sorted,
 	float rlen = length(r);
 
     // parameter that would be moved to FLOCKparams	
-	float searchradius = 0.05f;  //8.f; 	    // search radius TODO: remove hard coded parameter
+	//float searchradius = flockp->smoothing_distance;  //8.f; 	    // search radius TODO: remove hard coded parameter
 
 	//clf[index_i] = position_i; 
 	//clf[index_i].w = -129.;
@@ -55,7 +55,7 @@ inline void ForNeighbor(__global float4*  vars_sorted,
 
     // is this particle within cutoff?
 	//clf[index_i] = position_i; 
-	if (rlen <= searchradius) 
+	if (flockp->smoothing_distance >= flockp->search_radius && rlen <= flockp->search_radius) 
     {
 		//clf[index_i].x++;
 		//clf[index_i].x = 13.;

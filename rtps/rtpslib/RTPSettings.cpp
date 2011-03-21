@@ -35,8 +35,17 @@ RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain gri
     this->grid = grid;
     this->tri_collision = tri_collision;
 }
-RTPSettings::RTPSettings(int max_particles, float maxspeed, float separationdist, float perceptionrange, float color[])
+RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain grid, float maxspeed, float mindist, float searchradius, float color[])
 {
+    this->system = system;
+    this->max_particles = max_particles;
+    this->dt = dt;
+    this->grid = grid;
+    this->max_speed = maxspeed;
+    this->min_dist = mindist;
+    this->search_radius = searchradius;
+    float r = color[0]; float g = color[1]; float b = color[2]; 
+    this->color = float4(r,g,b,1.f);
 }
 
 }
