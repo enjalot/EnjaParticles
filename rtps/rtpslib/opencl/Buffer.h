@@ -12,10 +12,7 @@
 
 #include "CLL.h"
 
-namespace rtps {
-
-template <class T>
-class Buffer
+namespace rtps
 {
 public:
     Buffer(){ cli=NULL; vbo_id=0; };
@@ -66,7 +63,6 @@ private:
 
 
 };
-
 #include "Buffer.cpp"
 
 }

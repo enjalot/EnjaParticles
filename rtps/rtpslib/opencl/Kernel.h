@@ -16,49 +16,54 @@
 
 #include "CLL.h"
 
-namespace rtps{
-
-    
-class Kernel
+namespace rtps
 {
-public:
-    Kernel(){cli = NULL;};
-    Kernel(CL *cli, std::string source, std::string name);
-    Kernel(CL *cli, cl::Program program, std::string name);
 
-    //we will want to access buffers by name when going accross systems
-    std::string name;
-    std::string source;
 
-    CL *cli;
-    //we need to build a program to have a kernel
-    cl::Program program;
-
-    //the actual OpenCL kernel object
-    cl::Kernel kernel;
-
-    template <class T> void setArg(int arg, T val);
-    void setArgShared(int arg, int nb_bytes);
-    
-
-    //assumes null range for worksize offset and local worksize
-    void execute(int ndrange);
-    //later we will make more execute routines to give more options
-    void execute(int ndrange, int workgroup_size);
-    
-};
-
-template <class T> void Kernel::setArg(int arg, T val)
-{
-    try
+    class Kernel
     {
-        kernel.setArg(arg, val);
-    }
-    catch (cl::Error er) {
-        printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
-    }
+    public:
+        Kernel()
+        {
+            cli = NULL;
+        };
+        Kernel(CL *cli, std::string source, std::string name);
+        Kernel(CL *cli, cl::Program program, std::string name);
 
-}
+        //we will want to access buffers by name when going accross systems
+        std::string name;
+        std::string source;
+
+        CL *cli;
+        //we need to build a program to have a kernel
+        cl::Program program;
+
+        //the actual OpenCL kernel object
+        cl::Kernel kernel;
+
+        template <class T> void setArg(int arg, T val);
+        void setArgShared(int arg, int nb_bytes);
+
+
+        //assumes null range for worksize offset and local worksize
+        void execute(int ndrange);
+        //later we will make more execute routines to give more options
+        void execute(int ndrange, int workgroup_size);
+
+    };
+
+    template <class T> void Kernel::setArg(int arg, T val)
+    {
+        try
+        {
+            kernel.setArg(arg, val);
+        }
+        catch (cl::Error er)
+        {
+            printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+        }
+
+    }
 
 
 

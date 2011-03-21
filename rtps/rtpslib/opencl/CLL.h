@@ -5,47 +5,48 @@
 
 #include <CL/cl.hpp>
 
-namespace rtps{
-
-
-//NVIDIA helper functions    
-const char* oclErrorString(cl_int error);
-cl_int oclGetPlatformID(cl_platform_id* clSelectedPlatformID);
-
-class CL
+namespace rtps
 {
-public:
-    CL();
-/*
-    std::vector<Buffer> buffers;
-    std::vector<Program> programs;
-    std::vector<Kernel> kernels;
 
-    int addBuffer(Buffer buff);
-    int addProgram(Program prog);
-    int addKernel(Kernel kern);
-*/
 
-    cl::Context context;
-    cl::CommandQueue queue;
+    //NVIDIA helper functions    
+    const char* oclErrorString(cl_int error);
+    cl_int oclGetPlatformID(cl_platform_id* clSelectedPlatformID);
 
-    std::vector<cl::Device> devices;
-    int deviceUsed;
+    class CL
+    {
+    public:
+        CL();
+        /*
+            std::vector<Buffer> buffers;
+            std::vector<Program> programs;
+            std::vector<Kernel> kernels;
+        
+            int addBuffer(Buffer buff);
+            int addProgram(Program prog);
+            int addKernel(Kernel kern);
+        */
 
-    //error checking stuff
-    int err;
-    cl::Event event;
+        cl::Context context;
+        cl::CommandQueue queue;
 
-    //setup an OpenCL context that shares with OpenGL
-    void setup_gl_cl();
+        std::vector<cl::Device> devices;
+        int deviceUsed;
 
-    cl::Program loadProgram(std::string path, std::string options="");
-    cl::Kernel loadKernel(std::string path, std::string name);
-    cl::Kernel loadKernel(cl::Program program, std::string kernel_name);
+        //error checking stuff
+        int err;
+        cl::Event event;
 
-    //TODO add oclErrorString to the class
-    //move from util.h/cpp
-};
+        //setup an OpenCL context that shares with OpenGL
+        void setup_gl_cl();
+
+        cl::Program loadProgram(std::string path, std::string options="");
+        cl::Kernel loadKernel(std::string path, std::string name);
+        cl::Kernel loadKernel(cl::Program program, std::string kernel_name);
+
+        //TODO add oclErrorString to the class
+        //move from util.h/cpp
+    };
 
 
 

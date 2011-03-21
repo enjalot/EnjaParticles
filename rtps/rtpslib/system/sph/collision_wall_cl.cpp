@@ -5,14 +5,14 @@
 
 
 __kernel void collision_wall(
-		__global float4* vars_sorted, 
-		__constant struct GridParams* gp,
-		__constant struct SPHParams* params)
+                            __global float4* vars_sorted, 
+                            __constant struct GridParams* gp,
+                            __constant struct SPHParams* params)
 {
     unsigned int i = get_global_id(0);
     //int num = get_global_size(0);
-	int num = params->num;
-    if(i > num) return;
+    int num = params->num;
+    if (i > num) return;
 
 
     float4 p = pos(i);

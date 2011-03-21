@@ -3,12 +3,14 @@
 
 //OpenCL API
 #include "opencl/CLL.h"
-
 //Render API
 //#include "render/Render.h"
 
 //System API
 #include "system/System.h"
+
+//OpenCL API
+#include "opencl/CLL.h"
 
 //initial value API
 //TODO probably shouldn't be included here
@@ -24,9 +26,7 @@
 //TODO should not be included here
 #include "util.h"
 
-namespace rtps {
-
-class RTPS
+namespace rtps
 {
 public:
     //default constructor
@@ -58,7 +58,6 @@ public:
     void render();
     
 };
-
 }
 
 #endif

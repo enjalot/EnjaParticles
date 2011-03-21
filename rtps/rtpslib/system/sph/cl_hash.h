@@ -31,33 +31,36 @@ int4 calcGridCell(float4 p, float4 grid_min, float4 grid_delta)
 
 //----------------------------------------------------------------------
 uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges
-        //,__global float4* fdebug,
-        //__global int4* idebug
-		)
+                  //,__global float4* fdebug,
+                  //__global int4* idebug
+                 )
 {
     // each variable on single line or else STRINGIFY DOES NOT WORK
     int gx;
     int gy;
     int gz;
 
-    if(wrapEdges) {
+    if (wrapEdges)
+    {
         int gsx = (int)floor(grid_res.x);
         int gsy = (int)floor(grid_res.y);
         int gsz = (int)floor(grid_res.z);
 
-//          //power of 2 wrapping..
-//          gx = gridPos.x & gsx-1;
-//          gy = gridPos.y & gsy-1;
-//          gz = gridPos.z & gsz-1;
+        //          //power of 2 wrapping..
+        //          gx = gridPos.x & gsx-1;
+        //          gy = gridPos.y & gsy-1;
+        //          gz = gridPos.z & gsz-1;
 
         // wrap grid... but since we can not assume size is power of 2 we can't use binary AND/& :/
         gx = gridPos.x % gsx;
         gy = gridPos.y % gsy;
         gz = gridPos.z % gsz;
-        if(gx < 0) gx+=gsx;
-        if(gy < 0) gy+=gsy;
-        if(gz < 0) gz+=gsz;
-    } else {
+        if (gx < 0) gx+=gsx;
+        if (gy < 0) gy+=gsy;
+        if (gz < 0) gz+=gsz;
+    }
+    else
+    {
         gx = gridPos.x;
         gy = gridPos.y;
         gz = gridPos.z;
@@ -69,17 +72,17 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges
     //This means that we process the grid structure in "depth slice" order, and
     //each such slice is processed in row-column order.
 
-	//int index = get_global_id(0);
-	//fdebug[index] = grid_res;
-	//idebug[index] = (int4)(gx,gy,gz,1.);
+    //int index = get_global_id(0);
+    //fdebug[index] = grid_res;
+    //idebug[index] = (int4)(gx,gy,gz,1.);
     //idebug[index] = (gz*grid_res.y + gy) * grid_res.x + gx; 
 
-	// uint(-3) = 0   (so hash is never less than zero)
-	// But if particle leaves boundary to the right of the grid, the hash
-	// table can go out of bounds and the code might crash. This can happen
-	// either if the boundary does not catch the particles or if the courant
-	// condition is violated and the code goes unstable. 
+    // uint(-3) = 0   (so hash is never less than zero)
+    // But if particle leaves boundary to the right of the grid, the hash
+    // table can go out of bounds and the code might crash. This can happen
+    // either if the boundary does not catch the particles or if the courant
+    // condition is violated and the code goes unstable. 
 
-    return (gz*grid_res.y + gy) * grid_res.x + gx; 
+    return(gz*grid_res.y + gy) * grid_res.x + gx; 
 }
 #endif

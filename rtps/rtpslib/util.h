@@ -9,13 +9,13 @@
 namespace rtps
 {
 
-char *file_contents(const char *filename, int *length);
+    char *file_contents(const char *filename, int *length);
 
-GLuint createVBO(const void* data, int dataSize, GLenum target, GLenum usage);
-int deleteVBO(GLuint id);
+    GLuint createVBO(const void* data, int dataSize, GLenum target, GLenum usage);
+    int deleteVBO(GLuint id);
 
 
-void make_cube(std::vector<Triangle> &triangles, float4 center, float half_edge);
+    void make_cube(std::vector<Triangle> &triangles, float4 center, float half_edge);
 
 }
 
