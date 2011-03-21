@@ -1,11 +1,6 @@
 #ifndef RTPS_RTPS_H_INCLUDED
 #define RTPS_RTPS_H_INCLUDED
 
-//OpenCL API
-#include "opencl/CLL.h"
-//Render API
-//#include "render/Render.h"
-
 //System API
 #include "system/System.h"
 
