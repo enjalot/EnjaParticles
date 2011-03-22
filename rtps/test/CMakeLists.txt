@@ -27,14 +27,6 @@ FIND_PACKAGE (GLEW)
 
 set (test_INCLUDES
     ${RTPS_DIR}
-
-    ${RTPS_DIR}/system
-    ${RTPS_DIR}/system/common
-    ${RTPS_DIR}/render
-    ${RTPS_DIR}/render/util
-    ${RTPS_DIR}/domain
- 
-
     ${GLUT_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
     ${GLEW_INCLUDE_PATH}
