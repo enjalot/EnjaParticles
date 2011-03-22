@@ -21,7 +21,7 @@ namespace rtps
         //decide which system to use
         enum SysType
         {
-            Simple, SPH, SimpleFlock
+            Simple, SPH, FLOCK 
         };
         SysType system;
 

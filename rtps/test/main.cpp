@@ -212,13 +212,8 @@ void appKeyboard(unsigned char key, int x, int y)
 {
     int nn;
     float4 min;
-<<<<<<< HEAD
-    float4 max; 
-    switch(key) 
-=======
     float4 max;
     switch (key)
->>>>>>> 202b9331fc9838677dfa6915aa717371ab4b5e31
     {
         case 'e': //dam break
             nn = 16384;

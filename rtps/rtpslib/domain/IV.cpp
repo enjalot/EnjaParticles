@@ -57,7 +57,7 @@ std::vector<float4> addRect(int num, float4 min, float4 max, float spacing, floa
     for (float x = xmin; x <= xmax; x+=spacing) {
         if (i >= num) break;				
         rvec[i] = float4(x,z,y,1.0f);
-        rvec[i].print("rect pos[i]: ");
+//        rvec[i].print("rect pos[i]: ");
         i++;
     }}}
     rvec.resize(i);

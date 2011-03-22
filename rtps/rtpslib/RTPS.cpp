@@ -19,18 +19,6 @@ namespace rtps
         settings = s;
         Init();
     }
-    else if (settings.system == RTPSettings::FLOCK)
-    {
-        printf("flock system\n");
-        system = new FLOCK(this, settings.max_particles);
-    }
-    
-    
-
-    //pass in the position and color vbo ids to the renderer
-    //get the number from the system
-    //renderer = new Render(system->getPosVBO(), system->getColVBO(), system->getNum());
-}
 
     RTPS::~RTPS()
     {
@@ -94,6 +82,10 @@ namespace rtps
         }*/
     }
 
+    void RTPS::printTimers()
+    {
+            system->printTimers();
+    }
 }
 
 

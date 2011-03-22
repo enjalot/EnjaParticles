@@ -30,8 +30,6 @@ namespace rtps
             this->y = y;
             this->z = z;
         }
-
-
     } float3;
 
     // GE: Sept. 8, 2010
@@ -110,6 +108,10 @@ namespace rtps
         void print(const char* msg=0)
         {
             printf("%s: %e, %e, %e, %f\n", msg, x, y, z, w);
+        }
+        
+        void printd(const char* msg=0) {
+            printf("%s: %18.11e, %18.11e, %18.11e, %f\n", msg, x, y, z, w);
         }
 
         friend float4 operator-(float4& a, float4& b)
