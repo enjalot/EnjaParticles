@@ -7,10 +7,19 @@
 #include <string>
 
 #include "CLL.h"
+#ifdef WIN32
+    #if defined(rtps_EXPORTS)
+        #define RTPS_EXPORT __declspec(dllexport)
+    #else
+        #define RTPS_EXPORT __declspec(dllimport)
+	#endif 
+#else
+    #define RTPS_EXPORT
+#endif
 
 namespace rtps{
 
-class Program
+class RTPS_EXPORT Program
 {
 public:
     Program();

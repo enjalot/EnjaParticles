@@ -4,9 +4,14 @@ from pygame.locals import *
 from kernels import *
 from vector import Vec
 
-from timing import print_timing
+#from timing import print_timing
+from timing import Timing
+timings = Timing()
+
+
 
 #@print_timing
+@timings
 def density_update(sphp, particles):
     #brute force
     for pi in particles:
@@ -14,9 +19,12 @@ def density_update(sphp, particles):
         for pj in particles:
             r = pi.pos - pj.pos
             #print r
-            pi.dens += pj.mass*Wpoly6(pi.h, r)
+            if mag(r) > pi.h: continue
+            #pi.dens += pj.mass*Wpoly6(pi.h, r)
+            pi.dens += pj.mass * sphp.kernels.poly6(r)
 
 #@print_timing
+@timings
 def force_update(sphp, particles):
     #brute force
     rho0 = sphp.rho0
@@ -42,7 +50,8 @@ def force_update(sphp, particles):
             Pj = K*(dj - rho0)
 
             #print "dWspiky", dWspiky(pi.h, r)
-            kern = .5 * (Pi + Pj) * dWspiky(pi.h, r)
+            #kern = .5 * (Pi + Pj) * dWspiky(pi.h, r)
+            kern = .5 * (Pi + Pj) * sphp.kernels.dspiky(r)
             f = r*kern
             #does not account for variable mass
             f *= pi.mass / (di * dj)
@@ -53,7 +62,7 @@ def force_update(sphp, particles):
             #XSPH
             #float4 xsph = (2.f * sphp->mass * Wijpol6 * (velj-veli)/(di.x+dj.x));
             xsph = pj.veleval - pi.veleval
-            xsph *= 2. * pi.mass * Wpoly6(pi.h, r) / (di + dj) 
+            xsph *= 2. * pi.mass * sphp.kernels.poly6(r) / (di + dj) 
             pi.xsph += xsph
 
 
@@ -61,18 +70,21 @@ def force_update(sphp, particles):
   
 
 
+#@timings
 def calcRepulsionForce(normal, vel, sphp, distance):
     repulsion_force = (sphp.boundary_stiffness * distance - sphp.boundary_dampening * np.dot(normal, vel))*normal;
     return repulsion_force;
 
+#@timings
 def calcFrictionForce(v, f, normal, friction_kinetic, friction_static_limit):
     pass
 
 #@print_timing
+@timings
 def collision_wall(sphp, domain, particles):
     
-    dmin = domain.dmin * sphp.sim_scale
-    dmax = domain.dmax * sphp.sim_scale
+    dmin = domain.bnd_min * sphp.sim_scale
+    dmax = domain.bnd_max * sphp.sim_scale
     bnd_dist = sphp.boundary_distance
     #float diff = params->boundary_distance - (p.z - gp->bnd_min.z);
     #if (diff > params->EPSILON)
@@ -114,6 +126,7 @@ def collision_wall(sphp, domain, particles):
 
 
 #@print_timing
+@timings
 def euler_update(sphp, particles):
     dt = .001
 
@@ -133,6 +146,7 @@ def euler_update(sphp, particles):
         pi.pos += pi.vel * dt
 
 #@print_timing
+@timings
 def leapfrog_update(sphp, particles):
     dt = .001
 

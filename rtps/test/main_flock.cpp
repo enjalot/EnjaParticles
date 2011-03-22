@@ -67,10 +67,10 @@ void showFPS(float fps, std::string *report);
 void *font = GLUT_BITMAP_8_BY_13;
 
 rtps::RTPS* ps;
-//#define NUM_PARTICLES 524288
+#define NUM_PARTICLES 524288
 //#define NUM_PARTICLES 262144
 //#define NUM_PARTICLES 65536
-#define NUM_PARTICLES 16384
+//#define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 8192
 //#define NUM_PARTICLES 4096
 //#define NUM_PARTICLES 2048
@@ -228,12 +228,13 @@ void appKeyboard(unsigned char key, int x, int y)
         }
         case 'r': //drop a rectangle
         {
-            nn = 4096;
+            nn = 16384;
+            //nn = 4096;
             //nn = 4;
             //max = float4(2.5, 2.5, 2.5, 1.0f);
             //min = float4(2., 2., 2., 1.0f);
-            max = float4(2.5, 2.,2.5, 1.0f);
-            min = float4(1.5, 1.5, 1.5, 1.0f);
+            max = float4(3.5, 4., 3.5, 1.0f);
+            min = float4(1.5, 1., 2.5, 1.0f);
             //max = float4(1.1,1.1, 1.1, 1.0f);
             //min = float4(1., 1., 1., 1.0f);
             ps->system->addBox(nn, min, max, false);

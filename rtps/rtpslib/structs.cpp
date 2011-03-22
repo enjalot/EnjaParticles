@@ -18,8 +18,8 @@ float dist_squared(float4 vec)
 }
 float dot(float4 a, float4 b)
 {
-        return a.x*b.x + a.y*b.y + a.z*b.z;
-}
+    return a.x*b.x + a.y*b.y + a.z*b.z;
+}  
 
 float4 normalize(float4 a)
 {

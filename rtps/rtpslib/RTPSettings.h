@@ -2,82 +2,123 @@
 #define RTPS_RTPSETTINGS_H_INCLUDED
 
 #include "domain/Domain.h"
+#ifdef WIN32
+    #if defined(rtps_EXPORTS)
+        #define RTPS_EXPORT __declspec(dllexport)
+    #else
+        #define RTPS_EXPORT __declspec(dllimport)
+	#endif 
+#else
+    #define RTPS_EXPORT
+#endif
 
-namespace rtps{
-
-class RTPSettings
+namespace rtps
 {
-public:
-    //decide which system to use
-    enum SysType {Simple, SPH, FLOCK};
-    SysType system;
+
+    class RTPS_EXPORT RTPSettings 
+    {
+    public:
+        //decide which system to use
+        enum SysType
+        {
+            Simple, SPH, SimpleFlock
+        };
+        SysType system;
+
+        enum RenderType
+        {
+            RENDER = 0, SPRITE_RENDER, SCREEN_SPACE_RENDER
+        };
 
 
-    RTPSettings();
-    RTPSettings(SysType system, int max_particles, float dt);
-    RTPSettings(SysType system, int max_particles, float dt, Domain grid);
-    
-    //collision
-    RTPSettings(SysType system, int max_particles, float dt, Domain grid, bool tri_collision);
+        RTPSettings();
+        RTPSettings(SysType system, int max_particles, float dt);
+        RTPSettings(SysType system, int max_particles, float dt, Domain grid);
 
-    //flock
-    RTPSettings(SysType system, int max_particles, float dt, Domain grid, float maxspeed, float mindist, float searchradius, float color[]);
+        //collision
+        RTPSettings(SysType system, int max_particles, float dt, Domain grid, bool tri_collision);
 
-    //maximum number of particles a system can hold
-    int max_particles;
-    
-    //the bounding domain of the system
-    Domain grid;
+        //flock
+        RTPSettings(SysType system, int max_particles, float dt, Domain grid, float maxspeed, float mindist, float searchradius, float color[]);
 
-    //time step per iteration
-    float dt;
+        //maximum number of particles a system can hold
+        int max_particles;
+        
+        //the bounding domain of the system
+        Domain grid;
 
-    //triangle collision?
-    bool tri_collision;
+        //time step per iteration
+        float dt;
 
-    // max speed of the boids
-    float max_speed;
+        //triangle collision?
+        bool tri_collision;
 
-    // desired separation distance of the boids
-    float min_dist;
+        // max speed of the boids
+        float max_speed;
 
-    // radius to search for flockmates
-    float search_radius;
+        // desired separation distance of the boids
+        float min_dist;
 
-    // color of the flock
-    float4 color;
+        // radius to search for flockmates
+        float search_radius;
 
-// Added by GE
-private:
-	float render_radius_scale;
-	float render_blur_scale;
-	int render_type;
-	bool use_glsl;
-	bool use_alpha_blending;
+        // color of the flock
+        float4 color;
 
-public:
-	float getRadiusScale() { return render_radius_scale; }
-	void setRadiusScale(float scale) {
-		render_radius_scale = scale;
-	}
+        // Added by GE
+    private:
+        float render_radius_scale;
+        float render_blur_scale;
+        RenderType render_type;
+        bool use_glsl;
+        bool use_alpha_blending;
 
-	float getBlurScale() { return render_blur_scale; }
-	void setBlurScale(float scale) {
-		render_blur_scale = scale;
-	}
+    public:
+        float getRadiusScale()
+        {
+            return render_radius_scale;
+        }
+        void setRadiusScale(float scale)
+        {
+            render_radius_scale = scale;
+        }
 
-	int getRenderType() { return render_type; }
-	void setRenderType(int type) {
-		render_type = type;
-	}
+        float getBlurScale()
+        {
+            return render_blur_scale;
+        }
+        void setBlurScale(float scale)
+        {
+            render_blur_scale = scale;
+        }
 
-	int getUseAlphaBlending() { return use_alpha_blending; }
-	int setUseAlphaBlending(bool use_alpha) { use_alpha_blending = use_alpha; }
+        int getRenderType()
+        {
+            return render_type;
+        }
+        void setRenderType(RenderType type)
+        {
+            render_type = type;
+        }
 
-	int getUseGLSL() { return use_glsl; }
-	int setUseGLSL(bool use_glsl) { 
-		this->use_glsl = use_glsl; }
-};
+        int getUseAlphaBlending()
+        {
+            return use_alpha_blending;
+        }
+        void setUseAlphaBlending(bool use_alpha)
+        {
+            use_alpha_blending = use_alpha;
+        }
+
+        int getUseGLSL()
+        {
+            return use_glsl;
+        }
+        void setUseGLSL(bool use_glsl)
+        {
+            this->use_glsl = use_glsl;
+        }
+    };
 
 }
 

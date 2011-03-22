@@ -6,16 +6,26 @@
 #include "structs.h"
 #include <vector>
 
+#ifdef WIN32
+    #if defined(rtps_EXPORTS)
+        #define RTPS_EXPORT __declspec(dllexport)
+    #else
+        #define RTPS_EXPORT __declspec(dllimport)
+	#endif 
+#else
+    #define RTPS_EXPORT
+#endif
+
 namespace rtps
 {
 
-char *file_contents(const char *filename, int *length);
+    char RTPS_EXPORT *file_contents(const char *filename, int *length);
 
-GLuint createVBO(const void* data, int dataSize, GLenum target, GLenum usage);
-int deleteVBO(GLuint id);
+    GLuint RTPS_EXPORT createVBO(const void* data, int dataSize, GLenum target, GLenum usage);
+    int RTPS_EXPORT deleteVBO(GLuint id);
 
 
-void make_cube(std::vector<Triangle> &triangles, float4 center, float half_edge);
+    void RTPS_EXPORT make_cube(std::vector<Triangle> &triangles, float4 center, float half_edge);
 
 }
 

@@ -3,26 +3,101 @@
 
 #include "../structs.h"
 #include <vector>
+#include "../rtps_common.h"
 
 namespace rtps {
 
 
 
-class Domain
+class RTPS_EXPORT Domain
 {
 public:
+    /**
+     * 
+     * 
+     * @author andrew (3/13/2011)
+     */
     Domain(){};
+    /**
+     * 
+     * 
+     * @author andrew (3/13/2011)
+     * 
+     * @param min 
+     * @param max 
+     */
     Domain(float4 min, float4 max);
+    /**
+     * 
+     * 
+     * @author andrew (3/13/2011)
+     */
     ~Domain();
 
+    /**
+     * 
+     * 
+     * @author andrew (3/13/2011)
+     * 
+     * @param cell_size 
+     */
     void calculateCells(float cell_size);
 
+    /**
+     * 
+     * 
+     * @author andrew (3/13/2011)
+     * 
+     * @return float4 
+     */
     float4 getMin(){ return min; };
+    /**
+     * 
+     * 
+     * @author andrew (3/13/2011)
+     * 
+     * @return float4 
+     */
     float4 getMax(){ return max; };
+    /**
+     * 
+     * 
+     * @author andrew (3/13/2011)
+     * 
+     * @return float4 
+     */
     float4 getBndMin(){ return bnd_min; };
+    /**
+     * 
+     * 
+     * @author andrew (3/13/2011)
+     * 
+     * @return float4 
+     */
     float4 getBndMax(){ return bnd_max; };
-	float4 getDelta() { return delta; };
-	float4 getRes() { return res; };
+    /**
+     * 
+     * 
+     * @author andrew (3/13/2011)
+     * 
+     * @return float4 
+     */
+    float4 getDelta() { return delta; };
+    /**
+     * 
+     * 
+     * @author andrew (3/13/2011)
+     * 
+     * @return float4 
+     */
+    float4 getRes() { return res; };
+    /**
+     * 
+     * 
+     * @author andrew (3/13/2011)
+     * 
+     * @return float4 
+     */
 	float4 getSize() { return size; };
 
 

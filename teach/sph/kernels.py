@@ -6,6 +6,38 @@ from numpy import pi
 
 def mag(x):
     return sqrt(np.dot(x, x))
+def mag2(x):
+    return np.dot(x,x)
+
+
+class Kernel(object):
+    def __init__(self, h):
+        self.h = h
+        h6 = h**6
+        h9 = h6*h*h*h
+        self.coeffs = {}
+        self.coeffs["poly6"] = 315./(64.*pi*h9)
+        self.coeffs["dspiky"] = -45./(pi*h6)
+
+    def poly6(self, r):
+        mr2 = mag2(r)
+        if mr2 < self.h*self.h:
+            return self.coeffs["poly6"] * (self.h**2 - mr2)**3
+        else:
+            return 0.
+    
+    def dspiky(self, r):
+        magr = mag(r)
+        if magr == 0:
+            magr = 1E-6
+
+        hr2 = self.h - magr
+
+        if magr < self.h:
+            return self.coeffs["dspiky"] * hr2 * hr2 / magr
+        return 0
+
+
 
 def Wpoly6(h, r):
     coeff = 315./(64.*pi*h**9)

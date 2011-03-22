@@ -1,30 +1,31 @@
 #include "RTPSettings.h"
-namespace rtps {
-
-
-RTPSettings::RTPSettings()
+namespace rtps
 {
-    system = SPH;
-    max_particles = 2048;
-    dt = .001f;
-    grid = Domain(float4(-5,-.3,0,0), float4(2, 2, 12, 0));
-}
 
-RTPSettings::RTPSettings(SysType system, int max_particles, float dt)
-{
-    this->system = system;
-    this->max_particles = max_particles;
-    this->dt = dt;
-    grid = Domain(float4(-5,-.3,0,0), float4(2, 2, 12, 0));
-}
 
-RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain grid)
-{
-    this->system = system;
-    this->max_particles = max_particles;
-    this->dt = dt;
-    this->grid = grid;
-}
+    RTPSettings::RTPSettings()
+    {
+        system = SPH;
+        max_particles = 2048;
+        dt = .001f;
+        grid = Domain(float4(-5,-.3f,0,0), float4(2, 2, 12, 0));
+    }
+
+    RTPSettings::RTPSettings(SysType system, int max_particles, float dt)
+    {
+        this->system = system;
+        this->max_particles = max_particles;
+        this->dt = dt;
+        grid = Domain(float4(-5,-.3f,0,0), float4(2, 2, 12, 0));
+    }
+
+    RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain grid)
+    {
+        this->system = system;
+        this->max_particles = max_particles;
+        this->dt = dt;
+        this->grid = grid;
+    }
 
 //with triangle collision
 RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain grid, bool tri_collision)
@@ -47,5 +48,4 @@ RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain gri
     float r = color[0]; float g = color[1]; float b = color[2]; 
     this->color = float4(r,g,b,1.f);
 }
-
 }

@@ -2,34 +2,44 @@
 #define UNIFORMGRID_H_INCLUDED
 
 #include "../structs.h"
+#include "../rtps_common.h"
 
-namespace rtps {
-
-class UniformGrid
+namespace rtps
 {
-public:
-    UniformGrid(){};
-    UniformGrid(float4 min, float4 max, float cell_size);
-    ~UniformGrid();
 
-    void make_cube(float4 *positions, float spacing, int num);
-    void make_column(float4 *positions, float spacing, int num);
-    void make_dam(float4 *positions, float spacing, int num);
-    int make_line(float4 *positions, float spacing, int num);
+    class RTPS_EXPORT UniformGrid
+    {
+    public:
+        UniformGrid()
+        {
+        };
+        UniformGrid(float4 min, float4 max, float cell_size);
+        ~UniformGrid();
 
-    float4 getMin(){ return min; };
-    float4 getMax(){ return max; };
+        void make_cube(float4 *positions, float spacing, int num);
+        void make_column(float4 *positions, float spacing, int num);
+        void make_dam(float4 *positions, float spacing, int num);
+        int make_line(float4 *positions, float spacing, int num);
 
-private:
-    float4 min;
-    float4 max; 
+        float4 getMin()
+        {
+            return min;
+        };
+        float4 getMax()
+        {
+            return max;
+        };
 
-    float4 size;
-    float4 res;
-    float4 delta;
+    private:
+        float4 min;
+        float4 max; 
+
+        float4 size;
+        float4 res;
+        float4 delta;
 
 
-};
-   
+    };
+
 }
 #endif
