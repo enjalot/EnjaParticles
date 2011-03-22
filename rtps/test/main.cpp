@@ -140,8 +140,8 @@ int main(int argc, char** argv)
 
     settings.setRadiusScale(1.0);
     //settings.setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
-    //settings.setRenderType(RTPSettings::RENDER);
-    settings.setRenderType(RTPSettings::SPRITE_RENDER);
+    settings.setRenderType(RTPSettings::RENDER);
+    //settings.setRenderType(RTPSettings::SPRITE_RENDER);
     //settings.setRenderType((RTPSettings::RenderType)1);
     settings.setBlurScale(1.0);
     settings.setUseGLSL(1);
