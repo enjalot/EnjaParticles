@@ -227,11 +227,7 @@ namespace rtps
         //still in use?
         Buffer<float4> cl_error_check;
 
-        //these are defined in sph/ folder next to the kernels
-        void loadDensity();
-        void loadPressure();
-        void loadViscosity();
-        void loadXSPH();
+        //these are defined in sph/ folder
         void loadCollision_wall();
         void loadCollision_tri();
         void loadEuler();
