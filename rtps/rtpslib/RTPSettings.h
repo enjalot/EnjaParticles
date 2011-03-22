@@ -2,11 +2,20 @@
 #define RTPS_RTPSETTINGS_H_INCLUDED
 
 #include "domain/Domain.h"
+#ifdef WIN32
+    #if defined(rtps_EXPORTS)
+        #define RTPS_EXPORT __declspec(dllexport)
+    #else
+        #define RTPS_EXPORT __declspec(dllimport)
+	#endif 
+#else
+    #define RTPS_EXPORT
+#endif
 
 namespace rtps
 {
 
-    class RTPSettings
+    class RTPS_EXPORT RTPSettings 
     {
     public:
         //decide which system to use
@@ -83,7 +92,7 @@ namespace rtps
         {
             return use_alpha_blending;
         }
-        int setUseAlphaBlending(bool use_alpha)
+        void setUseAlphaBlending(bool use_alpha)
         {
             use_alpha_blending = use_alpha;
         }
@@ -92,7 +101,7 @@ namespace rtps
         {
             return use_glsl;
         }
-        int setUseGLSL(bool use_glsl)
+        void setUseGLSL(bool use_glsl)
         {
             this->use_glsl = use_glsl;
         }

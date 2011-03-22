@@ -8,7 +8,7 @@ namespace rtps
         printf("create leapfrog kernel\n");
 
         std::string path(SPH_CL_SOURCE_DIR);
-        path += "/leapfrog_cl.cl";
+        path += "/leapfrog.cl";
         k_leapfrog = Kernel(ps->cli, path, "leapfrog");
 
         int iargs = 0;

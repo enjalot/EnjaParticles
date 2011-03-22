@@ -16,6 +16,7 @@ SET( CMAKE_MODULE_PATH
 
 message("${CMAKE_MODULE_PATH}\n")
 
+SET(RTPS_DEBUG FALSE)
 
 ###### SETTING RELATED TO GPU VS CPU IMPLEMENTATIONS ##########################
 SET(WITH_OPENCL TRUE)
@@ -60,8 +61,6 @@ set (rtpslib_INCLUDES
     ${rtpslib_SOURCE_DIR}/opencl
     ${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src
     
-    ${OpenCV_INCLUDE_DIRS}
-
 )
 
 
@@ -72,6 +71,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/util
     ${rtpslib_SOURCE_DIR}/structs
     ${rtpslib_SOURCE_DIR}/timege
+    ${rtpslib_SOURCE_DIR}/rtps_common
 
     ${rtpslib_SOURCE_DIR}/render/Render
     ${rtpslib_SOURCE_DIR}/render/SpriteRender

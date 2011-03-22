@@ -22,7 +22,7 @@ namespace rtps
         printf("create density kernel\n");
 
         std::string path(SPH_CL_SOURCE_DIR);
-        path += "/density_cl.cl";
+        path += "/density.cl";
         k_density = Kernel(ps->cli, path, "density");
 
         k_density.setArg(0, cl_position.getDevicePtr());

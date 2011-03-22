@@ -1,27 +1,10 @@
-#include "../SPH.h"
+#include "SPH.h"
 #include <math.h>
 
 
 
 namespace rtps
 {
-
-    void SPH::loadPressure()
-    {
-        printf("create pressure kernel\n");
-
-        std::string path(SPH_CL_SOURCE_DIR);
-        path += "/pressure_cl.cl";
-        k_pressure = Kernel(ps->cli, path, "pressure");
-
-        //TODO: fix the way we are wrapping buffers
-        k_pressure.setArg(0, cl_position.getDevicePtr());
-        k_pressure.setArg(1, cl_density.getDevicePtr());
-        k_pressure.setArg(2, cl_force.getDevicePtr());
-        k_pressure.setArg(3, cl_SPHParams.getDevicePtr());
-
-    } 
-
 
     float SPH::Wspiky(float4 r, float h)
     {

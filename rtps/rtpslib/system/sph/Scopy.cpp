@@ -9,7 +9,7 @@ namespace rtps
     {
         printf("create scopy kernel\n");
         std::string path(SPH_CL_SOURCE_DIR);
-        path = path + "/scopy_cl.cl";
+        path = path + "/scopy.cl";
         k_scopy = Kernel(ps->cli, path, "scopy");
 
     }

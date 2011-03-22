@@ -3,30 +3,6 @@
 namespace rtps
 {
 
-    void SPH::loadXSPH()
-    {
-        printf("create xsph kernel\n");
-
-        std::string path(SPH_CL_SOURCE_DIR);
-        path += "/xsph_cl.cl";
-        k_xsph = Kernel(ps->cli, path, "xsph");
-
-        k_xsph.setArg(0, cl_position.getDevicePtr());
-        if (integrator == LEAPFROG)
-        {
-            k_xsph.setArg(1, cl_veleval.getDevicePtr());
-        }
-        else if (integrator == EULER)
-        {
-            k_xsph.setArg(1, cl_velocity.getDevicePtr());
-        }
-        k_xsph.setArg(2, cl_density.getDevicePtr());
-        k_xsph.setArg(3, cl_force.getDevicePtr());
-        k_xsph.setArg(4, cl_xsph.getDevicePtr());
-        k_xsph.setArg(5, cl_SPHParams.getDevicePtr());
-
-    } 
-
 
     void SPH::cpuXSPH()
     {

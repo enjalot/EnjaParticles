@@ -1,6 +1,8 @@
 #ifndef RTPS_RTPS_H_INCLUDED
 #define RTPS_RTPS_H_INCLUDED
 
+#include <vector>
+
 //System API
 #include "system/System.h"
 
@@ -21,10 +23,21 @@
 //TODO should not be included here
 #include "util.h"
 
+#ifdef WIN32
+    #if defined(rtps_EXPORTS)
+        #define RTPS_EXPORT __declspec(dllexport)
+    #else
+        #define RTPS_EXPORT __declspec(dllimport)
+	#endif 
+#else
+    #define RTPS_EXPORT
+#endif
+
 namespace rtps
 {
+
+    class RTPS_EXPORT RTPS
     
-    class RTPS
     {
     public:
         //default constructor

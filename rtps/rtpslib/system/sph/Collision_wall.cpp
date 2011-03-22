@@ -8,7 +8,7 @@ namespace rtps
         printf("create collision wall kernel\n");
 
         std::string path(SPH_CL_SOURCE_DIR);
-        path += "/collision_wall_cl.cl";
+        path += "/collision_wall.cl";
         k_collision_wall = Kernel(ps->cli, path, "collision_wall");
 
         int iargs = 0;

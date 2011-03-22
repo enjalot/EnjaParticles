@@ -93,7 +93,7 @@ rtps::RTPS* ps;
 //----------------------------------------------------------------------
 float rand_float(float mn, float mx)
 {
-    float r = random() / (float) RAND_MAX;
+    float r = rand() / (float) RAND_MAX;
     return mn + (mx-mn)*r;
 }
 //----------------------------------------------------------------------
@@ -138,12 +138,14 @@ int main(int argc, char** argv)
     //rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
     rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
 
-    settings.setRadiusScale(.5);
+    settings.setRadiusScale(1.0);
     //settings.setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
     settings.setRenderType(RTPSettings::RENDER);
-    settings.setBlurScale(1);
-    settings.setUseGLSL(0);
-    settings.setUseAlphaBlending(0);    
+    //settings.setRenderType(RTPSettings::SPRITE_RENDER);
+    //settings.setRenderType((RTPSettings::RenderType)1);
+    settings.setBlurScale(1.0);
+    settings.setUseGLSL(1);
+    settings.setUseAlphaBlending(1);    
 
     ps = new rtps::RTPS(settings);
 

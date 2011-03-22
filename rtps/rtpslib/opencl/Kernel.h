@@ -15,12 +15,21 @@
 #include <stdio.h>
 
 #include "CLL.h"
+#ifdef WIN32
+    #if defined(rtps_EXPORTS)
+        #define RTPS_EXPORT __declspec(dllexport)
+    #else
+        #define RTPS_EXPORT __declspec(dllimport)
+	#endif 
+#else
+    #define RTPS_EXPORT
+#endif
 
 namespace rtps
 {
 
 
-    class Kernel
+    class RTPS_EXPORT Kernel
     {
     public:
         Kernel()

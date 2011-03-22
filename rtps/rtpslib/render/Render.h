@@ -13,11 +13,11 @@
 
 #if defined __APPLE__ || defined(MACOSX)
 //OpenGL stuff
-    #include <GLUT/glut.h>
+    //#include <GLUT/glut.h>
     #include <OpenGL/gl.h>
 #else
 //OpenGL stuff
-    #include <GL/glut.h>
+    //#include <GL/glut.h>
     #include <GL/gl.h>
 #endif
 
@@ -29,6 +29,15 @@
 #include "../opencl/CLL.h"
 #include "../opencl/Kernel.h"
 #include "../opencl/Buffer.h"
+#ifdef WIN32
+    #if defined(rtps_EXPORTS)
+        #define RTPS_EXPORT __declspec(dllexport)
+    #else
+        #define RTPS_EXPORT __declspec(dllimport)
+	#endif 
+#else
+    #define RTPS_EXPORT
+#endif
 
 namespace rtps
 {
@@ -38,7 +47,7 @@ namespace rtps
         SHADER_DEPTH=0,SHADER_CURVATURE_FLOW,SHADER_FRESNEL
     };*/
 
-    class Render
+    class RTPS_EXPORT Render
     {
     public:
         Render(GLuint pos_vbo, GLuint vel_vbo, int num, CL *cli, RTPSettings* _settings=0);

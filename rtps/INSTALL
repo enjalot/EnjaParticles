@@ -1,0 +1,50 @@
+
+
+We use CMake to build the library and compile a standalone test application
+Check CMake for library dependencies (OpenCL, OpenGL, GLEW)
+
+We encourage an out-of-source build, so in the base directory of the repo do:
+    mkdir build
+    cd build
+    cmake ..
+    make
+
+the library will be in rtpslib/
+
+if you have Doxygen you can generate docs:
+    make doc
+
+the docs will be in rtpslib/html
+
+
+
+LINUX NOTES
+
+
+
+MAC OS X NOTES
+
+
+
+WIN32 NOTES
+
+* from Andrew Young
+Install CUDA toolkit for windows. http://www.nvidia.com/object/thankyou.html?url=/compute/cuda/3_2_prod/toolkit/cudatoolkit_3.2.16_win_64.msi
+Set GPU_COMPUTING_TOOLKIT environment path to CUDA directory 
+Download and install Nvidia\u2019s code samples (this comes prepackaged with glut glew and other utility libraries) http://developer.download.nvidia.com/compute/cuda/3_2_prod/sdk/gpucomputingsdk_3.2.16_win_64.exe
+Download and install visual studio 10 express edition.
+http://go.microsoft.com/?linkid=9709949
+
+    create a build directory
+    run cmake
+        point source directory to rtps
+        point build directory to your build directory
+        press configure
+        press generate
+    
+    navigate to build directory
+    double-click on rtpssuite.sln
+    when visual studio opens right-click on test.x in the left panel
+    select build
+    navigate to build directory copy rtpslib\Debug\rtps.dll to test\Debug
+    double-click test\Debug\test.exe
