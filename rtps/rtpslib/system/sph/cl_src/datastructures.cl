@@ -57,11 +57,17 @@ __kernel void datastructures(
     //but we can't keep going if our index goes out of bounds of the number of particles
     if (index >= num) return;
 
-    if ((index == 0 || hash != sharedHash[tid]))
+    //if ((index == 0 || hash != sharedHash[tid]))
+    if (index == 0)
     {
         cell_indices_start[hash] = index; // ERROR
-        if (index > 0)
+    }
+
+    if (index > 0)
+    {
+        if(sharedHash[tid] != hash)
         {
+            cell_indices_start[hash] = index; 
             cell_indices_end[sharedHash[tid]] = index;
         }
     }
