@@ -31,8 +31,9 @@ namespace rtps
 
         int ctaSize = 128; // work group size
         // Hash based on unscaled data
+        printf("num in hash %d\n", num);
         k_hash.setArg(0, num); 
-        k_hash.execute(num, ctaSize);
+        k_hash.execute(max_num, ctaSize);
         // set cell_indicies_start to -1
         int minus = 0xffffffff;
 
@@ -40,7 +41,7 @@ namespace rtps
 
         //-------------------
         // Set cl_cell indices to -1
-        std::vector<unsigned int> cells_indices_start(grid_params.nb_cells);
+        std::vector<unsigned int> cells_indices_start(grid_params.nb_cells+1);
         std::fill(cells_indices_start.begin(), cells_indices_start.end(), minus);
         cl_cell_indices_start.copyToDevice(cells_indices_start);
 

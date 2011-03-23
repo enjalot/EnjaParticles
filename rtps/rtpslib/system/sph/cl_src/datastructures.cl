@@ -26,15 +26,16 @@ __kernel void datastructures(
     int num = sphp->num;
     //int num = get_global_size(0);
     //if (index >= num) return;
+    uint ncells = gp->nb_cells;
 
     uint hash = sort_hashes[index];
 
     //don't want to write to cell_indices arrays if hash is out of bounds
-    if( hash > gp->nb_cells)
+    if( hash > ncells)
     {
         return;
     }
-
+#if 1
     // Load hash data into shared memory so that we can look 
     // at neighboring particle's hash value without loading
     // two hash values per thread	
@@ -48,7 +49,9 @@ __kernel void datastructures(
     if (index > 0 && tid == 0)
     {
         // first thread in block must load neighbor particle hash
-        sharedHash[0] = sort_hashes[index-1];
+        uint hashm1 = sort_hashes[index-1] < ncells ? sort_hashes[index-1] : ncells;
+        sharedHash[0] = hashm1;
+        //sharedHash[0] = sort_hashes[index-1];
         /*
         if(hash >= gp->nb_cells-1) //if particles go out of bounds, delete them
         {
@@ -125,6 +128,8 @@ __kernel void datastructures(
 #endif
 
 
+    //if(hash < gp->nb_cells)
+    //{
     //if ((index == 0 || hash != sharedHash[tid]))
     if (index == 0)
     {
@@ -141,24 +146,30 @@ __kernel void datastructures(
     }
     //return;
 
-    //if (index == numParticles - 1) {
     if (index == num - 1)
     {
         cell_indices_end[hash] = index + 1;
     }
-
-    if (hash == gp->nb_cells)
+    //}
+    
+    //barrier(CLK_LOCAL_MEM_FENCE);
+    //barrier(CLK_GLOBAL_MEM_FENCE);
+    /*
+    //if (hash == gp->nb_cells)
     {
-        int ii = 4095;
+        int ii = 1;
         cell_indices_start[ii] = 999;//cell_indices_end[4096];
         cell_indices_end[ii] = 888;//cell_indices_end[4096];
 
         cell_indices_start[ii+1] = 999;//cell_indices_end[4096];
         cell_indices_end[ii+1] = 888;//cell_indices_end[4096];
-    }
-    // particle index	
-    //if (index >= num) return;
 
+        cell_indices_start[ii-1] = 999;//cell_indices_end[4096];
+        cell_indices_end[ii-1] = 888;//cell_indices_end[4096];
+
+    }
+    */
+#endif
     
     //cell_indices_end[index] = 42;
     uint sorted_index = sort_indices[index];

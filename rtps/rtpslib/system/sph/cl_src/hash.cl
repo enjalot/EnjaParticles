@@ -39,7 +39,7 @@ __kernel void hash(
     // particle index
     uint index = get_global_id(0);
     //int num = get_global_size(0);
-    if (index >= num) return;
+    //if (index >= num) return; //hash everything
 
     // initialize to -1 (used in kernel datastructures in build_datastructures_wrap.cpp
     //int grid_size = (int) (gp->grid_res.x*gp->grid_res.y*gp->grid_res.z);
@@ -57,7 +57,13 @@ __kernel void hash(
     uint hash = (uint) calcGridHash(gridPos, gp->grid_res, wrap_edges);//, fdebug, idebug);
 
     hash = hash > gp->nb_cells ? gp->nb_cells : hash;
-
+    /*
+       //problem is that when we cut num we are hashing the wrong stuff?
+    if (index >= num)
+    {
+        hash = gp->nb_cells;
+    }
+    */
     // store grid hash and particle index
     sort_hashes[index] = hash;
     //int pp = (int) p.x;

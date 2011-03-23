@@ -77,34 +77,39 @@ namespace rtps
 
         ps->cli->queue.finish();
 
+        std::vector<unsigned int> num_changed(1);
+        cl_cell_indices_start.copyToHost(num_changed, grid_params.nb_cells);
         /*
-        cl_num_changed.copyToHost(num_changed);
         for(int i = 0; i < num; i++)
         {
             printf("nc[%d] = %d\n", i, num_changed[i]);
         }
+        */
         int nc = num_changed[0];
         printf("Num Changed: %d\n", nc);
         
-        if(num != 0 && num != 20)
-        { 
-            printf("QUITER!\n");
-            exit(0);}
-
+        
         if (nc < num && nc > 0)
         //if(num > 0)
         {
             //sphp.num = nc-1;
             //num = 10;
             //seems like hashes are getting messed up
-            //num = nc-1;
+            //probably because we are hashing on unsorted particles, cutting off only works on sorted
+            //num = 10;
+            //num = nc;
             sphp.num = num;
             updateSPHP();
             renderer->setNum(sphp.num);
         }
-        */
 
         printDataStructuresDiagnostics();
+
+        if (num > 0)
+        {
+            //exit(0);
+        }
+
 
 #if 0
     //printouts
@@ -173,7 +178,7 @@ namespace rtps
     void SPH::printDataStructuresDiagnostics()
     {
         printf("**************** DataStructures Diagnostics ****************\n");
-        int nbc = grid_params.nb_cells;
+        int nbc = grid_params.nb_cells + 1;
         printf("nb_cells: %d\n", nbc);
 
         std::vector<unsigned int> is(nbc);
@@ -183,7 +188,7 @@ namespace rtps
         cl_cell_indices_start.copyToHost(is);
 
 
-        for(int i = 0; i < nbc+1; i++)
+        for(int i = 0; i < nbc; i++)
         {
             if (is[i] != -1)// && ie[i] != 0)
             {

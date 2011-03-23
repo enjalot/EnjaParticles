@@ -256,7 +256,7 @@ void appKeyboard(unsigned char key, int x, int y)
         case 'r': //drop a rectangle
             {
                 nn = 20;
-                min = float4(5.9, 5.9, 5.9, 1.0f);
+                min = float4(5.7, 5.7, 5.7, 1.0f);
                 max = float4(6.5, 6.5, 6.5, 1.0f);
 
                 //min = float4(15.8, 15.8, 15.8, 1.0f);

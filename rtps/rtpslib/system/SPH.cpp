@@ -460,7 +460,7 @@ namespace rtps
         // occupied cells could be much less than the number of grid elements.
         std::vector<unsigned int> gcells(grid_params.nb_cells+1);
         int minus = 0xffffffff;
-        std::fill(gcells.begin(), gcells.end(), 0);
+        std::fill(gcells.begin(), gcells.end(), 666);
 
         cl_cell_indices_start = Buffer<unsigned int>(ps->cli, gcells);
         cl_cell_indices_end   = Buffer<unsigned int>(ps->cli, gcells);
