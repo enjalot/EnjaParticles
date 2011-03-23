@@ -56,19 +56,24 @@ namespace rtps
         scopy(num, cl_sort_output_indices.getDevicePtr(), 
               cl_sort_indices.getDevicePtr());
 
-        /*
+#if 1
         ps->cli->queue.finish();
     
-        sh = cl_sort_hashes.copyToHost(nbc);
-        eci = cl_cell_indices_end.copyToHost(nbc);
+        int nbc = 20;
+        //sh = cl_sort_hashes.copyToHost(nbc);
+        //eci = cl_cell_indices_end.copyToHost(nbc);
+        std::vector<int> sh = cl_sort_hashes.copyToHost(nbc);
+        std::vector<int> eci = cl_cell_indices_end.copyToHost(nbc);
+    
+
     
         for(int i = 0; i < nbc; i++)
         {
             printf("after[%d] %d eci: %d\n; ", i, sh[i], eci[i]);
         }
         printf("\n");
-        */
 
+#endif
 
 
     }

@@ -49,7 +49,10 @@ namespace rtps
         //sset(gp->nb_points, minus, cl_cell_indices_start->getDevicePtr());
         //exit(0);   // SOMETHING WRONG with sset!!! WHY? 
 
-        //printHashDiagnostics();
+        if(num > 0)
+        {
+            printHashDiagnostics();
+        }
 
 #if 0
         GridParams& gp = *cl_GridParams->getHostPtr();
@@ -86,11 +89,11 @@ namespace rtps
         //cli_debug->copyToHost();
 
         //for (int i=0; i < num; i++) {  
-        for (int i=0; i < 10; i++)
+        for (int i=0; i < 20; i++)
         {
             printf(" cl_sort_hash[%d] %u, cl_sort_indices[%d]: %u\n", i, sh[i], i, si[i]);
-            printf("cli_debug: %d, %d, %d, %d\n", cli[i].x, cli[i].y, cli[i].z, cli[i].w);
-            printf("clf_debug: %f, %f, %f, %f\n", clf[i].x, clf[i].y, clf[i].z, clf[i].w);
+            //printf("cli_debug: %d, %d, %d, %d\n", cli[i].x, cli[i].y, cli[i].z, cli[i].w);
+            //printf("clf_debug: %f, %f, %f, %f\n", clf[i].x, clf[i].y, clf[i].z, clf[i].w);
             printf("-----\n");
 
 #if 0

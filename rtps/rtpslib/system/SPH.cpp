@@ -185,25 +185,25 @@ namespace rtps
             k_viscosity.execute(num);
             k_xsph.execute(num);
             */
-            //printf("hash\n");
+            printf("hash\n");
             timers[TI_HASH]->start();
             hash();
             timers[TI_HASH]->end();
-            //printf("bitonic_sort\n");
+            printf("bitonic_sort\n");
             timers[TI_BITONIC_SORT]->start();
             bitonic_sort();
             timers[TI_BITONIC_SORT]->end();
-            //printf("data structures\n");
+            printf("data structures\n");
             timers[TI_BUILD]->start();
             buildDataStructures(); //reorder
             timers[TI_BUILD]->end();
 
             timers[TI_NEIGH]->start();
-            //printf("density\n");
+            printf("density\n");
             timers[TI_DENS]->start();
             neighborSearch(0);  //density
             timers[TI_DENS]->end();
-            //printf("forces\n");
+            printf("forces\n");
             timers[TI_FORCE]->start();
             neighborSearch(1);  //forces
             timers[TI_FORCE]->end();
@@ -519,7 +519,7 @@ namespace rtps
         //grid_params_scaled.grid_inv_delta.w = 1.0f;
 
         //grid_params.print();
-        //grid_params_scaled.print();
+        grid_params_scaled.print();
 
     }
 

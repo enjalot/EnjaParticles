@@ -36,11 +36,12 @@ class Domain(object):
                             self.res.y / self.size.y,
                             self.res.z / self.size.z ])
 
+        self.nb_cells = int(self.res.x * self.res.y * self.res.z)
 
        
-    def calc_pos(self, v):
-        """Calculate the grid position from a vertex"""
-        vv  = (v - self.grid_min)*self.grid_delta
+    def calc_cell(self, v):
+        """Calculate the grid cell from a vertex"""
+        vv  = (v - self.min)*self.delta
 
         ii = Vec([0,0,0])
         ii.x = int(vv.x)
@@ -48,16 +49,37 @@ class Domain(object):
         ii.z = int(vv.z)
         return ii
 
-    def calc_cell(self, p):
-        """Calculate the grid cell from a grid position"""
+    def calc_hash(self, p):
+        """Calculate the grid hash from a grid position"""
         #tODO: wrapEdges boolean
         gx = p.x
         gy = p.y
         gz = p.z
-        return (gz*grid_res.y + gy) * self.grid_res.x + gx; 
+        return (gz*self.res.y + gy) * self.res.x + gx; 
 
 
     def draw(self):
         """draw the lines of the grid"""
         pass
+
+    def __str__(self):
+        s = "min: %s\n" % self.min
+        s += "max: %s\n" % self.max
+        s += "bnd min: %s\n" % self.bnd_min
+        s += "bnd max: %s\n" % self.bnd_max
+        s += "size: %s\n" % self.size
+        s += "res: %s\n" % self.res
+        s += "delta: %s\n" % self.delta
+        s += "number of cells: %s\n" % self.nb_cells
+        return s
+
+if __name__ == "__main__":
+
+    #doing some testing on hashing out of bounds
+    dmin = Vec([0,0,0])
+    dmax = Vec([5,5,5])
+    domain = Domain(dmin, dmax)
+
+
+
 

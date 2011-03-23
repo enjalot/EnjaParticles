@@ -218,7 +218,10 @@ namespace rtps
         Buffer<GridParams>  cl_GridParamsScaled;
 
         //index neighbors. Maximum of 50
-        Buffer<int>         cl_index_neigh;
+        //Buffer<int>         cl_index_neigh;
+
+        //for keeping up with deleted particles
+        Buffer<unsigned int> cl_num_changed;
 
         Buffer<float4>      clf_debug;  //just for debugging cl files
         Buffer<int4>        cli_debug;  //just for debugging cl files

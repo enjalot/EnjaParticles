@@ -14,6 +14,10 @@ namespace rtps
         //k_datastructures = Kernel(ps->cli, path, filepath, "datastructures");
         k_datastructures = Kernel(ps->cli, path, "datastructures");
 
+        std::vector<unsigned int> num_changed(1);
+        num_changed[0] = 0;
+        cl_num_changed = Buffer<unsigned int>(ps->cli, num_changed);
+
         int iarg = 0;
         k_datastructures.setArg(iarg++, cl_vars_unsorted.getDevicePtr());
         k_datastructures.setArg(iarg++, cl_vars_sorted.getDevicePtr());
@@ -21,8 +25,9 @@ namespace rtps
         k_datastructures.setArg(iarg++, cl_sort_indices.getDevicePtr());
         k_datastructures.setArg(iarg++, cl_cell_indices_start.getDevicePtr());
         k_datastructures.setArg(iarg++, cl_cell_indices_end.getDevicePtr());
+        k_datastructures.setArg(iarg++, cl_num_changed.getDevicePtr());
         k_datastructures.setArg(iarg++, cl_SPHParams.getDevicePtr());
-        //k_datastructures.setArg(iarg++, cl_GridParamsScaled->getDevicePtr());
+        k_datastructures.setArg(iarg++, cl_GridParamsScaled.getDevicePtr());
 
         int workSize = 64;
         int nb_bytes = (workSize+1)*sizeof(int);
@@ -47,6 +52,9 @@ namespace rtps
         printf("\n");
         */
 
+        std::vector<unsigned int> num_changed(1);
+        num_changed[0] = 0;
+        cl_num_changed.copyToDevice(num_changed);
 
         //printf("about to data structures\n");
         int workSize = 64; // work group size
@@ -60,6 +68,16 @@ namespace rtps
         }
 
         ps->cli->queue.finish();
+
+        cl_num_changed.copyToHost(num_changed);
+        int nc = num_changed[0];
+        printf("Num Changed: %d\n", nc);
+        if (nc < num && nc > 0)
+        {
+            sphp.num = nc;
+            updateSPHP();
+            renderer->setNum(sphp.num);
+        }
 
 #if 0
     //printouts

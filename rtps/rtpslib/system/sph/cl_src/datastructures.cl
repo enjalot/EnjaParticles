@@ -7,6 +7,7 @@
 #include "cl_macros.h"
 #include "cl_structs.h"
 
+#pragma cl_khr_global_int32_base_atomics : enable
 //----------------------------------------------------------------------
 __kernel void datastructures(
                             __global float4*   vars_unsorted,
@@ -15,8 +16,9 @@ __kernel void datastructures(
                             __global uint* sort_indices,
                             __global uint* cell_indices_start,
                             __global uint* cell_indices_end,
+                            __global uint* num_changed,
                             __constant struct SPHParams* sphp,
-                            //__constant struct GridParams* gp,
+                            __constant struct GridParams* gp,
                             __local  uint* sharedHash   // blockSize+1 elements
                             )
 {
@@ -41,6 +43,16 @@ __kernel void datastructures(
     {
         // first thread in block must load neighbor particle hash
         sharedHash[0] = sort_hashes[index-1];
+        if(hash >= gp->nb_cells-1) //if particles go out of bounds, delete them
+        {
+            //cell_indices_end[gp->nb_cells - 2] = index + 1; //make sure last cell index is right // this is totally confused
+            if(num_changed[0] == 0)
+            {
+                num_changed[0] = index; //new number of particles to use
+                num = index;
+            }
+        }
+
     }
 
 #ifndef __DEVICE_EMULATION__
@@ -56,6 +68,22 @@ __kernel void datastructures(
     //Having this check here is important! Can't quit before local threads are done
     //but we can't keep going if our index goes out of bounds of the number of particles
     if (index >= num) return;
+
+    //if(tid == 0)
+    //{
+    //hmm this needs to be done for all local threads? or atomically?
+    //threads must be contending, last thread does this
+    /*
+        if(hash >= gp->nb_cells-1) //if particles go out of bounds, delete them
+        {
+            //cell_indices_end[gp->nb_cells - 2] = index + 1; //make sure last cell index is right // this is totally confused
+            num_changed[0] = index; //new number of particles to use
+            return;
+        }
+        */
+    //}
+
+
 
     //if ((index == 0 || hash != sharedHash[tid]))
     if (index == 0)
