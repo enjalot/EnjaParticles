@@ -91,15 +91,15 @@ namespace rtps
 #if 1 //printouts    
         //DEBUGING
         
-        if(num > 0)
+        if(num > 0 && choice == 0)
         {
             printf("============================================\n");
             printf("which == %d *** \n", choice);
             printf("***** PRINT neighbors diagnostics ******\n");
             printf("num %d\n", num);
 
-            std::vector<int4> cli;
-            std::vector<float4> clf;
+            std::vector<int4> cli(num);
+            std::vector<float4> clf(num);
             
             cli_debug.copyToHost(cli);
             clf_debug.copyToHost(clf);
@@ -111,8 +111,8 @@ namespace rtps
 #define POS 1
 #define VEL 2
 
-            cl_vars_sorted.copyToHost(dens);
-            cl_vars_sorted.copyToHost(poss,num);
+            cl_vars_sorted.copyToHost(dens, DENS*num);
+            cl_vars_sorted.copyToHost(poss, POS*num);
 
 
             for (int i=0; i < num; i++)

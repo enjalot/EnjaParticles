@@ -51,6 +51,7 @@ inline void ForNeighbor(__global float4*  vars_sorted,
 
             float Wij = Wpoly6(r, sphp->smoothing_distance, sphp);
             pt->density.x += sphp->mass*Wij;
+            pt->density.y += 1;
 
         }
 
@@ -125,7 +126,7 @@ __kernel void neighbors(
     {
         IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
         density(index) = sphp->wpoly6_coef * pt.density.x;
-        clf[index].x = pt.density.x;
+        clf[index].x = pt.density.x * sphp->wpoly6_coef;
         clf[index].y = pt.density.y;
         clf[index].z = sphp->smoothing_distance;
         clf[index].w = sphp->mass;
