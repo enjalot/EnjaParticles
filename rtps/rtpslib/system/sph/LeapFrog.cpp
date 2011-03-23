@@ -38,6 +38,33 @@ namespace rtps
         int local_size = 128;
         k_leapfrog.execute(num, local_size);
 
+
+#if 1
+#define DENS 0
+#define POS 1
+#define VEL 2
+
+        printf("************ LeapFrog **************");
+            int nbc = num+5;
+            std::vector<float4> poss(nbc);
+            std::vector<float4> dens(nbc);
+
+            cl_vars_sorted.copyToHost(dens, DENS*nbc);
+            cl_vars_sorted.copyToHost(poss, POS*nbc);
+
+            for (int i=0; i < nbc; i++)
+            //for (int i=0; i < 10; i++) 
+            {
+                //printf("-----\n");
+                //printf("clf_debug: %f, %f, %f, %f\n", clf[i].x, clf[i].y, clf[i].z, clf[i].w);
+                printf("pos sorted: %f, %f, %f, %f\n", poss[i].x, poss[i].y, poss[i].z, poss[i].w);
+                printf("dens sorted: %f, %f, %f, %f\n", dens[i].x, dens[i].y, dens[i].z, dens[i].w);
+            }
+
+#endif
+
+
+
     }
 
     void SPH::cpuLeapFrog()

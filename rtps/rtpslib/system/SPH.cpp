@@ -381,6 +381,11 @@ namespace rtps
 
         //for reading back different values from the kernel
         std::vector<float4> error_check(max_num);
+        
+        float4 pmax = grid_params.grid_max + grid_params.grid_size;
+        //std::fill(positions.begin(), positions.end(), pmax);
+
+
 
         std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 1.0f, 0.0f));
         std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -441,8 +446,12 @@ namespace rtps
         std::vector<float4> unsorted(max_num*nb_var);
         std::vector<float4> sorted(max_num*nb_var);
 
-        std::fill(unsorted.begin(), unsorted.end(),float4(0.0f, 0.0f, 0.0f, 1.0f));
-        std::fill(sorted.begin(), sorted.end(),float4(0.0f, 0.0f, 0.0f, 1.0f));
+        //std::fill(unsorted.begin(), unsorted.end(),float4(0.0f, 0.0f, 0.0f, 1.0f));
+        //std::fill(sorted.begin(), sorted.end(),float4(0.0f, 0.0f, 0.0f, 1.0f));
+        std::fill(unsorted.begin(), unsorted.end(), pmax);
+        std::fill(sorted.begin(), sorted.end(), pmax);
+
+
 
         cl_vars_unsorted = Buffer<float4>(ps->cli, unsorted);
         cl_vars_sorted = Buffer<float4>(ps->cli, sorted);
