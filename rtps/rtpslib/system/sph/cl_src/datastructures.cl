@@ -149,7 +149,12 @@ __kernel void datastructures(
 
     if (hash == gp->nb_cells)
     {
-        cell_indices_start[4096] = 999;//cell_indices_end[4096];
+        int ii = 4095;
+        cell_indices_start[ii] = 999;//cell_indices_end[4096];
+        cell_indices_end[ii] = 888;//cell_indices_end[4096];
+
+        cell_indices_start[ii+1] = 999;//cell_indices_end[4096];
+        cell_indices_end[ii+1] = 888;//cell_indices_end[4096];
     }
     // particle index	
     //if (index >= num) return;

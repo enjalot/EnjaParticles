@@ -174,6 +174,7 @@ namespace rtps
     {
         printf("**************** DataStructures Diagnostics ****************\n");
         int nbc = grid_params.nb_cells;
+        printf("nb_cells: %d\n", nbc);
 
         std::vector<unsigned int> is(nbc);
         std::vector<unsigned int> ie(nbc);
