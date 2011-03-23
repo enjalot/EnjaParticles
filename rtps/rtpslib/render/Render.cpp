@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <GL/glew.h>
+
 #include "Render.h"
 #include "util.h"
 #include "stb_image.h" 

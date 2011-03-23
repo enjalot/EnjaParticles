@@ -1,3 +1,6 @@
+
+#include "GL/glew.h"
+
 #include "SpriteRender.h"
 
 using namespace std;
