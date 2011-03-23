@@ -8,7 +8,7 @@ void FLOCK::loadPrep()
 {
     printf("create prep kernel\n");
     std::string path(FLOCK_CL_SOURCE_DIR);
-	path = path + "/prep_cl.cl";
+	path = path + "/prep.cl";
     k_prep = Kernel(ps->cli, path, "prep");
 
     int args = 0;

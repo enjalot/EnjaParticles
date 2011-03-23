@@ -8,7 +8,7 @@ void FLOCK::loadDataStructures()
 {
     printf("create datastructures kernel\n");
     std::string path(FLOCK_CL_SOURCE_DIR);
-	path = path + "/datastructures_cl.cl";
+	path = path + "/datastructures.cl";
     k_datastructures = Kernel(ps->cli, path, "datastructures");
 
     int iarg = 0;

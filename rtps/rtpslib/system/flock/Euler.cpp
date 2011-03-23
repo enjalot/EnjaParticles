@@ -12,7 +12,7 @@ void FLOCK::loadEuler()
     printf("create euler kernel\n");
 
     std::string path(FLOCK_CL_SOURCE_DIR);
-    path += "/euler_cl.cl";
+    path += "/euler.cl";
     k_euler = Kernel(ps->cli, path, "euler");
   
     int iargs = 0;

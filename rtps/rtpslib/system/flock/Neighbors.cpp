@@ -12,7 +12,7 @@ void FLOCK::loadNeighbors()
 {
     try {
         string path(FLOCK_CL_SOURCE_DIR);
-        path = path + "/neighbors_cl.cl";
+        path = path + "/neighbors.cl";
         k_neighbors = Kernel(ps->cli, path, "neighbors");
         //printf("bigger problem\n");
     } catch(cl::Error er) {

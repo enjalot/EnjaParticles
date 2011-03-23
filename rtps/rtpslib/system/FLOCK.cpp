@@ -51,6 +51,9 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     //setup the sorted and unsorted arrays
     prepareSorted();
 
+    std::string cl_includes(FLOCK_CL_SOURCE_DIR);
+    ps->cli->setIncludeDir(cl_includes);
+
 #ifdef CPU
     printf("RUNNING ON THE CPU\n");
 #endif
@@ -504,7 +507,7 @@ void FLOCK::calculateFLOCKSettings()
 
 void FLOCK::prepareSorted()
 {
-    #include "flock/cl_macros.h"
+    #include "flock/cl_src/cl_macros.h"
     
     //for reading back different values from the kernel
     std::vector<float4> error_check(max_num);

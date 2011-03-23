@@ -8,7 +8,7 @@ void FLOCK::loadScopy()
 {
     printf("create scopy kernel\n");
     std::string path(FLOCK_CL_SOURCE_DIR);
-	path = path + "/scopy_cl.cl";
+	path = path + "/scopy.cl";
     k_scopy = Kernel(ps->cli, path, "scopy");
 
 }
