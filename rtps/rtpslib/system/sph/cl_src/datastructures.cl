@@ -43,15 +43,18 @@ __kernel void datastructures(
     {
         // first thread in block must load neighbor particle hash
         sharedHash[0] = sort_hashes[index-1];
+        /*
         if(hash >= gp->nb_cells-1) //if particles go out of bounds, delete them
         {
             //cell_indices_end[gp->nb_cells - 2] = index + 1; //make sure last cell index is right // this is totally confused
             if(num_changed[0] == 0)
             {
                 num_changed[0] = index; //new number of particles to use
-                num = index;
+                //num = index;
+                return;
             }
         }
+        */
 
     }
 
@@ -73,16 +76,47 @@ __kernel void datastructures(
     //{
     //hmm this needs to be done for all local threads? or atomically?
     //threads must be contending, last thread does this
-    /*
-        if(hash >= gp->nb_cells-1) //if particles go out of bounds, delete them
+    
+#if 1
+    //DIRTY DIRTY CODE
+    //is being tired an excuse?
+    if(hash >= gp->nb_cells-1) //if particles go out of bounds, delete them
+    //if(sharedHash[tid] >= gp->nb_cells-1) //if particles go out of bounds, delete them
+    //if(hash >= gp->nb_cells-1) //if particles go out of bounds, delete them
+    {
+        //cell_indices_end[gp->nb_cells - 2] = index + 1; //make sure last cell index is right // this is totally confused
+        //if(num_changed[0] == 0)
         {
-            //cell_indices_end[gp->nb_cells - 2] = index + 1; //make sure last cell index is right // this is totally confused
-            num_changed[0] = index; //new number of particles to use
-            return;
+            num_changed[index] = index; //new number of particles to use
+            //num_changed[sort_indices[index]] = 1; //new number of particles to use
+            //return;
         }
-        */
-    //}
+    }
+    barrier(CLK_GLOBAL_MEM_FENCE);
+    if(tid == 0)
+    {
+        for(int j = 0; j < num; j++)
+        {
+            if(num_changed[j] > 0)
+            {
+                num_changed[0] = j;
+                break;
+            }
+        }
+    }
+    barrier(CLK_GLOBAL_MEM_FENCE);
 
+    //some kind of problem with setting the cell indices and starts if this triggers
+    //cutting num down seems to work fine unless this happens implying this is the problem
+    //maybe not, still broken with this commented out
+
+    //if(index > num_changed[0] && num_changed[0] > 0)
+    //{    return;    }
+
+
+
+    //}
+#endif
 
 
     //if ((index == 0 || hash != sharedHash[tid]))
@@ -109,6 +143,7 @@ __kernel void datastructures(
     // particle index	
     //if (index >= num) return;
 
+    
     //cell_indices_end[index] = 42;
     uint sorted_index = sort_indices[index];
     //uint sorted_index = index;

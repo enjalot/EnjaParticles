@@ -63,13 +63,14 @@ namespace rtps
         //sh = cl_sort_hashes.copyToHost(nbc);
         //eci = cl_cell_indices_end.copyToHost(nbc);
         std::vector<int> sh = cl_sort_hashes.copyToHost(nbc);
-        std::vector<int> eci = cl_cell_indices_end.copyToHost(nbc);
-    
+        std::vector<int> si = cl_sort_indices.copyToHost(nbc);
+        //std::vector<int> eci = cl_cell_indices_end.copyToHost(nbc);
 
     
         for(int i = 0; i < nbc; i++)
         {
-            printf("after[%d] %d eci: %d\n; ", i, sh[i], eci[i]);
+            //printf("after[%d] %d eci: %d\n; ", i, sh[i], eci[i]);
+            printf("sh[%d] %d si: %d\n; ", i, sh[i], si[i]);
         }
         printf("\n");
 

@@ -14,7 +14,8 @@ namespace rtps
         //k_datastructures = Kernel(ps->cli, path, filepath, "datastructures");
         k_datastructures = Kernel(ps->cli, path, "datastructures");
 
-        std::vector<unsigned int> num_changed(1);
+        std::vector<unsigned int> num_changed(20);
+        std::fill(num_changed.begin(), num_changed.end(), 0);
         num_changed[0] = 0;
         cl_num_changed = Buffer<unsigned int>(ps->cli, num_changed);
 
@@ -52,7 +53,10 @@ namespace rtps
         printf("\n");
         */
 
-        std::vector<unsigned int> num_changed(1);
+        //std::vector<unsigned int> num_changed(1);
+        std::vector<unsigned int> num_changed(20);
+        std::fill(num_changed.begin(), num_changed.end(), 0);
+
         num_changed[0] = 0;
         cl_num_changed.copyToDevice(num_changed);
 
@@ -70,11 +74,23 @@ namespace rtps
         ps->cli->queue.finish();
 
         cl_num_changed.copyToHost(num_changed);
+        for(int i = 0; i < num; i++)
+        {
+            printf("nc[%d] = %d\n", i, num_changed[i]);
+        }
         int nc = num_changed[0];
         printf("Num Changed: %d\n", nc);
+        
+        //if(num != 0 && num != 20){ exit(0);}
+
         if (nc < num && nc > 0)
+        //if(num > 0)
         {
-            sphp.num = nc;
+            //sphp.num = nc-1;
+            //num = 10;
+            //seems like hashes are getting messed up
+            //num = nc-1;
+            sphp.num = num;
             updateSPHP();
             renderer->setNum(sphp.num);
         }

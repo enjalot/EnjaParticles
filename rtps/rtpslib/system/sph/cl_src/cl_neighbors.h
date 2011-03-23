@@ -37,6 +37,12 @@ void IterateParticlesInCell(
 {
     // get hash (of position) of current cell
     uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
+    
+    //need to check cellHash to make sure its not out of bounds?
+    if(cellHash >= gp->nb_cells)
+    {
+        return;
+    }
 
     /* get start/end positions for this cell/bucket */
     uint startIndex = FETCH(cell_indexes_start,cellHash);
@@ -84,6 +90,7 @@ void IterateParticlesInNearbyCells(
 
     // iterate through the 3^3 cells in and around the given position
     // can't unroll these loops, they are not innermost 
+    //TODO bug in that we don't take into account cells on edge of grid!
     for (int z=cell.z-1; z<=cell.z+1; ++z)
     {
         for (int y=cell.y-1; y<=cell.y+1; ++y)
