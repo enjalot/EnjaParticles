@@ -50,6 +50,7 @@ if __name__ == "__main__":
     print_hash(domain, v)
 
     print "out of negative bounds"
+    #these are not accurate because hash should be unsigned int
     v = Vec([-1., -1., -1.])
     print_hash(domain, v)
 

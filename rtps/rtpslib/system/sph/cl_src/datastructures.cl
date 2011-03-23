@@ -16,7 +16,7 @@ __kernel void datastructures(
                             __global uint* sort_indices,
                             __global uint* cell_indices_start,
                             __global uint* cell_indices_end,
-                            __global uint* num_changed,
+//                            __global uint* num_changed,
                             __constant struct SPHParams* sphp,
                             __constant struct GridParams* gp,
                             __local  uint* sharedHash   // blockSize+1 elements
@@ -28,6 +28,12 @@ __kernel void datastructures(
     //if (index >= num) return;
 
     uint hash = sort_hashes[index];
+
+    //don't want to write to cell_indices arrays if hash is out of bounds
+    if( hash > gp->nb_cells)
+    {
+        return;
+    }
 
     // Load hash data into shared memory so that we can look 
     // at neighboring particle's hash value without loading
@@ -77,7 +83,7 @@ __kernel void datastructures(
     //hmm this needs to be done for all local threads? or atomically?
     //threads must be contending, last thread does this
     
-#if 1
+#if 0
     //DIRTY DIRTY CODE
     //is being tired an excuse?
     if(hash >= gp->nb_cells-1) //if particles go out of bounds, delete them
@@ -122,7 +128,7 @@ __kernel void datastructures(
     //if ((index == 0 || hash != sharedHash[tid]))
     if (index == 0)
     {
-        cell_indices_start[hash] = index; // ERROR
+        cell_indices_start[hash] = index;
     }
 
     if (index > 0)

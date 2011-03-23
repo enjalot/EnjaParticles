@@ -14,10 +14,12 @@ namespace rtps
         //k_datastructures = Kernel(ps->cli, path, filepath, "datastructures");
         k_datastructures = Kernel(ps->cli, path, "datastructures");
 
+        /*
         std::vector<unsigned int> num_changed(20);
         std::fill(num_changed.begin(), num_changed.end(), 0);
         num_changed[0] = 0;
         cl_num_changed = Buffer<unsigned int>(ps->cli, num_changed);
+        */
 
         int iarg = 0;
         k_datastructures.setArg(iarg++, cl_vars_unsorted.getDevicePtr());
@@ -26,7 +28,7 @@ namespace rtps
         k_datastructures.setArg(iarg++, cl_sort_indices.getDevicePtr());
         k_datastructures.setArg(iarg++, cl_cell_indices_start.getDevicePtr());
         k_datastructures.setArg(iarg++, cl_cell_indices_end.getDevicePtr());
-        k_datastructures.setArg(iarg++, cl_num_changed.getDevicePtr());
+        //k_datastructures.setArg(iarg++, cl_num_changed.getDevicePtr());
         k_datastructures.setArg(iarg++, cl_SPHParams.getDevicePtr());
         k_datastructures.setArg(iarg++, cl_GridParamsScaled.getDevicePtr());
 
@@ -53,12 +55,14 @@ namespace rtps
         printf("\n");
         */
 
+        /*
         //std::vector<unsigned int> num_changed(1);
         std::vector<unsigned int> num_changed(20);
         std::fill(num_changed.begin(), num_changed.end(), 0);
 
         num_changed[0] = 0;
         cl_num_changed.copyToDevice(num_changed);
+        */
 
         //printf("about to data structures\n");
         int workSize = 64; // work group size
@@ -73,6 +77,7 @@ namespace rtps
 
         ps->cli->queue.finish();
 
+        /*
         cl_num_changed.copyToHost(num_changed);
         for(int i = 0; i < num; i++)
         {
@@ -97,6 +102,7 @@ namespace rtps
             updateSPHP();
             renderer->setNum(sphp.num);
         }
+        */
 
         printDataStructuresDiagnostics();
 
@@ -166,7 +172,7 @@ namespace rtps
 
     void SPH::printDataStructuresDiagnostics()
     {
-        printf("DataStructures Diagnostics\n");
+        printf("**************** DataStructures Diagnostics ****************\n");
         int nbc = grid_params.nb_cells;
 
         std::vector<int> is(nbc);
