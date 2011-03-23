@@ -115,8 +115,8 @@ set (rtpslib_SOURCES
 	# FLOCK
     ${rtpslib_SOURCE_DIR}/system/FLOCK.cpp
     ${rtpslib_SOURCE_DIR}/system/flock/Euler
-    #    ${rtpslib_SOURCE_DIR}/system/flock/LeapFrog
-    #${rtpslib_SOURCE_DIR}/system/flock/Density
+    #${rtpslib_SOURCE_DIR}/system/flock/LeapFrog
+    ${rtpslib_SOURCE_DIR}/system/flock/Density
     #${rtpslib_SOURCE_DIR}/system/flock/Pressure
     #${rtpslib_SOURCE_DIR}/system/flock/Viscosity
     #${rtpslib_SOURCE_DIR}/system/flock/XFLOCK
@@ -126,6 +126,7 @@ set (rtpslib_SOURCES
     # Added by GE
     ${rtpslib_SOURCE_DIR}/system/boids
     
+    # neighbors
     ${rtpslib_SOURCE_DIR}/system/flock/Prep
     ${rtpslib_SOURCE_DIR}/system/flock/Hash
     ${rtpslib_SOURCE_DIR}/system/flock/BitonicSort
