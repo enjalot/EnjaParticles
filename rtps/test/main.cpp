@@ -31,8 +31,8 @@ float translate_y = 0.f;//-200.0f;//300.f;
 float translate_z = 1.5f;//200.f;
 */
 float translate_x = -2.00f;
-float translate_y = -3.00f;//300.f;
-float translate_z = 3.00f;
+float translate_y = -2.70f;//300.f;
+float translate_z = 3.50f;
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -262,8 +262,8 @@ void appKeyboard(unsigned char key, int x, int y)
                 //min = float4(15.8, 15.8, 15.8, 1.0f);
                 //max = float4(16.5, 16.5, 16.5, 1.0f);
 
-                //min = float4(.2, .2, .2, 1.0f);
-                //max = float4(2., 2., 2., 1.0f);
+                min = float4(1.2, 1.2, 1.2, 1.0f);
+                max = float4(2., 2., 2., 1.0f);
                 ps->system->addBox(nn, min, max, false);
                 return;
             }

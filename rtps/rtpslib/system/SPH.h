@@ -73,6 +73,7 @@ namespace rtps
         int num;
         int nb_vars; // for combined variables (vars_sorted, etc.)
         int choice; // which kind of calculation to invoke
+        int max_num;
 
 
         void print()

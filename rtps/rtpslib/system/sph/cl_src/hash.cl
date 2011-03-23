@@ -25,11 +25,10 @@
 // comes from K_Grid_Hash
 // CANNOT USE references to structures/classes as arguments!
 __kernel void hash(
-                  int num,
                   __global float4* vars_unsorted,
                   __global uint* sort_hashes,
                   __global uint* sort_indexes,
-                  //__global uint* cell_indices_start,
+                  __constant struct SPHParams* sphp,
                   __constant struct GridParams* gp
                   DEBUG_ARGS
                   //__global float4* fdebug,
@@ -38,6 +37,7 @@ __kernel void hash(
 {
     // particle index
     uint index = get_global_id(0);
+    int num = sphp->num;
     //int num = get_global_size(0);
     //comment this out to hash everything if using max_num
     if (index >= num) return;
@@ -75,7 +75,7 @@ __kernel void hash(
     //fdebug[index] = (float4)((p.x - gp->grid_min.x) * gp->grid_inv_delta.x, p.x, 0,0);
     clf[index] = (float4)((p.x - gp->grid_min.x) * gp->grid_delta.x, p.x, 0,0);
     cli[index] = gridPos;
-    cli[index].w = num;
+    cli[index].w = sphp->max_num;
 }
 //----------------------------------------------------------------------
 

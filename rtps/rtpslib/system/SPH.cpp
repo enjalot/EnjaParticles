@@ -348,6 +348,7 @@ namespace rtps
         sphp.PI = pi;
         sphp.K = 20.0f;
         sphp.num = num;
+        sphp.max_num = max_num;
         //sphp.surface_threshold = 2.0 * sphp.simulation_scale; //0.01;
         sphp.viscosity = .01f;
         //sphp.viscosity = 1.0f;
