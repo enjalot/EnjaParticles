@@ -81,7 +81,10 @@ namespace rtps
         int nc = num_changed[0];
         printf("Num Changed: %d\n", nc);
         
-        //if(num != 0 && num != 20){ exit(0);}
+        if(num != 0 && num != 20)
+        { 
+            printf("QUITER!\n");
+            exit(0);}
 
         if (nc < num && nc > 0)
         //if(num > 0)
@@ -95,11 +98,13 @@ namespace rtps
             renderer->setNum(sphp.num);
         }
 
+        printDataStructuresDiagnostics();
+
 #if 0
     //printouts
     int nbc = 10;
-    printf("start cell indices\n");
-    printf("end cell indices\n");
+    //printf("start cell indices\n");
+    //printf("end cell indices\n");
     //nbc = grid_params.nb_cells;
     //std::vector<int> is = cl_cell_indices_start.copyToHost(nbc);
     //std::vector<int> ie = cl_cell_indices_end.copyToHost(nbc);
@@ -157,8 +162,29 @@ namespace rtps
 #endif
 
 
+    }
+
+    void SPH::printDataStructuresDiagnostics()
+    {
+        printf("DataStructures Diagnostics\n");
+        int nbc = grid_params.nb_cells;
+
+        std::vector<int> is(nbc);
+        std::vector<int> ie(nbc);
+        
+        cl_cell_indices_end.copyToHost(ie);
+        cl_cell_indices_start.copyToHost(is);
 
 
+        for(int i = 0; i < nbc; i++)
+        {
+            if (is[i] != -1)// && ie[i] != 0)
+            {
+                //nb = ie[i] - is[i];
+                //nb_particles += nb;
+                printf("cell: %d indices start: %d indices stop: %d\n", i, is[i], ie[i]);
+            }
+        }
 
     }
 

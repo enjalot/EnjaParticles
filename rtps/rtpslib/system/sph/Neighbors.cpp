@@ -88,29 +88,44 @@ namespace rtps
         }
         ps->cli->queue.finish();
 
-#if 0 //printouts    
+#if 1 //printouts    
         //DEBUGING
-        printf("============================================\n");
-        printf("which == %d *** \n", choice);
-        printf("***** PRINT neighbors diagnostics ******\n");
-
-        std::vector<int4> cli;
-        std::vector<float4> clf;
-        printf("num %d\n", num);
-        if (num > 0)
+        
+        if(num > 0)
         {
-            cli = cli_debug.copyToHost(num);
-            clf = clf_debug.copyToHost(num);
-        }
+            printf("============================================\n");
+            printf("which == %d *** \n", choice);
+            printf("***** PRINT neighbors diagnostics ******\n");
+            printf("num %d\n", num);
 
-        for (int i=0; i < num; i++)
-        //for (int i=0; i < 10; i++) 
-        {
-            printf("-----\n");
-            printf("clf_debug: %f, %f, %f, %f\n", clf[i].x, clf[i].y, clf[i].z, clf[i].w);
-            //if(clf[i].w == 0.0) exit(0);
-            //printf("cli_debug: %d, %d, %d, %d\n", cli[i].x, cli[i].y, cli[i].z, cli[i].w);
-            //		printf("pos : %f, %f, %f, %f\n", pos[i].x, pos[i].y, pos[i].z, pos[i].w);
+            std::vector<int4> cli;
+            std::vector<float4> clf;
+            
+            cli_debug.copyToHost(cli);
+            clf_debug.copyToHost(clf);
+
+            std::vector<float4> poss(num);
+            std::vector<float4> dens(num);
+
+#define DENS 0
+#define POS 1
+#define VEL 2
+
+            cl_vars_sorted.copyToHost(dens);
+            cl_vars_sorted.copyToHost(poss,num);
+
+
+            for (int i=0; i < num; i++)
+            //for (int i=0; i < 10; i++) 
+            {
+                //printf("-----\n");
+                printf("clf_debug: %f, %f, %f, %f\n", clf[i].x, clf[i].y, clf[i].z, clf[i].w);
+                printf("pos sorted: %f, %f, %f, %f\n", poss[i].x, poss[i].y, poss[i].z, poss[i].w);
+                printf("dens sorted: %f, %f, %f, %f\n", dens[i].x, dens[i].y, dens[i].z, dens[i].w);
+                //if(clf[i].w == 0.0) exit(0);
+                //printf("cli_debug: %d, %d, %d, %d\n", cli[i].x, cli[i].y, cli[i].z, cli[i].w);
+                //		printf("pos : %f, %f, %f, %f\n", pos[i].x, pos[i].y, pos[i].z, pos[i].w);
+            }
         }
 #endif
 

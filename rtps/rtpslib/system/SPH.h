@@ -264,6 +264,7 @@ namespace rtps
         void printHashDiagnostics();
         void bitonic_sort();
         void buildDataStructures();
+        void printDataStructuresDiagnostics();
         void neighborSearch(int choice);
         void collision();
         void collide_triangles();
