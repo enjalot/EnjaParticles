@@ -14,7 +14,6 @@ namespace rtps
                                 &cl_sort_hashes,
                                 &cl_sort_indices);
 
-
     }
 
     void SPH::bitonic_sort()

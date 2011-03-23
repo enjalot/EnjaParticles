@@ -12,24 +12,6 @@ namespace rtps
         path = path + "/prep.cl";
         k_prep = Kernel(ps->cli, path, "prep");
 
-        int args = 0;
-        k_prep.setArg(args++, num);
-        k_prep.setArg(args++, 0);
-        k_prep.setArg(args++, cl_position.getDevicePtr());
-        k_prep.setArg(args++, cl_velocity.getDevicePtr());
-        k_prep.setArg(args++, cl_vars_unsorted.getDevicePtr());
-        k_prep.setArg(args++, cl_vars_sorted.getDevicePtr()); 
-        k_prep.setArg(args++, cl_sort_indices.getDevicePtr());
-
-
-        /*
-        k_prep.setArg(args++, cl_density.getDevicePtr());
-        k_prep.setArg(args++, cl_velocity.getDevicePtr());
-        k_prep.setArg(args++, cl_veleval.getDevicePtr());
-        k_prep.setArg(args++, cl_force.getDevicePtr());
-        k_prep.setArg(args++, cl_xsph.getDevicePtr());
-        */
-
     }
 
     void SPH::prep(int stage)
@@ -41,8 +23,16 @@ namespace rtps
          */
 
         printf("num: %d, stage: %d\n", num, stage);
-        k_prep.setArg(0, num);
-        k_prep.setArg(1, stage);
+        int args = 0;
+        k_prep.setArg(args++, num);
+        k_prep.setArg(args++, stage);
+        k_prep.setArg(args++, cl_position.getDevicePtr());
+        k_prep.setArg(args++, cl_velocity.getDevicePtr());
+        k_prep.setArg(args++, cl_vars_unsorted.getDevicePtr());
+        k_prep.setArg(args++, cl_vars_sorted.getDevicePtr()); 
+        k_prep.setArg(args++, cl_sort_indices.getDevicePtr());
+
+
         int ctaSize = 128; // work group size
         // Hash based on unscaled data
         try

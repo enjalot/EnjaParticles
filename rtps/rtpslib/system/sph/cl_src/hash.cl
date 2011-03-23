@@ -39,7 +39,8 @@ __kernel void hash(
     // particle index
     uint index = get_global_id(0);
     //int num = get_global_size(0);
-    //if (index >= num) return; //hash everything
+    //comment this out to hash everything if using max_num
+    if (index >= num) return;
 
     // initialize to -1 (used in kernel datastructures in build_datastructures_wrap.cpp
     //int grid_size = (int) (gp->grid_res.x*gp->grid_res.y*gp->grid_res.z);

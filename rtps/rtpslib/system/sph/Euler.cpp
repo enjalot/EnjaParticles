@@ -10,7 +10,10 @@ namespace rtps
         std::string path(SPH_CL_SOURCE_DIR);
         path += "/euler.cl";
         k_euler = Kernel(ps->cli, path, "euler");
-
+    } 
+    
+    void SPH::euler()
+    {
         int iargs = 0;
         k_euler.setArg(iargs++, cl_sort_indices.getDevicePtr());
         k_euler.setArg(iargs++, cl_vars_unsorted.getDevicePtr());
@@ -19,9 +22,10 @@ namespace rtps
         k_euler.setArg(iargs++, cl_SPHParams.getDevicePtr());
         k_euler.setArg(iargs++, ps->settings.dt); //time step
 
+        int local_size = 128;
+        k_euler.execute(num, local_size);
 
-
-    } 
+    }
 
     void SPH::cpuEuler()
     {

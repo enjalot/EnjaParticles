@@ -229,10 +229,11 @@ namespace rtps
 
     void SPH::collision()
     {
-        int local_size = 128;
         //when implemented other collision routines can be chosen here
         timers[TI_COLLISION_WALL]->start();
-        k_collision_wall.execute(num, local_size);
+        
+        collide_wall();
+        //k_collision_wall.execute(num, local_size);
         timers[TI_COLLISION_WALL]->end();
 
         timers[TI_COLLISION_TRI]->start();
@@ -243,19 +244,20 @@ namespace rtps
 
     void SPH::integrate()
     {
-        int local_size = 128;
         if (integrator == EULER)
         {
             //k_euler.execute(max_num);
             timers[TI_EULER]->start();
-            k_euler.execute(num, local_size);
+            euler();
+            //k_euler.execute(num, local_size);
             timers[TI_EULER]->end();
         }
         else if (integrator == LEAPFROG)
         {
             //k_leapfrog.execute(max_num);
             timers[TI_LEAPFROG]->start();
-            k_leapfrog.execute(num, local_size);
+            leapfrog();
+            //k_leapfrog.execute(num, local_size);
             timers[TI_LEAPFROG]->end();
         }
 

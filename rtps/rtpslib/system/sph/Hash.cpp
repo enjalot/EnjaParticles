@@ -11,8 +11,12 @@ namespace rtps
         std::string path(SPH_CL_SOURCE_DIR);
         path = path + "/hash.cl";
         k_hash = Kernel(ps->cli, path, "hash");
+    }
 
-        printf("kernel made, set args\n");
+    void SPH::hash()
+    // Generate hash list: stored in cl_sort_hashes
+    {
+
         int args = 0;
         k_hash.setArg(args++, num); 
         k_hash.setArg(args++, cl_vars_unsorted.getDevicePtr()); // positions + other variables
@@ -23,17 +27,11 @@ namespace rtps
         k_hash.setArg(args++, cli_debug.getDevicePtr());
 
 
-    }
-
-    void SPH::hash()
-    // Generate hash list: stored in cl_sort_hashes
-    {
-
         int ctaSize = 128; // work group size
         // Hash based on unscaled data
         printf("num in hash %d\n", num);
-        k_hash.setArg(0, num); 
-        k_hash.execute(max_num, ctaSize);
+        k_hash.execute(num, ctaSize);
+        //k_hash.execute(max_num, ctaSize); //makes the out of bounds particles "stick".. or not
         // set cell_indicies_start to -1
         int minus = 0xffffffff;
 

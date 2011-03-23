@@ -267,8 +267,11 @@ namespace rtps
         void printDataStructuresDiagnostics();
         void neighborSearch(int choice);
         void collision();
+        void collide_wall();
         void collide_triangles();
         void integrate();
+        void euler();
+        void leapfrog();
 
         float Wpoly6(float4 r, float h);
         float Wspiky(float4 r, float h);

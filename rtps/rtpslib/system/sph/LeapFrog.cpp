@@ -11,15 +11,6 @@ namespace rtps
         path += "/leapfrog.cl";
         k_leapfrog = Kernel(ps->cli, path, "leapfrog");
 
-        int iargs = 0;
-        k_leapfrog.setArg(iargs++, cl_sort_indices.getDevicePtr());
-        k_leapfrog.setArg(iargs++, cl_vars_unsorted.getDevicePtr());
-        k_leapfrog.setArg(iargs++, cl_vars_sorted.getDevicePtr());
-        k_leapfrog.setArg(iargs++, cl_position.getDevicePtr());
-        //    k_leapfrog.setArg(iargs++, cl_color.getDevicePtr());
-        k_leapfrog.setArg(iargs++, cl_SPHParams.getDevicePtr());
-        k_leapfrog.setArg(iargs++, ps->settings.dt); //time step
-
         /*
         //TODO: fix the way we are wrapping buffers
         k_leapfrog.setArg(0, cl_position.getDevicePtr());
@@ -32,6 +23,22 @@ namespace rtps
         k_leapfrog.setArg(7, cl_SPHParams.getDevicePtr());
         */
     } 
+    void SPH::leapfrog()
+    {
+
+        int iargs = 0;
+        k_leapfrog.setArg(iargs++, cl_sort_indices.getDevicePtr());
+        k_leapfrog.setArg(iargs++, cl_vars_unsorted.getDevicePtr());
+        k_leapfrog.setArg(iargs++, cl_vars_sorted.getDevicePtr());
+        k_leapfrog.setArg(iargs++, cl_position.getDevicePtr());
+        //    k_leapfrog.setArg(iargs++, cl_color.getDevicePtr());
+        k_leapfrog.setArg(iargs++, cl_SPHParams.getDevicePtr());
+        k_leapfrog.setArg(iargs++, ps->settings.dt); //time step
+
+        int local_size = 128;
+        k_leapfrog.execute(num, local_size);
+
+    }
 
     void SPH::cpuLeapFrog()
     {

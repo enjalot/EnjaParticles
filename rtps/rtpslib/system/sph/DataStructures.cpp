@@ -13,13 +13,12 @@ namespace rtps
         //std::string filepath = path + "/datastructures.cl";
         //k_datastructures = Kernel(ps->cli, path, filepath, "datastructures");
         k_datastructures = Kernel(ps->cli, path, "datastructures");
+        
+    }
 
-        /*
-        std::vector<unsigned int> num_changed(20);
-        std::fill(num_changed.begin(), num_changed.end(), 0);
-        num_changed[0] = 0;
-        cl_num_changed = Buffer<unsigned int>(ps->cli, num_changed);
-        */
+    void SPH::buildDataStructures()
+    // Generate hash list: stored in cl_sort_hashes
+    {
 
         int iarg = 0;
         k_datastructures.setArg(iarg++, cl_vars_unsorted.getDevicePtr());
@@ -36,36 +35,8 @@ namespace rtps
         int nb_bytes = (workSize+1)*sizeof(int);
         k_datastructures.setArgShared(iarg++, nb_bytes);
 
-    }
-
-    void SPH::buildDataStructures()
-    // Generate hash list: stored in cl_sort_hashes
-    {
-
-
-        /*
-        int nbc = 20;
-        std::vector<int> sh = cl_sort_hashes.copyToHost(nbc);
-        //std::vector<int> eci = cl_cell_indices_end.copyToHost(nbc);
-    
-        for(int i = 0; i < nbc; i++)
-        {
-            printf("sh[%d] %d; ", i, sh[i]);
-        }
-        printf("\n");
-        */
-
-        /*
-        //std::vector<unsigned int> num_changed(1);
-        std::vector<unsigned int> num_changed(20);
-        std::fill(num_changed.begin(), num_changed.end(), 0);
-
-        num_changed[0] = 0;
-        cl_num_changed.copyToDevice(num_changed);
-        */
-
+        
         //printf("about to data structures\n");
-        int workSize = 64; // work group size
         try
         {
             k_datastructures.execute(num, workSize);
@@ -79,15 +50,9 @@ namespace rtps
 
         std::vector<unsigned int> num_changed(1);
         cl_cell_indices_start.copyToHost(num_changed, grid_params.nb_cells);
-        /*
-        for(int i = 0; i < num; i++)
-        {
-            printf("nc[%d] = %d\n", i, num_changed[i]);
-        }
-        */
+       
         int nc = num_changed[0];
         printf("Num Changed: %d\n", nc);
-        
         
         if (nc < num && nc > 0)
         //if(num > 0)

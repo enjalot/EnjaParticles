@@ -26,29 +26,23 @@ namespace rtps
             exit(1);
         }
 
-        Kernel kern = k_neighbors;
-
-        printf("setting kernel args\n");
-        int iarg = 0;
-        kern.setArg(iarg++, cl_vars_sorted.getDevicePtr());
-        kern.setArg(iarg++, cl_cell_indices_start.getDevicePtr());
-        kern.setArg(iarg++, cl_cell_indices_end.getDevicePtr());
-        kern.setArg(iarg++, cl_GridParamsScaled.getDevicePtr());
-        //kern.setArg(iarg++, cl_FluidParams->getDevicePtr());
-        kern.setArg(iarg++, cl_SPHParams.getDevicePtr());
-
-        // ONLY IF DEBUGGING
-        kern.setArg(iarg++, clf_debug.getDevicePtr());
-        kern.setArg(iarg++, cli_debug.getDevicePtr());
-        //kern.setArg(iarg++, cl_index_neigh->getDevicePtr());
-
-
 
     }
     //----------------------------------------------------------------------
 
     void SPH::neighborSearch(int choice)
     {
+        int iarg = 0;
+        k_neighbors.setArg(iarg++, cl_vars_sorted.getDevicePtr());
+        k_neighbors.setArg(iarg++, cl_cell_indices_start.getDevicePtr());
+        k_neighbors.setArg(iarg++, cl_cell_indices_end.getDevicePtr());
+        k_neighbors.setArg(iarg++, cl_GridParamsScaled.getDevicePtr());
+        //k_neighbors.setArg(iarg++, cl_FluidParams->getDevicePtr());
+        k_neighbors.setArg(iarg++, cl_SPHParams.getDevicePtr());
+
+        // ONLY IF DEBUGGING
+        k_neighbors.setArg(iarg++, clf_debug.getDevicePtr());
+        k_neighbors.setArg(iarg++, cli_debug.getDevicePtr());
 
         // which == 0 : density update
         // which == 1 : force update
@@ -62,9 +56,12 @@ namespace rtps
 
         //Copy choice to SPHParams
         sphp.choice = choice;
+        updateSPHP();
+        /*
         std::vector<SPHParams> vsphp(0);
         vsphp.push_back(sphp);
         cl_SPHParams.copyToDevice(vsphp);
+        */
 
 #if 0
         std::vector<int4> cli = cli_debug.copyToHost(2);
@@ -74,9 +71,7 @@ namespace rtps
         }
 #endif
 
-        size_t global = (size_t) num;
         int local = 64;
-
         try
         {
             k_neighbors.execute(num, local);
