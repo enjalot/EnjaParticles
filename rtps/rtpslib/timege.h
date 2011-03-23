@@ -4,6 +4,8 @@
 // gettimeofday: measured in sec/microsec: wall clock time
 // irrespective of CPU/system/threads, etc.
 
+
+
 #include <string>
 #ifdef WIN32
 #include <time.h>
@@ -15,10 +17,19 @@
 
 #include <vector>
 //#include "time.h"
+#ifdef WIN32
+    #if defined(rtps_EXPORTS)
+        #define RTPS_EXPORT __declspec(dllexport)
+    #else
+        #define RTPS_EXPORT __declspec(dllimport)
+	#endif 
+#else
+    #define RTPS_EXPORT
+#endif
 
 namespace GE {
 
-class Time
+class RTPS_EXPORT Time
 {
 public:
 	static std::vector<Time*> timeList;

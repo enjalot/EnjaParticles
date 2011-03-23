@@ -289,6 +289,7 @@ namespace rtps
         timers[TI_COLLISION_TRI]     = new GE::Time("collision_triangle", time_offset, print_freq);
         timers[TI_EULER]     = new GE::Time("euler", time_offset, print_freq);
         timers[TI_LEAPFROG]     = new GE::Time("leapfrog", time_offset, print_freq);
+		return 0;
     }
 
     void SPH::printTimers()

@@ -19,6 +19,7 @@ SET( CMAKE_MODULE_PATH
 
 message("${CMAKE_MODULE_PATH}\n")
 
+
 FIND_PACKAGE (GLUT)
 FIND_PACKAGE (OpenGL)
 FIND_PACKAGE (OPENCL)
@@ -26,6 +27,14 @@ FIND_PACKAGE (GLEW)
 
 set (test_INCLUDES
     ${RTPS_DIR}
+
+    ${RTPS_DIR}/system
+    ${RTPS_DIR}/system/common
+    ${RTPS_DIR}/render
+    ${RTPS_DIR}/render/util
+    ${RTPS_DIR}/domain
+ 
+
     ${GLUT_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
     ${GLEW_INCLUDE_PATH}
@@ -63,6 +72,7 @@ SET(LINK_LIBS
     ${OPENCL_LIBRARIES}
     ${GLEW_LIBRARY}
 )
+message(RTPS_EXPORTS "${rtps_EXPORTS}")
 
 TARGET_LINK_LIBRARIES (test.x
     ${LINK_LIBS}

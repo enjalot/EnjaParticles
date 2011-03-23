@@ -3,18 +3,28 @@
 
 #include <string>
 
-#include "../RTPS.h"
+#include "RTPS.h"
 #include "System.h"
 #include "ForceField.h"
-#include "../opencl/Kernel.h"
-#include "../opencl/Buffer.h"
+#include "Kernel.h"
+#include "Buffer.h"
+
+#ifdef WIN32
+    #if defined(rtps_EXPORTS)
+        #define RTPS_EXPORT __declspec(dllexport)
+    #else
+        #define RTPS_EXPORT __declspec(dllimport)
+	#endif 
+#else
+    #define RTPS_EXPORT
+#endif
 //#include "../util.h"
 
 namespace rtps
 {
 
 
-    class Simple : public System
+    class RTPS_EXPORT Simple : public System
     {
     public:
         Simple(RTPS *ps, int num);

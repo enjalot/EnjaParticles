@@ -1,12 +1,6 @@
-#ifndef RTPS_PROGRAM_H_INCLUDED
-#define RTPS_PROGRAM_H_INCLUDED
-/*
- *
-*/
+#ifdef RTPS_COMMON_H
+#define RTPS_COMMON_H
 
-#include <string>
-
-#include "CLL.h"
 #ifdef WIN32
     #if defined(rtps_EXPORTS)
         #define RTPS_EXPORT __declspec(dllexport)
@@ -17,15 +11,4 @@
     #define RTPS_EXPORT
 #endif
 
-namespace rtps{
-
-class RTPS_EXPORT Program
-{
-public:
-    Program();
-};
-
-}
-
 #endif
-

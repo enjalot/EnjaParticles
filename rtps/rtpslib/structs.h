@@ -4,6 +4,16 @@
 #include <stdio.h>
 #include <math.h>
 
+#ifdef WIN32
+    #if defined(rtps_EXPORTS)
+        #define RTPS_EXPORT __declspec(dllexport)
+    #else
+        #define RTPS_EXPORT __declspec(dllimport)
+	#endif 
+#else
+    #define RTPS_EXPORT
+#endif
+
 namespace rtps
 {
 
@@ -175,11 +185,11 @@ namespace rtps
 
     //maybe these helper functions should go elsewhere? 
     //or be functions of the structs
-    float magnitude(float4 vec);
-    float dist_squared(float4 vec);
-    float dot(float4 a, float4 b);
-    float4 cross(float4 a, float4 b);
-    float4 normalize(float4 vect);
+    RTPS_EXPORT float magnitude(float4 vec);
+    RTPS_EXPORT float dist_squared(float4 vec);
+    RTPS_EXPORT float dot(float4 a, float4 b);
+    RTPS_EXPORT float4 cross(float4 a, float4 b);
+    RTPS_EXPORT float4 normalize(float4 vect);
 
 }
 

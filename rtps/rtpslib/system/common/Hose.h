@@ -4,13 +4,15 @@
 #include "../../RTPS.h"
 #include "../../structs.h"
 #include <vector>
+
+#include "../../rtps_common.h"
 using namespace std;
 
 namespace rtps
 {
 
     
-class Hose
+class RTPS_EXPORT Hose
 {
 public:
     Hose(RTPS *ps, int total_n, float4 center, float4 velocity, float radius, float spacing);

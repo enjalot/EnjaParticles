@@ -105,7 +105,7 @@ rtps::RTPS* ps;
 //----------------------------------------------------------------------
 float rand_float(float mn, float mx)
 {
-    float r = random() / (float) RAND_MAX;
+    float r = rand() / (float) RAND_MAX;
     return mn + (mx-mn)*r;
 }
 //----------------------------------------------------------------------
@@ -226,7 +226,7 @@ void appKeyboard(unsigned char key, int x, int y)
             ps->system->addBox(nn, min, max, false);
             return;
         case 'p': //print timers
-            ps->printTimers();
+            ps->system->printTimers();
             return;
         case '\033': // escape quits
         case '\015': // Enter quits    

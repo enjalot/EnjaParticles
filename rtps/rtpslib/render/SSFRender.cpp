@@ -21,15 +21,15 @@ namespace rtps
 
         createFramebufferTextures();
 
-        glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER,fbos[0]);
-        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,gl_framebuffer_texs["thickness"],0);
-        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT1,GL_TEXTURE_2D,gl_framebuffer_texs["depthColor"],0);
-        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT2,GL_TEXTURE_2D,gl_framebuffer_texs["normalColor"],0);
-        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT3,GL_TEXTURE_2D,gl_framebuffer_texs["lightColor"],0);
-        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT4,GL_TEXTURE_2D,gl_framebuffer_texs["Color"],0);
-        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT5,GL_TEXTURE_2D,gl_framebuffer_texs["depthColorSmooth"],0);
-        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,gl_framebuffer_texs["depth"],0);
-        glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER,0);
+        glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT,fbos[0]);
+        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["thickness"],0);
+        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT1_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["depthColor"],0);
+        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT2_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["normalColor"],0);
+        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT3_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["lightColor"],0);
+        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT4_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["Color"],0);
+        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT5_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["depthColorSmooth"],0);
+        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["depth"],0);
+        glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT,0);
 
 
         //glFinish();

@@ -81,12 +81,7 @@ namespace rtps
         }*/
     }
 
-
-
-    void RTPS::printTimers()
-    {
-        system->printTimers();
-    }
-
 }
+
+
 

@@ -72,6 +72,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/util
     ${rtpslib_SOURCE_DIR}/structs
     ${rtpslib_SOURCE_DIR}/timege
+    ${rtpslib_SOURCE_DIR}/rtps_common
 
     ${rtpslib_SOURCE_DIR}/render/Render
     ${rtpslib_SOURCE_DIR}/render/SpriteRender
@@ -112,11 +113,19 @@ set (rtpslib_SOURCES
     #${rtpslib_SOURCE_DIR}/particle
     )
 
+IF (WIN32)
+    set (rtpslib_SOURCES 
+    	${rtpslib_SOURCES}
+    	${rtpslib_SOURCE_DIR}/gtod_windows
+    )
+ENDIF ()
+
+
 IF(WITH_OPENCL)
 SET(rtpslib_SOURCES ${rtpslib_SOURCES}
     ${rtpslib_SOURCE_DIR}/opencl/CLL
     ${rtpslib_SOURCE_DIR}/opencl/Kernel
-    #${rtpslib_SOURCE_DIR}/opencl/Buffer #template class
+    ${rtpslib_SOURCE_DIR}/opencl/Buffer #template class
 
     #${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src/oclBitonicSort_launcher
     #${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src/BitonicSort #template class

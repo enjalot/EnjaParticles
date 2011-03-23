@@ -16,6 +16,7 @@
 
 #include <timege.h>
 
+#include "../rtps_common.h"
 
 namespace rtps
 {
@@ -102,7 +103,7 @@ namespace rtps
 #endif
 
 
-    class SPH : public System
+    class RTPS_EXPORT SPH : public System
     {
     public:
         SPH(RTPS *ps, int num);
