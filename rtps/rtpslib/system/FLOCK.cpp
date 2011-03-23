@@ -139,14 +139,15 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     
 #endif
      // settings defaults to 0
-     renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
-     printf("spacing for radius %f\n", flock_settings.spacing);
+     //renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+     //printf("spacing for radius %f\n", flock_settings.spacing);
      //renderer->setParticleRadius(spacing*0.5);
      //renderer->setParticleRadius(spacing*0.5);
-     renderer->setParticleRadius(flock_settings.spacing);
-	 
+     //renderer->setParticleRadius(flock_settings.spacing);
      //renderer = new Render(pos_vbo,col_vbo,num,ps->cli);
      //renderer->setParticleRadius(flock_settings.spacing*0.25);
+     
+    setRenderer();
 
 }
 
@@ -772,6 +773,30 @@ void FLOCK::render()
 	System::render();
 	renderer->render_box(grid.getBndMin(), grid.getBndMax());
     //renderer->render_table(grid.getBndMin(), grid.getBndMax());
+}
+
+void FLOCK::setRenderer()
+{
+    switch(ps->settings.getRenderType())
+    {
+        case RTPSettings::SPRITE_RENDER:
+            renderer = new SpriteRender(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+            printf("spacing for radius %f\n", flock_settings.spacing);
+            break;
+        case RTPSettings::SCREEN_SPACE_RENDER:
+            //renderer = new ScreenSpaceRender();
+            renderer = new SSFRender(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+            break;
+        case RTPSettings::RENDER:
+            renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+            break;
+        default:
+            //should be an error
+            renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+        break;
+    }
+    //renderer->setParticleRadius(spacing*0.5);
+    renderer->setParticleRadius(flock_settings.spacing);
 }
 
 

@@ -151,6 +151,8 @@ public:
     void printTimers();
 
 
+protected:
+    virtual void setRenderer();
     
 private:
     //the particle system framework
