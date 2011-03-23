@@ -114,7 +114,7 @@ __kernel void euler(
     // compute acc
     acc = vi + acc_sep + acc_aln + acc_coh;
 	acc.w = 0.f;
-    clf[sort_indices[i]] = acc;
+    //clf[sort_indices[i]] = acc;
    
 
     // constrain acceleration
@@ -172,6 +172,6 @@ __kernel void euler(
     int4 iden = (int4)((int)den(i).x, (int)den(i).y, 0, 0);
     cli[originalIndex] = iden;
     //vi = (float4)(5.f,5.f, 5.f, 5.f);
-//    clf[originalIndex] = vi; 
+    clf[originalIndex] = pi; 
 
 }

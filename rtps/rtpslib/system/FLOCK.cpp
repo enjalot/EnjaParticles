@@ -272,6 +272,7 @@ void FLOCK::updateGPU()
         //printf("collision\n");
 //        collision();
         //printf("integrate\n");
+        //printf("num = %d\n", num);
         integrate();		// compute the rules and itegrate
         //exit(0);
         //
@@ -719,6 +720,7 @@ void FLOCK::pushParticles(vector<float4> pos)
 #endif
 
 #ifdef GPU
+
     glFinish();
     cl_position.acquire();
     cl_color.acquire();
@@ -745,6 +747,7 @@ void FLOCK::pushParticles(vector<float4> pos)
     //printf("about to updateNum\n");
     //ps->updateNum(params.num);
 
+    //printf("pushParticles: %d\n", num);
     params.num = num+nn;
     updateFLOCKP();
 
