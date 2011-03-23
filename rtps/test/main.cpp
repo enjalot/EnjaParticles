@@ -23,13 +23,30 @@ using namespace rtps;
 
 int window_width = 1200;
 int window_height = 600;
-float fov = 65.;
 int glutWindowHandle = 0;
-/*
-float translate_x = -.5f;
-float translate_y = 0.f;//-200.0f;//300.f;
-float translate_z = 1.5f;//200.f;
-*/
+
+
+#define DTR 0.0174532925
+
+struct camera
+{
+    GLdouble leftfrustum;
+    GLdouble rightfrustum;
+    GLdouble bottomfrustum;
+    GLdouble topfrustum;
+    GLfloat modeltranslation;
+} leftCam, rightCam;
+
+bool stereo_enabled = true;
+float depthZ = -10.0;                                      //depth of the object drawing
+
+double fovy = 65.;                                          //field of view in y-axis
+double aspect = double(window_width)/double(window_height);  //screen aspect ratio
+double nearZ = 3.0;                                        //near clipping plane
+double farZ = 100.0;                                        //far clipping plane
+double screenZ = 10.0;                                     //screen projection plane
+double IOD = 0.5;                                          //intraocular distance
+
 float translate_x = -2.00f;
 float translate_y = -3.00f;//300.f;
 float translate_z = 3.00f;
@@ -39,17 +56,12 @@ int mouse_old_x, mouse_old_y;
 int mouse_buttons = 0;
 float rotate_x = 0.0, rotate_y = 0.0;
 std::vector<Triangle> triangles;
-//std::vector<Box> boxes;
 
-// offsets into the triangle list. tri_offsets[i] corresponds to the 
-// triangle list for box[i]. Number of triangles for triangles[i] is
-//    tri_offsets[i+1]-tri_offsets[i]
-// Add one more offset so that the number of triangles in 
-//   boxes[boxes.size()-1] is tri_offsets[boxes.size()]-tri_offsets[boxes.size()-1]
-//std::vector<int> tri_offsets;
 
 
 void init_gl();
+void render_stereo();
+void setFrustum();
 
 void appKeyboard(unsigned char key, int x, int y);
 void keyUp(unsigned char key, int x, int y);
@@ -177,17 +189,13 @@ void init_gl()
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     //gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 100.0);
-    gluPerspective(fov, (GLfloat)window_width / (GLfloat) window_height, 0.3, 100.0);
+    //gluPerspective(fov, (GLfloat)window_width / (GLfloat) window_height, 0.3, 100.0);
     //gluPerspective(90.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 10000.0); //for lorentz
 
     // set view matrix
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glRotatef(-90, 1.0, 0.0, 0.0);
-    glRotatef(rotate_x, 1.0, 0.0, 0.0);
-    glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
-    glTranslatef(translate_x, translate_z, translate_y);
     ps->system->getRenderer()->setWindowDimensions(window_width,window_height);
     //glTranslatef(0, 10, 0);
     /*
@@ -233,7 +241,9 @@ void appKeyboard(unsigned char key, int x, int y)
             ps->system->sprayHoses();
             return;
 
-
+        case '`':
+            stereo_enabled = !stereo_enabled;
+            break;
         case 't': //place a cube for collision
             {
                 nn = 512;
@@ -288,14 +298,15 @@ void appKeyboard(unsigned char key, int x, int y)
             return;
     }
 
+    glutPostRedisplay();
     // set view matrix
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    /*glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glRotatef(-90, 1.0, 0.0, 0.0);
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
-    glTranslatef(translate_x, translate_z, translate_y);
+    glTranslatef(translate_x, translate_z, translate_y);*/
 }
 
 void appRender()
@@ -305,8 +316,26 @@ void appRender()
     ps->update();
 
     glEnable(GL_DEPTH_TEST);
+    if (stereo_enabled)
+    {
+        render_stereo();
+    }
+    else
+    {
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        gluPerspective(fovy, aspect, nearZ, farZ);
 
-    ps->render();
+        // set view matrix
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        glRotatef(-90, 1.0, 0.0, 0.0);
+        glRotatef(rotate_x, 1.0, 0.0, 0.0);
+        glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
+        glTranslatef(translate_x, translate_z, translate_y);
+        ps->render();
+    }
     glColor4f(0,0,1,.5);
 
     //glDepthMask(GL_FALSE);
@@ -389,16 +418,7 @@ void appMotion(int x, int y)
     mouse_old_y = y;
 
     // set view matrix
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    //glTranslatef(-translate_x, -translate_y, -translate_z);
-    glRotatef(-90, 1.0, 0.0, 0.0);
-    glRotatef(rotate_x, 1.0, 0.0, 0.0);
-    glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
-    glTranslatef(translate_x, translate_z, translate_y);
-    //glTranslatef(0, translate_z, translate_y);
-    //glutPostRedisplay();
+    glutPostRedisplay();
 }
 
 
@@ -472,18 +492,76 @@ void resizeWindow(int w, int h)
     // projection
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(fov, (GLfloat)w / (GLfloat) h, 0.3, 100.0);
-
-    // set view matrix
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glRotatef(-90, 1.0, 0.0, 0.0);
-    glRotatef(rotate_x, 1.0, 0.0, 0.0);
-    glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
-    glTranslatef(translate_x, translate_z, translate_y);
+    //gluPerspective(fov, aspect, nearZ, farZ);
     ps->system->getRenderer()->setWindowDimensions(w,h);
     window_width = w;
     window_height = h;
+    setFrustum();
     glutPostRedisplay();
+}
+
+void render_stereo()
+{
+
+    glDrawBuffer(GL_BACK_LEFT);                              //draw into back left buffer
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();                                        //reset projection matrix
+    glFrustum(leftCam.leftfrustum, leftCam.rightfrustum,     //set left view frustum
+              leftCam.bottomfrustum, leftCam.topfrustum,
+              nearZ, farZ);
+    glTranslatef(leftCam.modeltranslation, 0.0, 0.0);        //translate to cancel parallax
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glPushMatrix();
+    {
+        //glTranslatef(0.0, 0.0, depthZ);                        //translate to screenplane
+        glRotatef(-90, 1.0, 0.0, 0.0);
+        glRotatef(rotate_x, 1.0, 0.0, 0.0);
+        glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
+        glTranslatef(translate_x, translate_z, translate_y);
+        ps->render();
+    }
+    glPopMatrix();
+
+    glDrawBuffer(GL_BACK_RIGHT);                             //draw into back right buffer
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();                                        //reset projection matrix
+    glFrustum(rightCam.leftfrustum, rightCam.rightfrustum,   //set left view frustum
+              rightCam.bottomfrustum, rightCam.topfrustum,
+              nearZ, farZ);
+    glTranslatef(rightCam.modeltranslation, 0.0, 0.0);       //translate to cancel parallax
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    glPushMatrix();
+    {
+        glRotatef(-90, 1.0, 0.0, 0.0);
+        glRotatef(rotate_x, 1.0, 0.0, 0.0);
+        glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
+        glTranslatef(translate_x, translate_z, translate_y);
+        ps->render();
+    }
+    glPopMatrix();
+}
+
+
+void setFrustum(void)
+{
+    double top = nearZ*tan(DTR*fovy/2);                    //sets top of frustum based on fovy and near clipping plane
+    double right = aspect*top;                             //sets right of frustum based on aspect ratio
+    double frustumshift = (IOD/2)*nearZ/screenZ;
+
+    leftCam.topfrustum = top;
+    leftCam.bottomfrustum = -top;
+    leftCam.leftfrustum = -right + frustumshift;
+    leftCam.rightfrustum = right + frustumshift;
+    leftCam.modeltranslation = IOD/2;
+
+    rightCam.topfrustum = top;
+    rightCam.bottomfrustum = -top;
+    rightCam.leftfrustum = -right - frustumshift;
+    rightCam.rightfrustum = right - frustumshift;
+    rightCam.modeltranslation = -IOD/2;
 }
