@@ -31,6 +31,7 @@ class Domain(object):
                             math.ceil(self.size.z / cell_size) ])
 
         self.size = self.res * cell_size
+        self.max = self.min + self.size
 
         self.delta = Vec([  self.res.x / self.size.x,
                             self.res.y / self.size.y,

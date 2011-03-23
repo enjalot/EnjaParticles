@@ -175,14 +175,14 @@ namespace rtps
         printf("**************** DataStructures Diagnostics ****************\n");
         int nbc = grid_params.nb_cells;
 
-        std::vector<int> is(nbc);
-        std::vector<int> ie(nbc);
+        std::vector<unsigned int> is(nbc);
+        std::vector<unsigned int> ie(nbc);
         
         cl_cell_indices_end.copyToHost(ie);
         cl_cell_indices_start.copyToHost(is);
 
 
-        for(int i = 0; i < nbc; i++)
+        for(int i = 0; i < nbc+1; i++)
         {
             if (is[i] != -1)// && ie[i] != 0)
             {

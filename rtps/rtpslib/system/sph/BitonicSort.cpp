@@ -8,7 +8,7 @@ namespace rtps
 
         printf("about to instantiate sorting\n");
 
-        bitonic = Bitonic<int>( ps->cli,    
+        bitonic = Bitonic<unsigned int>( ps->cli,    
                                 &cl_sort_output_hashes,
                                 &cl_sort_output_indices,
                                 &cl_sort_hashes,
@@ -63,8 +63,8 @@ namespace rtps
         int nbc = 20;
         //sh = cl_sort_hashes.copyToHost(nbc);
         //eci = cl_cell_indices_end.copyToHost(nbc);
-        std::vector<int> sh = cl_sort_hashes.copyToHost(nbc);
-        std::vector<int> si = cl_sort_indices.copyToHost(nbc);
+        std::vector<unsigned int> sh = cl_sort_hashes.copyToHost(nbc);
+        std::vector<unsigned int> si = cl_sort_indices.copyToHost(nbc);
         //std::vector<int> eci = cl_cell_indices_end.copyToHost(nbc);
 
     

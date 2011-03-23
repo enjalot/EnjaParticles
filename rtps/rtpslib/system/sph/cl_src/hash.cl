@@ -56,6 +56,8 @@ __kernel void hash(
     bool wrap_edges = false;
     uint hash = (uint) calcGridHash(gridPos, gp->grid_res, wrap_edges);//, fdebug, idebug);
 
+    hash = hash > gp->nb_cells ? gp->nb_cells : hash;
+
     // store grid hash and particle index
     sort_hashes[index] = hash;
     //int pp = (int) p.x;

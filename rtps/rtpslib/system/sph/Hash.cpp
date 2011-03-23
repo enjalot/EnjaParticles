@@ -40,7 +40,7 @@ namespace rtps
 
         //-------------------
         // Set cl_cell indices to -1
-        std::vector<int> cells_indices_start(grid_params.nb_cells);
+        std::vector<unsigned int> cells_indices_start(grid_params.nb_cells);
         std::fill(cells_indices_start.begin(), cells_indices_start.end(), minus);
         cl_cell_indices_start.copyToDevice(cells_indices_start);
 
@@ -76,8 +76,8 @@ namespace rtps
     {
 #if 1
         printf("***** PRINT hash diagnostics ******\n");
-        std::vector<int> sh = cl_sort_hashes.copyToHost(num);
-        std::vector<int> si = cl_sort_indices.copyToHost(num);
+        std::vector<unsigned int> sh = cl_sort_hashes.copyToHost(num);
+        std::vector<unsigned int> si = cl_sort_indices.copyToHost(num);
         //cl_cells->copyToHost();
         std::vector<int4> cli = cli_debug.copyToHost(num);
         std::vector<float4> clf = clf_debug.copyToHost(num);

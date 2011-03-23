@@ -444,25 +444,26 @@ namespace rtps
         cl_vars_unsorted = Buffer<float4>(ps->cli, unsorted);
         cl_vars_sorted = Buffer<float4>(ps->cli, sorted);
 
-        std::vector<int> keys(max_num);
+        std::vector<unsigned int> keys(max_num);
         //to get around limits of bitonic sort only handling powers of 2
 #include "limits.h"
         std::fill(keys.begin(), keys.end(), INT_MAX);
-        cl_sort_indices  = Buffer<int>(ps->cli, keys);
-        cl_sort_hashes   = Buffer<int>(ps->cli, keys);
+        cl_sort_indices  = Buffer<unsigned int>(ps->cli, keys);
+        cl_sort_hashes   = Buffer<unsigned int>(ps->cli, keys);
 
         // for debugging. Store neighbors of indices
         // change nb of neighbors in cl_macro.h as well
         //cl_index_neigh = Buffer<int>(ps->cli, max_num*50);
 
-        // Size is the grid size. That is a problem since the number of
-        // occupied cells could be much less than the number of grid elements. 
-        std::vector<int> gcells(grid_params.nb_cells);
+        // Size is the grid size + 1, the last index is used to signify how many particles are within bounds
+        // That is a problem since the number of
+        // occupied cells could be much less than the number of grid elements.
+        std::vector<unsigned int> gcells(grid_params.nb_cells+1);
         int minus = 0xffffffff;
         std::fill(gcells.begin(), gcells.end(), 0);
 
-        cl_cell_indices_start = Buffer<int>(ps->cli, gcells);
-        cl_cell_indices_end   = Buffer<int>(ps->cli, gcells);
+        cl_cell_indices_start = Buffer<unsigned int>(ps->cli, gcells);
+        cl_cell_indices_end   = Buffer<unsigned int>(ps->cli, gcells);
         //printf("gp.nb_points= %d\n", gp.nb_points); exit(0);
 
 
@@ -470,8 +471,8 @@ namespace rtps
         // For bitonic sort. Remove when bitonic sort no longer used
         // Currently, there is an error in the Radix Sort (just run both
         // sorts and compare outputs visually
-        cl_sort_output_hashes = Buffer<int>(ps->cli, keys);
-        cl_sort_output_indices = Buffer<int>(ps->cli, keys);
+        cl_sort_output_hashes = Buffer<unsigned int>(ps->cli, keys);
+        cl_sort_output_indices = Buffer<unsigned int>(ps->cli, keys);
 
 
         std::vector<Triangle> maxtri(2048);

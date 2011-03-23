@@ -196,21 +196,21 @@ namespace rtps
         Buffer<float4>      cl_vars_sorted;
         Buffer<float4>      cl_vars_unsorted;
         Buffer<float4>      cl_cells; // positions in Ian code
-        Buffer<int>         cl_cell_indices_start;
-        Buffer<int>         cl_cell_indices_end;
+        Buffer<unsigned int>         cl_cell_indices_start;
+        Buffer<unsigned int>         cl_cell_indices_end;
         Buffer<int>         cl_vars_sort_indices;
-        Buffer<int>         cl_sort_hashes;
-        Buffer<int>         cl_sort_indices;
-        Buffer<int>         cl_unsort;
-        Buffer<int>         cl_sort;
+        Buffer<unsigned int>         cl_sort_hashes;
+        Buffer<unsigned int>         cl_sort_indices;
+        Buffer<unsigned int>         cl_unsort;
+        Buffer<unsigned int>         cl_sort;
 
         Buffer<Triangle>    cl_triangles;
 
         //Two arrays for bitonic sort (sort not done in place)
-        Buffer<int>         cl_sort_output_hashes;
-        Buffer<int>         cl_sort_output_indices;
+        Buffer<unsigned int>         cl_sort_output_hashes;
+        Buffer<unsigned int>         cl_sort_output_indices;
 
-        Bitonic<int> bitonic;
+        Bitonic<unsigned int> bitonic;
 
         //Parameter structs
         Buffer<SPHParams>   cl_SPHParams;

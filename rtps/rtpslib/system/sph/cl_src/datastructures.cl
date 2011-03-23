@@ -146,6 +146,11 @@ __kernel void datastructures(
     {
         cell_indices_end[hash] = index + 1;
     }
+
+    if (hash == gp->nb_cells)
+    {
+        cell_indices_start[4096] = 999;//cell_indices_end[4096];
+    }
     // particle index	
     //if (index >= num) return;
 
