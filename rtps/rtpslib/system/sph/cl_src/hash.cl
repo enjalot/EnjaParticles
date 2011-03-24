@@ -78,7 +78,8 @@ __kernel void hash(
 
     //fdebug[index] = gp->grid_inv_delta;
     //fdebug[index] = (float4)((p.x - gp->grid_min.x) * gp->grid_inv_delta.x, p.x, 0,0);
-    clf[index] = (float4)((p.x - gp->grid_min.x) * gp->grid_delta.x, p.x, 0,0);
+    //clf[index] = (float4)((p.x - gp->grid_min.x) * gp->grid_delta.x, p.x, 0,0);
+    clf[index] = p;
     //cli[index].w = sphp->max_num;
 }
 //----------------------------------------------------------------------

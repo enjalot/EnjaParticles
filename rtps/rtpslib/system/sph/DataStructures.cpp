@@ -80,6 +80,8 @@ namespace rtps
             renderer->setNum(sphp.num);
             //need to copy sorted positions into unsorted + position array
             prep(2);
+            hash();
+            bitonic_sort();
         }
 
         printDataStructuresDiagnostics();

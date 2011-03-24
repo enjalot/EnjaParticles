@@ -39,7 +39,7 @@ __kernel void prep(
     {
         velocity[index] = vel(i);
     }
-    else if (stage == 2)
+    if (stage == 2)
     {
         //used if we need to copy sorted positions into positions array
         //later we also need to copy color
@@ -47,15 +47,8 @@ __kernel void prep(
         position[i] = pos(i);
         velocity[i] = vel(i);
         unsorted_pos(i) = pos(i);
+        //unsorted_pos(i) = (float4)(1166., 66., 66., 66.);
     }
-    else if (stage == 3)
-    {
-        unsorted_pos(4) = (float4)(10., 10., 10., 1.);
-        unsorted_pos(5) = (float4)(10., 10., 10., 1.);
-        unsorted_pos(6) = (float4)(10., 10., 10., 1.);
-        unsorted_pos(7) = (float4)(10., 10., 10., 1.);
-    }
-
     /*
     unsorted_density(i) = density[i];
     unsorted_vel(i) = velocity[i];

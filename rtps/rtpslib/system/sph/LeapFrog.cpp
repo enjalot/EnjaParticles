@@ -47,10 +47,12 @@ namespace rtps
         printf("************ LeapFrog **************\n");
             int nbc = num+5;
             std::vector<float4> poss(nbc);
+            std::vector<float4> uposs(nbc);
             std::vector<float4> dens(nbc);
 
             //cl_vars_sorted.copyToHost(dens, DENS*sphp.max_num);
             cl_vars_sorted.copyToHost(poss, POS*sphp.max_num);
+            cl_vars_unsorted.copyToHost(uposs, POS*sphp.max_num);
 
             for (int i=0; i < nbc; i++)
             //for (int i=0; i < 10; i++) 
@@ -59,14 +61,16 @@ namespace rtps
                 //printf("-----\n");
                 //printf("clf_debug: %f, %f, %f, %f\n", clf[i].x, clf[i].y, clf[i].z, clf[i].w);
                 printf("pos sorted: %f, %f, %f, %f\n", poss[i].x, poss[i].y, poss[i].z, poss[i].w);
+                printf("pos unsorted: %f, %f, %f, %f\n", uposs[i].x, uposs[i].y, uposs[i].z, uposs[i].w);
                 //printf("dens sorted: %f, %f, %f, %f\n", dens[i].x, dens[i].y, dens[i].z, dens[i].w);
             }
 
 #endif
 
-        if(cut)
+        if(cut >= 1)
         {
-            exit(0);
+            if (cut == 2) {exit(0);}
+            cut++;
         }
 
 
