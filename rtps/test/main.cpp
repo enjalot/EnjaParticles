@@ -326,7 +326,6 @@ void appKeyboard(unsigned char key, int x, int y)
 
 void appRender()
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     ps->update();
 
@@ -357,6 +356,10 @@ void appRender()
 
     }
 
+    if(render_movie)
+    {
+        frame_counter++;
+    }
     //showFPS(enjas->getFPS(), enjas->getReport());
     glutSwapBuffers();
 
@@ -509,6 +512,7 @@ void render_stereo()
 {
 
     glDrawBuffer(GL_BACK_LEFT);                              //draw into back left buffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();                                        //reset projection matrix
     glFrustum(leftCam.leftfrustum, leftCam.rightfrustum,     //set left view frustum
@@ -534,6 +538,7 @@ void render_stereo()
     }
 
     glDrawBuffer(GL_BACK_RIGHT);                             //draw into back right buffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();                                        //reset projection matrix
     glFrustum(rightCam.leftfrustum, rightCam.rightfrustum,   //set left view frustum
@@ -581,7 +586,7 @@ void setFrustum(void)
 
 int write_movie_frame(const char* name)
 {
-        sprintf(filename,"%s%s_%08d.png",render_dir,name,frame_counter++);
+        sprintf(filename,"%s%s_%08d.png",render_dir,name,frame_counter);
         glReadPixels(0, 0, window_width, window_height, GL_RGBA, GL_UNSIGNED_BYTE, image);
         if (!stbi_write_png(filename,window_width,window_height,4,(void*)image,0))
         {
