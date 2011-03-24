@@ -133,7 +133,7 @@ namespace rtps
         //srand ( time(NULL) );
 
         printf("num: %d\n", num);
-        spacing *= 1.999f; //should probably just figure out whats up with my spacing
+        spacing *= 1.1f; //should probably just figure out whats up with my spacing
         printf("spacing: %f\n", spacing);
         float pert = .1f*spacing;   //amount of perterbation
 
