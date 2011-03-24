@@ -72,7 +72,7 @@ namespace rtps
             //seems like hashes are getting messed up
             //probably because we are hashing on unsorted particles, cutting off only works on sorted
             //num = 10;
-            //num = nc;
+            num = nc;
             sphp.num = num;
             updateSPHP();
             renderer->setNum(sphp.num);
