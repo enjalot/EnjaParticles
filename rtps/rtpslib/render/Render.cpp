@@ -325,11 +325,11 @@ namespace rtps
     {
 
         glEnable(GL_DEPTH_TEST);
-        //glColor4f(0.5f, 0.5f, 0.5f, 1.0f);
+        glColor4f(0.5f, 0.5f, 0.5f, 1.0f);
         //glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT2,GL_TEXTURE_2D,0,0);
         //glBindTexture(GL_TEXTURE_2D,gl_framebuffer_texs["normalColor"]);
         //glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT2,GL_TEXTURE_2D,gl_framebuffer_texs["normalColor"],0);
-        glBindTexture(GL_TEXTURE_2D,gl_textures["checker_board"]);
+        //glBindTexture(GL_TEXTURE_2D,gl_textures["checker_board"]);
         //glBegin(GL_TRIANGLE_STRIP);
         glBegin(GL_QUADS);
         float4 scale = float4((0.25f)*(max.x-min.x),(0.25f)*(max.y-min.y),(0.25f)*(max.z-min.z),0.0f);

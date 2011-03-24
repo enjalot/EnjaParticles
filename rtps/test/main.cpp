@@ -19,10 +19,12 @@
 
 #include <RTPS.h>
 //#include "timege.h"
+#include "../rtpslib/render/util/stb_image_write.h"
+
 using namespace rtps;
 
-int window_width = 1200;
-int window_height = 600;
+int window_width = 640;
+int window_height = 480;
 int glutWindowHandle = 0;
 
 
@@ -37,12 +39,18 @@ struct camera
     GLfloat modeltranslation;
 } leftCam, rightCam;
 
-bool stereo_enabled = true;
+bool stereo_enabled = false;
+bool render_movie = false;
+GLubyte* image = new GLubyte[window_width*window_height*4];
+const char* render_dir = "./frames/";
+
+char filename[512] = {'\0'};
+unsigned int frame_counter = 0;
 float depthZ = -10.0;                                      //depth of the object drawing
 
 double fovy = 65.;                                          //field of view in y-axis
 double aspect = double(window_width)/double(window_height);  //screen aspect ratio
-double nearZ = 3.0;                                        //near clipping plane
+double nearZ = 0.3;                                        //near clipping plane
 double farZ = 100.0;                                        //far clipping plane
 double screenZ = 10.0;                                     //screen projection plane
 double IOD = 0.5;                                          //intraocular distance
@@ -76,6 +84,10 @@ void timerCB(int ms);
 
 void drawString(const char *str, int x, int y, float color[4], void *font);
 void showFPS(float fps, std::string *report);
+int write_movie_frame(const char* name);
+void draw_collision_boxes();
+void rotate_img(GLubyte* img, int size);
+
 void *font = GLUT_BITMAP_8_BY_13;
 
 rtps::RTPS* ps;
@@ -149,7 +161,7 @@ int main(int argc, char** argv)
     rtps::Domain grid = Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
     //rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
     rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
-    settings.setRadiusScale(.5);
+    settings.setRadiusScale(1);
     settings.setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
     settings.setBlurScale(1);
     settings.setUseGLSL(0);
@@ -241,6 +253,9 @@ void appKeyboard(unsigned char key, int x, int y)
             ps->system->sprayHoses();
             return;
 
+        case 'n':
+            render_movie=!render_movie;
+            break;
         case '`':
             stereo_enabled = !stereo_enabled;
             break;
@@ -335,27 +350,13 @@ void appRender()
         glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
         glTranslatef(translate_x, translate_z, translate_y);
         ps->render();
+        if(render_movie)
+        {
+            write_movie_frame("image");
+        }
+
     }
-    glColor4f(0,0,1,.5);
 
-    //glDepthMask(GL_FALSE);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glBegin(GL_TRIANGLES);
-    //printf("num triangles %zd\n", triangles.size());
-    for (int i=0; i < triangles.size(); i++)
-    {
-        //for (int i=0; i < 20; i++) {
-        Triangle& tria = triangles[i];
-        glNormal3fv(&tria.normal.x);
-        glVertex3f(tria.verts[0].x, tria.verts[0].y, tria.verts[0].z);
-        glVertex3f(tria.verts[1].x, tria.verts[1].y, tria.verts[1].z);
-        glVertex3f(tria.verts[2].x, tria.verts[2].y, tria.verts[2].z);
-    }
-    glEnd();
-
-    glDisable(GL_BLEND);
     //showFPS(enjas->getFPS(), enjas->getReport());
     glutSwapBuffers();
 
@@ -498,6 +499,8 @@ void resizeWindow(int w, int h)
     ps->system->getRenderer()->setWindowDimensions(w,h);
     window_width = w;
     window_height = h;
+    delete[] image;
+    image = new GLubyte[w*h*4];
     setFrustum();
     glutPostRedisplay();
 }
@@ -524,6 +527,11 @@ void render_stereo()
         ps->render();
     }
     glPopMatrix();
+    draw_collision_boxes();
+    if(render_movie)
+    {
+        write_movie_frame("stereo/image_left_");
+    }
 
     glDrawBuffer(GL_BACK_RIGHT);                             //draw into back right buffer
     glMatrixMode(GL_PROJECTION);
@@ -544,6 +552,11 @@ void render_stereo()
         ps->render();
     }
     glPopMatrix();
+    draw_collision_boxes();
+    if(render_movie)
+    {
+        write_movie_frame("stereo/image_right_");
+    }
 }
 
 
@@ -564,4 +577,53 @@ void setFrustum(void)
     rightCam.leftfrustum = -right - frustumshift;
     rightCam.rightfrustum = right - frustumshift;
     rightCam.modeltranslation = -IOD/2;
+}
+
+int write_movie_frame(const char* name)
+{
+        sprintf(filename,"%s%s_%08d.png",render_dir,name,frame_counter++);
+        glReadPixels(0, 0, window_width, window_height, GL_RGBA, GL_UNSIGNED_BYTE, image);
+        if (!stbi_write_png(filename,window_width,window_height,4,(void*)image,0))
+        {
+            printf("failed to write image %s\n",filename);
+            return -1;
+        }
+        return 0;
+}
+void rotate_img(GLubyte* img, int size)
+{
+    GLubyte tmp=0;
+    for(int i = 0; i<size; i++)
+    {
+        for(int j = 0; j<4; j++)
+        {
+            tmp = img[(i*4)+j];
+            img[(i*4)+j] = img[size-((i*4)+j)-1];
+            img[size-((i*4)+j)-1] = tmp;
+        }
+    }
+}
+
+void draw_collision_boxes()
+{
+    glColor4f(0,0,1,.5);
+
+    //glDepthMask(GL_FALSE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glBegin(GL_TRIANGLES);
+    //printf("num triangles %zd\n", triangles.size());
+    for (int i=0; i < triangles.size(); i++)
+    {
+        //for (int i=0; i < 20; i++) {
+        Triangle& tria = triangles[i];
+        glNormal3fv(&tria.normal.x);
+        glVertex3f(tria.verts[0].x, tria.verts[0].y, tria.verts[0].z);
+        glVertex3f(tria.verts[1].x, tria.verts[1].y, tria.verts[1].z);
+        glVertex3f(tria.verts[2].x, tria.verts[2].y, tria.verts[2].z);
+    }
+    glEnd();
+
+    glDisable(GL_BLEND);
 }

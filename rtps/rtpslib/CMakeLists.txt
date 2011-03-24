@@ -125,7 +125,7 @@ IF(WITH_OPENCL)
 SET(rtpslib_SOURCES ${rtpslib_SOURCES}
     ${rtpslib_SOURCE_DIR}/opencl/CLL
     ${rtpslib_SOURCE_DIR}/opencl/Kernel
-    ${rtpslib_SOURCE_DIR}/opencl/Buffer #template class
+    #${rtpslib_SOURCE_DIR}/opencl/Buffer #template class
 
     #${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src/oclBitonicSort_launcher
     #${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src/BitonicSort #template class
