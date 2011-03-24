@@ -122,6 +122,8 @@ namespace rtps
 
         void loadTriangles(std::vector<Triangle> triangles);
 
+        void testCut();
+        bool cut;
 
 
         enum

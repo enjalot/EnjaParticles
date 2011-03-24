@@ -564,6 +564,11 @@ namespace rtps
 
     void SPH::sprayHoses()
     {
+        //IJ testing only
+        testCut();
+        return;
+
+
         std::vector<float4> parts;
         for (int i = 0; i < hoses.size(); i++)
         {

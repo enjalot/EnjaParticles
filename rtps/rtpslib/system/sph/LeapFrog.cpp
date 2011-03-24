@@ -38,6 +38,12 @@ namespace rtps
         int local_size = 128;
         k_leapfrog.execute(num, local_size);
 
+
+        if(cut)
+        {
+            exit(0);
+        }
+
     }
 
     void SPH::cpuLeapFrog()

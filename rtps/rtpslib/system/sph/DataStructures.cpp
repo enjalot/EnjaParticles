@@ -16,6 +16,16 @@ namespace rtps
         
     }
 
+    void SPH::testCut()
+    {
+        num = 10;
+        sphp.num = num;
+        updateSPHP();
+        renderer->setNum(sphp.num);
+        cut = true;
+
+    }
+
     void SPH::buildDataStructures()
     // Generate hash list: stored in cl_sort_hashes
     {
