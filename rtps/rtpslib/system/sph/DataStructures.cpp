@@ -184,7 +184,7 @@ namespace rtps
             std::vector<float4> poss(nbc);
             std::vector<float4> dens(nbc);
 
-            cl_vars_sorted.copyToHost(dens, DENS*sphp.max_num);
+            //cl_vars_sorted.copyToHost(dens, DENS*sphp.max_num);
             cl_vars_sorted.copyToHost(poss, POS*sphp.max_num);
 
             for (int i=0; i < nbc; i++)

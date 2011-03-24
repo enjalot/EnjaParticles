@@ -83,7 +83,7 @@ namespace rtps
         }
         ps->cli->queue.finish();
 
-#if 1 //printouts    
+#if 0 //printouts    
         //DEBUGING
         
         if(num > 0)// && choice == 0)
