@@ -150,16 +150,6 @@ int main(int argc, char** argv)
     ps = new rtps::RTPS(settings);
 
 
-    printf("about to make hose\n");
-    float4 center(2., 2., 2., 1.);
-    float4 velocity(.6, -.6, -.6, 0);
-
-    //sph sets spacing and multiplies by radius value
-    ps->system->addHose(2048, center, velocity, 5);
-
-
-
-
     //initialize the OpenGL scene for rendering
     init_gl();
 
@@ -231,17 +221,22 @@ void appKeyboard(unsigned char key, int x, int y)
             // Cleanup up and quit
             appDestroy();
             return;
-        case 'm':
-            //spray hose
-            printf("about to spray\n");
-            ps->system->sprayHoses();
-            return;
         case 'b':
             printf("deleting willy nilly\n");
             ps->system->testDelete();
             return;
-
-
+        case 'h':
+        {
+            //spray hose
+            printf("about to make hose\n");
+            float4 center(2., 2., 2., 1.);
+            //float4 velocity(.6, -.6, -.6, 0);
+            float4 velocity(2., 5., -.8, 0);
+            //sph sets spacing and multiplies by radius value
+            ps->system->addHose(2048, center, velocity, 5);
+            return;
+        }
+        
         case 't': //place a cube for collision
             {
                 nn = 512;
@@ -325,6 +320,7 @@ void appRender()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    ps->system->sprayHoses();
     ps->update();
 
     glEnable(GL_DEPTH_TEST);
