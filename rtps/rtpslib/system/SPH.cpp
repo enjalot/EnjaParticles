@@ -590,9 +590,7 @@ namespace rtps
 
     void SPH::pushParticles(vector<float4> pos, float4 velo)
     {
-        cut = true;
-
-
+        //cut = true;
 
         int nn = pos.size();
         if (num + nn > max_num)
