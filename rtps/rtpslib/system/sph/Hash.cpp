@@ -45,28 +45,12 @@ namespace rtps
 
         //-------------------
 
-        //sset(gp->nb_points, minus, cl_cell_indices_start->getDevicePtr());
-        //exit(0);   // SOMETHING WRONG with sset!!! WHY? 
 
         if(num > 0)
         {
             printHashDiagnostics();
         }
 
-#if 0
-        GridParams& gp = *cl_GridParams->getHostPtr();
-        cl_sort_hashes->copyToHost();
-        int* h = cl_sort_hashes->getHostPtr();
-        int sz = (int) (gp.grid_res.x * gp.grid_res.y * gp.grid_res.z);
-        int mx = -1;
-        for (int i=0; i < nb_el; i++)
-        {
-            //printf("h[%d]= %d\n", i, h[i]);
-            if (h[i] > mx) mx = h[i];
-        }
-        printf("sz= %d, max hash: %d\n", sz, mx);
-        //exit(0);
-#endif
     }
 
     //----------------------------------------------------------------------

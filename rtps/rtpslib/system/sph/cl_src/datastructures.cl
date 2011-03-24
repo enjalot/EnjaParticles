@@ -152,23 +152,6 @@ __kernel void datastructures(
     }
     //}
     
-    //barrier(CLK_LOCAL_MEM_FENCE);
-    //barrier(CLK_GLOBAL_MEM_FENCE);
-    /*
-    //if (hash == gp->nb_cells)
-    {
-        int ii = 1;
-        cell_indices_start[ii] = 999;//cell_indices_end[4096];
-        cell_indices_end[ii] = 888;//cell_indices_end[4096];
-
-        cell_indices_start[ii+1] = 999;//cell_indices_end[4096];
-        cell_indices_end[ii+1] = 888;//cell_indices_end[4096];
-
-        cell_indices_start[ii-1] = 999;//cell_indices_end[4096];
-        cell_indices_end[ii-1] = 888;//cell_indices_end[4096];
-
-    }
-    */
 #endif
     
     //cell_indices_end[index] = 42;

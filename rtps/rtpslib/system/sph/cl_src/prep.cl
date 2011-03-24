@@ -39,6 +39,22 @@ __kernel void prep(
     {
         velocity[index] = vel(i);
     }
+    else if (stage == 2)
+    {
+        //used if we need to copy sorted positions into positions array
+        //later we also need to copy color
+
+        position[i] = pos(i);
+        velocity[i] = vel(i);
+        unsorted_pos(i) = pos(i);
+    }
+    else if (stage == 3)
+    {
+        unsorted_pos(4) = (float4)(10., 10., 10., 1.);
+        unsorted_pos(5) = (float4)(10., 10., 10., 1.);
+        unsorted_pos(6) = (float4)(10., 10., 10., 1.);
+        unsorted_pos(7) = (float4)(10., 10., 10., 1.);
+    }
 
     /*
     unsorted_density(i) = density[i];

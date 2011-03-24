@@ -7,7 +7,6 @@
 #include "cl_macros.h"
 #include "cl_hash.h"
 
-
 //----------------------------------------------------------------------
 // Calculate a grid hash value for each particle
 
@@ -57,7 +56,10 @@ __kernel void hash(
     bool wrap_edges = false;
     //uint hash = (uint) calcGridHash(gridPos, gp->grid_res, wrap_edges);//, fdebug, idebug);
     int hash = calcGridHash(gridPos, gp->grid_res, wrap_edges);//, fdebug, idebug);
+
+    cli[index].xyz = gridPos.xyz;
     cli[index].w = hash;
+    //cli[index].w = (gridPos.z*gp->grid_res.y + gridPos.y) * gp->grid_res.x + gridPos.x; 
 
     hash = hash > gp->nb_cells ? gp->nb_cells : hash;
     hash = hash < 0 ? gp->nb_cells : hash;
@@ -77,7 +79,6 @@ __kernel void hash(
     //fdebug[index] = gp->grid_inv_delta;
     //fdebug[index] = (float4)((p.x - gp->grid_min.x) * gp->grid_inv_delta.x, p.x, 0,0);
     clf[index] = (float4)((p.x - gp->grid_min.x) * gp->grid_delta.x, p.x, 0,0);
-    cli[index].xyz = gridPos.xyz;
     //cli[index].w = sphp->max_num;
 }
 //----------------------------------------------------------------------

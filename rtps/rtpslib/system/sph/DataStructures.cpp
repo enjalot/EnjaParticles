@@ -78,77 +78,11 @@ namespace rtps
             sphp.num = num;
             updateSPHP();
             renderer->setNum(sphp.num);
+            //need to copy sorted positions into unsorted + position array
+            prep(2);
         }
 
         printDataStructuresDiagnostics();
-
-        if (num > 0)
-        {
-            //exit(0);
-        }
-
-
-#if 0
-    //printouts
-    int nbc = 10;
-    //printf("start cell indices\n");
-    //printf("end cell indices\n");
-    //nbc = grid_params.nb_cells;
-    //std::vector<int> is = cl_cell_indices_start.copyToHost(nbc);
-    //std::vector<int> ie = cl_cell_indices_end.copyToHost(nbc);
-
-    std::vector<int> is(nbc);
-    std::vector<int> ie(nbc);
-    
-    cl_cell_indices_end.copyToHost(is);
-    cl_cell_indices_start.copyToHost(ie, 100);
-
-
-    /*
-    for(int i = 0; i < nbc; i++)
-    {
-        printf("sci[%d] %d eci[%d] %d\n", i, is[i], i, ie[i]);
-    }
-    */
-
-    int nb_particles = 0;
-    int nb;
-    int asdf = 0;
-    for (int i=0; i < nbc; i++) {
-    //for (int i=0; i < 100; i++) {
-        printf("is,ie[%d]= %d, %d\n", i, is[i], ie[i]);
-        // ie[i] SHOULD NEVER BE ZERO 
-        //printf("is[%d] %d ie[%d] %d\n", i, is[i], i, ie[i]);
-        if (is[i] != -1 && ie[i] != 0) {
-            nb = ie[i] - is[i];
-            nb_particles += nb;
-        }
-        */
-
-        int nb_particles = 0;
-        int nb;
-        int asdf = 0;
-        for (int i=0; i < grid_params.nb_cells; i++)
-        {
-            //for (int i=0; i < 100; i++) {
-            //printf("is,ie[%d]= %d, %d\n", i, is[i], ie[i]);
-            // ie[i] SHOULD NEVER BE ZERO 
-            //printf("is[%d] %d ie[%d] %d\n", i, is[i], i, ie[i]);
-            if (is[i] != -1 && ie[i] != 0)
-            {
-                nb = ie[i] - is[i];
-                nb_particles += nb;
-            }
-            if (is[i] != -1 && ie[i] != 0 && i > 600 && i < 1000)
-            {
-                asdf++;
-                //printf("(GPU) [%d]: indices_start: %d, indices_end: %d, nb pts: %d\n", i, is[i], ie[i], nb);
-            }
-        }
-        printf("asdf: %d\n", asdf);
-        printf("done with data structures\n");
-#endif
-
 
     }
 
@@ -177,7 +111,8 @@ namespace rtps
         }
 
 
-#if 1
+#if 0
+        //print out elements from the sorted arrays
 #define DENS 0
 #define POS 1
 #define VEL 2
