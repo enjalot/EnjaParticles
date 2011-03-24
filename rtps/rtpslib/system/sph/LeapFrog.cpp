@@ -39,7 +39,7 @@ namespace rtps
         k_leapfrog.execute(num, local_size);
 
 
-#if 1
+#if 0
 #define DENS 0
 #define POS 1
 #define VEL 2
@@ -67,11 +67,15 @@ namespace rtps
 
 #endif
 
+        /*
+         * enables us to cut off after a couple iterations
+         * by setting cut = 1 from some other function
         if(cut >= 1)
         {
             if (cut == 2) {exit(0);}
             cut++;
         }
+        */
 
 
     }

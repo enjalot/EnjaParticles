@@ -185,25 +185,25 @@ namespace rtps
             k_viscosity.execute(num);
             k_xsph.execute(num);
             */
-            printf("hash\n");
+            //printf("hash\n");
             timers[TI_HASH]->start();
             hash();
             timers[TI_HASH]->end();
-            printf("bitonic_sort\n");
+            //printf("bitonic_sort\n");
             timers[TI_BITONIC_SORT]->start();
             bitonic_sort();
             timers[TI_BITONIC_SORT]->end();
-            printf("data structures\n");
+            //printf("data structures\n");
             timers[TI_BUILD]->start();
             buildDataStructures(); //reorder
             timers[TI_BUILD]->end();
 
             timers[TI_NEIGH]->start();
-            printf("density\n");
+            //printf("density\n");
             timers[TI_DENS]->start();
             neighborSearch(0);  //density
             timers[TI_DENS]->end();
-            printf("forces\n");
+            //printf("forces\n");
             timers[TI_FORCE]->start();
             neighborSearch(1);  //forces
             timers[TI_FORCE]->end();
@@ -574,15 +574,6 @@ namespace rtps
 
     void SPH::sprayHoses()
     {
-        //cut = 1;
-        std::vector<float4> poss(4);
-        float4 posx(10.,10.,10.,1.);
-        std::fill(poss.begin(), poss.end(),posx);
-        cl_vars_unsorted.copyToDevice(poss, max_num + 2);
-        ps->cli->queue.finish();
-
-
-
 
         std::vector<float4> parts;
         for (int i = 0; i < hoses.size(); i++)
@@ -593,6 +584,18 @@ namespace rtps
         }
     }
 
+    void SPH::testDelete()
+    {
+
+        //cut = 1;
+        std::vector<float4> poss(40);
+        float4 posx(10.,10.,10.,1.);
+        std::fill(poss.begin(), poss.end(),posx);
+        cl_vars_unsorted.copyToDevice(poss, max_num + 2);
+        ps->cli->queue.finish();
+
+
+    }
     void SPH::pushParticles(vector<float4> pos, float4 velo)
     {
         //cut = 1;

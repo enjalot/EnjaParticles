@@ -73,6 +73,9 @@ namespace rtps
         virtual void sprayHoses()
         {
         };
+        virtual void testDelete()
+        {
+        };
 
 
         virtual void loadTriangles(std::vector<Triangle> triangles)

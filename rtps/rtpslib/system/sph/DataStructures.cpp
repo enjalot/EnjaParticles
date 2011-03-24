@@ -16,16 +16,6 @@ namespace rtps
         
     }
 
-    void SPH::testCut()
-    {
-        num = 10;
-        sphp.num = num;
-        updateSPHP();
-        renderer->setNum(sphp.num);
-        cut = true;
-
-    }
-
     void SPH::buildDataStructures()
     // Generate hash list: stored in cl_sort_hashes
     {
@@ -62,18 +52,13 @@ namespace rtps
         cl_cell_indices_start.copyToHost(num_changed, grid_params.nb_cells);
        
         int nc = num_changed[0];
-        printf("Num Changed: %d\n", nc);
+        //printf("Num Changed: %d\n", nc);
 
         //if(num > 0 && nc < 0) { exit(0); }
         
         if (nc < num && nc > 0)
         //if(num > 0)
         {
-            //sphp.num = nc-1;
-            //num = 10;
-            //seems like hashes are getting messed up
-            //probably because we are hashing on unsorted particles, cutting off only works on sorted
-            //num = 10;
             num = nc;
             sphp.num = num;
             updateSPHP();
@@ -84,7 +69,7 @@ namespace rtps
             bitonic_sort();
         }
 
-        printDataStructuresDiagnostics();
+        //printDataStructuresDiagnostics();
 
     }
 

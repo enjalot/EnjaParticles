@@ -123,8 +123,8 @@ namespace rtps
 
         void loadTriangles(std::vector<Triangle> triangles);
 
-        void testCut();
-        int cut;
+        void testDelete();
+        int cut; //for debugging DEBUG
 
 
         enum

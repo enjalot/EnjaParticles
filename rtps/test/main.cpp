@@ -236,6 +236,10 @@ void appKeyboard(unsigned char key, int x, int y)
             printf("about to spray\n");
             ps->system->sprayHoses();
             return;
+        case 'b':
+            printf("deleting willy nilly\n");
+            ps->system->testDelete();
+            return;
 
 
         case 't': //place a cube for collision
@@ -255,7 +259,8 @@ void appKeyboard(unsigned char key, int x, int y)
             }
         case 'r': //drop a rectangle
             {
-                nn = 20;
+                //nn = 20;
+                nn = 2048;
                 //test out of bounds (max)
                 //with max_num = 8192 this will have 2 particles in bounds and 18 out
                 min = float4(5.7, 5.7, 5.7, 1.0f);

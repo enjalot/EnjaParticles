@@ -48,7 +48,7 @@ namespace rtps
 
         if(num > 0)
         {
-            printHashDiagnostics();
+            //printHashDiagnostics();
         }
 
     }
