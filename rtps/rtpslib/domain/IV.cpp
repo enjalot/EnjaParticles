@@ -1,6 +1,10 @@
 #include "IV.h"
 #include <vector>
 
+//for random
+#include<stdlib.h>
+#include<time.h>
+
 namespace rtps
 {
 
@@ -116,6 +120,61 @@ namespace rtps
         return rvec;
 
     }
+
+    std::vector<float4> addDiscRandom(int num, float4 center, float4 u, float4 v, float radius, float spacing)
+    {
+        /*
+         * randomly space the particles on a grid, rather than evenly
+         * randomize the velocity within some bounds 
+         * so each particle needs its own velocity
+         */
+
+        //seed random
+        //srand ( time(NULL) );
+
+        printf("num: %d\n", num);
+        spacing *= 1.999f; //should probably just figure out whats up with my spacing
+        printf("spacing: %f\n", spacing);
+        float pert = .1f*spacing;   //amount of perterbation
+
+        float4 umin = -radius*u;
+        float4 vmin = -radius*v;
+        /*
+        printf("u %f %f %f %f\n", u.x, u.y, u.z, u.w);
+        printf("v %f %f %f %f\n", v.x, v.y, v.z, v.w);
+        printf("umin %f %f %f %f\n", umin.x, umin.y, umin.z, umin.w);
+        printf("vmin %f %f %f %f\n", vmin.x, vmin.y, vmin.z, vmin.w);
+        */
+
+        std::vector<float4> rvec;
+        int i = 0;
+        float d2 = 0.;
+        float r2 = radius*radius;
+        for (float du = 0.; du < 2.*radius; du += spacing)
+        {
+            for (float dv = 0.; dv < 2.*radius; dv += spacing)
+            {
+                if (i >= num) break;
+                float rru = rand()*pert*2./RAND_MAX - pert;   //random number between -pert and pert
+                float rrv = rand()*pert*2./RAND_MAX - pert;   //random number between -pert and pert
+                du += rru;
+                dv += rrv;
+                float4 part = center + umin + u*du + vmin + v*dv;
+                part.w = 1.0f;
+                //printf("part %f %f %f %f\n", part.x, part.y, part.z, part.w);
+                d2 = dist_squared(part-center);
+                //printf("d2: %f, r2: %f\n", d2, r2);
+                if (d2 < r2)
+                {
+                    rvec.push_back(part);
+                    i++;
+                }
+            }
+        }
+        return rvec;
+
+    }
+
 
 
 }

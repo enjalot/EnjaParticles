@@ -170,7 +170,7 @@ namespace rtps
         //should just do try/except?
         for (int i=0; i < sub_intervals; i++)
         {
-            //sprayHoses();
+            sprayHoses();
         }
 
         cl_position.acquire();
@@ -346,7 +346,7 @@ namespace rtps
         sphp.boundary_distance = boundary_distance;
         sphp.EPSILON = .00001f;
         sphp.PI = pi;
-        sphp.K = 20.0f;
+        sphp.K = 5.0f;
         sphp.num = num;
         sphp.max_num = max_num;
         //sphp.surface_threshold = 2.0 * sphp.simulation_scale; //0.01;

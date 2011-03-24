@@ -69,27 +69,24 @@ void Hose::calc_em()
     float dt = ps->settings.dt;
     float magv = magnitude(velocity);
     //printf("magv: %f\n", magv);
-    em = (int) (1 + spacing/dt/magv/8.);
+    //em = (int) (1 + spacing/dt/magv/8.);
+    //why do i have to divide by 4?
+    em = (int) (1 + spacing/dt/magv/4);
     //printf("em: %d\n", em);
 }
 
-/*
- * randomly space the particles on a grid, rather than evenly
- * randomize the velocity within some bounds 
- * so each particle needs its own velocity
- */
-
 std::vector<float4> Hose::spray()
 {
-    printf("SPRAY!\n");
+    //printf("SPRAY!\n");
     em_count++;
     calc_em();
-    printf("em_count %d em %d n_count %d\n", em_count, em, n_count);
+    //printf("em_count %d em %d n_count %d\n", em_count, em, n_count);
     std::vector<float4> particles;
     if(em_count >= em && n_count > 0)
     {
         //std::vector<float4> addDisc(int num, float4 center, float4 u, float4 v, float radius, float spacing);
-        particles = addDisc(n_count, center, u, w, radius, spacing);
+        //particles = addDisc(n_count, center, u, w, radius, spacing);
+        particles = addDiscRandom(n_count, center, u, w, radius, spacing);
         n_count -= particles.size();
         em_count = 0;
     }

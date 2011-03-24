@@ -70,10 +70,10 @@ rtps::RTPS* ps;
 
 //#define NUM_PARTICLES 524288
 //#define NUM_PARTICLES 262144
-//#define NUM_PARTICLES 65536
+#define NUM_PARTICLES 65536
 //#define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 10000
-#define NUM_PARTICLES 8192
+//#define NUM_PARTICLES 8192
 //#define NUM_PARTICLES 4096
 //#define NUM_PARTICLES 2048
 //#define NUM_PARTICLES 1024
@@ -320,7 +320,7 @@ void appRender()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    ps->system->sprayHoses();
+    //ps->system->sprayHoses();
     ps->update();
 
     glEnable(GL_DEPTH_TEST);
