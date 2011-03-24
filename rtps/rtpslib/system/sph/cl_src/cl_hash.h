@@ -30,7 +30,7 @@ int4 calcGridCell(float4 p, float4 grid_min, float4 grid_delta)
 }
 
 //----------------------------------------------------------------------
-uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges
+int calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges
                   //,__global float4* fdebug,
                   //__global int4* idebug
                  )

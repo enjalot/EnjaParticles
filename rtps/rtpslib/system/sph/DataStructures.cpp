@@ -63,6 +63,8 @@ namespace rtps
        
         int nc = num_changed[0];
         printf("Num Changed: %d\n", nc);
+
+        //if(num > 0 && nc < 0) { exit(0); }
         
         if (nc < num && nc > 0)
         //if(num > 0)

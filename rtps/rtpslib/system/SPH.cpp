@@ -532,7 +532,7 @@ namespace rtps
         //grid_params_scaled.grid_inv_delta.w = 1.0f;
 
         //grid_params.print();
-        grid_params_scaled.print();
+        //grid_params_scaled.print();
 
     }
 
@@ -590,7 +590,7 @@ namespace rtps
 
     void SPH::pushParticles(vector<float4> pos, float4 velo)
     {
-        //cut = true;
+        cut = true;
 
 
 

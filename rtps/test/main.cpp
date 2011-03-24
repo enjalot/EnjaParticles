@@ -256,8 +256,16 @@ void appKeyboard(unsigned char key, int x, int y)
         case 'r': //drop a rectangle
             {
                 nn = 20;
+                //test out of bounds (max)
+                //with max_num = 8192 this will have 2 particles in bounds and 18 out
                 min = float4(5.7, 5.7, 5.7, 1.0f);
                 max = float4(6.5, 6.5, 6.5, 1.0f);
+
+                //test negative bounds
+                //with max_num = 8192 this will have 8 particles in bounds and 12 out
+                min = float4(-1.5, -1.5, -1.0, 1.0f);
+                max = float4(1.0, 1.0, 1.0, 1.0f);
+
 
                 //min = float4(15.8, 15.8, 15.8, 1.0f);
                 //max = float4(16.5, 16.5, 16.5, 1.0f);

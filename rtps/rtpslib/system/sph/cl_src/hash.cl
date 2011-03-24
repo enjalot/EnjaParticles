@@ -55,9 +55,12 @@ __kernel void hash(
     //int4 gridPos = calcGridCell(p, gp->grid_min, gp->grid_inv_delta);
     int4 gridPos = calcGridCell(p, gp->grid_min, gp->grid_delta);
     bool wrap_edges = false;
-    uint hash = (uint) calcGridHash(gridPos, gp->grid_res, wrap_edges);//, fdebug, idebug);
+    //uint hash = (uint) calcGridHash(gridPos, gp->grid_res, wrap_edges);//, fdebug, idebug);
+    int hash = calcGridHash(gridPos, gp->grid_res, wrap_edges);//, fdebug, idebug);
+    cli[index].w = hash;
 
     hash = hash > gp->nb_cells ? gp->nb_cells : hash;
+    hash = hash < 0 ? gp->nb_cells : hash;
     /*
        //problem is that when we cut num we are hashing the wrong stuff?
     if (index >= num)
@@ -66,7 +69,7 @@ __kernel void hash(
     }
     */
     // store grid hash and particle index
-    sort_hashes[index] = hash;
+    sort_hashes[index] = (uint)hash;
     //int pp = (int) p.x;
 
     sort_indexes[index] = index;
@@ -74,8 +77,8 @@ __kernel void hash(
     //fdebug[index] = gp->grid_inv_delta;
     //fdebug[index] = (float4)((p.x - gp->grid_min.x) * gp->grid_inv_delta.x, p.x, 0,0);
     clf[index] = (float4)((p.x - gp->grid_min.x) * gp->grid_delta.x, p.x, 0,0);
-    cli[index] = gridPos;
-    cli[index].w = sphp->max_num;
+    cli[index].xyz = gridPos.xyz;
+    //cli[index].w = sphp->max_num;
 }
 //----------------------------------------------------------------------
 
