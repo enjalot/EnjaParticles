@@ -24,13 +24,13 @@ namespace rtps
 
         printf("num: %d, stage: %d\n", num, stage);
         int args = 0;
-        k_prep.setArg(args++, num);
         k_prep.setArg(args++, stage);
         k_prep.setArg(args++, cl_position.getDevicePtr());
         k_prep.setArg(args++, cl_velocity.getDevicePtr());
         k_prep.setArg(args++, cl_vars_unsorted.getDevicePtr());
         k_prep.setArg(args++, cl_vars_sorted.getDevicePtr()); 
         k_prep.setArg(args++, cl_sort_indices.getDevicePtr());
+        k_prep.setArg(args++, cl_SPHParams.getDevicePtr());
 
 
         int ctaSize = 128; // work group size

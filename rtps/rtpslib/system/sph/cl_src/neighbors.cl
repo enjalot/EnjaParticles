@@ -111,7 +111,7 @@ __kernel void neighbors(
     float4 position_i = pos(index);
 
     //debuging
-    clf[index] = (float4)(99,99,0,0);
+    clf[index] = (float4)(99,0,0,0);
     //cli[index].w = 0;
 
     // Do calculations on particles in neighboring cells
@@ -128,13 +128,13 @@ __kernel void neighbors(
         clf[index].z = sphp->smoothing_distance;
         clf[index].w = sphp->mass;
         */
-        //clf[index].w = density(index);
+        clf[index].w = density(index);
     }
     if (sphp->choice == 1) // update force
     {
         IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
         force(index) = pt.force; // Does not seem to maintain value into euler.cl
-        //clf[index].xyz = pt.force.xyz;
+        clf[index].xyz = pt.force.xyz;
         xsph(index) = sphp->wpoly6_coef * pt.xsph;
     }
 #if 0

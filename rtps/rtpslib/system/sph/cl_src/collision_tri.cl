@@ -261,7 +261,7 @@ float4 collisions_triangle(float4 pos,
         __global Triangle* triangles_glob, 
         float dt, 
         __local Triangle* triangles, 
-		__constant struct SPHParams* params
+		__constant struct SPHParams* sphp
 )
 {
 	int one_tri = 16;
@@ -275,7 +275,7 @@ float4 collisions_triangle(float4 pos,
     //float mag = sqrt(vel.x*vel.x + vel.y*vel.y + vel.z*vel.z); 
     //float damping = 1.0f;
 
-    //these should be moved to the params struct
+    //these should be moved to the sphp struct
     //but set to 0 in both of Krog's simulations...
     float friction_kinetic = 0.0f;
     float friction_static_limit = 0.0f;
@@ -289,16 +289,16 @@ float4 collisions_triangle(float4 pos,
     dtdt *= dtdt;
     for (int j=0; j < (last-first); j++)
     {
-        //distance = intersect_triangle_ge(pos, vel, &triangles[j], params->boundary_distance, eps, params->simulation_scale);
-        distance = intersect_triangle_segment(pos, vel, &triangles[j], params->boundary_distance, eps, params->simulation_scale);
+        //distance = intersect_triangle_ge(pos, vel, &triangles[j], sphp->boundary_distance, eps, sphp->simulation_scale);
+        distance = intersect_triangle_segment(pos, vel, &triangles[j], sphp->boundary_distance, eps, sphp->simulation_scale);
         //distance = intersect_triangle_ge(pos, vel, &triangles[j], dt, eps);
         //if ( distance != -1)
-        //distance = params->boundary_distance - distance;
-        distance = params->rest_distance - distance;
-        if (distance > eps)// && distance < params->boundary_distance)
+        //distance = sphp->boundary_distance - distance;
+        distance = sphp->rest_distance - distance;
+        if (distance > eps)// && distance < sphp->boundary_distance)
         {
             //Krog boundary forces
-            //f += calculateRepulsionForce(triangles[j].normal, vel, 1*params->boundary_stiffness, 1*params->boundary_dampening, distance);
+            //f += calculateRepulsionForce(triangles[j].normal, vel, 1*sphp->boundary_stiffness, 1*sphp->boundary_dampening, distance);
             //f += calculateFrictionForce(vel, force, triangles[j].normal, friction_kinetic, friction_static_limit);
             //Harada boundary wall forces
             f += distance * triangles[j].normal * dtdt;
@@ -386,14 +386,14 @@ __kernel void collision_triangle(    __global float4* vars_sorted,
                                     __global Triangle* triangles_glob, 
                                     int n_triangles, 
                                     float dt, 
-		                            __constant struct SPHParams* params,
+		                            __constant struct SPHParams* sphp,
                                     __local Triangle* triangles
 				                    DEBUG_ARGS
                                     )
 {
 #if 1
     unsigned int i = get_global_id(0);
-	int num = params->num;
+	int num = sphp->num;
 
     float4 p = pos(i);
     float4 v = vel(i);
@@ -423,7 +423,7 @@ __kernel void collision_triangle(    __global float4* vars_sorted,
 		//int l_tri = tri_offsets[j+1];
 		// offsets are monotonic
 		//f = collisions_box(p, v, first, last, boxes_glob, dt, boxes, triangles, f_tri, l_tri, tri_offsets);
-		rf += collisions_triangle(p, v, f, first, last, triangles_glob, dt, triangles, params);
+		rf += collisions_triangle(p, v, f, first, last, triangles_glob, dt, triangles, sphp);
     //rf = (float4)(11.,11.,11.,1);
 	}
 
@@ -431,9 +431,9 @@ __kernel void collision_triangle(    __global float4* vars_sorted,
 
 
     clf[i] = rf;
-    clf[i].w = pos(i).z / params->simulation_scale;
+    clf[i].w = pos(i).z / sphp->simulation_scale;
     cli[i].x = (int)rf.w;
-    cli[i].y = params->num;
+    cli[i].y = sphp->num;
     cli[i].z = get_local_size(0);
     
     /*

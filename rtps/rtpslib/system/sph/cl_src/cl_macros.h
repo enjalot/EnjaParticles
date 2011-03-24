@@ -18,7 +18,8 @@
 #define VELEVAL 8
 #define XSPH 9
 
-#define numParticles num
+//#define numParticles num
+#define numParticles sphp->max_num
 
 #define FETCH(t, i) t[i]
 #define FETCH_VAR(t, i, ivar) t[i+ivar*numParticles]

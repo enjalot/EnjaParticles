@@ -83,10 +83,10 @@ namespace rtps
         }
         ps->cli->queue.finish();
 
-#if 0 //printouts    
+#if 1 //printouts    
         //DEBUGING
         
-        if(num > 0 && choice == 0)
+        if(num > 0)// && choice == 0)
         {
             printf("============================================\n");
             printf("which == %d *** \n", choice);
@@ -102,21 +102,11 @@ namespace rtps
             std::vector<float4> poss(num);
             std::vector<float4> dens(num);
 
-#define DENS 0
-#define POS 1
-#define VEL 2
-
-            cl_vars_sorted.copyToHost(dens, DENS*num);
-            cl_vars_sorted.copyToHost(poss, POS*num);
-
-
             for (int i=0; i < num; i++)
             //for (int i=0; i < 10; i++) 
             {
                 //printf("-----\n");
                 printf("clf_debug: %f, %f, %f, %f\n", clf[i].x, clf[i].y, clf[i].z, clf[i].w);
-                printf("pos sorted: %f, %f, %f, %f\n", poss[i].x, poss[i].y, poss[i].z, poss[i].w);
-                printf("dens sorted: %f, %f, %f, %f\n", dens[i].x, dens[i].y, dens[i].z, dens[i].w);
                 //if(clf[i].w == 0.0) exit(0);
                 //printf("cli_debug: %d, %d, %d, %d\n", cli[i].x, cli[i].y, cli[i].z, cli[i].w);
                 //		printf("pos : %f, %f, %f, %f\n", pos[i].x, pos[i].y, pos[i].z, pos[i].w);

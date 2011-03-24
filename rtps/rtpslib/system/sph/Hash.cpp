@@ -18,10 +18,10 @@ namespace rtps
     {
 
         int args = 0;
-        k_hash.setArg(args++, num); 
         k_hash.setArg(args++, cl_vars_unsorted.getDevicePtr()); // positions + other variables
         k_hash.setArg(args++, cl_sort_hashes.getDevicePtr());
         k_hash.setArg(args++, cl_sort_indices.getDevicePtr());
+        k_hash.setArg(args++, cl_SPHParams.getDevicePtr());
         k_hash.setArg(args++, cl_GridParams.getDevicePtr());
         k_hash.setArg(args++, clf_debug.getDevicePtr());
         k_hash.setArg(args++, cli_debug.getDevicePtr());
@@ -29,7 +29,7 @@ namespace rtps
 
         int ctaSize = 128; // work group size
         // Hash based on unscaled data
-        printf("num in hash %d\n", num);
+        //printf("num in hash %d\n", num);
         k_hash.execute(num, ctaSize);
         //k_hash.execute(max_num, ctaSize); //makes the out of bounds particles "stick".. or not
         // set cell_indicies_start to -1
@@ -75,11 +75,12 @@ namespace rtps
     {
 #if 1
         printf("***** PRINT hash diagnostics ******\n");
-        std::vector<unsigned int> sh = cl_sort_hashes.copyToHost(num);
-        std::vector<unsigned int> si = cl_sort_indices.copyToHost(num);
+        int nbc = num + 5;
+        std::vector<unsigned int> sh = cl_sort_hashes.copyToHost(nbc);
+        std::vector<unsigned int> si = cl_sort_indices.copyToHost(nbc);
         //cl_cells->copyToHost();
-        std::vector<int4> cli = cli_debug.copyToHost(num);
-        std::vector<float4> clf = clf_debug.copyToHost(num);
+        std::vector<int4> cli = cli_debug.copyToHost(nbc);
+        std::vector<float4> clf = clf_debug.copyToHost(nbc);
         //cl_GridParams.copyToHost();
 
         //GridParams& gp = *cl_GridParams->getHostPtr();
@@ -88,9 +89,9 @@ namespace rtps
         //cli_debug->copyToHost();
 
         //for (int i=0; i < num; i++) {  
-        for (int i=0; i < 20; i++)
+        for (int i=0; i < nbc; i++)
         {
-            printf(" cl_sort_hash[%d] %u, cl_sort_indices[%d]: %u\n", i, sh[i], i, si[i]);
+            printf("cl_sort_hash[%d] %u, cl_sort_indices[%d]: %u\n", i, sh[i], i, si[i]);
             //printf("cli_debug: %d, %d, %d, %d\n", cli[i].x, cli[i].y, cli[i].z, cli[i].w);
             //printf("clf_debug: %f, %f, %f, %f\n", clf[i].x, clf[i].y, clf[i].z, clf[i].w);
             //printf("-----\n");

@@ -39,10 +39,36 @@ namespace rtps
         k_leapfrog.execute(num, local_size);
 
 
+#if 1
+#define DENS 0
+#define POS 1
+#define VEL 2
+
+        printf("************ LeapFrog **************\n");
+            int nbc = num+5;
+            std::vector<float4> poss(nbc);
+            std::vector<float4> dens(nbc);
+
+            cl_vars_sorted.copyToHost(dens, DENS*sphp.max_num);
+            cl_vars_sorted.copyToHost(poss, POS*sphp.max_num);
+
+            for (int i=0; i < nbc; i++)
+            //for (int i=0; i < 10; i++) 
+            {
+                poss[i] = poss[i] / sphp.simulation_scale;
+                //printf("-----\n");
+                //printf("clf_debug: %f, %f, %f, %f\n", clf[i].x, clf[i].y, clf[i].z, clf[i].w);
+                printf("pos sorted: %f, %f, %f, %f\n", poss[i].x, poss[i].y, poss[i].z, poss[i].w);
+                printf("dens sorted: %f, %f, %f, %f\n", dens[i].x, dens[i].y, dens[i].z, dens[i].w);
+            }
+
+#endif
+
         if(cut)
         {
             exit(0);
         }
+
 
     }
 

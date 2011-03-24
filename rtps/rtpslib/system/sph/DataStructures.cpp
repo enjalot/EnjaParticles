@@ -155,6 +155,7 @@ namespace rtps
         printf("**************** DataStructures Diagnostics ****************\n");
         int nbc = grid_params.nb_cells + 1;
         printf("nb_cells: %d\n", nbc);
+        printf("num particles: %d\n", num);
 
         std::vector<unsigned int> is(nbc);
         std::vector<unsigned int> ie(nbc);
@@ -172,6 +173,32 @@ namespace rtps
                 printf("cell: %d indices start: %d indices stop: %d\n", i, is[i], ie[i]);
             }
         }
+
+
+#if 1
+#define DENS 0
+#define POS 1
+#define VEL 2
+
+            nbc = num+5;
+            std::vector<float4> poss(nbc);
+            std::vector<float4> dens(nbc);
+
+            cl_vars_sorted.copyToHost(dens, DENS*sphp.max_num);
+            cl_vars_sorted.copyToHost(poss, POS*sphp.max_num);
+
+            for (int i=0; i < nbc; i++)
+            //for (int i=0; i < 10; i++) 
+            {
+                poss[i] = poss[i] / sphp.simulation_scale;
+                //printf("-----\n");
+                //printf("clf_debug: %f, %f, %f, %f\n", clf[i].x, clf[i].y, clf[i].z, clf[i].w);
+                printf("pos sorted: %f, %f, %f, %f\n", poss[i].x, poss[i].y, poss[i].z, poss[i].w);
+                //printf("dens sorted: %f, %f, %f, %f\n", dens[i].x, dens[i].y, dens[i].z, dens[i].w);
+            }
+
+#endif
+
 
     }
 
