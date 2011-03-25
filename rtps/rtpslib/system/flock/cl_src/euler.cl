@@ -11,8 +11,6 @@ __kernel void euler(
 		__global float4* vars_unsorted, 
 		__global float4* vars_sorted, 
 		__global float4* positions,  // for VBO 
-//		__global float4* color,
-//		__constant struct FLOCKParams* params, 
 		__constant struct FLOCKParameters* flockp, 
 		float dt
 		DEBUG_ARGS
@@ -46,13 +44,12 @@ __kernel void euler(
     float count =  den(i).y;
 
     // weights for the rules
-	float w_sep = 0.10f;  // 0.3f
-	float w_aln = 0.001f;
-	float w_coh = 0.0001f;  // 3.f
+	float w_sep = flockp->w_sep;    //0.10f;  // 0.3f
+	float w_aln = flockp->w_align;  //0.001f;
+	float w_coh = flockp->w_coh;    //0.0001f;  // 3.f
 	
     // boundary limits, used to computed boundary conditions    
 	float4 bndMax = flockp->grid_max;
-    
 	float4 bndMin = flockp->grid_min;
 
 

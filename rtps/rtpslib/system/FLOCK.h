@@ -43,6 +43,9 @@ typedef struct FLOCKSettings
 
 //----------------------------------------------------------------------
 //pass parameters to OpenCL routines
+#ifdef WIN32
+#pragma pack(push,16)
+#endif
 typedef struct FLOCKParameters
 {
 
@@ -61,13 +64,23 @@ typedef struct FLOCKParameters
     float search_radius;
     float max_speed; 
     
+    float w_sep;
+    float w_align;
+    float w_coh;
+
     void print() {
 		printf("----- FLOCKParams ----\n");
 		printf("min_dist: %f\n", min_dist);
 		printf("search_radius: %f\n", search_radius);
 		printf("max_speed: %f\n", max_speed);
 	}
-} FLOCKParams 
+} FLOCKParameters
+#ifndef WIN32
+    __attribute__((aligned(16)));
+#else
+    ;
+#pragma pack(pop,16)
+#endif 
 
 //----------------------------------------------------------------------
 class RTPS_EXPORT FLOCK : public System

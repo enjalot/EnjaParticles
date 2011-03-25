@@ -127,10 +127,13 @@ int main(int argc, char** argv)
     printf("before we call enjas functions\n");
 
     float color[4] = {1.f, 0.f, 0.f, 0.f};
+    float w_sep = 0.01f;
+    float w_align = 0.01f;
+    float w_coh = 0.001f;
     
     //default constructor
     rtps::Domain grid = Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
-    rtps::RTPSettings settings(rtps::RTPSettings::FLOCK, NUM_PARTICLES, DT, grid, maxspeed, mindist, searchradius, color);
+    rtps::RTPSettings settings(rtps::RTPSettings::FLOCK, NUM_PARTICLES, DT, grid, maxspeed, mindist, searchradius, color, w_sep, w_align, w_coh);
 
     settings.setRadiusScale(1.0);
     settings.setRenderType(RTPSettings::RENDER);
@@ -246,12 +249,12 @@ void appKeyboard(unsigned char key, int x, int y)
             }
         case 'r': //drop a rectangle
         {
-            nn = 2000;
+            nn = 1024;
             //nn = 4096;
             //nn = 4;
             //max = float4(2.5, 2.5, 2.5, 1.0f);
             //min = float4(2., 2., 2., 1.0f);
-            max = float4(3.5, 3., 3.5, 1.0f);
+            max = float4(2.5, 3., 2.5, 1.0f);
             min = float4(1.5, 2., 1.5, 1.0f);
             //max = float4(1.1,1.1, 1.1, 1.0f);
             //min = float4(1., 1., 1., 1.0f);

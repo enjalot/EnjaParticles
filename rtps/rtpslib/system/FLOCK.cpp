@@ -267,6 +267,10 @@ void FLOCK::calculateFLOCKSettings()
     flock_params.search_radius= 0.8f * flock_params.smoothing_distance * ps->settings.search_radius;
     flock_params.max_speed    = 1.0f * ps->settings.max_speed;
 
+    flock_params.w_sep = ps->settings.w_sep;
+    flock_params.w_align = ps->settings.w_align;
+    flock_params.w_coh= ps->settings.w_coh;
+    
     // debug mymese
 #if 0
     float4 gmin = params.grid_min;

@@ -37,7 +37,7 @@ namespace rtps
         this->tri_collision = tri_collision;
     }
     
-    RTPSettings(SysType system, int max_particles, float dt, Domain grid, float maxspeed, float mindist, float searchradius, float color[], float w_sep, float w_align, float w_coh);
+    RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain grid, float maxspeed, float mindist, float searchradius, float color[], float w_sep, float w_align, float w_coh)
     {
         this->system = system;
         this->max_particles = max_particles;
