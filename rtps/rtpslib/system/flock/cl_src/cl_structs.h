@@ -85,6 +85,7 @@ struct GridParams
 };
 
 //----------------------------------------------------------------------
+#if 0
 struct FluidParams
 {
 	float smoothing_length; // FLOCK radius
@@ -100,5 +101,5 @@ struct FluidParams
 	float gravity; // -9.8 m/sec^2
 	int choice; // EASY WAY TO SELECT KERNELS
 };
-
+#endif
 #endif

@@ -4,7 +4,6 @@
 
 #include "System.h"
 #include "FLOCK.h"
-//#include "../domain/UniformGrid.h"
 #include "Domain.h"
 #include "IV.h"
 
@@ -35,15 +34,13 @@ FLOCK::FLOCK(RTPS *psfr, int n)
 
     grid = ps->settings.grid;
 
-    //FLOCK settings depend on number of particles used
+    //FLOCKSettings depend on number of particles used
 	// Must be called before load kernel methods!
     calculateFLOCKSettings();
+    
     //set up the grid
     setupDomain();
-
-    //flock_settings.integrator = LEAPFROG2;
-    flock_settings.integrator = EULER2;
-
+    
     //*** end Initialization
 
     setupTimers();
@@ -60,31 +57,7 @@ FLOCK::FLOCK(RTPS *psfr, int n)
 #ifdef GPU
     printf("RUNNING ON THE GPU\n");
 
-
-
-    //replace these with the 2 steps
-    /*
-    loadDensity();
-    loadPressure();
-    loadViscosity();
-    loadXFLOCK();
-    */
-
-    //loadStep1();
-    //loadStep2();
-
-//    loadCollision_wall();
-//    loadCollision_tri();
-
-    //could generalize this to other integration methods later (leap frog, RK4)
-//    if(flock_settings.integrator == LEAPFROG2)
-//    {
-//        loadLeapFrog();
-//    }
-//    else if(flock_settings.integrator == EULER2)
-//    {
-        loadEuler();
-//    }
+    loadEuler();
 
     loadScopy();
 
@@ -93,62 +66,8 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     loadBitonicSort();
     loadDataStructures();
     loadNeighbors();
-
-    ////////////////// Setup some initial particles
-    //// really this should be setup by the user
-    //int nn = 1024;
-    int nn = 3333;
-    //nn = 8192;
-    nn = 2048;
-    //nn = 1024;
-    //float4 min = float4(.4, .4, .1, 0.0f);
-    //float4 max = float4(.6, .6, .4, 0.0f);
-
-
-    //float4 min   = float4(-559., -15., 0.5, 1.);
-	//float4 max   = float4(-400., 225., 1050., 1);
-    //grid = Domain(float4(-560,-30,0,0), float4(256, 256, 1276, 0));
-    //float4 min   = float4(100./sd, -15./sd, 0.5/sd, 1.);
-    //float4 min   = float4(100., -15., 550, 1.);
-	//float4 max   = float4(255./sd, 225./sd, 1250./sd, 1);
-
-
-
-    //float4 min = float4(.1, .1, .1, 0.0f);
-    //float4 max = float4(.3, .3, .4, 0.0f);
-
-    //addBox(nn, min, max, false);
-    
-    //nn = 512;
-    /*nn = 512;
-    float4 min = float4(.1, .1, .1, 1.0f);
-	float4 max = float4(.9, .5, .9, 1.0f);
-    addBox(nn, min, max, false);*/
-    //addBox(nn, min, max, false);
-   
-    //float4 center = float4(.1/scale, .15/scale, .3/scale, 0.0f);
-    //addBall(nn, center, .06/scale);
-    //addBall(nn, center, .1/scale);
-    ////////////////// Done with setup particles
-
-    ////DEBUG STUFF
-    printf("positions 0: \n");
-    positions[0].print();
-    
-    //////////////
-
-
-    
     
 #endif
-     // settings defaults to 0
-     //renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
-     //printf("spacing for radius %f\n", flock_settings.spacing);
-     //renderer->setParticleRadius(spacing*0.5);
-     //renderer->setParticleRadius(spacing*0.5);
-     //renderer->setParticleRadius(flock_settings.spacing);
-     //renderer = new Render(pos_vbo,col_vbo,num,ps->cli);
-     //renderer->setParticleRadius(flock_settings.spacing*0.25);
      
     setRenderer();
 
@@ -174,8 +93,6 @@ FLOCK::~FLOCK()
 
 void FLOCK::update()
 {
-    //call kernels
-    //TODO: add timings
 #ifdef CPU
     updateCPU();
 #endif
@@ -187,33 +104,15 @@ void FLOCK::update()
 //----------------------------------------------------------------------
 void FLOCK::updateCPU()
 {
-    //cpuDensity();
-    //cpuPressure();
-    //cpuViscosity();
-    //cpuXFLOCK();
-    //cpuCollision_wall();
+    ge_cpuEuler();  // based on my boids program
 
-   // if(flock_settings.integrator == EULER2)
-   // {
-        //cpuEuler();   // Original from Myrna
-		// Modified by Gordon Erlebacher, 
-        ge_cpuEuler();  // based on my boids program
-   // }
-   //else if(flock_settings.integrator == LEAPFROG2)
-   // {
-   //     cpuLeapFrog();
-   // }
-    //printf("positions[0].z %f\n", positions[0].z);
+    // mymese debugging
 #if 0
-    for(int i = 0; i < 10; i+=15)
+    for(int i = 0; i < num; i+=64)
     {
-        //if(xflocks[i].z != 0.0)
         printf("particle %d, positions: %f %f %f  \n", positions[i].x, positions[i].y, positions[i].z);
-        //printf("force: %f %f %f  \n", forces[i].x, forces[i].y, forces[i].z);
-        //printf("force: %f %f %f  \n", velocities[i].x, velocities[i].y, velocities[i].z);
     }
 #endif
-    //printf("cpu execute!\n");
 
     glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
     glBufferData(GL_ARRAY_BUFFER, num * sizeof(float4), &positions[0], GL_DYNAMIC_DRAW);
@@ -232,13 +131,6 @@ void FLOCK::updateGPU()
     int sub_intervals = 1;  //should be a setting
     for(int i=0; i < sub_intervals; i++)
     {
-        /*
-        k_density.execute(num);
-        k_pressure.execute(num);
-        k_viscosity.execute(num);
-        k_xflock.execute(num);
-        */
-
         //printf("hash\n");
         timers[TI_HASH]->start();
         hash();
@@ -262,22 +154,10 @@ void FLOCK::updateGPU()
         neighborSearch(0);  //density => flockmates
         timers[TI_DENS]->end();
 
-        //printf("forces\n");
-        //timers[TI_FORCE]->start();
-        //neighborSearch(1);  //forces => velocities
-        //timers[TI_FORCE]->end();
-
         timers[TI_NEIGH]->end();
         
-        //printf("collision\n");
-//        collision();
         //printf("integrate\n");
-        //printf("num = %d\n", num);
         integrate();		// compute the rules and itegrate
-        //exit(0);
-        //
-        //Andrew's rendering emporium
-        //neighborSearch(4);
     }
 
     cl_position.release();
@@ -287,55 +167,16 @@ void FLOCK::updateGPU()
 
 }
 
-void FLOCK::collision()
-{
-    int local_size = 128;
-    //when implemented other collision routines can be chosen here
-    timers[TI_COLLISION_WALL]->start();
-  //  k_collision_wall.execute(num, local_size);
-    timers[TI_COLLISION_WALL]->end();
-
-    timers[TI_COLLISION_TRI]->start();
-   // collide_triangles();
-    timers[TI_COLLISION_TRI]->end();
-
-}
 
 void FLOCK::integrate()
 {
-	typedef std::vector<float4> VF;
-	//VF vel = cl_velocity
     int local_size = 128;
-    if(flock_settings.integrator == EULER2)
-    {
-        //k_euler.execute(max_num);
-        timers[TI_EULER]->start();
-        k_euler.execute(num, local_size);
-        timers[TI_EULER]->end();
+        
+    timers[TI_EULER]->start();
+    k_euler.execute(num, local_size);
+    timers[TI_EULER]->end();
 
-		#if 0 
-		VF v(128);
-		v = clf_debug.copyToHost(100);
-        std::vector<int4> cli(128);
-        cli = cli_debug.copyToHost(12);
-		for (int i=0; i < 30; i++) {
-		    printf("boid %d\n", i);
-            //printf("numFlockmates: %d and count: %d\n", cli[i].x, cli[i].y);
-            v[i].print("v[i]");
-        }
-        printf("\n");
-		//exit(0);
-		#endif
-    }
-   // else if(flock_settings.integrator == LEAPFROG2)
-   // {
-        //k_leapfrog.execute(max_num);
-     //   timers[TI_LEAPFROG]->start();
-      //  k_leapfrog.execute(num, local_size);
-    //    timers[TI_LEAPFROG]->end();
-   // }
-
-
+    // mymese debugging
 #if 0 
     if(num > 0)
     {
@@ -345,26 +186,12 @@ void FLOCK::integrate()
         std::vector<float4> clf(num);
         clf_debug.copyToHost(clf);
 
-        //std::vector<float4> pos = cl_position.copyToHost(num);
-        //std::vector<float4> vel = cl_velocity.copyToHost(num);
-        
-        //std::vector<float4> f(num);
-        //cl_force.copyToHost(f);
-
-        //std::vector<float> d(num);
-        //cl_density.copyToHost(d);
-        //std::vector<float4> xf = cl_xflock.copyToHost(num);
-        
         for(int i = 0; i < 4; i++)
         {
-            //printf("pos   [%d] = %f %f %f\n", i, pos[i].x, pos[i].y, pos[i].z);
-            //printf("sep[%d] = %f %f %f\n", i, f[i].x, f[i].y, f[i].z);
-            //printf("numFlockmates = %d\n", d[i]);
             printf("numFlockmates = %d and count = %d \n", cli[i].x, cli[i].y);
             printf("clf[%d] = %f %f %f %f\n", i, clf[i].x, clf[i].y, clf[i].z, clf[i].w);
         }
 		printf("num= %d\n", num);
-		//exit(0);
         printf("\n\n");
     }
 #endif
@@ -373,7 +200,6 @@ void FLOCK::integrate()
 
 int FLOCK::setupTimers()
 {
-    //int print_freq = 20000;
     int print_freq = 1000; //one second
     int time_offset = 5;
 
@@ -401,26 +227,18 @@ void FLOCK::printTimers()
 
 void FLOCK::calculateFLOCKSettings()
 {
-    /*!
-    * The Particle Mass (and hence everything following) depends on the MAXIMUM number of particles in the system
-    */
 
     float4 dmin = grid.getBndMin();
     float4 dmax = grid.getBndMax();
-    //printf("dmin: %f %f %f\n", dmin.x, dmin.y, dmin.z);
-    //printf("dmax: %f %f %f\n", dmax.x, dmax.y, dmax.z);
-    float domain_vol = (dmax.x - dmin.x) * (dmax.y - dmin.y) * (dmax.z - dmin.z);
-    printf("domain volume: %f\n", domain_vol);
-
 
 //////
-    flock_settings.rest_density = 1000;
+//    flock_settings.rest_density = 1000;
     //flock_settings.rest_density = 2000;
 
-    flock_settings.particle_mass = (128*1024.0)/max_num * .0002;
-    printf("particle mass: %f\n", flock_settings.particle_mass);
+//    flock_settings.particle_mass = (128*1024.0)/max_num * .0002;
+//    printf("particle mass: %f\n", flock_settings.particle_mass);
 
-    float particle_vol = flock_settings.particle_mass / flock_settings.rest_density;
+//    float particle_vol = flock_settings.particle_mass / flock_settings.rest_density;
 /////
 
     
@@ -434,7 +252,7 @@ void FLOCK::calculateFLOCKSettings()
     flock_settings.smoothing_distance = 2.0f * flock_settings.particle_rest_distance;
 
 ////
-    flock_settings.boundary_distance = .5f * flock_settings.particle_rest_distance;
+//    flock_settings.boundary_distance = .5f * flock_settings.particle_rest_distance;
 ////
 
 
@@ -450,31 +268,31 @@ void FLOCK::calculateFLOCKSettings()
     //flock_settings.spacing = flock_settings.particle_rest_distance/ flock_settings.simulation_scale;
     flock_settings.spacing = 0.050f; // must be less than smoothing_distance
 
-    float particle_radius = flock_settings.spacing;
-    printf("particle radius: %f\n", particle_radius);
+    //float particle_radius = flock_settings.spacing;
+    //printf("particle radius: %f\n", particle_radius);
  
     params.grid_min = dmin;
     params.grid_max = dmax;
-    params.mass = flock_settings.particle_mass;
+//    params.mass = flock_settings.particle_mass;
     params.rest_distance = flock_settings.particle_rest_distance;
     params.smoothing_distance = flock_settings.smoothing_distance;
-    params.simulation_scale = flock_settings.simulation_scale;
-    params.boundary_stiffness = 20000.0f;
-    params.boundary_dampening = 256.0f;
-    params.boundary_distance = flock_settings.particle_rest_distance * .5f;
-    params.EPSILON = .00001f;
-    params.PI = 3.14159265f;
-    params.K = 20.0f;
+//    params.simulation_scale = flock_settings.simulation_scale;
+//    params.boundary_stiffness = 20000.0f;
+//    params.boundary_dampening = 256.0f;
+//    params.boundary_distance = flock_settings.particle_rest_distance * .5f;
+//    params.EPSILON = .00001f;
+//    params.PI = 3.14159265f;
+//    params.K = 20.0f;
     params.num = num;
 //    params.surface_threshold = 2.0 * params.simulation_scale; //0.01;
-    params.viscosity = .001f;
+//    params.viscosity = .001f;
     //params.viscosity = 1.0f;
-    params.gravity = -9.8f;
+//    params.gravity = -9.8f;
     //params.gravity = 0.0f;
-    params.velocity_limit = 600.0f;
-    params.xflock_factor = .05f;
+//    params.velocity_limit = 600.0f;
+//    params.xflock_factor = .05f;
     //params.min_dist = .08f; 
-
+/*
 	float h = params.smoothing_distance;
 	float pi = acos(-1.0);
 	float h9 = pow(h,9.);
@@ -488,20 +306,20 @@ void FLOCK::calculateFLOCKSettings()
 	params.wvisc_coef = 15./(2.*pi*h3);
 	params.wvisc_d_coef = 15./(2.*pi*h3);
 	params.wvisc_dd_coef = 45./(pi*h6);
-
+*/
     // Boids parameters
 	params.min_dist     = 0.5f * params.smoothing_distance * ps->settings.min_dist; // desired separation between boids
     params.search_radius= 0.8f * params.smoothing_distance * ps->settings.search_radius;
     params.max_speed    = 1.0f * ps->settings.max_speed;
 
-    // debug mymese
+ /*   // debug mymese
     float4 gmin = params.grid_min;
     float4 gmax = params.grid_max;
     float bd = params.boundary_distance;
     printf("\n *************** \n boundary distance: %f\n", bd); 
     printf("min grid: %f, %f, %f\n", gmin.x, gmin.y, gmin.z);
     printf("max grid: %f, %f, %f\n ************** \n", gmax.x,gmax.y, gmax.z);
-
+*/
 }
 
 
@@ -605,8 +423,8 @@ void FLOCK::prepareSorted()
 	cl_sort_output_hashes = Buffer<int>(ps->cli, keys);
 	cl_sort_output_indices = Buffer<int>(ps->cli, keys);
 
-    std::vector<Triangle> maxtri(2048);
-    cl_triangles = Buffer<Triangle>(ps->cli, maxtri);
+//    std::vector<Triangle> maxtri(2048);
+//    cl_triangles = Buffer<Triangle>(ps->cli, maxtri);
 #endif
 
 }
@@ -627,7 +445,7 @@ void FLOCK::setupDomain()
 
     printf("gp nb_cells: %d\n", grid_params.nb_cells);
 
-
+/*
 // debug mymese
 float4 gmin = grid_params.bnd_min;
 float4 gmax = grid_params.bnd_max;
@@ -635,7 +453,7 @@ float4 bd = grid_params.grid_size;
 printf("\n *************** \n grid size: %f, %f, %f\n", bd.x, bd.y, bd.z); 
 printf("min boundary: %f, %f, %f\n", gmin.x, gmin.y, gmin.z);
 printf("max boundary: %f, %f, %f\n ************** \n", gmax.x,gmax.y, gmax.z);
-
+*/
 
     /*
 	grid_params.grid_inv_delta.x = 1. / grid_params.grid_delta.x;

@@ -21,20 +21,14 @@
 
 namespace rtps {
 
-enum Integrator2 {EULER2, LEAPFROG2};
 
-//keep track of the fluid settings
+//keep track of the flock settings
 typedef struct FLOCKSettings
 {
-    float rest_density;
     float simulation_scale;
-    float particle_mass;
     float particle_rest_distance;
     float smoothing_distance;
-    float boundary_distance;
     float spacing;
-    float grid_cell_size;
-    Integrator2 integrator;
 } FLOCKSettings;
 
 //pass parameters to OpenCL routines
@@ -45,7 +39,7 @@ typedef struct FLOCKParams
     float mass;
     float rest_distance;
     float smoothing_distance;
-    float simulation_scale;
+   float simulation_scale;
     float boundary_stiffness;
     float boundary_dampening;
     float boundary_distance;
@@ -86,16 +80,6 @@ typedef struct FLOCKParams
     
     void print() {
 		printf("----- FLOCKParams ----\n");
-		printf("simulation_scale: %f\n", simulation_scale);
-		printf("friction_coef: %f\n", friction_coef);
-		printf("restitution_coef: %f\n", restitution_coef);
-		printf("damping: %f\n", boundary_dampening);
-		printf("shear: %f\n", shear);
-		printf("attraction: %f\n", attraction);
-		printf("spring: %f\n", spring);
-		printf("gravity: %f\n", gravity);
-		printf("choice: %d\n", choice);
-        printf("Boids params\n");
 		printf("min_dist: %f\n", min_dist);
 		printf("search_radius: %f\n", search_radius);
 		printf("max_speed: %f\n", max_speed);
@@ -103,27 +87,6 @@ typedef struct FLOCKParams
 } FLOCKParams __attribute__((aligned(16)));
 
 //----------------------------------------------------------------------
-// GORDON Datastructure for Fluid parameters.
-// struct for fluid parameters
-#if 0
-struct FluidParams
-{
-	float smoothing_length; // FLOCK radius
-	float scale_to_simulation;
-	//float mass;
-	//float dt;
-	float friction_coef;
-	float restitution_coef;
-	float damping;
-	float shear;
-	float attraction;
-	float spring;
-	float gravity; // -9.8 m/sec^2
-	int   choice; // which kind of calculation to invoke
-
-};
-#endif
-
 
 class FLOCK : public System
 {
@@ -131,25 +94,26 @@ public:
     FLOCK(RTPS *ps, int num);
     ~FLOCK();
 
+    // update call for CPU and GPU
     void update();
+    
     //wrapper around IV.h addRect
     int addBox(int nn, float4 min, float4 max, bool scaled);
+    
     //wrapper around IV.h addSphere
     void addBall(int nn, float4 center, float radius, bool scaled);
-	virtual void render();
+	
+    virtual void render();
     
-    //void loadTriangles(std::vector<Triangle> triangles);
-    
-
-
-    enum {TI_HASH=0, TI_BITONIC_SORT, TI_BUILD, TI_NEIGH, 
-          TI_DENS, TI_FORCE, TI_EULER, TI_LEAPFROG, TI_UPDATE, TI_COLLISION_WALL,
-          TI_COLLISION_TRI
-          }; //11
+    // timers
+    enum {
+            TI_HASH=0, TI_BITONIC_SORT, TI_BUILD, TI_NEIGH, 
+            TI_DENS, TI_FORCE, TI_EULER, TI_LEAPFROG, TI_UPDATE, TI_COLLISION_WALL,
+            TI_COLLISION_TRI
+         }; 
     GE::Time* timers[30];
     int setupTimers();
     void printTimers();
-
 
 protected:
     virtual void setRenderer();
@@ -166,21 +130,16 @@ private:
 
     int nb_var;
 
-    bool triangles_loaded; //keep track if we've loaded triangles yet
-
     //needs to be called when particles are added
     void calculateFLOCKSettings();
     void setupDomain();
     void prepareSorted();
     void pushParticles(vector<float4> pos);
-    //void popParticles();
 
-    Kernel k_density, k_pressure, k_viscosity;
-    Kernel k_collision_wall;
-    Kernel k_collision_tri;
-    Kernel k_euler, k_leapfrog;
-    Kernel k_xflock;
+    // kernels
+    Kernel k_euler; 
 
+    // kernels - neighbors
     Kernel k_prep;
     Kernel k_hash;
     Kernel k_datastructures;
@@ -217,13 +176,12 @@ private:
 	Buffer<int> 		cl_unsort;
 	Buffer<int> 		cl_sort;
 
-    Buffer<Triangle>    cl_triangles;
 	
     //Two arrays for bitonic sort (sort not done in place)
 	Buffer<int>         cl_sort_output_hashes;
 	Buffer<int>         cl_sort_output_indices;
 
-    Bitonic<int> bitonic;
+    Bitonic<int>        bitonic;
     
     //Parameter structs
     Buffer<FLOCKParams>   cl_FLOCKParams;
@@ -236,20 +194,12 @@ private:
     Buffer<float4>  	clf_debug;  //just for debugging cl files
 	Buffer<int4>		cli_debug;  //just for debugging cl files
     
-    
     //still in use?
     Buffer<float4> cl_error_check;
 
-    //these are defined in flock/ folder next to the kernels
-    void loadDensity();
-    void loadPressure();
-    void loadViscosity();
-    void loadXFLOCK();
-    void loadCollision_wall();
-    void loadCollision_tri();
+    //these are defined in flock/ folder 
     void loadEuler();
 	void ge_loadEuler();
-    void loadLeapFrog();
 
     //Nearest Neighbors search related kernels
     void loadPrep();
@@ -259,14 +209,8 @@ private:
     void loadNeighbors();
 
     //CPU functions
-    void cpuDensity();
-    void cpuPressure();
-    void cpuViscosity();
-    void cpuXFLOCK();
-    void cpuCollision_wall();
     void cpuEuler();
 	void ge_cpuEuler();
-    void cpuLeapFrog();
 
     void updateCPU();
     void updateGPU();
@@ -281,23 +225,14 @@ private:
     void bitonic_sort();
     void buildDataStructures();
     void neighborSearch(int choice);
-    void collision();
-    void collide_triangles();
+    
     void integrate();
-
-    float Wpoly6(float4 r, float h);
-    float Wspiky(float4 r, float h);
-    float Wviscosity(float4 r, float h);
 
     //OpenCL helper functions, should probably be part of the OpenCL classes
     void loadScopy();
 	void scopy(int n, cl_mem xsrc, cl_mem ydst); 
-	
-	//void sset_int(int n, int val, cl_mem xdst);
    
 };
-
-
 
 }
 

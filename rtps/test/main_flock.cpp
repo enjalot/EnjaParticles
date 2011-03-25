@@ -78,7 +78,7 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 2048
 //#define NUM_PARTICLES 1024
 //#define NUM_PARTICLES 256
-#define DT .001f
+#define DT .01f
 #define maxspeed        0.1f
 #define mindist         1.f
 #define searchradius    1.f
@@ -251,8 +251,8 @@ void appKeyboard(unsigned char key, int x, int y)
             //nn = 4;
             //max = float4(2.5, 2.5, 2.5, 1.0f);
             //min = float4(2., 2., 2., 1.0f);
-            max = float4(3.5, 4., 3.5, 1.0f);
-            min = float4(1.5, 1., 2.5, 1.0f);
+            max = float4(3.5, 3., 3.5, 1.0f);
+            min = float4(1.5, 2., 1.5, 1.0f);
             //max = float4(1.1,1.1, 1.1, 1.0f);
             //min = float4(1., 1., 1., 1.0f);
             ps->system->addBox(nn, min, max, false);
