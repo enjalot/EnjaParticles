@@ -127,7 +127,9 @@ int main(int argc, char** argv)
 
     //initialize glut
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH
+		//|GLUT_STEREO //if you want stereo you must uncomment this.
+		);
     glutInitWindowSize(window_width, window_height);
     glutInitWindowPosition (glutGet(GLUT_SCREEN_WIDTH)/2 - window_width/2, 
                             glutGet(GLUT_SCREEN_HEIGHT)/2 - window_height/2);
@@ -161,7 +163,7 @@ int main(int argc, char** argv)
     rtps::Domain grid = Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
     //rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
     rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
-    settings.setRenderType(RTPSettings::SPRITE_RENDER);
+    settings.setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
     settings.setRadiusScale(1);
     settings.setBlurScale(1);
     settings.setUseGLSL(0);
