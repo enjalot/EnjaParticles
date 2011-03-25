@@ -13,7 +13,7 @@ void FLOCK::ge_loadEuler()
     k_euler.setArg(iargs++, cl_vars_unsorted.getDevicePtr());
     k_euler.setArg(iargs++, cl_vars_sorted.getDevicePtr());
     k_euler.setArg(iargs++, cl_position.getDevicePtr());
-    k_euler.setArg(iargs++, cl_FLOCKParams.getDevicePtr());
+    k_euler.setArg(iargs++, cl_FLOCKParameters.getDevicePtr());
     k_euler.setArg(iargs++, ps->settings.dt);           //time step
     k_euler.setArg(iargs++, ps->settings.min_dist);     //desired separation distance
     k_euler.setArg(iargs++, ps->settings.search_radius);//searching radius for neighbors
@@ -40,8 +40,8 @@ void FLOCK::ge_cpuEuler()
     float w_aln = 0.0001f;  //0.0001f;
     float w_coh = 0.00003f;  //0.00003f;
 
-    float4 bndMax = params.grid_max;
-    float4 bndMin = params.grid_min;
+    float4 bndMax = parameters.grid_max;
+    float4 bndMin = parameters.grid_min;
 
 	float spacing = flock_settings.spacing;
 	spacing *= 2;

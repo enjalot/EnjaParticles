@@ -252,7 +252,7 @@ void FLOCK::calculateFLOCKSettings()
 
     //flock_settings.spacing = flock_settings.particle_rest_distance/ flock_settings.simulation_scale;
     flock_settings.spacing = 0.050f; // must be less than smoothing_distance
-
+#if 0
     // FLOCKParams
     params.grid_min = dmin;
     params.grid_max = dmax;
@@ -264,7 +264,7 @@ void FLOCK::calculateFLOCKSettings()
 	params.min_dist     = 0.5f * params.smoothing_distance * ps->settings.min_dist; // desired separation between boids
     params.search_radius= 0.8f * params.smoothing_distance * ps->settings.search_radius;
     params.max_speed    = 1.0f * ps->settings.max_speed;
-    
+#endif 
     // FLOCKParameters
     parameters.grid_min = dmin;
     parameters.grid_max = dmax;
@@ -325,9 +325,9 @@ void FLOCK::prepareSorted()
     cl_xflock = Buffer<float4>(ps->cli, xflocks);
 
     //TODO make a helper constructor for buffer to make a cl_mem from a struct
-    std::vector<FLOCKParams> vparams(0);
-    vparams.push_back(params);
-    cl_FLOCKParams = Buffer<FLOCKParams>(ps->cli, vparams);
+    //std::vector<FLOCKParams> vparams(0);
+    //vparams.push_back(params);
+    //cl_FLOCKParams = Buffer<FLOCKParams>(ps->cli, vparams);
 
     std::vector<FLOCKParameters> vparameters(0);
     vparameters.push_back(parameters);
@@ -502,7 +502,7 @@ void FLOCK::pushParticles(vector<float4> pos)
 
     cl_velocity.copyToDevice(vels, num);
 
-    params.num = num+nn;
+    //params.num = num+nn;
     parameters.num = num+nn;
     updateFLOCKP();
 
@@ -525,9 +525,9 @@ void FLOCK::pushParticles(vector<float4> pos)
 //----------------------------------------------------------------------
 void FLOCK::updateFLOCKP()
 {
-    std::vector<FLOCKParams> vparams(0);
-    vparams.push_back(params);
-    cl_FLOCKParams.copyToDevice(vparams);
+    //std::vector<FLOCKParams> vparams(0);
+    //vparams.push_back(params);
+    //cl_FLOCKParams.copyToDevice(vparams);
     
     std::vector<FLOCKParameters> vparameters(0);
     vparameters.push_back(parameters);

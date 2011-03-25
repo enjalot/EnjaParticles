@@ -51,6 +51,7 @@ typedef struct FLOCKParameters
 }FLOCKParameters;
 
 //pass parameters to OpenCL routines
+#if 0
 typedef struct FLOCKParams
 {
     float4 grid_min;
@@ -104,7 +105,7 @@ typedef struct FLOCKParams
 		printf("max_speed: %f\n", max_speed);
 	}
 } FLOCKParams __attribute__((aligned(16)));
-
+#endif
 //----------------------------------------------------------------------
 
 class FLOCK : public System
@@ -143,7 +144,7 @@ private:
 	//Boids *boids;
 
     FLOCKSettings flock_settings;
-    FLOCKParams params;
+    //FLOCKParams params;
     FLOCKParameters parameters;
     GridParams grid_params;
     GridParams grid_params_scaled;
@@ -204,7 +205,7 @@ private:
     Bitonic<int>        bitonic;
     
     //Parameter structs
-    Buffer<FLOCKParams>   cl_FLOCKParams;
+    //Buffer<FLOCKParams>   cl_FLOCKParams;
     Buffer<FLOCKParameters>   cl_FLOCKParameters;
 	Buffer<GridParams>  cl_GridParams;
 	Buffer<GridParams>  cl_GridParamsScaled;

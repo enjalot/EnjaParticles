@@ -56,8 +56,8 @@ void FLOCK::cpuEuler()
     float w_aln = 0.0f;
     float w_coh = 0.0f;
 
-    float4 bndMax = params.grid_max;
-    float4 bndMin = params.grid_min;
+    float4 bndMax = parameters.grid_max;
+    float4 bndMin = parameters.grid_min;
 
 	float hh = flock_settings.spacing;
 	hh *= 2;

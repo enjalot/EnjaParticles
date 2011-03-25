@@ -1,7 +1,7 @@
 #ifndef _CL_STRUCTURES_H_
 #define _CL_STRUCTURES_H_
 
-
+#if 0
 typedef struct FLOCKParams
 {
     float4 grid_min;            //float3s are really float4 in opencl 1.0 & 1.1
@@ -48,7 +48,7 @@ typedef struct FLOCKParams
     float search_radius;
     float max_speed; 
 } FLOCKParams;
-
+#endif
 
 // Will be local variable
 // used to output multiple variables per point

@@ -52,10 +52,10 @@ void FLOCK::neighborSearch(int choice)
     */
 
     //Copy choice to FLOCKParams
-    params.choice = choice;
-    std::vector<FLOCKParams> vparams(0);
-    vparams.push_back(params);
-    cl_FLOCKParams.copyToDevice(vparams);
+    parameters.choice = choice;
+    std::vector<FLOCKParameters> vparams(0);
+    vparams.push_back(parameters);
+    cl_FLOCKParameters.copyToDevice(vparams);
 
 
 #if 0
