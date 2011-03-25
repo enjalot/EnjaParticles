@@ -41,6 +41,7 @@ ADD_DEFINITIONS(-DGLSL_SOURCE_DIR="./render/")
 ELSE(WIN32)
 ADD_DEFINITIONS(-DSIMPLE_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_simple")
 ADD_DEFINITIONS(-DSPH_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_sph")
+ADD_DEFINITIONS(-DFLOCK_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_flock")
 ADD_DEFINITIONS(-DGLSL_BIN_DIR="${rtpslib_BINARY_DIR}/shaders")
 ADD_DEFINITIONS(-DBITONIC_CL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/")
 ADD_DEFINITIONS(-DGLSL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/render/")
@@ -68,8 +69,6 @@ set (rtpslib_INCLUDES
     ${rtpslib_SOURCE_DIR}/opencl
     ${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src
     
-    ${OpenCV_INCLUDE_DIRS}
-
 )
 
 
@@ -90,12 +89,14 @@ set (rtpslib_SOURCES
 
     ${rtpslib_SOURCE_DIR}/domain/Domain
     ${rtpslib_SOURCE_DIR}/domain/IV
+    ${rtpslib_SOURCE_DIR}/system/common/Hose
     
-
+	# Simple
     ${rtpslib_SOURCE_DIR}/system/Simple.cpp
     ${rtpslib_SOURCE_DIR}/system/simple/ForceField
     ${rtpslib_SOURCE_DIR}/system/simple/Euler
-    
+    	
+	# SPH
     ${rtpslib_SOURCE_DIR}/system/SPH.cpp
     ${rtpslib_SOURCE_DIR}/system/sph/Euler
     ${rtpslib_SOURCE_DIR}/system/sph/LeapFrog
@@ -117,7 +118,27 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/sph/BitonicSort
     ${rtpslib_SOURCE_DIR}/system/sph/DataStructures
     ${rtpslib_SOURCE_DIR}/system/sph/Neighbors
+
+	# FLOCK
+    ${rtpslib_SOURCE_DIR}/system/FLOCK.cpp
+    ${rtpslib_SOURCE_DIR}/system/flock/Euler
+    #${rtpslib_SOURCE_DIR}/system/flock/LeapFrog
+    #${rtpslib_SOURCE_DIR}/system/flock/Density
+    #${rtpslib_SOURCE_DIR}/system/flock/Pressure
+    #${rtpslib_SOURCE_DIR}/system/flock/Viscosity
+    #${rtpslib_SOURCE_DIR}/system/flock/XFLOCK
+    #${rtpslib_SOURCE_DIR}/system/flock/Collision_wall
+    #${rtpslib_SOURCE_DIR}/system/flock/Collision_triangle
 	
+    # Added by GE
+    ${rtpslib_SOURCE_DIR}/system/boids
+    
+    # neighbors
+    ${rtpslib_SOURCE_DIR}/system/flock/Prep
+    ${rtpslib_SOURCE_DIR}/system/flock/Hash
+    ${rtpslib_SOURCE_DIR}/system/flock/BitonicSort
+    ${rtpslib_SOURCE_DIR}/system/flock/DataStructures
+    ${rtpslib_SOURCE_DIR}/system/flock/Neighbors
     #${rtpslib_SOURCE_DIR}/particle
     )
 
@@ -139,6 +160,7 @@ SET(rtpslib_SOURCES ${rtpslib_SOURCES}
     #${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src/BitonicSort #template class
     #these should probably be in the OpenCL classes
     ${rtpslib_SOURCE_DIR}/system/sph/Scopy
+    ${rtpslib_SOURCE_DIR}/system/flock/Scopy
     #${rtpslib_SOURCE_DIR}/system/sph/SetInt
     )
 ENDIF(WITH_OPENCL)
@@ -180,6 +202,7 @@ add_custom_target(doc DEPENDS ${DOXYGEN_OUTPUT})
 
 ADD_SUBDIRECTORY(system/simple)
 ADD_SUBDIRECTORY(system/sph)
+ADD_SUBDIRECTORY(system/flock)
 
 MAKE_DIRECTORY(${rtpslib_BINARY_DIR}/shaders)
 FILE(COPY ${rtpslib_SOURCE_DIR}/render/shaders/ DESTINATION ${rtpslib_BINARY_DIR}/shaders/)

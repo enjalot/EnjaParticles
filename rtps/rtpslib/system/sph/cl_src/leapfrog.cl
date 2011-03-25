@@ -9,12 +9,12 @@ __kernel void leapfrog(
                       __global float4* vars_sorted, 
                       __global float4* positions,  // for VBO 
                       //		__global float4* color,
-                      __constant struct SPHParams* params, 
+                      __constant struct SPHParams* sphp, 
                       float dt)
 {
     unsigned int i = get_global_id(0);
     //int num = get_global_size(0); // for access functions in cl_macros.h
-    int num = params->num;
+    int num = sphp->num;
     if (i >= num) return;
 
     float4 p = pos(i);
@@ -22,19 +22,19 @@ __kernel void leapfrog(
     float4 f = force(i);
 
     //external force is gravity
-    f.z += params->gravity;
+    f.z += sphp->gravity;
     f.w = 0.f;
 
     float speed = length(f);
-    if (speed > params->velocity_limit) //velocity limit, need to pass in as struct
+    if (speed > sphp->velocity_limit) //velocity limit, need to pass in as struct
     {
-        f *= params->velocity_limit/speed;
+        f *= sphp->velocity_limit/speed;
     }
 
     float4 vnext = v + dt*f;
     //float4 vnext = v;// + dt*f;
     // WHY IS MY CORRECTION NEGATIVE and IAN's POSITIVE? 
-    vnext += params->xsph_factor * xsph(i);
+    vnext += sphp->xsph_factor * xsph(i);
 
     p += dt * vnext;
     p.w = 1.0f; //just in case
@@ -45,9 +45,9 @@ __kernel void leapfrog(
 
     // writeback to unsorted buffer
     float dens = density(i);
-    p.xyz /= params->simulation_scale;
+    p.xyz /= sphp->simulation_scale;
     unsorted_pos(originalIndex)     = (float4)(p.xyz, dens);
-    //unsorted_pos(originalIndex) = (float4)(pos(i).xyz / params->simulation_scale, 1.);
+    //unsorted_pos(originalIndex) = (float4)(pos(i).xyz / sphp->simulation_scale, 1.);
     unsorted_vel(originalIndex)     = vnext;
     unsorted_veleval(originalIndex) = veval; 
     positions[originalIndex]        = (float4)(p.xyz, 1.);  // for plotting

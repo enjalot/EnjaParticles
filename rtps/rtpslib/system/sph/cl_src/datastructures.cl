@@ -7,6 +7,7 @@
 #include "cl_macros.h"
 #include "cl_structs.h"
 
+#pragma cl_khr_global_int32_base_atomics : enable
 //----------------------------------------------------------------------
 __kernel void datastructures(
                             __global float4*   vars_unsorted,
@@ -15,8 +16,9 @@ __kernel void datastructures(
                             __global uint* sort_indices,
                             __global uint* cell_indices_start,
                             __global uint* cell_indices_end,
+//                            __global uint* num_changed,
                             __constant struct SPHParams* sphp,
-                            //__constant struct GridParams* gp,
+                            __constant struct GridParams* gp,
                             __local  uint* sharedHash   // blockSize+1 elements
                             )
 {
@@ -24,9 +26,16 @@ __kernel void datastructures(
     int num = sphp->num;
     //int num = get_global_size(0);
     //if (index >= num) return;
+    uint ncells = gp->nb_cells;
 
     uint hash = sort_hashes[index];
 
+    //don't want to write to cell_indices arrays if hash is out of bounds
+    if( hash > ncells)
+    {
+        return;
+    }
+#if 1
     // Load hash data into shared memory so that we can look 
     // at neighboring particle's hash value without loading
     // two hash values per thread	
@@ -40,7 +49,22 @@ __kernel void datastructures(
     if (index > 0 && tid == 0)
     {
         // first thread in block must load neighbor particle hash
-        sharedHash[0] = sort_hashes[index-1];
+        uint hashm1 = sort_hashes[index-1] < ncells ? sort_hashes[index-1] : ncells;
+        sharedHash[0] = hashm1;
+        //sharedHash[0] = sort_hashes[index-1];
+        /*
+        if(hash >= gp->nb_cells-1) //if particles go out of bounds, delete them
+        {
+            //cell_indices_end[gp->nb_cells - 2] = index + 1; //make sure last cell index is right // this is totally confused
+            if(num_changed[0] == 0)
+            {
+                num_changed[0] = index; //new number of particles to use
+                //num = index;
+                return;
+            }
+        }
+        */
+
     }
 
 #ifndef __DEVICE_EMULATION__
@@ -57,24 +81,79 @@ __kernel void datastructures(
     //but we can't keep going if our index goes out of bounds of the number of particles
     if (index >= num) return;
 
-    if ((index == 0 || hash != sharedHash[tid]))
+    //if(tid == 0)
+    //{
+    //hmm this needs to be done for all local threads? or atomically?
+    //threads must be contending, last thread does this
+    
+#if 0
+    //DIRTY DIRTY CODE
+    //is being tired an excuse?
+    if(hash >= gp->nb_cells-1) //if particles go out of bounds, delete them
+    //if(sharedHash[tid] >= gp->nb_cells-1) //if particles go out of bounds, delete them
+    //if(hash >= gp->nb_cells-1) //if particles go out of bounds, delete them
     {
-        cell_indices_start[hash] = index; // ERROR
-        if (index > 0)
+        //cell_indices_end[gp->nb_cells - 2] = index + 1; //make sure last cell index is right // this is totally confused
+        //if(num_changed[0] == 0)
         {
+            num_changed[index] = index; //new number of particles to use
+            //num_changed[sort_indices[index]] = 1; //new number of particles to use
+            //return;
+        }
+    }
+    barrier(CLK_GLOBAL_MEM_FENCE);
+    if(tid == 0)
+    {
+        for(int j = 0; j < num; j++)
+        {
+            if(num_changed[j] > 0)
+            {
+                num_changed[0] = j;
+                break;
+            }
+        }
+    }
+    barrier(CLK_GLOBAL_MEM_FENCE);
+
+    //some kind of problem with setting the cell indices and starts if this triggers
+    //cutting num down seems to work fine unless this happens implying this is the problem
+    //maybe not, still broken with this commented out
+
+    //if(index > num_changed[0] && num_changed[0] > 0)
+    //{    return;    }
+
+
+
+    //}
+#endif
+
+
+    //if(hash < gp->nb_cells)
+    //{
+    //if ((index == 0 || hash != sharedHash[tid]))
+    if (index == 0)
+    {
+        cell_indices_start[hash] = index;
+    }
+
+    if (index > 0)
+    {
+        if(sharedHash[tid] != hash)
+        {
+            cell_indices_start[hash] = index; 
             cell_indices_end[sharedHash[tid]] = index;
         }
     }
     //return;
 
-    //if (index == numParticles - 1) {
     if (index == num - 1)
     {
         cell_indices_end[hash] = index + 1;
     }
-    // particle index	
-    //if (index >= num) return;
-
+    //}
+    
+#endif
+    
     //cell_indices_end[index] = 42;
     uint sorted_index = sort_indices[index];
     //uint sorted_index = index;
@@ -93,6 +172,8 @@ __kernel void datastructures(
     // Variables to sort could change for different types of simulations 
     // SHOULD I divide by simulation scale upon return? do not think so
     pos(index)     = unsorted_pos(sorted_index) * sphp->simulation_scale;
+    //pos(index)     = (float4)(99.,99.,99.,99.);
+    //vars_sorted[index + sphp->max_num]     = (float4)(99.,99.,99.,99.);
     //pos(index)     = unsorted_pos(index) * sphp->simulation_scale;
     vel(index)     = unsorted_vel(sorted_index);
     veleval(index) = unsorted_veleval(sorted_index); // not sure if needed

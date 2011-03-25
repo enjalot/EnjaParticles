@@ -67,6 +67,8 @@ namespace rtps
 
         void update();
         void render();
+
+        void printTimers();
         
     };
 }

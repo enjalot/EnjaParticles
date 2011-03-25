@@ -8,12 +8,11 @@ namespace rtps
 
         printf("about to instantiate sorting\n");
 
-        bitonic = Bitonic<int>( ps->cli,    
+        bitonic = Bitonic<unsigned int>( ps->cli,    
                                 &cl_sort_output_hashes,
                                 &cl_sort_output_indices,
                                 &cl_sort_hashes,
                                 &cl_sort_indices);
-
 
     }
 
@@ -56,19 +55,25 @@ namespace rtps
         scopy(num, cl_sort_output_indices.getDevicePtr(), 
               cl_sort_indices.getDevicePtr());
 
-        /*
         ps->cli->queue.finish();
+#if 0
     
-        sh = cl_sort_hashes.copyToHost(nbc);
-        eci = cl_cell_indices_end.copyToHost(nbc);
+        printf("********* Bitonic Sort Diagnostics **************\n");
+        int nbc = 20;
+        //sh = cl_sort_hashes.copyToHost(nbc);
+        //eci = cl_cell_indices_end.copyToHost(nbc);
+        std::vector<unsigned int> sh = cl_sort_hashes.copyToHost(nbc);
+        std::vector<unsigned int> si = cl_sort_indices.copyToHost(nbc);
+        //std::vector<int> eci = cl_cell_indices_end.copyToHost(nbc);
+
     
         for(int i = 0; i < nbc; i++)
         {
-            printf("after[%d] %d eci: %d\n; ", i, sh[i], eci[i]);
+            //printf("after[%d] %d eci: %d\n; ", i, sh[i], eci[i]);
+            printf("sh[%d] %d si: %d\n ", i, sh[i], si[i]);
         }
-        printf("\n");
-        */
 
+#endif
 
 
     }

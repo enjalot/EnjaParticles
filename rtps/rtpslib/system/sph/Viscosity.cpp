@@ -3,30 +3,6 @@
 namespace rtps
 {
 
-    void SPH::loadViscosity()
-    {
-        printf("create viscosity kernel\n");
-
-        std::string path(SPH_CL_SOURCE_DIR);
-        path += "/viscosity.cl";
-        k_viscosity = Kernel(ps->cli, path, "viscosity");
-
-        k_viscosity.setArg(0, cl_position.getDevicePtr());
-        if (integrator == LEAPFROG)
-        {
-            k_viscosity.setArg(1, cl_veleval.getDevicePtr());
-        }
-        else if (integrator == EULER)
-        {
-            k_viscosity.setArg(1, cl_velocity.getDevicePtr());
-        }
-        k_viscosity.setArg(2, cl_density.getDevicePtr());
-        k_viscosity.setArg(3, cl_force.getDevicePtr());
-        k_viscosity.setArg(4, cl_SPHParams.getDevicePtr());
-
-    } 
-
-
     float SPH::Wviscosity(float4 r, float h)
     {
         //from simple SPH in Krog's thesis

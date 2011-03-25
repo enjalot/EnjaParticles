@@ -17,9 +17,6 @@ namespace rtps
         min = this->bnd_min - float4(s2, s2, s2, 0.);
         max = this->bnd_max + float4(s2, s2, s2, 0.);
 
-        this->min = min;
-        this->max = max;
-
         printf("cell size: %f\n ASDFASDFSDF\n", cell_size);
 
         size = float4(max.x - min.x,
@@ -47,6 +44,11 @@ namespace rtps
                        size.z / res.z,
                        1.0f);
         */
+
+        this->min = min;
+        this->max = min + size;
+        //this->max = max;
+
 
     }
 

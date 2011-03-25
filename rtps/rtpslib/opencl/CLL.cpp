@@ -226,9 +226,10 @@ namespace rtps
 
         //create the command queue we will use to execute OpenCL commands
         ///command_queue = clCreateCommandQueue(context, devices[deviceUsed], 0, &err);
+        cl_command_queue_properties cq_props = CL_QUEUE_PROFILING_ENABLE;
         try
         {
-            queue = cl::CommandQueue(context, devices[deviceUsed], 0, &err);
+            queue = cl::CommandQueue(context, devices[deviceUsed], cq_props, &err);
         }
         catch (cl::Error er)
         {

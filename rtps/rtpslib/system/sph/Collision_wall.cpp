@@ -11,13 +11,18 @@ namespace rtps
         path += "/collision_wall.cl";
         k_collision_wall = Kernel(ps->cli, path, "collision_wall");
 
+    } 
+
+    void SPH::collide_wall()
+    {
         int iargs = 0;
         k_collision_wall.setArg(iargs++, cl_vars_sorted.getDevicePtr());
         k_collision_wall.setArg(iargs++, cl_GridParamsScaled.getDevicePtr());
         k_collision_wall.setArg(iargs++, cl_SPHParams.getDevicePtr());
 
-    } 
-
+        int local_size = 128;
+        k_collision_wall.execute(num, local_size);
+    }
 
     //from Krog '10
     float4 calculateRepulsionForce(float4 normal, float4 vel, float boundary_stiffness, float boundary_dampening, float boundary_distance)

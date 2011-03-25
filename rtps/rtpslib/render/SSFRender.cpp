@@ -4,6 +4,8 @@
 #else
     #include <GL/glut.h>
 #endif*/
+#include <GL/glew.h>
+
 #include "SSFRender.h"
 
 using namespace std;

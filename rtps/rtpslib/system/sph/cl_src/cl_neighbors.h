@@ -30,13 +30,19 @@ void IterateParticlesInCell(
                            __global int*       cell_indexes_start,
                            __global int*       cell_indexes_end,
                            __constant struct GridParams* gp,
-                           //__constant struct FluidParams* fp,
                            __constant struct SPHParams* sphp
                            DEBUG_ARGS
                            )
 {
     // get hash (of position) of current cell
     uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
+    
+    //need to check cellHash to make sure its not out of bounds
+    if(cellHash >= gp->nb_cells)
+    {
+        return;
+    }
+    //even with cellHash in bounds we are still getting out of bounds indices
 
     /* get start/end positions for this cell/bucket */
     uint startIndex = FETCH(cell_indexes_start,cellHash);
@@ -53,7 +59,7 @@ void IterateParticlesInCell(
 #if 1
             //***** UPDATE pt (sum)
             //ForPossibleNeighbor(vars_sorted, pt, num, index_i, index_j, position_i, gp, /*fp,*/ sphp DEBUG_ARGV);
-            ForNeighbor(vars_sorted, pt, index_i, index_j, position_i, gp, /*fp,*/ sphp DEBUG_ARGV);
+            ForNeighbor(vars_sorted, pt, index_i, index_j, position_i, gp, sphp DEBUG_ARGV);
 #endif
         }
     }
@@ -84,6 +90,7 @@ void IterateParticlesInNearbyCells(
 
     // iterate through the 3^3 cells in and around the given position
     // can't unroll these loops, they are not innermost 
+    //TODO bug in that we don't take into account cells on edge of grid!
     for (int z=cell.z-1; z<=cell.z+1; ++z)
     {
         for (int y=cell.y-1; y<=cell.y+1; ++y)

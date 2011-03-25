@@ -22,25 +22,35 @@ namespace rtps
         //kernel = cli->loadKernel(source, name);
     }
 
-    void Kernel::execute(int ndrange)
+    float Kernel::execute(int ndrange)
     {
         if (ndrange <= 0)
-            return;
+            return -1.f;
+
+        
+        cl_ulong start, end;
+        float timing = -1.0f;
+
         try
         {
             cl::Event event;
             cli->err = cli->queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(ndrange), cl::NullRange, NULL, &event);
             cli->queue.finish();
+            event.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
+            event.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
+            timing = (end - start) * 1.0e-6f;
+
         }
         catch (cl::Error er)
         {
             printf("err: work group size: %d\n", ndrange);
             printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
         }
+        return timing;
 
     }
 
-    void Kernel::execute(int ndrange, int worksize)
+    float Kernel::execute(int ndrange, int worksize)
     {
         int global;
         float factor = (1.0f * ndrange) / worksize;
@@ -59,19 +69,25 @@ namespace rtps
 
         //printf("global %d, local %d\n", global, worksize);
         if (ndrange <=0 || worksize <= 0)
-            return;
+            return - 1.f;
 
+        cl_ulong start, end;
+        float timing = -1.0f;
         try
         {
             cl::Event event;
             cli->err = cli->queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(global), cl::NDRange(worksize), NULL, &event);
             cli->queue.finish();
+            event.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
+            event.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
+            timing = (end - start) * 1.0e-6f;
         }
         catch (cl::Error er)
         {
             printf("err: global %d, local %d\n", global, worksize);
             printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
         }
+        return timing;
 
     }
 

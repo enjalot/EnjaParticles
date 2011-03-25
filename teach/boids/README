@@ -1,0 +1,19 @@
+to use you will need PyOpenCL and PyOpenGL
+
+
+
+
+to install PyOpenCL you must get it from the git repo in order to have GL interop
+git clone http://git.tiker.net/trees/pyopencl.git
+TO BUILD (on MAC):
+    cd pyopencl
+    git submodule init
+    git submodule update
+    python configure.py --cl-enable-gl
+    make
+    sudo make install
+
+http://mathema.tician.de/software/pyopencl
+
+
+you can install PyOpenGL any normal python way (easy_install or from the website)

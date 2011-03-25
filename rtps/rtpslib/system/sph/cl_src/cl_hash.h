@@ -30,7 +30,7 @@ int4 calcGridCell(float4 p, float4 grid_min, float4 grid_delta)
 }
 
 //----------------------------------------------------------------------
-uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges
+int calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges
                   //,__global float4* fdebug,
                   //__global int4* idebug
                  )
@@ -82,7 +82,10 @@ uint calcGridHash(int4 gridPos, float4 grid_res, bool wrapEdges
     // table can go out of bounds and the code might crash. This can happen
     // either if the boundary does not catch the particles or if the courant
     // condition is violated and the code goes unstable. 
+    //  ^ this is resolved by checking hash
 
-    return(gz*grid_res.y + gy) * grid_res.x + gx; 
+    //int ret = (gz*grid_res.y + gy) * grid_res.x + gx; 
+    //return ret;
+    return (gz*grid_res.y + gy) * grid_res.x + gx; 
 }
 #endif

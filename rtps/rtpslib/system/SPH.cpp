@@ -127,7 +127,6 @@ namespace rtps
 
     void SPH::updateCPU()
     {
-#ifdef CPU
         cpuDensity();
         cpuPressure();
         cpuViscosity();
@@ -155,8 +154,6 @@ namespace rtps
 #endif
         glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
         glBufferData(GL_ARRAY_BUFFER, num * sizeof(float4), &positions[0], GL_DYNAMIC_DRAW);
-
-#endif
     }
 
     void SPH::updateGPU()
@@ -173,7 +170,7 @@ namespace rtps
         //should just do try/except?
         for (int i=0; i < sub_intervals; i++)
         {
-            //sprayHoses();
+            sprayHoses();
         }
 
         cl_position.acquire();
@@ -232,10 +229,11 @@ namespace rtps
 
     void SPH::collision()
     {
-        int local_size = 128;
         //when implemented other collision routines can be chosen here
         timers[TI_COLLISION_WALL]->start();
-        k_collision_wall.execute(num, local_size);
+        
+        collide_wall();
+        //k_collision_wall.execute(num, local_size);
         timers[TI_COLLISION_WALL]->end();
 
         timers[TI_COLLISION_TRI]->start();
@@ -246,19 +244,20 @@ namespace rtps
 
     void SPH::integrate()
     {
-        int local_size = 128;
         if (integrator == EULER)
         {
             //k_euler.execute(max_num);
             timers[TI_EULER]->start();
-            k_euler.execute(num, local_size);
+            euler();
+            //k_euler.execute(num, local_size);
             timers[TI_EULER]->end();
         }
         else if (integrator == LEAPFROG)
         {
             //k_leapfrog.execute(max_num);
             timers[TI_LEAPFROG]->start();
-            k_leapfrog.execute(num, local_size);
+            leapfrog();
+            //k_leapfrog.execute(num, local_size);
             timers[TI_LEAPFROG]->end();
         }
 
@@ -347,8 +346,9 @@ namespace rtps
         sphp.boundary_distance = boundary_distance;
         sphp.EPSILON = .00001f;
         sphp.PI = pi;
-        sphp.K = 20.0f;
+        sphp.K = 5.0f;
         sphp.num = num;
+        sphp.max_num = max_num;
         //sphp.surface_threshold = 2.0 * sphp.simulation_scale; //0.01;
         sphp.viscosity = .01f;
         //sphp.viscosity = 1.0f;
@@ -381,6 +381,11 @@ namespace rtps
 
         //for reading back different values from the kernel
         std::vector<float4> error_check(max_num);
+        
+        float4 pmax = grid_params.grid_max + grid_params.grid_size;
+        //std::fill(positions.begin(), positions.end(), pmax);
+
+
 
         std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 1.0f, 0.0f));
         std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -443,29 +448,34 @@ namespace rtps
 
         std::fill(unsorted.begin(), unsorted.end(),float4(0.0f, 0.0f, 0.0f, 1.0f));
         std::fill(sorted.begin(), sorted.end(),float4(0.0f, 0.0f, 0.0f, 1.0f));
+        //std::fill(unsorted.begin(), unsorted.end(), pmax);
+        //std::fill(sorted.begin(), sorted.end(), pmax);
+
+
 
         cl_vars_unsorted = Buffer<float4>(ps->cli, unsorted);
         cl_vars_sorted = Buffer<float4>(ps->cli, sorted);
 
-        std::vector<int> keys(max_num);
+        std::vector<unsigned int> keys(max_num);
         //to get around limits of bitonic sort only handling powers of 2
 #include "limits.h"
         std::fill(keys.begin(), keys.end(), INT_MAX);
-        cl_sort_indices  = Buffer<int>(ps->cli, keys);
-        cl_sort_hashes   = Buffer<int>(ps->cli, keys);
+        cl_sort_indices  = Buffer<unsigned int>(ps->cli, keys);
+        cl_sort_hashes   = Buffer<unsigned int>(ps->cli, keys);
 
         // for debugging. Store neighbors of indices
         // change nb of neighbors in cl_macro.h as well
         //cl_index_neigh = Buffer<int>(ps->cli, max_num*50);
 
-        // Size is the grid size. That is a problem since the number of
-        // occupied cells could be much less than the number of grid elements. 
-        std::vector<int> gcells(grid_params.nb_cells);
+        // Size is the grid size + 1, the last index is used to signify how many particles are within bounds
+        // That is a problem since the number of
+        // occupied cells could be much less than the number of grid elements.
+        std::vector<unsigned int> gcells(grid_params.nb_cells+1);
         int minus = 0xffffffff;
-        std::fill(gcells.begin(), gcells.end(), 0);
+        std::fill(gcells.begin(), gcells.end(), 666);
 
-        cl_cell_indices_start = Buffer<int>(ps->cli, gcells);
-        cl_cell_indices_end   = Buffer<int>(ps->cli, gcells);
+        cl_cell_indices_start = Buffer<unsigned int>(ps->cli, gcells);
+        cl_cell_indices_end   = Buffer<unsigned int>(ps->cli, gcells);
         //printf("gp.nb_points= %d\n", gp.nb_points); exit(0);
 
 
@@ -473,8 +483,8 @@ namespace rtps
         // For bitonic sort. Remove when bitonic sort no longer used
         // Currently, there is an error in the Radix Sort (just run both
         // sorts and compare outputs visually
-        cl_sort_output_hashes = Buffer<int>(ps->cli, keys);
-        cl_sort_output_indices = Buffer<int>(ps->cli, keys);
+        cl_sort_output_hashes = Buffer<unsigned int>(ps->cli, keys);
+        cl_sort_output_indices = Buffer<unsigned int>(ps->cli, keys);
 
 
         std::vector<Triangle> maxtri(2048);
@@ -564,6 +574,7 @@ namespace rtps
 
     void SPH::sprayHoses()
     {
+
         std::vector<float4> parts;
         for (int i = 0; i < hoses.size(); i++)
         {
@@ -573,8 +584,22 @@ namespace rtps
         }
     }
 
+    void SPH::testDelete()
+    {
+
+        //cut = 1;
+        std::vector<float4> poss(40);
+        float4 posx(10.,10.,10.,1.);
+        std::fill(poss.begin(), poss.end(),posx);
+        cl_vars_unsorted.copyToDevice(poss, max_num + 2);
+        ps->cli->queue.finish();
+
+
+    }
     void SPH::pushParticles(vector<float4> pos, float4 velo)
     {
+        //cut = 1;
+
         int nn = pos.size();
         if (num + nn > max_num)
         {
