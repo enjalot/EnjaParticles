@@ -161,7 +161,7 @@ int main(int argc, char** argv)
     rtps::Domain grid = Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
     //rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
     rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
-    settings.setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
+    settings.setRenderType(RTPSettings::SPRITE_RENDER);
     settings.setRadiusScale(1);
     settings.setBlurScale(1);
     settings.setUseGLSL(0);
@@ -349,6 +349,7 @@ void appRender()
         glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
         glTranslatef(translate_x, translate_z, translate_y);
         ps->render();
+	draw_collision_boxes();
         if(render_movie)
         {
             write_movie_frame("image");
