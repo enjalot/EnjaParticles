@@ -45,16 +45,18 @@ namespace rtps
         glBindTexture(GL_TEXTURE_2D,0);
 
 
-        glDepthMask(GL_TRUE);
+        //glDepthMask(GL_TRUE);
 
-        glPopClientAttrib();
-        glPopAttrib();
         //glDisable(GL_POINT_SMOOTH);
         if (blending)
         {
             glDisable(GL_BLEND);
         }
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+ 
+        glPopClientAttrib();
+        glPopAttrib();
+        
         glFinish();
  
 
