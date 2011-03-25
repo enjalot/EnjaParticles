@@ -26,29 +26,23 @@ namespace rtps
             exit(1);
         }
 
-        Kernel kern = k_neighbors;
-
-        printf("setting kernel args\n");
-        int iarg = 0;
-        kern.setArg(iarg++, cl_vars_sorted.getDevicePtr());
-        kern.setArg(iarg++, cl_cell_indices_start.getDevicePtr());
-        kern.setArg(iarg++, cl_cell_indices_end.getDevicePtr());
-        kern.setArg(iarg++, cl_GridParamsScaled.getDevicePtr());
-        //kern.setArg(iarg++, cl_FluidParams->getDevicePtr());
-        kern.setArg(iarg++, cl_SPHParams.getDevicePtr());
-
-        // ONLY IF DEBUGGING
-        kern.setArg(iarg++, clf_debug.getDevicePtr());
-        kern.setArg(iarg++, cli_debug.getDevicePtr());
-        //kern.setArg(iarg++, cl_index_neigh->getDevicePtr());
-
-
 
     }
     //----------------------------------------------------------------------
 
     void SPH::neighborSearch(int choice)
     {
+        int iarg = 0;
+        k_neighbors.setArg(iarg++, cl_vars_sorted.getDevicePtr());
+        k_neighbors.setArg(iarg++, cl_cell_indices_start.getDevicePtr());
+        k_neighbors.setArg(iarg++, cl_cell_indices_end.getDevicePtr());
+        k_neighbors.setArg(iarg++, cl_GridParamsScaled.getDevicePtr());
+        //k_neighbors.setArg(iarg++, cl_FluidParams->getDevicePtr());
+        k_neighbors.setArg(iarg++, cl_SPHParams.getDevicePtr());
+
+        // ONLY IF DEBUGGING
+        k_neighbors.setArg(iarg++, clf_debug.getDevicePtr());
+        k_neighbors.setArg(iarg++, cli_debug.getDevicePtr());
 
         // which == 0 : density update
         // which == 1 : force update
@@ -62,9 +56,12 @@ namespace rtps
 
         //Copy choice to SPHParams
         sphp.choice = choice;
+        updateSPHP();
+        /*
         std::vector<SPHParams> vsphp(0);
         vsphp.push_back(sphp);
         cl_SPHParams.copyToDevice(vsphp);
+        */
 
 #if 0
         std::vector<int4> cli = cli_debug.copyToHost(2);
@@ -74,9 +71,7 @@ namespace rtps
         }
 #endif
 
-        size_t global = (size_t) num;
         int local = 64;
-
         try
         {
             k_neighbors.execute(num, local);
@@ -90,27 +85,32 @@ namespace rtps
 
 #if 0 //printouts    
         //DEBUGING
-        printf("============================================\n");
-        printf("which == %d *** \n", choice);
-        printf("***** PRINT neighbors diagnostics ******\n");
-
-        std::vector<int4> cli;
-        std::vector<float4> clf;
-        printf("num %d\n", num);
-        if (num > 0)
+        
+        if(num > 0)// && choice == 0)
         {
-            cli = cli_debug.copyToHost(num);
-            clf = clf_debug.copyToHost(num);
-        }
+            printf("============================================\n");
+            printf("which == %d *** \n", choice);
+            printf("***** PRINT neighbors diagnostics ******\n");
+            printf("num %d\n", num);
 
-        for (int i=0; i < num; i++)
-        //for (int i=0; i < 10; i++) 
-        {
-            printf("-----\n");
-            printf("clf_debug: %f, %f, %f, %f\n", clf[i].x, clf[i].y, clf[i].z, clf[i].w);
-            //if(clf[i].w == 0.0) exit(0);
-            //printf("cli_debug: %d, %d, %d, %d\n", cli[i].x, cli[i].y, cli[i].z, cli[i].w);
-            //		printf("pos : %f, %f, %f, %f\n", pos[i].x, pos[i].y, pos[i].z, pos[i].w);
+            std::vector<int4> cli(num);
+            std::vector<float4> clf(num);
+            
+            cli_debug.copyToHost(cli);
+            clf_debug.copyToHost(clf);
+
+            std::vector<float4> poss(num);
+            std::vector<float4> dens(num);
+
+            for (int i=0; i < num; i++)
+            //for (int i=0; i < 10; i++) 
+            {
+                //printf("-----\n");
+                printf("clf_debug: %f, %f, %f, %f\n", clf[i].x, clf[i].y, clf[i].z, clf[i].w);
+                //if(clf[i].w == 0.0) exit(0);
+                //printf("cli_debug: %d, %d, %d, %d\n", cli[i].x, cli[i].y, cli[i].z, cli[i].w);
+                //		printf("pos : %f, %f, %f, %f\n", pos[i].x, pos[i].y, pos[i].z, pos[i].w);
+            }
         }
 #endif
 

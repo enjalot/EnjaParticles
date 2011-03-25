@@ -7,7 +7,6 @@
 #include "cl_macros.h"
 #include "cl_hash.h"
 
-
 //----------------------------------------------------------------------
 // Calculate a grid hash value for each particle
 
@@ -25,11 +24,10 @@
 // comes from K_Grid_Hash
 // CANNOT USE references to structures/classes as arguments!
 __kernel void hash(
-                  int num,
                   __global float4* vars_unsorted,
                   __global uint* sort_hashes,
                   __global uint* sort_indexes,
-                  //__global uint* cell_indices_start,
+                  __constant struct SPHParams* sphp,
                   __constant struct GridParams* gp
                   DEBUG_ARGS
                   //__global float4* fdebug,
@@ -38,7 +36,9 @@ __kernel void hash(
 {
     // particle index
     uint index = get_global_id(0);
+    int num = sphp->num;
     //int num = get_global_size(0);
+    //comment this out to hash everything if using max_num
     if (index >= num) return;
 
     // initialize to -1 (used in kernel datastructures in build_datastructures_wrap.cpp
@@ -54,19 +54,33 @@ __kernel void hash(
     //int4 gridPos = calcGridCell(p, gp->grid_min, gp->grid_inv_delta);
     int4 gridPos = calcGridCell(p, gp->grid_min, gp->grid_delta);
     bool wrap_edges = false;
-    uint hash = (uint) calcGridHash(gridPos, gp->grid_res, wrap_edges);//, fdebug, idebug);
+    //uint hash = (uint) calcGridHash(gridPos, gp->grid_res, wrap_edges);//, fdebug, idebug);
+    int hash = calcGridHash(gridPos, gp->grid_res, wrap_edges);//, fdebug, idebug);
 
+    cli[index].xyz = gridPos.xyz;
+    cli[index].w = hash;
+    //cli[index].w = (gridPos.z*gp->grid_res.y + gridPos.y) * gp->grid_res.x + gridPos.x; 
+
+    hash = hash > gp->nb_cells ? gp->nb_cells : hash;
+    hash = hash < 0 ? gp->nb_cells : hash;
+    /*
+       //problem is that when we cut num we are hashing the wrong stuff?
+    if (index >= num)
+    {
+        hash = gp->nb_cells;
+    }
+    */
     // store grid hash and particle index
-    sort_hashes[index] = hash;
+    sort_hashes[index] = (uint)hash;
     //int pp = (int) p.x;
 
     sort_indexes[index] = index;
 
     //fdebug[index] = gp->grid_inv_delta;
     //fdebug[index] = (float4)((p.x - gp->grid_min.x) * gp->grid_inv_delta.x, p.x, 0,0);
-    clf[index] = (float4)((p.x - gp->grid_min.x) * gp->grid_delta.x, p.x, 0,0);
-    cli[index] = gridPos;
-    cli[index].w = num;
+    //clf[index] = (float4)((p.x - gp->grid_min.x) * gp->grid_delta.x, p.x, 0,0);
+    clf[index] = p;
+    //cli[index].w = sphp->max_num;
 }
 //----------------------------------------------------------------------
 

@@ -17,21 +17,6 @@ float dist_squared(float4 vec)
 namespace rtps
 {
 
-    void SPH::loadDensity()
-    {
-        printf("create density kernel\n");
-
-        std::string path(SPH_CL_SOURCE_DIR);
-        path += "/density.cl";
-        k_density = Kernel(ps->cli, path, "density");
-
-        k_density.setArg(0, cl_position.getDevicePtr());
-        k_density.setArg(1, cl_density.getDevicePtr());
-        k_density.setArg(2, cl_SPHParams.getDevicePtr());
-        //k_density.setArg(3, cl_error_check.cl_buffer[0]);
-
-    } 
-
     float SPH::Wpoly6(float4 r, float h)
     {
         float h9 = h*h*h * h*h*h * h*h*h;

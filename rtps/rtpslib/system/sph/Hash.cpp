@@ -11,28 +11,27 @@ namespace rtps
         std::string path(SPH_CL_SOURCE_DIR);
         path = path + "/hash.cl";
         k_hash = Kernel(ps->cli, path, "hash");
-
-        printf("kernel made, set args\n");
-        int args = 0;
-        k_hash.setArg(args++, num); 
-        k_hash.setArg(args++, cl_vars_unsorted.getDevicePtr()); // positions + other variables
-        k_hash.setArg(args++, cl_sort_hashes.getDevicePtr());
-        k_hash.setArg(args++, cl_sort_indices.getDevicePtr());
-        k_hash.setArg(args++, cl_GridParams.getDevicePtr());
-        k_hash.setArg(args++, clf_debug.getDevicePtr());
-        k_hash.setArg(args++, cli_debug.getDevicePtr());
-
-
     }
 
     void SPH::hash()
     // Generate hash list: stored in cl_sort_hashes
     {
 
+        int args = 0;
+        k_hash.setArg(args++, cl_vars_unsorted.getDevicePtr()); // positions + other variables
+        k_hash.setArg(args++, cl_sort_hashes.getDevicePtr());
+        k_hash.setArg(args++, cl_sort_indices.getDevicePtr());
+        k_hash.setArg(args++, cl_SPHParams.getDevicePtr());
+        k_hash.setArg(args++, cl_GridParams.getDevicePtr());
+        k_hash.setArg(args++, clf_debug.getDevicePtr());
+        k_hash.setArg(args++, cli_debug.getDevicePtr());
+
+
         int ctaSize = 128; // work group size
         // Hash based on unscaled data
-        k_hash.setArg(0, num); 
+        //printf("num in hash %d\n", num);
         k_hash.execute(num, ctaSize);
+        //k_hash.execute(max_num, ctaSize); //makes the out of bounds particles "stick".. or not
         // set cell_indicies_start to -1
         int minus = 0xffffffff;
 
@@ -40,31 +39,18 @@ namespace rtps
 
         //-------------------
         // Set cl_cell indices to -1
-        std::vector<int> cells_indices_start(grid_params.nb_cells);
+        std::vector<unsigned int> cells_indices_start(grid_params.nb_cells+1);
         std::fill(cells_indices_start.begin(), cells_indices_start.end(), minus);
         cl_cell_indices_start.copyToDevice(cells_indices_start);
 
         //-------------------
 
-        //sset(gp->nb_points, minus, cl_cell_indices_start->getDevicePtr());
-        //exit(0);   // SOMETHING WRONG with sset!!! WHY? 
 
-        //printHashDiagnostics();
-
-#if 0
-        GridParams& gp = *cl_GridParams->getHostPtr();
-        cl_sort_hashes->copyToHost();
-        int* h = cl_sort_hashes->getHostPtr();
-        int sz = (int) (gp.grid_res.x * gp.grid_res.y * gp.grid_res.z);
-        int mx = -1;
-        for (int i=0; i < nb_el; i++)
+        if(num > 0)
         {
-            //printf("h[%d]= %d\n", i, h[i]);
-            if (h[i] > mx) mx = h[i];
+            //printHashDiagnostics();
         }
-        printf("sz= %d, max hash: %d\n", sz, mx);
-        //exit(0);
-#endif
+
     }
 
     //----------------------------------------------------------------------
@@ -73,11 +59,12 @@ namespace rtps
     {
 #if 1
         printf("***** PRINT hash diagnostics ******\n");
-        std::vector<int> sh = cl_sort_hashes.copyToHost(num);
-        std::vector<int> si = cl_sort_indices.copyToHost(num);
+        int nbc = num + 5;
+        std::vector<unsigned int> sh = cl_sort_hashes.copyToHost(nbc);
+        std::vector<unsigned int> si = cl_sort_indices.copyToHost(nbc);
         //cl_cells->copyToHost();
-        std::vector<int4> cli = cli_debug.copyToHost(num);
-        std::vector<float4> clf = clf_debug.copyToHost(num);
+        std::vector<int4> cli = cli_debug.copyToHost(nbc);
+        std::vector<float4> clf = clf_debug.copyToHost(nbc);
         //cl_GridParams.copyToHost();
 
         //GridParams& gp = *cl_GridParams->getHostPtr();
@@ -86,12 +73,12 @@ namespace rtps
         //cli_debug->copyToHost();
 
         //for (int i=0; i < num; i++) {  
-        for (int i=0; i < 10; i++)
+        for (int i=0; i < nbc; i++)
         {
-            printf(" cl_sort_hash[%d] %u, cl_sort_indices[%d]: %u\n", i, sh[i], i, si[i]);
+            printf("cl_sort_hash[%d] %u, cl_sort_indices[%d]: %u\n", i, sh[i], i, si[i]);
             printf("cli_debug: %d, %d, %d, %d\n", cli[i].x, cli[i].y, cli[i].z, cli[i].w);
             printf("clf_debug: %f, %f, %f, %f\n", clf[i].x, clf[i].y, clf[i].z, clf[i].w);
-            printf("-----\n");
+            //printf("-----\n");
 
 #if 0
             int gx = (cl_cells[i].x - gp.grid_min.x) * gp.grid_inv_delta.x ;

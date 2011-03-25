@@ -53,11 +53,11 @@ namespace rtps
         template <class T> void setArg(int arg, T val);
         void setArgShared(int arg, int nb_bytes);
 
-
+        //execute the kernel and return the time it took in milliseconds using GPU timer
         //assumes null range for worksize offset and local worksize
-        void execute(int ndrange);
+        float execute(int ndrange);
         //later we will make more execute routines to give more options
-        void execute(int ndrange, int workgroup_size);
+        float execute(int ndrange, int workgroup_size);
 
     };
 

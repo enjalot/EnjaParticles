@@ -73,6 +73,7 @@ namespace rtps
         int num;
         int nb_vars; // for combined variables (vars_sorted, etc.)
         int choice; // which kind of calculation to invoke
+        int max_num;
 
 
         void print()
@@ -122,6 +123,8 @@ namespace rtps
 
         void loadTriangles(std::vector<Triangle> triangles);
 
+        void testDelete();
+        int cut; //for debugging DEBUG
 
 
         enum
@@ -196,21 +199,21 @@ namespace rtps
         Buffer<float4>      cl_vars_sorted;
         Buffer<float4>      cl_vars_unsorted;
         Buffer<float4>      cl_cells; // positions in Ian code
-        Buffer<int>         cl_cell_indices_start;
-        Buffer<int>         cl_cell_indices_end;
+        Buffer<unsigned int>         cl_cell_indices_start;
+        Buffer<unsigned int>         cl_cell_indices_end;
         Buffer<int>         cl_vars_sort_indices;
-        Buffer<int>         cl_sort_hashes;
-        Buffer<int>         cl_sort_indices;
-        Buffer<int>         cl_unsort;
-        Buffer<int>         cl_sort;
+        Buffer<unsigned int>         cl_sort_hashes;
+        Buffer<unsigned int>         cl_sort_indices;
+        Buffer<unsigned int>         cl_unsort;
+        Buffer<unsigned int>         cl_sort;
 
         Buffer<Triangle>    cl_triangles;
 
         //Two arrays for bitonic sort (sort not done in place)
-        Buffer<int>         cl_sort_output_hashes;
-        Buffer<int>         cl_sort_output_indices;
+        Buffer<unsigned int>         cl_sort_output_hashes;
+        Buffer<unsigned int>         cl_sort_output_indices;
 
-        Bitonic<int> bitonic;
+        Bitonic<unsigned int> bitonic;
 
         //Parameter structs
         Buffer<SPHParams>   cl_SPHParams;
@@ -218,7 +221,10 @@ namespace rtps
         Buffer<GridParams>  cl_GridParamsScaled;
 
         //index neighbors. Maximum of 50
-        Buffer<int>         cl_index_neigh;
+        //Buffer<int>         cl_index_neigh;
+
+        //for keeping up with deleted particles
+        Buffer<unsigned int> cl_num_changed;
 
         Buffer<float4>      clf_debug;  //just for debugging cl files
         Buffer<int4>        cli_debug;  //just for debugging cl files
@@ -227,11 +233,7 @@ namespace rtps
         //still in use?
         Buffer<float4> cl_error_check;
 
-        //these are defined in sph/ folder next to the kernels
-        void loadDensity();
-        void loadPressure();
-        void loadViscosity();
-        void loadXSPH();
+        //these are defined in sph/ folder
         void loadCollision_wall();
         void loadCollision_tri();
         void loadEuler();
@@ -265,10 +267,14 @@ namespace rtps
         void printHashDiagnostics();
         void bitonic_sort();
         void buildDataStructures();
+        void printDataStructuresDiagnostics();
         void neighborSearch(int choice);
         void collision();
+        void collide_wall();
         void collide_triangles();
         void integrate();
+        void euler();
+        void leapfrog();
 
         float Wpoly6(float4 r, float h);
         float Wspiky(float4 r, float h);
