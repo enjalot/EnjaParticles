@@ -21,13 +21,7 @@ __kernel void euler(
     int num = params->num;
     
     if(i >= num) 
-	return;
-
-    // this parameters will be moved to FLOCKparams
-	//#define	maxspeed	    .03f	    // .003f
-	//#define desiredspeed	0.0025f	// .5f
-	//#define MinUrgency      0.0025f	// .05f
-	//#define MaxUrgency      0.005f	// .1f
+	    return;
 
 	// positions
 	float4 pi = pos(i);
@@ -49,9 +43,6 @@ __kernel void euler(
     // getting number of flockmates and how many flockmates were within the separation dist
 	float numFlockmates = den(i).x;
     float count =  den(i).y;
-	// count = numFlockmates - 1 (true or false)
-//	clf[i] = (float4)(numFlockmates,count,3.,4.);
-	//return;
 
     // weights for the rules
 	float w_sep = 0.10f;  // 0.3f
@@ -64,7 +55,6 @@ __kernel void euler(
 
 
 	// RULE 1. SEPARATION
-	
 	// already computed in cl_density.h
 	// it is stored in pt->force
     if(count > 0){
@@ -73,16 +63,11 @@ __kernel void euler(
         separation = normalize(separation);
     }
 	acc_sep = separation * w_sep;
-    //clf[sort_indices[i]]= force(i); 
-
 	
 	// RULE 2. ALIGNMENT
-
 	// desired velocity computed in cl_density.h
 	// it is stored in pt->surf_tens
-
 	// dividing by the number of flockmates to get the actual average
-	//alignment = numFlockmates > 0 ? alignment/numFlockmates : alignment;
 	alignment = numFlockmates > 0 ? alignment/numFlockmates: alignment;
 
 	// steering towards the average velocity 
@@ -91,18 +76,10 @@ __kernel void euler(
 	alignment = normalize(alignment);
 	acc_aln = alignment * w_aln;
 
-
 	// RULE 3. COHESION
-	
 	// average position already computed in cl_density.h
 	// it is stored in pt->xflock
-
-	// number of flockmates calculated in cl_density.h
-	// it is stored in pt->density.x
-
 	// dividing by the number of flockmates to get the actual average
-	//clf[i] = (float4)(1.,2.,3.,4.);
-	//return;
     cohesion = numFlockmates > 0 ? cohesion/numFlockmates: cohesion;
 
 	// steering towards the average position
@@ -114,8 +91,6 @@ __kernel void euler(
     // compute acc
     acc = vi + acc_sep + acc_aln + acc_coh;
 	acc.w = 0.f;
-    //clf[sort_indices[i]] = acc;
-   
 
     // constrain acceleration
     float accspeed = length(acc);
@@ -133,9 +108,7 @@ __kernel void euler(
     vi = v + acc;
     vi.w =0.f;
 
-
 	// INTEGRATION
-    //pi += vi; 	// euler integration, add the velocity times the timestep
     pi += dt*vi; 	// euler integration, add the velocity times the timestep
 
 #if 1
@@ -165,13 +138,10 @@ __kernel void euler(
     uint originalIndex = sort_indices[i];
     unsorted_vel(originalIndex) = vi;	
     unsorted_pos(originalIndex) = (float4)(pi.xyz, 1.f);    // changed the last component to 1 for my boids, im not using density
-//	clf[i].xyz = pi.xyz;
     positions[originalIndex] = (float4)(pi.xyz, 1.f);       // for plotting
     
     // debugging vectors
     int4 iden = (int4)((int)den(i).x, (int)den(i).y, 0, 0);
     cli[originalIndex] = iden;
-    //vi = (float4)(5.f,5.f, 5.f, 5.f);
     clf[originalIndex] = pi; 
-
 }

@@ -12,6 +12,7 @@
 
 namespace rtps {
 
+//----------------------------------------------------------------------
 FLOCK::FLOCK(RTPS *psfr, int n)
 {
     //store the particle system framework
@@ -73,6 +74,7 @@ FLOCK::FLOCK(RTPS *psfr, int n)
 
 }
 
+//----------------------------------------------------------------------
 FLOCK::~FLOCK()
 {
     printf("FLOCK destructor\n");
@@ -91,6 +93,7 @@ FLOCK::~FLOCK()
 
 }
 
+//----------------------------------------------------------------------
 void FLOCK::update()
 {
 #ifdef CPU
@@ -167,7 +170,7 @@ void FLOCK::updateGPU()
 
 }
 
-
+//----------------------------------------------------------------------
 void FLOCK::integrate()
 {
     int local_size = 128;
@@ -198,6 +201,7 @@ void FLOCK::integrate()
 
 }
 
+//----------------------------------------------------------------------
 int FLOCK::setupTimers()
 {
     int print_freq = 1000; //one second
@@ -216,6 +220,7 @@ int FLOCK::setupTimers()
     timers[TI_LEAPFROG]     = new GE::Time("leapfrog", time_offset, print_freq);
 }
 
+//----------------------------------------------------------------------
 void FLOCK::printTimers()
 {
     for(int i = 0; i < 11; i++) //switch to vector of timers and use size()
@@ -225,23 +230,13 @@ void FLOCK::printTimers()
     System::printTimers();
 }
 
+//----------------------------------------------------------------------
 void FLOCK::calculateFLOCKSettings()
 {
 
     float4 dmin = grid.getBndMin();
     float4 dmax = grid.getBndMax();
 
-//////
-//    flock_settings.rest_density = 1000;
-    //flock_settings.rest_density = 2000;
-
-//    flock_settings.particle_mass = (128*1024.0)/max_num * .0002;
-//    printf("particle mass: %f\n", flock_settings.particle_mass);
-
-//    float particle_vol = flock_settings.particle_mass / flock_settings.rest_density;
-/////
-
-    
     //constant .87 is magic
     //flock_settings.particle_rest_distance = .87 * pow(particle_vol, 1./3.);
     flock_settings.particle_rest_distance = .05;
@@ -251,16 +246,6 @@ void FLOCK::calculateFLOCKSettings()
     //flock_settings.smoothing_distance = .50f;
     flock_settings.smoothing_distance = 2.0f * flock_settings.particle_rest_distance;
 
-////
-//    flock_settings.boundary_distance = .5f * flock_settings.particle_rest_distance;
-////
-
-
-
-
-
-
-
     //flock_settings.simulation_scale = pow(particle_vol * max_num / domain_vol, 1./3.); 
     flock_settings.simulation_scale = 1.0f;
     printf("simulation scale: %f\n", flock_settings.simulation_scale);
@@ -268,62 +253,31 @@ void FLOCK::calculateFLOCKSettings()
     //flock_settings.spacing = flock_settings.particle_rest_distance/ flock_settings.simulation_scale;
     flock_settings.spacing = 0.050f; // must be less than smoothing_distance
 
-    //float particle_radius = flock_settings.spacing;
-    //printf("particle radius: %f\n", particle_radius);
- 
+    // FLOCKParams
     params.grid_min = dmin;
     params.grid_max = dmax;
-//    params.mass = flock_settings.particle_mass;
     params.rest_distance = flock_settings.particle_rest_distance;
     params.smoothing_distance = flock_settings.smoothing_distance;
-//    params.simulation_scale = flock_settings.simulation_scale;
-//    params.boundary_stiffness = 20000.0f;
-//    params.boundary_dampening = 256.0f;
-//    params.boundary_distance = flock_settings.particle_rest_distance * .5f;
-//    params.EPSILON = .00001f;
-//    params.PI = 3.14159265f;
-//    params.K = 20.0f;
     params.num = num;
-//    params.surface_threshold = 2.0 * params.simulation_scale; //0.01;
-//    params.viscosity = .001f;
-    //params.viscosity = 1.0f;
-//    params.gravity = -9.8f;
-    //params.gravity = 0.0f;
-//    params.velocity_limit = 600.0f;
-//    params.xflock_factor = .05f;
-    //params.min_dist = .08f; 
-/*
-	float h = params.smoothing_distance;
-	float pi = acos(-1.0);
-	float h9 = pow(h,9.);
-	float h6 = pow(h,6.);
-	float h3 = pow(h,3.);
-    params.wpoly6_coef = 315.f/64.0f/pi/h9;
-	params.wpoly6_d_coef = -945.f/(32.0f*pi*h9);
-	params.wpoly6_dd_coef = -945.f/(32.0f*pi*h9);
-	params.wspiky_coef = 15.f/pi/h6;
-    params.wspiky_d_coef = 45.f/(pi*h6);
-	params.wvisc_coef = 15./(2.*pi*h3);
-	params.wvisc_d_coef = 15./(2.*pi*h3);
-	params.wvisc_dd_coef = 45./(pi*h6);
-*/
+    
     // Boids parameters
 	params.min_dist     = 0.5f * params.smoothing_distance * ps->settings.min_dist; // desired separation between boids
     params.search_radius= 0.8f * params.smoothing_distance * ps->settings.search_radius;
     params.max_speed    = 1.0f * ps->settings.max_speed;
 
- /*   // debug mymese
+    // debug mymese
+#if 0
     float4 gmin = params.grid_min;
     float4 gmax = params.grid_max;
     float bd = params.boundary_distance;
     printf("\n *************** \n boundary distance: %f\n", bd); 
     printf("min grid: %f, %f, %f\n", gmin.x, gmin.y, gmin.z);
     printf("max grid: %f, %f, %f\n ************** \n", gmax.x,gmax.y, gmax.z);
-*/
+#endif
+
 }
 
-
-
+//----------------------------------------------------------------------
 void FLOCK::prepareSorted()
 {
     #include "flock/cl_src/cl_macros.h"
@@ -332,11 +286,7 @@ void FLOCK::prepareSorted()
     std::vector<float4> error_check(max_num);
  
     std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
-    //std::fill(velocities.begin(), velocities.end(),float4(rand(), rand(), rand(), 0.0f));
-    //std::fill(velocities.begin(), velocities.end(), float4(0.1f, 0.1f, 0.1f, 0.f));
     std::fill(velocities.begin(), velocities.end(), float4(0.0f, 0.0f, 0.0f, 1.f));
-    //std::fill(veleval.begin(), veleval.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
-
     std::fill(densities.begin(), densities.end(), 0.0f);
     std::fill(xflocks.begin(), xflocks.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     std::fill(error_check.begin(), error_check.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -362,8 +312,6 @@ void FLOCK::prepareSorted()
     cl_density = Buffer<float>(ps->cli, densities);
     cl_xflock = Buffer<float4>(ps->cli, xflocks);
 
-    //cl_error_check= Buffer<float4>(ps->cli, error_check);
-
     //TODO make a helper constructor for buffer to make a cl_mem from a struct
     std::vector<FLOCKParams> vparams(0);
     vparams.push_back(params);
@@ -373,6 +321,7 @@ void FLOCK::prepareSorted()
     std::vector<GridParams> gparams(0);
     gparams.push_back(grid_params);
     cl_GridParams = Buffer<GridParams>(ps->cli, gparams);
+    
     //scaled Grid Parameters
     std::vector<GridParams> sgparams(0);
     sgparams.push_back(grid_params_scaled);
@@ -397,15 +346,13 @@ void FLOCK::prepareSorted()
     cl_vars_sorted = Buffer<float4>(ps->cli, sorted);
 
     std::vector<int> keys(max_num);
+    
     //to get around limits of bitonic sort only handling powers of 2
-#include "limits.h"
+    #include "limits.h"
+    
     std::fill(keys.begin(), keys.end(), INT_MAX);
 	cl_sort_indices  = Buffer<int>(ps->cli, keys);
 	cl_sort_hashes   = Buffer<int>(ps->cli, keys);
-
-	// for debugging. Store neighbors of indices
-	// change nb of neighbors in cl_macro.h as well
-	//cl_index_neigh = Buffer<int>(ps->cli, max_num*50);
 
     // Size is the grid size. That is a problem since the number of
 	// occupied cells could be much less than the number of grid elements. 
@@ -415,7 +362,6 @@ void FLOCK::prepareSorted()
 
 	cl_cell_indices_start = Buffer<int>(ps->cli, gcells);
 	cl_cell_indices_end   = Buffer<int>(ps->cli, gcells);
-	//printf("gp.nb_points= %d\n", gp.nb_points); exit(0);
 
 	// For bitonic sort. Remove when bitonic sort no longer used
 	// Currently, there is an error in the Radix Sort (just run both
@@ -423,16 +369,14 @@ void FLOCK::prepareSorted()
 	cl_sort_output_hashes = Buffer<int>(ps->cli, keys);
 	cl_sort_output_indices = Buffer<int>(ps->cli, keys);
 
-//    std::vector<Triangle> maxtri(2048);
-//    cl_triangles = Buffer<Triangle>(ps->cli, maxtri);
 #endif
 
 }
 
+//----------------------------------------------------------------------
 void FLOCK::setupDomain()
 {
     grid.calculateCells(flock_settings.smoothing_distance / flock_settings.simulation_scale);
-
 
 	grid_params.grid_min = grid.getMin();
 	grid_params.grid_max = grid.getMax();
@@ -445,22 +389,15 @@ void FLOCK::setupDomain()
 
     printf("gp nb_cells: %d\n", grid_params.nb_cells);
 
-/*
-// debug mymese
-float4 gmin = grid_params.bnd_min;
-float4 gmax = grid_params.bnd_max;
-float4 bd = grid_params.grid_size;
-printf("\n *************** \n grid size: %f, %f, %f\n", bd.x, bd.y, bd.z); 
-printf("min boundary: %f, %f, %f\n", gmin.x, gmin.y, gmin.z);
-printf("max boundary: %f, %f, %f\n ************** \n", gmax.x,gmax.y, gmax.z);
-*/
-
-    /*
-	grid_params.grid_inv_delta.x = 1. / grid_params.grid_delta.x;
-	grid_params.grid_inv_delta.y = 1. / grid_params.grid_delta.y;
-	grid_params.grid_inv_delta.z = 1. / grid_params.grid_delta.z;
-	grid_params.grid_inv_delta.w = 1.;
-    */
+    // debug mymese
+#if 0
+    float4 gmin = grid_params.bnd_min;
+    float4 gmax = grid_params.bnd_max;
+    float4 bd = grid_params.grid_size;
+    printf("\n *************** \n grid size: %f, %f, %f\n", bd.x, bd.y, bd.z); 
+    printf("min boundary: %f, %f, %f\n", gmin.x, gmin.y, gmin.z);
+    printf("max boundary: %f, %f, %f\n ************** \n", gmax.x,gmax.y, gmax.z);
+#endif
 
     float ss = flock_settings.simulation_scale;
 
@@ -471,10 +408,7 @@ printf("max boundary: %f, %f, %f\n ************** \n", gmax.x,gmax.y, gmax.z);
 	grid_params_scaled.grid_res = grid_params.grid_res;
 	grid_params_scaled.grid_size = grid_params.grid_size * ss;
 	grid_params_scaled.grid_delta = grid_params.grid_delta / ss;
-	//grid_params_scaled.nb_cells = (int) (grid_params_scaled.grid_res.x*grid_params_scaled.grid_res.y*grid_params_scaled.grid_res.z);
     grid_params_scaled.nb_cells = grid_params.nb_cells;
-    //grid_params_scaled.grid_inv_delta = grid_params.grid_inv_delta / ss;
-    //grid_params_scaled.grid_inv_delta.w = 1.0f;
 
     grid_params.print();
     grid_params_scaled.print();
@@ -489,11 +423,14 @@ int FLOCK::addBox(int nn, float4 min, float4 max, bool scaled)
     {
         scale = flock_settings.simulation_scale;
     }
-printf("\n\n ADDING A CUBE \n\n");
+    
+    printf("\n\n ADDING A CUBE \n\n");
+    
     vector<float4> rect;
+    
     addCube(nn, min, max, flock_settings.spacing, scale, rect);
-	//printf("rect size: %d\n", rect.size()); exit(0);
     pushParticles(rect);
+    
     return rect.size();
 }
 
@@ -505,7 +442,9 @@ void FLOCK::addBall(int nn, float4 center, float radius, bool scaled)
     {
         scale = flock_settings.simulation_scale;
     }
-printf("\n\n ADDING A SPHERE \n\n");
+    
+    printf("\n\n ADDING A SPHERE \n\n");
+    
     vector<float4> flockere = addSphere(nn, center, radius, flock_settings.spacing, scale);
     pushParticles(flockere);
 }
@@ -514,38 +453,30 @@ printf("\n\n ADDING A SPHERE \n\n");
 void FLOCK::pushParticles(vector<float4> pos)
 {
     int nn = pos.size();
+    
+    // if we have reach max num of particles, then return
     if (num + nn > max_num) {return;}
+    
     float rr = (rand() % 255)/255.0f;
     float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
     
-    //printf("random color: %f %f %f\n", rr, 0.f, 1.0f-rr, 1.f);
-	//float4 color(0.0f,0.0f,0.1f,0.1f);
-
     std::vector<float4> cols(nn);
     std::vector<float4> vels(nn);
 
     std::fill(cols.begin(), cols.end(),color);
-    //float v = .5f;
-    //float v = rand()/RAND_MAX;    //mymese
-    //float4 iv = float4(v, v, -v, 0.0f);
-    float4 iv = float4(0.f, 0.f, 0.f, 0.0f);   //mymese
-    std::fill(vels.begin(), vels.end(),iv);   // mymese
+    float4 iv = float4(0.f, 0.f, 0.f, 0.0f);   
+    std::fill(vels.begin(), vels.end(),iv);   
 
 #ifdef CPU
  std::copy(pos.begin(), pos.end(), positions.begin()+num);
-//printf("pushParticles nn = %d\n", nn);
-//exit(0);
 #endif
 
 #ifdef GPU
-
     glFinish();
     cl_position.acquire();
     cl_color.acquire();
  
-    //printf("about to prep 0\n");
     prep(0);
-    //printf("done with prep 0\n");
 
     cl_position.copyToDevice(pos, num);
     cl_color.copyToDevice(cols, num);
@@ -553,36 +484,27 @@ void FLOCK::pushParticles(vector<float4> pos)
     cl_color.release();
     cl_position.release();
 
-    //2 is from cl_macros.h should probably not hardcode this number
     cl_velocity.copyToDevice(vels, num);
-    //cl_vars_unsorted.copyToDevice(vels, max_num*8+num);
 
-    //params.num = num+nn;
-    //std::vector<FLOCKParams> vparams(0);
-    //vparams.push_back(params);
-    //cl_FLOCKParams.copyToDevice(vparams);
-
-    //printf("about to updateNum\n");
-    //ps->updateNum(params.num);
-
-    //printf("pushParticles: %d\n", num);
     params.num = num+nn;
     updateFLOCKP();
 
     num += nn;  //keep track of number of particles we use
 
     cl_position.acquire();
+    
     //reprep the unsorted (packed) array to account for new particles
     //might need to do it conditionally if particles are added or subtracted
-    printf("about to prep\n");
     prep(1);
-    printf("done with prep\n");
     cl_position.release();
+
 #else
     num += nn;  //keep track of number of particles we use
 #endif
+
 	renderer->setNum(num);
 }
+
 //----------------------------------------------------------------------
 void FLOCK::updateFLOCKP()
 {
@@ -596,9 +518,9 @@ void FLOCK::render()
 {
 	System::render();
 	renderer->render_box(grid.getBndMin(), grid.getBndMax());
-    //renderer->render_table(grid.getBndMin(), grid.getBndMax());
 }
 
+//----------------------------------------------------------------------
 void FLOCK::setRenderer()
 {
     switch(ps->settings.getRenderType())
@@ -608,7 +530,6 @@ void FLOCK::setRenderer()
             printf("spacing for radius %f\n", flock_settings.spacing);
             break;
         case RTPSettings::SCREEN_SPACE_RENDER:
-            //renderer = new ScreenSpaceRender();
             renderer = new SSFRender(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
             break;
         case RTPSettings::RENDER:
@@ -619,7 +540,6 @@ void FLOCK::setRenderer()
             renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
         break;
     }
-    //renderer->setParticleRadius(spacing*0.5);
     renderer->setParticleRadius(flock_settings.spacing);
 }
 
