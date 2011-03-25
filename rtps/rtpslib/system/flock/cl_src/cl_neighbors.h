@@ -31,7 +31,7 @@ void IterateParticlesInCell(
     __global int* 		cell_indexes_end,
     __constant struct GridParams* gp,
     //__constant struct FluidParams* fp,
-    __constant struct FLOCKParams* flockp
+    __constant struct FLOCKParameters* flockp
     DEBUG_ARGS
 )
 {
@@ -74,7 +74,7 @@ void IterateParticlesInNearbyCells(
     __global int* 		cell_indices_end,
     __constant struct GridParams* gp,
     //__constant struct FluidParams* fp,
-    __constant struct FLOCKParams* flockp
+    __constant struct FLOCKParameters* flockp
     DEBUG_ARGS
     )
 {

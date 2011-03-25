@@ -12,13 +12,14 @@ __kernel void euler(
 		__global float4* vars_sorted, 
 		__global float4* positions,  // for VBO 
 //		__global float4* color,
-		__constant struct FLOCKParams* params, 
+//		__constant struct FLOCKParams* params, 
+		__constant struct FLOCKParameters* flockp, 
 		float dt
 		DEBUG_ARGS
         )
 {
     unsigned int i = get_global_id(0);
-    int num = params->num;
+    int num = flockp->num;
     
     if(i >= num) 
 	    return;
@@ -50,8 +51,9 @@ __kernel void euler(
 	float w_coh = 0.0001f;  // 3.f
 	
     // boundary limits, used to computed boundary conditions    
-	float4 bndMax = params->grid_max;
-	float4 bndMin = params->grid_min;
+	float4 bndMax = flockp->grid_max;
+    
+	float4 bndMin = flockp->grid_min;
 
 
 	// RULE 1. SEPARATION
@@ -95,9 +97,9 @@ __kernel void euler(
     // constrain acceleration
     float accspeed = length(acc);
     float4 accnorm = normalize(acc);
-    if(accspeed > params->max_speed){
+    if(accspeed > flockp->max_speed){
         // set magnitude to Max Speed
-        acc = accnorm * params->max_speed;
+        acc = accnorm * flockp->max_speed;
     }
 
     // add circular velocity field

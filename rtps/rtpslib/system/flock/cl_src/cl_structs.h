@@ -84,6 +84,26 @@ struct GridParams
     int nb_cells;
 };
 
+struct FLOCKParameters
+{
+
+    float4 grid_min;
+    float4 grid_max;
+    
+    float rest_distance;
+    float smoothing_distance;
+    
+    int num;
+    int nb_vars; // for combined variables (vars_sorted, etc.)
+	int choice; // which kind of calculation to invoke
+    
+    // Boids
+    float min_dist;  // desired separation between boids
+    float search_radius;
+    float max_speed; 
+};
+
+//pass parameters to OpenCL routines
 //----------------------------------------------------------------------
 #if 0
 struct FluidParams

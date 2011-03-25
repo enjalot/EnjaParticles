@@ -31,6 +31,25 @@ typedef struct FLOCKSettings
     float spacing;
 } FLOCKSettings;
 
+typedef struct FLOCKParameters
+{
+
+    float4 grid_min;
+    float4 grid_max;
+    
+    float rest_distance;
+    float smoothing_distance;
+    
+    int num;
+    int nb_vars; // for combined variables (vars_sorted, etc.)
+	int choice; // which kind of calculation to invoke
+    
+    // Boids
+    float min_dist;  // desired separation between boids
+    float search_radius;
+    float max_speed; 
+}FLOCKParameters;
+
 //pass parameters to OpenCL routines
 typedef struct FLOCKParams
 {
@@ -125,6 +144,7 @@ private:
 
     FLOCKSettings flock_settings;
     FLOCKParams params;
+    FLOCKParameters parameters;
     GridParams grid_params;
     GridParams grid_params_scaled;
 
@@ -185,6 +205,7 @@ private:
     
     //Parameter structs
     Buffer<FLOCKParams>   cl_FLOCKParams;
+    Buffer<FLOCKParameters>   cl_FLOCKParameters;
 	Buffer<GridParams>  cl_GridParams;
 	Buffer<GridParams>  cl_GridParamsScaled;
    

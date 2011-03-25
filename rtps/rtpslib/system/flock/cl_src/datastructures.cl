@@ -15,7 +15,8 @@ __kernel void datastructures(
 		   			__global uint* sort_indices,
 		   			__global uint* cell_indices_start,
 		   			__global uint* cell_indices_end,
-		   			__constant struct FLOCKParams* flockp,
+		   		//	__constant struct FLOCKParams* flockp,
+		   			__constant struct FLOCKParameters* flockp,
 		   			//__constant struct GridParams* gp,
 					__local  uint* sharedHash   // blockSize+1 elements
 			  )

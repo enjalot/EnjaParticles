@@ -264,6 +264,18 @@ void FLOCK::calculateFLOCKSettings()
 	params.min_dist     = 0.5f * params.smoothing_distance * ps->settings.min_dist; // desired separation between boids
     params.search_radius= 0.8f * params.smoothing_distance * ps->settings.search_radius;
     params.max_speed    = 1.0f * ps->settings.max_speed;
+    
+    // FLOCKParameters
+    parameters.grid_min = dmin;
+    parameters.grid_max = dmax;
+    parameters.rest_distance = flock_settings.particle_rest_distance;
+    parameters.smoothing_distance = flock_settings.smoothing_distance;
+    parameters.num = num;
+    
+    // Boids parameters
+	parameters.min_dist     = 0.5f * parameters.smoothing_distance * ps->settings.min_dist; // desired separation between boids
+    parameters.search_radius= 0.8f * parameters.smoothing_distance * ps->settings.search_radius;
+    parameters.max_speed    = 1.0f * ps->settings.max_speed;
 
     // debug mymese
 #if 0
@@ -317,6 +329,10 @@ void FLOCK::prepareSorted()
     vparams.push_back(params);
     cl_FLOCKParams = Buffer<FLOCKParams>(ps->cli, vparams);
 
+    std::vector<FLOCKParameters> vparameters(0);
+    vparameters.push_back(parameters);
+    cl_FLOCKParameters = Buffer<FLOCKParameters>(ps->cli, vparameters);
+    
     //Setup Grid Parameter structs
     std::vector<GridParams> gparams(0);
     gparams.push_back(grid_params);
@@ -487,6 +503,7 @@ void FLOCK::pushParticles(vector<float4> pos)
     cl_velocity.copyToDevice(vels, num);
 
     params.num = num+nn;
+    parameters.num = num+nn;
     updateFLOCKP();
 
     num += nn;  //keep track of number of particles we use
@@ -511,6 +528,10 @@ void FLOCK::updateFLOCKP()
     std::vector<FLOCKParams> vparams(0);
     vparams.push_back(params);
     cl_FLOCKParams.copyToDevice(vparams);
+    
+    std::vector<FLOCKParameters> vparameters(0);
+    vparameters.push_back(parameters);
+    cl_FLOCKParameters.copyToDevice(vparameters);
 }
 
 //----------------------------------------------------------------------

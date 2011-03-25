@@ -28,8 +28,7 @@ void FLOCK::loadNeighbors()
 	kern.setArg(iarg++, cl_cell_indices_start.getDevicePtr());
 	kern.setArg(iarg++, cl_cell_indices_end.getDevicePtr());
 	kern.setArg(iarg++, cl_GridParamsScaled.getDevicePtr());
-	//kern.setArg(iarg++, cl_FluidParams->getDevicePtr());
-	kern.setArg(iarg++, cl_FLOCKParams.getDevicePtr());
+	kern.setArg(iarg++, cl_FLOCKParameters.getDevicePtr());
 
 	// ONLY IF DEBUGGING
 	kern.setArg(iarg++, clf_debug.getDevicePtr());

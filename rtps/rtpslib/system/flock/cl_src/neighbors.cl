@@ -11,7 +11,7 @@ inline void ForNeighbor(__global float4*  vars_sorted,
 				uint index_j,
 				float4 position_i,
 	  			__constant struct GridParams* gp,
-	  			__constant struct FLOCKParams* flockp
+ 	  			__constant struct FLOCKParameters* flockp
                 DEBUG_ARGS
 				)
 {
@@ -69,7 +69,7 @@ __kernel void neighbors(
         		__global int*    cell_indexes_start,
         		__global int*    cell_indexes_end,
 				__constant struct GridParams* gp,
-				__constant struct FLOCKParams* flockp 
+				__constant struct FLOCKParameters* flockp 
 				DEBUG_ARGS
 				)
 {

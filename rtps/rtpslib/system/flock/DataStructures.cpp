@@ -18,7 +18,8 @@ void FLOCK::loadDataStructures()
 	k_datastructures.setArg(iarg++, cl_sort_indices.getDevicePtr());
 	k_datastructures.setArg(iarg++, cl_cell_indices_start.getDevicePtr());
 	k_datastructures.setArg(iarg++, cl_cell_indices_end.getDevicePtr());
-	k_datastructures.setArg(iarg++, cl_FLOCKParams.getDevicePtr());
+//	k_datastructures.setArg(iarg++, cl_FLOCKParams.getDevicePtr());
+	k_datastructures.setArg(iarg++, cl_FLOCKParameters.getDevicePtr());
 	//k_datastructures.setArg(iarg++, cl_GridParamsScaled->getDevicePtr());
     
     int workSize = 64;
