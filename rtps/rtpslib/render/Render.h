@@ -10,6 +10,10 @@
 //OpenCL stuff
 #endif*/
 
+#ifdef WIN32
+//must include windows.h before gl.h on windows platform
+#include <windows.h>
+#endif
 
 #if defined __APPLE__ || defined(MACOSX)
 //OpenGL stuff
