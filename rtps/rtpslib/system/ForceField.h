@@ -10,7 +10,7 @@ enum FFType{ATTRACTOR, REPELER};
 
 //keep track of the fluid settings
 #ifdef WIN32
-#pragma pack(2)
+#pragma pack(push,16)
 #endif
 typedef struct ForceField
 {
@@ -41,6 +41,7 @@ typedef struct ForceField
 __attribute__((aligned(16)));
 #else
 ;
+#pragma pack(pop)
 #endif
 
 

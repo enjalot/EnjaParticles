@@ -42,7 +42,7 @@ typedef struct FLOCKSettings
 
 //pass parameters to OpenCL routines
 #ifdef WIN32
-#pragma pack(2)
+#pragma pack(push,16)
 #endif
 typedef struct FLOCKParams
 {
@@ -101,6 +101,7 @@ typedef struct FLOCKParams
 	__attribute__((aligned(16)));
 #else
 		;
+#pragma pack(pop,16)
 #endif
 
 //----------------------------------------------------------------------

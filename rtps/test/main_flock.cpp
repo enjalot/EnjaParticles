@@ -69,11 +69,11 @@ void *font = GLUT_BITMAP_8_BY_13;
 rtps::RTPS* ps;
 
 //#define NUM_PARTICLES 524288
-#define NUM_PARTICLES 262144
+//#define NUM_PARTICLES 262144
 //#define NUM_PARTICLES 65536
 //#define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 10000
-//#define NUM_PARTICLES 8192
+#define NUM_PARTICLES 8192
 //#define NUM_PARTICLES 4096
 //#define NUM_PARTICLES 2048
 //#define NUM_PARTICLES 1024
@@ -207,7 +207,7 @@ void appKeyboard(unsigned char key, int x, int y)
     switch (key)
     {
         case 'e': //dam break
-            nn = 16384;
+            nn = 2000;
             min = float4(.1, .1, .1, 1.0f);
             max = float4(3.9, 3.9, 3.9, 1.0f);
             ps->system->addBox(nn, min, max, false);
@@ -246,7 +246,7 @@ void appKeyboard(unsigned char key, int x, int y)
             }
         case 'r': //drop a rectangle
         {
-            nn = 16384;
+            nn = 2000;
             //nn = 4096;
             //nn = 4;
             //max = float4(2.5, 2.5, 2.5, 1.0f);
