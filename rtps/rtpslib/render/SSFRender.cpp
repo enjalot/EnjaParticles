@@ -131,6 +131,9 @@ namespace rtps
 
     void SSFRender::render()
     {
+        //perserve original buffer
+        GLint buffer;
+        glGetIntegerv(GL_DRAW_BUFFER,&buffer);
         //TODO: do this properly
         int xywh[4];
         glGetIntegerv(GL_VIEWPORT, xywh);
@@ -145,20 +148,9 @@ namespace rtps
         glGetFloatv(GL_DEPTH_RANGE,nf);
         near_depth = nf[0];
         far_depth = nf[1];
+        glViewport(0, 0, window_width, window_height);
+        glScissor(0, 0, window_width, window_height);
 
-        /*
-        printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
-        printf("w: %d h: %d\n", window_width, window_height);
-        printf("x: %d y: %d w: %d h: %d\n", xywh[0], xywh[1], xywh[2], xywh[3]);
-        */
-        /*
-        int whatbuffer;
-        glGetIntegerv(GL_DRAW_BUFFER0, &whatbuffer);
-        printf("What buffer? %d, GL_BACK: %d\n", whatbuffer, GL_BACK);
-        */
-
-        // Render the particles with OpenGL
-        //printf("window width = %d window height = %d",window_width,window_height);
         timers[TI_RENDER]->start();
 
         glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -168,12 +160,10 @@ namespace rtps
         {
             //glDepthMask(GL_FALSE);
             glEnable(GL_BLEND);
-            //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         }
 
-        glViewport(0, 0, window_width, window_height);
-        glScissor(0, 0, window_width, window_height);
+        
         //glViewport(0, 0, window_width-xywh[0], window_height-xywh[1]);
 
 
@@ -183,7 +173,7 @@ namespace rtps
         glDisable(GL_DEPTH_TEST);
         glDepthMask(GL_FALSE);
         glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
-        glClearColor(0.0f,0.0f,0.0f,1.0f);
+        glClearColor(0.0f,0.0f,0.0f,0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         renderPointsAsSpheres();
         glEnable(GL_DEPTH_TEST);
@@ -258,7 +248,7 @@ namespace rtps
         glEnable(GL_DEPTH_TEST);
 
         glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT,0);
-        glDrawBuffer(GL_BACK);
+        glDrawBuffer(buffer);
 
         glViewport(xywh[0],xywh[1],window_width,window_height);
         glScissor(xywh[0], xywh[1], window_width, window_height);

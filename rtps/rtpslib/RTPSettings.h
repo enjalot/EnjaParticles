@@ -39,7 +39,7 @@ namespace rtps
         RTPSettings(SysType system, int max_particles, float dt, Domain grid, bool tri_collision);
 
         //flock
-        RTPSettings(SysType system, int max_particles, float dt, Domain grid, float maxspeed, float mindist, float searchradius, float color[]);
+        RTPSettings(SysType system, int max_particles, float dt, Domain grid, float maxspeed, float mindist, float searchradius, float color[], float w_sep, float w_align, float w_coh);
 
         //maximum number of particles a system can hold
         int max_particles;
@@ -64,6 +64,11 @@ namespace rtps
 
         // color of the flock
         float4 color;
+
+        // weights
+        float w_sep;
+        float w_align;
+        float w_coh;
 
         // Added by GE
     private:

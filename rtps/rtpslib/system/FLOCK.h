@@ -17,6 +17,15 @@
 #include "../domain/Domain.h"
 
 #include "timege.h"
+#ifdef WIN32
+    #if defined(rtps_EXPORTS)
+        #define RTPS_EXPORT __declspec(dllexport)
+    #else
+        #define RTPS_EXPORT __declspec(dllimport)
+	#endif 
+#else
+    #define RTPS_EXPORT
+#endif
 
 
 namespace rtps {
@@ -58,11 +67,10 @@ typedef struct FLOCKParameters
 		printf("search_radius: %f\n", search_radius);
 		printf("max_speed: %f\n", max_speed);
 	}
-
-}FLOCKParameters;
+} FLOCKParams 
 
 //----------------------------------------------------------------------
-class FLOCK : public System
+class RTPS_EXPORT FLOCK : public System
 {
 public:
     FLOCK(RTPS *ps, int num);
