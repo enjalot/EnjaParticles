@@ -32,7 +32,7 @@ ENDIF(WITH_OPENCL)
 ##############################################################################
 
 ##### Source Paths ############################################################
-if(WIN32)
+IF(WIN32)
 ADD_DEFINITIONS(-DSIMPLE_CL_SOURCE_DIR="./cl_simple")
 ADD_DEFINITIONS(-DSPH_CL_SOURCE_DIR="./cl_sph")
 ADD_DEFINITIONS(-DGLSL_BIN_DIR="./shaders")

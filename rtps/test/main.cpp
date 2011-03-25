@@ -349,6 +349,7 @@ void appRender()
         glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
         glTranslatef(translate_x, translate_z, translate_y);
         ps->render();
+	draw_collision_boxes();
         if(render_movie)
         {
             write_movie_frame("image");

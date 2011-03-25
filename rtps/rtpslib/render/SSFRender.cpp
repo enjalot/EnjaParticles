@@ -141,13 +141,13 @@ namespace rtps
         {
             //printf("SETTING DIMENSIONS\n");
             setWindowDimensions(glwidth, glheight);
-            glViewport(0, 0, window_width, window_height);
-            glScissor(0, 0, window_width, window_height);
         }
         float nf[2];
         glGetFloatv(GL_DEPTH_RANGE,nf);
         near_depth = nf[0];
         far_depth = nf[1];
+        glViewport(0, 0, window_width, window_height);
+        glScissor(0, 0, window_width, window_height);
 
         timers[TI_RENDER]->start();
 
