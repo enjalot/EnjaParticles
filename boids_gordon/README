@@ -1,0 +1,12 @@
+Error: with only separation, the motion should retain symmetry of initial configuration 
+(rectangle or circle), unless addRect has an error. 
+
+
+Building without SWIG: 
+======================
+
+If you dont have SWIG installed on your machine, run cmake with: 
+
+cmake -DUSE_SWIG=0 ..
+make 
+

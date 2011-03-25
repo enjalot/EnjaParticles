@@ -24,7 +24,7 @@ namespace rtps
     Render::Render(GLuint pos, GLuint col, int n, CL* cli, RTPSettings* _settings)
     {
         this->settings = _settings;
-
+     
         rtype = POINTS;
         pos_vbo = pos;
         col_vbo = col;
@@ -37,12 +37,10 @@ namespace rtps
         write_framebuffers = false;
         GLubyte col1[] = {0,0,0,255};
         GLubyte col2[] = {255,255,255,255};
-        
-        generateCheckerBoardTex(col1,col2,8, 640);
 
+        generateCheckerBoardTex(col1,col2,8, 640);
         printf("GL VERSION %s\n", glGetString(GL_VERSION));
         blending = false;
-
         setupTimers();
     }
 
