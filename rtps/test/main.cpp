@@ -127,7 +127,7 @@ int main(int argc, char** argv)
 
     //initialize glut
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH |GLUT_STEREO);
     glutInitWindowSize(window_width, window_height);
     glutInitWindowPosition (glutGet(GLUT_SCREEN_WIDTH)/2 - window_width/2, 
                             glutGet(GLUT_SCREEN_HEIGHT)/2 - window_height/2);
@@ -161,11 +161,11 @@ int main(int argc, char** argv)
     rtps::Domain grid = Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
     //rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
     rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
-    settings.setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
-    settings.setRadiusScale(1);
+    settings.setRenderType(RTPSettings::RENDER);
+    settings.setRadiusScale(1.5);
     settings.setBlurScale(1);
-    settings.setUseGLSL(0);
-    settings.setUseAlphaBlending(0);    
+    settings.setUseGLSL(1);
+    settings.setUseAlphaBlending(1);    
 
     ps = new rtps::RTPS(settings);
 
@@ -252,7 +252,7 @@ void appKeyboard(unsigned char key, int x, int y)
             printf("about to spray\n");
             ps->system->sprayHoses();
             return;
-
+		
         case 'n':
             render_movie=!render_movie;
             break;
@@ -538,7 +538,7 @@ void render_stereo()
     }
 
     glDrawBuffer(GL_BACK_RIGHT);                             //draw into back right buffer
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();                                        //reset projection matrix
     glFrustum(rightCam.leftfrustum, rightCam.rightfrustum,   //set left view frustum
