@@ -218,6 +218,8 @@ int FLOCK::setupTimers()
     timers[TI_COLLISION_TRI]     = new GE::Time("collision_triangle", time_offset, print_freq);
     timers[TI_EULER]     = new GE::Time("euler", time_offset, print_freq);
     timers[TI_LEAPFROG]     = new GE::Time("leapfrog", time_offset, print_freq);
+
+    return 0;
 }
 
 //----------------------------------------------------------------------
@@ -252,30 +254,18 @@ void FLOCK::calculateFLOCKSettings()
 
     //flock_settings.spacing = flock_settings.particle_rest_distance/ flock_settings.simulation_scale;
     flock_settings.spacing = 0.050f; // must be less than smoothing_distance
-#if 0
-    // FLOCKParams
-    params.grid_min = dmin;
-    params.grid_max = dmax;
-    params.rest_distance = flock_settings.particle_rest_distance;
-    params.smoothing_distance = flock_settings.smoothing_distance;
-    params.num = num;
     
-    // Boids parameters
-	params.min_dist     = 0.5f * params.smoothing_distance * ps->settings.min_dist; // desired separation between boids
-    params.search_radius= 0.8f * params.smoothing_distance * ps->settings.search_radius;
-    params.max_speed    = 1.0f * ps->settings.max_speed;
-#endif 
     // FLOCKParameters
-    parameters.grid_min = dmin;
-    parameters.grid_max = dmax;
-    parameters.rest_distance = flock_settings.particle_rest_distance;
-    parameters.smoothing_distance = flock_settings.smoothing_distance;
-    parameters.num = num;
+    flock_params.grid_min = dmin;
+    flock_params.grid_max = dmax;
+    flock_params.rest_distance = flock_settings.particle_rest_distance;
+    flock_params.smoothing_distance = flock_settings.smoothing_distance;
+    flock_params.num = num;
     
-    // Boids parameters
-	parameters.min_dist     = 0.5f * parameters.smoothing_distance * ps->settings.min_dist; // desired separation between boids
-    parameters.search_radius= 0.8f * parameters.smoothing_distance * ps->settings.search_radius;
-    parameters.max_speed    = 1.0f * ps->settings.max_speed;
+    // Boids flock_params
+	flock_params.min_dist     = 0.5f * flock_params.smoothing_distance * ps->settings.min_dist; // desired separation between boids
+    flock_params.search_radius= 0.8f * flock_params.smoothing_distance * ps->settings.search_radius;
+    flock_params.max_speed    = 1.0f * ps->settings.max_speed;
 
     // debug mymese
 #if 0
@@ -324,14 +314,10 @@ void FLOCK::prepareSorted()
     cl_density = Buffer<float>(ps->cli, densities);
     cl_xflock = Buffer<float4>(ps->cli, xflocks);
 
-    //TODO make a helper constructor for buffer to make a cl_mem from a struct
-    //std::vector<FLOCKParams> vparams(0);
-    //vparams.push_back(params);
-    //cl_FLOCKParams = Buffer<FLOCKParams>(ps->cli, vparams);
-
-    std::vector<FLOCKParameters> vparameters(0);
-    vparameters.push_back(parameters);
-    cl_FLOCKParameters = Buffer<FLOCKParameters>(ps->cli, vparameters);
+    // FLOCK Parameters
+    std::vector<FLOCKParameters> vparams(0);
+    vparams.push_back(flock_params);
+    cl_FLOCKParameters = Buffer<FLOCKParameters>(ps->cli, vparams);
     
     //Setup Grid Parameter structs
     std::vector<GridParams> gparams(0);
@@ -502,8 +488,7 @@ void FLOCK::pushParticles(vector<float4> pos)
 
     cl_velocity.copyToDevice(vels, num);
 
-    //params.num = num+nn;
-    parameters.num = num+nn;
+    flock_params.num = num+nn;
     updateFLOCKP();
 
     num += nn;  //keep track of number of particles we use
@@ -525,13 +510,9 @@ void FLOCK::pushParticles(vector<float4> pos)
 //----------------------------------------------------------------------
 void FLOCK::updateFLOCKP()
 {
-    //std::vector<FLOCKParams> vparams(0);
-    //vparams.push_back(params);
-    //cl_FLOCKParams.copyToDevice(vparams);
-    
-    std::vector<FLOCKParameters> vparameters(0);
-    vparameters.push_back(parameters);
-    cl_FLOCKParameters.copyToDevice(vparameters);
+    std::vector<FLOCKParameters> vparams(0);
+    vparams.push_back(flock_params);
+    cl_FLOCKParameters.copyToDevice(vparams);
 }
 
 //----------------------------------------------------------------------

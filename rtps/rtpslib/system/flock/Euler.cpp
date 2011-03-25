@@ -20,7 +20,6 @@ void FLOCK::loadEuler()
     k_euler.setArg(iargs++, cl_vars_unsorted.getDevicePtr());
     k_euler.setArg(iargs++, cl_vars_sorted.getDevicePtr());
     k_euler.setArg(iargs++, cl_position.getDevicePtr());
-//    k_euler.setArg(iargs++, cl_FLOCKParams.getDevicePtr());
     k_euler.setArg(iargs++, cl_FLOCKParameters.getDevicePtr());
     k_euler.setArg(iargs++, ps->settings.dt); //time step
 
@@ -56,8 +55,8 @@ void FLOCK::cpuEuler()
     float w_aln = 0.0f;
     float w_coh = 0.0f;
 
-    float4 bndMax = parameters.grid_max;
-    float4 bndMin = parameters.grid_min;
+    float4 bndMax = flock_params.grid_max;
+    float4 bndMin = flock_params.grid_min;
 
 	float hh = flock_settings.spacing;
 	hh *= 2;

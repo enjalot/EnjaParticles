@@ -22,6 +22,7 @@
 namespace rtps {
 
 
+//----------------------------------------------------------------------
 //keep track of the flock settings
 typedef struct FLOCKSettings
 {
@@ -31,6 +32,8 @@ typedef struct FLOCKSettings
     float spacing;
 } FLOCKSettings;
 
+//----------------------------------------------------------------------
+//pass parameters to OpenCL routines
 typedef struct FLOCKParameters
 {
 
@@ -41,57 +44,8 @@ typedef struct FLOCKParameters
     float smoothing_distance;
     
     int num;
-    int nb_vars; // for combined variables (vars_sorted, etc.)
-	int choice; // which kind of calculation to invoke
-    
-    // Boids
-    float min_dist;  // desired separation between boids
-    float search_radius;
-    float max_speed; 
-}FLOCKParameters;
-
-//pass parameters to OpenCL routines
-#if 0
-typedef struct FLOCKParams
-{
-    float4 grid_min;
-    float4 grid_max;
-    float mass;
-    float rest_distance;
-    float smoothing_distance;
-   float simulation_scale;
-    float boundary_stiffness;
-    float boundary_dampening;
-    float boundary_distance;
-    float EPSILON;
-    float PI;       //delicious
-    float K;        //gas constant
-    float viscosity;
-    float velocity_limit;
-    float xflock_factor;
-
-	float gravity; // -9.8 m/sec^2
-    float friction_coef;
-	float restitution_coef;
-	float shear;
-	float attraction;
-	float spring;
-	//float surface_threshold;
-    
-    //Kernel Coefficients
-    float wpoly6_coef;
-	float wpoly6_d_coef;
-	float wpoly6_dd_coef; // laplacian
-	float wspiky_coef;
-	float wspiky_d_coef;
-	float wspiky_dd_coef;
-	float wvisc_coef;
-	float wvisc_d_coef;
-	float wvisc_dd_coef;
-
-    int num;
-    int nb_vars; // for combined variables (vars_sorted, etc.)
-	int choice; // which kind of calculation to invoke
+    int nb_vars;    // for combined variables (vars_sorted, etc.)
+	int choice;     // which kind of calculation to invoke
     
     // Boids
     float min_dist;  // desired separation between boids
@@ -104,10 +58,10 @@ typedef struct FLOCKParams
 		printf("search_radius: %f\n", search_radius);
 		printf("max_speed: %f\n", max_speed);
 	}
-} FLOCKParams __attribute__((aligned(16)));
-#endif
-//----------------------------------------------------------------------
 
+}FLOCKParameters;
+
+//----------------------------------------------------------------------
 class FLOCK : public System
 {
 public:
@@ -143,11 +97,10 @@ private:
     RTPS *ps;
 	//Boids *boids;
 
-    FLOCKSettings flock_settings;
-    //FLOCKParams params;
-    FLOCKParameters parameters;
-    GridParams grid_params;
-    GridParams grid_params_scaled;
+    FLOCKSettings   flock_settings;
+    FLOCKParameters flock_params;
+    GridParams      grid_params;
+    GridParams      grid_params_scaled;
 
     int nb_var;
 
@@ -205,10 +158,9 @@ private:
     Bitonic<int>        bitonic;
     
     //Parameter structs
-    //Buffer<FLOCKParams>   cl_FLOCKParams;
-    Buffer<FLOCKParameters>   cl_FLOCKParameters;
-	Buffer<GridParams>  cl_GridParams;
-	Buffer<GridParams>  cl_GridParamsScaled;
+    Buffer<FLOCKParameters>     cl_FLOCKParameters;
+	Buffer<GridParams>          cl_GridParams;
+	Buffer<GridParams>          cl_GridParamsScaled;
    
     //index neighbors. Maximum of 50
 	Buffer<int> 		cl_index_neigh;
