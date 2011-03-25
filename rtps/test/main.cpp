@@ -257,7 +257,7 @@ void appKeyboard(unsigned char key, int x, int y)
             //sph sets spacing and multiplies by radius value
             ps->system->addHose(5000, center, velocity, 5);
             return;
-
+		}
         case 'n':
             render_movie=!render_movie;
             break;
@@ -370,7 +370,7 @@ void appRender()
         glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
         glTranslatef(translate_x, translate_z, translate_y);
         ps->render();
-	draw_collision_boxes();
+        draw_collision_boxes();
         if(render_movie)
         {
             write_movie_frame("image");
@@ -551,9 +551,10 @@ void render_stereo()
         glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
         glTranslatef(translate_x, translate_z, translate_y);
         ps->render();
+        draw_collision_boxes();
     }
     glPopMatrix();
-    draw_collision_boxes();
+
     if(render_movie)
     {
         write_movie_frame("stereo/image_left_");
@@ -577,9 +578,9 @@ void render_stereo()
         glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
         glTranslatef(translate_x, translate_z, translate_y);
         ps->render();
+        draw_collision_boxes();
     }
     glPopMatrix();
-    draw_collision_boxes();
     if(render_movie)
     {
         write_movie_frame("stereo/image_right_");

@@ -17,6 +17,15 @@
 #include "../domain/Domain.h"
 
 #include "timege.h"
+#ifdef WIN32
+    #if defined(rtps_EXPORTS)
+        #define RTPS_EXPORT __declspec(dllexport)
+    #else
+        #define RTPS_EXPORT __declspec(dllimport)
+	#endif 
+#else
+    #define RTPS_EXPORT
+#endif
 
 
 namespace rtps {
@@ -32,6 +41,9 @@ typedef struct FLOCKSettings
 } FLOCKSettings;
 
 //pass parameters to OpenCL routines
+#ifdef WIN32
+#pragma pack(2)
+#endif
 typedef struct FLOCKParams
 {
     float4 grid_min;
@@ -84,11 +96,16 @@ typedef struct FLOCKParams
 		printf("search_radius: %f\n", search_radius);
 		printf("max_speed: %f\n", max_speed);
 	}
-} FLOCKParams __attribute__((aligned(16)));
+} FLOCKParams 
+#ifndef WIN32
+	__attribute__((aligned(16)));
+#else
+		;
+#endif
 
 //----------------------------------------------------------------------
 
-class FLOCK : public System
+class RTPS_EXPORT FLOCK : public System
 {
 public:
     FLOCK(RTPS *ps, int num);
