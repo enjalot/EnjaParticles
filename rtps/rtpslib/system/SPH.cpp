@@ -286,7 +286,8 @@ namespace rtps
         */
 
         timers["update"] = new EB::Timer("Update loop", time_offset);
-        timers["hash"] = new EB::Timer("Hash kernel execution", time_offset);
+        timers["hash"] = new EB::Timer("Hash function", time_offset);
+        timers["hash_gpu"] = new EB::Timer("Hash GPU kernel execution", time_offset);
         timers["datastructures"] = new EB::Timer("Datastructures kernel execution", time_offset);
         timers["bitonic"] = new EB::Timer("Bitonic Sort kernel execution", time_offset);
         //timers["neighbor"] = new EB::Timer("Neighbor Total", time_offset);

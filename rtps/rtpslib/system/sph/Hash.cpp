@@ -27,10 +27,13 @@ namespace rtps
         k_hash.setArg(args++, cli_debug.getDevicePtr());
 
 
+        float gputime;
         int ctaSize = 128; // work group size
         // Hash based on unscaled data
         //printf("num in hash %d\n", num);
-        k_hash.execute(num, ctaSize);
+        gputime = k_hash.execute(num, ctaSize);
+        if(gputime > 0)
+            timers["hash_gpu"]->set(gputime);
         //k_hash.execute(max_num, ctaSize); //makes the out of bounds particles "stick".. or not
         // set cell_indicies_start to -1
         int minus = 0xffffffff;
