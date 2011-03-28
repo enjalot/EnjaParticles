@@ -79,7 +79,8 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/RTPSettings
     ${rtpslib_SOURCE_DIR}/util
     ${rtpslib_SOURCE_DIR}/structs
-    ${rtpslib_SOURCE_DIR}/timege
+    ${rtpslib_SOURCE_DIR}/timege    #gordon's timer class
+    ${rtpslib_SOURCE_DIR}/timer_eb  #evan's timer class
     ${rtpslib_SOURCE_DIR}/rtps_common
 
     ${rtpslib_SOURCE_DIR}/render/Render

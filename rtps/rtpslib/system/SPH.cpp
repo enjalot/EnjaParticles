@@ -159,7 +159,7 @@ namespace rtps
     void SPH::updateGPU()
     {
 
-        timers[TI_UPDATE]->start();
+        timers["update"]->start();
         glFinish();
 
         //GE
@@ -175,7 +175,6 @@ namespace rtps
 
         cl_position.acquire();
         cl_color.acquire();
-
         //sub-intervals
         for (int i=0; i < sub_intervals; i++)
         {
@@ -186,34 +185,34 @@ namespace rtps
             k_xsph.execute(num);
             */
             //printf("hash\n");
-            timers[TI_HASH]->start();
+            timers["hash"]->start();
             hash();
-            timers[TI_HASH]->end();
+            timers["hash"]->stop();
             //printf("bitonic_sort\n");
-            timers[TI_BITONIC_SORT]->start();
+            timers["bitonic"]->start();
             bitonic_sort();
-            timers[TI_BITONIC_SORT]->end();
+            timers["bitonic"]->stop();
             //printf("data structures\n");
-            timers[TI_BUILD]->start();
+            timers["datastructures"]->start();
             buildDataStructures(); //reorder
-            timers[TI_BUILD]->end();
+            timers["datastructures"]->stop();
 
-            timers[TI_NEIGH]->start();
             //printf("density\n");
-            timers[TI_DENS]->start();
+            timers["density"]->start();
             neighborSearch(0);  //density
-            timers[TI_DENS]->end();
+            timers["density"]->stop();
             //printf("forces\n");
-            timers[TI_FORCE]->start();
+            timers["force"]->start();
             neighborSearch(1);  //forces
-            timers[TI_FORCE]->end();
+            timers["force"]->stop();
             //exit(0);
-            timers[TI_NEIGH]->end();
 
             //printf("collision\n");
             collision();
             //printf("integrate\n");
+            timers["integrate"]->start();
             integrate();
+            timers["integrate"]->stop();
             //exit(0);
             //
             //Andrew's rendering emporium
@@ -223,22 +222,21 @@ namespace rtps
         cl_position.release();
         cl_color.release();
 
-        timers[TI_UPDATE]->end();
+        timers["update"]->stop();
 
     }
 
     void SPH::collision()
     {
         //when implemented other collision routines can be chosen here
-        timers[TI_COLLISION_WALL]->start();
-        
+        timers["collision_wall"]->start();
         collide_wall();
         //k_collision_wall.execute(num, local_size);
-        timers[TI_COLLISION_WALL]->end();
+        timers["collision_wall"]->stop();
 
-        timers[TI_COLLISION_TRI]->start();
+        timers["collision_tri"]->start();
         collide_triangles();
-        timers[TI_COLLISION_TRI]->end();
+        timers["collision_tri"]->stop();
 
     }
 
@@ -246,19 +244,11 @@ namespace rtps
     {
         if (integrator == EULER)
         {
-            //k_euler.execute(max_num);
-            timers[TI_EULER]->start();
             euler();
-            //k_euler.execute(num, local_size);
-            timers[TI_EULER]->end();
         }
         else if (integrator == LEAPFROG)
         {
-            //k_leapfrog.execute(max_num);
-            timers[TI_LEAPFROG]->start();
             leapfrog();
-            //k_leapfrog.execute(num, local_size);
-            timers[TI_LEAPFROG]->end();
         }
 
 #if 0
@@ -281,6 +271,7 @@ namespace rtps
         int print_freq = 1000; //one second
         int time_offset = 5;
 
+        /*
         timers[TI_UPDATE]     = new GE::Time("update", time_offset, print_freq);
         timers[TI_HASH]     = new GE::Time("hash", time_offset, print_freq);
         timers[TI_BUILD]     = new GE::Time("build", time_offset, print_freq);
@@ -292,16 +283,31 @@ namespace rtps
         timers[TI_COLLISION_TRI]     = new GE::Time("collision_triangle", time_offset, print_freq);
         timers[TI_EULER]     = new GE::Time("euler", time_offset, print_freq);
         timers[TI_LEAPFROG]     = new GE::Time("leapfrog", time_offset, print_freq);
+        */
+
+        timers["update"] = new EB::Timer("Update loop", time_offset);
+        timers["hash"] = new EB::Timer("Hash kernel execution", time_offset);
+        timers["datastructures"] = new EB::Timer("Datastructures kernel execution", time_offset);
+        timers["bitonic"] = new EB::Timer("Bitonic Sort kernel execution", time_offset);
+        //timers["neighbor"] = new EB::Timer("Neighbor Total", time_offset);
+        timers["density"] = new EB::Timer("Density kernel execution", time_offset);
+        timers["force"] = new EB::Timer("Force kernel execution", time_offset);
+        timers["collision_wall"] = new EB::Timer("Collision wall kernel execution", time_offset);
+        timers["collision_tri"] = new EB::Timer("Collision triangles kernel execution", time_offset);
+        timers["integrate"] = new EB::Timer("Integration kernel execution", time_offset);
 		return 0;
     }
 
     void SPH::printTimers()
     {
+        timers.printAll();
+        /*
         for (int i = 0; i < 11; i++) //switch to vector of timers and use size()
         {
             timers[i]->print();
         }
-        System::printTimers();
+        */
+        //System::printTimers();
     }
 
     void SPH::calculateSPHSettings()

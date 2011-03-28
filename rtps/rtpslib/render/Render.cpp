@@ -97,7 +97,7 @@ namespace rtps
     //----------------------------------------------------------------------
     void Render::render()
     {
-        timers[TI_RENDER]->start();
+        timers["render"]->start();
 
         glPushAttrib(GL_ALL_ATTRIB_BITS);
         glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
@@ -137,7 +137,7 @@ namespace rtps
         glFinish();
 
         //printf("done rendering\n");
-        timers[TI_RENDER]->end();
+        timers["render"]->end();
     }
 
     void Render::writeBuffersToDisk()
@@ -529,16 +529,18 @@ namespace rtps
     int Render::setupTimers()
     {
         //int print_freq = 20000;
-        int print_freq = 100; //one second
+        //int print_freq = 100; //one second
         int time_offset = 5;
 
-        timers[TI_RENDER]     = new GE::Time("render", time_offset, print_freq);
+        //timers[TI_RENDER]     = new GE::Time("render", time_offset, print_freq);
+        timers["render"] = new EB::Timer("Render call", time_offset);
 		return 0;
     }
 
     void Render::printTimers()
     {
-        timers[TI_RENDER]->print();
+        //timers[TI_RENDER]->print();
+        timers.printAll();
     }
 
 

@@ -155,7 +155,7 @@ namespace rtps
         glViewport(0, 0, window_width, window_height);
         glScissor(0, 0, window_width, window_height);
 
-        timers[TI_RENDER]->start();
+        timers["render"]->start();
 
         
         if (blending)
@@ -299,7 +299,7 @@ namespace rtps
         glFinish();
 
         //printf("done rendering\n");
-        timers[TI_RENDER]->end();
+        timers["render"]->end();
         if (write_framebuffers)
         {
             writeFramebufferTextures();

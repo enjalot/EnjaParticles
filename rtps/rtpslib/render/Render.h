@@ -29,7 +29,8 @@
 
 #include "RTPSettings.h"
 #include "../structs.h"
-#include "../timege.h"
+//#include "../timege.h"
+#include "../timer_eb.h"
 #include "../opencl/CLL.h"
 #include "../opencl/Kernel.h"
 #include "../opencl/Buffer.h"
@@ -99,7 +100,8 @@ namespace rtps
         {
             TI_RENDER=0, TI_GLSL
         }; //2
-        GE::Time* timers[2];
+        //GE::Time* timers[2];
+        EB::TimerList timers;
         int setupTimers();
         void printTimers();
 

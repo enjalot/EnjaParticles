@@ -14,7 +14,8 @@
 #include <Domain.h>
 #include <Hose.h>
 
-#include <timege.h>
+//#include <timege.h>
+#include <timer_eb.h>
 
 #include "../rtps_common.h"
 
@@ -128,6 +129,7 @@ namespace rtps
         int cut; //for debugging DEBUG
 
 
+        /*
         enum
         {
             TI_HASH=0, TI_BITONIC_SORT, TI_BUILD, TI_NEIGH, 
@@ -135,6 +137,8 @@ namespace rtps
             TI_COLLISION_TRI
         }; //11
         GE::Time* timers[30];
+        */
+        EB::TimerList timers;
         int setupTimers();
         void printTimers();
 
