@@ -319,10 +319,12 @@ namespace rtps
 
         float rho0 = 1000;                              //rest density [kg/m^3 ]
         //float mass = (128*1024.0)/max_num * .0002;    //krog's way
-        float VP = .0262144 / max_num;                  //Particle Volume [ m^3 ]
+        float VP = 2 * .0262144 / max_num;                  //Particle Volume [ m^3 ]
+        //float VP = .0262144 / 16000;                  //Particle Volume [ m^3 ]
         float mass = rho0 * VP;                         //Particle Mass [ kg ]
         //constant .87 is magic
         float rest_distance = .87 * pow(VP, 1.f/3.f);     //rest distance between particles [ m ]
+        //float rest_distance = pow(VP, 1.f/3.f);     //rest distance between particles [ m ]
 
         float smoothing_distance = 2.0f * rest_distance;//interaction radius
         float boundary_distance = .5f * rest_distance;
@@ -335,7 +337,8 @@ namespace rtps
         //printf("domain volume: %f\n", domain_vol);
 
         //ratio between particle radius in simulation coords and world coords
-        float simulation_scale = pow(VP * max_num / domain_vol, 1.f/3.f); 
+        float simulation_scale = pow(.5 * VP * max_num / domain_vol, 1.f/3.f); 
+        //float simulation_scale = pow(VP * 16000/ domain_vol, 1.f/3.f); 
 
         spacing = rest_distance/ simulation_scale;
 
@@ -353,7 +356,7 @@ namespace rtps
         sphp.boundary_distance = boundary_distance;
         sphp.EPSILON = .00001f;
         sphp.PI = pi;
-        sphp.K = 5.0f;
+        sphp.K = 15.0f;
         sphp.num = num;
         sphp.max_num = max_num;
         //sphp.surface_threshold = 2.0 * sphp.simulation_scale; //0.01;
