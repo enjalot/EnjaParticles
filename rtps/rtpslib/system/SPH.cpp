@@ -80,7 +80,20 @@ namespace rtps
         std::string cl_includes(SPH_CL_SOURCE_DIR);
         ps->cli->setIncludeDir(cl_includes);
 
-        loadCollision_wall();
+        loadScopy();
+
+        loadPrep();
+        //loadHash();
+        hash = Hash(ps->cli, timers["hash_gpu"]);
+        bitonic = Bitonic<unsigned int>( ps->cli );
+        datastructures = DataStructures( ps->cli, timers["ds_gpu"] );
+
+        //loadBitonicSort();
+        //loadDataStructures();
+        loadNeighbors();
+
+        //loadCollision_wall();
+        collision_wall = CollisionWall(ps->cli, timers["cw_gpu"]);
         loadCollision_tri();
 
         //could generalize this to other integration methods later (leap frog, RK4)
@@ -93,17 +106,7 @@ namespace rtps
             loadEuler();
         }
 
-        loadScopy();
 
-        loadPrep();
-        //loadHash();
-        hash = Hash(ps->cli, timers["hash_gpu"]);
-        bitonic = Bitonic<unsigned int>( ps->cli );
-        datastructures = DataStructures( ps->cli, timers["ds_gpu"] );
-
-        //loadBitonicSort();
-        //loadDataStructures();
-        loadNeighbors();
 
 
 #endif
@@ -296,12 +299,29 @@ namespace rtps
     {
         //when implemented other collision routines can be chosen here
         timers["collision_wall"]->start();
-        collide_wall();
+        //collide_wall();
+        collision_wall.execute(num,
+                cl_vars_sorted, 
+                cl_sphp,
+                cl_GridParamsScaled,
+                //debug
+                clf_debug,
+                cli_debug);
+
         //k_collision_wall.execute(num, local_size);
         timers["collision_wall"]->stop();
 
         timers["collision_tri"]->start();
         collide_triangles();
+        /*
+        collision_triangles.execute(num,
+                cl_vars_sorted, 
+                cl_sphp,
+                cl_GridParamsScaled,
+                //debug
+                clf_debug,
+                cli_debug);
+        */
         timers["collision_tri"]->stop();
 
     }

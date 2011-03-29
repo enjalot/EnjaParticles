@@ -15,6 +15,8 @@
 #include <BitonicSort.h>
 #include <DataStructures.h>
 
+#include <Collision_wall.h>
+
 //#include "../util.h"
 #include <Hose.h>
 
@@ -163,7 +165,7 @@ namespace rtps
         Buffer<float4> cl_error_check;
 
         //these are defined in sph/ folder
-        void loadCollision_wall();
+        //void loadCollision_wall();
         void loadCollision_tri();
         void loadEuler();
         void loadLeapFrog();
@@ -203,7 +205,8 @@ namespace rtps
         //int buildDataStructures();
         void neighborSearch(int choice);
         void collision();
-        void collide_wall();
+        //void collide_wall();
+        CollisionWall collision_wall;
         void collide_triangles();
         void integrate();
         void euler();

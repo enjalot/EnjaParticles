@@ -3,26 +3,38 @@
 namespace rtps
 {
 
-    void SPH::loadCollision_wall()
+    CollisionWall::CollisionWall(CL* cli_, EB::Timer* timer_)
     {
+        cli = cli_;
+        timer = timer_;
         printf("create collision wall kernel\n");
-
         std::string path(SPH_CL_SOURCE_DIR);
         path += "/collision_wall.cl";
-        k_collision_wall = Kernel(ps->cli, path, "collision_wall");
+        k_collision_wall = Kernel(cli, path, "collision_wall");
 
     } 
-
-    void SPH::collide_wall()
+    void CollisionWall::execute(int num,
+            //input
+            Buffer<float4>& svars, 
+            //output
+            //params
+            Buffer<SPHParams>& sphp,
+            Buffer<GridParams>& gp,
+            //debug
+            Buffer<float4>& clf_debug,
+            Buffer<int4>& cli_debug)
     {
         int iargs = 0;
-        k_collision_wall.setArg(iargs++, cl_vars_sorted.getDevicePtr());
-        k_collision_wall.setArg(iargs++, cl_GridParamsScaled.getDevicePtr());
-        k_collision_wall.setArg(iargs++, cl_sphp.getDevicePtr());
+        k_collision_wall.setArg(iargs++, svars.getDevicePtr());
+        k_collision_wall.setArg(iargs++, gp.getDevicePtr());
+        k_collision_wall.setArg(iargs++, sphp.getDevicePtr());
 
         int local_size = 128;
         k_collision_wall.execute(num, local_size);
     }
+
+
+    //************* CPU functions
 
     //from Krog '10
     float4 calculateRepulsionForce(float4 normal, float4 vel, float boundary_stiffness, float boundary_dampening, float boundary_distance)
