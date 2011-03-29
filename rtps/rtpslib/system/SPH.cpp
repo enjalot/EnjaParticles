@@ -205,6 +205,7 @@ namespace rtps
             k_viscosity.execute(num);
             k_xsph.execute(num);
             */
+            
             //printf("hash\n");
             timers["hash"]->start();
             //hash();
@@ -217,6 +218,7 @@ namespace rtps
                             clf_debug,
                             cli_debug);
             timers["hash"]->stop();
+
             //printf("bitonic_sort\n");
             timers["bitonic"]->start();
             bitonic_sort();
