@@ -90,7 +90,7 @@ __kernel void hash(
         //clf[0].x = fsphp[0];
     }
 
-
+/*
     clf[0].x = sphp->mass;
     clf[0].y = sphp->rest_distance;
     clf[0].z = sphp->smoothing_distance;
@@ -131,7 +131,7 @@ __kernel void hash(
     clf[7].y = sphp->nb_vars; // for combined variables (vars_sorted, etc.)
     clf[7].z = sphp->choice; // which kind of calculation to invoke
     clf[7].w = sphp->max_num;
-
+*/
 
 
 

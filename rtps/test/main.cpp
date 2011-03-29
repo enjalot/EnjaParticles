@@ -345,11 +345,17 @@ void appKeyboard(unsigned char key, int x, int y)
     glTranslatef(translate_x, translate_z, translate_y);*/
 }
 
+void timerCB(int ms)
+{
+    glutTimerFunc(ms, timerCB, ms);
+    ps->update();
+    glutPostRedisplay();
+}
+
 void appRender()
 {
 
     //ps->system->sprayHoses();
-    ps->update();
 
     glEnable(GL_DEPTH_TEST);
     if (stereo_enabled)
@@ -401,11 +407,7 @@ void appDestroy()
     exit(0);
 }
 
-void timerCB(int ms)
-{
-    glutTimerFunc(ms, timerCB, ms);
-    glutPostRedisplay();
-}
+
 
 
 void appMouse(int button, int state, int x, int y)

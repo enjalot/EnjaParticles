@@ -42,9 +42,11 @@ namespace rtps
 
         sphsettings = new SPHSettings(grid, max_num);
         //sphsettings->printSettings();
+        sphsettings->updateSPHP(sphp);
+        spacing = sphsettings->GetSettingAs<float>("Spacing");
 
         //SPH settings depend on number of particles used
-        calculateSPHSettings();
+        //calculateSPHSettings();
         //set up the grid
         setupDomain();
 
