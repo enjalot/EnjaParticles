@@ -8,10 +8,13 @@
 #include <Kernel.h>
 #include <Buffer.h>
 
+#include <Domain.h>
+#include <SPHSettings.h>
+
+#include <Hash.h>
 #include <BitonicSort.h>
 
 //#include "../util.h"
-#include <Domain.h>
 #include <Hose.h>
 
 //#include <timege.h>
@@ -19,7 +22,6 @@
 
 #include "../rtps_common.h"
 
-#include <SPHSettings.h>
 
 namespace rtps
 {
@@ -167,7 +169,7 @@ namespace rtps
 
         //Nearest Neighbors search related kernels
         void loadPrep();
-        void loadHash();
+        //void loadHash();
         void loadBitonicSort();
         void loadDataStructures();
         void loadNeighbors();
@@ -190,7 +192,8 @@ namespace rtps
 
         //Nearest Neighbors search related functions
         void prep(int stage);
-        void hash();
+        //void hash();
+        Hash* hash;
         void printHashDiagnostics();
         void bitonic_sort();
         void buildDataStructures();

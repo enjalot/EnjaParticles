@@ -40,12 +40,12 @@ Buffer<T>::Buffer(CL *cli, GLuint bo_id, int type)
     this->cli = cli;
     if (type == 0)
     {
-        printf("here 1\n");
+        //printf("here 1\n");
         cl_buffer.push_back(cl::BufferGL(cli->context, CL_MEM_READ_WRITE, bo_id, &cli->err));
     }
     else if (type == 1)
     {
-        printf("here 2\n");
+        //printf("here 2\n");
         cl_buffer.push_back(cl::Image2DGL(cli->context,CL_MEM_READ_WRITE,GL_TEXTURE_2D,0, bo_id, &cli->err));
     }
 }

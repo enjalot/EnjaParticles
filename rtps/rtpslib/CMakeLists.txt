@@ -63,6 +63,7 @@ set (rtpslib_INCLUDES
     ${BASE_DIR}/opencl10
     ${rtpslib_SOURCE_DIR}
     ${rtpslib_SOURCE_DIR}/system
+    ${rtpslib_SOURCE_DIR}/system/sph
     ${rtpslib_SOURCE_DIR}/system/common
     ${rtpslib_SOURCE_DIR}/render
     ${rtpslib_SOURCE_DIR}/render/util

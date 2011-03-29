@@ -20,6 +20,14 @@ namespace rtps
     // Generate hash list: stored in cl_sort_hashes
     {
 
+        //-------------------
+        // Set cl_cell indices to -1
+        int minus = 0xffffffff;
+        std::vector<unsigned int> cells_indices_start(grid_params.nb_cells+1);
+        std::fill(cells_indices_start.begin(), cells_indices_start.end(), minus);
+        cl_cell_indices_start.copyToDevice(cells_indices_start);
+
+
         int iarg = 0;
         k_datastructures.setArg(iarg++, cl_vars_unsorted.getDevicePtr());
         k_datastructures.setArg(iarg++, cl_vars_sorted.getDevicePtr());
@@ -65,9 +73,21 @@ namespace rtps
             updateSPHP();
             renderer->setNum(sphp.num);
             //need to copy sorted positions into unsorted + position array
+            
             prep(2);
-            hash();
+            //hash();
+            //TODO move this stuff to its own class or callback
+            hash->execute(   num,
+                    cl_vars_unsorted,
+                    cl_sort_hashes,
+                    cl_sort_indices,
+                    cl_sphp,
+                    cl_GridParams,
+                    clf_debug,
+                    cli_debug);
+
             bitonic_sort();
+            
         }
 
         //printDataStructuresDiagnostics();

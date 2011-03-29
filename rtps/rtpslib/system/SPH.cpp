@@ -96,7 +96,9 @@ namespace rtps
         loadScopy();
 
         loadPrep();
-        loadHash();
+        //loadHash();
+        hash = new Hash(ps->cli, timers["hash_gpu"]);
+
         loadBitonicSort();
         loadDataStructures();
         loadNeighbors();
@@ -205,7 +207,15 @@ namespace rtps
             */
             //printf("hash\n");
             timers["hash"]->start();
-            hash();
+            //hash();
+            hash->execute(   num,
+                            cl_vars_unsorted,
+                            cl_sort_hashes,
+                            cl_sort_indices,
+                            cl_sphp,
+                            cl_GridParams,
+                            clf_debug,
+                            cli_debug);
             timers["hash"]->stop();
             //printf("bitonic_sort\n");
             timers["bitonic"]->start();
