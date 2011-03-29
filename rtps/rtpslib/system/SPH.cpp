@@ -53,7 +53,7 @@ namespace rtps
 
         //settings->printSettings();
 
-        spacing = ps->settings.GetSettingAs<float>("Spacing");
+        spacing = settings->GetSettingAs<float>("Spacing");
 
         //SPH settings depend on number of particles used
         //calculateSPHSettings();
