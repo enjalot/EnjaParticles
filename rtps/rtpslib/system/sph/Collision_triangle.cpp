@@ -15,7 +15,7 @@ void SPH::loadCollision_tri()
     // 1 = triangles
     // 2 = n_triangles
     k_collision_tri.setArg(3, ps->settings.dt);
-    k_collision_tri.setArg(4, cl_SPHParams.getDevicePtr());
+    k_collision_tri.setArg(4, cl_sphp.getDevicePtr());
     // 5 = local triangles
     // ONLY IF DEBUGGING
 	k_collision_tri.setArg(6, clf_debug.getDevicePtr());

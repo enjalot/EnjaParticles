@@ -28,7 +28,7 @@ namespace rtps
         k_datastructures.setArg(iarg++, cl_cell_indices_start.getDevicePtr());
         k_datastructures.setArg(iarg++, cl_cell_indices_end.getDevicePtr());
         //k_datastructures.setArg(iarg++, cl_num_changed.getDevicePtr());
-        k_datastructures.setArg(iarg++, cl_SPHParams.getDevicePtr());
+        k_datastructures.setArg(iarg++, cl_sphp.getDevicePtr());
         k_datastructures.setArg(iarg++, cl_GridParamsScaled.getDevicePtr());
 
         int workSize = 64;
@@ -60,7 +60,8 @@ namespace rtps
         //if(num > 0)
         {
             num = nc;
-            sphp.num = num;
+            settings->SetSetting("Number of Particles", num);
+            //sphp.num = num;
             updateSPHP();
             renderer->setNum(sphp.num);
             //need to copy sorted positions into unsorted + position array

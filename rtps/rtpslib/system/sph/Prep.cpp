@@ -30,7 +30,7 @@ namespace rtps
         k_prep.setArg(args++, cl_vars_unsorted.getDevicePtr());
         k_prep.setArg(args++, cl_vars_sorted.getDevicePtr()); 
         k_prep.setArg(args++, cl_sort_indices.getDevicePtr());
-        k_prep.setArg(args++, cl_SPHParams.getDevicePtr());
+        k_prep.setArg(args++, cl_sphp.getDevicePtr());
 
 
         int ctaSize = 128; // work group size

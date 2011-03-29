@@ -22,6 +22,7 @@ namespace rtps
     {
         //store the particle system framework
         ps = psfr;
+        settings = &ps->settings;
 
         max_num = n;
         num = 0;
@@ -38,12 +39,21 @@ namespace rtps
         //seed random
         srand ( time(NULL) );
 
-        grid = ps->settings.grid;
+        grid = settings->grid;
 
-        sphsettings = new SPHSettings(grid, max_num);
+        //sphsettings = new SPHSettings(grid, max_num);
         //sphsettings->printSettings();
-        sphsettings->updateSPHP(sphp);
-        spacing = sphsettings->GetSettingAs<float>("Spacing");
+        //sphsettings->updateSPHP(sphp);
+        std::vector<SPHParams> vparams(0);
+        vparams.push_back(sphp);
+        cl_sphp = Buffer<SPHParams>(ps->cli, vparams);
+
+        calculate();
+        updateSPHP();
+
+        settings->printSettings();
+
+        spacing = ps->settings.GetSettingAs<float>("Spacing");
 
         //SPH settings depend on number of particles used
         //calculateSPHSettings();
@@ -337,10 +347,6 @@ namespace rtps
         //cl_error_check= Buffer<float4>(ps->cli, error_check);
 
         //TODO make a helper constructor for buffer to make a cl_mem from a struct
-        std::vector<SPHParams> vparams(0);
-        vparams.push_back(sphp);
-        cl_SPHParams = Buffer<SPHParams>(ps->cli, vparams);
-
         //Setup Grid Parameter structs
         std::vector<GridParams> gparams(0);
         gparams.push_back(grid_params);
@@ -389,6 +395,7 @@ namespace rtps
         // Size is the grid size + 1, the last index is used to signify how many particles are within bounds
         // That is a problem since the number of
         // occupied cells could be much less than the number of grid elements.
+        printf("%d\n", grid_params.nb_cells);
         std::vector<unsigned int> gcells(grid_params.nb_cells+1);
         int minus = 0xffffffff;
         std::fill(gcells.begin(), gcells.end(), 666);
@@ -561,7 +568,8 @@ namespace rtps
         cl_velocity.copyToDevice(vels, num);
         //cl_vars_unsorted.copyToDevice(vels, max_num*8+num);
 
-        sphp.num = num+nn;
+        //sphp.num = num+nn;
+        settings->SetSetting("Number of Particles", num+nn);
         updateSPHP();
 
         num += nn;  //keep track of number of particles we use
@@ -579,12 +587,6 @@ namespace rtps
         renderer->setNum(num);
     }
 
-    void SPH::updateSPHP()
-    {
-        std::vector<SPHParams> vparams(0);
-        vparams.push_back(sphp);
-        cl_SPHParams.copyToDevice(vparams);
-    }
 
     void SPH::render()
     {

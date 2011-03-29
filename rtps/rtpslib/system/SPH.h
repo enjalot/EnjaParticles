@@ -46,6 +46,7 @@ namespace rtps
         void testDelete();
         int cut; //for debugging DEBUG
 
+        /*
         template <typename RT>
         RT GetSettingAs(std::string key, std::string defaultval = "0")
         {
@@ -56,6 +57,7 @@ namespace rtps
         {
             sphsettings->SetSetting(key, value);
         }
+        */
 
         EB::TimerList timers;
         int setupTimers();
@@ -66,9 +68,10 @@ namespace rtps
         virtual void setRenderer();
     private:
         //the particle system framework
-        RTPS *ps;
+        RTPS* ps;
+        RTPSettings* settings;
 
-        SPHSettings* sphsettings;
+        //SPHSettings* sphsettings;
         SPHParams sphp;
         GridParams grid_params;
         GridParams grid_params_scaled;
@@ -139,7 +142,7 @@ namespace rtps
         Bitonic<unsigned int> bitonic;
 
         //Parameter structs
-        Buffer<SPHParams>   cl_SPHParams;
+        Buffer<SPHParams>   cl_sphp;
         Buffer<GridParams>  cl_GridParams;
         Buffer<GridParams>  cl_GridParamsScaled;
 
@@ -181,6 +184,7 @@ namespace rtps
         void updateCPU();
         void updateGPU();
 
+        void calculate();
         //copy the SPH parameter struct to the GPU
         void updateSPHP();
 

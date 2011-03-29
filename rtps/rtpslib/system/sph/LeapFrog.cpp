@@ -32,7 +32,7 @@ namespace rtps
         k_leapfrog.setArg(iargs++, cl_vars_sorted.getDevicePtr());
         k_leapfrog.setArg(iargs++, cl_position.getDevicePtr());
         //    k_leapfrog.setArg(iargs++, cl_color.getDevicePtr());
-        k_leapfrog.setArg(iargs++, cl_SPHParams.getDevicePtr());
+        k_leapfrog.setArg(iargs++, cl_sphp.getDevicePtr());
         k_leapfrog.setArg(iargs++, ps->settings.dt); //time step
 
         int local_size = 128;

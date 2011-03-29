@@ -21,7 +21,7 @@ namespace rtps
         k_hash.setArg(args++, cl_vars_unsorted.getDevicePtr()); // positions + other variables
         k_hash.setArg(args++, cl_sort_hashes.getDevicePtr());
         k_hash.setArg(args++, cl_sort_indices.getDevicePtr());
-        k_hash.setArg(args++, cl_SPHParams.getDevicePtr());
+        k_hash.setArg(args++, cl_sphp.getDevicePtr());
         k_hash.setArg(args++, cl_GridParams.getDevicePtr());
         k_hash.setArg(args++, clf_debug.getDevicePtr());
         k_hash.setArg(args++, cli_debug.getDevicePtr());
@@ -51,7 +51,7 @@ namespace rtps
 
         if(num > 0)
         {
-            printHashDiagnostics();
+            //printHashDiagnostics();
         }
 
     }
@@ -78,7 +78,7 @@ namespace rtps
 
         //for (int i=0; i < num; i++) {  
         //sphp.print();
-        sphsettings->printSettings();
+        ps->settings.printSettings();
         for (int i=0; i < nbc; i++)
         {
             //printf("cl_sort_hash[%d] %u, cl_sort_indices[%d]: %u\n", i, sh[i], i, si[i]);

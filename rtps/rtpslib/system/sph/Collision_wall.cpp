@@ -18,7 +18,7 @@ namespace rtps
         int iargs = 0;
         k_collision_wall.setArg(iargs++, cl_vars_sorted.getDevicePtr());
         k_collision_wall.setArg(iargs++, cl_GridParamsScaled.getDevicePtr());
-        k_collision_wall.setArg(iargs++, cl_SPHParams.getDevicePtr());
+        k_collision_wall.setArg(iargs++, cl_sphp.getDevicePtr());
 
         int local_size = 128;
         k_collision_wall.execute(num, local_size);

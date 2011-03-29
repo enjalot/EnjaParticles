@@ -97,6 +97,7 @@ namespace rtps
         #pragma pack(pop)
 #endif
 
+/*
     class SPHSettings
     {
         public:
@@ -168,7 +169,7 @@ namespace rtps
 
 
     };
-
+*/
 
 
 

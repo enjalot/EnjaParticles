@@ -82,13 +82,6 @@ __kernel void hash(
     //clf[index] = p;
     //cli[index].w = sphp->max_num;
 
-    //__private float* fsphp = (float*)sphp;
-    //for(int k = 0; k < 9; k++)
-    {
-        //clf[k] = sphpf[k];
-        //clf[0].x = 5;//fsphp[0];
-        //clf[0].x = fsphp[0];
-    }
 
 /*
     clf[0].x = sphp->mass;

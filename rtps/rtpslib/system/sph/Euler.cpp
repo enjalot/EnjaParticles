@@ -19,7 +19,7 @@ namespace rtps
         k_euler.setArg(iargs++, cl_vars_unsorted.getDevicePtr());
         k_euler.setArg(iargs++, cl_vars_sorted.getDevicePtr());
         k_euler.setArg(iargs++, cl_position.getDevicePtr());
-        k_euler.setArg(iargs++, cl_SPHParams.getDevicePtr());
+        k_euler.setArg(iargs++, cl_sphp.getDevicePtr());
         k_euler.setArg(iargs++, ps->settings.dt); //time step
 
         int local_size = 128;

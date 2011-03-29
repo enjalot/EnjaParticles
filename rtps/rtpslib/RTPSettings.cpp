@@ -48,4 +48,19 @@ RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain gri
     float r = color[0]; float g = color[1]; float b = color[2]; 
     this->color = float4(r,g,b,1.f);
 }
+
+
+    void RTPSettings::printSettings()
+    {
+        printf("SPH Settings\n");
+        typedef std::map <std::string, std::string> MapType;
+
+        MapType::const_iterator end = settings.end();
+        for(MapType::const_iterator it = settings.begin(); it != end; ++it)
+        {
+            printf("%s: %s\n", it->first.c_str(), it->second.c_str());
+        }
+    }
+
+
 }

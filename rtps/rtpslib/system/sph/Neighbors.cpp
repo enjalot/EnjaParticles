@@ -38,7 +38,7 @@ namespace rtps
         k_neighbors.setArg(iarg++, cl_cell_indices_end.getDevicePtr());
         k_neighbors.setArg(iarg++, cl_GridParamsScaled.getDevicePtr());
         //k_neighbors.setArg(iarg++, cl_FluidParams->getDevicePtr());
-        k_neighbors.setArg(iarg++, cl_SPHParams.getDevicePtr());
+        k_neighbors.setArg(iarg++, cl_sphp.getDevicePtr());
 
         // ONLY IF DEBUGGING
         k_neighbors.setArg(iarg++, clf_debug.getDevicePtr());
@@ -55,7 +55,8 @@ namespace rtps
         */
 
         //Copy choice to SPHParams
-        sphp.choice = choice;
+        settings->SetSetting("Choice", choice);
+        //sphp.choice = choice;
         updateSPHP();
         /*
         std::vector<SPHParams> vsphp(0);
