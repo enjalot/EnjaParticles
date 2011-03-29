@@ -3,15 +3,6 @@
 namespace rtps
 {
 
-    void SPH::loadBitonicSort()
-    {
-
-        printf("about to instantiate sorting\n");
-
-        bitonic = Bitonic<unsigned int>( ps->cli );
-
-    }
-
     void SPH::bitonic_sort()
     {
         try
@@ -79,5 +70,10 @@ namespace rtps
 
 
     }
+
+    //void SPH::radix_sort()
+    //{
+    //}
+
 
 }

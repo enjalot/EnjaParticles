@@ -97,10 +97,12 @@ namespace rtps
 
         loadPrep();
         //loadHash();
-        hash = new Hash(ps->cli, timers["hash_gpu"]);
+        hash = Hash(ps->cli, timers["hash_gpu"]);
+        bitonic = Bitonic<unsigned int>( ps->cli );
+        datastructures = DataStructures( ps->cli, timers["ds_gpu"] );
 
-        loadBitonicSort();
-        loadDataStructures();
+        //loadBitonicSort();
+        //loadDataStructures();
         loadNeighbors();
 
 
@@ -199,34 +201,45 @@ namespace rtps
         //sub-intervals
         for (int i=0; i < sub_intervals; i++)
         {
-            /*
-            k_density.execute(num);
-            k_pressure.execute(num);
-            k_viscosity.execute(num);
-            k_xsph.execute(num);
-            */
-            
-            //printf("hash\n");
-            timers["hash"]->start();
-            //hash();
-            hash->execute(   num,
-                            cl_vars_unsorted,
-                            cl_sort_hashes,
-                            cl_sort_indices,
-                            cl_sphp,
-                            cl_GridParams,
-                            clf_debug,
-                            cli_debug);
-            timers["hash"]->stop();
 
-            //printf("bitonic_sort\n");
-            timers["bitonic"]->start();
-            bitonic_sort();
-            timers["bitonic"]->stop();
+            hash_and_sort();
+
             //printf("data structures\n");
             timers["datastructures"]->start();
-            buildDataStructures(); //reorder
+            //int nc = buildDataStructures(); //reorder
+            int nc = datastructures.execute(   num,
+                cl_vars_unsorted,
+                cl_vars_sorted,
+                cl_sort_hashes,
+                cl_sort_indices,
+                cl_cell_indices_start,
+                cl_cell_indices_end,
+                cl_sphp,
+                cl_GridParams,
+                grid_params.nb_cells,
+                clf_debug,
+                cli_debug);
+
             timers["datastructures"]->stop();
+        
+            if (nc < num && nc > 0)
+            {
+                //check if the number of particles have changed
+                //(this happens when particles go out of bounds,
+                //  either because of forces or by explicitly placing
+                //  them in order to delete)
+                //
+                //if so we need to copy sorted into unsorted
+                //and redo hash_and_sort
+                num = nc;
+                settings->SetSetting("Number of Particles", num);
+                //sphp.num = num;
+                updateSPHP();
+                renderer->setNum(sphp.num);
+                //need to copy sorted positions into unsorted + position array
+                prep(2);
+                hash_and_sort();
+            }
 
             //printf("density\n");
             timers["density"]->start();
@@ -254,6 +267,28 @@ namespace rtps
         cl_color.release();
 
         timers["update"]->stop();
+
+    }
+
+    void SPH::hash_and_sort()
+    {
+        //printf("hash\n");
+        timers["hash"]->start();
+        hash.execute(   num,
+                cl_vars_unsorted,
+                cl_sort_hashes,
+                cl_sort_indices,
+                cl_sphp,
+                cl_GridParams,
+                clf_debug,
+                cli_debug);
+        timers["hash"]->stop();
+
+        //printf("bitonic_sort\n");
+        //defined in Sort.cpp
+        timers["bitonic"]->start();
+        bitonic_sort();
+        timers["bitonic"]->stop();
 
     }
 
@@ -305,6 +340,7 @@ namespace rtps
         timers["hash"] = new EB::Timer("Hash function", time_offset);
         timers["hash_gpu"] = new EB::Timer("Hash GPU kernel execution", time_offset);
         timers["datastructures"] = new EB::Timer("Datastructures kernel execution", time_offset);
+        timers["ds_gpu"] = new EB::Timer("DataStructures GPU kernel execution", time_offset);
         timers["bitonic"] = new EB::Timer("Bitonic Sort kernel execution", time_offset);
         //timers["neighbor"] = new EB::Timer("Neighbor Total", time_offset);
         timers["density"] = new EB::Timer("Density kernel execution", time_offset);

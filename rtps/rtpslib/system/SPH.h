@@ -13,6 +13,7 @@
 
 #include <Hash.h>
 #include <BitonicSort.h>
+#include <DataStructures.h>
 
 //#include "../util.h"
 #include <Hose.h>
@@ -170,8 +171,8 @@ namespace rtps
         //Nearest Neighbors search related kernels
         void loadPrep();
         //void loadHash();
-        void loadBitonicSort();
-        void loadDataStructures();
+        //void loadBitonicSort();
+        //void loadDataStructures();
         void loadNeighbors();
 
         //CPU functions
@@ -186,6 +187,7 @@ namespace rtps
         void updateCPU();
         void updateGPU();
 
+        //calculate the various parameters that depend on max_num of particles
         void calculate();
         //copy the SPH parameter struct to the GPU
         void updateSPHP();
@@ -193,11 +195,12 @@ namespace rtps
         //Nearest Neighbors search related functions
         void prep(int stage);
         //void hash();
-        Hash* hash;
-        void printHashDiagnostics();
+        Hash hash;
+        DataStructures datastructures;
+        //void printHashDiagnostics();
+        void hash_and_sort();
         void bitonic_sort();
-        void buildDataStructures();
-        void printDataStructuresDiagnostics();
+        //int buildDataStructures();
         void neighborSearch(int choice);
         void collision();
         void collide_wall();
