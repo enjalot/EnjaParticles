@@ -121,7 +121,7 @@ namespace rtps
             float friction_static_limit = 0.0f;
 
             //bottom wall
-            float diff = sphp.boundary_distance - (p.z - sphp.grid_min.z) * sphp.simulation_scale;
+            float diff = sphp.boundary_distance - (p.z - grid_params.grid_min.z) * sphp.simulation_scale;
             if (diff > sphp.EPSILON)
             {
                 //printf("colliding with the bottom! %d\n", i);
@@ -139,7 +139,7 @@ namespace rtps
             }
 
             //Y walls
-            diff = sphp.boundary_distance - (p.y - sphp.grid_min.y) * sphp.simulation_scale;
+            diff = sphp.boundary_distance - (p.y - grid_params.grid_min.y) * sphp.simulation_scale;
             if (diff > sphp.EPSILON)
             {
                 float4 normal = float4(0.0f, 1.0f, 0.0f, 0.0f);
@@ -153,7 +153,7 @@ namespace rtps
                 f_f.z += cff.z;
 
             }
-            diff = sphp.boundary_distance - (sphp.grid_max.y - p.y) * sphp.simulation_scale;
+            diff = sphp.boundary_distance - (grid_params.grid_max.y - p.y) * sphp.simulation_scale;
             if (diff > sphp.EPSILON)
             {
                 float4 normal = float4(0.0f, -1.0f, 0.0f, 0.0f);
@@ -168,7 +168,7 @@ namespace rtps
 
             }
             //X walls
-            diff = sphp.boundary_distance - (p.x - sphp.grid_min.x) * sphp.simulation_scale;
+            diff = sphp.boundary_distance - (p.x - grid_params.grid_min.x) * sphp.simulation_scale;
             if (diff > sphp.EPSILON)
             {
                 float4 normal = float4(1.0f, 0.0f, 0.0f, 0.0f);
@@ -182,7 +182,7 @@ namespace rtps
                 f_f.z += cff.z;
 
             }
-            diff = sphp.boundary_distance - (sphp.grid_max.x - p.x) * sphp.simulation_scale;
+            diff = sphp.boundary_distance - (grid_params.grid_max.x - p.x) * sphp.simulation_scale;
             if (diff > sphp.EPSILON)
             {
                 float4 normal = float4(-1.0f, 0.0f, 0.0f, 0.0f);

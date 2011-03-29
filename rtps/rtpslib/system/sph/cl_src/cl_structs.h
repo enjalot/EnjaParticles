@@ -4,37 +4,38 @@
 
 typedef struct SPHParams
 {
-    float4 grid_min;            //float3s are really float4 in opencl 1.0 & 1.1
-    float4 grid_max;            //so we have padding in C++ definition
     float mass;
     float rest_distance;
     float smoothing_distance;
     float simulation_scale;
+
     float boundary_stiffness;
     float boundary_dampening;
     float boundary_distance;
-    float EPSILON;
-    float PI;       //delicious
     float K;        //speed of sound
+    
     float viscosity;
     float velocity_limit;
     float xsph_factor;
-
-
-
     float gravity; // -9.8 m/sec^2
+
     float friction_coef;
     float restitution_coef;
     float shear;
     float attraction;
-    float spring;
-    //float surface_threshold;
 
+    float spring;
+    //constants
+    float EPSILON;
+    float PI;       //delicious
+    //kernel coefficients
     float wpoly6_coef;
+
     float wpoly6_d_coef;
     float wpoly6_dd_coef; // laplacian
     float wspiky_coef;
     float wspiky_d_coef;
+
     float wspiky_dd_coef;
     float wvisc_coef;
     float wvisc_d_coef;

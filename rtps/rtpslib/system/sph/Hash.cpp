@@ -51,7 +51,7 @@ namespace rtps
 
         if(num > 0)
         {
-            //printHashDiagnostics();
+            printHashDiagnostics();
         }
 
     }
@@ -63,6 +63,7 @@ namespace rtps
 #if 1
         printf("***** PRINT hash diagnostics ******\n");
         int nbc = num + 5;
+        nbc = 8;
         std::vector<unsigned int> sh = cl_sort_hashes.copyToHost(nbc);
         std::vector<unsigned int> si = cl_sort_indices.copyToHost(nbc);
         //cl_cells->copyToHost();
@@ -76,10 +77,12 @@ namespace rtps
         //cli_debug->copyToHost();
 
         //for (int i=0; i < num; i++) {  
+        //sphp.print();
+        sphsettings->printSettings();
         for (int i=0; i < nbc; i++)
         {
-            printf("cl_sort_hash[%d] %u, cl_sort_indices[%d]: %u\n", i, sh[i], i, si[i]);
-            printf("cli_debug: %d, %d, %d, %d\n", cli[i].x, cli[i].y, cli[i].z, cli[i].w);
+            //printf("cl_sort_hash[%d] %u, cl_sort_indices[%d]: %u\n", i, sh[i], i, si[i]);
+            //printf("cli_debug: %d, %d, %d, %d\n", cli[i].x, cli[i].y, cli[i].z, cli[i].w);
             printf("clf_debug: %f, %f, %f, %f\n", clf[i].x, clf[i].y, clf[i].z, clf[i].w);
             //printf("-----\n");
 

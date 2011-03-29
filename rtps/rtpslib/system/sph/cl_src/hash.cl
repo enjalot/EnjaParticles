@@ -79,8 +79,62 @@ __kernel void hash(
     //fdebug[index] = gp->grid_inv_delta;
     //fdebug[index] = (float4)((p.x - gp->grid_min.x) * gp->grid_inv_delta.x, p.x, 0,0);
     //clf[index] = (float4)((p.x - gp->grid_min.x) * gp->grid_delta.x, p.x, 0,0);
-    clf[index] = p;
+    //clf[index] = p;
     //cli[index].w = sphp->max_num;
+
+    //__private float* fsphp = (float*)sphp;
+    //for(int k = 0; k < 9; k++)
+    {
+        //clf[k] = sphpf[k];
+        //clf[0].x = 5;//fsphp[0];
+        //clf[0].x = fsphp[0];
+    }
+
+
+    clf[0].x = sphp->mass;
+    clf[0].y = sphp->rest_distance;
+    clf[0].z = sphp->smoothing_distance;
+    clf[0].w = sphp->simulation_scale;
+
+    clf[1].x = sphp->boundary_stiffness;
+    clf[1].y = sphp->boundary_dampening;
+    clf[1].z = sphp->boundary_distance;
+    clf[1].w = sphp->EPSILON;
+
+    clf[2].x = sphp->PI;       //delicious
+    clf[2].y = sphp->K;        //speed of sound
+    clf[2].z = sphp->viscosity;
+    clf[2].w = sphp->velocity_limit;
+
+    clf[3].x = sphp->xsph_factor;
+    clf[3].y = sphp->gravity; // -9.8 m/sec^2
+    clf[3].z = sphp->friction_coef;
+    clf[3].w = sphp->restitution_coef;
+
+    clf[4].x = sphp->shear;
+    clf[4].y = sphp->attraction;
+    clf[4].z = sphp->spring;
+    //kernel coefficients
+    clf[4].w = sphp->wpoly6_coef;
+
+    clf[5].x = sphp->wpoly6_d_coef;
+    clf[5].y = sphp->wpoly6_dd_coef; // laplacian
+    clf[5].z = sphp->wspiky_coef;
+    clf[5].w = sphp->wspiky_d_coef;
+
+    clf[6].x = sphp->wspiky_dd_coef;
+    clf[6].y = sphp->wvisc_coef;
+    clf[6].z = sphp->wvisc_d_coef;
+    clf[6].w = sphp->wvisc_dd_coef;
+
+    clf[7].x = sphp->num;
+    clf[7].y = sphp->nb_vars; // for combined variables (vars_sorted, etc.)
+    clf[7].z = sphp->choice; // which kind of calculation to invoke
+    clf[7].w = sphp->max_num;
+
+
+
+
 }
 //----------------------------------------------------------------------
 

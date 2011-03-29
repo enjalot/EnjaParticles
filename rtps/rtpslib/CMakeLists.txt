@@ -16,7 +16,7 @@ SET( CMAKE_MODULE_PATH
 
 message("${CMAKE_MODULE_PATH}\n")
 
-SET(RTPS_DEBUG FALSE)
+SET(RTPS_DEBUG TRUE)
 
 ###### SETTING RELATED TO GPU VS CPU IMPLEMENTATIONS ##########################
 SET(WITH_OPENCL TRUE)
@@ -100,6 +100,7 @@ set (rtpslib_SOURCES
     	
 	# SPH
     ${rtpslib_SOURCE_DIR}/system/SPH.cpp
+    ${rtpslib_SOURCE_DIR}/system/SPHSettings.cpp
     ${rtpslib_SOURCE_DIR}/system/sph/Euler
     ${rtpslib_SOURCE_DIR}/system/sph/LeapFrog
     

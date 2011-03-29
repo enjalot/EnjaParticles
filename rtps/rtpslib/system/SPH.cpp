@@ -40,6 +40,9 @@ namespace rtps
 
         grid = ps->settings.grid;
 
+        sphsettings = new SPHSettings(grid, max_num);
+        //sphsettings->printSettings();
+
         //SPH settings depend on number of particles used
         calculateSPHSettings();
         //set up the grid
@@ -345,8 +348,8 @@ namespace rtps
         float particle_radius = spacing;
         float pi = acos(-1.0);
 
-        sphp.grid_min = grid.getMin();
-        sphp.grid_max = grid.getMax();
+        //sphp.grid_min = grid.getMin();
+        //sphp.grid_max = grid.getMax();
         sphp.mass = mass;
         sphp.rest_distance = rest_distance;
         sphp.smoothing_distance = smoothing_distance;
