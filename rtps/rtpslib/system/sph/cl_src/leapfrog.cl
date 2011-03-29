@@ -40,12 +40,17 @@ __kernel void leapfrog(
     p.w = 1.0f; //just in case
     float4 veval = 0.5f*(v+vnext);
 
+    //Not sure why we put them back in unsorted order
+    //might as well write them back in order and save some memory access costs
     uint originalIndex = sort_indices[i];
+    //this does mess some things up right now, with very slight speed increase
     //uint originalIndex = i;
 
     // writeback to unsorted buffer
     float dens = density(i);
     p.xyz /= sphp->simulation_scale;
+
+
     unsorted_pos(originalIndex)     = (float4)(p.xyz, dens);
     //unsorted_pos(originalIndex) = (float4)(pos(i).xyz / sphp->simulation_scale, 1.);
     unsorted_vel(originalIndex)     = vnext;

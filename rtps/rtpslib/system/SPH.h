@@ -17,6 +17,8 @@
 
 #include <Collision_wall.h>
 #include <Collision_triangle.h>
+#include <LeapFrog.h>
+#include <Euler.h>
 
 //#include "../util.h"
 #include <Hose.h>
@@ -170,8 +172,8 @@ namespace rtps
         //void loadCollision_wall();
         //void loadCollision_tri();
         //bool triangles_loaded; //keep track if we've loaded triangles yet
-        void loadEuler();
-        void loadLeapFrog();
+        //void loadEuler();
+        //void loadLeapFrog();
 
         //Nearest Neighbors search related kernels
         void loadPrep();
@@ -213,8 +215,10 @@ namespace rtps
         //void collide_wall();
         //void collide_triangles();
         void integrate();
-        void euler();
-        void leapfrog();
+        //void euler();
+        //void leapfrog();
+        LeapFrog leapfrog;
+        Euler euler;
 
         float Wpoly6(float4 r, float h);
         float Wspiky(float4 r, float h);

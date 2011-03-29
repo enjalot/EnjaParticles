@@ -12,11 +12,11 @@ __kernel void euler(
                    __global float4* vars_sorted, 
                    __global float4* positions,  // for VBO 
                    //		__global float4* color,
-                   __constant struct SPHParams* params, 
+                   __constant struct SPHParams* sphp, 
                    float dt)
 {
     unsigned int i = get_global_id(0);
-    int num = params->num;
+    int num = sphp->num;
     if (i >= num) return;
 
 
@@ -35,10 +35,10 @@ __kernel void euler(
     }
 
     v += dt*f;
-    //p += dt*v / params->simulation_scale;
+    //p += dt*v / sphp->simulation_scale;
     p += dt*v;
     p.w = 1.0f; //just in case
-    p.xyz /= params->simulation_scale;
+    p.xyz /= sphp->simulation_scale;
 
     uint originalIndex = sort_indices[i];
 

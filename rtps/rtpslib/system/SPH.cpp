@@ -100,11 +100,13 @@ namespace rtps
         //could generalize this to other integration methods later (leap frog, RK4)
         if (integrator == LEAPFROG)
         {
-            loadLeapFrog();
+            //loadLeapFrog();
+            leapfrog = LeapFrog(ps->cli, timers["leapfrog_gpu"]);
         }
         else if (integrator == EULER)
         {
-            loadEuler();
+            //loadEuler();
+            euler = Euler(ps->cli, timers["euler_gpu"]);
         }
 
 
@@ -329,11 +331,34 @@ namespace rtps
     {
         if (integrator == EULER)
         {
-            euler();
+            //euler();
+            euler.execute(num,
+                settings->dt,
+                cl_position,
+                cl_vars_unsorted, 
+                cl_vars_sorted, 
+                cl_sort_indices,
+                cl_sphp,
+                //debug
+                clf_debug,
+                cli_debug);
+
+
         }
         else if (integrator == LEAPFROG)
         {
-            leapfrog();
+            //leapfrog();
+             leapfrog.execute(num,
+                settings->dt,
+                cl_position,
+                cl_vars_unsorted, 
+                cl_vars_sorted, 
+                cl_sort_indices,
+                cl_sphp,
+                //debug
+                clf_debug,
+                cli_debug);
+
         }
 
 #if 0
@@ -365,8 +390,12 @@ namespace rtps
         timers["density"] = new EB::Timer("Density kernel execution", time_offset);
         timers["force"] = new EB::Timer("Force kernel execution", time_offset);
         timers["collision_wall"] = new EB::Timer("Collision wall kernel execution", time_offset);
+        timers["cw_gpu"] = new EB::Timer("Collision Wall GPU kernel execution", time_offset);
         timers["collision_tri"] = new EB::Timer("Collision triangles kernel execution", time_offset);
+        timers["ct_gpu"] = new EB::Timer("Collision Triangle GPU kernel execution", time_offset);
         timers["integrate"] = new EB::Timer("Integration kernel execution", time_offset);
+        timers["leapfrog_gpu"] = new EB::Timer("LeapFrog Integration GPU kernel execution", time_offset);
+        timers["euler_gpu"] = new EB::Timer("Euler Integration GPU kernel execution", time_offset);
 		return 0;
     }
 
