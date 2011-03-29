@@ -16,6 +16,7 @@
 #include <DataStructures.h>
 
 #include <Collision_wall.h>
+#include <Collision_triangle.h>
 
 //#include "../util.h"
 #include <Hose.h>
@@ -85,7 +86,6 @@ namespace rtps
 
         int nb_var;
 
-        bool triangles_loaded; //keep track if we've loaded triangles yet
 
         //keep track of hoses
         std::vector<Hose> hoses;
@@ -96,15 +96,17 @@ namespace rtps
         void prepareSorted();
         //void popParticles();
 
-        Kernel k_density, k_pressure, k_viscosity;
-        Kernel k_collision_wall;
-        Kernel k_collision_tri;
+        ////Kernel k_density, k_pressure, k_viscosity;
+        //Kernel k_collision_wall;
+        //Kernel k_collision_tri;
         Kernel k_euler, k_leapfrog;
-        Kernel k_xsph;
+        //Kernel k_xsph;
 
         Kernel k_prep;
+        /*
         Kernel k_hash;
         Kernel k_datastructures;
+        */
         Kernel k_neighbors;
 
         //This should be in OpenCL classes
@@ -138,7 +140,7 @@ namespace rtps
         Buffer<unsigned int>         cl_unsort;
         Buffer<unsigned int>         cl_sort;
 
-        Buffer<Triangle>    cl_triangles;
+        //Buffer<Triangle>    cl_triangles;
 
         //Two arrays for bitonic sort (sort not done in place)
         Buffer<unsigned int>         cl_sort_output_hashes;
@@ -166,7 +168,8 @@ namespace rtps
 
         //these are defined in sph/ folder
         //void loadCollision_wall();
-        void loadCollision_tri();
+        //void loadCollision_tri();
+        //bool triangles_loaded; //keep track if we've loaded triangles yet
         void loadEuler();
         void loadLeapFrog();
 
@@ -205,9 +208,10 @@ namespace rtps
         //int buildDataStructures();
         void neighborSearch(int choice);
         void collision();
-        //void collide_wall();
         CollisionWall collision_wall;
-        void collide_triangles();
+        CollisionTriangle collision_tri;
+        //void collide_wall();
+        //void collide_triangles();
         void integrate();
         void euler();
         void leapfrog();

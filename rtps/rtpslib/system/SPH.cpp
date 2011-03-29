@@ -94,7 +94,8 @@ namespace rtps
 
         //loadCollision_wall();
         collision_wall = CollisionWall(ps->cli, timers["cw_gpu"]);
-        loadCollision_tri();
+        collision_tri = CollisionTriangle(ps->cli, timers["ct_gpu"], 2048); //TODO expose max_triangles as a parameter
+        //loadCollision_tri();
 
         //could generalize this to other integration methods later (leap frog, RK4)
         if (integrator == LEAPFROG)
@@ -312,16 +313,14 @@ namespace rtps
         timers["collision_wall"]->stop();
 
         timers["collision_tri"]->start();
-        collide_triangles();
-        /*
-        collision_triangles.execute(num,
+        //collide_triangles();
+        collision_tri.execute(num,
+                settings->dt,
                 cl_vars_sorted, 
                 cl_sphp,
-                cl_GridParamsScaled,
                 //debug
                 clf_debug,
                 cli_debug);
-        */
         timers["collision_tri"]->stop();
 
     }
@@ -485,11 +484,7 @@ namespace rtps
         cl_sort_output_indices = Buffer<unsigned int>(ps->cli, keys);
 
 
-        std::vector<Triangle> maxtri(2048);
-        cl_triangles = Buffer<Triangle>(ps->cli, maxtri);
-
-
-    }
+     }
 
     void SPH::setupDomain()
     {
