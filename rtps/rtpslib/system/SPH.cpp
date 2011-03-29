@@ -275,21 +275,6 @@ namespace rtps
         //int print_freq = 20000;
         int print_freq = 1000; //one second
         int time_offset = 5;
-
-        /*
-        timers[TI_UPDATE]     = new GE::Time("update", time_offset, print_freq);
-        timers[TI_HASH]     = new GE::Time("hash", time_offset, print_freq);
-        timers[TI_BUILD]     = new GE::Time("build", time_offset, print_freq);
-        timers[TI_BITONIC_SORT]     = new GE::Time("bitonic_sort", time_offset, print_freq);
-        timers[TI_NEIGH]     = new GE::Time("neigh", time_offset, print_freq);
-        timers[TI_DENS]     = new GE::Time("dens", time_offset, print_freq);
-        timers[TI_FORCE]     = new GE::Time("force", time_offset, print_freq);
-        timers[TI_COLLISION_WALL]     = new GE::Time("collision_wall", time_offset, print_freq);
-        timers[TI_COLLISION_TRI]     = new GE::Time("collision_triangle", time_offset, print_freq);
-        timers[TI_EULER]     = new GE::Time("euler", time_offset, print_freq);
-        timers[TI_LEAPFROG]     = new GE::Time("leapfrog", time_offset, print_freq);
-        */
-
         timers["update"] = new EB::Timer("Update loop", time_offset);
         timers["hash"] = new EB::Timer("Hash function", time_offset);
         timers["hash_gpu"] = new EB::Timer("Hash GPU kernel execution", time_offset);
@@ -307,87 +292,6 @@ namespace rtps
     void SPH::printTimers()
     {
         timers.printAll();
-        /*
-        for (int i = 0; i < 11; i++) //switch to vector of timers and use size()
-        {
-            timers[i]->print();
-        }
-        */
-        //System::printTimers();
-    }
-
-    void SPH::calculateSPHSettings()
-    {
-        /*!
-        * The Particle Mass (and hence everything following) depends on the MAXIMUM number of particles in the system
-        */
-
-        float rho0 = 1000;                              //rest density [kg/m^3 ]
-        //float mass = (128*1024.0)/max_num * .0002;    //krog's way
-        float VP = 2 * .0262144 / max_num;                  //Particle Volume [ m^3 ]
-        //float VP = .0262144 / 16000;                  //Particle Volume [ m^3 ]
-        float mass = rho0 * VP;                         //Particle Mass [ kg ]
-        //constant .87 is magic
-        float rest_distance = .87 * pow(VP, 1.f/3.f);     //rest distance between particles [ m ]
-        //float rest_distance = pow(VP, 1.f/3.f);     //rest distance between particles [ m ]
-
-        float smoothing_distance = 2.0f * rest_distance;//interaction radius
-        float boundary_distance = .5f * rest_distance;
-
-        float4 dmin = grid.getBndMin();
-        float4 dmax = grid.getBndMax();
-        //printf("dmin: %f %f %f\n", dmin.x, dmin.y, dmin.z);
-        //printf("dmax: %f %f %f\n", dmax.x, dmax.y, dmax.z);
-        float domain_vol = (dmax.x - dmin.x) * (dmax.y - dmin.y) * (dmax.z - dmin.z);
-        //printf("domain volume: %f\n", domain_vol);
-
-        //ratio between particle radius in simulation coords and world coords
-        float simulation_scale = pow(.5 * VP * max_num / domain_vol, 1.f/3.f); 
-        //float simulation_scale = pow(VP * 16000/ domain_vol, 1.f/3.f); 
-
-        spacing = rest_distance/ simulation_scale;
-
-        float particle_radius = spacing;
-        float pi = acos(-1.0);
-
-        //sphp.grid_min = grid.getMin();
-        //sphp.grid_max = grid.getMax();
-        sphp.mass = mass;
-        sphp.rest_distance = rest_distance;
-        sphp.smoothing_distance = smoothing_distance;
-        sphp.simulation_scale = simulation_scale;
-        sphp.boundary_stiffness = 20000.0f;
-        sphp.boundary_dampening = 256.0f;
-        sphp.boundary_distance = boundary_distance;
-        sphp.EPSILON = .00001f;
-        sphp.PI = pi;
-        sphp.K = 15.0f;
-        sphp.num = num;
-        sphp.max_num = max_num;
-        //sphp.surface_threshold = 2.0 * sphp.simulation_scale; //0.01;
-        sphp.viscosity = .01f;
-        //sphp.viscosity = 1.0f;
-        sphp.gravity = -9.8f;
-        //sphp.gravity = 0.0f;
-        sphp.velocity_limit = 600.0f;
-        sphp.xsph_factor = .1f;
-
-        float h = sphp.smoothing_distance;
-        float h9 = pow(h,9.f);
-        float h6 = pow(h,6.f);
-        float h3 = pow(h,3.f);
-        sphp.wpoly6_coef = 315.f/64.0f/pi/h9;
-        sphp.wpoly6_d_coef = -945.f/(32.0f*pi*h9);
-        sphp.wpoly6_dd_coef = -945.f/(32.0f*pi*h9);
-        sphp.wspiky_coef = 15.f/pi/h6;
-        sphp.wspiky_d_coef = -45.f/(pi*h6);
-        sphp.wvisc_coef = 15./(2.*pi*h3);
-        sphp.wvisc_d_coef = 15./(2.*pi*h3);
-        sphp.wvisc_dd_coef = 45./(pi*h6);
-
-        printf("spacing: %f\n", spacing);
-        sphp.print();
-
     }
 
     void SPH::prepareSorted()

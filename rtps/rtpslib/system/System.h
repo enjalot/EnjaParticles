@@ -57,6 +57,17 @@ namespace rtps
             renderer->render();
         }
 
+/*
+        template <typename RT>
+        virtual RT GetSettingAs(std::string key, std::string defaultval = "0") 
+        {
+        };
+        template <typename RT>
+        virtual void SetSetting(std::string key, RT value) 
+        {
+        };
+*/
+
         virtual int addBox(int nn, float4 min, float4 max, bool scaled)
         {
             return 0;

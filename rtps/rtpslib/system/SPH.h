@@ -46,32 +46,20 @@ namespace rtps
         void testDelete();
         int cut; //for debugging DEBUG
 
-
-        /*
-        enum
+        template <typename RT>
+        RT GetSettingAs(std::string key, std::string defaultval = "0")
         {
-            TI_HASH=0, TI_BITONIC_SORT, TI_BUILD, TI_NEIGH, 
-            TI_DENS, TI_FORCE, TI_EULER, TI_LEAPFROG, TI_UPDATE, TI_COLLISION_WALL,
-            TI_COLLISION_TRI
-        }; //11
-        GE::Time* timers[30];
-        */
+            return sphsettings->GetSettingAs<RT>(key, defaultval);
+        }
+        template <typename RT>
+        void SetSetting(std::string key, RT value)
+        {
+            sphsettings->SetSetting(key, value);
+        }
+
         EB::TimerList timers;
         int setupTimers();
         void printTimers();
-/*
-        //dynamic params
-        float boundary_stiffness;
-        float boundary_dampening;
-        float boundary_distance;
-        float K;        //gas constant
-        float viscosity;
-        float velocity_limit;
-        float xsph_factor;
-        float gravity; // -9.8 m/sec^2
-        float friction_coef;
-*/
-
         void pushParticles(vector<float4> pos, float4 velo);
 
     protected:
