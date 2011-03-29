@@ -51,7 +51,7 @@ namespace rtps
         calculate();
         updateSPHP();
 
-        settings->printSettings();
+        //settings->printSettings();
 
         spacing = ps->settings.GetSettingAs<float>("Spacing");
 
@@ -176,6 +176,10 @@ namespace rtps
 
         timers["update"]->start();
         glFinish();
+
+        if (settings->has_changed()) updateSPHP();
+
+        //settings->printSettings();
 
         //GE
         int sub_intervals = 3;  //should be a setting

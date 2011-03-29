@@ -5,6 +5,7 @@ namespace rtps
 
     RTPSettings::RTPSettings()
     {
+        changed = false;
         system = SPH;
         max_particles = 2048;
         dt = .001f;
@@ -13,6 +14,7 @@ namespace rtps
 
     RTPSettings::RTPSettings(SysType system, int max_particles, float dt)
     {
+        changed = false;
         this->system = system;
         this->max_particles = max_particles;
         this->dt = dt;
@@ -21,6 +23,7 @@ namespace rtps
 
     RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain grid)
     {
+        changed = false;
         this->system = system;
         this->max_particles = max_particles;
         this->dt = dt;
@@ -30,6 +33,7 @@ namespace rtps
 //with triangle collision
 RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain grid, bool tri_collision)
 {
+        changed = false;
     this->system = system;
     this->max_particles = max_particles;
     this->dt = dt;
@@ -38,6 +42,7 @@ RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain gri
 }
 RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain grid, float maxspeed, float mindist, float searchradius, float color[])
 {
+    changed = false;
     this->system = system;
     this->max_particles = max_particles;
     this->dt = dt;

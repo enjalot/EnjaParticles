@@ -145,6 +145,8 @@ namespace rtps
         std::vector<SPHParams> vparams(0);
         vparams.push_back(sphp);
         cl_sphp.copyToDevice(vparams);
+
+        settings->updated();
     }
 
 

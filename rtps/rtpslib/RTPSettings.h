@@ -70,7 +70,9 @@ namespace rtps
         float4 color;
 
 
-        //bool has_changed();
+        bool has_changed() { return changed; };
+        void updated() { changed = false; }; //for now we are assuming only one consumer (one system using the settings)
+
         void printSettings();
 
         // Return the value associate with KEY as the specified template parameter type
@@ -102,12 +104,13 @@ namespace rtps
                 std::ostringstream oss; 
                 oss << value; 
                 settings[key] = oss.str(); 
-                //changed = true;
+                changed = true;
             }
         }
 
     private:
         std::map<std::string, std::string> settings;
+        bool changed;
         
         
         // Added by GE
