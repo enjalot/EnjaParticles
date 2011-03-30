@@ -69,17 +69,17 @@ void *font = GLUT_BITMAP_8_BY_13;
 rtps::RTPS* ps;
 
 //#define NUM_PARTICLES 524288
-//#define NUM_PARTICLES 262144
+#define NUM_PARTICLES 262144
 //#define NUM_PARTICLES 65536
 //#define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 10000
-#define NUM_PARTICLES 8192
+//#define NUM_PARTICLES 8192
 //#define NUM_PARTICLES 4096
 //#define NUM_PARTICLES 2048
 //#define NUM_PARTICLES 1024
 //#define NUM_PARTICLES 256
-#define DT .01f
-#define maxspeed        0.1f
+#define DT              0.001f
+#define maxspeed        100.0f
 #define mindist         1.f
 #define searchradius    1.f
 
@@ -127,9 +127,9 @@ int main(int argc, char** argv)
     printf("before we call enjas functions\n");
 
     float color[4] = {1.f, 0.f, 0.f, 0.f};
-    float w_sep = 0.01f;
-    float w_align = 0.01f;
-    float w_coh = 0.001f;
+    float w_sep = 1.f;     // 0.0001f
+    float w_align = 1.f;   // 0.0001f
+    float w_coh = 0.3f;    // 0.00003f
     
     //default constructor
     rtps::Domain grid = Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
@@ -249,8 +249,8 @@ void appKeyboard(unsigned char key, int x, int y)
             }
         case 'r': //drop a rectangle
         {
-            nn = 1024;
-            //nn = 4096;
+            //nn = 1024;
+            nn = 8192;
             //nn = 4;
             //max = float4(2.5, 2.5, 2.5, 1.0f);
             //min = float4(2., 2., 2., 1.0f);

@@ -107,6 +107,8 @@ void FLOCK::update()
 //----------------------------------------------------------------------
 void FLOCK::updateCPU()
 {
+    timers[TI_UPDATE]->start();
+    
     ge_cpuEuler();  // based on my boids program
 
     // mymese debugging
@@ -119,6 +121,8 @@ void FLOCK::updateCPU()
 
     glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
     glBufferData(GL_ARRAY_BUFFER, num * sizeof(float4), &positions[0], GL_DYNAMIC_DRAW);
+    
+    timers[TI_UPDATE]->end();
 }
 
 //----------------------------------------------------------------------
