@@ -57,7 +57,7 @@ RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain gri
 
     void RTPSettings::printSettings()
     {
-        printf("SPH Settings\n");
+        printf("RTPS Settings\n");
         typedef std::map <std::string, std::string> MapType;
 
         MapType::const_iterator end = settings.end();

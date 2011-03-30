@@ -64,15 +64,16 @@ namespace rtps
         settings->SetSetting("wvisc_dd", 45./(pi*h6) );
 
         //dynamic params
-        settings->SetSetting("Boundary Stiffness", 20000.0f);
-        settings->SetSetting("Boundary Dampening", 256.0f);
+        settings->SetSetting("Gravity", -9.8f); // -9.8 m/sec^2
         settings->SetSetting("Gas Constant", 15.0f);
         settings->SetSetting("Viscosity", .01f);
         settings->SetSetting("Velocity Limit", 600.0f);
         settings->SetSetting("XSPH Factor", .1f);
-        settings->SetSetting("Gravity", -9.8f); // -9.8 m/sec^2
         settings->SetSetting("Friction Kinetic", 0.0f);
         settings->SetSetting("Friction Static", 0.0f);
+        settings->SetSetting("Boundary Stiffness", 20000.0f);
+        settings->SetSetting("Boundary Dampening", 256.0f);
+
 
         //next 4 not used at the moment
         settings->SetSetting("Restitution", 0.0f);

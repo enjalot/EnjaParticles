@@ -214,7 +214,6 @@ namespace rtps
 
             //printf("data structures\n");
             timers["datastructures"]->start();
-            //int nc = buildDataStructures(); //reorder
             int nc = datastructures.execute(   num,
                 cl_vars_unsorted,
                 cl_vars_sorted,
@@ -227,7 +226,6 @@ namespace rtps
                 grid_params.nb_cells,
                 clf_debug,
                 cli_debug);
-
             timers["datastructures"]->stop();
         
             if (nc < num && nc > 0)
@@ -251,7 +249,6 @@ namespace rtps
 
             //printf("density\n");
             timers["density"]->start();
-            //neighborSearch(0);  //density
             density.execute(   num,
                 cl_vars_sorted,
                 cl_cell_indices_start,
@@ -264,7 +261,6 @@ namespace rtps
             
             //printf("forces\n");
             timers["force"]->start();
-            //neighborSearch(1);  //forces
             force.execute(   num,
                 cl_vars_sorted,
                 cl_cell_indices_start,
@@ -275,15 +271,11 @@ namespace rtps
                 cli_debug);
 
             timers["force"]->stop();
-            //exit(0);
 
-            //printf("collision\n");
             collision();
-            //printf("integrate\n");
             timers["integrate"]->start();
             integrate();
             timers["integrate"]->stop();
-            //exit(0);
             //
             //Andrew's rendering emporium
             //neighborSearch(4);
