@@ -90,7 +90,9 @@ namespace rtps
 
         //loadBitonicSort();
         //loadDataStructures();
-        loadNeighbors();
+        //loadNeighbors();
+        density = Density(ps->cli, timers["density_gpu"]);
+        force = Force(ps->cli, timers["force_gpu"]);
 
         //loadCollision_wall();
         collision_wall = CollisionWall(ps->cli, timers["cw_gpu"]);
@@ -249,11 +251,29 @@ namespace rtps
 
             //printf("density\n");
             timers["density"]->start();
-            neighborSearch(0);  //density
+            //neighborSearch(0);  //density
+            density.execute(   num,
+                cl_vars_sorted,
+                cl_cell_indices_start,
+                cl_cell_indices_end,
+                cl_sphp,
+                cl_GridParamsScaled,
+                clf_debug,
+                cli_debug);
             timers["density"]->stop();
+            
             //printf("forces\n");
             timers["force"]->start();
-            neighborSearch(1);  //forces
+            //neighborSearch(1);  //forces
+            force.execute(   num,
+                cl_vars_sorted,
+                cl_cell_indices_start,
+                cl_cell_indices_end,
+                cl_sphp,
+                cl_GridParamsScaled,
+                clf_debug,
+                cli_debug);
+
             timers["force"]->stop();
             //exit(0);
 

@@ -1,5 +1,4 @@
 #include "SPH.h"
-#include "Hash.h"
 #include <string>
 
 namespace rtps

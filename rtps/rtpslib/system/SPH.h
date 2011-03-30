@@ -11,10 +11,12 @@
 #include <Domain.h>
 #include <SPHSettings.h>
 
+
 #include <Hash.h>
 #include <BitonicSort.h>
 #include <DataStructures.h>
-
+#include <Density.h>
+#include <Force.h>
 #include <Collision_wall.h>
 #include <Collision_triangle.h>
 #include <LeapFrog.h>
@@ -136,15 +138,16 @@ namespace rtps
         Buffer<float4>      cl_cells; // positions in Ian code
         Buffer<unsigned int>         cl_cell_indices_start;
         Buffer<unsigned int>         cl_cell_indices_end;
-        Buffer<int>         cl_vars_sort_indices;
+        //Buffer<int>                  cl_vars_sort_indices;
         Buffer<unsigned int>         cl_sort_hashes;
         Buffer<unsigned int>         cl_sort_indices;
-        Buffer<unsigned int>         cl_unsort;
-        Buffer<unsigned int>         cl_sort;
+        //Buffer<unsigned int>         cl_unsort;
+        //Buffer<unsigned int>         cl_sort;
 
         //Buffer<Triangle>    cl_triangles;
 
         //Two arrays for bitonic sort (sort not done in place)
+        //should be moved to within bitonic
         Buffer<unsigned int>         cl_sort_output_hashes;
         Buffer<unsigned int>         cl_sort_output_indices;
 
@@ -159,7 +162,7 @@ namespace rtps
         //Buffer<int>         cl_index_neigh;
 
         //for keeping up with deleted particles
-        Buffer<unsigned int> cl_num_changed;
+        //Buffer<unsigned int> cl_num_changed;
 
         Buffer<float4>      clf_debug;  //just for debugging cl files
         Buffer<int4>        cli_debug;  //just for debugging cl files
@@ -180,7 +183,7 @@ namespace rtps
         //void loadHash();
         //void loadBitonicSort();
         //void loadDataStructures();
-        void loadNeighbors();
+        //void loadNeighbors();
 
         //CPU functions
         void cpuDensity();
@@ -208,7 +211,9 @@ namespace rtps
         void hash_and_sort();
         void bitonic_sort();
         //int buildDataStructures();
-        void neighborSearch(int choice);
+        //void neighborSearch(int choice);
+        Density density;
+        Force force;
         void collision();
         CollisionWall collision_wall;
         CollisionTriangle collision_tri;
