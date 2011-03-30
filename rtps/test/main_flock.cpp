@@ -126,7 +126,7 @@ int main(int argc, char** argv)
 
     printf("before we call enjas functions\n");
 
-    float color[4] = {1.f, 0.f, 0.f, 0.f};
+    float color[4] = {255.f, 0.f, 0.f, 0.f};
     float w_sep = 1.f;     // 0.0001f
     float w_align = 1.f;   // 0.0001f
     float w_coh = 0.3f;    // 0.00003f
@@ -249,12 +249,13 @@ void appKeyboard(unsigned char key, int x, int y)
             }
         case 'r': //drop a rectangle
         {
-            //nn = 1024;
-            nn = 8192;
+            nn = 65536;
+	    //nn = 1024;
+            //nn = 8192;
             //nn = 4;
             //max = float4(2.5, 2.5, 2.5, 1.0f);
             //min = float4(2., 2., 2., 1.0f);
-            max = float4(2.5, 3., 2.5, 1.0f);
+            max = float4(4.5, 3., 4.5, 1.0f);
             min = float4(1.5, 2., 1.5, 1.0f);
             //max = float4(1.1,1.1, 1.1, 1.0f);
             //min = float4(1., 1., 1., 1.0f);
