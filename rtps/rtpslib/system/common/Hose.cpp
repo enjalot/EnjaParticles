@@ -73,7 +73,7 @@ void Hose::calc_em()
     //printf("magv: %f\n", magv);
     //em = (int) (1 + spacing/dt/magv/8.);
     //why do i have to divide by 4?
-    em = (int) (1 + spacing/dt/magv/8);
+    em = (int) (1 + spacing/dt/magv/10);
     //printf("em: %d\n", em);
 }
 
