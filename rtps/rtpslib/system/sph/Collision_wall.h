@@ -1,0 +1,36 @@
+#ifndef RTPS_COLLISION_WALL_H_INCLUDED
+#define RTPS_COLLISION_WALL_H_INCLUDED
+
+
+#include <CLL.h>
+#include <Buffer.h>
+
+
+namespace rtps
+{
+    class CollisionWall
+    {
+        public:
+            CollisionWall() { cli = NULL; timer = NULL; };
+            CollisionWall(CL* cli, EB::Timer* timer);
+            void execute(int num,
+                        //input
+                        Buffer<float4>& svars, 
+                        //output
+                        //params
+                        Buffer<SPHParams>& sphp,
+                        Buffer<GridParams>& gp,
+                        //debug
+                        Buffer<float4>& clf_debug,
+                        Buffer<int4>& cli_debug);
+            
+           
+
+        private:
+            CL* cli;
+            Kernel k_collision_wall;
+            EB::Timer* timer;
+    };
+}
+
+#endif
