@@ -178,6 +178,7 @@ int main(int argc, char** argv)
     settings.SetSetting("render_use_alpha", true);
     settings.SetSetting("render_alpha_function", "add");
     settings.SetSetting("lt_increment", -.004);
+    settings.SetSetting("lt_cl", "lifetime.cl");
 
 
     cli = new CL();
@@ -195,7 +196,8 @@ int main(int argc, char** argv)
     settings.SetSetting("render_alpha_function", "multiply");
     //settings.SetSetting("render_alpha_function", "add");
     //settings.SetSetting("render_alpha_function", "alpha");
-    settings.SetSetting("lt_increment", .008);
+    settings.SetSetting("lt_increment", .002);
+    settings.SetSetting("lt_cl", "lifetime_smoke.cl");
     ps2 = new rtps::RTPS(settings, cli);
 
 
@@ -206,7 +208,7 @@ int main(int argc, char** argv)
     ps1->settings.SetSetting("Velocity Limit", 600.0f);
     ps1->settings.SetSetting("XSPH Factor", .1f);
 
-    ps2->settings.SetSetting("Gravity", 1.8f); // -9.8 m/sec^2
+    ps2->settings.SetSetting("Gravity", .8f); // -9.8 m/sec^2
     ps2->settings.SetSetting("Gas Constant", 50.0f);
     ps2->settings.SetSetting("Viscosity", .001f);
     ps2->settings.SetSetting("Velocity Limit", 600.0f);
@@ -307,13 +309,17 @@ void appKeyboard(unsigned char key, int x, int y)
         {
             //spray hose
             printf("about to make hose\n");
-            float4 center(2., 2., 2., 1.);
+            float4 center(2., 2., .2, 1.);
             //float4 velocity(.6, -.6, -.6, 0);
             //float4 velocity(2., 5., -.8, 0);
-            float4 velocity(2., 0., 0., 0);
+            float4 velocity(0., 0., 1., 0);
             //sph sets spacing and multiplies by radius value
-            ps1->system->addHose(5000, center, velocity, 5);
-            ps2->system->addHose(5000, center, velocity, 5);
+            float4 col1 = float4(1., 1., 1., 1.);
+            float4 col2 = float4(0., 0., 0., 1.);
+
+
+            ps1->system->addHose(5000, center, velocity, 5, col1);
+            ps2->system->addHose(5000, center, velocity, 5, col2);
             return;
 		}
         case 'n':
@@ -360,7 +366,7 @@ void appKeyboard(unsigned char key, int x, int y)
                 max = float4(2., 2., 2., 1.0f);
 
                 float4 col1 = float4(1., 1., 1., 1.);
-                float4 col2 = float4(1., 1., 1., 0.);
+                float4 col2 = float4(0., 0., 0., 1.);
 
                 ps1->system->addBox(nn, min, max, false, col1);
                 ps2->system->addBox(nn, min, max, false, col2);

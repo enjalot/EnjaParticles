@@ -12,7 +12,7 @@ namespace rtps
     {
         public:
             Lifetime() { cli = NULL; timer = NULL; };
-            Lifetime(CL* cli, EB::Timer* timer);
+            Lifetime(CL* cli, EB::Timer* timer, std::string filename);
             void execute(int num,
                     float dt,
                     Buffer<float4>& pos,

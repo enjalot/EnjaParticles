@@ -5,7 +5,7 @@
 namespace rtps
 {
 
-Hose::Hose(RTPS *ps, int total_n, float4 center, float4 velocity, float radius, float spacing)
+Hose::Hose(RTPS *ps, int total_n, float4 center, float4 velocity, float radius, float spacing, float4 color)
 {
     printf("Constructor!\n");
     this->ps = ps;
@@ -14,6 +14,7 @@ Hose::Hose(RTPS *ps, int total_n, float4 center, float4 velocity, float radius, 
     this->velocity = velocity;
     this->radius = radius;
     this->spacing = spacing;
+    this->color = color;
     em_count = 0;
     n_count = total_n;
     calc_vectors();
@@ -21,12 +22,13 @@ Hose::Hose(RTPS *ps, int total_n, float4 center, float4 velocity, float radius, 
     velocity.print("velocity");
 }
 
-void Hose::update(float4 center, float4 velocity, float radius, float spacing)
+void Hose::update(float4 center, float4 velocity, float radius, float spacing, float4 color)
 {
     this->center = center;
     this->velocity = velocity;
     this->radius = radius;
     this->spacing = spacing;
+    this->color = color;
     calc_vectors();
 }
 

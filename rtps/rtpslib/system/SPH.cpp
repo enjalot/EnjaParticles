@@ -103,7 +103,8 @@ namespace rtps
             euler = Euler(ps->cli, timers["euler_gpu"]);
         }
 
-        lifetime = Lifetime(ps->cli, timers["lifetime_gpu"]);
+        string lt_file = settings->GetSettingAs<string>("lt_cl");
+        lifetime = Lifetime(ps->cli, timers["lifetime_gpu"], lt_file);
 
 
 
@@ -613,12 +614,12 @@ namespace rtps
         pushParticles(sphere,velo);
     }
 
-    void SPH::addHose(int total_n, float4 center, float4 velocity, float radius)
+    void SPH::addHose(int total_n, float4 center, float4 velocity, float radius, float4 color)
     {
         printf("wtf for real\n");
         //in sph we just use sph spacing
         radius *= spacing;
-        Hose hose = Hose(ps, total_n, center, velocity, radius, spacing);
+        Hose hose = Hose(ps, total_n, center, velocity, radius, spacing, color);
         printf("wtf\n");
         hoses.push_back(hose);
         printf("size of hoses: %d\n", hoses.size());
@@ -632,7 +633,7 @@ namespace rtps
         {
             parts = hoses[i].spray();
             if (parts.size() > 0)
-                pushParticles(parts, hoses[i].getVelocity());
+                pushParticles(parts, hoses[i].getVelocity(), hoses[i].getColor());
         }
     }
 

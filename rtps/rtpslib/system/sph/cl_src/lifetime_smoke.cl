@@ -1,3 +1,4 @@
+//LIFETIME SMOKE
 #include "cl_macros.h"
 #include "cl_structs.h"
 
@@ -25,20 +26,18 @@ __kernel void lifetime(__global float4* pos_u,
         //pos_u[i] = (float4)(100.0f, 100.0f, 100.0f, 1.0f);
         life = 0.f;
     }
-    if(life >= 1.0)
+    if(life >= 3.14)
     {
-        life = 1.0f;
+        life = 3.14f;
     }
-    float alpha = life;
+    float alpha = sin(life);
     
     //you can manipulate the color based on properties of the system
     //here we adjust the alpha
-    /*
     color_s[i].x = alpha;
     color_s[i].y = alpha;
     color_s[i].z = alpha;
-    */
-    color_s[i].w = alpha;
+    color_s[i].w = life;
 
     uint originalIndex = sort_indices[i];
     color_u[originalIndex] = color_s[i];

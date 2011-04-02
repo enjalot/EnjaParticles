@@ -47,7 +47,7 @@ namespace rtps
         //wrapper around IV.h addSphere
         void addBall(int nn, float4 center, float radius, bool scaled);
         //wrapper around Hose.h 
-        void addHose(int total_n, float4 center, float4 velocity, float radius);
+        void addHose(int total_n, float4 center, float4 velocity, float radius, float4 color=float4(1.0, 0.0, 0.0, 1.0f));
         void sprayHoses();
 
         virtual void render();

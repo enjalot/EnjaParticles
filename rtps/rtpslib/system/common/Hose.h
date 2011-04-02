@@ -15,13 +15,14 @@ namespace rtps
 class RTPS_EXPORT Hose
 {
 public:
-    Hose(RTPS *ps, int total_n, float4 center, float4 velocity, float radius, float spacing);
+    Hose(RTPS *ps, int total_n, float4 center, float4 velocity, float radius, float spacing, float4 color);
     //~Hose();
 
-    void update(float4 center, float4 velocity, float radius, float spacing);
+    void update(float4 center, float4 velocity, float radius, float spacing, float4 color);
     std::vector<float4> spray();
     //refill();
     float4 getVelocity(){ return velocity;}
+    float4 getColor(){ return color;}
 
 
 private:
@@ -30,6 +31,7 @@ private:
 
     float4 center;
     float4 velocity;
+    float4 color;
     float4 u, w;        //orthogonal vectors to velocity
     void calc_vectors();
 
