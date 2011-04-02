@@ -40,7 +40,8 @@ namespace rtps
 
         generateCheckerBoardTex(col1,col2,8, 640);
         printf("GL VERSION %s\n", glGetString(GL_VERSION));
-        blending = false;
+        //blending = settings.GetSettingAs<bool>("Render: Blending");
+        blending = settings->getUseAlphaBlending();
         setupTimers();
     }
 

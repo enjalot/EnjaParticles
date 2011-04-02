@@ -166,15 +166,27 @@ int main(int argc, char** argv)
     rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
 
     //settings.setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
-    settings.setRenderType(RTPSettings::RENDER);
-    //settings.setRenderType(RTPSettings::SPRITE_RENDER);
-    settings.setRadiusScale(1.0);
+    //settings.setRenderType(RTPSettings::RENDER);
+    settings.setRenderType(RTPSettings::SPRITE_RENDER);
+    settings.setRadiusScale(2.0);
     settings.setBlurScale(1.0);
     settings.setUseGLSL(1);
     settings.setUseAlphaBlending(1);    
 
 
     ps = new rtps::RTPS(settings);
+
+    ps->settings.SetSetting("Gravity", -9.8f); // -9.8 m/sec^2
+    ps->settings.SetSetting("Gas Constant", 15.0f);
+    ps->settings.SetSetting("Viscosity", .01f);
+    ps->settings.SetSetting("Velocity Limit", 600.0f);
+    ps->settings.SetSetting("XSPH Factor", .1f);
+    ps->settings.SetSetting("Friction Kinetic", 0.0f);
+    ps->settings.SetSetting("Friction Static", 0.0f);
+    ps->settings.SetSetting("Boundary Stiffness", 20000.0f);
+    ps->settings.SetSetting("Boundary Dampening", 256.0f);
+
+
 
 
     //initialize the OpenGL scene for rendering
@@ -203,6 +215,7 @@ void init_gl()
 
     // set view matrix
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(.6, .6, .6, 1.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     ps->system->getRenderer()->setWindowDimensions(window_width,window_height);
