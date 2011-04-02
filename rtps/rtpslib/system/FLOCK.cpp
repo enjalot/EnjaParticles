@@ -418,7 +418,7 @@ void FLOCK::setupDomain()
 }
 
 //----------------------------------------------------------------------
-int FLOCK::addBox(int nn, float4 min, float4 max, bool scaled)
+int FLOCK::addBox(int nn, float4 min, float4 max, bool scaled, float4 color)
 {
     float scale = 1.0f;
     if(scaled)

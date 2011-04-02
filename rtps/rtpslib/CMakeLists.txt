@@ -104,6 +104,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/SPHSettings.cpp
     ${rtpslib_SOURCE_DIR}/system/sph/Euler
     ${rtpslib_SOURCE_DIR}/system/sph/LeapFrog
+    ${rtpslib_SOURCE_DIR}/system/sph/Lifetime
     
     ${rtpslib_SOURCE_DIR}/system/common/Hose
 
@@ -116,6 +117,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/sph/Collision_wall
     ${rtpslib_SOURCE_DIR}/system/sph/Collision_triangle
     
+    #Neighbor datastructures
     ${rtpslib_SOURCE_DIR}/system/sph/Prep
     ${rtpslib_SOURCE_DIR}/system/sph/Hash
     ${rtpslib_SOURCE_DIR}/system/sph/BitonicSort

@@ -16,7 +16,9 @@ namespace rtps
             int execute(int num,
                     //input
                     Buffer<float4>& uvars, 
+                    Buffer<float4>& color_u,
                     Buffer<float4>& svars, 
+                    Buffer<float4>& color_s,
                     //output
                     Buffer<unsigned int>& hashes,
                     Buffer<unsigned int>& indices,

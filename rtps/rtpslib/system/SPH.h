@@ -20,6 +20,7 @@
 #include <Collision_wall.h>
 #include <Collision_triangle.h>
 #include <LeapFrog.h>
+#include <Lifetime.h>
 #include <Euler.h>
 
 //#include "../util.h"
@@ -42,7 +43,7 @@ namespace rtps
 
         void update();
         //wrapper around IV.h addRect
-        int addBox(int nn, float4 min, float4 max, bool scaled);
+        int addBox(int nn, float4 min, float4 max, bool scaled, float4 color=float4(1.0f, 0.0f, 0.0f, 1.0f));
         //wrapper around IV.h addSphere
         void addBall(int nn, float4 center, float radius, bool scaled);
         //wrapper around Hose.h 
@@ -72,7 +73,7 @@ namespace rtps
         EB::TimerList timers;
         int setupTimers();
         void printTimers();
-        void pushParticles(vector<float4> pos, float4 velo);
+        void pushParticles(vector<float4> pos, float4 velo, float4 color=float4(1.0, 0.0, 0.0, 1.0));
 
     protected:
         virtual void setRenderer();
@@ -125,7 +126,10 @@ namespace rtps
         std::vector<float4> xsphs;
 
         Buffer<float4>      cl_position;
-        Buffer<float4>      cl_color;
+        
+        Buffer<float4>      cl_color_u;
+        Buffer<float4>      cl_color_s;
+
         Buffer<float>       cl_density;
         Buffer<float4>      cl_force;
         Buffer<float4>      cl_velocity;
@@ -224,6 +228,9 @@ namespace rtps
         //void leapfrog();
         LeapFrog leapfrog;
         Euler euler;
+
+        Lifetime lifetime;
+
 
         float Wpoly6(float4 r, float h);
         float Wspiky(float4 r, float h);

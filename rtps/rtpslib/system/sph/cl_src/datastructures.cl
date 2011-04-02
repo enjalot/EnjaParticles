@@ -11,7 +11,9 @@
 //----------------------------------------------------------------------
 __kernel void datastructures(
                             __global float4*   vars_unsorted,
+                            __global float4* color_u,
                             __global float4*   vars_sorted, 
+                            __global float4* color_s,
                             __global uint* sort_hashes,
                             __global uint* sort_indices,
                             __global uint* cell_indices_start,
@@ -177,6 +179,7 @@ __kernel void datastructures(
     //pos(index)     = unsorted_pos(index) * sphp->simulation_scale;
     vel(index)     = unsorted_vel(sorted_index);
     veleval(index) = unsorted_veleval(sorted_index); // not sure if needed
+    color_s[index] = color_u[sorted_index];
     //density(index) = unsorted_density(sorted_index); // only for debugging
 #endif
 }

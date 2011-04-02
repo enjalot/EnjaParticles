@@ -10,12 +10,24 @@ namespace rtps
 
     RTPS::RTPS()
     {
+        cli = new CL();
+        cl_managed = true;
         //settings will be the default constructor
         Init();
     }
 
     RTPS::RTPS(RTPSettings s)
     {
+        cli = new CL();
+        cl_managed = true;
+        settings = s;
+        Init();
+    }
+
+    RTPS::RTPS(RTPSettings s, CL* _cli)
+    {
+        cli = _cli;
+        cl_managed = false;
         settings = s;
         Init();
     }
@@ -24,7 +36,10 @@ namespace rtps
     {
         printf("RTPS destructor\n");
         delete system;
-        delete cli;
+        if(cl_managed)
+        {
+            delete cli;
+        }
         //delete renderer;
     }
 
@@ -34,7 +49,6 @@ namespace rtps
         //whats best way to check if stuff like glGenBuffers has been inited?
         //glewInit();
 
-        cli = new CL();
         system = NULL;
         //renderer = NULL;
 

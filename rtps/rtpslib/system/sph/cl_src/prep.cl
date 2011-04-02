@@ -12,6 +12,8 @@ __kernel void prep(
                   __global float4* velocity,
                   __global float4* vars_unsorted,
                   __global float4* vars_sorted,
+                  __global float4* color_u,
+                  __global float4* color_s,
                   __global uint* sort_indices,
                   __constant struct SPHParams* sphp
                   /*
@@ -28,16 +30,16 @@ __kernel void prep(
     if (i >= num) return;
 
     uint index = sort_indices[i];
-
-    if (stage == 1)
+    if (stage == 0)
+    {
+        velocity[index] = vel(i);
+    }
+    else if (stage == 1)
     {
         unsorted_pos(i) = position[i];
         unsorted_vel(i) = velocity[i];
+        //color_u[i] = color_s[i];
 
-    }
-    else if (stage == 0)
-    {
-        velocity[index] = vel(i);
     }
     if (stage == 2)
     {
@@ -47,6 +49,7 @@ __kernel void prep(
         position[i] = pos(i);
         velocity[i] = vel(i);
         unsorted_pos(i) = pos(i);
+        //color_u[i] = color_s[i];
         //unsorted_pos(i) = (float4)(1166., 66., 66., 66.);
     }
     /*

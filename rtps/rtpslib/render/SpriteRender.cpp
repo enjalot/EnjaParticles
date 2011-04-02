@@ -9,20 +9,24 @@ namespace rtps
     SpriteRender::SpriteRender(GLuint pos, GLuint col, int n, CL* cli, RTPSettings* _settings):Render(pos,col,n,cli,_settings)
     {
         string path(GLSL_SOURCE_DIR);
+        string filename = settings->GetSettingAs<string>("render_texture");
         //path += "../../../sprites/fsu_seal.jpg";
-        path += "../../../sprites/firejet_blast.png";   //borrowed from http://homepage.mac.com/nephilim/sw3ddev/additive_blending.html
+        //path += "../../../sprites/firejet_blast.png";   //borrowed from http://homepage.mac.com/nephilim/sw3ddev/additive_blending.html
+        path += "../../../sprites/" + filename;
         //path += "../../../sprites/firejet_smoke.png";
         //path += "../../../sprites/tomek.jpg";
         //path += "../../../sprites/enjalot.jpg";
         printf("LOAD TEXTURE!!!!!!!!!!!!!!\n");
+        printf("filename: %s\n", filename.c_str());
         printf("path: %s\n", path.c_str());
+        settings->printSettings();
         loadTexture(path, "texture");
         string vert(GLSL_BIN_DIR);
         string frag(GLSL_BIN_DIR);
         //vert+="/sphere_vert.glsl";
         //frag+="/sphere_tex_frag.glsl";
         vert+="/sprite_vert.glsl";
-        frag+="/sprite_tex_frag.glsl";
+        frag+="/" + settings->GetSettingAs<string>("render_frag_shader");
 
         glsl_program[SPHERE_SHADER] = compileShaders(vert.c_str(),frag.c_str());
     }
@@ -33,14 +37,25 @@ namespace rtps
         glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
         //printf("BLENDING: %d\n", blending);
 
+
         if (blending)
         {
             glDisable(GL_DEPTH_TEST);
             glDepthMask(GL_FALSE);
             glEnable(GL_BLEND);
-            //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-            //glBlendFunc(GL_DST_COLOR, GL_ZERO);
+            string afunc = settings->GetSettingAs<string>("render_alpha_function");
+            if(afunc == "alpha")
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            else if(afunc == "add")
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            else if(afunc == "multiply")
+            {
+                glBlendFunc(GL_DST_COLOR, GL_ZERO);
+                //glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+                //glBlendColor(.9, .9, .9, 1.);
+                //glBlendFunc(GL_CONSTANT_COLOR, GL_ZERO);
+                //glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_ONE);
+            }
         }
 
         glDisable(GL_LIGHTING);

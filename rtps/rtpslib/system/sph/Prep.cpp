@@ -29,6 +29,8 @@ namespace rtps
         k_prep.setArg(args++, cl_velocity.getDevicePtr());
         k_prep.setArg(args++, cl_vars_unsorted.getDevicePtr());
         k_prep.setArg(args++, cl_vars_sorted.getDevicePtr()); 
+        k_prep.setArg(args++, cl_color_u.getDevicePtr());
+        k_prep.setArg(args++, cl_color_s.getDevicePtr());
         k_prep.setArg(args++, cl_sort_indices.getDevicePtr());
         k_prep.setArg(args++, cl_sphp.getDevicePtr());
 

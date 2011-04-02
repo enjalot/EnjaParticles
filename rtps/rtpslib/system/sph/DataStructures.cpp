@@ -19,7 +19,9 @@ namespace rtps
     int DataStructures::execute(int num,
                     //input
                     Buffer<float4>& uvars, 
+                    Buffer<float4>& color_u,
                     Buffer<float4>& svars, 
+                    Buffer<float4>& color_s,
                     //output
                     Buffer<unsigned int>& hashes,
                     Buffer<unsigned int>& indices,
@@ -44,7 +46,9 @@ namespace rtps
 
         int iarg = 0;
         k_datastructures.setArg(iarg++, uvars.getDevicePtr());
+        k_datastructures.setArg(iarg++, color_u.getDevicePtr());
         k_datastructures.setArg(iarg++, svars.getDevicePtr());
+        k_datastructures.setArg(iarg++, color_s.getDevicePtr());
         k_datastructures.setArg(iarg++, hashes.getDevicePtr());
         k_datastructures.setArg(iarg++, indices.getDevicePtr());
         k_datastructures.setArg(iarg++, ci_start.getDevicePtr());

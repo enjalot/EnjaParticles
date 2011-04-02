@@ -28,14 +28,6 @@ namespace rtps
         num = 0;
         nb_var = 10;
 
-        positions.resize(max_num);
-        colors.resize(max_num);
-        forces.resize(max_num);
-        velocities.resize(max_num);
-        veleval.resize(max_num);
-        densities.resize(max_num);
-        xsphs.resize(max_num);
-
         //seed random
         srand ( time(NULL) );
 
@@ -111,6 +103,7 @@ namespace rtps
             euler = Euler(ps->cli, timers["euler_gpu"]);
         }
 
+        lifetime = Lifetime(ps->cli, timers["lifetime_gpu"]);
 
 
 
@@ -119,6 +112,10 @@ namespace rtps
         // settings defaults to 0
         //renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
         setRenderer();
+
+        //printf("MAIN settings: \n");
+        //settings->printSettings();
+        //printf("=================================================\n");
 
     }
 
@@ -205,7 +202,7 @@ namespace rtps
         }
 
         cl_position.acquire();
-        cl_color.acquire();
+        cl_color_u.acquire();
         //sub-intervals
         for (int i=0; i < sub_intervals; i++)
         {
@@ -216,7 +213,9 @@ namespace rtps
             timers["datastructures"]->start();
             int nc = datastructures.execute(   num,
                 cl_vars_unsorted,
+                cl_color_u,
                 cl_vars_sorted,
+                cl_color_s,
                 cl_sort_hashes,
                 cl_sort_indices,
                 cl_cell_indices_start,
@@ -237,6 +236,8 @@ namespace rtps
                 //
                 //if so we need to copy sorted into unsorted
                 //and redo hash_and_sort
+                printf("SOME PARTICLES WERE DELETED!\n");
+                printf("nc: %d num: %d\n", nc, num);
                 num = nc;
                 settings->SetSetting("Number of Particles", num);
                 //sphp.num = num;
@@ -276,13 +277,22 @@ namespace rtps
             timers["integrate"]->start();
             integrate();
             timers["integrate"]->stop();
+
+            lifetime.execute( num,
+                              settings->GetSettingAs<float>("lt_increment"),
+                              cl_position,
+                              cl_color_u,
+                              cl_color_s,
+                              cl_sort_indices
+                              );
+
             //
             //Andrew's rendering emporium
             //neighborSearch(4);
         }
 
         cl_position.release();
-        cl_color.release();
+        cl_color_u.release();
 
         timers["update"]->stop();
 
@@ -408,6 +418,7 @@ namespace rtps
         timers["integrate"] = new EB::Timer("Integration kernel execution", time_offset);
         timers["leapfrog_gpu"] = new EB::Timer("LeapFrog Integration GPU kernel execution", time_offset);
         timers["euler_gpu"] = new EB::Timer("Euler Integration GPU kernel execution", time_offset);
+        timers["lifetime_gpu"] = new EB::Timer("Lifetime GPU kernel execution", time_offset);
 		return 0;
     }
 
@@ -420,13 +431,19 @@ namespace rtps
     {
 #include "sph/cl_src/cl_macros.h"
 
+        positions.resize(max_num);
+        colors.resize(max_num);
+        forces.resize(max_num);
+        velocities.resize(max_num);
+        veleval.resize(max_num);
+        densities.resize(max_num);
+        xsphs.resize(max_num);
+
         //for reading back different values from the kernel
         std::vector<float4> error_check(max_num);
         
         float4 pmax = grid_params.grid_max + grid_params.grid_size;
         //std::fill(positions.begin(), positions.end(), pmax);
-
-
 
         std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 1.0f, 0.0f));
         std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -447,7 +464,8 @@ namespace rtps
 
         //vbo buffers
         cl_position = Buffer<float4>(ps->cli, pos_vbo);
-        cl_color = Buffer<float4>(ps->cli, col_vbo);
+        cl_color_u = Buffer<float4>(ps->cli, col_vbo);
+        cl_color_s = Buffer<float4>(ps->cli, colors);
 
         //pure opencl buffers: these are deprecated
         cl_force = Buffer<float4>(ps->cli, forces);
@@ -570,7 +588,7 @@ namespace rtps
 
     }
 
-    int SPH::addBox(int nn, float4 min, float4 max, bool scaled)
+    int SPH::addBox(int nn, float4 min, float4 max, bool scaled, float4 color)
     {
         float scale = 1.0f;
         if (scaled)
@@ -579,7 +597,7 @@ namespace rtps
         }
         vector<float4> rect = addRect(nn, min, max, spacing, scale);
         float4 velo(0, 0, 0, 0);
-        pushParticles(rect, velo);
+        pushParticles(rect, velo, color);
         return rect.size();
     }
 
@@ -630,7 +648,7 @@ namespace rtps
 
 
     }
-    void SPH::pushParticles(vector<float4> pos, float4 velo)
+    void SPH::pushParticles(vector<float4> pos, float4 velo, float4 color)
     {
         //cut = 1;
 
@@ -639,10 +657,10 @@ namespace rtps
         {
             return;
         }
-        // float rr = (rand() % 255)/255.0f;
+        float rr = (rand() % 255)/255.0f;
         //float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
         //printf("random: %f\n", rr);
-        float4 color(1.0f,0.0f,0.0f,1.0f);
+        //float4 color(1.0f,1.0f,1.0f,1.0f);
 
         std::vector<float4> cols(nn);
         std::vector<float4> vels(nn);
@@ -659,7 +677,7 @@ namespace rtps
 #ifdef GPU
         glFinish();
         cl_position.acquire();
-        cl_color.acquire();
+        cl_color_u.acquire();
 
         //printf("about to prep 0\n");
         prep(0);
@@ -667,10 +685,10 @@ namespace rtps
 
 
         cl_position.copyToDevice(pos, num);
-        cl_color.copyToDevice(cols, num);
+        cl_color_u.copyToDevice(cols, num);
 
-        cl_color.release();
-        cl_position.release();
+        //cl_color_u.release();
+        //cl_position.release();
 
         //2 is from cl_macros.h should probably not hardcode this number
         cl_velocity.copyToDevice(vels, num);
@@ -682,13 +700,15 @@ namespace rtps
 
         num += nn;  //keep track of number of particles we use
 
-        cl_position.acquire();
+        //cl_position.acquire();
+        //cl_color_u.acquire();
         //reprep the unsorted (packed) array to account for new particles
         //might need to do it conditionally if particles are added or subtracted
         printf("about to prep\n");
         prep(1);
         printf("done with prep\n");
         cl_position.release();
+        cl_color_u.release();
 #else
         num += nn;  //keep track of number of particles we use
 #endif

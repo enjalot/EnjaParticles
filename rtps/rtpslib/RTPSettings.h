@@ -98,15 +98,19 @@ namespace rtps
         template <typename RT>
         void SetSetting(std::string key, RT value) {
             // TODO: change to stringstream for any type of input that is cast as string
-            RT oldval = this->GetSettingAs<RT>(key);
-            if (oldval != value)
-            {
+            //RT oldval = this->GetSettingAs<RT>(key);
+            //if (oldval != value)
+            //{
                 std::ostringstream oss; 
                 oss << value; 
                 settings[key] = oss.str(); 
+                std::cout << "setting: " << key << " | " << value << std::endl;//printf("setting: %s %s\n", settings[key].c_str());
                 changed = true;
-            }
+            //}
         }
+    
+        bool Exists(std::string key) { if(settings.find(key) == settings.end()) { return false; } else { return true; } }
+
 
     private:
         std::map<std::string, std::string> settings;
