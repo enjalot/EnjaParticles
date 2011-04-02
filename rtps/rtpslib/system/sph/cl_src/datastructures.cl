@@ -11,9 +11,9 @@
 //----------------------------------------------------------------------
 __kernel void datastructures(
                             __global float4*   vars_unsorted,
-                            __global float4* color_u,
+                            __global float4*   color_u,
                             __global float4*   vars_sorted, 
-                            __global float4* color_s,
+                            __global float4*   color_s,
                             __global uint* sort_hashes,
                             __global uint* sort_indices,
                             __global uint* cell_indices_start,

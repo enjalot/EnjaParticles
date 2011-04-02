@@ -22,7 +22,8 @@ __kernel void lifetime(__global float4* pos_u,
         //p = pos_gen[i];
         //v = vel_gen[i];
         //life = 1.0f;    
-        //pos_u[i] = (float4)(100.0f, 100.0f, 100.0f, 1.0f);
+        //this will only work once we stop using vars_unsorted (or i need to pass that in)
+        //pos_u[i] = (float4)(10.0f, 10.0f, 10.0f, 1.0f);
         life = 0.f;
     }
     if(life >= 1.0)
