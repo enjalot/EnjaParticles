@@ -98,7 +98,7 @@ namespace rtps
 
         //if(num > 0 && nc < 0) { exit(0); }
         
-#if 1
+#if 0
         //printDataStructuresDiagnostics();
 
         printf("**************** DataStructures Diagnostics ****************\n");

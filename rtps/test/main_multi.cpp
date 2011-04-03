@@ -196,7 +196,7 @@ int main(int argc, char** argv)
     settings.SetSetting("render_alpha_function", "multiply");
     //settings.SetSetting("render_alpha_function", "add");
     //settings.SetSetting("render_alpha_function", "alpha");
-    settings.SetSetting("lt_increment", .002);
+    settings.SetSetting("lt_increment", .004);
     settings.SetSetting("lt_cl", "lifetime_smoke.cl");
     ps2 = new rtps::RTPS(settings, cli);
 

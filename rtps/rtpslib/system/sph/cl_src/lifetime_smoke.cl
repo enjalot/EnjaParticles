@@ -24,12 +24,12 @@ __kernel void lifetime( int num,
         //p = pos_gen[i];
         //v = vel_gen[i];
         //life = 1.0f;    
-        //pos_u[i] = (float4)(100.0f, 100.0f, 100.0f, 1.0f);
         life = 0.f;
     }
     if(life >= 3.14)
     {
         life = 3.14f;
+        pos_u[i] = (float4)(100.0f, 100.0f, 100.0f, 1.0f);
     }
     float alpha = sin(life);
     
@@ -40,8 +40,9 @@ __kernel void lifetime( int num,
     color_s[i].z = alpha;
     color_s[i].w = life;
 
-    uint originalIndex = sort_indices[i];
-    color_u[originalIndex] = color_s[i];
+    //uint originalIndex = sort_indices[i];
+    //color_u[originalIndex] = color_s[i];
+    color_u[i] = color_s[i];
 
 
 

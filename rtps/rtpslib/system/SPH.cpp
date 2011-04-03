@@ -236,7 +236,7 @@ namespace rtps
                 cli_debug);
             timers["datastructures"]->stop();
         
-            printf("num %d, nc %d\n", num, nc);
+            //printf("num %d, nc %d\n", num, nc);
             if (nc <= num && nc >= 0)
             {
                 //check if the number of particles have changed
@@ -256,9 +256,10 @@ namespace rtps
                 //need to copy sorted positions into unsorted + position array
                 call_prep(2);
                 printf("HOW MANY NOW? %d\n", num);
-                //hash_and_sort();
+                hash_and_sort();
                 //we've changed num and copied sorted to unsorted. skip this iteration and do next one
-                continue; 
+                //this doesn't work because sorted force etc. are having an effect?
+                //continue; 
             }
 
             //if(num >0) printf("density\n");
@@ -298,7 +299,6 @@ namespace rtps
             integrate();
             timers["integrate"]->stop();
 
-            /*
             lifetime.execute( num,
                               settings->GetSettingAs<float>("lt_increment"),
                               cl_position_u,
@@ -308,7 +308,6 @@ namespace rtps
                               clf_debug,
                               cli_debug
                               );
-                              */
 
             //
             //Andrew's rendering emporium

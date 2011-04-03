@@ -62,7 +62,7 @@ namespace rtps
         //-------------------
 
         //diagnostics
-#if 1
+#if 0
         if(num > 0)
         {
             printf("***** PRINT hash diagnostics ******\n");

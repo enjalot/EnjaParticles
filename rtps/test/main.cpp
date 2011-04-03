@@ -176,7 +176,7 @@ int main(int argc, char** argv)
     settings.SetSetting("render_frag_shader", "sprite_tex_frag.glsl");
     settings.SetSetting("render_use_alpha", true);
     settings.SetSetting("render_alpha_function", "add");
-    settings.SetSetting("lt_increment", -.00);
+    settings.SetSetting("lt_increment", -.004);
     settings.SetSetting("lt_cl", "lifetime.cl");
 
 

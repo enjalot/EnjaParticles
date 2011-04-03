@@ -24,8 +24,9 @@ __kernel void lifetime( int num,
         //v = vel_gen[i];
         //life = 1.0f;    
         //this will only work once we stop using vars_unsorted (or i need to pass that in)
-        //pos_u[i] = (float4)(10.0f, 10.0f, 10.0f, 1.0f);
-        life = 0.f;
+        pos_u[i] = (float4)(100.0f, 100.0f, 100.0f, 1.0f);
+        //pos_u[i] = (float4)(0.0f, 0.0f, 0.0f, 1.0f);
+        life = 0.0f;
     }
     if(life >= 1.0f)
     {
@@ -40,8 +41,9 @@ __kernel void lifetime( int num,
     color_s[i].z = alpha;
     color_s[i].w = alpha;
 
-    uint originalIndex = sort_indices[i];
-    color_u[originalIndex] = color_s[i];
+    //uint originalIndex = sort_indices[i];
+    //color_u[originalIndex] = color_s[i];
+    color_u[i] = color_s[i];
     //clf[i] = color_u[originalIndex];
     //cli[i] = sort_indices[i];
     //clf[i] = color_s[i];
