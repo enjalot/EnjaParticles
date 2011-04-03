@@ -15,7 +15,10 @@ namespace rtps
     } 
     void CollisionWall::execute(int num,
             //input
-            Buffer<float4>& svars, 
+            //Buffer<float4>& svars, 
+            Buffer<float4>& pos_s, 
+            Buffer<float4>& vel_s, 
+            Buffer<float4>& force_s, 
             //output
             //params
             Buffer<SPHParams>& sphp,
@@ -25,7 +28,10 @@ namespace rtps
             Buffer<int4>& cli_debug)
     {
         int iargs = 0;
-        k_collision_wall.setArg(iargs++, svars.getDevicePtr());
+        //k_collision_wall.setArg(iargs++, svars.getDevicePtr());
+        k_collision_wall.setArg(iargs++, pos_s.getDevicePtr());
+        k_collision_wall.setArg(iargs++, vel_s.getDevicePtr());
+        k_collision_wall.setArg(iargs++, force_s.getDevicePtr());
         k_collision_wall.setArg(iargs++, gp.getDevicePtr());
         k_collision_wall.setArg(iargs++, sphp.getDevicePtr());
 

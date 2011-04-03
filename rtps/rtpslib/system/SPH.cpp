@@ -347,7 +347,10 @@ namespace rtps
         timers["collision_wall"]->start();
         //collide_wall();
         collision_wall.execute(num,
-                cl_vars_sorted, 
+                //cl_vars_sorted, 
+                cl_position_s,
+                cl_velocity_s,
+                cl_force_s,
                 cl_sphp,
                 cl_GridParamsScaled,
                 //debug
@@ -700,9 +703,12 @@ namespace rtps
 
         //cut = 1;
         std::vector<float4> poss(40);
-        float4 posx(10.,10.,10.,1.);
+        float4 posx(100.,100.,100.,1.);
         std::fill(poss.begin(), poss.end(),posx);
-        cl_vars_unsorted.copyToDevice(poss, max_num + 2);
+        //cl_vars_unsorted.copyToDevice(poss, max_num + 2);
+        cl_position_u.acquire();
+        cl_position_u.copyToDevice(poss);
+        cl_position_u.release();
         ps->cli->queue.finish();
 
 

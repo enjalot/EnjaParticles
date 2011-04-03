@@ -14,9 +14,10 @@ namespace rtps
             CollisionWall() { cli = NULL; timer = NULL; };
             CollisionWall(CL* cli, EB::Timer* timer);
             void execute(int num,
-                        //input
-                        Buffer<float4>& svars, 
-                        //output
+                        Buffer<float4>& pos_s, 
+                        Buffer<float4>& vel_s, 
+                        Buffer<float4>& force_s, 
+                        //Buffer<float4>& svars, 
                         //params
                         Buffer<SPHParams>& sphp,
                         Buffer<GridParams>& gp,
