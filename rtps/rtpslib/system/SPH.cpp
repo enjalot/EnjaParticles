@@ -248,16 +248,24 @@ namespace rtps
                 //and redo hash_and_sort
                 printf("SOME PARTICLES WERE DELETED!\n");
                 printf("nc: %d num: %d\n", nc, num);
+
+                deleted_pos.resize(num-nc);
+                deleted_vel.resize(num-nc);
+                //The deleted particles should be the nc particles after num
+                cl_position_s.copyToHost(deleted_pos, nc); //damn these will always be out of bounds here!
+                cl_velocity_s.copyToHost(deleted_vel, nc);
+
+ 
                 num = nc;
                 settings->SetSetting("Number of Particles", num);
                 //sphp.num = num;
                 updateSPHP();
                 renderer->setNum(sphp.num);
-                //need to copy sorted positions into unsorted + position array
+                //need to copy sorted arrays into unsorted arrays
                 call_prep(2);
                 printf("HOW MANY NOW? %d\n", num);
                 hash_and_sort();
-                //we've changed num and copied sorted to unsorted. skip this iteration and do next one
+                                //we've changed num and copied sorted to unsorted. skip this iteration and do next one
                 //this doesn't work because sorted force etc. are having an effect?
                 //continue; 
             }
@@ -722,6 +730,14 @@ namespace rtps
     }
     void SPH::pushParticles(vector<float4> pos, float4 velo, float4 color)
     {
+        int nn = pos.size();
+        std::vector<float4> vels(nn);
+        std::fill(vels.begin(), vels.end(), velo);
+        pushParticles(pos, vels, color);
+
+    }
+    void SPH::pushParticles(vector<float4> pos, vector<float4> vels, float4 color)
+    {
         //cut = 1;
 
         int nn = pos.size();
@@ -735,7 +751,6 @@ namespace rtps
         //float4 color(1.0f,1.0f,1.0f,1.0f);
 
         std::vector<float4> cols(nn);
-        std::vector<float4> vels(nn);
 
         std::fill(cols.begin(), cols.end(),color);
         //float v = .5f;
@@ -743,7 +758,6 @@ namespace rtps
         //float4 iv = float4(v, v, -v, 0.0f);
         //float4 iv = float4(0, v, -.1, 0.0f);
         //std::fill(vels.begin(), vels.end(),iv);
-        std::fill(vels.begin(), vels.end(),velo);
 
 
 #ifdef GPU

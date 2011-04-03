@@ -75,6 +75,10 @@ namespace rtps
         int setupTimers();
         void printTimers();
         void pushParticles(vector<float4> pos, float4 velo, float4 color=float4(1.0, 0.0, 0.0, 1.0));
+        void pushParticles(vector<float4> pos, vector<float4> velo, float4 color=float4(1.0, 0.0, 0.0, 1.0));
+
+        std::vector<float4> getDeletedPos();
+        std::vector<float4> getDeletedVel();
 
     protected:
         virtual void setRenderer();
@@ -91,6 +95,9 @@ namespace rtps
         float spacing; //Particle rest distance in world coordinates
 
         int nb_var;
+
+        std::vector<float4> deleted_pos;
+        std::vector<float4> deleted_vel;
 
 
         //keep track of hoses
