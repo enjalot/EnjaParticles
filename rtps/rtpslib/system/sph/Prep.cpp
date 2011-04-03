@@ -5,16 +5,31 @@
 namespace rtps
 {
 
-    void SPH::loadPrep()
+    Prep::Prep(CL* cli_, EB::Timer* timer_)
     {
+        cli = cli_;
+        timer = timer_;
         printf("create prep kernel\n");
         std::string path(SPH_CL_SOURCE_DIR);
         path = path + "/prep.cl";
-        k_prep = Kernel(ps->cli, path, "prep");
-
+        k_prep = Kernel(cli, path, "prep");
     }
 
-    void SPH::prep(int stage)
+    void Prep::execute(int num,
+                    int stage,
+                    Buffer<float4>& pos_u,
+                    Buffer<float4>& vel_u,
+                    Buffer<float4>& color_u,
+                    Buffer<float4>& color_s,
+                    Buffer<float4>& uvars, 
+                    Buffer<float4>& svars, 
+                    Buffer<unsigned int>& indices,
+                    //params
+                    Buffer<SPHParams>& sphp,
+                    //Buffer<GridParams>& gp,
+                    //debug params
+                    Buffer<float4>& clf_debug,
+                    Buffer<int4>& cli_debug)
     {
         /**
          * sometimes we only want to copy positions
@@ -25,14 +40,14 @@ namespace rtps
         printf("num: %d, stage: %d\n", num, stage);
         int args = 0;
         k_prep.setArg(args++, stage);
-        k_prep.setArg(args++, cl_position.getDevicePtr());
-        k_prep.setArg(args++, cl_velocity.getDevicePtr());
-        k_prep.setArg(args++, cl_vars_unsorted.getDevicePtr());
-        k_prep.setArg(args++, cl_vars_sorted.getDevicePtr()); 
-        k_prep.setArg(args++, cl_color_u.getDevicePtr());
-        k_prep.setArg(args++, cl_color_s.getDevicePtr());
-        k_prep.setArg(args++, cl_sort_indices.getDevicePtr());
-        k_prep.setArg(args++, cl_sphp.getDevicePtr());
+        k_prep.setArg(args++, pos_u.getDevicePtr());
+        k_prep.setArg(args++, vel_u.getDevicePtr());
+        k_prep.setArg(args++, uvars.getDevicePtr());
+        k_prep.setArg(args++, svars.getDevicePtr()); 
+        k_prep.setArg(args++, color_u.getDevicePtr());
+        k_prep.setArg(args++, color_s.getDevicePtr());
+        k_prep.setArg(args++, indices.getDevicePtr());
+        k_prep.setArg(args++, sphp.getDevicePtr());
 
 
         int ctaSize = 128; // work group size
@@ -47,7 +62,6 @@ namespace rtps
             exit(1);
         }
 
-        ps->cli->queue.finish();
     }
 
 }

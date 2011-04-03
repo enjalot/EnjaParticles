@@ -96,9 +96,9 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 262144
 //#define NUM_PARTICLES 65536
 //#define NUM_PARTICLES 32768
-#define NUM_PARTICLES 16384
+//#define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 10000
-//#define NUM_PARTICLES 8192
+#define NUM_PARTICLES 8192
 //#define NUM_PARTICLES 4096
 //#define NUM_PARTICLES 2048
 //#define NUM_PARTICLES 1024
@@ -166,8 +166,8 @@ int main(int argc, char** argv)
     rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
 
     //settings.setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
-    //settings.setRenderType(RTPSettings::RENDER);
-    settings.setRenderType(RTPSettings::SPRITE_RENDER);
+    settings.setRenderType(RTPSettings::RENDER);
+    //settings.setRenderType(RTPSettings::SPRITE_RENDER);
     settings.setRadiusScale(1.0);
     settings.setBlurScale(1.0);
     settings.setUseGLSL(1);
@@ -176,7 +176,7 @@ int main(int argc, char** argv)
     settings.SetSetting("render_frag_shader", "sprite_tex_frag.glsl");
     settings.SetSetting("render_use_alpha", true);
     settings.SetSetting("render_alpha_function", "add");
-    settings.SetSetting("lt_increment", -.004);
+    settings.SetSetting("lt_increment", -.00);
     settings.SetSetting("lt_cl", "lifetime.cl");
 
 

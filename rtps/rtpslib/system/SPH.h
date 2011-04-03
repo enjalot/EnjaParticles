@@ -12,6 +12,7 @@
 #include <SPHSettings.h>
 
 
+#include <Prep.h>
 #include <Hash.h>
 #include <BitonicSort.h>
 #include <DataStructures.h>
@@ -104,7 +105,7 @@ namespace rtps
         ////Kernel k_density, k_pressure, k_viscosity;
         //Kernel k_collision_wall;
         //Kernel k_collision_tri;
-        Kernel k_euler, k_leapfrog;
+        //Kernel k_euler, k_leapfrog;
         //Kernel k_xsph;
 
         Kernel k_prep;
@@ -112,29 +113,32 @@ namespace rtps
         Kernel k_hash;
         Kernel k_datastructures;
         */
-        Kernel k_neighbors;
+        //Kernel k_neighbors;
 
         //This should be in OpenCL classes
         Kernel k_scopy;
 
         std::vector<float4> positions;
         std::vector<float4> colors;
-        std::vector<float>  densities;
-        std::vector<float4> forces;
         std::vector<float4> velocities;
         std::vector<float4> veleval;
+
+        std::vector<float>  densities;
+        std::vector<float4> forces;
         std::vector<float4> xsphs;
 
-        Buffer<float4>      cl_position;
-        
+        Buffer<float4>      cl_position_u;
+        Buffer<float4>      cl_position_s;
         Buffer<float4>      cl_color_u;
         Buffer<float4>      cl_color_s;
+        Buffer<float4>      cl_velocity_u;
+        Buffer<float4>      cl_velocity_s;
+        Buffer<float4>      cl_veleval_u;
+        Buffer<float4>      cl_veleval_s;
 
-        Buffer<float>       cl_density;
-        Buffer<float4>      cl_force;
-        Buffer<float4>      cl_velocity;
-        Buffer<float4>      cl_veleval;
-        Buffer<float4>      cl_xsph;
+        Buffer<float>       cl_density_s;
+        Buffer<float4>      cl_force_s;
+        Buffer<float4>      cl_xsph_s;
 
         //Neighbor Search related arrays
         Buffer<float4>      cl_vars_sorted;
@@ -207,7 +211,8 @@ namespace rtps
         void updateSPHP();
 
         //Nearest Neighbors search related functions
-        void prep(int stage);
+        Prep prep;
+        void call_prep(int stage);
         //void hash();
         Hash hash;
         DataStructures datastructures;

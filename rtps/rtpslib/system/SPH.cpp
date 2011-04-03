@@ -74,7 +74,8 @@ namespace rtps
 
         loadScopy();
 
-        loadPrep();
+        //loadPrep();
+        prep = Prep(ps->cli, timers["prep_gpu"]);
         //loadHash();
         hash = Hash(ps->cli, timers["hash_gpu"]);
         bitonic = Bitonic<unsigned int>( ps->cli );
@@ -202,7 +203,7 @@ namespace rtps
             sprayHoses();
         }
 
-        cl_position.acquire();
+        cl_position_u.acquire();
         cl_color_u.acquire();
         //sub-intervals
         for (int i=0; i < sub_intervals; i++)
@@ -247,7 +248,7 @@ namespace rtps
                 updateSPHP();
                 renderer->setNum(sphp.num);
                 //need to copy sorted positions into unsorted + position array
-                prep(2);
+                call_prep(2);
                 hash_and_sort();
             }
 
@@ -283,7 +284,7 @@ namespace rtps
 
             lifetime.execute( num,
                               settings->GetSettingAs<float>("lt_increment"),
-                              cl_position,
+                              cl_position_u,
                               cl_color_u,
                               cl_color_s,
                               cl_sort_indices,
@@ -296,7 +297,7 @@ namespace rtps
             //neighborSearch(4);
         }
 
-        cl_position.release();
+        cl_position_u.release();
         cl_color_u.release();
 
         timers["update"]->stop();
@@ -361,7 +362,7 @@ namespace rtps
             //euler();
             euler.execute(num,
                 settings->dt,
-                cl_position,
+                cl_position_u,
                 cl_vars_unsorted, 
                 cl_vars_sorted, 
                 cl_sort_indices,
@@ -377,7 +378,7 @@ namespace rtps
             //leapfrog();
              leapfrog.execute(num,
                 settings->dt,
-                cl_position,
+                cl_position_u,
                 cl_vars_unsorted, 
                 cl_vars_sorted, 
                 cl_sort_indices,
@@ -400,6 +401,26 @@ namespace rtps
 #endif
 
 
+    }
+
+    void SPH::call_prep(int stage)
+    {
+
+            prep.execute(num,
+                    stage,
+                    cl_position_u,
+                    cl_velocity_u,
+                    cl_color_u,
+                    cl_color_s,
+                    cl_vars_unsorted, 
+                    cl_vars_sorted, 
+                    cl_sort_indices,
+                    //params
+                    cl_sphp,
+                    //Buffer<GridParams>& gp,
+                    //debug params
+                    clf_debug,
+                    cli_debug);
     }
 
     int SPH::setupTimers()
@@ -426,6 +447,7 @@ namespace rtps
         timers["leapfrog_gpu"] = new EB::Timer("LeapFrog Integration GPU kernel execution", time_offset);
         timers["euler_gpu"] = new EB::Timer("Euler Integration GPU kernel execution", time_offset);
         timers["lifetime_gpu"] = new EB::Timer("Lifetime GPU kernel execution", time_offset);
+        timers["prep_gpu"] = new EB::Timer("Prep GPU kernel execution", time_offset);
 		return 0;
     }
 
@@ -471,16 +493,16 @@ namespace rtps
         // end VBO creation
 
         //vbo buffers
-        cl_position = Buffer<float4>(ps->cli, pos_vbo);
+        cl_position_u = Buffer<float4>(ps->cli, pos_vbo);
         cl_color_u = Buffer<float4>(ps->cli, col_vbo);
         cl_color_s = Buffer<float4>(ps->cli, colors);
 
         //pure opencl buffers: these are deprecated
-        cl_force = Buffer<float4>(ps->cli, forces);
-        cl_velocity = Buffer<float4>(ps->cli, velocities);
-        cl_veleval = Buffer<float4>(ps->cli, veleval);
-        cl_density = Buffer<float>(ps->cli, densities);
-        cl_xsph = Buffer<float4>(ps->cli, xsphs);
+        cl_velocity_u = Buffer<float4>(ps->cli, velocities);
+        cl_veleval_u = Buffer<float4>(ps->cli, veleval);
+        cl_density_s = Buffer<float>(ps->cli, densities);
+        cl_force_s = Buffer<float4>(ps->cli, forces);
+        cl_xsph_s = Buffer<float4>(ps->cli, xsphs);
 
         //cl_error_check= Buffer<float4>(ps->cli, error_check);
 
@@ -684,22 +706,22 @@ namespace rtps
 
 #ifdef GPU
         glFinish();
-        cl_position.acquire();
+        cl_position_u.acquire();
         cl_color_u.acquire();
 
         //printf("about to prep 0\n");
-        prep(0);
+        call_prep(0);
         //printf("done with prep 0\n");
 
 
-        cl_position.copyToDevice(pos, num);
+        cl_position_u.copyToDevice(pos, num);
         cl_color_u.copyToDevice(cols, num);
 
         //cl_color_u.release();
         //cl_position.release();
 
         //2 is from cl_macros.h should probably not hardcode this number
-        cl_velocity.copyToDevice(vels, num);
+        cl_velocity_u.copyToDevice(vels, num);
         //cl_vars_unsorted.copyToDevice(vels, max_num*8+num);
 
         //sphp.num = num+nn;
@@ -713,9 +735,9 @@ namespace rtps
         //reprep the unsorted (packed) array to account for new particles
         //might need to do it conditionally if particles are added or subtracted
         printf("about to prep\n");
-        prep(1);
+        call_prep(1);
         printf("done with prep\n");
-        cl_position.release();
+        cl_position_u.release();
         cl_color_u.release();
 #else
         num += nn;  //keep track of number of particles we use
