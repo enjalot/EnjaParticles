@@ -108,7 +108,6 @@ namespace rtps
         lifetime = Lifetime(ps->cli, timers["lifetime_gpu"], lt_file);
 
 
-
 #endif
 
         // settings defaults to 0
@@ -216,9 +215,15 @@ namespace rtps
             //printf("data structures\n");
             timers["datastructures"]->start();
             int nc = datastructures.execute(   num,
-                cl_vars_unsorted,
+                cl_position_u,
+                cl_position_s,
+                cl_velocity_u,
+                cl_velocity_s,
+                cl_veleval_u,
+                cl_veleval_s,
+                //cl_vars_unsorted,
                 cl_color_u,
-                cl_vars_sorted,
+                //cl_vars_sorted,
                 cl_color_s,
                 cl_sort_hashes,
                 cl_sort_indices,
@@ -255,7 +260,9 @@ namespace rtps
             //if(num >0) printf("density\n");
             timers["density"]->start();
             density.execute(   num,
-                cl_vars_sorted,
+                //cl_vars_sorted,
+                cl_position_s,
+                cl_density_s,
                 cl_cell_indices_start,
                 cl_cell_indices_end,
                 cl_sphp,
@@ -267,7 +274,12 @@ namespace rtps
             //if(num >0) printf("force\n");
             timers["force"]->start();
             force.execute(   num,
-                cl_vars_sorted,
+                //cl_vars_sorted,
+                cl_position_s,
+                cl_density_s,
+                cl_veleval_s,
+                cl_force_s,
+                cl_xsph_s,
                 cl_cell_indices_start,
                 cl_cell_indices_end,
                 cl_sphp,
@@ -282,6 +294,7 @@ namespace rtps
             integrate();
             timers["integrate"]->stop();
 
+            /*
             lifetime.execute( num,
                               settings->GetSettingAs<float>("lt_increment"),
                               cl_position_u,
@@ -291,6 +304,7 @@ namespace rtps
                               clf_debug,
                               cli_debug
                               );
+                              */
 
             //
             //Andrew's rendering emporium
@@ -309,7 +323,8 @@ namespace rtps
         //printf("hash\n");
         timers["hash"]->start();
         hash.execute(   num,
-                cl_vars_unsorted,
+                //cl_vars_unsorted,
+                cl_position_u,
                 cl_sort_hashes,
                 cl_sort_indices,
                 cl_sphp,
@@ -346,7 +361,10 @@ namespace rtps
         //collide_triangles();
         collision_tri.execute(num,
                 settings->dt,
-                cl_vars_sorted, 
+                //cl_vars_sorted, 
+                cl_position_s,
+                cl_velocity_s,
+                cl_force_s,
                 cl_sphp,
                 //debug
                 clf_debug,
@@ -379,8 +397,14 @@ namespace rtps
              leapfrog.execute(num,
                 settings->dt,
                 cl_position_u,
-                cl_vars_unsorted, 
-                cl_vars_sorted, 
+                cl_position_s,
+                cl_velocity_u,
+                cl_velocity_s,
+                cl_veleval_u,
+                cl_force_s,
+                cl_xsph_s,
+                //cl_vars_unsorted, 
+                //cl_vars_sorted, 
                 cl_sort_indices,
                 cl_sphp,
                 //debug
@@ -409,11 +433,13 @@ namespace rtps
             prep.execute(num,
                     stage,
                     cl_position_u,
+                    cl_position_s,
                     cl_velocity_u,
+                    cl_velocity_s,
                     cl_color_u,
                     cl_color_s,
-                    cl_vars_unsorted, 
-                    cl_vars_sorted, 
+                    //cl_vars_unsorted, 
+                    //cl_vars_sorted, 
                     cl_sort_indices,
                     //params
                     cl_sphp,
@@ -494,12 +520,15 @@ namespace rtps
 
         //vbo buffers
         cl_position_u = Buffer<float4>(ps->cli, pos_vbo);
+        cl_position_s = Buffer<float4>(ps->cli, positions);
         cl_color_u = Buffer<float4>(ps->cli, col_vbo);
         cl_color_s = Buffer<float4>(ps->cli, colors);
 
         //pure opencl buffers: these are deprecated
         cl_velocity_u = Buffer<float4>(ps->cli, velocities);
+        cl_velocity_s = Buffer<float4>(ps->cli, velocities);
         cl_veleval_u = Buffer<float4>(ps->cli, veleval);
+        cl_veleval_s = Buffer<float4>(ps->cli, veleval);
         cl_density_s = Buffer<float>(ps->cli, densities);
         cl_force_s = Buffer<float4>(ps->cli, forces);
         cl_xsph_s = Buffer<float4>(ps->cli, xsphs);

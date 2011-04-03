@@ -17,7 +17,8 @@ namespace rtps
                     
     void Hash::execute(int num,
                     //input
-                    Buffer<float4>& uvars, 
+                    //Buffer<float4>& uvars, 
+                    Buffer<float4>& pos_u, 
                     //output
                     Buffer<unsigned int>& hashes,
                     Buffer<unsigned int>& indices,
@@ -30,7 +31,8 @@ namespace rtps
     {
 
         int args = 0;
-        k_hash.setArg(args++, uvars.getDevicePtr()); // positions + other variables
+        //k_hash.setArg(args++, uvars.getDevicePtr()); // positions + other variables
+        k_hash.setArg(args++, pos_u.getDevicePtr()); 
         k_hash.setArg(args++, hashes.getDevicePtr());
         k_hash.setArg(args++, indices.getDevicePtr());
         k_hash.setArg(args++, sphp.getDevicePtr());

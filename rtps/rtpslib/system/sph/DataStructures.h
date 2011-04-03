@@ -15,9 +15,16 @@ namespace rtps
             DataStructures(CL* cli, EB::Timer* timer);
             int execute(int num,
                     //input
-                    Buffer<float4>& uvars, 
+                    Buffer<float4>& pos_u,
+                    Buffer<float4>& pos_s,
+                    Buffer<float4>& vel_u,
+                    Buffer<float4>& vel_s,
+                    Buffer<float4>& veleval_u,
+                    Buffer<float4>& veleval_s,
+
+                    //Buffer<float4>& uvars, 
                     Buffer<float4>& color_u,
-                    Buffer<float4>& svars, 
+                    //Buffer<float4>& svars, 
                     Buffer<float4>& color_s,
                     //output
                     Buffer<unsigned int>& hashes,

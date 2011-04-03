@@ -16,11 +16,15 @@ namespace rtps
     } 
     void LeapFrog::execute(int num,
                     float dt,
-                    //input
-                    Buffer<float4>& pos,
-                    Buffer<float4>& uvars, 
-                    Buffer<float4>& svars, 
-                    //output
+                    Buffer<float4>& pos_u,
+                    Buffer<float4>& pos_s,
+                    Buffer<float4>& vel_u,
+                    Buffer<float4>& vel_s,
+                    Buffer<float4>& veleval_u,
+                    Buffer<float4>& force_s,
+                    Buffer<float4>& xsph_s,
+                    //Buffer<float4>& uvars, 
+                    //Buffer<float4>& svars, 
                     Buffer<unsigned int>& indices,
                     //params
                     Buffer<SPHParams>& sphp,
@@ -30,10 +34,16 @@ namespace rtps
     {
 
         int iargs = 0;
+        //k_leapfrog.setArg(iargs++, uvars.getDevicePtr());
+        //k_leapfrog.setArg(iargs++, svars.getDevicePtr());
+        k_leapfrog.setArg(iargs++, pos_u.getDevicePtr());
+        k_leapfrog.setArg(iargs++, pos_s.getDevicePtr());
+        k_leapfrog.setArg(iargs++, vel_u.getDevicePtr());
+        k_leapfrog.setArg(iargs++, vel_s.getDevicePtr());
+        k_leapfrog.setArg(iargs++, veleval_u.getDevicePtr());
+        k_leapfrog.setArg(iargs++, force_s.getDevicePtr());
+        k_leapfrog.setArg(iargs++, xsph_s.getDevicePtr());
         k_leapfrog.setArg(iargs++, indices.getDevicePtr());
-        k_leapfrog.setArg(iargs++, uvars.getDevicePtr());
-        k_leapfrog.setArg(iargs++, svars.getDevicePtr());
-        k_leapfrog.setArg(iargs++, pos.getDevicePtr());
         //leapfrog.setArg(iargs++, color.getDevicePtr());
         k_leapfrog.setArg(iargs++, sphp.getDevicePtr());
         k_leapfrog.setArg(iargs++, dt); //time step

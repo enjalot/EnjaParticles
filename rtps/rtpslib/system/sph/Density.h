@@ -15,7 +15,9 @@ namespace rtps
             Density(CL* cli, EB::Timer* timer);
             void execute(int num,
                     //input
-                    Buffer<float4>& svars, 
+                    //Buffer<float4>& svars, 
+                    Buffer<float4>& pos_s, 
+                    Buffer<float>& dens_s, 
                     //output
                     Buffer<unsigned int>& ci_start,
                     Buffer<unsigned int>& ci_end,

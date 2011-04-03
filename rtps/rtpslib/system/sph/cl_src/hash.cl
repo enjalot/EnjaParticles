@@ -24,7 +24,8 @@
 // comes from K_Grid_Hash
 // CANNOT USE references to structures/classes as arguments!
 __kernel void hash(
-                  __global float4* vars_unsorted,
+                  //__global float4* vars_unsorted,
+                  __global float4* pos_u,
                   __global uint* sort_hashes,
                   __global uint* sort_indexes,
                   __constant struct SPHParams* sphp,
@@ -48,7 +49,8 @@ __kernel void hash(
     //}
 
     // particle position
-    float4 p = unsorted_pos(index); // macro
+    //float4 p = unsorted_pos(index); // macro
+    float4 p = pos_u[index]; // macro
 
     // get address in grid
     //int4 gridPos = calcGridCell(p, gp->grid_min, gp->grid_inv_delta);

@@ -10,9 +10,16 @@
 #pragma cl_khr_global_int32_base_atomics : enable
 //----------------------------------------------------------------------
 __kernel void datastructures(
-                            __global float4*   vars_unsorted,
+                            __global float4* pos_u,
+                            __global float4* pos_s,
+                            __global float4* vel_u,
+                            __global float4* vel_s,
+                            __global float4* veleval_u,
+                            __global float4* veleval_s,
+
+//                            __global float4*   vars_unsorted,
                             __global float4*   color_u,
-                            __global float4*   vars_sorted, 
+//                            __global float4*   vars_sorted, 
                             __global float4*   color_s,
                             __global uint* sort_hashes,
                             __global uint* sort_indices,
@@ -83,53 +90,6 @@ __kernel void datastructures(
     //but we can't keep going if our index goes out of bounds of the number of particles
     if (index >= num) return;
 
-    //if(tid == 0)
-    //{
-    //hmm this needs to be done for all local threads? or atomically?
-    //threads must be contending, last thread does this
-    
-#if 0
-    //DIRTY DIRTY CODE
-    //is being tired an excuse?
-    if(hash >= gp->nb_cells-1) //if particles go out of bounds, delete them
-    //if(sharedHash[tid] >= gp->nb_cells-1) //if particles go out of bounds, delete them
-    //if(hash >= gp->nb_cells-1) //if particles go out of bounds, delete them
-    {
-        //cell_indices_end[gp->nb_cells - 2] = index + 1; //make sure last cell index is right // this is totally confused
-        //if(num_changed[0] == 0)
-        {
-            num_changed[index] = index; //new number of particles to use
-            //num_changed[sort_indices[index]] = 1; //new number of particles to use
-            //return;
-        }
-    }
-    barrier(CLK_GLOBAL_MEM_FENCE);
-    if(tid == 0)
-    {
-        for(int j = 0; j < num; j++)
-        {
-            if(num_changed[j] > 0)
-            {
-                num_changed[0] = j;
-                break;
-            }
-        }
-    }
-    barrier(CLK_GLOBAL_MEM_FENCE);
-
-    //some kind of problem with setting the cell indices and starts if this triggers
-    //cutting num down seems to work fine unless this happens implying this is the problem
-    //maybe not, still broken with this commented out
-
-    //if(index > num_changed[0] && num_changed[0] > 0)
-    //{    return;    }
-
-
-
-    //}
-#endif
-
-
     //if(hash < gp->nb_cells)
     //{
     //if ((index == 0 || hash != sharedHash[tid]))
@@ -172,13 +132,14 @@ __kernel void datastructures(
 
 
     // Variables to sort could change for different types of simulations 
-    // SHOULD I divide by simulation scale upon return? do not think so
-    pos(index)     = unsorted_pos(sorted_index) * sphp->simulation_scale;
-    //pos(index)     = (float4)(99.,99.,99.,99.);
-    //vars_sorted[index + sphp->max_num]     = (float4)(99.,99.,99.,99.);
-    //pos(index)     = unsorted_pos(index) * sphp->simulation_scale;
-    vel(index)     = unsorted_vel(sorted_index);
-    veleval(index) = unsorted_veleval(sorted_index); // not sure if needed
+    ///pos(index)     = unsorted_pos(sorted_index) * sphp->simulation_scale;
+    ///vel(index)     = unsorted_vel(sorted_index);
+    ///veleval(index) = unsorted_veleval(sorted_index); // not sure if needed
+    ///color_s[index] = color_u[sorted_index];
+
+    pos_s[index]     = pos_u[sorted_index] * sphp->simulation_scale;
+    vel_s[index]     = vel_u[sorted_index];
+    veleval_s[index] = veleval_u[sorted_index]; // not sure if needed
     color_s[index] = color_u[sorted_index];
     //density(index) = unsorted_density(sorted_index); // only for debugging
 #endif

@@ -2,9 +2,11 @@
 #define _NEIGHBORS_CL_
 
 
-/* TO BE INCLUDED FROM OTHER FILES. In OpenCL, I believe that all device code
-// must be in the same file as the kernel using it. 
-*/
+//These are passed along through cl_neighbors.h
+//only used inside ForNeighbor defined in this file
+#define ARGS __global float4* pos, __global float* density
+#define ARGV pos, density
+
 
 /*----------------------------------------------------------------------*/
 
@@ -15,7 +17,8 @@
 
 
 //----------------------------------------------------------------------
-inline void ForNeighbor(__global float4*  vars_sorted,
+inline void ForNeighbor(//__global float4*  vars_sorted,
+                        ARGS,
                         PointData* pt,
                         uint index_i,
                         uint index_j,
@@ -28,7 +31,7 @@ inline void ForNeighbor(__global float4*  vars_sorted,
     int num = sphp->num;
 
     // get the particle info (in the current grid) to test against
-    float4 position_j = pos(index_j); 
+    float4 position_j = pos[index_j]; 
     float4 r = (position_i - position_j); 
     r.w = 0.f; // I stored density in 4th component
     // |r|
@@ -53,7 +56,8 @@ inline void ForNeighbor(__global float4*  vars_sorted,
 // compute forces on particles
 
 __kernel void density_update(
-                       __global float4* vars_sorted,
+//                       __global float4* vars_sorted,
+                       ARGS,
                        __global int*    cell_indexes_start,
                        __global int*    cell_indexes_end,
                        __constant struct GridParams* gp,
@@ -71,7 +75,7 @@ __kernel void density_update(
     if (index >= num) return;
 
 #if 1
-    float4 position_i = pos(index);
+    float4 position_i = pos[index];
 
     //debuging
     clf[index] = (float4)(99,0,0,0);
@@ -81,15 +85,16 @@ __kernel void density_update(
     PointData pt;
     zeroPoint(&pt);
 
-    IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
-    density(index) = sphp->wpoly6_coef * pt.density.x;
+    //IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
+    IterateParticlesInNearbyCells(ARGV, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
+    density[index] = sphp->wpoly6_coef * pt.density.x;
     /*
     clf[index].x = pt.density.x * sphp->wpoly6_coef;
     clf[index].y = pt.density.y;
     clf[index].z = sphp->smoothing_distance;
     clf[index].w = sphp->mass;
     */
-    clf[index].w = density(index);
+    clf[index].w = density[index];
 #endif
 }
 

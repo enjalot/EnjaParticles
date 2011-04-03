@@ -15,7 +15,8 @@ namespace rtps
             Hash(CL* cli, EB::Timer* timer);
             void execute(int num,
                         //input
-                        Buffer<float4>& uvars, 
+                        //Buffer<float4>& uvars, 
+                        Buffer<float4>& pos_u, 
                         //output
                         Buffer<unsigned int>& hashes,
                         Buffer<unsigned int>& indices,

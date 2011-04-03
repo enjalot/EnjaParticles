@@ -16,7 +16,10 @@ namespace rtps
             void execute(int num,
                         float dt,
                         //input
-                        Buffer<float4>& svars, 
+                        //Buffer<float4>& svars, 
+                        Buffer<float4>& pos_s, 
+                        Buffer<float4>& vel_s, 
+                        Buffer<float4>& force_s, 
                         //output
                         //params
                         Buffer<SPHParams>& sphp,

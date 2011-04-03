@@ -33,8 +33,8 @@ namespace rtps {
         cl_triangles.copyToDevice(triangles);
         //printf("Triangle z %f\n", triangles[0].verts[0].z);
 
-        k_collision_tri.setArg(1, cl_triangles.getDevicePtr());     //triangles
-        k_collision_tri.setArg(2, n_triangles);                     //number of triangles
+        k_collision_tri.setArg(3, cl_triangles.getDevicePtr());     //triangles
+        k_collision_tri.setArg(4, n_triangles);                     //number of triangles
 
         //printf("sizeof(Triangle) = %d\n", (int) sizeof(Triangle));
 
@@ -60,7 +60,10 @@ namespace rtps {
     void CollisionTriangle::execute(int num,
                                     float dt,
                                     //input
-                                    Buffer<float4>& svars, 
+                                    //Buffer<float4>& svars, 
+                                    Buffer<float4>& pos_s, 
+                                    Buffer<float4>& vel_s, 
+                                    Buffer<float4>& force_s, 
                                     //output
                                     //params
                                     Buffer<SPHParams>& sphp,
@@ -74,15 +77,18 @@ namespace rtps {
     if(triangles_loaded)
     {
         
-        k_collision_tri.setArg(0, svars.getDevicePtr());
+        //k_collision_tri.setArg(0, svars.getDevicePtr());
+        k_collision_tri.setArg(0, pos_s.getDevicePtr());
+        k_collision_tri.setArg(1, vel_s.getDevicePtr());
+        k_collision_tri.setArg(2, force_s.getDevicePtr());
         // 1 = triangles
         // 2 = n_triangles
-        k_collision_tri.setArg(3, dt);
-        k_collision_tri.setArg(4, sphp.getDevicePtr());
+        k_collision_tri.setArg(5, dt);
+        k_collision_tri.setArg(6, sphp.getDevicePtr());
         // 5 = local triangles
         // ONLY IF DEBUGGING
-        k_collision_tri.setArg(6, clf_debug.getDevicePtr());
-        k_collision_tri.setArg(7, cli_debug.getDevicePtr());
+        k_collision_tri.setArg(8, clf_debug.getDevicePtr());
+        k_collision_tri.setArg(9, cli_debug.getDevicePtr());
 
 
         //printf("execute!\n");

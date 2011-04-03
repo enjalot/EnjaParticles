@@ -18,9 +18,15 @@ namespace rtps
 
     int DataStructures::execute(int num,
                     //input
-                    Buffer<float4>& uvars, 
+                    Buffer<float4>& pos_u,
+                    Buffer<float4>& pos_s,
+                    Buffer<float4>& vel_u,
+                    Buffer<float4>& vel_s,
+                    Buffer<float4>& veleval_u,
+                    Buffer<float4>& veleval_s,
+                    //Buffer<float4>& uvars, 
                     Buffer<float4>& color_u,
-                    Buffer<float4>& svars, 
+                    //Buffer<float4>& svars, 
                     Buffer<float4>& color_s,
                     //output
                     Buffer<unsigned int>& hashes,
@@ -45,9 +51,15 @@ namespace rtps
 
 
         int iarg = 0;
-        k_datastructures.setArg(iarg++, uvars.getDevicePtr());
+        k_datastructures.setArg(iarg++, pos_u.getDevicePtr());
+        k_datastructures.setArg(iarg++, pos_s.getDevicePtr());
+        k_datastructures.setArg(iarg++, vel_u.getDevicePtr());
+        k_datastructures.setArg(iarg++, vel_s.getDevicePtr());
+        k_datastructures.setArg(iarg++, veleval_u.getDevicePtr());
+        k_datastructures.setArg(iarg++, veleval_s.getDevicePtr());
+        //k_datastructures.setArg(iarg++, uvars.getDevicePtr());
         k_datastructures.setArg(iarg++, color_u.getDevicePtr());
-        k_datastructures.setArg(iarg++, svars.getDevicePtr());
+        //k_datastructures.setArg(iarg++, svars.getDevicePtr());
         k_datastructures.setArg(iarg++, color_s.getDevicePtr());
         k_datastructures.setArg(iarg++, hashes.getDevicePtr());
         k_datastructures.setArg(iarg++, indices.getDevicePtr());

@@ -8,10 +8,12 @@
 
 __kernel void prep(
                   int stage,
-                  __global float4* position,
-                  __global float4* velocity,
-                  __global float4* vars_unsorted,
-                  __global float4* vars_sorted,
+                  __global float4* pos_u,
+                  __global float4* pos_s,
+                  __global float4* vel_u,
+                  __global float4* vel_s,
+                  //__global float4* vars_unsorted,
+                  //__global float4* vars_sorted,
                   __global float4* color_u,
                   __global float4* color_s,
                   __global uint* sort_indices,
@@ -32,13 +34,17 @@ __kernel void prep(
     uint index = sort_indices[i];
     if (stage == 0)
     {
-        velocity[index] = vel(i);
+        //velocity[index] = vel(i);
+        vel_u[index] = vel_s[i];
         //color_u[index] = color_s[i];
     }
     else if (stage == 1)
     {
-        unsorted_pos(i) = position[i];
-        unsorted_vel(i) = velocity[i];
+        //unsorted_pos(i) = position[i];
+        //unsorted_vel(i) = velocity[i];
+
+        //pos_u[i] = pos_s[i];
+        //vel_u[i] = vel_s[i];
         //color_u[i] = color_s[i];
 
     }
@@ -47,11 +53,16 @@ __kernel void prep(
         //used if we need to copy sorted positions into positions array
         //later we also need to copy color
 
+        /*
         position[i] = pos(i);
         velocity[i] = vel(i);
         unsorted_pos(i) = pos(i);
+        */
+
+        pos_u[i] = pos_s[i];
+        vel_u[i] = vel_s[i];
+        //unsorted_pos(i) = pos(i);
         //color_u[i] = color_s[i];
-        //unsorted_pos(i) = (float4)(1166., 66., 66., 66.);
     }
     /*
     unsorted_density(i) = density[i];

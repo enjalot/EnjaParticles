@@ -28,7 +28,9 @@ namespace rtps
 
     void Density::execute(int num,
                     //input
-                    Buffer<float4>& svars, 
+                    //Buffer<float4>& svars, 
+                    Buffer<float4>& pos_s,
+                    Buffer<float>& dens_s,
                     //output
                     Buffer<unsigned int>& ci_start,
                     Buffer<unsigned int>& ci_end,
@@ -40,7 +42,9 @@ namespace rtps
                     Buffer<int4>& cli_debug)
     { 
         int iarg = 0;
-        k_density.setArg(iarg++, svars.getDevicePtr());
+        //k_density.setArg(iarg++, svars.getDevicePtr());
+        k_density.setArg(iarg++, pos_s.getDevicePtr());
+        k_density.setArg(iarg++, dens_s.getDevicePtr());
         k_density.setArg(iarg++, ci_start.getDevicePtr());
         k_density.setArg(iarg++, ci_end.getDevicePtr());
         k_density.setArg(iarg++, gp.getDevicePtr());

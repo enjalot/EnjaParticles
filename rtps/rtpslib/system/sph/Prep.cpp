@@ -18,11 +18,13 @@ namespace rtps
     void Prep::execute(int num,
                     int stage,
                     Buffer<float4>& pos_u,
+                    Buffer<float4>& pos_s,
                     Buffer<float4>& vel_u,
+                    Buffer<float4>& vel_s,
                     Buffer<float4>& color_u,
                     Buffer<float4>& color_s,
-                    Buffer<float4>& uvars, 
-                    Buffer<float4>& svars, 
+                    //Buffer<float4>& uvars, 
+                    //Buffer<float4>& svars, 
                     Buffer<unsigned int>& indices,
                     //params
                     Buffer<SPHParams>& sphp,
@@ -41,9 +43,11 @@ namespace rtps
         int args = 0;
         k_prep.setArg(args++, stage);
         k_prep.setArg(args++, pos_u.getDevicePtr());
+        k_prep.setArg(args++, pos_s.getDevicePtr());
         k_prep.setArg(args++, vel_u.getDevicePtr());
-        k_prep.setArg(args++, uvars.getDevicePtr());
-        k_prep.setArg(args++, svars.getDevicePtr()); 
+        k_prep.setArg(args++, vel_s.getDevicePtr());
+        //k_prep.setArg(args++, uvars.getDevicePtr());
+        //k_prep.setArg(args++, svars.getDevicePtr()); 
         k_prep.setArg(args++, color_u.getDevicePtr());
         k_prep.setArg(args++, color_s.getDevicePtr());
         k_prep.setArg(args++, indices.getDevicePtr());

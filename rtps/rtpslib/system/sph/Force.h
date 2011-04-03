@@ -14,9 +14,11 @@ namespace rtps
             Force() { cli = NULL; timer = NULL; };
             Force(CL* cli, EB::Timer* timer);
             void execute(int num,
-                    //input
-                    Buffer<float4>& svars, 
-                    //output
+                    Buffer<float4>& pos_s, 
+                    Buffer<float>& dens_s, 
+                    Buffer<float4>& veleval_s, 
+                    Buffer<float4>& force_s, 
+                    Buffer<float4>& xsph_s, 
                     Buffer<unsigned int>& ci_start,
                     Buffer<unsigned int>& ci_end,
                     //params
