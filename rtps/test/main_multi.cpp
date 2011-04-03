@@ -312,7 +312,7 @@ void appKeyboard(unsigned char key, int x, int y)
             float4 center(2., 2., .2, 1.);
             //float4 velocity(.6, -.6, -.6, 0);
             //float4 velocity(2., 5., -.8, 0);
-            float4 velocity(0., 0., 1., 0);
+            float4 velocity(0., 0., 2., 0);
             //sph sets spacing and multiplies by radius value
             float4 col1 = float4(1., 1., 1., 1.);
             float4 col2 = float4(0., 0., 0., 1.);

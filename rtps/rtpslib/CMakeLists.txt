@@ -121,7 +121,9 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/sph/Prep
     ${rtpslib_SOURCE_DIR}/system/sph/Hash
     ${rtpslib_SOURCE_DIR}/system/sph/BitonicSort
-    ${rtpslib_SOURCE_DIR}/system/sph/DataStructures
+    #${rtpslib_SOURCE_DIR}/system/sph/DataStructures
+    ${rtpslib_SOURCE_DIR}/system/sph/CellIndices
+    ${rtpslib_SOURCE_DIR}/system/sph/Permute
     #${rtpslib_SOURCE_DIR}/system/sph/Neighbors
     ${rtpslib_SOURCE_DIR}/system/sph/Density
     ${rtpslib_SOURCE_DIR}/system/sph/Force

@@ -15,7 +15,9 @@
 #include <Prep.h>
 #include <Hash.h>
 #include <BitonicSort.h>
-#include <DataStructures.h>
+//#include <DataStructures.h>
+#include <CellIndices.h>
+#include <Permute.h>
 #include <Density.h>
 #include <Force.h>
 #include <Collision_wall.h>
@@ -58,19 +60,6 @@ namespace rtps
         void testDelete();
         int cut; //for debugging DEBUG
 
-        /*
-        template <typename RT>
-        RT GetSettingAs(std::string key, std::string defaultval = "0")
-        {
-            return sphsettings->GetSettingAs<RT>(key, defaultval);
-        }
-        template <typename RT>
-        void SetSetting(std::string key, RT value)
-        {
-            sphsettings->SetSetting(key, value);
-        }
-        */
-
         EB::TimerList timers;
         int setupTimers();
         void printTimers();
@@ -108,19 +97,6 @@ namespace rtps
         void setupDomain();
         void prepareSorted();
         //void popParticles();
-
-        ////Kernel k_density, k_pressure, k_viscosity;
-        //Kernel k_collision_wall;
-        //Kernel k_collision_tri;
-        //Kernel k_euler, k_leapfrog;
-        //Kernel k_xsph;
-
-        Kernel k_prep;
-        /*
-        Kernel k_hash;
-        Kernel k_datastructures;
-        */
-        //Kernel k_neighbors;
 
         //This should be in OpenCL classes
         Kernel k_scopy;
@@ -173,32 +149,9 @@ namespace rtps
         Buffer<GridParams>  cl_GridParams;
         Buffer<GridParams>  cl_GridParamsScaled;
 
-        //index neighbors. Maximum of 50
-        //Buffer<int>         cl_index_neigh;
-
-        //for keeping up with deleted particles
-        //Buffer<unsigned int> cl_num_changed;
-
         Buffer<float4>      clf_debug;  //just for debugging cl files
         Buffer<int4>        cli_debug;  //just for debugging cl files
 
-
-        //still in use?
-        Buffer<float4> cl_error_check;
-
-        //these are defined in sph/ folder
-        //void loadCollision_wall();
-        //void loadCollision_tri();
-        //bool triangles_loaded; //keep track if we've loaded triangles yet
-        //void loadEuler();
-        //void loadLeapFrog();
-
-        //Nearest Neighbors search related kernels
-        void loadPrep();
-        //void loadHash();
-        //void loadBitonicSort();
-        //void loadDataStructures();
-        //void loadNeighbors();
 
         //CPU functions
         void cpuDensity();
@@ -220,24 +173,18 @@ namespace rtps
         //Nearest Neighbors search related functions
         Prep prep;
         void call_prep(int stage);
-        //void hash();
         Hash hash;
-        DataStructures datastructures;
-        //void printHashDiagnostics();
+        //DataStructures datastructures;
+        CellIndices cellindices;
+        Permute permute;
         void hash_and_sort();
         void bitonic_sort();
-        //int buildDataStructures();
-        //void neighborSearch(int choice);
         Density density;
         Force force;
         void collision();
         CollisionWall collision_wall;
         CollisionTriangle collision_tri;
-        //void collide_wall();
-        //void collide_triangles();
         void integrate();
-        //void euler();
-        //void leapfrog();
         LeapFrog leapfrog;
         Euler euler;
 

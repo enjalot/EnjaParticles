@@ -195,10 +195,9 @@ int main(int argc, char** argv)
     ps->settings.SetSetting("Boundary Dampening", 256.0f);
 
 
-
-
     //initialize the OpenGL scene for rendering
     init_gl();
+
 
     glutMainLoop();
     return 0;
