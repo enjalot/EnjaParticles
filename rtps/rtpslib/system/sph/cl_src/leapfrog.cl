@@ -55,7 +55,7 @@ __kernel void leapfrog(
     //unsorted_pos(originalIndex) = (float4)(pos(i).xyz / sphp->simulation_scale, 1.);
     unsorted_vel(originalIndex)     = vnext;
     unsorted_veleval(originalIndex) = veval; 
-    positions[originalIndex]        = (float4)(p.xyz, 1.);  // for plotting
+    positions[originalIndex]        = (float4)(p.xyz, 1.0f);  // for plotting
     //	color[originalIndex]			= surface(i);
     //positions[originalIndex] = unsorted_pos(originalIndex);
     //positions[i] = unsorted_pos(i);

@@ -208,7 +208,9 @@ namespace rtps
         for (int i=0; i < sub_intervals; i++)
         {
 
+            //if(num >0) printf("before hash and sort\n");
             hash_and_sort();
+            //if(num >0) printf("after hash and sort\n");
 
             //printf("data structures\n");
             timers["datastructures"]->start();
@@ -249,7 +251,7 @@ namespace rtps
                 hash_and_sort();
             }
 
-            //printf("density\n");
+            //if(num >0) printf("density\n");
             timers["density"]->start();
             density.execute(   num,
                 cl_vars_sorted,
@@ -261,7 +263,7 @@ namespace rtps
                 cli_debug);
             timers["density"]->stop();
             
-            //printf("forces\n");
+            //if(num >0) printf("force\n");
             timers["force"]->start();
             force.execute(   num,
                 cl_vars_sorted,
@@ -284,7 +286,9 @@ namespace rtps
                               cl_position,
                               cl_color_u,
                               cl_color_s,
-                              cl_sort_indices
+                              cl_sort_indices,
+                              clf_debug,
+                              cli_debug
                               );
 
             //

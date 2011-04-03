@@ -2,17 +2,18 @@
 #include "cl_macros.h"
 #include "cl_structs.h"
 
-__kernel void lifetime(__global float4* pos_u, 
+__kernel void lifetime( int num,
+                        float increment,
+                        __global float4* pos_u, 
                         __global float4* color_u, 
                         __global float4* color_s, 
-                        __global uint* sort_indices,
-                        //__global float* life, 
-                        //__global float4* pos_gen, 
-                        //__global float4* vel_gen, 
-                        float increment)
+                        __global uint* sort_indices
+                        DEBUG_ARGS
+                        ) 
 {
     //get our index in the array
     unsigned int i = get_global_id(0);
+    if(i >= num) return;
 
     float life = color_s[i].w;
     //decrease the life by the time step (this value could be adjusted to lengthen or shorten particle life
@@ -41,7 +42,6 @@ __kernel void lifetime(__global float4* pos_u,
 
     uint originalIndex = sort_indices[i];
     color_u[originalIndex] = color_s[i];
-
 
 
 

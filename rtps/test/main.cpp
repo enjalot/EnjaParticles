@@ -105,7 +105,7 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 256
 #define DT .001f
 
-
+float4 color = float4(1.0, 0.0, 0.0, 1.0);
 
 
 
@@ -166,9 +166,9 @@ int main(int argc, char** argv)
     rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
 
     //settings.setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
-    settings.setRenderType(RTPSettings::RENDER);
-    //settings.setRenderType(RTPSettings::SPRITE_RENDER);
-    settings.setRadiusScale(2.0);
+    //settings.setRenderType(RTPSettings::RENDER);
+    settings.setRenderType(RTPSettings::SPRITE_RENDER);
+    settings.setRadiusScale(1.0);
     settings.setBlurScale(1.0);
     settings.setUseGLSL(1);
 
@@ -176,7 +176,7 @@ int main(int argc, char** argv)
     settings.SetSetting("render_frag_shader", "sprite_tex_frag.glsl");
     settings.SetSetting("render_use_alpha", true);
     settings.SetSetting("render_alpha_function", "add");
-    settings.SetSetting("lt_increment", .00);
+    settings.SetSetting("lt_increment", -.004);
     settings.SetSetting("lt_cl", "lifetime.cl");
 
 
@@ -278,7 +278,7 @@ void appKeyboard(unsigned char key, int x, int y)
             //float4 velocity(2., 5., -.8, 0);
             float4 velocity(2., 0., 0., 0);
             //sph sets spacing and multiplies by radius value
-            ps->system->addHose(5000, center, velocity, 5);
+            ps->system->addHose(5000, center, velocity, 5, color);
             return;
 		}
         case 'n':
@@ -322,7 +322,7 @@ void appKeyboard(unsigned char key, int x, int y)
 
                 min = float4(1.2, 1.2, 1.2, 1.0f);
                 max = float4(2., 2., 2., 1.0f);
-                ps->system->addBox(nn, min, max, false);
+                ps->system->addBox(nn, min, max, false, color);
                 return;
             }
         case 'o':

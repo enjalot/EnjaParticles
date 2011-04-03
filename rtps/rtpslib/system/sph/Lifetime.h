@@ -18,9 +18,9 @@ namespace rtps
                     Buffer<float4>& pos,
                     Buffer<float4>& color_u, 
                     Buffer<float4>& color_s, 
-                    Buffer<unsigned int>& indices
-                    //Buffer<float4>& clf_debug,
-                    //Buffer<int4>& cli_debug)
+                    Buffer<unsigned int>& indices,
+                    Buffer<float4>& clf_debug,
+                    Buffer<int4>& cli_debug
                 );
             
 
