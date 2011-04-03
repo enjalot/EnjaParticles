@@ -141,9 +141,9 @@ namespace rtps
         Buffer<float4>      cl_xsph_s;
 
         //Neighbor Search related arrays
-        Buffer<float4>      cl_vars_sorted;
-        Buffer<float4>      cl_vars_unsorted;
-        Buffer<float4>      cl_cells; // positions in Ian code
+        //Buffer<float4>      cl_vars_sorted;
+        //Buffer<float4>      cl_vars_unsorted;
+        //Buffer<float4>      cl_cells; // positions in Ian code
         Buffer<unsigned int>         cl_cell_indices_start;
         Buffer<unsigned int>         cl_cell_indices_end;
         //Buffer<int>                  cl_vars_sort_indices;

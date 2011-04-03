@@ -21,6 +21,8 @@ namespace rtps
                     Buffer<float4>& pos_s,
                     Buffer<float4>& vel_u,
                     Buffer<float4>& vel_s,
+                    Buffer<float4>& veleval_u,
+                    Buffer<float4>& veleval_s,
                     Buffer<float4>& color_u,
                     Buffer<float4>& color_s,
                     //Buffer<float4>& uvars, 
@@ -46,6 +48,8 @@ namespace rtps
         k_prep.setArg(args++, pos_s.getDevicePtr());
         k_prep.setArg(args++, vel_u.getDevicePtr());
         k_prep.setArg(args++, vel_s.getDevicePtr());
+        k_prep.setArg(args++, veleval_u.getDevicePtr());
+        k_prep.setArg(args++, veleval_s.getDevicePtr());
         //k_prep.setArg(args++, uvars.getDevicePtr());
         //k_prep.setArg(args++, svars.getDevicePtr()); 
         k_prep.setArg(args++, color_u.getDevicePtr());

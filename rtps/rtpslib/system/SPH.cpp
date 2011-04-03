@@ -255,6 +255,7 @@ namespace rtps
                 //need to copy sorted positions into unsorted + position array
                 call_prep(2);
                 hash_and_sort();
+                //continue;
             }
 
             //if(num >0) printf("density\n");
@@ -443,6 +444,8 @@ namespace rtps
                     cl_position_s,
                     cl_velocity_u,
                     cl_velocity_s,
+                    cl_veleval_u,
+                    cl_veleval_s,
                     cl_color_u,
                     cl_color_s,
                     //cl_vars_unsorted, 
@@ -562,7 +565,7 @@ namespace rtps
         cli_debug = Buffer<int4>(ps->cli, cliv);
 
 
-
+        /*
         //sorted and unsorted arrays
         std::vector<float4> unsorted(max_num*nb_var);
         std::vector<float4> sorted(max_num*nb_var);
@@ -571,11 +574,9 @@ namespace rtps
         std::fill(sorted.begin(), sorted.end(),float4(0.0f, 0.0f, 0.0f, 1.0f));
         //std::fill(unsorted.begin(), unsorted.end(), pmax);
         //std::fill(sorted.begin(), sorted.end(), pmax);
-
-
-
         cl_vars_unsorted = Buffer<float4>(ps->cli, unsorted);
         cl_vars_sorted = Buffer<float4>(ps->cli, sorted);
+        */
 
         std::vector<unsigned int> keys(max_num);
         //to get around limits of bitonic sort only handling powers of 2
@@ -759,9 +760,7 @@ namespace rtps
         //cl_color_u.release();
         //cl_position.release();
 
-        //2 is from cl_macros.h should probably not hardcode this number
         cl_velocity_u.copyToDevice(vels, num);
-        //cl_vars_unsorted.copyToDevice(vels, max_num*8+num);
 
         //sphp.num = num+nn;
         settings->SetSetting("Number of Particles", num+nn);

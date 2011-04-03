@@ -19,6 +19,8 @@ namespace rtps
                     Buffer<float4>& pos_s,
                     Buffer<float4>& vel_u,
                     Buffer<float4>& vel_s,
+                    Buffer<float4>& veleval_u,
+                    Buffer<float4>& veleval_s,
                     Buffer<float4>& color_u,
                     Buffer<float4>& color_s,
                     //Buffer<float4>& uvars, 

@@ -15,7 +15,7 @@ namespace rtps
             Lifetime(CL* cli, EB::Timer* timer, std::string filename);
             void execute(int num,
                     float dt,
-                    Buffer<float4>& pos,
+                    Buffer<float4>& pos_u,
                     Buffer<float4>& color_u, 
                     Buffer<float4>& color_s, 
                     Buffer<unsigned int>& indices,

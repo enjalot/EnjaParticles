@@ -16,7 +16,7 @@ namespace rtps
     } 
     void Lifetime::execute(int num,
                     float increment,
-                    Buffer<float4>& pos,
+                    Buffer<float4>& pos_u,
                     Buffer<float4>& color_u, 
                     Buffer<float4>& color_s, 
                     Buffer<unsigned int>& indices,
@@ -27,7 +27,7 @@ namespace rtps
         int iargs = 0;
         k_lifetime.setArg(iargs++, num); //time step
         k_lifetime.setArg(iargs++, increment); //time step
-        k_lifetime.setArg(iargs++, pos.getDevicePtr());
+        k_lifetime.setArg(iargs++, pos_u.getDevicePtr());
         k_lifetime.setArg(iargs++, color_u.getDevicePtr());
         k_lifetime.setArg(iargs++, color_s.getDevicePtr());
         k_lifetime.setArg(iargs++, indices.getDevicePtr());

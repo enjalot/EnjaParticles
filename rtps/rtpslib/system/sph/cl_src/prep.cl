@@ -12,6 +12,8 @@ __kernel void prep(
                   __global float4* pos_s,
                   __global float4* vel_u,
                   __global float4* vel_s,
+                  __global float4* veleval_u,
+                  __global float4* veleval_s,
                   //__global float4* vars_unsorted,
                   //__global float4* vars_sorted,
                   __global float4* color_u,
@@ -36,6 +38,7 @@ __kernel void prep(
     {
         //velocity[index] = vel(i);
         vel_u[index] = vel_s[i];
+        veleval_u[index] = veleval_s[i];
         //color_u[index] = color_s[i];
     }
     else if (stage == 1)
@@ -45,6 +48,7 @@ __kernel void prep(
 
         //pos_u[i] = pos_s[i];
         //vel_u[i] = vel_s[i];
+        //veleval_u[i] = veleval_s[i];
         //color_u[i] = color_s[i];
 
     }
@@ -61,6 +65,7 @@ __kernel void prep(
 
         pos_u[i] = pos_s[i];
         vel_u[i] = vel_s[i];
+        veleval_u[i] = veleval_s[i];
         //unsorted_pos(i) = pos(i);
         //color_u[i] = color_s[i];
     }
