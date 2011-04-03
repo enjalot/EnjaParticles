@@ -65,7 +65,10 @@ namespace rtps
         //printf("about to data structures\n");
         try
         {
-            k_datastructures.execute(num, workSize);
+            float gputime = k_datastructures.execute(num, workSize);
+            if(gputime > 0)
+                timer->set(gputime);
+
         }
         catch (cl::Error er)
         {

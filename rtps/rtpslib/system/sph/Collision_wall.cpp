@@ -30,7 +30,11 @@ namespace rtps
         k_collision_wall.setArg(iargs++, sphp.getDevicePtr());
 
         int local_size = 128;
-        k_collision_wall.execute(num, local_size);
+        float gputime = k_collision_wall.execute(num, local_size);
+        if(gputime > 0)
+            timer->set(gputime);
+
+
     }
 
 

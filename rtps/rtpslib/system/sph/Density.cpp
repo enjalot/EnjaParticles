@@ -53,7 +53,10 @@ namespace rtps
         int local = 64;
         try
         {
-            k_density.execute(num, local);
+            float gputime = k_density.execute(num, local);
+            if(gputime > 0)
+                timer->set(gputime);
+
         }
 
         catch (cl::Error er)

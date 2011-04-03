@@ -406,15 +406,17 @@ namespace rtps
         timers["update"] = new EB::Timer("Update loop", time_offset);
         timers["hash"] = new EB::Timer("Hash function", time_offset);
         timers["hash_gpu"] = new EB::Timer("Hash GPU kernel execution", time_offset);
-        timers["datastructures"] = new EB::Timer("Datastructures kernel execution", time_offset);
+        timers["datastructures"] = new EB::Timer("Datastructures function", time_offset);
         timers["ds_gpu"] = new EB::Timer("DataStructures GPU kernel execution", time_offset);
-        timers["bitonic"] = new EB::Timer("Bitonic Sort kernel execution", time_offset);
+        timers["bitonic"] = new EB::Timer("Bitonic Sort function", time_offset);
         //timers["neighbor"] = new EB::Timer("Neighbor Total", time_offset);
-        timers["density"] = new EB::Timer("Density kernel execution", time_offset);
-        timers["force"] = new EB::Timer("Force kernel execution", time_offset);
-        timers["collision_wall"] = new EB::Timer("Collision wall kernel execution", time_offset);
+        timers["density"] = new EB::Timer("Density function", time_offset);
+        timers["density_gpu"] = new EB::Timer("Density GPU kernel execution", time_offset);
+        timers["force"] = new EB::Timer("Force function", time_offset);
+        timers["force_gpu"] = new EB::Timer("Force GPU kernel execution", time_offset);
+        timers["collision_wall"] = new EB::Timer("Collision wall function", time_offset);
         timers["cw_gpu"] = new EB::Timer("Collision Wall GPU kernel execution", time_offset);
-        timers["collision_tri"] = new EB::Timer("Collision triangles kernel execution", time_offset);
+        timers["collision_tri"] = new EB::Timer("Collision triangles function", time_offset);
         timers["ct_gpu"] = new EB::Timer("Collision Triangle GPU kernel execution", time_offset);
         timers["integrate"] = new EB::Timer("Integration kernel execution", time_offset);
         timers["leapfrog_gpu"] = new EB::Timer("LeapFrog Integration GPU kernel execution", time_offset);
@@ -426,6 +428,7 @@ namespace rtps
     void SPH::printTimers()
     {
         timers.printAll();
+        timers.writeToFile("sph_timer_log"); 
     }
 
     void SPH::prepareSorted()

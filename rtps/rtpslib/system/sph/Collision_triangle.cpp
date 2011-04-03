@@ -86,7 +86,10 @@ namespace rtps {
 
 
         //printf("execute!\n");
-        k_collision_tri.execute(num, local_size);
+        float gputime = k_collision_tri.execute(num, local_size);
+        if(gputime > 0)
+            timer->set(gputime);
+
 
  #if 0 //printouts    
     //DEBUGING
