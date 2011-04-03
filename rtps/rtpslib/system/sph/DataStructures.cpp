@@ -91,46 +91,18 @@ namespace rtps
 
         std::vector<unsigned int> num_changed(1);
         ci_start.copyToHost(num_changed, nb_cells);
+        //ci_end.copyToHost(num_changed, nb_cells);
        
         int nc = num_changed[0];
-        return nc;
         //printf("Num Changed: %d\n", nc);
 
         //if(num > 0 && nc < 0) { exit(0); }
         
-#if 0 
-//this has been moved to SPH.cpp
-        if (nc < num && nc > 0)
-        //if(num > 0)
-        {
-            num = nc;
-            settings->SetSetting("Number of Particles", num);
-            //sphp.num = num;
-            updateSPHP();
-            renderer->setNum(sphp.num);
-            //need to copy sorted positions into unsorted + position array
-            
-            prep(2);
-            //hash();
-            hash.execute(   num,
-                    uvars,
-                    hashes,
-                    indices,
-                    cl_sphp,
-                    cl_GridParams,
-                    clf_debug,
-                    cli_debug);
-
-            bitonic_sort();
-            
-        }
-#endif
-
-#if 0
+#if 1
         //printDataStructuresDiagnostics();
 
         printf("**************** DataStructures Diagnostics ****************\n");
-        int nbc = grid_params.nb_cells + 1;
+        int nbc = nb_cells + 1;
         printf("nb_cells: %d\n", nbc);
         printf("num particles: %d\n", num);
 
@@ -179,6 +151,7 @@ namespace rtps
 #endif
 
 
+        return nc;
     }
 
 }

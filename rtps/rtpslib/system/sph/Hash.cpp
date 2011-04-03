@@ -62,14 +62,14 @@ namespace rtps
         //-------------------
 
         //diagnostics
-#if 0
+#if 1
         if(num > 0)
         {
             printf("***** PRINT hash diagnostics ******\n");
             int nbc = num + 5;
             nbc = 8;
-            std::vector<unsigned int> sh = cl_sort_hashes.copyToHost(nbc);
-            std::vector<unsigned int> si = cl_sort_indices.copyToHost(nbc);
+            std::vector<unsigned int> sh = hashes.copyToHost(nbc);
+            std::vector<unsigned int> si = indices.copyToHost(nbc);
             //cl_cells->copyToHost();
             std::vector<int4> cli = cli_debug.copyToHost(nbc);
             std::vector<float4> clf = clf_debug.copyToHost(nbc);
@@ -81,10 +81,11 @@ namespace rtps
             //cli_debug->copyToHost();
 
             //sphp.print();
-            ps->settings.printSettings();
+            //settings.printSettings();
             for (int i=0; i < nbc; i++)
             {
-                //printf("cl_sort_hash[%d] %u, cl_sort_indices[%d]: %u\n", i, sh[i], i, si[i]);
+
+                printf("cl_sort_hash[%d] %u, cl_sort_indices[%d]: %u\n", i, sh[i], i, si[i]);
                 //printf("cli_debug: %d, %d, %d, %d\n", cli[i].x, cli[i].y, cli[i].z, cli[i].w);
                 //printf("clf_debug: %f, %f, %f, %f\n", clf[i].x, clf[i].y, clf[i].z, clf[i].w);
                 //printf("-----\n");

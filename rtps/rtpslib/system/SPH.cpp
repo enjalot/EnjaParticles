@@ -236,7 +236,8 @@ namespace rtps
                 cli_debug);
             timers["datastructures"]->stop();
         
-            if (nc < num && nc > 0)
+            printf("num %d, nc %d\n", num, nc);
+            if (nc <= num && nc >= 0)
             {
                 //check if the number of particles have changed
                 //(this happens when particles go out of bounds,
@@ -254,8 +255,10 @@ namespace rtps
                 renderer->setNum(sphp.num);
                 //need to copy sorted positions into unsorted + position array
                 call_prep(2);
-                hash_and_sort();
-                //continue;
+                printf("HOW MANY NOW? %d\n", num);
+                //hash_and_sort();
+                //we've changed num and copied sorted to unsorted. skip this iteration and do next one
+                continue; 
             }
 
             //if(num >0) printf("density\n");
@@ -650,8 +653,8 @@ namespace rtps
         //grid_params_scaled.grid_inv_delta = grid_params.grid_inv_delta / ss;
         //grid_params_scaled.grid_inv_delta.w = 1.0f;
 
-        //grid_params.print();
-        //grid_params_scaled.print();
+        grid_params.print();
+        grid_params_scaled.print();
 
     }
 
