@@ -15,11 +15,13 @@ namespace rtps
     
     void Euler::execute(int num,
                     float dt,
-                    //input
-                    Buffer<float4>& pos,
-                    Buffer<float4>& uvars, 
-                    Buffer<float4>& svars, 
-                    //output
+                    Buffer<float4>& pos_u,
+                    Buffer<float4>& pos_s,
+                    Buffer<float4>& vel_u,
+                    Buffer<float4>& vel_s,
+                    Buffer<float4>& force_s,
+                    //Buffer<float4>& uvars, 
+                    //Buffer<float4>& svars, 
                     Buffer<unsigned int>& indices,
                     //params
                     Buffer<SPHParams>& sphp,
@@ -29,10 +31,14 @@ namespace rtps
     {
 
         int iargs = 0;
+        //k_euler.setArg(iargs++, uvars.getDevicePtr());
+        //k_euler.setArg(iargs++, svars.getDevicePtr());
+        k_euler.setArg(iargs++, pos_u.getDevicePtr());
+        k_euler.setArg(iargs++, pos_s.getDevicePtr());
+        k_euler.setArg(iargs++, vel_u.getDevicePtr());
+        k_euler.setArg(iargs++, vel_s.getDevicePtr());
+        k_euler.setArg(iargs++, force_s.getDevicePtr());
         k_euler.setArg(iargs++, indices.getDevicePtr());
-        k_euler.setArg(iargs++, uvars.getDevicePtr());
-        k_euler.setArg(iargs++, svars.getDevicePtr());
-        k_euler.setArg(iargs++, pos.getDevicePtr());
         k_euler.setArg(iargs++, sphp.getDevicePtr());
         k_euler.setArg(iargs++, dt); //time step
 
