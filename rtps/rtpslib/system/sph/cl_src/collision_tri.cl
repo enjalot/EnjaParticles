@@ -169,7 +169,7 @@ float intersect_triangle_ge(float4 pos, float4 vel, __local Triangle* tri, float
     t = dot(edge2, qvec) * inv_det;
 
     //if(t > eps and t < dist)
-    if(t > -2*dist and t < dist)
+    if(t > -2*dist && t < dist)
         return t;
 
     return 2*dist;

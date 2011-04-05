@@ -49,7 +49,7 @@ namespace rtps {
         size_t sz = max_tri*sizeof(Triangle);
         //printf("sz= %zd bytes\n", sz);
 
-        k_collision_tri.setArgShared(5, sz);
+        k_collision_tri.setArgShared(7, sz);
 
 
         triangles_loaded = true;
