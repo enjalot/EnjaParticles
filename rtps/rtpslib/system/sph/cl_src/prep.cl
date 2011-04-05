@@ -37,8 +37,8 @@ __kernel void prep(
     if (stage == 0)
     {
         //velocity[index] = vel(i);
-        vel_u[index] = vel_s[i];
-        veleval_u[index] = veleval_s[i];
+        //vel_u[index] = vel_s[i];
+        //veleval_u[index] = veleval_s[i];
         //color_u[index] = color_s[i];
     }
     else if (stage == 1)

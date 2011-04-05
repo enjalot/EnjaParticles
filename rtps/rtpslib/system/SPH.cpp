@@ -559,6 +559,8 @@ namespace rtps
         float4 pmax = grid_params.grid_max + grid_params.grid_size;
         //std::fill(positions.begin(), positions.end(), pmax);
 
+        //float4 color = float4(0.0, 1.0, 0.0, 1.0f);
+        //std::fill(colors.begin(), colors.end(),color);
         std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 1.0f, 0.0f));
         std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
         std::fill(veleval.begin(), veleval.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -789,6 +791,7 @@ namespace rtps
         //float4 color(1.0f,1.0f,1.0f,1.0f);
 
         std::vector<float4> cols(nn);
+        printf("color: %f %f %f %f\n", color.x, color.y, color.z, color.w);
 
         std::fill(cols.begin(), cols.end(),color);
         //float v = .5f;
@@ -804,16 +807,12 @@ namespace rtps
         cl_color_u.acquire();
 
         //printf("about to prep 0\n");
-        call_prep(0);
+        //call_prep(0);
         //printf("done with prep 0\n");
 
 
         cl_position_u.copyToDevice(pos, num);
         cl_color_u.copyToDevice(cols, num);
-
-        //cl_color_u.release();
-        //cl_position.release();
-
         cl_velocity_u.copyToDevice(vels, num);
 
         //sphp.num = num+nn;
@@ -826,9 +825,10 @@ namespace rtps
         //cl_color_u.acquire();
         //reprep the unsorted (packed) array to account for new particles
         //might need to do it conditionally if particles are added or subtracted
-        printf("about to prep\n");
-        call_prep(1);
-        printf("done with prep\n");
+        // -- no longer needed: april, enjalot
+        //printf("about to prep\n");
+        //call_prep(1);
+        //printf("done with prep\n");
         cl_position_u.release();
         cl_color_u.release();
 #else

@@ -7,7 +7,7 @@
 #include "cl_macros.h"
 #include "cl_structs.h"
 
-#pragma cl_khr_global_int32_base_atomics : enable
+//#pragma cl_khr_global_int32_base_atomics : enable
 //----------------------------------------------------------------------
 __kernel void permute(
                             __global float4* pos_u,
@@ -32,7 +32,7 @@ __kernel void permute(
     pos_s[index]     = pos_u[sorted_index] * sphp->simulation_scale;
     vel_s[index]     = vel_u[sorted_index];
     veleval_s[index] = veleval_u[sorted_index]; // not sure if needed
-    color_s[index] = color_u[sorted_index];
+    color_s[index]   = color_u[sorted_index];
     //density(index) = unsorted_density(sorted_index); // only for debugging
 }
 //----------------------------------------------------------------------

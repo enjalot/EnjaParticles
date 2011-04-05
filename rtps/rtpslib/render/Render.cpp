@@ -264,7 +264,7 @@ namespace rtps
         glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "near"), near_depth );
         glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "far"), far_depth );
 
-        glColor3f(1., 1., 1.);
+        //glColor3f(1., 1., 1.);
 
         drawArrays();
 

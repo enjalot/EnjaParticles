@@ -36,9 +36,11 @@ __kernel void lifetime( int num,
     
     //you can manipulate the color based on properties of the system
     //here we adjust the alpha
+    /*
     color_s[i].x = alpha;
     color_s[i].y = alpha;
     color_s[i].z = alpha;
+    */
     color_s[i].w = alpha;
 
     //uint originalIndex = sort_indices[i];

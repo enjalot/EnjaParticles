@@ -94,18 +94,17 @@ rtps::RTPS* ps;
 
 //#define NUM_PARTICLES 524288
 //#define NUM_PARTICLES 262144
-//#define NUM_PARTICLES 65536
+#define NUM_PARTICLES 65536
 //#define NUM_PARTICLES 32768
 //#define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 10000
-#define NUM_PARTICLES 8192
+//#define NUM_PARTICLES 8192
 //#define NUM_PARTICLES 4096
 //#define NUM_PARTICLES 2048
 //#define NUM_PARTICLES 1024
 //#define NUM_PARTICLES 256
 #define DT .001f
 
-float4 color = float4(1.0, 0.0, 0.0, 1.0);
 
 
 
@@ -175,8 +174,9 @@ int main(int argc, char** argv)
     settings.SetSetting("render_texture", "firejet_blast.png");
     settings.SetSetting("render_frag_shader", "sprite_tex_frag.glsl");
     settings.SetSetting("render_use_alpha", true);
+    //settings.SetSetting("render_use_alpha", false);
     settings.SetSetting("render_alpha_function", "add");
-    settings.SetSetting("lt_increment", -.004);
+    settings.SetSetting("lt_increment", -.00);
     settings.SetSetting("lt_cl", "lifetime.cl");
 
 
@@ -188,7 +188,7 @@ int main(int argc, char** argv)
     ps->settings.SetSetting("Gas Constant", 15.0f);
     ps->settings.SetSetting("Viscosity", .01f);
     ps->settings.SetSetting("Velocity Limit", 600.0f);
-    ps->settings.SetSetting("XSPH Factor", .1f);
+    ps->settings.SetSetting("XSPH Factor", .2f);
     ps->settings.SetSetting("Friction Kinetic", 0.0f);
     ps->settings.SetSetting("Friction Static", 0.0f);
     ps->settings.SetSetting("Boundary Stiffness", 20000.0f);
@@ -272,12 +272,13 @@ void appKeyboard(unsigned char key, int x, int y)
         {
             //spray hose
             printf("about to make hose\n");
-            float4 center(2., 2., 2., 1.);
+            float4 center(1., 2., 2., 1.);
             //float4 velocity(.6, -.6, -.6, 0);
             //float4 velocity(2., 5., -.8, 0);
-            float4 velocity(2., 0., 0., 0);
+            float4 velocity(2., .5, 2., 0);
             //sph sets spacing and multiplies by radius value
-            ps->system->addHose(5000, center, velocity, 5, color);
+            float4 color = float4(.0, 0.0, 1.0, 1.0);
+            ps->system->addHose(5000, center, velocity, 4, color);
             return;
 		}
         case 'n':
@@ -321,6 +322,7 @@ void appKeyboard(unsigned char key, int x, int y)
 
                 min = float4(1.2, 1.2, 1.2, 1.0f);
                 max = float4(2., 2., 2., 1.0f);
+                float4 color = float4(1.0, 0.0, 0.0, 1.0);
                 ps->system->addBox(nn, min, max, false, color);
                 return;
             }

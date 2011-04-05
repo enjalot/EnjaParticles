@@ -7,7 +7,7 @@
 #include "cl_macros.h"
 #include "cl_structs.h"
 
-#pragma cl_khr_global_int32_base_atomics : enable
+//#pragma cl_khr_global_int32_base_atomics : enable
 //----------------------------------------------------------------------
 __kernel void cellindices(
                            __global uint* sort_hashes,
@@ -40,7 +40,6 @@ __kernel void cellindices(
     uint tid = get_local_id(0);
     //if(tid >= 64) return;
 
-#if 1
     sharedHash[tid+1] = hash;  // SOMETHING WRONG WITH hash on Fermi
 
     if (index > 0 && tid == 0)
