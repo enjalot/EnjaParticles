@@ -164,7 +164,7 @@ int main(int argc, char** argv)
     //rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
     rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
 
-    settings.setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
+    settings.setRenderType(RTPSettings::SPRITE_RENDER);
     //settings.setRenderType(RTPSettings::RENDER);
     //settings.setRenderType(RTPSettings::SPRITE_RENDER);
     settings.setRadiusScale(4.0);

@@ -40,7 +40,7 @@ namespace rtps
 
         generateCheckerBoardTex(col1,col2,8, 640);
         printf("GL VERSION %s\n", glGetString(GL_VERSION));
-        blending = false;
+        blending = true;
         setupTimers();
     }
 
@@ -586,11 +586,11 @@ namespace rtps
     int Render::loadTexture(string texture_file, string texture_name)
     {
 
-        std::string path(GLSL_SOURCE_DIR);
-        path += "../../../sprites/tomek.jpg";
+        //std::string path(GLSL_SOURCE_DIR);
+        //path += "../../../sprites/boid.png";
         //path += "../../../sprites/enjalot.jpg";
         printf("LOAD TEXTURE!!!!!!!!!!!!!!\n");
-        printf("path: %s\n", path.c_str());
+        //printf("path: %s\n", path.c_str());
 
         //Load an image with stb_image
         int w,h,channels;
@@ -613,10 +613,21 @@ namespace rtps
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0,
+
+        if(channels == 3)
+        {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0,
                      GL_RGB, GL_UNSIGNED_BYTE, &im[0]);
+        }
+        else if(channels == 4)
+        {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
+                     GL_RGBA, GL_UNSIGNED_BYTE, &im[0]);
+        }
 
         glBindTexture(GL_TEXTURE_2D,0);
+        free(im);
+
         return 0; //success
     }
 

@@ -9,7 +9,7 @@ namespace rtps
     SpriteRender::SpriteRender(GLuint pos, GLuint col, int n, CL* cli, RTPSettings* _settings):Render(pos,col,n,cli,_settings)
     {
         string path(GLSL_SOURCE_DIR);
-        path += "../../../sprites/tomek.jpg";
+        path += "../../../sprites/boid2.png";
         //path += "../../../sprites/enjalot.jpg";
         printf("LOAD TEXTURE!!!!!!!!!!!!!!\n");
         printf("path: %s\n", path.c_str());

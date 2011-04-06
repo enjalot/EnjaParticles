@@ -550,7 +550,7 @@ void FLOCK::setRenderer()
             renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
         break;
     }
-    renderer->setParticleRadius(flock_settings.spacing);
+    renderer->setParticleRadius(flock_settings.spacing/2);
 }
 
 

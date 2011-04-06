@@ -127,16 +127,16 @@ int main(int argc, char** argv)
     printf("before we call enjas functions\n");
 
     float color[4] = {1.f, 0.f, 0.f, 0.f};
-    float w_sep = 1.f;     // 0.0001f
-    float w_align = 1.f;   // 0.0001f
-    float w_coh = 0.3f;    // 0.00003f
+    float w_sep = .1f;     // 0.0001f
+    float w_align = 1.0f;   // 0.0001f
+    float w_coh = 0.001f;    // 0.00003f
     
     //default constructor
     rtps::Domain grid = Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
     rtps::RTPSettings settings(rtps::RTPSettings::FLOCK, NUM_PARTICLES, DT, grid, maxspeed, mindist, searchradius, color, w_sep, w_align, w_coh);
 
     settings.setRadiusScale(1.0);
-    settings.setRenderType(RTPSettings::RENDER);
+    settings.setRenderType(RTPSettings::SPRITE_RENDER);
     
     settings.setBlurScale(1.0);
     settings.setUseGLSL(1);
