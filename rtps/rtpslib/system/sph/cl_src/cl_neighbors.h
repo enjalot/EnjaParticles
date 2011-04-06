@@ -21,7 +21,8 @@ void zeroPoint(PointData* pt)
 /* Iterate over particles found in the nearby cells (including cell of position_i)
 */
 void IterateParticlesInCell(
-                           __global float4*    vars_sorted,
+                           //__global float4*    vars_sorted,
+                           ARGS,
                            PointData* pt,
                            uint num,
                            int4    cellPos,
@@ -59,7 +60,8 @@ void IterateParticlesInCell(
 #if 1
             //***** UPDATE pt (sum)
             //ForPossibleNeighbor(vars_sorted, pt, num, index_i, index_j, position_i, gp, /*fp,*/ sphp DEBUG_ARGV);
-            ForNeighbor(vars_sorted, pt, index_i, index_j, position_i, gp, sphp DEBUG_ARGV);
+            //ForNeighbor(vars_sorted, pt, index_i, index_j, position_i, gp, sphp DEBUG_ARGV);
+            ForNeighbor(ARGV, pt, index_i, index_j, position_i, gp, sphp DEBUG_ARGV);
 #endif
         }
     }
@@ -69,7 +71,8 @@ void IterateParticlesInCell(
 /* Iterate over particles found in the nearby cells (including cell of position_i) 
  */
 void IterateParticlesInNearbyCells(
-                                  __global float4* vars_sorted,
+                                  //__global float4* vars_sorted,
+                                  ARGS,
                                   PointData* pt,
                                   uint num,
                                   int     index_i, 
@@ -100,7 +103,8 @@ void IterateParticlesInNearbyCells(
                 int4 ipos = (int4) (x,y,z,1);
 
                 // **** SUMMATION/UPDATE
-                IterateParticlesInCell(vars_sorted, pt, num, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp,/* fp,*/ sphp DEBUG_ARGV);
+                //IterateParticlesInCell(vars_sorted, pt, num, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp,/* fp,*/ sphp DEBUG_ARGV);
+                IterateParticlesInCell(ARGV, pt, num, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp,/* fp,*/ sphp DEBUG_ARGV);
 
                 //barrier(CLK_LOCAL_MEM_FENCE); // DEBUG
                 // SERIOUS PROBLEM: Results different than results with cli = 5 (bottom of this file)

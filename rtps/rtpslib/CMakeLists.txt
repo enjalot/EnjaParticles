@@ -63,6 +63,7 @@ set (rtpslib_INCLUDES
     ${BASE_DIR}/opencl10
     ${rtpslib_SOURCE_DIR}
     ${rtpslib_SOURCE_DIR}/system
+    ${rtpslib_SOURCE_DIR}/system/sph
     ${rtpslib_SOURCE_DIR}/system/common
     ${rtpslib_SOURCE_DIR}/render
     ${rtpslib_SOURCE_DIR}/render/util
@@ -79,7 +80,8 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/RTPSettings
     ${rtpslib_SOURCE_DIR}/util
     ${rtpslib_SOURCE_DIR}/structs
-    ${rtpslib_SOURCE_DIR}/timege
+    ${rtpslib_SOURCE_DIR}/timege    #gordon's timer class
+    ${rtpslib_SOURCE_DIR}/timer_eb  #evan's timer class
     ${rtpslib_SOURCE_DIR}/rtps_common
 
     ${rtpslib_SOURCE_DIR}/render/Render
@@ -99,13 +101,14 @@ set (rtpslib_SOURCES
     	
 	# SPH
     ${rtpslib_SOURCE_DIR}/system/SPH.cpp
+    ${rtpslib_SOURCE_DIR}/system/SPHSettings.cpp
     ${rtpslib_SOURCE_DIR}/system/sph/Euler
     ${rtpslib_SOURCE_DIR}/system/sph/LeapFrog
+    ${rtpslib_SOURCE_DIR}/system/sph/Lifetime
     
     ${rtpslib_SOURCE_DIR}/system/common/Hose
 
     #### these are CPU only
-    ${rtpslib_SOURCE_DIR}/system/sph/Density
     ${rtpslib_SOURCE_DIR}/system/sph/Pressure
     ${rtpslib_SOURCE_DIR}/system/sph/Viscosity
     ${rtpslib_SOURCE_DIR}/system/sph/XSPH
@@ -114,11 +117,16 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/sph/Collision_wall
     ${rtpslib_SOURCE_DIR}/system/sph/Collision_triangle
     
+    #Neighbor datastructures
     ${rtpslib_SOURCE_DIR}/system/sph/Prep
     ${rtpslib_SOURCE_DIR}/system/sph/Hash
     ${rtpslib_SOURCE_DIR}/system/sph/BitonicSort
-    ${rtpslib_SOURCE_DIR}/system/sph/DataStructures
-    ${rtpslib_SOURCE_DIR}/system/sph/Neighbors
+    #${rtpslib_SOURCE_DIR}/system/sph/DataStructures
+    ${rtpslib_SOURCE_DIR}/system/sph/CellIndices
+    ${rtpslib_SOURCE_DIR}/system/sph/Permute
+    #${rtpslib_SOURCE_DIR}/system/sph/Neighbors
+    ${rtpslib_SOURCE_DIR}/system/sph/Density
+    ${rtpslib_SOURCE_DIR}/system/sph/Force
 
 	# FLOCK
     ${rtpslib_SOURCE_DIR}/system/FLOCK.cpp

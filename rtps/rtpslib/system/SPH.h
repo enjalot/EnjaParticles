@@ -8,102 +8,35 @@
 #include <Kernel.h>
 #include <Buffer.h>
 
+#include <Domain.h>
+#include <SPHSettings.h>
+
+
+#include <Prep.h>
+#include <Hash.h>
 #include <BitonicSort.h>
+//#include <DataStructures.h>
+#include <CellIndices.h>
+#include <Permute.h>
+#include <Density.h>
+#include <Force.h>
+#include <Collision_wall.h>
+#include <Collision_triangle.h>
+#include <LeapFrog.h>
+#include <Lifetime.h>
+#include <Euler.h>
 
 //#include "../util.h"
-#include <Domain.h>
 #include <Hose.h>
 
-#include <timege.h>
+//#include <timege.h>
+#include <timer_eb.h>
 
 #include "../rtps_common.h"
 
+
 namespace rtps
 {
-
-    enum Integrator
-    {
-        EULER, LEAPFROG
-    };
-
-    //pass parameters to OpenCL routines
-#ifdef WIN32
-#pragma pack(push,16)
-#endif
-	typedef struct SPHParams
-    {
-        float4 grid_min;
-        float4 grid_max;
-        float mass;
-        float rest_distance;
-        float smoothing_distance;
-        float simulation_scale;
-        float boundary_stiffness;
-        float boundary_dampening;
-        float boundary_distance;
-        float EPSILON;
-        float PI;       //delicious
-        float K;        //gas constant
-        float viscosity;
-        float velocity_limit;
-        float xsph_factor;
-
-
-
-        float gravity; // -9.8 m/sec^2
-        float friction_coef;
-        float restitution_coef;
-        float shear;
-        float attraction;
-        float spring;
-        //float surface_threshold;
-
-
-        //Kernel Coefficients
-        float wpoly6_coef;
-        float wpoly6_d_coef;
-        float wpoly6_dd_coef; // laplacian
-        float wspiky_coef;
-        float wspiky_d_coef;
-        float wspiky_dd_coef;
-        float wvisc_coef;
-        float wvisc_d_coef;
-        float wvisc_dd_coef;
-
-        int num;
-        int nb_vars; // for combined variables (vars_sorted, etc.)
-        int choice; // which kind of calculation to invoke
-        int max_num;
-
-
-        void print()
-        {
-            printf("----- SPHParams ----\n");
-            printf("mass: %f\n", mass);
-            printf("simulation_scale: %f\n", simulation_scale);
-            printf("rest distance: %f\n", rest_distance);
-            printf("smoothing distance: %f\n", smoothing_distance);
-            printf("--------------------\n");
-
-            /*
-            printf("friction_coef: %f\n", friction_coef);
-            printf("restitution_coef: %f\n", restitution_coef);
-            printf("damping: %f\n", boundary_dampening);
-            printf("shear: %f\n", shear);
-            printf("attraction: %f\n", attraction);
-            printf("spring: %f\n", spring);
-            printf("gravity: %f\n", gravity);
-            printf("choice: %d\n", choice);
-            */
-        }
-    } SPHParams
-#ifndef WIN32
-	__attribute__((aligned(16)));
-#else
-		;
-        #pragma pack(pop)
-#endif
-
 
     class RTPS_EXPORT SPH : public System
     {
@@ -113,11 +46,11 @@ namespace rtps
 
         void update();
         //wrapper around IV.h addRect
-        int addBox(int nn, float4 min, float4 max, bool scaled);
+        int addBox(int nn, float4 min, float4 max, bool scaled, float4 color=float4(1.0f, 0.0f, 0.0f, 1.0f));
         //wrapper around IV.h addSphere
         void addBall(int nn, float4 center, float radius, bool scaled);
         //wrapper around Hose.h 
-        void addHose(int total_n, float4 center, float4 velocity, float radius);
+        void addHose(int total_n, float4 center, float4 velocity, float radius, float4 color=float4(1.0, 0.0, 0.0, 1.0f));
         void sprayHoses();
 
         virtual void render();
@@ -127,26 +60,23 @@ namespace rtps
         void testDelete();
         int cut; //for debugging DEBUG
 
-
-        enum
-        {
-            TI_HASH=0, TI_BITONIC_SORT, TI_BUILD, TI_NEIGH, 
-            TI_DENS, TI_FORCE, TI_EULER, TI_LEAPFROG, TI_UPDATE, TI_COLLISION_WALL,
-            TI_COLLISION_TRI
-        }; //11
-        GE::Time* timers[30];
+        EB::TimerList timers;
         int setupTimers();
         void printTimers();
+        void pushParticles(vector<float4> pos, float4 velo, float4 color=float4(1.0, 0.0, 0.0, 1.0));
+        void pushParticles(vector<float4> pos, vector<float4> velo, float4 color=float4(1.0, 0.0, 0.0, 1.0));
 
-
-        void pushParticles(vector<float4> pos, float4 velo);
+        std::vector<float4> getDeletedPos();
+        std::vector<float4> getDeletedVel();
 
     protected:
         virtual void setRenderer();
     private:
         //the particle system framework
-        RTPS *ps;
+        RTPS* ps;
+        RTPSettings* settings;
 
+        //SPHSettings* sphsettings;
         SPHParams sphp;
         GridParams grid_params;
         GridParams grid_params_scaled;
@@ -155,7 +85,9 @@ namespace rtps
 
         int nb_var;
 
-        bool triangles_loaded; //keep track if we've loaded triangles yet
+        std::vector<float4> deleted_pos;
+        std::vector<float4> deleted_vel;
+
 
         //keep track of hoses
         std::vector<Hose> hoses;
@@ -166,86 +98,60 @@ namespace rtps
         void prepareSorted();
         //void popParticles();
 
-        Kernel k_density, k_pressure, k_viscosity;
-        Kernel k_collision_wall;
-        Kernel k_collision_tri;
-        Kernel k_euler, k_leapfrog;
-        Kernel k_xsph;
-
-        Kernel k_prep;
-        Kernel k_hash;
-        Kernel k_datastructures;
-        Kernel k_neighbors;
-
         //This should be in OpenCL classes
         Kernel k_scopy;
 
         std::vector<float4> positions;
         std::vector<float4> colors;
-        std::vector<float>  densities;
-        std::vector<float4> forces;
         std::vector<float4> velocities;
         std::vector<float4> veleval;
+
+        std::vector<float>  densities;
+        std::vector<float4> forces;
         std::vector<float4> xsphs;
 
-        Buffer<float4>      cl_position;
-        Buffer<float4>      cl_color;
-        Buffer<float>       cl_density;
-        Buffer<float4>      cl_force;
-        Buffer<float4>      cl_velocity;
-        Buffer<float4>      cl_veleval;
-        Buffer<float4>      cl_xsph;
+        Buffer<float4>      cl_position_u;
+        Buffer<float4>      cl_position_s;
+        Buffer<float4>      cl_color_u;
+        Buffer<float4>      cl_color_s;
+        Buffer<float4>      cl_velocity_u;
+        Buffer<float4>      cl_velocity_s;
+        Buffer<float4>      cl_veleval_u;
+        Buffer<float4>      cl_veleval_s;
+
+        Buffer<float>       cl_density_s;
+        Buffer<float4>      cl_force_s;
+        Buffer<float4>      cl_xsph_s;
 
         //Neighbor Search related arrays
-        Buffer<float4>      cl_vars_sorted;
-        Buffer<float4>      cl_vars_unsorted;
-        Buffer<float4>      cl_cells; // positions in Ian code
+        //Buffer<float4>      cl_vars_sorted;
+        //Buffer<float4>      cl_vars_unsorted;
+        //Buffer<float4>      cl_cells; // positions in Ian code
         Buffer<unsigned int>         cl_cell_indices_start;
         Buffer<unsigned int>         cl_cell_indices_end;
-        Buffer<int>         cl_vars_sort_indices;
+        //Buffer<int>                  cl_vars_sort_indices;
         Buffer<unsigned int>         cl_sort_hashes;
         Buffer<unsigned int>         cl_sort_indices;
-        Buffer<unsigned int>         cl_unsort;
-        Buffer<unsigned int>         cl_sort;
+        //Buffer<unsigned int>         cl_unsort;
+        //Buffer<unsigned int>         cl_sort;
 
-        Buffer<Triangle>    cl_triangles;
+        //Buffer<Triangle>    cl_triangles;
 
         //Two arrays for bitonic sort (sort not done in place)
+        //should be moved to within bitonic
         Buffer<unsigned int>         cl_sort_output_hashes;
         Buffer<unsigned int>         cl_sort_output_indices;
 
         Bitonic<unsigned int> bitonic;
 
         //Parameter structs
-        Buffer<SPHParams>   cl_SPHParams;
+        Buffer<SPHParams>   cl_sphp;
         Buffer<GridParams>  cl_GridParams;
         Buffer<GridParams>  cl_GridParamsScaled;
-
-        //index neighbors. Maximum of 50
-        //Buffer<int>         cl_index_neigh;
-
-        //for keeping up with deleted particles
-        Buffer<unsigned int> cl_num_changed;
 
         Buffer<float4>      clf_debug;  //just for debugging cl files
         Buffer<int4>        cli_debug;  //just for debugging cl files
 
-
-        //still in use?
-        Buffer<float4> cl_error_check;
-
-        //these are defined in sph/ folder
-        void loadCollision_wall();
-        void loadCollision_tri();
-        void loadEuler();
-        void loadLeapFrog();
-
-        //Nearest Neighbors search related kernels
-        void loadPrep();
-        void loadHash();
-        void loadBitonicSort();
-        void loadDataStructures();
-        void loadNeighbors();
 
         //CPU functions
         void cpuDensity();
@@ -259,23 +165,31 @@ namespace rtps
         void updateCPU();
         void updateGPU();
 
+        //calculate the various parameters that depend on max_num of particles
+        void calculate();
         //copy the SPH parameter struct to the GPU
         void updateSPHP();
 
         //Nearest Neighbors search related functions
-        void prep(int stage);
-        void hash();
-        void printHashDiagnostics();
+        Prep prep;
+        void call_prep(int stage);
+        Hash hash;
+        //DataStructures datastructures;
+        CellIndices cellindices;
+        Permute permute;
+        void hash_and_sort();
         void bitonic_sort();
-        void buildDataStructures();
-        void printDataStructuresDiagnostics();
-        void neighborSearch(int choice);
+        Density density;
+        Force force;
         void collision();
-        void collide_wall();
-        void collide_triangles();
+        CollisionWall collision_wall;
+        CollisionTriangle collision_tri;
         void integrate();
-        void euler();
-        void leapfrog();
+        LeapFrog leapfrog;
+        Euler euler;
+
+        Lifetime lifetime;
+
 
         float Wpoly6(float4 r, float h);
         float Wspiky(float4 r, float h);

@@ -21,11 +21,11 @@ class Bitonic
 public:
     Bitonic(){ cli=NULL; };
     //create an OpenCL buffer from existing data
-    Bitonic(    CL *cli,
+    Bitonic( CL *cli );
+
+    int Sort(int batch, int arrayLength, int dir,
                 Buffer<T> *dstkey, Buffer<T> *dstval, 
                 Buffer<T> *srckey, Buffer<T> *srcval);
-
-    int Sort(int batch, int arrayLength, int dir);
     void loadKernels();
 
 
@@ -33,10 +33,12 @@ public:
 private:
     Kernel k_bitonicSortLocal, k_bitonicSortLocal1;
     Kernel k_bitonicMergeLocal, k_bitonicMergeGlobal;
+    /*
     Buffer<T> *cl_srckey;
     Buffer<T> *cl_srcval;
     Buffer<T> *cl_dstkey;
     Buffer<T> *cl_dstval;
+    */
 
     CL *cli;
 

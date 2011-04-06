@@ -5,7 +5,10 @@
 
 
 __kernel void collision_wall(
-                            __global float4* vars_sorted, 
+                            //__global float4* vars_sorted, 
+                            __global float4* pos_s,
+                            __global float4* vel_s,
+                            __global float4* force_s,
                             __constant struct GridParams* gp,
                             __constant struct SPHParams* sphp)
 {
@@ -15,9 +18,15 @@ __kernel void collision_wall(
     if (i > num) return;
 
 
+    /*
     float4 p = pos(i);
     float4 v = vel(i);// * sphp->simulation_scale;
     float4 f = force(i);
+    */
+    float4 p = pos_s[i];
+    float4 v = vel_s[i];// * sphp->simulation_scale;
+    float4 f = force_s[i];
+
     float4 r_f = (float4)(0.f, 0.f, 0.f, 0.f);
     float4 f_f = (float4)(0.f, 0.f, 0.f, 0.f);
 
@@ -78,6 +87,7 @@ __kernel void collision_wall(
     }
 
 
-    force(i) += r_f + f_f;
+    //force(i) += r_f + f_f;
+    force_s[i] += r_f + f_f;
 
 }

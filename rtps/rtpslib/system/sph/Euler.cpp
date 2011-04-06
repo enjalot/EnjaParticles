@@ -2,25 +2,45 @@
 
 namespace rtps
 {
-
-    void SPH::loadEuler()
+    Euler::Euler(CL* cli_, EB::Timer* timer_)
     {
+        cli = cli_;
+        timer = timer_;
+ 
         printf("create euler kernel\n");
-
         std::string path(SPH_CL_SOURCE_DIR);
         path += "/euler.cl";
-        k_euler = Kernel(ps->cli, path, "euler");
+        k_euler = Kernel(cli, path, "euler");
     } 
     
-    void SPH::euler()
+    void Euler::execute(int num,
+                    float dt,
+                    Buffer<float4>& pos_u,
+                    Buffer<float4>& pos_s,
+                    Buffer<float4>& vel_u,
+                    Buffer<float4>& vel_s,
+                    Buffer<float4>& force_s,
+                    //Buffer<float4>& uvars, 
+                    //Buffer<float4>& svars, 
+                    Buffer<unsigned int>& indices,
+                    //params
+                    Buffer<SPHParams>& sphp,
+                    //debug params
+                    Buffer<float4>& clf_debug,
+                    Buffer<int4>& cli_debug)
     {
+
         int iargs = 0;
-        k_euler.setArg(iargs++, cl_sort_indices.getDevicePtr());
-        k_euler.setArg(iargs++, cl_vars_unsorted.getDevicePtr());
-        k_euler.setArg(iargs++, cl_vars_sorted.getDevicePtr());
-        k_euler.setArg(iargs++, cl_position.getDevicePtr());
-        k_euler.setArg(iargs++, cl_SPHParams.getDevicePtr());
-        k_euler.setArg(iargs++, ps->settings.dt); //time step
+        //k_euler.setArg(iargs++, uvars.getDevicePtr());
+        //k_euler.setArg(iargs++, svars.getDevicePtr());
+        k_euler.setArg(iargs++, pos_u.getDevicePtr());
+        k_euler.setArg(iargs++, pos_s.getDevicePtr());
+        k_euler.setArg(iargs++, vel_u.getDevicePtr());
+        k_euler.setArg(iargs++, vel_s.getDevicePtr());
+        k_euler.setArg(iargs++, force_s.getDevicePtr());
+        k_euler.setArg(iargs++, indices.getDevicePtr());
+        k_euler.setArg(iargs++, sphp.getDevicePtr());
+        k_euler.setArg(iargs++, dt); //time step
 
         int local_size = 128;
         k_euler.execute(num, local_size);

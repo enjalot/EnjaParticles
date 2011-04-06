@@ -5,6 +5,7 @@ namespace rtps
 
     RTPSettings::RTPSettings()
     {
+        changed = false;
         system = SPH;
         max_particles = 2048;
         dt = .001f;
@@ -13,6 +14,7 @@ namespace rtps
 
     RTPSettings::RTPSettings(SysType system, int max_particles, float dt)
     {
+        changed = false;
         this->system = system;
         this->max_particles = max_particles;
         this->dt = dt;
@@ -21,6 +23,7 @@ namespace rtps
 
     RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain grid)
     {
+        changed = false;
         this->system = system;
         this->max_particles = max_particles;
         this->dt = dt;
@@ -30,6 +33,7 @@ namespace rtps
     //with triangle collision
     RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain grid, bool tri_collision)
     {
+        changed = false;
         this->system = system;
         this->max_particles = max_particles;
         this->dt = dt;
@@ -39,6 +43,8 @@ namespace rtps
     
     RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain grid, float maxspeed, float mindist, float searchradius, float color[], float w_sep, float w_align, float w_coh)
     {
+        changed = false;
+        this->system = system;
         this->system = system;
         this->max_particles = max_particles;
         this->dt = dt;
@@ -51,4 +57,17 @@ namespace rtps
         this->w_align = w_align;
         this->w_coh = w_coh;
     }
+
+    void RTPSettings::printSettings()
+    {
+        printf("RTPS Settings\n");
+        typedef std::map <std::string, std::string> MapType;
+
+        MapType::const_iterator end = settings.end();
+        for(MapType::const_iterator it = settings.begin(); it != end; ++it)
+        {
+            printf("%s: %s\n", it->first.c_str(), it->second.c_str());
+        }
+    }
+
 }

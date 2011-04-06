@@ -39,6 +39,11 @@ set (test_SOURCES
     main.cpp
     )
 
+set (test_multi_SOURCES
+    main_multi.cpp
+    )
+
+
 set (test_simple_SOURCES
     main_simple.cpp
     )
@@ -52,9 +57,10 @@ set (test_flock_SOURCES
 ADD_DEFINITIONS(-g )
 
 INCLUDE_DIRECTORIES(${test_INCLUDES})
-ADD_EXECUTABLE(test.x ${test_SOURCES})
-ADD_EXECUTABLE(test_simple.x ${test_simple_SOURCES})
-ADD_EXECUTABLE(test_flock.x ${test_flock_SOURCES})
+ADD_EXECUTABLE(sph.x ${test_SOURCES})
+ADD_EXECUTABLE(multi.x ${test_multi_SOURCES})
+ADD_EXECUTABLE(simple.x ${test_simple_SOURCES})
+ADD_EXECUTABLE(flock.x ${test_flock_SOURCES})
 
 message("current build dir:\n")
 message("${BASE_DIR}/rtps/build")
@@ -71,15 +77,18 @@ SET(LINK_LIBS
 )
 message(RTPS_EXPORTS "${rtps_EXPORTS}")
 
-TARGET_LINK_LIBRARIES (test.x
+TARGET_LINK_LIBRARIES (sph.x
+    ${LINK_LIBS}
+)
+TARGET_LINK_LIBRARIES (multi.x
     ${LINK_LIBS}
 )
 
-TARGET_LINK_LIBRARIES (test_simple.x
+TARGET_LINK_LIBRARIES (simple.x
     ${LINK_LIBS}
 )
 
-TARGET_LINK_LIBRARIES (test_flock.x
+TARGET_LINK_LIBRARIES (flock.x
     ${LINK_LIBS}
 )
 

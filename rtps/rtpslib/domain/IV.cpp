@@ -149,7 +149,7 @@ namespace rtps
 
     }
 
-    std::vector<float4> addDiscRandom(int num, float4 center, float4 u, float4 v, float radius, float spacing)
+    std::vector<float4> addDiscRandom(int num, float4 center, float4 v, float4 u, float4 w, float radius, float spacing)
     {
         /*
          * randomly space the particles on a grid, rather than evenly
@@ -164,9 +164,10 @@ namespace rtps
         spacing *= 1.1f; //should probably just figure out whats up with my spacing
         printf("spacing: %f\n", spacing);
         float pert = .1f*spacing;   //amount of perterbation
+        float vpert = 100.f;
 
         float4 umin = -radius*u;
-        float4 vmin = -radius*v;
+        float4 wmin = -radius*w;
         /*
         printf("u %f %f %f %f\n", u.x, u.y, u.z, u.w);
         printf("v %f %f %f %f\n", v.x, v.y, v.z, v.w);
@@ -180,14 +181,15 @@ namespace rtps
         float r2 = radius*radius;
         for (float du = 0.; du < 2.*radius; du += spacing)
         {
-            for (float dv = 0.; dv < 2.*radius; dv += spacing)
+            for (float dw = 0.; dw < 2.*radius; dw += spacing)
             {
                 if (i >= num) break;
+                float rrv = rand()*vpert*2./RAND_MAX - vpert;   //random number between -pert and pert
                 float rru = rand()*pert*2./RAND_MAX - pert;   //random number between -pert and pert
-                float rrv = rand()*pert*2./RAND_MAX - pert;   //random number between -pert and pert
+                float rrw = rand()*pert*2./RAND_MAX - pert;   //random number between -pert and pert
                 du += rru;
-                dv += rrv;
-                float4 part = center + umin + u*du + vmin + v*dv;
+                dw += rrw;
+                float4 part = center + umin + u*du + wmin + w*dw + rrv*v;
                 part.w = 1.0f;
                 //printf("part %f %f %f %f\n", part.x, part.y, part.z, part.w);
                 d2 = dist_squared(part-center);

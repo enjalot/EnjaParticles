@@ -5,7 +5,7 @@
 namespace rtps
 {
 
-Hose::Hose(RTPS *ps, int total_n, float4 center, float4 velocity, float radius, float spacing)
+Hose::Hose(RTPS *ps, int total_n, float4 center, float4 velocity, float radius, float spacing, float4 color)
 {
     printf("Constructor!\n");
     this->ps = ps;
@@ -14,17 +14,21 @@ Hose::Hose(RTPS *ps, int total_n, float4 center, float4 velocity, float radius, 
     this->velocity = velocity;
     this->radius = radius;
     this->spacing = spacing;
+    this->color = color;
     em_count = 0;
     n_count = total_n;
     calc_vectors();
+    center.print("center");
+    velocity.print("velocity");
 }
 
-void Hose::update(float4 center, float4 velocity, float radius, float spacing)
+void Hose::update(float4 center, float4 velocity, float radius, float spacing, float4 color)
 {
     this->center = center;
     this->velocity = velocity;
     this->radius = radius;
     this->spacing = spacing;
+    this->color = color;
     calc_vectors();
 }
 
@@ -71,7 +75,7 @@ void Hose::calc_em()
     //printf("magv: %f\n", magv);
     //em = (int) (1 + spacing/dt/magv/8.);
     //why do i have to divide by 4?
-    em = (int) (1 + spacing/dt/magv/4);
+    em = (int) (1 + spacing/dt/magv/10);
     //printf("em: %d\n", em);
 }
 
@@ -86,7 +90,8 @@ std::vector<float4> Hose::spray()
     {
         //std::vector<float4> addDisc(int num, float4 center, float4 u, float4 v, float radius, float spacing);
         //particles = addDisc(n_count, center, u, w, radius, spacing);
-        particles = addDiscRandom(n_count, center, u, w, radius, spacing);
+        float4 v = velocity * ps->settings.dt;
+        particles = addDiscRandom(n_count, center, v, u, w, radius, spacing);
         n_count -= particles.size();
         em_count = 0;
     }

@@ -93,7 +93,7 @@ public:
     void update();
     
     //wrapper around IV.h addRect
-    int addBox(int nn, float4 min, float4 max, bool scaled);
+    int addBox(int nn, float4 min, float4 max, bool scaled, float4 color=float4(1., 0., 0., 1.));
     
     //wrapper around IV.h addSphere
     void addBall(int nn, float4 center, float radius, bool scaled);

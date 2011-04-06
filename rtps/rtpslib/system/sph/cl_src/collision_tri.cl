@@ -169,7 +169,7 @@ float intersect_triangle_ge(float4 pos, float4 vel, __local Triangle* tri, float
     t = dot(edge2, qvec) * inv_det;
 
     //if(t > eps and t < dist)
-    if(t > -2*dist and t < dist)
+    if(t > -2*dist && t < dist)
         return t;
 
     return 2*dist;
@@ -382,7 +382,10 @@ float4 collisions_box(float4 pos, float4 vel, int first, int last, __global Box*
 }
 //----------------------------------------------------------------------
 //__kernel void collision_ge( __global float4* pos, __global float4* vel, __global float4* force, __global Box* boxes_glob, int n_boxes, float dt, __global int* tri_offsets, __global int* triangles,  __local Box* boxes)
-__kernel void collision_triangle(    __global float4* vars_sorted, 
+__kernel void collision_triangle(   //__global float4* vars_sorted, 
+                                    __global float4* pos_s,
+                                    __global float4* vel_s,
+                                    __global float4* force_s,
                                     __global Triangle* triangles_glob, 
                                     int n_triangles, 
                                     float dt, 
@@ -395,9 +398,15 @@ __kernel void collision_triangle(    __global float4* vars_sorted,
     unsigned int i = get_global_id(0);
 	int num = sphp->num;
 
+    /*
     float4 p = pos(i);
     float4 v = vel(i);
     float4 f = force(i);
+    */
+    float4 p = pos_s[i];
+    float4 v = vel_s[i];
+    float4 f = force_s[i];
+
 
 
     int tc = 0; //triangle count
@@ -431,7 +440,8 @@ __kernel void collision_triangle(    __global float4* vars_sorted,
 
 
     clf[i] = rf;
-    clf[i].w = pos(i).z / sphp->simulation_scale;
+    //clf[i].w = pos(i).z / sphp->simulation_scale;
+    clf[i].w = pos_s[i].z / sphp->simulation_scale;
     cli[i].x = (int)rf.w;
     cli[i].y = sphp->num;
     cli[i].z = get_local_size(0);
@@ -444,7 +454,8 @@ __kernel void collision_triangle(    __global float4* vars_sorted,
     }
     else{
     */
-    force(i) += rf;
+    //force(i) += rf;
+    force_s[i] += rf;
     //}
     
 /*

@@ -3,40 +3,56 @@
 namespace rtps
 {
 
-    void SPH::loadLeapFrog()
+    LeapFrog::LeapFrog(CL* cli_, EB::Timer* timer_)
     {
+        cli = cli_;
+        timer = timer_;
+ 
         printf("create leapfrog kernel\n");
-
         std::string path(SPH_CL_SOURCE_DIR);
         path += "/leapfrog.cl";
-        k_leapfrog = Kernel(ps->cli, path, "leapfrog");
+        k_leapfrog = Kernel(cli, path, "leapfrog");
 
-        /*
-        //TODO: fix the way we are wrapping buffers
-        k_leapfrog.setArg(0, cl_position.getDevicePtr());
-        k_leapfrog.setArg(1, cl_velocity.getDevicePtr());
-        k_leapfrog.setArg(2, cl_veleval.getDevicePtr());
-        k_leapfrog.setArg(3, cl_force.getDevicePtr());
-        k_leapfrog.setArg(4, cl_xsph.getDevicePtr());
-        k_leapfrog.setArg(5, cl_color.getDevicePtr());
-        k_leapfrog.setArg(6, ps->settings.dt); //time step
-        k_leapfrog.setArg(7, cl_SPHParams.getDevicePtr());
-        */
     } 
-    void SPH::leapfrog()
+    void LeapFrog::execute(int num,
+                    float dt,
+                    Buffer<float4>& pos_u,
+                    Buffer<float4>& pos_s,
+                    Buffer<float4>& vel_u,
+                    Buffer<float4>& vel_s,
+                    Buffer<float4>& veleval_u,
+                    Buffer<float4>& force_s,
+                    Buffer<float4>& xsph_s,
+                    //Buffer<float4>& uvars, 
+                    //Buffer<float4>& svars, 
+                    Buffer<unsigned int>& indices,
+                    //params
+                    Buffer<SPHParams>& sphp,
+                    //debug params
+                    Buffer<float4>& clf_debug,
+                    Buffer<int4>& cli_debug)
     {
 
         int iargs = 0;
-        k_leapfrog.setArg(iargs++, cl_sort_indices.getDevicePtr());
-        k_leapfrog.setArg(iargs++, cl_vars_unsorted.getDevicePtr());
-        k_leapfrog.setArg(iargs++, cl_vars_sorted.getDevicePtr());
-        k_leapfrog.setArg(iargs++, cl_position.getDevicePtr());
-        //    k_leapfrog.setArg(iargs++, cl_color.getDevicePtr());
-        k_leapfrog.setArg(iargs++, cl_SPHParams.getDevicePtr());
-        k_leapfrog.setArg(iargs++, ps->settings.dt); //time step
+        //k_leapfrog.setArg(iargs++, uvars.getDevicePtr());
+        //k_leapfrog.setArg(iargs++, svars.getDevicePtr());
+        k_leapfrog.setArg(iargs++, pos_u.getDevicePtr());
+        k_leapfrog.setArg(iargs++, pos_s.getDevicePtr());
+        k_leapfrog.setArg(iargs++, vel_u.getDevicePtr());
+        k_leapfrog.setArg(iargs++, vel_s.getDevicePtr());
+        k_leapfrog.setArg(iargs++, veleval_u.getDevicePtr());
+        k_leapfrog.setArg(iargs++, force_s.getDevicePtr());
+        k_leapfrog.setArg(iargs++, xsph_s.getDevicePtr());
+        k_leapfrog.setArg(iargs++, indices.getDevicePtr());
+        //leapfrog.setArg(iargs++, color.getDevicePtr());
+        k_leapfrog.setArg(iargs++, sphp.getDevicePtr());
+        k_leapfrog.setArg(iargs++, dt); //time step
 
         int local_size = 128;
-        k_leapfrog.execute(num, local_size);
+        float gputime = k_leapfrog.execute(num, local_size);
+        if(gputime > 0)
+            timer->set(gputime);
+
 
 
 #if 0

@@ -22,26 +22,33 @@ namespace rtps
     {
         //store the particle system framework
         ps = psfr;
+        settings = &ps->settings;
 
         max_num = n;
         num = 0;
         nb_var = 10;
 
-        positions.resize(max_num);
-        colors.resize(max_num);
-        forces.resize(max_num);
-        velocities.resize(max_num);
-        veleval.resize(max_num);
-        densities.resize(max_num);
-        xsphs.resize(max_num);
-
         //seed random
         srand ( time(NULL) );
 
-        grid = ps->settings.grid;
+        grid = settings->grid;
+
+        //sphsettings = new SPHSettings(grid, max_num);
+        //sphsettings->printSettings();
+        //sphsettings->updateSPHP(sphp);
+        std::vector<SPHParams> vparams(0);
+        vparams.push_back(sphp);
+        cl_sphp = Buffer<SPHParams>(ps->cli, vparams);
+
+        calculate();
+        updateSPHP();
+
+        //settings->printSettings();
+
+        spacing = settings->GetSettingAs<float>("Spacing");
 
         //SPH settings depend on number of particles used
-        calculateSPHSettings();
+        //calculateSPHSettings();
         //set up the grid
         setupDomain();
 
@@ -65,26 +72,42 @@ namespace rtps
         std::string cl_includes(SPH_CL_SOURCE_DIR);
         ps->cli->setIncludeDir(cl_includes);
 
-        loadCollision_wall();
-        loadCollision_tri();
+        loadScopy();
+
+        //loadPrep();
+        prep = Prep(ps->cli, timers["prep_gpu"]);
+        //loadHash();
+        hash = Hash(ps->cli, timers["hash_gpu"]);
+        bitonic = Bitonic<unsigned int>( ps->cli );
+        //datastructures = DataStructures( ps->cli, timers["ds_gpu"] );
+        cellindices = CellIndices( ps->cli, timers["ci_gpu"] );
+        permute = Permute( ps->cli, timers["perm_gpu"] );
+
+        //loadBitonicSort();
+        //loadDataStructures();
+        //loadNeighbors();
+        density = Density(ps->cli, timers["density_gpu"]);
+        force = Force(ps->cli, timers["force_gpu"]);
+
+        //loadCollision_wall();
+        collision_wall = CollisionWall(ps->cli, timers["cw_gpu"]);
+        collision_tri = CollisionTriangle(ps->cli, timers["ct_gpu"], 2048); //TODO expose max_triangles as a parameter
+        //loadCollision_tri();
 
         //could generalize this to other integration methods later (leap frog, RK4)
         if (integrator == LEAPFROG)
         {
-            loadLeapFrog();
+            //loadLeapFrog();
+            leapfrog = LeapFrog(ps->cli, timers["leapfrog_gpu"]);
         }
         else if (integrator == EULER)
         {
-            loadEuler();
+            //loadEuler();
+            euler = Euler(ps->cli, timers["euler_gpu"]);
         }
 
-        loadScopy();
-
-        loadPrep();
-        loadHash();
-        loadBitonicSort();
-        loadDataStructures();
-        loadNeighbors();
+        string lt_file = settings->GetSettingAs<string>("lt_cl");
+        lifetime = Lifetime(ps->cli, timers["lifetime_gpu"], lt_file);
 
 
 #endif
@@ -92,6 +115,10 @@ namespace rtps
         // settings defaults to 0
         //renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
         setRenderer();
+
+        //printf("MAIN settings: \n");
+        //settings->printSettings();
+        //printf("=================================================\n");
 
     }
 
@@ -159,8 +186,12 @@ namespace rtps
     void SPH::updateGPU()
     {
 
-        timers[TI_UPDATE]->start();
+        timers["update"]->start();
         glFinish();
+
+        if (settings->has_changed()) updateSPHP();
+
+        //settings->printSettings();
 
         //GE
         int sub_intervals = 3;  //should be a setting
@@ -173,72 +204,220 @@ namespace rtps
             sprayHoses();
         }
 
-        cl_position.acquire();
-        cl_color.acquire();
-
+        cl_position_u.acquire();
+        cl_color_u.acquire();
         //sub-intervals
         for (int i=0; i < sub_intervals; i++)
         {
-            /*
-            k_density.execute(num);
-            k_pressure.execute(num);
-            k_viscosity.execute(num);
-            k_xsph.execute(num);
-            */
-            //printf("hash\n");
-            timers[TI_HASH]->start();
-            hash();
-            timers[TI_HASH]->end();
-            //printf("bitonic_sort\n");
-            timers[TI_BITONIC_SORT]->start();
-            bitonic_sort();
-            timers[TI_BITONIC_SORT]->end();
+
+            //if(num >0) printf("before hash and sort\n");
+            hash_and_sort();
+            //if(num >0) printf("after hash and sort\n");
+
             //printf("data structures\n");
-            timers[TI_BUILD]->start();
-            buildDataStructures(); //reorder
-            timers[TI_BUILD]->end();
+            /*
+            timers["datastructures"]->start();
+            int nc = datastructures.execute(   num,
+                cl_position_u,
+                cl_position_s,
+                cl_velocity_u,
+                cl_velocity_s,
+                cl_veleval_u,
+                cl_veleval_s,
+                //cl_vars_unsorted,
+                cl_color_u,
+                //cl_vars_sorted,
+                cl_color_s,
+                cl_sort_hashes,
+                cl_sort_indices,
+                cl_cell_indices_start,
+                cl_cell_indices_end,
+                cl_sphp,
+                cl_GridParams,
+                grid_params.nb_cells,
+                clf_debug,
+                cli_debug);
+            timers["datastructures"]->stop();
+            */
+            timers["cellindices"]->start();
+            int nc = cellindices.execute(   num,
+                cl_sort_hashes,
+                cl_sort_indices,
+                cl_cell_indices_start,
+                cl_cell_indices_end,
+                cl_sphp,
+                cl_GridParams,
+                grid_params.nb_cells,
+                clf_debug,
+                cli_debug);
+            timers["cellindices"]->stop();
+       
+            timers["permute"]->start();
+            permute.execute(   num,
+                cl_position_u,
+                cl_position_s,
+                cl_velocity_u,
+                cl_velocity_s,
+                cl_veleval_u,
+                cl_veleval_s,
+                cl_color_u,
+                cl_color_s,
+                cl_sort_indices,
+                cl_sphp,
+                cl_GridParams,
+                clf_debug,
+                cli_debug);
+            timers["permute"]->stop();
+ 
 
-            timers[TI_NEIGH]->start();
-            //printf("density\n");
-            timers[TI_DENS]->start();
-            neighborSearch(0);  //density
-            timers[TI_DENS]->end();
-            //printf("forces\n");
-            timers[TI_FORCE]->start();
-            neighborSearch(1);  //forces
-            timers[TI_FORCE]->end();
-            //exit(0);
-            timers[TI_NEIGH]->end();
+            //printf("num %d, nc %d\n", num, nc);
+            if (nc <= num && nc >= 0)
+            {
+                //check if the number of particles have changed
+                //(this happens when particles go out of bounds,
+                //  either because of forces or by explicitly placing
+                //  them in order to delete)
+                //
+                //if so we need to copy sorted into unsorted
+                //and redo hash_and_sort
+                printf("SOME PARTICLES WERE DELETED!\n");
+                printf("nc: %d num: %d\n", nc, num);
 
-            //printf("collision\n");
+                deleted_pos.resize(num-nc);
+                deleted_vel.resize(num-nc);
+                //The deleted particles should be the nc particles after num
+                cl_position_s.copyToHost(deleted_pos, nc); //damn these will always be out of bounds here!
+                cl_velocity_s.copyToHost(deleted_vel, nc);
+
+ 
+                num = nc;
+                settings->SetSetting("Number of Particles", num);
+                //sphp.num = num;
+                updateSPHP();
+                renderer->setNum(sphp.num);
+                //need to copy sorted arrays into unsorted arrays
+                call_prep(2);
+                printf("HOW MANY NOW? %d\n", num);
+                hash_and_sort();
+                                //we've changed num and copied sorted to unsorted. skip this iteration and do next one
+                //this doesn't work because sorted force etc. are having an effect?
+                //continue; 
+            }
+
+            //if(num >0) printf("density\n");
+            timers["density"]->start();
+            density.execute(   num,
+                //cl_vars_sorted,
+                cl_position_s,
+                cl_density_s,
+                cl_cell_indices_start,
+                cl_cell_indices_end,
+                cl_sphp,
+                cl_GridParamsScaled,
+                clf_debug,
+                cli_debug);
+            timers["density"]->stop();
+            
+            //if(num >0) printf("force\n");
+            timers["force"]->start();
+            force.execute(   num,
+                //cl_vars_sorted,
+                cl_position_s,
+                cl_density_s,
+                cl_veleval_s,
+                cl_force_s,
+                cl_xsph_s,
+                cl_cell_indices_start,
+                cl_cell_indices_end,
+                cl_sphp,
+                cl_GridParamsScaled,
+                clf_debug,
+                cli_debug);
+
+            timers["force"]->stop();
+
             collision();
-            //printf("integrate\n");
+            timers["integrate"]->start();
             integrate();
-            //exit(0);
+            timers["integrate"]->stop();
+
+            lifetime.execute( num,
+                              settings->GetSettingAs<float>("lt_increment"),
+                              cl_position_u,
+                              cl_color_u,
+                              cl_color_s,
+                              cl_sort_indices,
+                              clf_debug,
+                              cli_debug
+                              );
+
             //
             //Andrew's rendering emporium
             //neighborSearch(4);
         }
 
-        cl_position.release();
-        cl_color.release();
+        cl_position_u.release();
+        cl_color_u.release();
 
-        timers[TI_UPDATE]->end();
+        timers["update"]->stop();
+
+    }
+
+    void SPH::hash_and_sort()
+    {
+        //printf("hash\n");
+        timers["hash"]->start();
+        hash.execute(   num,
+                //cl_vars_unsorted,
+                cl_position_u,
+                cl_sort_hashes,
+                cl_sort_indices,
+                cl_sphp,
+                cl_GridParams,
+                clf_debug,
+                cli_debug);
+        timers["hash"]->stop();
+
+        //printf("bitonic_sort\n");
+        //defined in Sort.cpp
+        timers["bitonic"]->start();
+        bitonic_sort();
+        timers["bitonic"]->stop();
 
     }
 
     void SPH::collision()
     {
         //when implemented other collision routines can be chosen here
-        timers[TI_COLLISION_WALL]->start();
-        
-        collide_wall();
-        //k_collision_wall.execute(num, local_size);
-        timers[TI_COLLISION_WALL]->end();
+        timers["collision_wall"]->start();
+        //collide_wall();
+        collision_wall.execute(num,
+                //cl_vars_sorted, 
+                cl_position_s,
+                cl_velocity_s,
+                cl_force_s,
+                cl_sphp,
+                cl_GridParamsScaled,
+                //debug
+                clf_debug,
+                cli_debug);
 
-        timers[TI_COLLISION_TRI]->start();
-        collide_triangles();
-        timers[TI_COLLISION_TRI]->end();
+        //k_collision_wall.execute(num, local_size);
+        timers["collision_wall"]->stop();
+
+        timers["collision_tri"]->start();
+        //collide_triangles();
+        collision_tri.execute(num,
+                settings->dt,
+                //cl_vars_sorted, 
+                cl_position_s,
+                cl_velocity_s,
+                cl_force_s,
+                cl_sphp,
+                //debug
+                clf_debug,
+                cli_debug);
+        timers["collision_tri"]->stop();
 
     }
 
@@ -246,19 +425,44 @@ namespace rtps
     {
         if (integrator == EULER)
         {
-            //k_euler.execute(max_num);
-            timers[TI_EULER]->start();
-            euler();
-            //k_euler.execute(num, local_size);
-            timers[TI_EULER]->end();
+            //euler();
+            euler.execute(num,
+                settings->dt,
+                cl_position_u,
+                cl_position_s,
+                cl_velocity_u,
+                cl_velocity_s,
+                cl_force_s,
+                //cl_vars_unsorted, 
+                //cl_vars_sorted, 
+                cl_sort_indices,
+                cl_sphp,
+                //debug
+                clf_debug,
+                cli_debug);
+
+
         }
         else if (integrator == LEAPFROG)
         {
-            //k_leapfrog.execute(max_num);
-            timers[TI_LEAPFROG]->start();
-            leapfrog();
-            //k_leapfrog.execute(num, local_size);
-            timers[TI_LEAPFROG]->end();
+            //leapfrog();
+             leapfrog.execute(num,
+                settings->dt,
+                cl_position_u,
+                cl_position_s,
+                cl_velocity_u,
+                cl_velocity_s,
+                cl_veleval_u,
+                cl_force_s,
+                cl_xsph_s,
+                //cl_vars_unsorted, 
+                //cl_vars_sorted, 
+                cl_sort_indices,
+                cl_sphp,
+                //debug
+                clf_debug,
+                cli_debug);
+
         }
 
 #if 0
@@ -275,109 +479,79 @@ namespace rtps
 
     }
 
+    void SPH::call_prep(int stage)
+    {
+
+            prep.execute(num,
+                    stage,
+                    cl_position_u,
+                    cl_position_s,
+                    cl_velocity_u,
+                    cl_velocity_s,
+                    cl_veleval_u,
+                    cl_veleval_s,
+                    cl_color_u,
+                    cl_color_s,
+                    //cl_vars_unsorted, 
+                    //cl_vars_sorted, 
+                    cl_sort_indices,
+                    //params
+                    cl_sphp,
+                    //Buffer<GridParams>& gp,
+                    //debug params
+                    clf_debug,
+                    cli_debug);
+    }
+
     int SPH::setupTimers()
     {
         //int print_freq = 20000;
         int print_freq = 1000; //one second
         int time_offset = 5;
-
-        timers[TI_UPDATE]     = new GE::Time("update", time_offset, print_freq);
-        timers[TI_HASH]     = new GE::Time("hash", time_offset, print_freq);
-        timers[TI_BUILD]     = new GE::Time("build", time_offset, print_freq);
-        timers[TI_BITONIC_SORT]     = new GE::Time("bitonic_sort", time_offset, print_freq);
-        timers[TI_NEIGH]     = new GE::Time("neigh", time_offset, print_freq);
-        timers[TI_DENS]     = new GE::Time("dens", time_offset, print_freq);
-        timers[TI_FORCE]     = new GE::Time("force", time_offset, print_freq);
-        timers[TI_COLLISION_WALL]     = new GE::Time("collision_wall", time_offset, print_freq);
-        timers[TI_COLLISION_TRI]     = new GE::Time("collision_triangle", time_offset, print_freq);
-        timers[TI_EULER]     = new GE::Time("euler", time_offset, print_freq);
-        timers[TI_LEAPFROG]     = new GE::Time("leapfrog", time_offset, print_freq);
+        timers["update"] = new EB::Timer("Update loop", time_offset);
+        timers["hash"] = new EB::Timer("Hash function", time_offset);
+        timers["hash_gpu"] = new EB::Timer("Hash GPU kernel execution", time_offset);
+        //timers["datastructures"] = new EB::Timer("Datastructures function", time_offset);
+        timers["cellindices"] = new EB::Timer("CellIndices function", time_offset);
+        timers["ci_gpu"] = new EB::Timer("CellIndices GPU kernel execution", time_offset);
+        timers["permute"] = new EB::Timer("Permute function", time_offset);
+        timers["perm_gpu"] = new EB::Timer("Permute GPU kernel execution", time_offset);
+        timers["ds_gpu"] = new EB::Timer("DataStructures GPU kernel execution", time_offset);
+        timers["bitonic"] = new EB::Timer("Bitonic Sort function", time_offset);
+        //timers["neighbor"] = new EB::Timer("Neighbor Total", time_offset);
+        timers["density"] = new EB::Timer("Density function", time_offset);
+        timers["density_gpu"] = new EB::Timer("Density GPU kernel execution", time_offset);
+        timers["force"] = new EB::Timer("Force function", time_offset);
+        timers["force_gpu"] = new EB::Timer("Force GPU kernel execution", time_offset);
+        timers["collision_wall"] = new EB::Timer("Collision wall function", time_offset);
+        timers["cw_gpu"] = new EB::Timer("Collision Wall GPU kernel execution", time_offset);
+        timers["collision_tri"] = new EB::Timer("Collision triangles function", time_offset);
+        timers["ct_gpu"] = new EB::Timer("Collision Triangle GPU kernel execution", time_offset);
+        timers["integrate"] = new EB::Timer("Integration kernel execution", time_offset);
+        timers["leapfrog_gpu"] = new EB::Timer("LeapFrog Integration GPU kernel execution", time_offset);
+        timers["euler_gpu"] = new EB::Timer("Euler Integration GPU kernel execution", time_offset);
+        timers["lifetime_gpu"] = new EB::Timer("Lifetime GPU kernel execution", time_offset);
+        timers["prep_gpu"] = new EB::Timer("Prep GPU kernel execution", time_offset);
 		return 0;
     }
 
     void SPH::printTimers()
     {
-        for (int i = 0; i < 11; i++) //switch to vector of timers and use size()
-        {
-            timers[i]->print();
-        }
-        System::printTimers();
-    }
-
-    void SPH::calculateSPHSettings()
-    {
-        /*!
-        * The Particle Mass (and hence everything following) depends on the MAXIMUM number of particles in the system
-        */
-
-        float rho0 = 1000;                              //rest density [kg/m^3 ]
-        //float mass = (128*1024.0)/max_num * .0002;    //krog's way
-        float VP = .0262144 / max_num;                  //Particle Volume [ m^3 ]
-        float mass = rho0 * VP;                         //Particle Mass [ kg ]
-        //constant .87 is magic
-        float rest_distance = .87 * pow(VP, 1.f/3.f);     //rest distance between particles [ m ]
-
-        float smoothing_distance = 2.0f * rest_distance;//interaction radius
-        float boundary_distance = .5f * rest_distance;
-
-        float4 dmin = grid.getBndMin();
-        float4 dmax = grid.getBndMax();
-        //printf("dmin: %f %f %f\n", dmin.x, dmin.y, dmin.z);
-        //printf("dmax: %f %f %f\n", dmax.x, dmax.y, dmax.z);
-        float domain_vol = (dmax.x - dmin.x) * (dmax.y - dmin.y) * (dmax.z - dmin.z);
-        //printf("domain volume: %f\n", domain_vol);
-
-        //ratio between particle radius in simulation coords and world coords
-        float simulation_scale = pow(VP * max_num / domain_vol, 1.f/3.f); 
-
-        spacing = rest_distance/ simulation_scale;
-
-        float particle_radius = spacing;
-        float pi = acos(-1.0);
-
-        sphp.grid_min = grid.getMin();
-        sphp.grid_max = grid.getMax();
-        sphp.mass = mass;
-        sphp.rest_distance = rest_distance;
-        sphp.smoothing_distance = smoothing_distance;
-        sphp.simulation_scale = simulation_scale;
-        sphp.boundary_stiffness = 20000.0f;
-        sphp.boundary_dampening = 256.0f;
-        sphp.boundary_distance = boundary_distance;
-        sphp.EPSILON = .00001f;
-        sphp.PI = pi;
-        sphp.K = 5.0f;
-        sphp.num = num;
-        sphp.max_num = max_num;
-        //sphp.surface_threshold = 2.0 * sphp.simulation_scale; //0.01;
-        sphp.viscosity = .01f;
-        //sphp.viscosity = 1.0f;
-        sphp.gravity = -9.8f;
-        //sphp.gravity = 0.0f;
-        sphp.velocity_limit = 600.0f;
-        sphp.xsph_factor = .1f;
-
-        float h = sphp.smoothing_distance;
-        float h9 = pow(h,9.f);
-        float h6 = pow(h,6.f);
-        float h3 = pow(h,3.f);
-        sphp.wpoly6_coef = 315.f/64.0f/pi/h9;
-        sphp.wpoly6_d_coef = -945.f/(32.0f*pi*h9);
-        sphp.wpoly6_dd_coef = -945.f/(32.0f*pi*h9);
-        sphp.wspiky_coef = 15.f/pi/h6;
-        sphp.wspiky_d_coef = -45.f/(pi*h6);
-        sphp.wvisc_coef = 15./(2.*pi*h3);
-        sphp.wvisc_d_coef = 15./(2.*pi*h3);
-        sphp.wvisc_dd_coef = 45./(pi*h6);
-
-        printf("spacing: %f\n", spacing);
-        sphp.print();
-
+        timers.printAll();
+        timers.writeToFile("sph_timer_log"); 
     }
 
     void SPH::prepareSorted()
     {
 #include "sph/cl_src/cl_macros.h"
+
+        positions.resize(max_num);
+        colors.resize(max_num);
+        forces.resize(max_num);
+        velocities.resize(max_num);
+        veleval.resize(max_num);
+        densities.resize(max_num);
+        xsphs.resize(max_num);
 
         //for reading back different values from the kernel
         std::vector<float4> error_check(max_num);
@@ -385,8 +559,8 @@ namespace rtps
         float4 pmax = grid_params.grid_max + grid_params.grid_size;
         //std::fill(positions.begin(), positions.end(), pmax);
 
-
-
+        //float4 color = float4(0.0, 1.0, 0.0, 1.0f);
+        //std::fill(colors.begin(), colors.end(),color);
         std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 1.0f, 0.0f));
         std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
         std::fill(veleval.begin(), veleval.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -405,23 +579,23 @@ namespace rtps
         // end VBO creation
 
         //vbo buffers
-        cl_position = Buffer<float4>(ps->cli, pos_vbo);
-        cl_color = Buffer<float4>(ps->cli, col_vbo);
+        cl_position_u = Buffer<float4>(ps->cli, pos_vbo);
+        cl_position_s = Buffer<float4>(ps->cli, positions);
+        cl_color_u = Buffer<float4>(ps->cli, col_vbo);
+        cl_color_s = Buffer<float4>(ps->cli, colors);
 
         //pure opencl buffers: these are deprecated
-        cl_force = Buffer<float4>(ps->cli, forces);
-        cl_velocity = Buffer<float4>(ps->cli, velocities);
-        cl_veleval = Buffer<float4>(ps->cli, veleval);
-        cl_density = Buffer<float>(ps->cli, densities);
-        cl_xsph = Buffer<float4>(ps->cli, xsphs);
+        cl_velocity_u = Buffer<float4>(ps->cli, velocities);
+        cl_velocity_s = Buffer<float4>(ps->cli, velocities);
+        cl_veleval_u = Buffer<float4>(ps->cli, veleval);
+        cl_veleval_s = Buffer<float4>(ps->cli, veleval);
+        cl_density_s = Buffer<float>(ps->cli, densities);
+        cl_force_s = Buffer<float4>(ps->cli, forces);
+        cl_xsph_s = Buffer<float4>(ps->cli, xsphs);
 
         //cl_error_check= Buffer<float4>(ps->cli, error_check);
 
         //TODO make a helper constructor for buffer to make a cl_mem from a struct
-        std::vector<SPHParams> vparams(0);
-        vparams.push_back(sphp);
-        cl_SPHParams = Buffer<SPHParams>(ps->cli, vparams);
-
         //Setup Grid Parameter structs
         std::vector<GridParams> gparams(0);
         gparams.push_back(grid_params);
@@ -441,7 +615,7 @@ namespace rtps
         cli_debug = Buffer<int4>(ps->cli, cliv);
 
 
-
+        /*
         //sorted and unsorted arrays
         std::vector<float4> unsorted(max_num*nb_var);
         std::vector<float4> sorted(max_num*nb_var);
@@ -450,11 +624,9 @@ namespace rtps
         std::fill(sorted.begin(), sorted.end(),float4(0.0f, 0.0f, 0.0f, 1.0f));
         //std::fill(unsorted.begin(), unsorted.end(), pmax);
         //std::fill(sorted.begin(), sorted.end(), pmax);
-
-
-
         cl_vars_unsorted = Buffer<float4>(ps->cli, unsorted);
         cl_vars_sorted = Buffer<float4>(ps->cli, sorted);
+        */
 
         std::vector<unsigned int> keys(max_num);
         //to get around limits of bitonic sort only handling powers of 2
@@ -470,6 +642,7 @@ namespace rtps
         // Size is the grid size + 1, the last index is used to signify how many particles are within bounds
         // That is a problem since the number of
         // occupied cells could be much less than the number of grid elements.
+        printf("%d\n", grid_params.nb_cells);
         std::vector<unsigned int> gcells(grid_params.nb_cells+1);
         int minus = 0xffffffff;
         std::fill(gcells.begin(), gcells.end(), 666);
@@ -487,11 +660,7 @@ namespace rtps
         cl_sort_output_indices = Buffer<unsigned int>(ps->cli, keys);
 
 
-        std::vector<Triangle> maxtri(2048);
-        cl_triangles = Buffer<Triangle>(ps->cli, maxtri);
-
-
-    }
+     }
 
     void SPH::setupDomain()
     {
@@ -531,12 +700,12 @@ namespace rtps
         //grid_params_scaled.grid_inv_delta = grid_params.grid_inv_delta / ss;
         //grid_params_scaled.grid_inv_delta.w = 1.0f;
 
-        //grid_params.print();
-        //grid_params_scaled.print();
+        grid_params.print();
+        grid_params_scaled.print();
 
     }
 
-    int SPH::addBox(int nn, float4 min, float4 max, bool scaled)
+    int SPH::addBox(int nn, float4 min, float4 max, bool scaled, float4 color)
     {
         float scale = 1.0f;
         if (scaled)
@@ -545,7 +714,7 @@ namespace rtps
         }
         vector<float4> rect = addRect(nn, min, max, spacing, scale);
         float4 velo(0, 0, 0, 0);
-        pushParticles(rect, velo);
+        pushParticles(rect, velo, color);
         return rect.size();
     }
 
@@ -561,12 +730,12 @@ namespace rtps
         pushParticles(sphere,velo);
     }
 
-    void SPH::addHose(int total_n, float4 center, float4 velocity, float radius)
+    void SPH::addHose(int total_n, float4 center, float4 velocity, float radius, float4 color)
     {
         printf("wtf for real\n");
         //in sph we just use sph spacing
         radius *= spacing;
-        Hose hose = Hose(ps, total_n, center, velocity, radius, spacing);
+        Hose hose = Hose(ps, total_n, center, velocity, radius, spacing, color);
         printf("wtf\n");
         hoses.push_back(hose);
         printf("size of hoses: %d\n", hoses.size());
@@ -580,7 +749,7 @@ namespace rtps
         {
             parts = hoses[i].spray();
             if (parts.size() > 0)
-                pushParticles(parts, hoses[i].getVelocity());
+                pushParticles(parts, hoses[i].getVelocity(), hoses[i].getColor());
         }
     }
 
@@ -589,14 +758,25 @@ namespace rtps
 
         //cut = 1;
         std::vector<float4> poss(40);
-        float4 posx(10.,10.,10.,1.);
+        float4 posx(100.,100.,100.,1.);
         std::fill(poss.begin(), poss.end(),posx);
-        cl_vars_unsorted.copyToDevice(poss, max_num + 2);
+        //cl_vars_unsorted.copyToDevice(poss, max_num + 2);
+        cl_position_u.acquire();
+        cl_position_u.copyToDevice(poss);
+        cl_position_u.release();
         ps->cli->queue.finish();
 
 
     }
-    void SPH::pushParticles(vector<float4> pos, float4 velo)
+    void SPH::pushParticles(vector<float4> pos, float4 velo, float4 color)
+    {
+        int nn = pos.size();
+        std::vector<float4> vels(nn);
+        std::fill(vels.begin(), vels.end(), velo);
+        pushParticles(pos, vels, color);
+
+    }
+    void SPH::pushParticles(vector<float4> pos, vector<float4> vels, float4 color)
     {
         //cut = 1;
 
@@ -605,13 +785,13 @@ namespace rtps
         {
             return;
         }
-        // float rr = (rand() % 255)/255.0f;
+        float rr = (rand() % 255)/255.0f;
         //float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
         //printf("random: %f\n", rr);
-        float4 color(1.0f,0.0f,0.0f,1.0f);
+        //float4 color(1.0f,1.0f,1.0f,1.0f);
 
         std::vector<float4> cols(nn);
-        std::vector<float4> vels(nn);
+        printf("color: %f %f %f %f\n", color.x, color.y, color.z, color.w);
 
         std::fill(cols.begin(), cols.end(),color);
         //float v = .5f;
@@ -619,53 +799,44 @@ namespace rtps
         //float4 iv = float4(v, v, -v, 0.0f);
         //float4 iv = float4(0, v, -.1, 0.0f);
         //std::fill(vels.begin(), vels.end(),iv);
-        std::fill(vels.begin(), vels.end(),velo);
 
 
 #ifdef GPU
         glFinish();
-        cl_position.acquire();
-        cl_color.acquire();
+        cl_position_u.acquire();
+        cl_color_u.acquire();
 
         //printf("about to prep 0\n");
-        prep(0);
+        //call_prep(0);
         //printf("done with prep 0\n");
 
 
-        cl_position.copyToDevice(pos, num);
-        cl_color.copyToDevice(cols, num);
+        cl_position_u.copyToDevice(pos, num);
+        cl_color_u.copyToDevice(cols, num);
+        cl_velocity_u.copyToDevice(vels, num);
 
-        cl_color.release();
-        cl_position.release();
-
-        //2 is from cl_macros.h should probably not hardcode this number
-        cl_velocity.copyToDevice(vels, num);
-        //cl_vars_unsorted.copyToDevice(vels, max_num*8+num);
-
-        sphp.num = num+nn;
+        //sphp.num = num+nn;
+        settings->SetSetting("Number of Particles", num+nn);
         updateSPHP();
 
         num += nn;  //keep track of number of particles we use
 
-        cl_position.acquire();
+        //cl_position.acquire();
+        //cl_color_u.acquire();
         //reprep the unsorted (packed) array to account for new particles
         //might need to do it conditionally if particles are added or subtracted
-        printf("about to prep\n");
-        prep(1);
-        printf("done with prep\n");
-        cl_position.release();
+        // -- no longer needed: april, enjalot
+        //printf("about to prep\n");
+        //call_prep(1);
+        //printf("done with prep\n");
+        cl_position_u.release();
+        cl_color_u.release();
 #else
         num += nn;  //keep track of number of particles we use
 #endif
         renderer->setNum(num);
     }
 
-    void SPH::updateSPHP()
-    {
-        std::vector<SPHParams> vparams(0);
-        vparams.push_back(sphp);
-        cl_SPHParams.copyToDevice(vparams);
-    }
 
     void SPH::render()
     {

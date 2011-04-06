@@ -40,7 +40,9 @@ namespace rtps
 
         generateCheckerBoardTex(col1,col2,8, 640);
         printf("GL VERSION %s\n", glGetString(GL_VERSION));
-        blending = true;
+        //blending = settings.GetSettingAs<bool>("Render: Blending");
+        //blending = settings->getUseAlphaBlending();
+        blending = settings->GetSettingAs<bool>("render_use_alpha");
         setupTimers();
     }
 
@@ -97,7 +99,7 @@ namespace rtps
     //----------------------------------------------------------------------
     void Render::render()
     {
-        timers[TI_RENDER]->start();
+        timers["render"]->start();
 
         glPushAttrib(GL_ALL_ATTRIB_BITS);
         glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
@@ -137,7 +139,7 @@ namespace rtps
         glFinish();
 
         //printf("done rendering\n");
-        timers[TI_RENDER]->end();
+        timers["render"]->end();
     }
 
     void Render::writeBuffersToDisk()
@@ -262,7 +264,7 @@ namespace rtps
         glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "near"), near_depth );
         glUniform1f( glGetUniformLocation(glsl_program[SPHERE_SHADER], "far"), far_depth );
 
-        glColor3f(1., 1., 1.);
+        //glColor3f(1., 1., 1.);
 
         drawArrays();
 
@@ -529,16 +531,18 @@ namespace rtps
     int Render::setupTimers()
     {
         //int print_freq = 20000;
-        int print_freq = 100; //one second
+        //int print_freq = 100; //one second
         int time_offset = 5;
 
-        timers[TI_RENDER]     = new GE::Time("render", time_offset, print_freq);
+        //timers[TI_RENDER]     = new GE::Time("render", time_offset, print_freq);
+        timers["render"] = new EB::Timer("Render call", time_offset);
 		return 0;
     }
 
     void Render::printTimers()
     {
-        timers[TI_RENDER]->print();
+        //timers[TI_RENDER]->print();
+        timers.printAll();
     }
 
 
@@ -613,21 +617,22 @@ namespace rtps
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
+        
+        //better way to do this?
         if(channels == 3)
         {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0,
                      GL_RGB, GL_UNSIGNED_BYTE, &im[0]);
         }
-        else if(channels == 4)
+        else if (channels == 4)
         {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
-                     GL_RGBA, GL_UNSIGNED_BYTE, &im[0]);
+            printf("%d %d %d %d\n", im[0], im[1], im[2], im[3]);
+             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
+                  GL_RGBA, GL_UNSIGNED_BYTE, &im[0]);
         }
 
         glBindTexture(GL_TEXTURE_2D,0);
         free(im);
-
         return 0; //success
     }
 

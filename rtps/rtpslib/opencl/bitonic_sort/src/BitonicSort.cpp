@@ -5,15 +5,15 @@
 
 
 template <class T>
-Bitonic<T>::Bitonic(CL *cli,
-                Buffer<T> *dstkey, Buffer<T> *dstval, 
-                Buffer<T> *srckey, Buffer<T> *srcval)
+Bitonic<T>::Bitonic(CL *cli )
 {
     this->cli = cli;
+    /*
     this->cl_dstkey = dstkey;
     this->cl_dstval = dstval;
     this->cl_srckey = srckey;
     this->cl_srcval = srcval;
+    */
     loadKernels();
 }
 
@@ -46,6 +46,31 @@ void Bitonic<T>::loadKernels()
     printf("bitonic dev pointers: %d\n", cl_srcval->getDevicePtr());
     */
 
+
+}
+
+static cl_uint factorRadix2(cl_uint& log2L, cl_uint L){
+    if(!L){
+        log2L = 0;
+        return 0;
+    }else{
+        for(log2L = 0; (L & 1) == 0; L >>= 1, log2L++);
+        return L;
+    }
+}
+
+
+
+template <class T>
+int Bitonic<T>::Sort(int batch, int arrayLength, int dir,
+                    Buffer<T> *cl_dstkey, Buffer<T> *cl_dstval, 
+                    Buffer<T> *cl_srckey, Buffer<T> *cl_srcval)
+{
+
+    if(arrayLength < 2)
+        return 0;
+
+
     int arg = 0;
     k_bitonicSortLocal.setArg(arg++, cl_dstkey->getDevicePtr());
     k_bitonicSortLocal.setArg(arg++, cl_dstval->getDevicePtr());
@@ -72,26 +97,8 @@ void Bitonic<T>::loadKernels()
 
 
 
-}
-
-static cl_uint factorRadix2(cl_uint& log2L, cl_uint L){
-    if(!L){
-        log2L = 0;
-        return 0;
-    }else{
-        for(log2L = 0; (L & 1) == 0; L >>= 1, log2L++);
-        return L;
-    }
-}
 
 
-
-template <class T>
-int Bitonic<T>::Sort(int batch, int arrayLength, int dir)
-{
-
-    if(arrayLength < 2)
-        return 0;
 
     //Only power-of-two array lengths are supported so far
     cl_uint log2L;

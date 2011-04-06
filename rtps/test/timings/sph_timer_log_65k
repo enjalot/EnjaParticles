@@ -1,0 +1,26 @@
+====================================
+Timers [All times in ms (1/1000 s)]: 
+====================================
+
+Update loop                                         |  avg:    33.0850  |  tot: 36128.7891  |  count=  1092
+Hash function                                       |  avg:     0.0558  |  tot:   183.4709  |  count=  3286
+Hash GPU kernel execution                           |  avg:     0.0208  |  tot:    64.8981  |  count=  3121
+Datastructures function                             |  avg:     0.2930  |  tot:   962.9422  |  count=  3286
+DataStructures GPU kernel execution                 |  avg:     0.1121  |  tot:   349.7904  |  count=  3121
+Bitonic Sort function                               |  avg:     1.6277  |  tot:  5348.4976  |  count=  3286
+Density function                                    |  avg:     2.4343  |  tot:  7998.9897  |  count=  3286
+Density GPU kernel execution                        |  avg:     2.5311  |  tot:  7899.6006  |  count=  3121
+Force function                                      |  avg:     4.5108  |  tot: 14822.4512  |  count=  3286
+Force GPU kernel execution                          |  avg:     4.7115  |  tot: 14704.7168  |  count=  3121
+Collision wall function                             |  avg:     0.0706  |  tot:   232.0134  |  count=  3286
+Collision Wall GPU kernel execution                 |  avg:     0.0340  |  tot:   106.0570  |  count=  3121
+Collision triangles function                        |  avg:     1.6046  |  tot:  5272.7275  |  count=  3286
+Collision Triangle GPU kernel execution             |  avg:     1.6497  |  tot:  5148.8213  |  count=  3121
+Integration kernel execution                        |  avg:     0.1681  |  tot:   552.4059  |  count=  3286
+LeapFrog Integration GPU kernel execution           |  avg:     0.1328  |  tot:   414.3340  |  count=  3121
+Lifetime GPU kernel execution                       |  avg:     0.0324  |  tot:   101.2067  |  count=  3121
+Render call                                         |  avg:     0.4743  |  tot:   518.3617  |  count=  1093
+
+NOTE: only timers that have called Timer::start() are shown. 
+      [A time of 0.0 may indicate the timer was not stopped.]
+====================================

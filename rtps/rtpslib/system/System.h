@@ -57,19 +57,33 @@ namespace rtps
             renderer->render();
         }
 
-        virtual int addBox(int nn, float4 min, float4 max, bool scaled)
+/*
+        template <typename RT>
+        virtual RT GetSettingAs(std::string key, std::string defaultval = "0") 
+        {
+        };
+        template <typename RT>
+        virtual void SetSetting(std::string key, RT value) 
+        {
+        };
+*/
+
+        virtual int addBox(int nn, float4 min, float4 max, bool scaled, float4 color=float4(1., 0., 0., 1.))
         {
             return 0;
         };
+
         virtual void addBall(int nn, float4 center, float radius, bool scaled)
         {
         };
-        virtual void addHose(int total_n, float4 center, float4 velocity, float radius)
+        virtual void addHose(int total_n, float4 center, float4 velocity, float radius, float4 color=float4(1., 0., 0., 1.))
         {
         };
+        /*
         virtual void addHose(int total_n, float4 center, float4 velocity, float radius, float spacing)
         {
         };
+        */
         virtual void sprayHoses()
         {
         };

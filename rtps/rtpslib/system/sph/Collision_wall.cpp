@@ -3,26 +3,48 @@
 namespace rtps
 {
 
-    void SPH::loadCollision_wall()
+    CollisionWall::CollisionWall(CL* cli_, EB::Timer* timer_)
     {
+        cli = cli_;
+        timer = timer_;
         printf("create collision wall kernel\n");
-
         std::string path(SPH_CL_SOURCE_DIR);
         path += "/collision_wall.cl";
-        k_collision_wall = Kernel(ps->cli, path, "collision_wall");
+        k_collision_wall = Kernel(cli, path, "collision_wall");
 
     } 
-
-    void SPH::collide_wall()
+    void CollisionWall::execute(int num,
+            //input
+            //Buffer<float4>& svars, 
+            Buffer<float4>& pos_s, 
+            Buffer<float4>& vel_s, 
+            Buffer<float4>& force_s, 
+            //output
+            //params
+            Buffer<SPHParams>& sphp,
+            Buffer<GridParams>& gp,
+            //debug
+            Buffer<float4>& clf_debug,
+            Buffer<int4>& cli_debug)
     {
         int iargs = 0;
-        k_collision_wall.setArg(iargs++, cl_vars_sorted.getDevicePtr());
-        k_collision_wall.setArg(iargs++, cl_GridParamsScaled.getDevicePtr());
-        k_collision_wall.setArg(iargs++, cl_SPHParams.getDevicePtr());
+        //k_collision_wall.setArg(iargs++, svars.getDevicePtr());
+        k_collision_wall.setArg(iargs++, pos_s.getDevicePtr());
+        k_collision_wall.setArg(iargs++, vel_s.getDevicePtr());
+        k_collision_wall.setArg(iargs++, force_s.getDevicePtr());
+        k_collision_wall.setArg(iargs++, gp.getDevicePtr());
+        k_collision_wall.setArg(iargs++, sphp.getDevicePtr());
 
         int local_size = 128;
-        k_collision_wall.execute(num, local_size);
+        float gputime = k_collision_wall.execute(num, local_size);
+        if(gputime > 0)
+            timer->set(gputime);
+
+
     }
+
+
+    //************* CPU functions
 
     //from Krog '10
     float4 calculateRepulsionForce(float4 normal, float4 vel, float boundary_stiffness, float boundary_dampening, float boundary_distance)
@@ -121,7 +143,7 @@ namespace rtps
             float friction_static_limit = 0.0f;
 
             //bottom wall
-            float diff = sphp.boundary_distance - (p.z - sphp.grid_min.z) * sphp.simulation_scale;
+            float diff = sphp.boundary_distance - (p.z - grid_params.grid_min.z) * sphp.simulation_scale;
             if (diff > sphp.EPSILON)
             {
                 //printf("colliding with the bottom! %d\n", i);
@@ -139,7 +161,7 @@ namespace rtps
             }
 
             //Y walls
-            diff = sphp.boundary_distance - (p.y - sphp.grid_min.y) * sphp.simulation_scale;
+            diff = sphp.boundary_distance - (p.y - grid_params.grid_min.y) * sphp.simulation_scale;
             if (diff > sphp.EPSILON)
             {
                 float4 normal = float4(0.0f, 1.0f, 0.0f, 0.0f);
@@ -153,7 +175,7 @@ namespace rtps
                 f_f.z += cff.z;
 
             }
-            diff = sphp.boundary_distance - (sphp.grid_max.y - p.y) * sphp.simulation_scale;
+            diff = sphp.boundary_distance - (grid_params.grid_max.y - p.y) * sphp.simulation_scale;
             if (diff > sphp.EPSILON)
             {
                 float4 normal = float4(0.0f, -1.0f, 0.0f, 0.0f);
@@ -168,7 +190,7 @@ namespace rtps
 
             }
             //X walls
-            diff = sphp.boundary_distance - (p.x - sphp.grid_min.x) * sphp.simulation_scale;
+            diff = sphp.boundary_distance - (p.x - grid_params.grid_min.x) * sphp.simulation_scale;
             if (diff > sphp.EPSILON)
             {
                 float4 normal = float4(1.0f, 0.0f, 0.0f, 0.0f);
@@ -182,7 +204,7 @@ namespace rtps
                 f_f.z += cff.z;
 
             }
-            diff = sphp.boundary_distance - (sphp.grid_max.x - p.x) * sphp.simulation_scale;
+            diff = sphp.boundary_distance - (grid_params.grid_max.x - p.x) * sphp.simulation_scale;
             if (diff > sphp.EPSILON)
             {
                 float4 normal = float4(-1.0f, 0.0f, 0.0f, 0.0f);

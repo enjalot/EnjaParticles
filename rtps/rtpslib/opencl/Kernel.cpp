@@ -36,8 +36,8 @@ namespace rtps
             cl::Event event;
             cli->err = cli->queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(ndrange), cl::NullRange, NULL, &event);
             cli->queue.finish();
-            event.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
             event.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
+            event.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
             timing = (end - start) * 1.0e-6f;
 
         }
@@ -78,8 +78,8 @@ namespace rtps
             cl::Event event;
             cli->err = cli->queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(global), cl::NDRange(worksize), NULL, &event);
             cli->queue.finish();
-            event.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
             event.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
+            event.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
             timing = (end - start) * 1.0e-6f;
         }
         catch (cl::Error er)

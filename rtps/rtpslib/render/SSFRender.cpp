@@ -131,6 +131,10 @@ namespace rtps
 
     void SSFRender::render()
     {
+
+        glPushAttrib(GL_ALL_ATTRIB_BITS);
+        glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
+
         //perserve original buffer
         GLint buffer;
         glGetIntegerv(GL_DRAW_BUFFER,&buffer);
@@ -151,11 +155,9 @@ namespace rtps
         glViewport(0, 0, window_width, window_height);
         glScissor(0, 0, window_width, window_height);
 
-        timers[TI_RENDER]->start();
+        timers["render"]->start();
 
-        glPushAttrib(GL_ALL_ATTRIB_BITS);
-        glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
-
+        
         if (blending)
         {
             //glDepthMask(GL_FALSE);
@@ -249,6 +251,7 @@ namespace rtps
 
         glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT,0);
         glDrawBuffer(buffer);
+        //glDrawBuffer(GL_BACK);
 
         glViewport(xywh[0],xywh[1],window_width,window_height);
         glScissor(xywh[0], xywh[1], window_width, window_height);
@@ -280,13 +283,15 @@ namespace rtps
 
         glDepthMask(GL_TRUE);
 
-        glPopClientAttrib();
-        glPopAttrib();
         //glDisable(GL_POINT_SMOOTH);
         if (blending)
         {
             glDisable(GL_BLEND);
         }
+
+        glPopClientAttrib();
+        glPopAttrib();
+        
         //glEnable(GL_LIGHTING);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -294,7 +299,7 @@ namespace rtps
         glFinish();
 
         //printf("done rendering\n");
-        timers[TI_RENDER]->end();
+        timers["render"]->end();
         if (write_framebuffers)
         {
             writeFramebufferTextures();

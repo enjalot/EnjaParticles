@@ -3,19 +3,6 @@
 namespace rtps
 {
 
-    void SPH::loadBitonicSort()
-    {
-
-        printf("about to instantiate sorting\n");
-
-        bitonic = Bitonic<unsigned int>( ps->cli,    
-                                &cl_sort_output_hashes,
-                                &cl_sort_output_indices,
-                                &cl_sort_hashes,
-                                &cl_sort_indices);
-
-    }
-
     void SPH::bitonic_sort()
     {
         try
@@ -26,7 +13,13 @@ namespace rtps
             int batch = max_num / arrayLength;
 
             //printf("about to try sorting\n");
-            bitonic.Sort(batch, arrayLength, dir);
+            bitonic.Sort(batch, 
+                        arrayLength, 
+                        dir,
+                        &cl_sort_output_hashes,
+                        &cl_sort_output_indices,
+                        &cl_sort_hashes,
+                        &cl_sort_indices );
 
         }
         catch (cl::Error er)
@@ -77,5 +70,10 @@ namespace rtps
 
 
     }
+
+    //void SPH::radix_sort()
+    //{
+    //}
+
 
 }

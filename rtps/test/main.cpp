@@ -94,7 +94,9 @@ rtps::RTPS* ps;
 
 //#define NUM_PARTICLES 524288
 //#define NUM_PARTICLES 262144
-#define NUM_PARTICLES 65536
+//#define NUM_PARTICLES 131072
+//#define NUM_PARTICLES 65536
+#define NUM_PARTICLES 32768
 //#define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 10000
 //#define NUM_PARTICLES 8192
@@ -103,7 +105,6 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 1024
 //#define NUM_PARTICLES 256
 #define DT .001f
-
 
 
 
@@ -164,20 +165,40 @@ int main(int argc, char** argv)
     //rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
     rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
 
-    settings.setRenderType(RTPSettings::SPRITE_RENDER);
-    //settings.setRenderType(RTPSettings::RENDER);
+    //settings.setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
+    settings.setRenderType(RTPSettings::RENDER);
     //settings.setRenderType(RTPSettings::SPRITE_RENDER);
-    settings.setRadiusScale(4.0);
+    settings.setRadiusScale(1.0);
     settings.setBlurScale(1.0);
     settings.setUseGLSL(1);
-    settings.setUseAlphaBlending(1);    
+
+    settings.SetSetting("render_texture", "firejet_blast.png");
+    settings.SetSetting("render_frag_shader", "sprite_tex_frag.glsl");
+    settings.SetSetting("render_use_alpha", true);
+    //settings.SetSetting("render_use_alpha", false);
+    settings.SetSetting("render_alpha_function", "add");
+    settings.SetSetting("lt_increment", -.00);
+    settings.SetSetting("lt_cl", "lifetime.cl");
+
+
 
 
     ps = new rtps::RTPS(settings);
 
+    ps->settings.SetSetting("Gravity", -9.8f); // -9.8 m/sec^2
+    ps->settings.SetSetting("Gas Constant", 15.0f);
+    ps->settings.SetSetting("Viscosity", .01f);
+    ps->settings.SetSetting("Velocity Limit", 600.0f);
+    ps->settings.SetSetting("XSPH Factor", .2f);
+    ps->settings.SetSetting("Friction Kinetic", 0.0f);
+    ps->settings.SetSetting("Friction Static", 0.0f);
+    ps->settings.SetSetting("Boundary Stiffness", 20000.0f);
+    ps->settings.SetSetting("Boundary Dampening", 256.0f);
+
 
     //initialize the OpenGL scene for rendering
     init_gl();
+
 
     glutMainLoop();
     return 0;
@@ -202,6 +223,7 @@ void init_gl()
 
     // set view matrix
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(.6, .6, .6, 1.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     ps->system->getRenderer()->setWindowDimensions(window_width,window_height);
@@ -251,11 +273,13 @@ void appKeyboard(unsigned char key, int x, int y)
         {
             //spray hose
             printf("about to make hose\n");
-            float4 center(2., 2., 2., 1.);
+            float4 center(1., 2., 2., 1.);
             //float4 velocity(.6, -.6, -.6, 0);
-            float4 velocity(2., 5., -.8, 0);
+            //float4 velocity(2., 5., -.8, 0);
+            float4 velocity(2., .5, 2., 0);
             //sph sets spacing and multiplies by radius value
-            ps->system->addHose(5000, center, velocity, 5);
+            float4 color = float4(.0, 0.0, 1.0, 1.0);
+            ps->system->addHose(5000, center, velocity, 4, color);
             return;
 		}
         case 'n':
@@ -299,7 +323,8 @@ void appKeyboard(unsigned char key, int x, int y)
 
                 min = float4(1.2, 1.2, 1.2, 1.0f);
                 max = float4(2., 2., 2., 1.0f);
-                ps->system->addBox(nn, min, max, false);
+                float4 color = float4(1.0, 0.0, 0.0, 1.0);
+                ps->system->addBox(nn, min, max, false, color);
                 return;
             }
         case 'o':
@@ -344,11 +369,17 @@ void appKeyboard(unsigned char key, int x, int y)
     glTranslatef(translate_x, translate_z, translate_y);*/
 }
 
+void timerCB(int ms)
+{
+    glutTimerFunc(ms, timerCB, ms);
+    ps->update();
+    glutPostRedisplay();
+}
+
 void appRender()
 {
 
     //ps->system->sprayHoses();
-    ps->update();
 
     glEnable(GL_DEPTH_TEST);
     if (stereo_enabled)
@@ -400,11 +431,7 @@ void appDestroy()
     exit(0);
 }
 
-void timerCB(int ms)
-{
-    glutTimerFunc(ms, timerCB, ms);
-    glutPostRedisplay();
-}
+
 
 
 void appMouse(int button, int state, int x, int y)
