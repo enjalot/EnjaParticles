@@ -467,13 +467,13 @@ void FLOCK::pushParticles(vector<float4> pos)
     // if we have reach max num of particles, then return
     if (num + nn > max_num) {return;}
     
-    float rr = (rand() % 255)/255.0f;
-    float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
+    //float rr = (rand() % 255)/255.0f;
+    //float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
     
     std::vector<float4> cols(nn);
     std::vector<float4> vels(nn);
-
-    std::fill(cols.begin(), cols.end(),color);
+    
+    std::fill(cols.begin(), cols.end(),ps->settings.color);
     float4 iv = float4(0.f, 0.f, 0.f, 0.0f);   
     std::fill(vels.begin(), vels.end(),iv);   
 

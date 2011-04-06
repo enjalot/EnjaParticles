@@ -1,3 +1,4 @@
+#version 120
 uniform float pointRadius;  // point size in world space
 uniform float near;
 uniform float far;
@@ -14,11 +15,7 @@ void main()
     // calculate normal from texture coordinates
     vec3 n;
     //we should find a better way of doing this...
-    #if defined(__APPLE__) || defined(MACOSX)
-    n.xy = gl_TexCoord[0].xy*vec2(2.0, -2.0) + vec2(-1.0, 1.0);
-    #else
     n.xy = gl_PointCoord.st*vec2(2.0, -2.0) + vec2(-1.0, 1.0);
-    #endif
     float mag = dot(n.xy, n.xy);
     if (mag > 1.0) discard;   // kill pixels outside circle
     n.z = sqrt(1.0-mag);

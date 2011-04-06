@@ -52,7 +52,7 @@ namespace rtps
         this->max_speed = maxspeed;
         this->min_dist = mindist;
         this->search_radius = searchradius;
-        this->color = float4(color[0], color[1], color[2],1.f);
+        this->color = float4(color[0]/255, color[1]/255, color[2]/255,1.f);
         this->w_sep = w_sep;
         this->w_align = w_align;
         this->w_coh = w_coh;
