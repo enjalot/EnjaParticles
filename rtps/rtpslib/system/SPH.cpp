@@ -1,5 +1,5 @@
 
-#include <GL/glew.h>
+//#include <GL/glew.h>
 #include <math.h>
 
 #include "System.h"
@@ -65,6 +65,7 @@ namespace rtps
 #ifdef GPU
         printf("RUNNING ON THE GPU\n");
 
+        
         //setup the sorted and unsorted arrays
         prepareSorted();
 
