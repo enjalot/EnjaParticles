@@ -1,4 +1,4 @@
-//#include "GL/glew.h"
+#include "GL/glew.h"
 #include "RTPS.h"
 #include "system/Simple.h"
 #include "system/SPH.h"
@@ -47,7 +47,7 @@ namespace rtps
     {
         //this should already be done, but in blender its not
         //whats best way to check if stuff like glGenBuffers has been inited?
-        //glewInit();
+        glewInit();
 
         system = NULL;
         //renderer = NULL;
