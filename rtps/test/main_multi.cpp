@@ -93,6 +93,7 @@ void *font = GLUT_BITMAP_8_BY_13;
 rtps::CL* cli;
 rtps::RTPS* ps1;
 rtps::RTPS* ps2;
+rtps::RTPS* ps3;
 
 //#define NUM_PARTICLES 524288
 //#define NUM_PARTICLES 262144
@@ -198,9 +199,8 @@ int main(int argc, char** argv)
     //settings.SetSetting("render_alpha_function", "alpha");
     settings.SetSetting("lt_increment", .004);
     settings.SetSetting("lt_cl", "lifetime_smoke.cl");
+    
     ps2 = new rtps::RTPS(settings, cli);
-
-
 
     ps1->settings.SetSetting("Gravity", -.8f); // -9.8 m/sec^2
     ps1->settings.SetSetting("Gas Constant", 15.0f);
@@ -213,6 +213,28 @@ int main(int argc, char** argv)
     ps2->settings.SetSetting("Viscosity", .001f);
     ps2->settings.SetSetting("Velocity Limit", 600.0f);
     ps2->settings.SetSetting("XSPH Factor", .3f);
+
+
+    settings.setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
+    //settings.SetSetting("render_texture", "firejet_smoke.png");
+    //settings.SetSetting("render_frag_shader", "sprite_smoke_frag.glsl");
+    //settings.SetSetting("render_texture", "smoke.png");
+    //settings.SetSetting("render_texture", "reddit2.png");
+    //settings.SetSetting("render_texture", "enjalot.jpg");
+    settings.SetSetting("render_use_alpha", true);
+    //settings.SetSetting("render_alpha_function", "multiply");
+    //settings.SetSetting("render_alpha_function", "add");
+    //settings.SetSetting("render_alpha_function", "alpha");
+    settings.SetSetting("lt_increment", .00);
+    settings.SetSetting("lt_cl", "lifetime_smoke.cl");
+ 
+    ps3 = new rtps::RTPS(settings, cli);
+
+    ps3->settings.SetSetting("Gravity", 3.8f); // -9.8 m/sec^2
+    ps3->settings.SetSetting("Gas Constant", 50.0f);
+    ps3->settings.SetSetting("Viscosity", .001f);
+    ps3->settings.SetSetting("Velocity Limit", 600.0f);
+    ps3->settings.SetSetting("XSPH Factor", .3f);
 
 
 
@@ -253,6 +275,7 @@ void appRender()
         glTranslatef(translate_x, translate_z, translate_y);
         ps2->render();
         ps1->render();
+        //ps3->render();
         draw_collision_boxes();
         if(render_movie)
         {
@@ -370,6 +393,7 @@ void appKeyboard(unsigned char key, int x, int y)
 
                 ps1->system->addBox(nn, min, max, false, col1);
                 ps2->system->addBox(nn, min, max, false, col2);
+                ps3->system->addBox(nn, min, max, false, col1);
                 return;
             }
         case 'o':
@@ -455,6 +479,7 @@ void timerCB(int ms)
     glutTimerFunc(ms, timerCB, ms);
     ps1->update();
     ps2->update();
+    //ps3->update();
     glutPostRedisplay();
 }
 
