@@ -15,16 +15,25 @@ rtpslib/
     Build:
     see INSTALL file
 
+    Dependencies:
+    OpenCL
+    OpenGL
+    GLEW
+
+
     Usage:
 
     You can execute the test program like:
-    ./test/test.x
+    ./test/sph.x
+    ./test/flock.x
+    ./test/multi.x
 
     The test program has simple mouse interaction:
         Left-Click and drag to rotate the view
         Right-Click and drag to zoom in and out
     and keyboard:
         r - add particles
+        h - add hose of particles
         p - print timings of various functions
         w, a, s, d - move around like FPS controls
         t - add in some triangles to collide against
@@ -33,25 +42,8 @@ rtpslib/
     hit Q or ESC to exit (right now clicking the x on the window will not properly clean up GPU memory...)
 
 
-
-
-
-
-
-
 cmake/
     cmake modules to help find necessary libraries
-
-environment/
-    scripts to set the environment variables for using this project
-    with my BGEnjaParticles project
-    http://github.com/enjalot/BGEnjaParticles
-
-enjacl/
-    my first attempt at making a particle system, deprecated
-    the particle system library as well as a main.cpp to run it
-    check the README in enjacl for build instructions and more info
-
 
 
 *******************************************************************
