@@ -7,14 +7,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 project(rtpslib C CXX)
 
 #change this later
-SET( BASE_DIR ${rtpslib_SOURCE_DIR}/../..)
-
-#need to include FindOPENCL.cmake to
-SET( CMAKE_MODULE_PATH
-     ${BASE_DIR}/cmake
-     )
-
-message("${CMAKE_MODULE_PATH}\n")
+SET( CMAKE_MODULE_PATH ${RTPS_CMAKE_MODULE_PATH})
+message("cmake_module_path: ${CMAKE_MODULE_PATH}\n")
 
 SET(RTPS_DEBUG TRUE)
 
@@ -56,11 +50,14 @@ FIND_PACKAGE (OpenGL)
 FIND_PACKAGE (OPENCL)
 FIND_PACKAGE (GLEW)
 
+message("OPENCL INCLUDE: ${OPENCL_INCLUDE_DIR}\n")
+
 set (rtpslib_INCLUDES
     #${GLUT_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
     ${GLEW_INCLUDE_PATH}
-    ${BASE_DIR}/opencl10
+    #${BASE_DIR}/opencl10
+    ${OPENCL_INCLUDE_DIR}
     ${rtpslib_SOURCE_DIR}
     ${rtpslib_SOURCE_DIR}/system
     ${rtpslib_SOURCE_DIR}/system/sph
