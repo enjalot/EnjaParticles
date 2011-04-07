@@ -8,10 +8,12 @@ project(rtpsuite)
 
 #need to include FindOPENCL.cmake to
 SET( RTPS_CMAKE_MODULE_PATH
-     ${rtpsuite_SOURCE_DIR}/../cmake
+     ${rtpsuite_SOURCE_DIR}/cmake
 )
 SET( OPENCL_INCLUDE_DIR 
-    ${rtpsuite_SOURCE_DIR}/../opencl10)
+    ${rtpsuite_SOURCE_DIR}/opencl10)
+
+message("rtps_cmake_module_path: ${RTPS_CMAKE_MODULE_PATH}\n")
 
 
 ADD_SUBDIRECTORY (${rtpsuite_SOURCE_DIR}/rtpslib)

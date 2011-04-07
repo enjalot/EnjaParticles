@@ -7,7 +7,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 project(test CXX)
 
 #change this later
-SET( BASE_DIR ${test_SOURCE_DIR}/../..)
+SET( BASE_DIR ${test_SOURCE_DIR}/..)
 SET( RTPS_DIR ${test_SOURCE_DIR}/../rtpslib)
 
 message("base dir: ${BASE_DIR}")
