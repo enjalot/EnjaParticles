@@ -1,5 +1,0 @@
-# setup environment variables for vizlab machines
-
-export ENJA_DIR=${HOME}/research/EnjaParticles/enjacl
-export GRAPHICS_LIB=4
-

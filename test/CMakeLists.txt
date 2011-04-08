@@ -65,7 +65,8 @@ ADD_EXECUTABLE(flock.x ${test_flock_SOURCES})
 message("current build dir:\n")
 message("${BASE_DIR}/rtps/build")
 
-LINK_DIRECTORIES(${BASE_DIR}/rtps/build/rtpslib)
+LINK_DIRECTORIES(${rtpsuite_BINARY_DIR}/rtpslib)
+#${rtpsuite_BINARY_DIR}/bin)
 
 SET(LINK_LIBS
     #${BASE_DIR}/rtps/build/rtpslib/librtps.so
@@ -91,4 +92,11 @@ TARGET_LINK_LIBRARIES (simple.x
 TARGET_LINK_LIBRARIES (flock.x
     ${LINK_LIBS}
 )
+#IF(WIN32)
+install (TARGETS sph.x DESTINATION ${rtpsuite_BINARY_DIR}/bin)
+install (TARGETS multi.x DESTINATION ${rtpsuite_BINARY_DIR}/bin)
+install (TARGETS simple.x DESTINATION ${rtpsuite_BINARY_DIR}/bin)
+install (TARGETS flock.x DESTINATION ${rtpsuite_BINARY_DIR}/bin)
+#install (FILES MathFunctions.h DESTINATION include)
 
+#ENDIF(WIN32)
