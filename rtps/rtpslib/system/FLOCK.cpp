@@ -7,6 +7,8 @@
 #include "Domain.h"
 #include "IV.h"
 
+#include "common/Hose.h"
+
 //for random
 #include<time.h>
 
@@ -131,11 +133,19 @@ void FLOCK::updateGPU()
 
     timers[TI_UPDATE]->start();
     glFinish();
-    cl_position.acquire();
-    cl_color.acquire();
+
     
     //sub-intervals
     int sub_intervals = 1;  //should be a setting
+    
+    for (int i=0; i < sub_intervals; i++)
+    {
+        sprayHoses();
+    }
+
+    cl_position.acquire();
+    cl_color.acquire();
+    
     for(int i=0; i < sub_intervals; i++)
     {
         //printf("hash\n");
@@ -439,7 +449,7 @@ int FLOCK::addBox(int nn, float4 min, float4 max, bool scaled, float4 color)
     vector<float4> rect;
     
     addCube(nn, min, max, flock_settings.spacing, scale, rect);
-    pushParticles(rect);
+    pushParticles(rect, float4(0.f,0.f,0.f,0.f), ps->settings.color);
     
     return rect.size();
 }
@@ -456,11 +466,45 @@ void FLOCK::addBall(int nn, float4 center, float radius, bool scaled)
     printf("\n\n ADDING A SPHERE \n\n");
     
     vector<float4> flockere = addSphere(nn, center, radius, flock_settings.spacing, scale);
-    pushParticles(flockere);
+    pushParticles(flockere, float4(0.f,0.f,0.f,0.f), ps->settings.color);
 }
 
 //----------------------------------------------------------------------
-void FLOCK::pushParticles(vector<float4> pos)
+void FLOCK::addHose(int total_n, float4 center, float4 velocity, float radius, float4 color)
+{
+    printf("wtf for real\n");
+    //in sph we just use sph spacing
+    radius *= flock_settings.spacing;
+    Hose hose = Hose(ps, total_n, center, velocity, radius, flock_settings.spacing, color);
+    printf("wtf\n");
+    hoses.push_back(hose);
+    printf("size of hoses: %d\n", hoses.size());
+}
+
+//----------------------------------------------------------------------
+void FLOCK::sprayHoses()
+{
+    std::vector<float4> parts;
+    for (int i = 0; i < hoses.size(); i++)
+    {
+        parts = hoses[i].spray();
+        
+        if (parts.size() > 0)
+            pushParticles(parts, hoses[i].getVelocity(), hoses[i].getColor());
+    }
+}
+
+//----------------------------------------------------------------------
+void FLOCK::pushParticles(vector<float4> pos, float4 velo, float4 color)
+{
+    int nn = pos.size();
+    std::vector<float4> vels(nn);
+    std::fill(vels.begin(), vels.end(), velo);
+    pushParticles(pos, vels, color);
+}
+
+//----------------------------------------------------------------------
+void FLOCK::pushParticles(vector<float4> pos, vector<float4> vels, float4 color)
 {
     int nn = pos.size();
     
@@ -471,12 +515,12 @@ void FLOCK::pushParticles(vector<float4> pos)
     //float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
     
     std::vector<float4> cols(nn);
-    std::vector<float4> vels(nn);
+    //std::vector<float4> vels(nn);
     
     std::fill(cols.begin(), cols.end(),ps->settings.color);
-    float4 iv = float4(0.f, 0.f, 0.f, 0.0f);   
-    std::fill(vels.begin(), vels.end(),iv);   
-
+    //float4 iv = float4(0.f, 0.f, 0.f, 0.0f);   
+    //std::fill(vels.begin(), vels.end(),iv);   
+printf("pPUSH PARTICLES\n");
 #ifdef CPU
  std::copy(pos.begin(), pos.end(), positions.begin()+num);
 #endif

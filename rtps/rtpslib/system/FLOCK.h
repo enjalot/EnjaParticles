@@ -16,6 +16,8 @@
 //#include "../util.h"
 #include "../domain/Domain.h"
 
+#include <Hose.h>
+
 #include "timege.h"
 #ifdef WIN32
     #if defined(rtps_EXPORTS)
@@ -97,7 +99,12 @@ public:
     
     //wrapper around IV.h addSphere
     void addBall(int nn, float4 center, float radius, bool scaled);
-	
+
+    //wrapper around Hose.h 
+    void addHose(int total_n, float4 center, float4 velocity, float radius, float4 color=float4(1.0, 0.0, 0.0, 1.0f));
+    void sprayHoses();
+
+
     virtual void render();
     
     // timers
@@ -130,6 +137,8 @@ private:
     void setupDomain();
     void prepareSorted();
     void pushParticles(vector<float4> pos);
+    void pushParticles(vector<float4> pos, float4 velo, float4 color=float4(1.0, 0.0, 0.0, 1.0));
+    void pushParticles(vector<float4> pos, vector<float4> velo, float4 color=float4(1.0, 0.0, 0.0, 1.0));
 
     // kernels
     Kernel k_euler; 
@@ -226,7 +235,9 @@ private:
     //OpenCL helper functions, should probably be part of the OpenCL classes
     void loadScopy();
 	void scopy(int n, cl_mem xsrc, cl_mem ydst); 
-   
+
+    //keep track of hoses
+    std::vector<Hose> hoses;   
 };
 
 }

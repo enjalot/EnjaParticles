@@ -154,8 +154,8 @@ int main(int argc, char** argv)
     rtps::Domain grid = Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
     rtps::RTPSettings settings(rtps::RTPSettings::FLOCK, NUM_PARTICLES, DT, grid, maxspeed, mindist, searchradius, color, w_sep, w_align, w_coh);
 
-    //settings.setRenderType(RTPSettings::RENDER);
-    settings.setRenderType(RTPSettings::SPRITE_RENDER);
+    settings.setRenderType(RTPSettings::RENDER);
+    //settings.setRenderType(RTPSettings::SPRITE_RENDER);
     
     settings.setRadiusScale(1.0);
     settings.setBlurScale(1.0);
@@ -288,7 +288,21 @@ void appKeyboard(unsigned char key, int x, int y)
             radius = .3f;
             ps->system->addBall(nn, center, radius, false);
             return;
-        } 
+        }
+        case 'h':
+        {
+            //spray hose
+            printf("about to make hose\n");
+            float4 center(1., 2., 2., 1.);
+            //float4 velocity(.6, -.6, -.6, 0);
+            //float4 velocity(2., 5., -.8, 0);
+            float4 velocity(2., .5, 2., 0);
+            //sph sets spacing and multiplies by radius value
+            float4 color = float4(.0, 0.0, 1.0, 1.0);
+            ps->system->addHose(5000, center, velocity, 4, color);
+            return;
+        }
+
         case 'o':
             ps->system->getRenderer()->writeBuffersToDisk();
             return;
