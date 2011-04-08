@@ -6,9 +6,9 @@
 
 
 #ifdef WIN32
-#include <time.h>
 #include <Windows.h>
 #include "gtod_windows.h"
+#include <time.h>
 #else
 #include <sys/time.h>
 #endif
@@ -31,7 +31,7 @@
 
 namespace EB {
 
-class Timer
+class RTPS_EXPORT Timer
 {
 public:
 	static std::vector<Timer*> timeList;
@@ -75,7 +75,7 @@ public:
 
 
 
-class TimerList : public std::map<std::string, EB::Timer*>
+class RTPS_EXPORT TimerList : public std::map<std::string, EB::Timer*>
 {
     public: 
     void writeToFile(std::string filename) {
