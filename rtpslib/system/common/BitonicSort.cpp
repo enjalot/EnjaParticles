@@ -21,8 +21,8 @@ template <class T>
 void Bitonic<T>::loadKernels()
 {
 
-    std::string path(BITONIC_CL_SOURCE_DIR);
-    path += "/BitonicSort.cl";
+    std::string path(COMMON_CL_SOURCE_DIR);
+    path += "/bitonic.cl";
 
     std::string options = "-D LOCAL_SIZE_LIMIT=512";
     cl::Program prog = cli->loadProgram(path, options);
