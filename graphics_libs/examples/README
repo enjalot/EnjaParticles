@@ -1,7 +1,0 @@
-Perhaps problems are due 64 bit compilation of GLEW. 
-I now link againt 32-bit libraries, after amnual computation of GLEW 5.4
-Segmentation error. 
-----------------------------------------------------------------------
-vbo_explicit: bypass the class file. vbo worked! So there is an error in 
-my class? 
-----------------------------------------------------------------------

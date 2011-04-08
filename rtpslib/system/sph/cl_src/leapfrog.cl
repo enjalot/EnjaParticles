@@ -35,6 +35,7 @@ __kernel void leapfrog(
 
 
 
+
     //external force is gravity
     f.z += sphp->gravity;
     f.w = 0.f;
@@ -51,9 +52,25 @@ __kernel void leapfrog(
     //vnext += sphp->xsph_factor * xsph(i);
     vnext += sphp->xsph_factor * xsph_s[i];
 
+    float4 veval = 0.5f*(v+vnext);
+
+#if 0
+    //crazy velocity freezing effect
+    float x = p.x / sphp->simulation_scale;
+    if (x > 4.)
+    {
+        float mv = length( (float4)(vnext.xyz, 0.0f));
+        //vnext /= mv;
+        //vnext *= log(mv); 
+        //this should be changed to decay with lifetime
+        veval = (float4)(0.0, 0.0, 0.0, 0.0);
+        vnext = (float4)(0.0, 0.0, 0.0, 0.0);
+    }
+#endif
+
+
     p += dt * vnext;
     p.w = 1.0f; //just in case
-    float4 veval = 0.5f*(v+vnext);
 
     //Not sure why we put them back in unsorted order
     //might as well write them back in order and save some memory access costs
