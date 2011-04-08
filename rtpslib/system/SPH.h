@@ -1,6 +1,11 @@
 #ifndef RTPS_SPH_H_INCLUDED
 #define RTPS_SPH_H_INCLUDED
 
+#ifdef WIN32
+#define _USE_MATH_DEFINES
+#include <cmath>
+#endif
+
 #include <string>
 
 #include <RTPS.h>
