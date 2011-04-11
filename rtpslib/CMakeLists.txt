@@ -218,5 +218,4 @@ FILE(COPY ${rtpslib_SOURCE_DIR}/render/shaders/ DESTINATION ${rtpslib_BINARY_DIR
 install (TARGETS rtps DESTINATION ${rtpsuite_BINARY_DIR}/bin)
 #this should probably be done in a different way
 install (DIRECTORY ${rtpslib_BINARY_DIR}/shaders/ DESTINATION ${rtpsuite_BINARY_DIR}/bin/shaders/)
-
 #ENDIF(WIN32)
