@@ -16,10 +16,13 @@
     //#if defined(rtps_EXPORTS)
 	//This needs to be handled better. For some reason the above ifdef works
     // in all the other include files except this one.
+
         #define RTPS_EXPORT __declspec(dllexport)
+
     //#else
     //    #define RTPS_EXPORT __declspec(dllimport)
 	//#endif 
+
 #else
     #define RTPS_EXPORT
 #endif

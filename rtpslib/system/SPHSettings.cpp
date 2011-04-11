@@ -31,7 +31,7 @@ namespace rtps
 
 
         //ratio between particle radius in simulation coords and world coords
-        float simulation_scale = pow(.5 * VP * max_num / domain_vol, 1.f/3.f); 
+        float simulation_scale = pow(.5f * VP * max_num / domain_vol, 1.f/3.f); 
         //float simulation_scale = pow(VP * 16000/ domain_vol, 1.f/3.f); 
 
        

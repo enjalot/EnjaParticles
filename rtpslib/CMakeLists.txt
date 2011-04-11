@@ -30,15 +30,15 @@ IF(WIN32)
 ADD_DEFINITIONS(-DSIMPLE_CL_SOURCE_DIR="./cl_simple")
 ADD_DEFINITIONS(-DSPH_CL_SOURCE_DIR="./cl_sph")
 ADD_DEFINITIONS(-DFLOCK_CL_SOURCE_DIR="./cl_flock")
+ADD_DEFINITIONS(-DCOMMON_CL_SOURCE_DIR="./cl_common")
 ADD_DEFINITIONS(-DGLSL_BIN_DIR="./shaders")
-ADD_DEFINITIONS(-DBITONIC_CL_SOURCE_DIR="./opencl/bitonic_sort/")
 ADD_DEFINITIONS(-DGLSL_SOURCE_DIR="./render/")
 ELSE(WIN32)
 ADD_DEFINITIONS(-DSIMPLE_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_simple")
 ADD_DEFINITIONS(-DSPH_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_sph")
 ADD_DEFINITIONS(-DFLOCK_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_flock")
+ADD_DEFINITIONS(-DCOMMON_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_common")
 ADD_DEFINITIONS(-DGLSL_BIN_DIR="${rtpslib_BINARY_DIR}/shaders")
-ADD_DEFINITIONS(-DBITONIC_CL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/")
 ADD_DEFINITIONS(-DGLSL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/render/")
 ENDIF(WIN32)
 
@@ -66,7 +66,7 @@ set (rtpslib_INCLUDES
     ${rtpslib_SOURCE_DIR}/render/util
     ${rtpslib_SOURCE_DIR}/domain
     ${rtpslib_SOURCE_DIR}/opencl
-    ${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src
+    #${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src
     
 )
 
@@ -209,6 +209,13 @@ add_custom_target(doc DEPENDS ${DOXYGEN_OUTPUT})
 ADD_SUBDIRECTORY(system/simple)
 ADD_SUBDIRECTORY(system/sph)
 ADD_SUBDIRECTORY(system/flock)
+ADD_SUBDIRECTORY(system/common)
 
 MAKE_DIRECTORY(${rtpslib_BINARY_DIR}/shaders)
 FILE(COPY ${rtpslib_SOURCE_DIR}/render/shaders/ DESTINATION ${rtpslib_BINARY_DIR}/shaders/)
+
+#IF(WIN32)
+install (TARGETS rtps DESTINATION ${rtpsuite_BINARY_DIR}/bin)
+#this should probably be done in a different way
+install (DIRECTORY ${rtpslib_BINARY_DIR}/shaders/ DESTINATION ${rtpsuite_BINARY_DIR}/bin/shaders/)
+#ENDIF(WIN32)

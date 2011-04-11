@@ -6,7 +6,7 @@ FILE(GLOB cl_cpy "cl_src/*")
 MAKE_DIRECTORY(${rtpslib_BINARY_DIR}/cl_sph)
 
 FOREACH(loop_var ${cl_cpy})
-    FILE(COPY ${loop_var} DESTINATION ${rtpslib_BINARY_DIR}/cl_sph)
+    FILE(COPY ${loop_var} DESTINATION ${rtpslib_BINARY_DIR}/cl_common)
 ENDFOREACH(loop_var)
 
 IF(RTPS_DEBUG)
@@ -20,7 +20,7 @@ IF(RTPS_DEBUG)
             get_filename_component(filename ${loop_var} NAME)
             #message("var : ${loop_var}")
             #message("cmd : ${rtpslib_SOURCE_DIR}/utils/compile_to_cl.x")
-            EXECUTE_PROCESS(COMMAND ${rtpslib_SOURCE_DIR}/utils/compile_to_cl.x ${filename} ${rtpslib_BINARY_DIR}/cl_sph
+            EXECUTE_PROCESS(COMMAND ${rtpslib_SOURCE_DIR}/utils/compile_to_cl.x ${filename} ${rtpslib_BINARY_DIR}/cl_common
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/cl_src
             )
             #message("working dir :  ${CMAKE_CURRENT_SOURCE_DIR}")
@@ -30,6 +30,6 @@ ENDIF(RTPS_DEBUG)
 
 #IF(WIN32)
 #install (TARGETS rtps DESTINATION bin)
-install (FILES ${cl_cpy} DESTINATION ${rtpsuite_BINARY_DIR}/bin/cl_sph)
+install (FILES ${cl_cpy} DESTINATION ${rtpsuite_BINARY_DIR}/bin/cl_common)
 
 #ENDIF(WIN32)

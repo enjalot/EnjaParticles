@@ -27,3 +27,6 @@ IF(RTPS_DEBUG)
         ENDFOREACH(loop_var)
     ENDIF(NOT WIN32)
 ENDIF(RTPS_DEBUG)
+
+
+install (FILES ${cl_cpy} DESTINATION ${rtpsuite_BINARY_DIR}/bin/cl_flock)
