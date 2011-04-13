@@ -327,7 +327,7 @@ namespace rtps
     {
 
         glEnable(GL_DEPTH_TEST);
-        glColor4f(0.0f, 0.1f, 0.0f, 1.0f);
+        glColor4f(0.0f, 0.4f, 0.0f, 1.0f);
         //glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT2,GL_TEXTURE_2D,0,0);
         //glBindTexture(GL_TEXTURE_2D,gl_framebuffer_texs["normalColor"]);
         //glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT2,GL_TEXTURE_2D,gl_framebuffer_texs["normalColor"],0);

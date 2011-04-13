@@ -106,6 +106,7 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 256
 #define DT .001f
 
+float4 color = float4(0.1, 0.1, 0.73, .05);
 
 
 
@@ -223,7 +224,7 @@ void init_gl()
 
     // set view matrix
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glClearColor(.2, .2, .2, 1.0);
+    glClearColor(.2, .2, .6, 1.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     ps->system->getRenderer()->setWindowDimensions(window_width,window_height);
@@ -254,7 +255,7 @@ void appKeyboard(unsigned char key, int x, int y)
                 nn = 16384;
                 min = float4(.1, .1, .1, 1.0f);
                 max = float4(3.9, 3.9, 3.9, 1.0f);
-                float4 color = float4(0.1, 0.1, 0.3, .05);
+                //float4 color = float4(0.1, 0.1, 0.3, .01);
                 ps->system->addBox(nn, min, max, false,color);
                 return;
             }
@@ -282,7 +283,7 @@ void appKeyboard(unsigned char key, int x, int y)
             float4 velocity(2., .5, 2., 0);
             //sph sets spacing and multiplies by radius value
             //float4 color = float4(.0, 0.0, 1.0, 1.0);
-            float4 color = float4(0.1, 0.1, 0.3, .05);
+            //float4 color = float4(0.1, 0.1, 0.3, .01);
             ps->system->addHose(5000, center, velocity, 4, color);
             return;
 		}
@@ -328,7 +329,6 @@ void appKeyboard(unsigned char key, int x, int y)
                 min = float4(1.2, 1.2, 1.2, 1.0f);
                 max = float4(2., 2., 2., 1.0f);
                 
-                float4 color = float4(0.1, 0.1, 0.3, .05);
                 //float4 color = float4(rand()/(10.*RAND_MAX), rand()/(RAND_MAX+1.0), rand()/(RAND_MAX+1.0), 0.2);
                 ps->system->addBox(nn, min, max, false, color);
                 return;
