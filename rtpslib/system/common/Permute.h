@@ -2,7 +2,8 @@
 #define RTPS_PERMUTE_H_INCLUDED
 
 
-#include <CLL.h>
+#include <RTPS.h>
+//#include <CLL.h>
 #include <Buffer.h>
 
 
@@ -25,7 +26,7 @@ namespace rtps
                     Buffer<float4>& color_s,
                     Buffer<unsigned int>& indices,
                     //params
-                    Buffer<SPHParams>& sphp,
+                    //Buffer<SPHParams>& sphp,
                     Buffer<GridParams>& gp,
                     //debug params
                     Buffer<float4>& clf_debug,

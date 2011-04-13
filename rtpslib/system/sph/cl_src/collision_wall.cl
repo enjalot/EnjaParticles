@@ -23,7 +23,7 @@ __kernel void collision_wall(
     float4 v = vel(i);// * sphp->simulation_scale;
     float4 f = force(i);
     */
-    float4 p = pos_s[i];
+    float4 p = pos_s[i] * sphp->simulation_scale;
     float4 v = vel_s[i];// * sphp->simulation_scale;
     float4 f = force_s[i];
 

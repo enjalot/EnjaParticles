@@ -1,4 +1,4 @@
-#include "SPH.h"
+#include "CellIndices.h"
 
 #include <string>
 
@@ -10,7 +10,7 @@ namespace rtps
         cli = cli_;
         timer = timer_;
         printf("create cellindices kernel\n");
-        std::string path(SPH_CL_SOURCE_DIR);
+        std::string path(COMMON_CL_SOURCE_DIR);
         path = path + "/cellindices.cl";
         k_cellindices = Kernel(cli, path, "cellindices");
         
@@ -22,7 +22,7 @@ namespace rtps
                     Buffer<unsigned int>& ci_start,
                     Buffer<unsigned int>& ci_end,
                     //params
-                    Buffer<SPHParams>& sphp,
+                    //Buffer<SPHParams>& sphp,
                     Buffer<GridParams>& gp,
                     int nb_cells,               //we should be able to get this from the gp buffer
                     //debug params
@@ -39,12 +39,13 @@ namespace rtps
 
 
         int iarg = 0;
+        k_cellindices.setArg(iarg++, num);
         k_cellindices.setArg(iarg++, hashes.getDevicePtr());
         k_cellindices.setArg(iarg++, indices.getDevicePtr());
         k_cellindices.setArg(iarg++, ci_start.getDevicePtr());
         k_cellindices.setArg(iarg++, ci_end.getDevicePtr());
         //k_cellindices.setArg(iarg++, cl_num_changed.getDevicePtr());
-        k_cellindices.setArg(iarg++, sphp.getDevicePtr());
+        //k_cellindices.setArg(iarg++, sphp.getDevicePtr());
         k_cellindices.setArg(iarg++, gp.getDevicePtr());
 
         int workSize = 64;

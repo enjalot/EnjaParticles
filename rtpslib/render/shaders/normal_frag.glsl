@@ -69,8 +69,8 @@ void main()
     float specular = pow(max(0.0, dot(n, h)), shininess);
 	
     //gl_FragData[0] = vec4(1.,0.0,0.0,1.0)*diffuse+specular;
-    gl_FragData[0] = vec4(1.,0.0,0.0,0.5)*diffuse+specular;
-	//gl_FragData[0] = texture2D(colorTex,gl_TexCoord[0].xy)*diffuse+specular;
+    //gl_FragData[0] = vec4(1.,0.0,0.0,0.5)*diffuse+specular;
+	gl_FragData[0] = texture2D(colorTex,gl_TexCoord[0].xy)*diffuse+specular;
 	//gl_FragData[0] = vec4((n+vec3(1.0))/2.,1.0);
 	//gl_FragData[0] = vec4(depth,depth,depth,1.0);
 	//gl_FragDepth = depth;
