@@ -8,14 +8,14 @@
 # WIN32 should work, but is untested
 
 IF (WIN32)
-message(*****Opencl for windows: "$ENV{GPU_COMPUTING_TOOLKIT}" ******)
-	IF(NOT ${GPU_COMPUTING_TOOLKIT})
+message(*****Opencl for windows: "$ENV{CUDA_PATH}" ******)
+	IF(NOT ${CUDA_PATH})
 		# CYGWIN: 
-		SET (GPU_COMPUTING_TOOLKIT "/cygdrive/c/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v3.2/")
-	ENDIF (NOT ${GPU_COMPUTING_TOOLKIT}) 
+		SET (CUDA_PATH "/cygdrive/c/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v3.2/")
+	ENDIF (NOT ${CUDA_PATH}) 
 
     FIND_PATH(OPENCL_INCLUDE_DIR CL/cl.h 
-		$ENV{GPU_COMPUTING_TOOLKIT}/include
+		$ENV{CUDA_PATH}/include
 	)
 
     # TODO this is only a hack assuming the 64 bit library will
@@ -25,8 +25,8 @@ message(*****Opencl for windows: "$ENV{GPU_COMPUTING_TOOLKIT}" ******)
     FIND_LIBRARY(OPENCL_LIBRARIES 
 		NAMES OpenCL opencl opencl32 opencl64 OpenCL.dll
 		PATHS
-		$ENV{GPU_COMPUTING_TOOLKIT}/lib/Win32
-		$ENV{GPU_COMPUTING_TOOLKIT}/lib/x64
+		$ENV{CUDA_PATH}/lib/Win32
+		$ENV{CUDA_PATH}/lib/x64
 		/cygdrive/c/Windows/System32
 		/cygdrive/c/Windows/SysWOW64
 	)
