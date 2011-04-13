@@ -785,7 +785,7 @@ namespace rtps
         {
             return;
         }
-        float rr = (rand() % 255)/255.0f;
+        //float rr = (rand() % 255)/255.0f;
         //float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
         //printf("random: %f\n", rr);
         //float4 color(1.0f,1.0f,1.0f,1.0f);
