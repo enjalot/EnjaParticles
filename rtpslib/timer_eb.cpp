@@ -88,6 +88,7 @@ void Timer::reset()
 //----------------------------------------------------------------------
 void Timer::begin()
 {
+#if 0
 	if (count < offset) {
 		count++;
 		return;
@@ -96,10 +97,12 @@ void Timer::begin()
 	t1 = clock();
 	t2 = 0.0;
 	count++;
+#endif
 }
 //----------------------------------------------------------------------
 void Timer::end()
 {
+#if 0
 	if (count <= offset) return;
 
 	gettimeofday(&t_end, NULL);
@@ -112,6 +115,7 @@ void Timer::end()
 		print();
 		reset();
 	}
+#endif
 
 	//t +=  (clock() - t1) * scale;
 }

@@ -29,7 +29,7 @@ struct timezone
   int  tz_minuteswest; /* minutes W of Greenwich */
   int  tz_dsttime;     /* type of dst correction */
 };
- 
+
 // Definition of a gettimeofday function
  
 RTPS_EXPORT int gettimeofday(struct timeval *tv, struct timezone *tz);
