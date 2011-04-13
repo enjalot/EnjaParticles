@@ -29,7 +29,7 @@ __kernel void leapfrog(
     float4 f = force(i);
     */
 
-    float4 p = pos_s[i];
+    float4 p = pos_s[i] * sphp->simulation_scale;
     float4 v = vel_s[i];
     float4 f = force_s[i];
 

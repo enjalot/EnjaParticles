@@ -240,19 +240,21 @@ namespace rtps
                 cli_debug);
             timers["datastructures"]->stop();
             */
+            //printf("cellindices\n");
             timers["cellindices"]->start();
             int nc = cellindices.execute(   num,
                 cl_sort_hashes,
                 cl_sort_indices,
                 cl_cell_indices_start,
                 cl_cell_indices_end,
-                cl_sphp,
+                //cl_sphp,
                 cl_GridParams,
                 grid_params.nb_cells,
                 clf_debug,
                 cli_debug);
             timers["cellindices"]->stop();
        
+            //printf("permute\n");
             timers["permute"]->start();
             permute.execute(   num,
                 cl_position_u,
@@ -264,7 +266,7 @@ namespace rtps
                 cl_color_u,
                 cl_color_s,
                 cl_sort_indices,
-                cl_sphp,
+                //cl_sphp,
                 cl_GridParams,
                 clf_debug,
                 cli_debug);
@@ -373,7 +375,7 @@ namespace rtps
                 cl_position_u,
                 cl_sort_hashes,
                 cl_sort_indices,
-                cl_sphp,
+                //cl_sphp,
                 cl_GridParams,
                 clf_debug,
                 cli_debug);
@@ -482,6 +484,7 @@ namespace rtps
 
     void SPH::call_prep(int stage)
     {
+            //Replace with enqueueCopyBuffer
 
             prep.execute(num,
                     stage,

@@ -1,7 +1,14 @@
 // HOW TO INCLUDE WHEN COMPILING? ?
 
-#ifndef _CL_MACROS_H_
-#define _CL_MACROS_H_
+#ifndef _CL_SPH_MACROS_H_
+#define _CL_SPH_MACROS_H_
+
+#include "../../common/cl_src/cl_macros.h"
+
+
+
+//All of the below is depracated and not used
+
 
 
 //---------------------------------------------------------------------- 
@@ -58,14 +65,6 @@
 #define unsorted_color_normal(i)    vars_unsorted[i+NORMAL      *numParticles]
 #define unsorted_veleval(i)    		vars_unsorted[i+VELEVAL     *numParticles]
 #define unsorted_xsph(i)    		vars_unsorted[i+XSPH        *numParticles]
-
-
-// FOR DEBUGGING (could check for DEBUG flag
-#define DEBUG_ARGS  , __global float4* clf, __global int4* cli
-#define DEBUG_ARGV  , clf, cli
-
-// , __global int* index_neigh
-// , index_neigh
 
 
 

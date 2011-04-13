@@ -1,4 +1,4 @@
-#include "SPH.h"
+#include "Permute.h"
 
 #include <string>
 
@@ -10,7 +10,7 @@ namespace rtps
         cli = cli_;
         timer = timer_;
         printf("create permute kernel\n");
-        std::string path(SPH_CL_SOURCE_DIR);
+        std::string path(COMMON_CL_SOURCE_DIR);
         path = path + "/permute.cl";
         k_permute = Kernel(cli, path, "permute");
         
@@ -28,7 +28,7 @@ namespace rtps
                     Buffer<float4>& color_s,
                     Buffer<unsigned int>& indices,
                     //params
-                    Buffer<SPHParams>& sphp,
+                    //Buffer<SPHParams>& sphp,
                     Buffer<GridParams>& gp,
                     //debug params
                     Buffer<float4>& clf_debug,
@@ -37,6 +37,7 @@ namespace rtps
 
         
         int iarg = 0;
+        k_permute.setArg(iarg++, num);
         k_permute.setArg(iarg++, pos_u.getDevicePtr());
         k_permute.setArg(iarg++, pos_s.getDevicePtr());
         k_permute.setArg(iarg++, vel_u.getDevicePtr());
@@ -46,7 +47,7 @@ namespace rtps
         k_permute.setArg(iarg++, color_u.getDevicePtr());
         k_permute.setArg(iarg++, color_s.getDevicePtr());
         k_permute.setArg(iarg++, indices.getDevicePtr());
-        k_permute.setArg(iarg++, sphp.getDevicePtr());
+        //k_permute.setArg(iarg++, sphp.getDevicePtr());
         k_permute.setArg(iarg++, gp.getDevicePtr());
 
         int workSize = 64;

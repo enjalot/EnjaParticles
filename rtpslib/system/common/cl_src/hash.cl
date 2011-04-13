@@ -25,10 +25,11 @@
 // CANNOT USE references to structures/classes as arguments!
 __kernel void hash(
                   //__global float4* vars_unsorted,
+                  int num,
                   __global float4* pos_u,
                   __global uint* sort_hashes,
                   __global uint* sort_indexes,
-                  __constant struct SPHParams* sphp,
+                  //__constant struct SPHParams* sphp,
                   __constant struct GridParams* gp
                   DEBUG_ARGS
                   //__global float4* fdebug,
@@ -37,7 +38,7 @@ __kernel void hash(
 {
     // particle index
     uint index = get_global_id(0);
-    int num = sphp->num;
+    //int num = sphp->num;
     //int num = get_global_size(0);
     //comment this out to hash everything if using max_num
     if (index >= num) return;

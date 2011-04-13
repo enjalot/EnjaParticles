@@ -10,17 +10,18 @@
 //#pragma cl_khr_global_int32_base_atomics : enable
 //----------------------------------------------------------------------
 __kernel void cellindices(
-                           __global uint* sort_hashes,
+                            int num,
+                            __global uint* sort_hashes,
                             __global uint* sort_indices,
                             __global uint* cell_indices_start,
                             __global uint* cell_indices_end,
-                            __constant struct SPHParams* sphp,
+                            //__constant struct SPHParams* sphp,
                             __constant struct GridParams* gp,
                             __local  uint* sharedHash   // blockSize+1 elements
                             )
 {
     uint index = get_global_id(0);
-    int num = sphp->num;
+    //int num = sphp->num;
     //int num = get_global_size(0);
     //if (index >= num) return;
     uint ncells = gp->nb_cells;

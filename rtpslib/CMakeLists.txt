@@ -91,7 +91,15 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/domain/IV
     ${rtpslib_SOURCE_DIR}/system/common/Hose
     
-	# Simple
+
+    # common use for all systems
+    ${rtpslib_SOURCE_DIR}/system/common/Hose
+    ${rtpslib_SOURCE_DIR}/system/common/Hash
+    ${rtpslib_SOURCE_DIR}/system/common/CellIndices
+    ${rtpslib_SOURCE_DIR}/system/common/Permute
+	
+    
+    # Simple
     ${rtpslib_SOURCE_DIR}/system/Simple.cpp
     ${rtpslib_SOURCE_DIR}/system/simple/ForceField
     ${rtpslib_SOURCE_DIR}/system/simple/Euler
@@ -103,7 +111,12 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/sph/LeapFrog
     ${rtpslib_SOURCE_DIR}/system/sph/Lifetime
     
-    ${rtpslib_SOURCE_DIR}/system/common/Hose
+    ${rtpslib_SOURCE_DIR}/system/sph/Prep
+    ${rtpslib_SOURCE_DIR}/system/sph/Sort
+    ${rtpslib_SOURCE_DIR}/system/sph/Density
+    ${rtpslib_SOURCE_DIR}/system/sph/Force
+    ${rtpslib_SOURCE_DIR}/system/sph/Collision_wall
+    ${rtpslib_SOURCE_DIR}/system/sph/Collision_triangle
 
     #### these are CPU only
     ${rtpslib_SOURCE_DIR}/system/sph/Pressure
@@ -111,19 +124,6 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/sph/XSPH
     ####
 
-    ${rtpslib_SOURCE_DIR}/system/sph/Collision_wall
-    ${rtpslib_SOURCE_DIR}/system/sph/Collision_triangle
-    
-    #Neighbor datastructures
-    ${rtpslib_SOURCE_DIR}/system/sph/Prep
-    ${rtpslib_SOURCE_DIR}/system/sph/Hash
-    ${rtpslib_SOURCE_DIR}/system/sph/BitonicSort
-    #${rtpslib_SOURCE_DIR}/system/sph/DataStructures
-    ${rtpslib_SOURCE_DIR}/system/sph/CellIndices
-    ${rtpslib_SOURCE_DIR}/system/sph/Permute
-    #${rtpslib_SOURCE_DIR}/system/sph/Neighbors
-    ${rtpslib_SOURCE_DIR}/system/sph/Density
-    ${rtpslib_SOURCE_DIR}/system/sph/Force
 
 	# FLOCK
     ${rtpslib_SOURCE_DIR}/system/FLOCK.cpp
