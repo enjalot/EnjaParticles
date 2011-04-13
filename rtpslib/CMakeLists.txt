@@ -10,7 +10,9 @@ project(rtpslib C CXX)
 SET( CMAKE_MODULE_PATH ${RTPS_CMAKE_MODULE_PATH})
 message("cmake_module_path: ${CMAKE_MODULE_PATH}\n")
 
+#this mostly affects the preprocessing of cl files
 SET(RTPS_DEBUG TRUE)
+#SET(RTPS_DEBUG FALSE)
 
 ###### SETTING RELATED TO GPU VS CPU IMPLEMENTATIONS ##########################
 SET(WITH_OPENCL TRUE)
@@ -206,10 +208,10 @@ add_custom_target(doc DEPENDS ${DOXYGEN_OUTPUT})
 
 
 
+ADD_SUBDIRECTORY(system/common)
 ADD_SUBDIRECTORY(system/simple)
 ADD_SUBDIRECTORY(system/sph)
 ADD_SUBDIRECTORY(system/flock)
-ADD_SUBDIRECTORY(system/common)
 
 MAKE_DIRECTORY(${rtpslib_BINARY_DIR}/shaders)
 FILE(COPY ${rtpslib_SOURCE_DIR}/render/shaders/ DESTINATION ${rtpslib_BINARY_DIR}/shaders/)

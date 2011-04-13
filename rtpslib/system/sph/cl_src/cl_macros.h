@@ -3,7 +3,7 @@
 #ifndef _CL_SPH_MACROS_H_
 #define _CL_SPH_MACROS_H_
 
-#include "../../common/cl_src/cl_macros.h"
+#include "../cl_common/cl_macros.h"
 
 
 
