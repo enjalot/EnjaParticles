@@ -547,7 +547,7 @@ namespace rtps
 
     void SPH::prepareSorted()
     {
-#include "sph/cl_src/cl_macros.h"
+//#include "sph/cl_src/cl_macros.h"
 
         positions.resize(max_num);
         colors.resize(max_num);

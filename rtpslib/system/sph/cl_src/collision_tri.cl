@@ -1,4 +1,4 @@
-#include "../../common/cl_src/cl_macros.h"
+#include "cl_macros.h"
 #include "cl_structs.h"
 #include "cl_collision.h"
 
