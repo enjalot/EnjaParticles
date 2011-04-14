@@ -54,6 +54,10 @@ RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain gri
     this->color = float4(r,g,b,1.f);
 }
 
+RTPSettings::~RTPSettings()
+{
+    printf("destructing!\n");
+}
 
     void RTPSettings::printSettings()
     {

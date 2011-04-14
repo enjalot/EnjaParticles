@@ -110,6 +110,8 @@ float4 color = float4(0.1, 0.1, 0.73, .05);
 
 
 
+
+
 //timers
 //GE::Time *ts[3];
 
@@ -184,22 +186,29 @@ int main(int argc, char** argv)
 
 
 
+printf("creating new system\n");
     ps = new rtps::RTPS(settings);
+    //ps = new rtps::RTPS();
+printf("system created\n");
+printf("system created\n");
+printf("system created\n");
 
-    ps->settings.SetSetting("Gravity", -9.8f); // -9.8 m/sec^2
-    ps->settings.SetSetting("Gas Constant", 15.0f);
-    ps->settings.SetSetting("Viscosity", .01f);
-    ps->settings.SetSetting("Velocity Limit", 600.0f);
-    ps->settings.SetSetting("XSPH Factor", .2f);
-    ps->settings.SetSetting("Friction Kinetic", 0.0f);
-    ps->settings.SetSetting("Friction Static", 0.0f);
-    ps->settings.SetSetting("Boundary Stiffness", 20000.0f);
-    ps->settings.SetSetting("Boundary Dampening", 256.0f);
+    ps->settings->SetSetting("Gravity", -9.8f); // -9.8 m/sec^2
+    ps->settings->SetSetting("Gas Constant", 15.0f);
+    ps->settings->SetSetting("Viscosity", .01f);
+    ps->settings->SetSetting("Velocity Limit", 600.0f);
+    ps->settings->SetSetting("XSPH Factor", .2f);
+    ps->settings->SetSetting("Friction Kinetic", 0.0f);
+    ps->settings->SetSetting("Friction Static", 0.0f);
+    ps->settings->SetSetting("Boundary Stiffness", 20000.0f);
+    ps->settings->SetSetting("Boundary Dampening", 256.0f);
 
+printf("initializing gl\n");
 
     //initialize the OpenGL scene for rendering
     init_gl();
 
+printf("about to start main loop\n");
 
     glutMainLoop();
     return 0;

@@ -20,19 +20,23 @@ namespace rtps
 
     SPH::SPH(RTPS *psfr, int n)
     {
+printf("in sph constructor\n");
         //store the particle system framework
         ps = psfr;
-        settings = &ps->settings;
-
+        settings = ps->settings;
+printf("settin some variables\n");
         max_num = n;
         num = 0;
         nb_var = 10;
 
+printf("blah blah balh\n");
         //seed random
         srand ( time(NULL) );
 
+printf("setting grid\n");
         grid = settings->grid;
 
+printf("grid set\n");
         //sphsettings = new SPHSettings(grid, max_num);
         //sphsettings->printSettings();
         //sphsettings->updateSPHP(sphp);
@@ -40,6 +44,7 @@ namespace rtps
         vparams.push_back(sphp);
         cl_sphp = Buffer<SPHParams>(ps->cli, vparams);
 
+printf("did some buffer stuff\n");
         calculate();
         updateSPHP();
 
@@ -111,11 +116,14 @@ namespace rtps
         lifetime = Lifetime(ps->cli, timers["lifetime_gpu"], lt_file);
 
 
+        printf("Done with CL lets do GL\n");
+
 #endif
 
         // settings defaults to 0
         //renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
         setRenderer();
+        printf("done with setRenderer\n");
 
         //printf("MAIN settings: \n");
         //settings->printSettings();
@@ -143,6 +151,7 @@ namespace rtps
 
     void SPH::update()
     {
+printf("update!\n");
         //call kernels
         //TODO: add timings
 #ifdef CPU
@@ -187,12 +196,13 @@ namespace rtps
     void SPH::updateGPU()
     {
 
+printf("update GPU\n");
         timers["update"]->start();
         glFinish();
-
+printf("setttings\n");
         if (settings->has_changed()) updateSPHP();
 
-        //settings->printSettings();
+        settings->printSettings();
 
         //GE
         int sub_intervals = 3;  //should be a setting
@@ -204,6 +214,7 @@ namespace rtps
         {
             sprayHoses();
         }
+printf("acquiring\n");
 
         cl_position_u.acquire();
         cl_color_u.acquire();
@@ -850,22 +861,22 @@ namespace rtps
     }
     void SPH::setRenderer()
     {
-        switch(ps->settings.getRenderType())
+        switch(ps->settings->getRenderType())
         {
             case RTPSettings::SPRITE_RENDER:
-                renderer = new SpriteRender(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+                renderer = new SpriteRender(pos_vbo,col_vbo,num,ps->cli, ps->settings);
                 printf("spacing for radius %f\n", spacing);
                 break;
             case RTPSettings::SCREEN_SPACE_RENDER:
                 //renderer = new ScreenSpaceRender();
-                renderer = new SSFRender(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+                renderer = new SSFRender(pos_vbo,col_vbo,num,ps->cli, ps->settings);
                 break;
             case RTPSettings::RENDER:
-                renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+                renderer = new Render(pos_vbo,col_vbo,num,ps->cli, ps->settings);
                 break;
             default:
                 //should be an error
-                renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+                renderer = new Render(pos_vbo,col_vbo,num,ps->cli, ps->settings);
                 break;
         }
         //renderer->setParticleRadius(spacing*0.5);

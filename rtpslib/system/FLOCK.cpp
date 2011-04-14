@@ -33,7 +33,7 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     //seed random
     srand ( time(NULL) );
 
-    grid = ps->settings.grid;
+    grid = ps->settings->grid;
 
     //FLOCKSettings depend on number of particles used
 	// Must be called before load kernel methods!
@@ -263,9 +263,9 @@ void FLOCK::calculateFLOCKSettings()
     params.num = num;
     
     // Boids parameters
-	params.min_dist     = 0.5f * params.smoothing_distance * ps->settings.min_dist; // desired separation between boids
-    params.search_radius= 0.8f * params.smoothing_distance * ps->settings.search_radius;
-    params.max_speed    = 1.0f * ps->settings.max_speed;
+	params.min_dist     = 0.5f * params.smoothing_distance * ps->settings->min_dist; // desired separation between boids
+    params.search_radius= 0.8f * params.smoothing_distance * ps->settings->search_radius;
+    params.max_speed    = 1.0f * ps->settings->max_speed;
 
     // debug mymese
 #if 0
@@ -525,21 +525,21 @@ void FLOCK::render()
 //----------------------------------------------------------------------
 void FLOCK::setRenderer()
 {
-    switch(ps->settings.getRenderType())
+    switch(ps->settings->getRenderType())
     {
         case RTPSettings::SPRITE_RENDER:
-            renderer = new SpriteRender(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+            renderer = new SpriteRender(pos_vbo,col_vbo,num,ps->cli, ps->settings);
             printf("spacing for radius %f\n", flock_settings.spacing);
             break;
         case RTPSettings::SCREEN_SPACE_RENDER:
-            renderer = new SSFRender(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+            renderer = new SSFRender(pos_vbo,col_vbo,num,ps->cli, ps->settings);
             break;
         case RTPSettings::RENDER:
-            renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+            renderer = new Render(pos_vbo,col_vbo,num,ps->cli, ps->settings);
             break;
         default:
             //should be an error
-            renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+            renderer = new Render(pos_vbo,col_vbo,num,ps->cli, ps->settings);
         break;
     }
     renderer->setParticleRadius(flock_settings.spacing);

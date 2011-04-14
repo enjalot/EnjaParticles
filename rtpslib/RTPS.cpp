@@ -16,19 +16,20 @@ namespace rtps
         Init();
     }
 
-    RTPS::RTPS(RTPSettings s)
+    RTPS::RTPS(RTPSettings &s)
     {
         cli = new CL();
         cl_managed = true;
-        settings = s;
+        settings = &s;
         Init();
+printf("done with constructor\n");
     }
 
-    RTPS::RTPS(RTPSettings s, CL* _cli)
+    RTPS::RTPS(RTPSettings &s, CL* _cli)
     {
         cli = _cli;
         cl_managed = false;
-        settings = s;
+        settings = &s;
         Init();
     }
 
@@ -52,25 +53,26 @@ namespace rtps
         system = NULL;
         //renderer = NULL;
 
-        printf("init: settings.system: %d\n", settings.system);
+        printf("init: settings->system: %d\n", settings->system);
         //TODO choose based on settings
-        //system = new Simple(this, settings.max_particles);
-        if (settings.system == RTPSettings::Simple)
+        //system = new Simple(this, settings->max_particles);
+        if (settings->system == RTPSettings::Simple)
         {
             printf("simple system\n");
-            system = new Simple(this, settings.max_particles);
+            system = new Simple(this, settings->max_particles);
         }
-        else if (settings.system == RTPSettings::SPH)
+        else if (settings->system == RTPSettings::SPH)
         {
             printf("sph system\n");
-            system = new SPH(this, settings.max_particles);
+            system = new SPH(this, settings->max_particles);
         }
-        else if (settings.system == RTPSettings::FLOCK)
+        else if (settings->system == RTPSettings::FLOCK)
         {
             printf("flock system\n");
-            system = new FLOCK(this, settings.max_particles);
+            system = new FLOCK(this, settings->max_particles);
         }
 
+printf("created system in RTPS\n");
 
         //pass in the position and color vbo ids to the renderer
         //get the number from the system
@@ -91,7 +93,7 @@ namespace rtps
         /*renderer->render();
         //this functionality should be inside the system's render() function
         //so System should own the renderer object
-        if(settings.system == RTPSettings::SPH)
+        if(settings->system == RTPSettings::SPH)
         {
             Domain grid = system->getGrid();
             //should check if grid exists

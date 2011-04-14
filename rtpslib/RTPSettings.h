@@ -49,6 +49,11 @@ namespace rtps
         //flock
         RTPSettings(SysType system, int max_particles, float dt, Domain grid, float maxspeed, float mindist, float searchradius, float color[]);
 
+        //without this, windows was crashing with a ValidHeapPointer
+        //assertion error. Indicates the heap may be corrupted by 
+        //something in here
+        ~RTPSettings();
+
         //TODO get rid of all variables, just use map
         //maximum number of particles a system can hold
         int max_particles;

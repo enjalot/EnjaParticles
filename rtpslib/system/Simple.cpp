@@ -15,7 +15,7 @@ namespace rtps
         num = max_num;
         //store the particle system framework
         ps = psfr;
-        grid = ps->settings.grid;
+        grid = ps->settings->grid;
         forcefields_enabled = true;
         max_forcefields = 100;
 
