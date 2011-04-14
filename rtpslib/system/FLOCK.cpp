@@ -24,6 +24,10 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     num = 0;
     nb_var = 10;
 
+    //seed random
+    srand ( time(NULL) );
+    
+    /*
     positions.resize(max_num);
     colors.resize(max_num);
     forces.resize(max_num);
@@ -31,16 +35,26 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     veleval.resize(max_num);
     densities.resize(max_num);
     xflocks.resize(max_num);
+    */
 
-    //seed random
-    srand ( time(NULL) );
 
     grid = ps->settings.grid;
 
+    std::vector<FLOCKParams> vparams(0);
+    vparams.push_back(flock_params);
+    cl_FLOCKParameters= Buffer<FLOCKParameters>(ps->cli, vparams);
+
+
+
     //FLOCKSettings depend on number of particles used
 	// Must be called before load kernel methods!
-    calculateFLOCKSettings();
+    //calculateFLOCKSettings();
     
+    calculate();
+    updateFLOCKP();
+
+    spacing = settings->GetSettingsAs<float>("Spacing");
+
     //set up the grid
     setupDomain();
     
@@ -48,28 +62,38 @@ FLOCK::FLOCK(RTPS *psfr, int n)
 
     setupTimers();
 
-    //setup the sorted and unsorted arrays
-    prepareSorted();
-
-    std::string cl_includes(FLOCK_CL_SOURCE_DIR);
-    ps->cli->setIncludeDir(cl_includes);
-
 #ifdef CPU
     printf("RUNNING ON THE CPU\n");
 #endif
 #ifdef GPU
     printf("RUNNING ON THE GPU\n");
 
-    loadEuler();
+    //setup the sorted and unsorted arrays
+    prepareSorted();
+
+    std::string cl_includes(FLOCK_CL_SOURCE_DIR);
+    ps->cli->setIncludeDir(cl_includes);
+
+    //loadEuler();
 
     loadScopy();
 
-    loadPrep();
-    loadHash();
-    loadBitonicSort();
-    loadDataStructures();
-    loadNeighbors();
+    //loadPrep();
+    prep = Prep(ps->cli, timers["prep_gpu"]);
+    //loadHash();
+    hash = Hash(ps->cli, timers["hash_gpu"]);
+    //loadBitonicSort();
+    bitonic = Bitonic<unsigned int>(ps->cli);
     
+    //loadDataStructures();
+    //loadNeighbors();
+    
+    cellindices = CellIndices(ps->cli, timers["ci_gpu"]);
+    permute = Permute(ps->cli, timers["perm_gpu"]);
+    
+    density = Density(ps->cli, timers["density_gpu"]);
+
+
 #endif
      
     setRenderer();
@@ -109,7 +133,7 @@ void FLOCK::update()
 //----------------------------------------------------------------------
 void FLOCK::updateCPU()
 {
-    timers[TI_UPDATE]->start();
+    //timers[TI_UPDATE]->start();
     
     ge_cpuEuler();  // based on my boids program
 
@@ -124,17 +148,20 @@ void FLOCK::updateCPU()
     glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
     glBufferData(GL_ARRAY_BUFFER, num * sizeof(float4), &positions[0], GL_DYNAMIC_DRAW);
     
-    timers[TI_UPDATE]->end();
+    //timers[TI_UPDATE]->end();
 }
 
 //----------------------------------------------------------------------
 void FLOCK::updateGPU()
 {
 
-    timers[TI_UPDATE]->start();
+    //timers[TI_UPDATE]->start();
+    timers["update"]->start();
     glFinish();
 
-    
+    if(settings->has_changes())
+        updateFLOCKP();
+
     //sub-intervals
     int sub_intervals = 1;  //should be a setting
     
@@ -143,11 +170,12 @@ void FLOCK::updateGPU()
         sprayHoses();
     }
 
-    cl_position.acquire();
-    cl_color.acquire();
+    cl_position_u.acquire();
+    cl_color_u.acquire();
     
     for(int i=0; i < sub_intervals; i++)
     {
+        /*
         //printf("hash\n");
         timers[TI_HASH]->start();
         hash();
@@ -172,26 +200,152 @@ void FLOCK::updateGPU()
         timers[TI_DENS]->end();
 
         timers[TI_NEIGH]->end();
-        
+        */
+
+        hash_and_sort();
+
+
+        timers["cellindices"]->start();
+        int nc = cellindices.execute(   num,
+            cl_sort_hashes,
+            cl_sort_indices,
+            cl_cell_indices_start,
+            cl_cell_indices_end,
+            cl_sphp,
+            cl_GridParams,
+            grid_params.nb_cells,
+            clf_debug,
+            cli_debug);
+        timers["cellindices"]->stop();
+       
+        timers["permute"]->start();
+        permute.execute(   num,
+            cl_position_u,
+            cl_position_s,
+            cl_velocity_u,
+            cl_velocity_s,
+            cl_veleval_u,
+            cl_veleval_s,
+            cl_color_u,
+            cl_color_s,
+            cl_sort_indices,
+            cl_sphp,
+            cl_GridParams,
+            clf_debug,
+            cli_debug);
+        timers["permute"]->stop();
+
+            //printf("num %d, nc %d\n", num, nc);
+        if (nc <= num && nc >= 0)
+        {
+            //check if the number of particles have changed
+            //(this happens when particles go out of bounds,
+            //  either because of forces or by explicitly placing
+            //  them in order to delete)
+            //
+            //if so we need to copy sorted into unsorted
+            //and redo hash_and_sort
+            printf("SOME PARTICLES WERE DELETED!\n");
+            printf("nc: %d num: %d\n", nc, num);
+
+            deleted_pos.resize(num-nc);
+            deleted_vel.resize(num-nc);
+            //The deleted particles should be the nc particles after num
+            cl_position_s.copyToHost(deleted_pos, nc); //damn these will always be out of bounds here!
+            cl_velocity_s.copyToHost(deleted_vel, nc);
+
+ 
+            num = nc;
+            settings->SetSetting("Number of Particles", num);
+            //sphp.num = num;
+            updateSPHP();
+            renderer->setNum(sphp.num);
+            //need to copy sorted arrays into unsorted arrays
+            call_prep(2);
+            printf("HOW MANY NOW? %d\n", num);
+            hash_and_sort();
+            //we've changed num and copied sorted to unsorted. skip this iteration and do next one
+            //this doesn't work because sorted force etc. are having an effect?
+            //continue; 
+        }
+
+        //if(num >0) printf("density\n");
+        timers["density"]->start();
+        density.execute(   num,
+            //cl_vars_sorted,
+            cl_position_s,
+            cl_density_s,
+            cl_cell_indices_start,
+            cl_cell_indices_end,
+            cl_sphp,
+            cl_GridParamsScaled,
+            clf_debug,
+            cli_debug);
+       timers["density"]->stop();
+            
+       collision();
+       timers["integrate"]->start();
+       integrate();
+       timers["integrate"]->stop();
+
+
         //printf("integrate\n");
-        integrate();		// compute the rules and itegrate
+        //integrate();		// compute the rules and itegrate
     }
 
     cl_position.release();
     cl_color.release();
 
-    timers[TI_UPDATE]->end();
+    //timers[TI_UPDATE]->end();
+    timers["update"]->stop;
+}
 
+//----------------------------------------------------------------------
+void SPH::hash_and_sort()
+{
+    //printf("hash\n");
+    timers["hash"]->start();
+    hash.execute(   num,
+        //cl_vars_unsorted,
+        cl_position_u,
+        cl_sort_hashes,
+        cl_sort_indices,
+        cl_sphp,
+        cl_GridParams,
+        clf_debug,
+        cli_debug);
+    timers["hash"]->stop();
+
+    //printf("bitonic_sort\n");
+    //defined in Sort.cpp
+    timers["bitonic"]->start();
+    bitonic_sort();
+    timers["bitonic"]->stop();
 }
 
 //----------------------------------------------------------------------
 void FLOCK::integrate()
 {
-    int local_size = 128;
+    euler.execute(num,
+        settings->dt,
+        cl_position_u,
+        cl_position_s,
+        cl_velocity_u,
+        cl_velocity_s,
+        cl_force_s,
+        //cl_vars_unsorted, 
+        //cl_vars_sorted, 
+        cl_sort_indices,
+        cl_sphp,
+        //debug
+        clf_debug,
+        cli_debug);
+
+    //int local_size = 128;
         
-    timers[TI_EULER]->start();
-    k_euler.execute(num, local_size);
-    timers[TI_EULER]->end();
+    //timers[TI_EULER]->start();
+    //k_euler.execute(num, local_size);
+    //timers[TI_EULER]->end();
 
     // mymese debugging
 #if 0 
@@ -220,7 +374,7 @@ int FLOCK::setupTimers()
 {
     int print_freq = 1000; //one second
     int time_offset = 5;
-
+/*
     timers[TI_UPDATE]     = new GE::Time("update", time_offset, print_freq);
     timers[TI_HASH]     = new GE::Time("hash", time_offset, print_freq);
     timers[TI_BUILD]     = new GE::Time("build", time_offset, print_freq);
@@ -232,22 +386,45 @@ int FLOCK::setupTimers()
     timers[TI_COLLISION_TRI]     = new GE::Time("collision_triangle", time_offset, print_freq);
     timers[TI_EULER]     = new GE::Time("euler", time_offset, print_freq);
     timers[TI_LEAPFROG]     = new GE::Time("leapfrog", time_offset, print_freq);
+*/
 
+    timers["update"] = new EB::Timer("Update loop", time_offset);
+    timers["hash"] = new EB::Timer("Hash function", time_offset);
+    timers["hash_gpu"] = new EB::Timer("Hash GPU kernel execution", time_offset);
+    //timers["datastructures"] = new EB::Timer("Datastructures function", time_offset);
+    timers["cellindices"] = new EB::Timer("CellIndices function", time_offset);
+    timers["ci_gpu"] = new EB::Timer("CellIndices GPU kernel execution", time_offset);
+    timers["permute"] = new EB::Timer("Permute function", time_offset);
+    timers["perm_gpu"] = new EB::Timer("Permute GPU kernel execution", time_offset);
+    timers["ds_gpu"] = new EB::Timer("DataStructures GPU kernel execution", time_offset);
+    timers["bitonic"] = new EB::Timer("Bitonic Sort function", time_offset);
+    //timers["neighbor"] = new EB::Timer("Neighbor Total", time_offset);
+    timers["density"] = new EB::Timer("Density function", time_offset);
+    timers["density_gpu"] = new EB::Timer("Density GPU kernel execution", time_offset);
+    //timers["collision_wall"] = new EB::Timer("Collision wall function", time_offset);
+    //timers["cw_gpu"] = new EB::Timer("Collision Wall GPU kernel execution", time_offset);
+    //timers["collision_tri"] = new EB::Timer("Collision triangles function", time_offset);
+    //timers["ct_gpu"] = new EB::Timer("Collision Triangle GPU kernel execution", time_offset);
+    timers["integrate"] = new EB::Timer("Integration kernel execution", time_offset);
+    timers["euler_gpu"] = new EB::Timer("Euler Integration GPU kernel execution", time_offset);
+    timers["prep_gpu"] = new EB::Timer("Prep GPU kernel execution", time_offset);
 	return 0;
 }
 
 //----------------------------------------------------------------------
 void FLOCK::printTimers()
 {
-    for(int i = 0; i < 11; i++) //switch to vector of timers and use size()
-    {
-        timers[i]->print();
-    }
-    System::printTimers();
+//    for(int i = 0; i < 11; i++) //switch to vector of timers and use size()
+//    {
+//        timers[i]->print();
+//    }
+//    System::printTimers();
+    timers.printAll();
+    timers.writeToFile("flock_timer_log");
 }
 
 //----------------------------------------------------------------------
-void FLOCK::calculateFLOCKSettings()
+/*void FLOCK::calculateFLOCKSettings()
 {
 
     float4 dmin = grid.getBndMin();
@@ -296,17 +473,28 @@ void FLOCK::calculateFLOCKSettings()
 #endif
 
 }
-
+*/
 //----------------------------------------------------------------------
 void FLOCK::prepareSorted()
 {
     #include "flock/cl_src/cl_macros.h"
+ 
+    positions.resize(max_num);
+    colors.resize(max_num);
+    forces.resize(max_num);
+    velocities.resize(max_num);
+    veleval.resize(max_num);
+    densities.resize(max_num);
+    xflocks.resize(max_num);
     
     //for reading back different values from the kernel
     std::vector<float4> error_check(max_num);
- 
+    
     std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
-    std::fill(velocities.begin(), velocities.end(), float4(0.0f, 0.0f, 0.0f, 1.f));
+    std::fill(velocities.begin(), velocities.end(), float4(0.0f, 0.0f, 0.0f, 0.f));
+    
+    std::fill(veleval.begin(), veleval.end(), float4(0.0f, 0.0f, 0.0f, 0.f));
+    
     std::fill(densities.begin(), densities.end(), 0.0f);
     std::fill(xflocks.begin(), xflocks.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     std::fill(error_check.begin(), error_check.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -322,20 +510,24 @@ void FLOCK::prepareSorted()
 
 #ifdef GPU
     //vbo buffers
-    cl_position = Buffer<float4>(ps->cli, pos_vbo);
-    cl_color = Buffer<float4>(ps->cli, col_vbo);
+    cl_position_u = Buffer<float4>(ps->cli, pos_vbo);
+    cl_position_s = Buffer<float4>(ps->cli, positions);
+    cl_color_u = Buffer<float4>(ps->cli, col_vbo);
+    cl_color_s = Buffer<float4>(ps->cli, colors);
 
     //pure opencl buffers: these are deprecated
-    cl_force = Buffer<float4>(ps->cli, forces);
-    cl_velocity = Buffer<float4>(ps->cli, velocities);
-    cl_veleval = Buffer<float4>(ps->cli, veleval);
-    cl_density = Buffer<float>(ps->cli, densities);
-    cl_xflock = Buffer<float4>(ps->cli, xflocks);
+    cl_velocity_u = Buffer<float4>(ps->cli, velocities);
+    cl_velocity_s = Buffer<float4>(ps->cli, velocities);
+    cl_veleval_u = Buffer<float4>(ps->cli, veleval);
+    cl_veleval_s = Buffer<float4>(ps->cli, veleval);
+    cl_density_s = Buffer<float>(ps->cli, densities);
+    cl_force_s = Buffer<float4>(ps->cli, forces);
+    cl_xflock_s = Buffer<float4>(ps->cli, xflocks);
 
     // FLOCK Parameters
-    std::vector<FLOCKParameters> vparams(0);
-    vparams.push_back(flock_params);
-    cl_FLOCKParameters = Buffer<FLOCKParameters>(ps->cli, vparams);
+    //std::vector<FLOCKParameters> vparams(0);
+    //vparams.push_back(flock_params);
+    //cl_FLOCKParameters = Buffer<FLOCKParameters>(ps->cli, vparams);
     
     //Setup Grid Parameter structs
     std::vector<GridParams> gparams(0);
@@ -355,6 +547,7 @@ void FLOCK::prepareSorted()
     clf_debug = Buffer<float4>(ps->cli, clfv);
     cli_debug = Buffer<int4>(ps->cli, cliv);
 
+    /*
     //sorted and unsorted arrays
     std::vector<float4> unsorted(max_num*nb_var);
     std::vector<float4> sorted(max_num*nb_var);
@@ -364,30 +557,31 @@ void FLOCK::prepareSorted()
 
     cl_vars_unsorted = Buffer<float4>(ps->cli, unsorted);
     cl_vars_sorted = Buffer<float4>(ps->cli, sorted);
+    */
 
-    std::vector<int> keys(max_num);
+    std::vector<unsigned int> keys(max_num);
     
     //to get around limits of bitonic sort only handling powers of 2
     #include "limits.h"
     
     std::fill(keys.begin(), keys.end(), INT_MAX);
-	cl_sort_indices  = Buffer<int>(ps->cli, keys);
-	cl_sort_hashes   = Buffer<int>(ps->cli, keys);
+	cl_sort_indices  = Buffer<unsigned int>(ps->cli, keys);
+	cl_sort_hashes   = Buffer<unsigned int>(ps->cli, keys);
 
     // Size is the grid size. That is a problem since the number of
 	// occupied cells could be much less than the number of grid elements. 
-    std::vector<int> gcells(grid_params.nb_cells);
+    std::vector<unsigned int> gcells(grid_params.nb_cells+1);
 	int minus = 0xffffffff;
-    std::fill(gcells.begin(), gcells.end(), 0);
+    std::fill(gcells.begin(), gcells.end(), 666);
 
-	cl_cell_indices_start = Buffer<int>(ps->cli, gcells);
-	cl_cell_indices_end   = Buffer<int>(ps->cli, gcells);
+	cl_cell_indices_start = Buffer<unsigned int>(ps->cli, gcells);
+	cl_cell_indices_end   = Buffer<unsigned int>(ps->cli, gcells);
 
 	// For bitonic sort. Remove when bitonic sort no longer used
 	// Currently, there is an error in the Radix Sort (just run both
 	// sorts and compare outputs visually
-	cl_sort_output_hashes = Buffer<int>(ps->cli, keys);
-	cl_sort_output_indices = Buffer<int>(ps->cli, keys);
+	cl_sort_output_hashes = Buffer<unsigned int>(ps->cli, keys);
+	cl_sort_output_indices = Buffer<unsigned int>(ps->cli, keys);
 
 #endif
 
@@ -396,7 +590,7 @@ void FLOCK::prepareSorted()
 //----------------------------------------------------------------------
 void FLOCK::setupDomain()
 {
-    grid.calculateCells(flock_settings.smoothing_distance / flock_settings.simulation_scale);
+    grid.calculateCells(flock_params.smoothing_distance / flock_params.simulation_scale);
 
 	grid_params.grid_min = grid.getMin();
 	grid_params.grid_max = grid.getMax();
@@ -407,7 +601,7 @@ void FLOCK::setupDomain()
 	grid_params.grid_delta = grid.getDelta();
 	grid_params.nb_cells = (int) (grid_params.grid_res.x*grid_params.grid_res.y*grid_params.grid_res.z);
 
-    printf("gp nb_cells: %d\n", grid_params.nb_cells);
+    //printf("gp nb_cells: %d\n", grid_params.nb_cells);
 
     // debug mymese
 #if 0
@@ -419,7 +613,7 @@ void FLOCK::setupDomain()
     printf("max boundary: %f, %f, %f\n ************** \n", gmax.x,gmax.y, gmax.z);
 #endif
 
-    float ss = flock_settings.simulation_scale;
+    float ss = flock_params.simulation_scale;
 
 	grid_params_scaled.grid_min = grid_params.grid_min * ss;
 	grid_params_scaled.grid_max = grid_params.grid_max * ss;
@@ -441,15 +635,16 @@ int FLOCK::addBox(int nn, float4 min, float4 max, bool scaled, float4 color)
     float scale = 1.0f;
     if(scaled)
     {
-        scale = flock_settings.simulation_scale;
+        scale = flock_params.simulation_scale;
     }
     
     printf("\n\n ADDING A CUBE \n\n");
     
     vector<float4> rect;
+    addCube(nn, min, max, spacing, scale, rect);
     
-    addCube(nn, min, max, flock_settings.spacing, scale, rect);
-    pushParticles(rect, float4(0.f,0.f,0.f,0.f), ps->settings.color);
+    float4 velo(0.f,0.f,0.f,0.f);
+    pushParticles(rect, velo, ps->settings.color);  // BLENDER
     
     return rect.size();
 }
@@ -460,7 +655,7 @@ void FLOCK::addBall(int nn, float4 center, float radius, bool scaled)
     float scale = 1.0f;
     if(scaled)
     {
-        scale = flock_settings.simulation_scale;
+        scale = flock_params.simulation_scale;
     }
     
     printf("\n\n ADDING A SPHERE \n\n");
@@ -474,8 +669,8 @@ void FLOCK::addHose(int total_n, float4 center, float4 velocity, float radius, f
 {
     printf("wtf for real\n");
     //in sph we just use sph spacing
-    radius *= flock_settings.spacing;
-    Hose hose = Hose(ps, total_n, center, velocity, radius, flock_settings.spacing, color);
+    radius *= spacing;
+    Hose hose = Hose(ps, total_n, center, velocity, radius, spacing, color);
     printf("wtf\n");
     hoses.push_back(hose);
     printf("size of hoses: %d\n", hoses.size());
@@ -492,6 +687,20 @@ void FLOCK::sprayHoses()
         if (parts.size() > 0)
             pushParticles(parts, hoses[i].getVelocity(), hoses[i].getColor());
     }
+}
+
+//----------------------------------------------------------------------
+void FLOCK::testDelete()
+{
+    //cut = 1;
+    std::vector<float4> poss(40);
+    float4 posx(100.,100.,100.,1.);
+    std::fill(poss.begin(), poss.end(),posx);
+    //cl_vars_unsorted.copyToDevice(poss, max_num + 2);
+    cl_position_u.acquire();
+    cl_position_u.copyToDevice(poss);
+    cl_position_u.release();
+    ps->cli->queue.finish();
 }
 
 //----------------------------------------------------------------------
@@ -517,40 +726,45 @@ void FLOCK::pushParticles(vector<float4> pos, vector<float4> vels, float4 color)
     std::vector<float4> cols(nn);
     //std::vector<float4> vels(nn);
     
-    std::fill(cols.begin(), cols.end(),ps->settings.color);
+    std::fill(cols.begin(), cols.end(),ps->settings.color); //BLENDER
     //float4 iv = float4(0.f, 0.f, 0.f, 0.0f);   
     //std::fill(vels.begin(), vels.end(),iv);   
-printf("pPUSH PARTICLES\n");
+    //printf("PUSH PARTICLES\n");
+
 #ifdef CPU
- std::copy(pos.begin(), pos.end(), positions.begin()+num);
+    std::copy(pos.begin(), pos.end(), positions.begin()+num);
 #endif
 
 #ifdef GPU
     glFinish();
-    cl_position.acquire();
-    cl_color.acquire();
+    cl_position_u.acquire();
+    cl_color_u.acquire();
  
-    prep(0);
+    //prep(0);
 
-    cl_position.copyToDevice(pos, num);
-    cl_color.copyToDevice(cols, num);
+    cl_position_u.copyToDevice(pos, num);
+    cl_color_u.copyToDevice(cols, num);
+    cl_velocity_u.copyToDevice(vels, num);
 
-    cl_color.release();
-    cl_position.release();
-
-    cl_velocity.copyToDevice(vels, num);
-
-    flock_params.num = num+nn;
+    settings->SetSetting("Number of Particles", num+nn);
     updateFLOCKP();
 
     num += nn;  //keep track of number of particles we use
+    
+    cl_color_u.release();
+    cl_position_u.release();
 
-    cl_position.acquire();
+    //flock_params.num = num+nn;
+    //updateFLOCKP();
+
+
+
+    //cl_position.acquire();
     
     //reprep the unsorted (packed) array to account for new particles
     //might need to do it conditionally if particles are added or subtracted
-    prep(1);
-    cl_position.release();
+    //prep(1);
+    //cl_position.release();
 
 #else
     num += nn;  //keep track of number of particles we use
@@ -560,18 +774,20 @@ printf("pPUSH PARTICLES\n");
 }
 
 //----------------------------------------------------------------------
+/*
 void FLOCK::updateFLOCKP()
 {
     std::vector<FLOCKParameters> vparams(0);
     vparams.push_back(flock_params);
     cl_FLOCKParameters.copyToDevice(vparams);
 }
-
+*/
 //----------------------------------------------------------------------
 void FLOCK::render()
 {
-	System::render();
-	renderer->render_box(grid.getBndMin(), grid.getBndMax());
+    renderer->render_box(grid.getBndMin(), grid.getBndMax());
+    renderer->render_table(grid.getBndMin(), grid.getBndMax());
+    System::render();
 }
 
 //----------------------------------------------------------------------
@@ -581,7 +797,7 @@ void FLOCK::setRenderer()
     {
         case RTPSettings::SPRITE_RENDER:
             renderer = new SpriteRender(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
-            printf("spacing for radius %f\n", flock_settings.spacing);
+            printf("spacing for radius %f\n", spacing);
             break;
         case RTPSettings::SCREEN_SPACE_RENDER:
             renderer = new SSFRender(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
@@ -592,9 +808,9 @@ void FLOCK::setRenderer()
         default:
             //should be an error
             renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
-        break;
+            break;
     }
-    renderer->setParticleRadius(flock_settings.spacing/2);
+    renderer->setParticleRadius(spacing/2);
 }
 
 
