@@ -16,20 +16,20 @@ namespace rtps
         Init();
     }
 
-    RTPS::RTPS(RTPSettings &s)
+    RTPS::RTPS(RTPSettings *s)
     {
         cli = new CL();
         cl_managed = true;
-        settings = &s;
+        settings = s;
         Init();
 printf("done with constructor\n");
     }
 
-    RTPS::RTPS(RTPSettings &s, CL* _cli)
+    RTPS::RTPS(RTPSettings *s, CL* _cli)
     {
         cli = _cli;
         cl_managed = false;
-        settings = &s;
+        settings = s;
         Init();
     }
 

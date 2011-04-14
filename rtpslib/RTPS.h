@@ -43,8 +43,8 @@ namespace rtps
         //default constructor
         RTPS();
         //Setup CL, Render, initial values and System based on settings
-        RTPS(RTPSettings &s);
-        RTPS(RTPSettings &s, CL* _cli);
+        RTPS(RTPSettings *s);
+        RTPS(RTPSettings *s, CL* _cli);
 
         ~RTPS();
 

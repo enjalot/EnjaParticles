@@ -164,24 +164,24 @@ int main(int argc, char** argv)
     //default constructor
     //rtps::RTPSettings settings;
     //rtps::Domain grid = Domain(float4(-5,-.3,0,0), float4(2, 2, 12, 0));
-    rtps::Domain grid = Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
+    rtps::Domain* grid = new Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
     //rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
-    rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
+	rtps::RTPSettings* settings = new rtps::RTPSettings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
 
-    settings.setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
-    //settings.setRenderType(RTPSettings::RENDER);
+    //settings.setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
+    settings->setRenderType(RTPSettings::RENDER);
     //settings.setRenderType(RTPSettings::SPRITE_RENDER);
-    settings.setRadiusScale(1.0);
-    settings.setBlurScale(1.0);
-    settings.setUseGLSL(1);
+    settings->setRadiusScale(1.0);
+    settings->setBlurScale(1.0);
+    settings->setUseGLSL(1);
 
-    settings.SetSetting("render_texture", "firejet_blast.png");
-    settings.SetSetting("render_frag_shader", "sprite_tex_frag.glsl");
-    settings.SetSetting("render_use_alpha", true);
+    settings->SetSetting("render_texture", "firejet_blast.png");
+    settings->SetSetting("render_frag_shader", "sprite_tex_frag.glsl");
+    settings->SetSetting("render_use_alpha", true);
     //settings.SetSetting("render_use_alpha", false);
-    settings.SetSetting("render_alpha_function", "add");
-    settings.SetSetting("lt_increment", -.00);
-    settings.SetSetting("lt_cl", "lifetime.cl");
+    settings->SetSetting("render_alpha_function", "add");
+    settings->SetSetting("lt_increment", -.00);
+    settings->SetSetting("lt_cl", "lifetime.cl");
 
 
 
@@ -209,7 +209,6 @@ printf("initializing gl\n");
     init_gl();
 
 printf("about to start main loop\n");
-
     glutMainLoop();
     return 0;
 }

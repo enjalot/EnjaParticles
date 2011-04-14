@@ -26,8 +26,8 @@ namespace rtps
         velocities.resize(max_num);
         //forcefields.resize(max_forcefields);
 
-        float4 min = grid.getBndMin();
-        float4 max = grid.getBndMax();
+        float4 min = grid->getBndMin();
+        float4 max = grid->getBndMax();
 
         float spacing = .1; 
         std::vector<float4> box = addRect(num, min, max, spacing, 1);

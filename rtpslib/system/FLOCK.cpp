@@ -236,8 +236,8 @@ void FLOCK::printTimers()
 void FLOCK::calculateFLOCKSettings()
 {
 
-    float4 dmin = grid.getBndMin();
-    float4 dmax = grid.getBndMax();
+    float4 dmin = grid->getBndMin();
+    float4 dmax = grid->getBndMax();
 
     //constant .87 is magic
     //flock_settings.particle_rest_distance = .87 * pow(particle_vol, 1./3.);
@@ -378,15 +378,15 @@ void FLOCK::prepareSorted()
 //----------------------------------------------------------------------
 void FLOCK::setupDomain()
 {
-    grid.calculateCells(flock_settings.smoothing_distance / flock_settings.simulation_scale);
+    grid->calculateCells(flock_settings.smoothing_distance / flock_settings.simulation_scale);
 
-	grid_params.grid_min = grid.getMin();
-	grid_params.grid_max = grid.getMax();
-	grid_params.bnd_min  = grid.getBndMin();
-	grid_params.bnd_max  = grid.getBndMax();
-	grid_params.grid_res = grid.getRes();
-	grid_params.grid_size = grid.getSize();
-	grid_params.grid_delta = grid.getDelta();
+	grid_params.grid_min = grid->getMin();
+	grid_params.grid_max = grid->getMax();
+	grid_params.bnd_min  = grid->getBndMin();
+	grid_params.bnd_max  = grid->getBndMax();
+	grid_params.grid_res = grid->getRes();
+	grid_params.grid_size = grid->getSize();
+	grid_params.grid_delta = grid->getDelta();
 	grid_params.nb_cells = (int) (grid_params.grid_res.x*grid_params.grid_res.y*grid_params.grid_res.z);
 
     printf("gp nb_cells: %d\n", grid_params.nb_cells);
@@ -519,7 +519,7 @@ void FLOCK::updateFLOCKP()
 void FLOCK::render()
 {
 	System::render();
-	renderer->render_box(grid.getBndMin(), grid.getBndMax());
+	renderer->render_box(grid->getBndMin(), grid->getBndMax());
 }
 
 //----------------------------------------------------------------------

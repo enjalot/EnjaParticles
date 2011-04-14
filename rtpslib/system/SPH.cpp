@@ -147,6 +147,15 @@ printf("did some buffer stuff\n");
             col_vbo = 0;
         }
 
+        Hose* hose;
+        int hs = hoses.size();  
+        for(int i = 0; i < hs; i++)
+        {
+            hose = hoses[i];
+            delete hose;
+
+        }
+
     }
 
     void SPH::update()
@@ -202,7 +211,7 @@ printf("update GPU\n");
 printf("setttings\n");
         if (settings->has_changed()) updateSPHP();
 
-        settings->printSettings();
+        //settings->printSettings();
 
         //GE
         int sub_intervals = 3;  //should be a setting
@@ -679,16 +688,16 @@ printf("acquiring\n");
 
     void SPH::setupDomain()
     {
-        grid.calculateCells(sphp.smoothing_distance / sphp.simulation_scale);
+        grid->calculateCells(sphp.smoothing_distance / sphp.simulation_scale);
 
 
-        grid_params.grid_min = grid.getMin();
-        grid_params.grid_max = grid.getMax();
-        grid_params.bnd_min  = grid.getBndMin();
-        grid_params.bnd_max  = grid.getBndMax();
-        grid_params.grid_res = grid.getRes();
-        grid_params.grid_size = grid.getSize();
-        grid_params.grid_delta = grid.getDelta();
+        grid_params.grid_min = grid->getMin();
+        grid_params.grid_max = grid->getMax();
+        grid_params.bnd_min  = grid->getBndMin();
+        grid_params.bnd_max  = grid->getBndMax();
+        grid_params.grid_res = grid->getRes();
+        grid_params.grid_size = grid->getSize();
+        grid_params.grid_delta = grid->getDelta();
         grid_params.nb_cells = (int) (grid_params.grid_res.x*grid_params.grid_res.y*grid_params.grid_res.z);
 
         //printf("gp nb_cells: %d\n", grid_params.nb_cells);
@@ -750,7 +759,7 @@ printf("acquiring\n");
         printf("wtf for real\n");
         //in sph we just use sph spacing
         radius *= spacing;
-        Hose hose = Hose(ps, total_n, center, velocity, radius, spacing, color);
+        Hose *hose = new Hose(ps, total_n, center, velocity, radius, spacing, color);
         printf("wtf\n");
         hoses.push_back(hose);
         printf("size of hoses: %d\n", hoses.size());
@@ -762,9 +771,9 @@ printf("acquiring\n");
         std::vector<float4> parts;
         for (int i = 0; i < hoses.size(); i++)
         {
-            parts = hoses[i].spray();
+            parts = hoses[i]->spray();
             if (parts.size() > 0)
-                pushParticles(parts, hoses[i].getVelocity(), hoses[i].getColor());
+                pushParticles(parts, hoses[i]->getVelocity(), hoses[i]->getColor());
         }
     }
 
@@ -855,8 +864,8 @@ printf("acquiring\n");
 
     void SPH::render()
     {
-        renderer->render_box(grid.getBndMin(), grid.getBndMax());
-        renderer->render_table(grid.getBndMin(), grid.getBndMax());
+        renderer->render_box(grid->getBndMin(), grid->getBndMax());
+        renderer->render_table(grid->getBndMin(), grid->getBndMax());
         System::render();
     }
     void SPH::setRenderer()

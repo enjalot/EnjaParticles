@@ -9,7 +9,7 @@ namespace rtps
         system = SPH;
         max_particles = 2048;
         dt = .001f;
-        grid = Domain(float4(-5,-.3f,0,0), float4(2, 2, 12, 0));
+        grid = new Domain(float4(-5,-.3f,0,0), float4(2, 2, 12, 0));
     }
 
     RTPSettings::RTPSettings(SysType system, int max_particles, float dt)
@@ -18,10 +18,10 @@ namespace rtps
         this->system = system;
         this->max_particles = max_particles;
         this->dt = dt;
-        grid = Domain(float4(-5,-.3f,0,0), float4(2, 2, 12, 0));
+        grid = new Domain(float4(-5,-.3f,0,0), float4(2, 2, 12, 0));
     }
 
-    RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain grid)
+    RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain* grid)
     {
         changed = false;
         this->system = system;
@@ -31,16 +31,16 @@ namespace rtps
     }
 
 //with triangle collision
-RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain grid, bool tri_collision)
+RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain* grid, bool tri_collision)
 {
-        changed = false;
+    changed = false;
     this->system = system;
     this->max_particles = max_particles;
     this->dt = dt;
     this->grid = grid;
     this->tri_collision = tri_collision;
 }
-RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain grid, float maxspeed, float mindist, float searchradius, float color[])
+RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain* grid, float maxspeed, float mindist, float searchradius, float color[])
 {
     changed = false;
     this->system = system;
@@ -56,7 +56,7 @@ RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain gri
 
 RTPSettings::~RTPSettings()
 {
-    printf("destructing!\n");
+    printf("settings destructing!\n");
 }
 
     void RTPSettings::printSettings()

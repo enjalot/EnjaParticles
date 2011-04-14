@@ -67,7 +67,7 @@ namespace rtps
 
         virtual void render();
 
-        void loadTriangles(std::vector<Triangle> triangles);
+        void loadTriangles(std::vector<Triangle> &triangles);
 
         void testDelete();
         int cut; //for debugging DEBUG
@@ -102,7 +102,7 @@ namespace rtps
 
 
         //keep track of hoses
-        std::vector<Hose> hoses;
+        std::vector<Hose*> hoses;
 
         //needs to be called when particles are added
         void calculateSPHSettings();

@@ -31,7 +31,7 @@ namespace rtps
             delete renderer;
         }
 
-        virtual Domain getGrid()
+        virtual Domain* getGrid()
         {
             return grid;
         }
@@ -92,7 +92,7 @@ namespace rtps
         };
 
 
-        virtual void loadTriangles(std::vector<Triangle> triangles)
+        virtual void loadTriangles(std::vector<Triangle> &triangles)
         {
         };
         virtual void addForceField(ForceField ff)
@@ -121,7 +121,7 @@ namespace rtps
         //flag is true if the system's constructor creates the VBOs for the system
         bool managed;
 
-        Domain grid;
+        Domain* grid;
 
         Render* renderer;
 

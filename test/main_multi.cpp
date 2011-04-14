@@ -164,22 +164,22 @@ int main(int argc, char** argv)
     //default constructor
     //rtps::RTPSettings settings;
     //rtps::Domain grid = Domain(float4(-5,-.3,0,0), float4(2, 2, 12, 0));
-    rtps::Domain grid = Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
+    rtps::Domain* grid = new Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
     //rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
-    rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
+    rtps::RTPSettings *settings = new rtps::RTPSettings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
 
-    //settings.setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
-    //settings.setRenderType(RTPSettings::RENDER);
-    settings.setRenderType(RTPSettings::SPRITE_RENDER);
-    settings.setRadiusScale(1.0);
-    settings.setBlurScale(1.0);
-    settings.setUseGLSL(1);
-    settings.SetSetting("render_texture", "firejet_blast.png");
-    settings.SetSetting("render_frag_shader", "sprite_tex_frag.glsl");
-    settings.SetSetting("render_use_alpha", true);
-    settings.SetSetting("render_alpha_function", "add");
-    settings.SetSetting("lt_increment", -.004);
-    settings.SetSetting("lt_cl", "lifetime.cl");
+    //settings->setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
+    //settings->setRenderType(RTPSettings::RENDER);
+    settings->setRenderType(RTPSettings::SPRITE_RENDER);
+    settings->setRadiusScale(1.0);
+    settings->setBlurScale(1.0);
+    settings->setUseGLSL(1);
+    settings->SetSetting("render_texture", "firejet_blast.png");
+    settings->SetSetting("render_frag_shader", "sprite_tex_frag.glsl");
+    settings->SetSetting("render_use_alpha", true);
+    settings->SetSetting("render_alpha_function", "add");
+    settings->SetSetting("lt_increment", -.004);
+    settings->SetSetting("lt_cl", "lifetime.cl");
 
 
     cli = new CL();
@@ -187,18 +187,18 @@ int main(int argc, char** argv)
 
 
 
-    //settings.setRenderType(RTPSettings::RENDER);
-    settings.SetSetting("render_texture", "firejet_smoke.png");
-    settings.SetSetting("render_frag_shader", "sprite_smoke_frag.glsl");
-    //settings.SetSetting("render_texture", "smoke.png");
-    //settings.SetSetting("render_texture", "reddit2.png");
-    //settings.SetSetting("render_texture", "enjalot.jpg");
-    settings.SetSetting("render_use_alpha", true);
-    settings.SetSetting("render_alpha_function", "multiply");
-    //settings.SetSetting("render_alpha_function", "add");
-    //settings.SetSetting("render_alpha_function", "alpha");
-    settings.SetSetting("lt_increment", .004);
-    settings.SetSetting("lt_cl", "lifetime_smoke.cl");
+    //settings->setRenderType(RTPSettings::RENDER);
+    settings->SetSetting("render_texture", "firejet_smoke.png");
+    settings->SetSetting("render_frag_shader", "sprite_smoke_frag.glsl");
+    //settings->SetSetting("render_texture", "smoke.png");
+    //settings->SetSetting("render_texture", "reddit2.png");
+    //settings->SetSetting("render_texture", "enjalot.jpg");
+    settings->SetSetting("render_use_alpha", true);
+    settings->SetSetting("render_alpha_function", "multiply");
+    //settings->SetSetting("render_alpha_function", "add");
+    //settings->SetSetting("render_alpha_function", "alpha");
+    settings->SetSetting("lt_increment", .004);
+    settings->SetSetting("lt_cl", "lifetime_smoke.cl");
     
     ps2 = new rtps::RTPS(settings, cli);
 
@@ -215,18 +215,18 @@ int main(int argc, char** argv)
     ps2->settings->SetSetting("XSPH Factor", .3f);
 
 
-    settings.setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
-    //settings.SetSetting("render_texture", "firejet_smoke.png");
-    //settings.SetSetting("render_frag_shader", "sprite_smoke_frag.glsl");
-    //settings.SetSetting("render_texture", "smoke.png");
-    //settings.SetSetting("render_texture", "reddit2.png");
-    //settings.SetSetting("render_texture", "enjalot.jpg");
-    settings.SetSetting("render_use_alpha", true);
-    //settings.SetSetting("render_alpha_function", "multiply");
-    //settings.SetSetting("render_alpha_function", "add");
-    //settings.SetSetting("render_alpha_function", "alpha");
-    settings.SetSetting("lt_increment", .00);
-    settings.SetSetting("lt_cl", "lifetime_smoke.cl");
+    settings->setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
+    //settings->SetSetting("render_texture", "firejet_smoke.png");
+    //settings->SetSetting("render_frag_shader", "sprite_smoke_frag.glsl");
+    //settings->SetSetting("render_texture", "smoke.png");
+    //settings->SetSetting("render_texture", "reddit2.png");
+    //settings->SetSetting("render_texture", "enjalot.jpg");
+    settings->SetSetting("render_use_alpha", true);
+    //settings->SetSetting("render_alpha_function", "multiply");
+    //settings->SetSetting("render_alpha_function", "add");
+    //settings->SetSetting("render_alpha_function", "alpha");
+    settings->SetSetting("lt_increment", .00);
+    settings->SetSetting("lt_cl", "lifetime_smoke.cl");
  
     ps3 = new rtps::RTPS(settings, cli);
 

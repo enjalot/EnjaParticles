@@ -18,12 +18,12 @@ namespace rtps {
     } 
 
     //TODO: avoid need for this function?
-    void SPH::loadTriangles(std::vector<Triangle> triangles)
+    void SPH::loadTriangles(std::vector<Triangle> &triangles)
     {
         collision_tri.loadTriangles(triangles);
     }
 
-    void CollisionTriangle::loadTriangles(std::vector<Triangle> triangles)
+    void CollisionTriangle::loadTriangles(std::vector<Triangle> &triangles)
     {
         int n_triangles = triangles.size();
         //printf("n triangles: %d\n", n_triangles);
