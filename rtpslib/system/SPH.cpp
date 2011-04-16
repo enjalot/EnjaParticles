@@ -742,16 +742,27 @@ namespace rtps
         pushParticles(sphere,velo);
     }
 
-    void SPH::addHose(int total_n, float4 center, float4 velocity, float radius, float4 color)
+    int SPH::addHose(int total_n, float4 center, float4 velocity, float radius, float4 color)
     {
-        printf("wtf for real\n");
         //in sph we just use sph spacing
         radius *= spacing;
         Hose *hose = new Hose(ps, total_n, center, velocity, radius, spacing, color);
-        printf("wtf\n");
         hoses.push_back(hose);
-        printf("size of hoses: %d\n", hoses.size());
+        //return the index
+        return hoses.size()-1;
+        //printf("size of hoses: %d\n", hoses.size());
     }
+    void SPH::updateHose(int index, float4 center, float4 velocity, float radius, float4 color)
+    {
+        //we need to expose the vector of hoses somehow
+        //doesn't seem right to make user manage an index
+        //in sph we just use sph spacing
+        radius *= spacing;
+        hoses[index]->update(center, velocity, radius, spacing, color);
+        //printf("size of hoses: %d\n", hoses.size());
+    }
+
+
 
     void SPH::sprayHoses()
     {

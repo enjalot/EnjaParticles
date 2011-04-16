@@ -107,7 +107,7 @@ rtps::RTPS* ps;
 #define DT .001f
 
 float4 color = float4(0.1, 0.1, 0.73, .05);
-
+int hindex; 
 
 
 
@@ -290,9 +290,24 @@ void appKeyboard(unsigned char key, int x, int y)
             //sph sets spacing and multiplies by radius value
             //float4 color = float4(.0, 0.0, 1.0, 1.0);
             //float4 color = float4(0.1, 0.1, 0.3, .01);
-            ps->system->addHose(5000, center, velocity, 4, color);
+            hindex = ps->system->addHose(5000, center, velocity, 4, color);
             return;
 		}
+        case 'H':
+        {
+            //spray hose
+            printf("about to move hose\n");
+            float4 center(.1, 2., 1., 1.);
+            //float4 velocity(.6, -.6, -.6, 0);
+            //float4 velocity(2., 5., -.8, 0);
+            float4 velocity(2., -.5, -1., 0);
+            //sph sets spacing and multiplies by radius value
+            //float4 color = float4(.0, 0.0, 1.0, 1.0);
+            //float4 color = float4(0.1, 0.1, 0.3, .01);
+            ps->system->updateHose(hindex, center, velocity, 4, color);
+            return;
+		}
+
         case 'n':
             render_movie=!render_movie;
             break;
