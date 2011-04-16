@@ -308,7 +308,7 @@ namespace rtps
                 renderer->setNum(sphp.num);
                 //need to copy sorted arrays into unsorted arrays
                 call_prep(2);
-                printf("HOW MANY NOW? %d\n", num);
+                //printf("HOW MANY NOW? %d\n", num);
                 hash_and_sort();
                                 //we've changed num and copied sorted to unsorted. skip this iteration and do next one
                 //this doesn't work because sorted force etc. are having an effect?
@@ -803,7 +803,7 @@ namespace rtps
         //float4 color(1.0f,1.0f,1.0f,1.0f);
 
         std::vector<float4> cols(nn);
-        printf("color: %f %f %f %f\n", color.x, color.y, color.z, color.w);
+        //printf("color: %f %f %f %f\n", color.x, color.y, color.z, color.w);
 
         std::fill(cols.begin(), cols.end(),color);
         //float v = .5f;
@@ -853,7 +853,7 @@ namespace rtps
     void SPH::render()
     {
         renderer->render_box(grid->getBndMin(), grid->getBndMax());
-        renderer->render_table(grid->getBndMin(), grid->getBndMax());
+        //renderer->render_table(grid->getBndMin(), grid->getBndMax());
         System::render();
     }
     void SPH::setRenderer()
@@ -862,7 +862,7 @@ namespace rtps
         {
             case RTPSettings::SPRITE_RENDER:
                 renderer = new SpriteRender(pos_vbo,col_vbo,num,ps->cli, ps->settings);
-                printf("spacing for radius %f\n", spacing);
+                //printf("spacing for radius %f\n", spacing);
                 break;
             case RTPSettings::SCREEN_SPACE_RENDER:
                 //renderer = new ScreenSpaceRender();
