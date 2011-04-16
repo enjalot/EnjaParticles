@@ -111,7 +111,6 @@ float4 color = float4(0.1, 0.1, 0.73, .05);
 
 
 
-
 //timers
 //GE::Time *ts[3];
 
@@ -128,7 +127,6 @@ float rand_float(float mn, float mx)
 //----------------------------------------------------------------------
 int main(int argc, char** argv)
 {
-
     //initialize glut
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGB | GLUT_ALPHA | GLUT_DOUBLE | GLUT_DEPTH
