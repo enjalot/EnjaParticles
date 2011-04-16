@@ -76,9 +76,14 @@ namespace rtps
         virtual void addBall(int nn, float4 center, float radius, bool scaled)
         {
         };
-        virtual void addHose(int total_n, float4 center, float4 velocity, float radius, float4 color=float4(1., 0., 0., 1.))
+        virtual int addHose(int total_n, float4 center, float4 velocity, float radius, float4 color=float4(1., 0., 0., 1.))
+        {
+            return 0;
+        };
+        virtual void updateHose(int index, float4 center, float4 velocity, float radius, float4 color=float4(1., 0., 0., 1.))
         {
         };
+ 
         /*
         virtual void addHose(int total_n, float4 center, float4 velocity, float radius, float spacing)
         {
