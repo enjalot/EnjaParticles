@@ -20,31 +20,25 @@ namespace rtps
 
     SPH::SPH(RTPS *psfr, int n)
     {
-printf("in sph constructor\n");
         //store the particle system framework
         ps = psfr;
         settings = ps->settings;
-printf("settin some variables\n");
         max_num = n;
         num = 0;
         nb_var = 10;
 
-printf("blah blah balh\n");
         //seed random
         srand ( time(NULL) );
 
-printf("setting grid\n");
         grid = settings->grid;
 
-printf("grid set\n");
         //sphsettings = new SPHSettings(grid, max_num);
         //sphsettings->printSettings();
         //sphsettings->updateSPHP(sphp);
         std::vector<SPHParams> vparams(0);
         vparams.push_back(sphp);
         cl_sphp = Buffer<SPHParams>(ps->cli, vparams);
-
-printf("did some buffer stuff\n");
+        
         calculate();
         updateSPHP();
 
@@ -116,14 +110,12 @@ printf("did some buffer stuff\n");
         lifetime = Lifetime(ps->cli, timers["lifetime_gpu"], lt_file);
 
 
-        printf("Done with CL lets do GL\n");
 
 #endif
 
         // settings defaults to 0
         //renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
         setRenderer();
-        printf("done with setRenderer\n");
 
         //printf("MAIN settings: \n");
         //settings->printSettings();
@@ -160,7 +152,6 @@ printf("did some buffer stuff\n");
 
     void SPH::update()
     {
-printf("update!\n");
         //call kernels
         //TODO: add timings
 #ifdef CPU
@@ -205,10 +196,8 @@ printf("update!\n");
     void SPH::updateGPU()
     {
 
-printf("update GPU\n");
         timers["update"]->start();
         glFinish();
-printf("setttings\n");
         if (settings->has_changed()) updateSPHP();
 
         //settings->printSettings();
@@ -223,7 +212,6 @@ printf("setttings\n");
         {
             sprayHoses();
         }
-printf("acquiring\n");
 
         cl_position_u.acquire();
         cl_color_u.acquire();
