@@ -2,7 +2,7 @@ import math
 from vector import Vec
 
 class Domain(object):
-    def __init__(self, bnd_min, bnd_max, surface):
+    def __init__(self, bnd_min, bnd_max):#, surface):
 
         #the boundary we want particles to stay within
         self.bnd_min = bnd_min
@@ -16,7 +16,7 @@ class Domain(object):
 
         self.V = self.width * self.height * self.depth
 
-        self.surface = surface
+        #self.surface = surface
 
 
     def setup(self, cell_size):

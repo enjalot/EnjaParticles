@@ -1,99 +1,221 @@
-import pygame
-from pygame.locals import *
+#basic glut setup learned from here:
+#http://www.java2s.com/Open-Source/Python/Game-2D-3D/PyOpenGL/PyOpenGL-Demo-3.0.1b1/PyOpenGL-Demo/NeHe/lesson2.py.htm
 
-from forces import *
+from OpenGL.GL import *
+from OpenGL.GLU import *
+from OpenGL.GLUT import *
+import sys
+
+#helper modules
+import glutil
 from vector import Vec
+
+#from forces import *
+import forces
 import sph
+import clsph
 from hash import Domain
-#from domain import Domain
-#from timing import Timing, timing_collector
 
-#timings = {}
-#timing_coroutine = timing_collector(timings)
-#timing_coroutine.next()
+dt = .001
 
-#@Timing(timing_coroutine)
+class window(object):
+    def __init__(self, *args, **kwargs):
+        #mouse handling for transforming scene
+        self.mouse_down = False
+        self.mouse_old = Vec([0., 0.])
+        self.rotate = Vec([0., 0., 0.])
+        self.translate = Vec([0., 0., 0.])
+        #self.initrans = Vec([0., 0., -2.])
+        self.init_persp_trans = Vec([-.5, 0., -1.5])
+        self.init_ortho_trans = Vec([0., 0., 0.])
+        self.init_persp_rotate = Vec([0., 0., 0.])
+        self.init_ortho_rotate = Vec([90., -90., 0.])
+ 
 
-#@timings
-def fromscreen(p, surface):
-    #v.x
-    p.y = surface.get_height() - p.y
-    return p
+        self.ortho = True 
+        self.dt = dt
 
+        self.width = 640
+        self.height = 480
 
-def toscreen(p, surface, screen_scale):
-    translate = Vec([0,0])
-    p.x = translate.x + p.x*screen_scale
-    p.y = surface.get_height() - (translate.y + p.y*screen_scale)
-    return p
+        glutInit(sys.argv)
+        glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH)
+        glutInitWindowSize(self.width, self.height)
+        glutInitWindowPosition(0, 0)
+        self.win = glutCreateWindow("Part 2: Python")
 
+        #gets called by GLUT every frame
+        glutDisplayFunc(self.draw)
 
+        #handle user input
+        glutKeyboardFunc(self.on_key)
+        glutMouseFunc(self.on_click)
+        glutMotionFunc(self.on_mouse_motion)
+        
+        #this will call draw every 30 ms
+        glutTimerFunc(30, self.timer, 30)
 
-#@print_timing
-#@Timing(timing_coroutine)
-@timings
-def draw_particles(ps):
-    for p in ps:
-        p.draw()
-
-
-def main():
-    pygame.init()
-    screen = pygame.display.set_mode((800, 800))
-    pygame.display.set_caption('SPH Forces')
-
-    background = pygame.Surface(screen.get_size())
-    background = background.convert()
-    background.fill((250, 250, 250))
-
-    clock = pygame.time.Clock()
-
-    max_num = 2**12 #4096
-    #max_num = 2**10 #1024
-    #max_num = 2**8 #256
-    #max_num = 2**7 #128
-    
-    dmin = Vec([0,0,0])
-    dmax = Vec([5,5,5])
-    domain = Domain(dmin, dmax, screen)
-    system = sph.SPH(max_num, domain)
-
-    particles = sph.init_particles(50, system, domain, screen)
+        glViewport(0, 0, self.width, self.height)
+        #setup OpenGL scene
+        self.glprojection()
 
 
+        #########################################################################
+        #max_num = 2**12 #4096
+        #max_num = 2**10 #1024
+        max_num = 2**8 #256
+        #max_num = 2**7 #128
 
+        dmin = Vec([0,0,0])
+        dmax = Vec([5,5,1])
+        domain = Domain(dmin, dmax)
+        system = sph.SPH(max_num, domain)
+        clsystem = clsph.CLSPH(dt)
 
-    mouse_down = False
-    while 1:
-        clock.tick(60)
-        key = pygame.key.get_pressed()
-        for event in pygame.event.get():
-            if event.type == QUIT or key[K_ESCAPE] or key[K_q]:
-                print "quit!"
-                return
-            elif key[K_t]:
-                print timings
-            elif event.type == MOUSEBUTTONDOWN:
-                mouse_down = True
-            elif event.type == MOUSEMOTION:
-                if(mouse_down):
-                    v = Vec([event.pos[0], event.pos[1]])
-                    v = fromscreen(v, screen)
-                    particles[0].move(v)
-            elif event.type == MOUSEBUTTONUP:
-                mouse_down = False
+        clsystem.update()
+
+        #########################################################################
+        glutMainLoop()
+ 
+
+    def draw(self):
+        """Render the particles"""        
+        #TODO: 
+        # * set up Ortho2D viewing and mouse controls
+        # * find better color mapping for height
 
         
-        screen.blit(background, (0, 0))
+        #update or particle positions by calling the OpenCL kernel
+        #self.cle.execute(subintervals) 
+        glFlush()
 
-        density_update(system, particles)
-        force_update(system, particles)
-        collision_wall(system, domain, particles)
-        #euler_update(system, particles)
-        leapfrog_update(system, particles)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
 
-        draw_particles(particles)
-        pygame.display.flip()
+        #handle mouse transformations
+        #glTranslatef(self.initrans.x, self.initrans.y, self.initrans.z)
+        glRotatef(self.rotate.x, 1, 0, 0)
+        glRotatef(self.rotate.y, 0, 1, 0) 
+        glTranslatef(self.translate.x, self.translate.y, self.translate.z)
+        
+        #render the particles
+        #self.cle.render()
+
+        #draw the x, y and z axis as lines
+        glutil.draw_axes()
+
+        glutSwapBuffers()
+
+
+    def glprojection(self):
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+
+        if self.ortho:
+            glOrtho(0.0, 1.0, 0.0, -1.0, -1.5, 1.5)
+            self.translate = self.init_ortho_trans.copy()
+            self.rotate = self.init_ortho_rotate.copy()
+        else:
+            gluPerspective(60., self.width / float(self.height), .1, 1000.)
+            self.translate= self.init_persp_trans.copy()
+            self.rotate = self.init_persp_rotate.copy()
+
+        glMatrixMode(GL_MODELVIEW)
+
+
+    ###GL CALLBACKS
+    def timer(self, t):
+        glutTimerFunc(t, self.timer, t)
+        glutPostRedisplay()
+
+    def on_key(self, *args):
+        ESCAPE = '\033'
+        if args[0] == ESCAPE or args[0] == 'q':
+            sys.exit()
+        elif args[0] == 't':
+            print initialize.timings
+        elif args[0] == 'o':
+            self.ortho = not self.ortho
+            if self.ortho:
+                self.translate = self.init_ortho_trans.copy()
+                self.rotate = self.init_ortho_rotate.copy()
+            else:
+                self.translate = self.init_persp_trans.copy()
+                self.rotate = self.init_persp_rotate.copy()
+            self.glprojection()
+        elif args[0] == '1':
+            self.choice = 1
+            self.init_wave(self.dt, dx, ntracers, False)
+        elif args[0] == '2':
+            self.choice = 2
+            self.init_wave(self.dt, dx, ntracers, False)
+        elif args[0] == '3':
+            self.choice = 3
+            self.init_wave(self.dt, dx, ntracers, False)
+        elif args[0] == 's':
+            self.stable = not self.stable
+            #print "Stable parameters: ", self.stable
+            self.set_params()
+            self.cle.set_params(self.params)
+            #self.init_wave(self.dt, dx, ntracers, False)
+        elif args[0] == 'v':
+            self.wtype = "sin"
+            self.init_wave(self.dt, dx, ntracers, False)
+        elif args[0] == 'b':
+            self.wtype = "sawtooth"
+            self.init_wave(self.dt, dx, ntracers, False)
+        elif args[0] == 'n':
+            self.wtype = "square"
+            self.init_wave(self.dt, dx, ntracers, False)
+        elif args[0] == '-':
+            self.dt *= .1
+            self.set_params()
+            self.cle.set_params(self.params)
+        elif args[0] == '=':
+            self.dt *= 10
+            self.set_params()
+            self.cle.set_params(self.params)
+        """
+        elif args[0] == 'm':
+            self.wtype = "sweep_poly"
+            self.init_wave(self.dt, dx, ntracers, False)
+        """
+        
+
+
+
+
+
+
+
+    def on_click(self, button, state, x, y):
+        if state == GLUT_DOWN:
+            self.mouse_down = True
+            self.button = button
+        else:
+            self.mouse_down = False
+        self.mouse_old.x = x
+        self.mouse_old.y = y
+
+    
+    def on_mouse_motion(self, x, y):
+        dx = x - self.mouse_old.x
+        dy = y - self.mouse_old.y
+        if self.mouse_down and self.button == 0: #left button
+            self.rotate.x += dy * .2
+            #self.rotate.y += dx * .2
+        elif self.mouse_down and self.button == 2: #right button
+            self.translate.z -= dy * .01 
+        self.mouse_old.x = x
+        self.mouse_old.y = y
+    ###END GL CALLBACKS
+
+
+
 
 if __name__ == "__main__":
-    main()
+    p2 = window()
+
+
+
