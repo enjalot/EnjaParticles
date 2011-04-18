@@ -93,6 +93,10 @@ __kernel void leapfrog(
     vel_u[i] = vnext;
     veleval_u[i] = veval; 
     pos_u[i] = (float4)(p.xyz, 1.0f);  // for plotting
+
+    vel_u[i].z = 0.f;
+    veleval_u[i].z = 0.f; 
+    pos_u[i].z = 0.f;
     
     
     

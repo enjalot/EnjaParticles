@@ -44,7 +44,7 @@ class window(object):
         glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH)
         glutInitWindowSize(self.width, self.height)
         glutInitWindowPosition(0, 0)
-        self.win = glutCreateWindow("Part 2: Python")
+        self.win = glutCreateWindow("SPH: Python")
 
         #gets called by GLUT every frame
         glutDisplayFunc(self.draw)
@@ -63,7 +63,8 @@ class window(object):
 
 
         #########################################################################
-        max_num = 16384
+        #max_num = 16384
+        max_num = 8192
         #max_num = 2**12 #4096
         #max_num = 2**10 #1024
         #max_num = 2**8 #256
@@ -75,7 +76,7 @@ class window(object):
         self.system = sph.SPH(max_num, self.domain)
         self.clsystem = clsph.CLSPH(dt, self.system)
 
-        ipos = sph.addRect(50, Vec([0.1, 0.1, 0.1,0.]), Vec([1.,1.,1.,0.]), self.system)
+        ipos = sph.addRect(1024, Vec([0.1, 0.1, 0.,0.]), Vec([1.,1.,0.,0.]), self.system)
         #ipos = sph.addRect3D(50, Vec([1.2, 1.2, .2,0.]), Vec([2.,2.,1.,0.]), self.system)
         self.clsystem.push_particles(ipos, None, None)
 
@@ -151,44 +152,7 @@ class window(object):
                 self.translate = self.init_persp_trans.copy()
                 self.rotate = self.init_persp_rotate.copy()
             self.glprojection()
-        elif args[0] == '1':
-            self.choice = 1
-            self.init_wave(self.dt, dx, ntracers, False)
-        elif args[0] == '2':
-            self.choice = 2
-            self.init_wave(self.dt, dx, ntracers, False)
-        elif args[0] == '3':
-            self.choice = 3
-            self.init_wave(self.dt, dx, ntracers, False)
-        elif args[0] == 's':
-            self.stable = not self.stable
-            #print "Stable parameters: ", self.stable
-            self.set_params()
-            self.cle.set_params(self.params)
-            #self.init_wave(self.dt, dx, ntracers, False)
-        elif args[0] == 'v':
-            self.wtype = "sin"
-            self.init_wave(self.dt, dx, ntracers, False)
-        elif args[0] == 'b':
-            self.wtype = "sawtooth"
-            self.init_wave(self.dt, dx, ntracers, False)
-        elif args[0] == 'n':
-            self.wtype = "square"
-            self.init_wave(self.dt, dx, ntracers, False)
-        elif args[0] == '-':
-            self.dt *= .1
-            self.set_params()
-            self.cle.set_params(self.params)
-        elif args[0] == '=':
-            self.dt *= 10
-            self.set_params()
-            self.cle.set_params(self.params)
-        """
-        elif args[0] == 'm':
-            self.wtype = "sweep_poly"
-            self.init_wave(self.dt, dx, ntracers, False)
-        """
-        
+             
 
     def on_click(self, button, state, x, y):
         if state == GLUT_DOWN:

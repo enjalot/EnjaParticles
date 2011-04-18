@@ -16,8 +16,8 @@ class SPH:
         VF = .0262144               #simulation volume [ m^3 ]
         VP = VF / max_num           #particle volume [ m^3 ]
         m = rho0 * VP               #particle mass [ kg ]
-        #re = (VP)**(1/3.)           #particle radius [ m ]
-        re = (VP)**(1/2.)           #particle radius [ m ]
+        re = (VP)**(1/3.)           #particle radius [ m ]
+        #re = (VP)**(1/2.)           #particle radius [ m ]
         print "re, m, VP", re, m, VP
         rest_distance = .87 * re    #rest distance between particles [ m ]
 
@@ -28,10 +28,10 @@ class SPH:
         print "VF", VF
         print "domain.V: ", domain.V
         print "VF/domain.V", VF/domain.V
-        #print "scale calc", (VF/domain.V)**(1/3.)
-        print "scale calc", (VF/domain.V)**(1/2.)
-        #sim_scale = (VF / domain.V)**(1/3.)     #[m^3 / world m^3 ]
-        sim_scale = (VF / domain.V)**(1/2.)     #[m^3 / world m^3 ]
+        print "scale calc", (VF/domain.V)**(1/3.)
+        #print "scale calc", (VF/domain.V)**(1/2.)
+        sim_scale = (VF / domain.V)**(1/3.)     #[m^3 / world m^3 ]
+        #sim_scale = (VF / domain.V)**(1/2.)     #[m^2 / world m^2 ]
 
         self.rho0 = rho0
         self.VF = VF
@@ -64,7 +64,7 @@ class SPH:
         self.spring = 0.
 
         self.velocity_limit = 600.
-        self.xsph_factor = .1
+        self.xsph_factor = .05
 
         self.viscosity = .01
         self.gravity = -9.8
@@ -146,7 +146,7 @@ def addRect(num, pmin, pmax, sphp):
     print "**** addRect ****"
     print "rest dist:", sphp.rest_distance
     print "sim_scale:", sphp.sim_scale
-    spacing = 1.1 * sphp.rest_distance / sphp.sim_scale;
+    spacing = 1.0 * sphp.rest_distance / sphp.sim_scale;
     print "spacing", spacing
 
     xmin = pmin.x# * scale
