@@ -62,15 +62,15 @@ class window(object):
 
         #########################################################################
         #max_num = 2**12 #4096
-        #max_num = 2**10 #1024
-        max_num = 2**8 #256
+        max_num = 2**10 #1024
+        #max_num = 2**8 #256
         #max_num = 2**7 #128
 
         dmin = Vec([0,0,0])
-        dmax = Vec([5,5,1])
+        dmax = Vec([5,5,5])
         domain = Domain(dmin, dmax)
         system = sph.SPH(max_num, domain)
-        clsystem = clsph.CLSPH(dt)
+        clsystem = clsph.CLSPH(dt, system)
 
         clsystem.update()
 

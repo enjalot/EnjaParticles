@@ -74,6 +74,28 @@ class Domain(object):
         s += "number of cells: %s\n" % self.nb_cells
         return s
 
+    def make_struct(self):
+        import struct
+        gpstruct = struct.pack('ffff'+
+                                'ffff'+
+                                'ffff'+
+                                'ffff'+
+                                'ffff'+
+                                'ffff'+
+                                'ffff'+
+                                'i',
+                                self.size.x, self.size.y, self.size.z, 0.,
+                                self.min.x, self.min.y, self.min.z, 0.,
+                                self.max.x, self.max.y, self.max.z, 0.,
+                                self.bnd_min.x, self.bnd_min.y, self.bnd_min.z, 0.,
+                                self.bnd_max.x, self.bnd_max.y, self.bnd_max.z, 0.,
+                                self.res.x, self.res.y, self.res.z, 0.,
+                                self.delta.x, self.delta.y, self.delta.z, 0.,
+                                self.nb_cells
+                            )
+        return gpstruct
+
+
 if __name__ == "__main__":
 
     #doing some testing on hashing out of bounds

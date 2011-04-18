@@ -5,30 +5,15 @@ class CLDensity:
         self.clsph = clsph
         self.queue = self.clsph.queue
         self.dt = self.clsph.dt
-
+        self.clsph.loadProgram(self.clsph.clsph_dir + "/density.cl")
     
     #@timings
-    """
-    def execute(self,
-                pos_s,
-                density_s,
-                ci_start,
-                ci_end,
-                sphp,
-                gp,
-                clf_debug,
-                cli_debug
-                ):
-    """
     def execute(self, num, *args, **argv):
+        if num > 0:
+            global_size = (num,)
+            local_size = (64,)
 
-        print "args"
-        print args
+            self.clsph.prgs["density"].density_update(self.queue, global_size, local_size, *(args))
 
-        global_size = (num,)
-        local_size = None
-
-        self.prgs["density"].density(self.queue, global_size, local_size, *(args))
-
-        self.queue.finish()
- 
+            self.queue.finish()
+     

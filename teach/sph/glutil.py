@@ -1,8 +1,25 @@
 #from OpenGL.GL import *
 import OpenGL.GL as gl
 from OpenGL.GLU import *
+from OpenGL.raw.GL.VERSION.GL_1_5 import glBufferData as rawGlBufferData
+from OpenGL.arrays import ArrayDatatype as ADT
 
 from vector import Vec
+
+
+class VBO:
+#hacking this together because on Mac I can't use the PyOpenGL vbo class
+#mixed with PyOpenCL for some reason
+    def __init__(self, data):
+        self.data = data
+        self.vbo_id = gl.glGenBuffers(1)
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.vbo_id)
+        rawGlBufferData(gl.GL_ARRAY_BUFFER, ADT.arrayByteCount(data), ADT.voidDataPointer(data), gl.GL_DYNAMIC_DRAW)
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
+
+    def bind(self):
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.vbo_id)
+
 
 
 def init((width, height)):

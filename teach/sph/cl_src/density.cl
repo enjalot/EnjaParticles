@@ -48,10 +48,8 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
         //pt->density.x += sphp->mass*Wij;
     }
 }
-
 //Contains Iterate...Cells methods and ZeroPoint
 #include "cl_neighbors.h"
-
 //--------------------------------------------------------------
 // compute forces on particles
 

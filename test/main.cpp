@@ -96,9 +96,9 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 262144
 //#define NUM_PARTICLES 131072
 //#define NUM_PARTICLES 65536
-#define NUM_PARTICLES 32768
+//#define NUM_PARTICLES 32768
 //#define NUM_PARTICLES 16384
-//#define NUM_PARTICLES 10000
+#define NUM_PARTICLES 10000
 //#define NUM_PARTICLES 8192
 //#define NUM_PARTICLES 4096
 //#define NUM_PARTICLES 2048
@@ -106,7 +106,8 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 256
 #define DT .001f
 
-float4 color = float4(0.1, 0.1, 0.73, .05);
+//float4 color = float4(0.1, 0.1, 0.73, .05);
+float4 color = float4(1., 0.5, 0.0, 1.);
 int hindex; 
 
 
@@ -166,8 +167,8 @@ int main(int argc, char** argv)
     //rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
 	rtps::RTPSettings* settings = new rtps::RTPSettings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
 
-    settings->setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
-    //settings->setRenderType(RTPSettings::RENDER);
+    //settings->setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
+    settings->setRenderType(RTPSettings::RENDER);
     //settings.setRenderType(RTPSettings::SPRITE_RENDER);
     settings->setRadiusScale(1.0);
     settings->setBlurScale(1.0);

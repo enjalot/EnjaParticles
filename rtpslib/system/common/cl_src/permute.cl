@@ -21,8 +21,7 @@ __kernel void permute(
                             __global float4*   color_s,
                             __global uint* sort_indices,
                             //__constant struct SPHParams* sphp,
-                            __constant struct GridParams* gp,
-                            __local  uint* sharedHash   // blockSize+1 elements
+                            __constant struct GridParams* gp
                             )
 {
     uint index = get_global_id(0);

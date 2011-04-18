@@ -87,7 +87,7 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
 #if 1
         // Add viscous forces
         float vvisc = sphp->viscosity;
-        float dWijlapl = Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
+        float dWijlapl = sphp->wvisc_dd_coef * Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
         force += vvisc * (velj-veli) * dWijlapl;
 #endif
 
