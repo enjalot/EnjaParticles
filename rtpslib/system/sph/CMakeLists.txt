@@ -9,7 +9,7 @@ FOREACH(loop_var ${cl_cpy})
     FILE(COPY ${loop_var} DESTINATION ${rtpslib_BINARY_DIR}/cl_sph)
 ENDFOREACH(loop_var)
 
-IF(RTPS_DEBUG)
+IF(PREPROCESS_CL)
 # Only executes when I do "cmake"
 # I'd like it to execute when I do a make
 # this will run the c++ preprocessor on the opencl files
@@ -39,11 +39,12 @@ IF(RTPS_DEBUG)
 
 
     ENDIF(NOT WIN32)
-ENDIF(RTPS_DEBUG)
+ENDIF(PREPROCESS_CL)
 
 #IF(WIN32)
 #install (TARGETS rtps DESTINATION bin)
+INSTALL(CODE "FILE(MAKE_DIRECTORY ${RTPS_INSTALL_DIR}/cl_sph)")
 FILE(GLOB cl_cpy "${rtpslib_BINARY_DIR}/cl_sph/*")
-install (FILES ${cl_cpy} DESTINATION ${rtpsuite_BINARY_DIR}/bin/cl_sph)
+install (FILES ${cl_cpy} DESTINATION ${RTPS_INSTALL_DIR}/cl_sph)
 
 #ENDIF(WIN32)
