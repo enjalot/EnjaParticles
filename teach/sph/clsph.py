@@ -1,4 +1,5 @@
 #from OpenGL.GL import GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, glFlush, glGenBuffers, glBindBuffer
+from OpenGL.GL import *
 
 import numpy
 import pyopencl as cl
@@ -7,15 +8,11 @@ import glutil
 import clhash
 import clradix
 import clcellindices
-"""
 import clpermute
-"""
 import cldensity
-"""
 import clforce
 import clcollision_wall
 import clleapfrog
-"""
 
 class CLSPH:
     def __init__(self, dt, sph):
@@ -26,7 +23,7 @@ class CLSPH:
         self.clcommon_dir = "/Users/enjalot/code/sph/teach/sph/cl_common"
         
         self.dt = dt
-        self.num = 256
+        self.num = 0
         self.sph = sph
 
         self.loadData()
@@ -34,8 +31,11 @@ class CLSPH:
         self.hash = clhash.CLHash(self)
         self.radix = clradix.Radix(self, self.sph.max_num, 128, numpy.uint32(0))
         self.cellindices = clcellindices.CLCellIndices(self)
+        self.permute = clpermute.CLPermute(self)
         self.density = cldensity.CLDensity(self)
-         
+        self.force = clforce.CLForce(self)
+        self.collision_wall = clcollision_wall.CLCollisionWall(self)
+        self.leapfrog = clleapfrog.CLLeapFrog(self)
        
     
     def acquire_gl(self):
@@ -62,8 +62,13 @@ class CLSPH:
                             self.sort_indices
                         )
 
-        negone = numpy.ones((self.sph.domain.nb_cells+1,), dtype=numpy.uint32)
+
+ 
+
+        negone = numpy.ones((self.sph.domain.nb_cells+1,), dtype=numpy.int32)
+        negone *= -1
         cl.enqueue_write_buffer(self.queue, self.ci_start, negone)
+        self.queue.finish()
 
         self.cellindices.execute(   self.num,
                                     self.sort_hashes,
@@ -75,16 +80,93 @@ class CLSPH:
                                     #self.cli_debug
                                 )
 
+        """
+        tmp_start = numpy.ndarray((self.sph.domain.nb_cells,), dtype=numpy.uint32)
+        tmp_end = numpy.ndarray((self.sph.domain.nb_cells,), dtype=numpy.uint32)
+        cl.enqueue_read_buffer(self.queue, self.ci_start, tmp_start)
+        cl.enqueue_read_buffer(self.queue, self.ci_end, tmp_end)
+        import sys
+        for i in xrange(len(tmp_start)):
+            if tmp_start[i] <= self.sph.domain.nb_cells+1 or tmp_end[i] > 0:
+                print i, tmp_start[i], tmp_end[i]
+        """
+
+        self.permute.execute(   self.num, 
+                                self.position_u,
+                                self.position_s,
+                                self.velocity_u,
+                                self.velocity_s,
+                                self.veleval_u,
+                                self.veleval_s,
+                                self.color_u,
+                                self.color_s,
+                                self.sort_indices
+                                #self.clf_debug,
+                                #self.cli_debug
+                            )
+
+
         self.density.execute(   self.num, 
                                 self.position_s,
                                 self.density_s,
                                 self.ci_start,
                                 self.ci_end,
+                                #self.gp,
+                                self.gp_scaled,
                                 self.sphp,
-                                self.gp,
                                 self.clf_debug,
                                 self.cli_debug
                             )
+
+        """
+        density = numpy.ndarray((self.num,), dtype=numpy.float32)
+        cl.enqueue_read_buffer(self.queue, self.density_s, density)
+        print density.T
+        clf = numpy.ndarray((self.num,4), dtype=numpy.float32)
+        cl.enqueue_read_buffer(self.queue, self.clf_debug, clf)
+        print clf
+        """
+ 
+        self.force.execute(   self.num, 
+                              self.position_s,
+                              self.density_s,
+                              self.veleval_s,
+                              self.force_s,
+                              self.xsph_s,
+                              self.ci_start,
+                              self.ci_end,
+                              self.gp_scaled,
+                              self.sphp,
+                              self.clf_debug,
+                              self.cli_debug
+                          )
+
+        self.collision_wall.execute(  self.num, 
+                                      self.position_s,
+                                      self.velocity_s,
+                                      self.force_s,
+                                      self.gp_scaled,
+                                      self.sphp,
+                                      #self.clf_debug,
+                                     # self.cli_debug
+                                   )
+
+        self.leapfrog.execute(    self.num, 
+                                  self.position_u,
+                                  self.position_s,
+                                  self.velocity_u,
+                                  self.velocity_s,
+                                  self.veleval_u,
+                                  self.force_s,
+                                  self.xsph_s,
+                                  self.sort_indices,
+                                  self.sphp,
+                                  #self.clf_debug,
+                                  #self.cli_debug
+                                  numpy.float32(self.dt)
+                             )
+        #"""                
+
 
         self.release_gl()
  
@@ -121,11 +203,15 @@ class CLSPH:
         self.force_s = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp)
         self.xsph_s = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp)
 
-        tmp_uint = numpy.ndarray((self.sph.max_num,), dtype=numpy.uint32)
+        import sys
+        tmp_uint = numpy.ones((self.sph.max_num,), dtype=numpy.uint32)
+        tmp_uint = tmp_uint * sys.maxint
+
         self.sort_indices = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp_uint)
         self.sort_hashes = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp_uint)
 
-        tmp_grid = numpy.ndarray((self.sph.domain.nb_cells+1, ), dtype=numpy.uint32)
+        tmp_grid = numpy.ones((self.sph.domain.nb_cells+1, ), dtype=numpy.int32)
+        tmp_grid += -1
         #grid size
         self.ci_start= cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp_grid)
         self.ci_end = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp_grid)
@@ -136,8 +222,13 @@ class CLSPH:
         self.sphp = cl.Buffer(self.ctx, mf.READ_ONLY, len(self.sphp_struct))
         cl.enqueue_write_buffer(self.queue, self.sphp, self.sphp_struct).wait()
 
-        self.gp_struct = self.sph.domain.make_struct()
+        self.gp_struct = self.sph.domain.make_struct(1.0)
         self.gp = cl.Buffer(self.ctx, mf.READ_ONLY, len(self.gp_struct))
+        cl.enqueue_write_buffer(self.queue, self.gp, self.gp_struct)
+
+        self.gp_struct_scaled = self.sph.domain.make_struct(self.sph.sim_scale)
+        self.gp_scaled = cl.Buffer(self.ctx, mf.READ_ONLY, len(self.gp_struct_scaled))
+        cl.enqueue_write_buffer(self.queue, self.gp_scaled, self.gp_struct_scaled)
 
         #debug arrays
         tmp_int = numpy.ndarray((self.sph.max_num, 4), dtype=numpy.int32)
@@ -150,6 +241,24 @@ class CLSPH:
         self.gl_objects = [self.position_u, self.color_u]
 
 
+
+    def updateSPHP(self):
+        self.sphp_struct = self.sph.make_struct(self.num)
+        cl.enqueue_write_buffer(self.queue, self.sphp, self.sphp_struct).wait()
+
+
+    def push_particles(self, pos, vel, color):
+        nn = pos.shape[0]
+        if self.num + nn > self.sph.max_num:
+            return
+
+        self.acquire_gl()
+        cl.enqueue_write_buffer(self.queue, self.position_u, pos, self.num)
+        self.release_gl()
+
+        self.num += nn
+        self.updateSPHP()
+        self.queue.finish()
 
  
     def reloadData(self):
@@ -200,16 +309,16 @@ class CLSPH:
     def render(self):
 
 
-        #glColor3f(1,0,0)
+        glColor3f(1,0,0)
         glEnable(GL_POINT_SMOOTH)
         glPointSize(5)
 
-        glEnable(GL_BLEND)
-        glBlendFunc(GL_ONE, GL_ONE)
+        #glEnable(GL_BLEND)
+        #glBlendFunc(GL_ONE, GL_ONE)
         #glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         #glEnable(GL_DEPTH_TEST)
-        glDisable(GL_DEPTH_TEST)
-        glDepthMask(GL_FALSE)
+        #glDisable(GL_DEPTH_TEST)
+        #glDepthMask(GL_FALSE)
 
         """
         glColor3f(1., 0, 0)
@@ -220,15 +329,15 @@ class CLSPH:
         glEnd()
         """
 
-        self.col_vbo.bind()
-        glColorPointer(4, GL_FLOAT, 0, self.col_vbo)
+        #self.col_vbo.bind()
+        #glColorPointer(4, GL_FLOAT, 0, None)
 
         self.pos_vbo.bind()
-        glVertexPointer(4, GL_FLOAT, 0, self.pos_vbo)
+        glVertexPointer(4, GL_FLOAT, 0, None)
 
         glEnableClientState(GL_VERTEX_ARRAY)
-        glEnableClientState(GL_COLOR_ARRAY)
-        glDrawArrays(GL_POINTS, 0, self.num*(self.ntracers+1))
+        #glEnableClientState(GL_COLOR_ARRAY)
+        glDrawArrays(GL_POINTS, 0, self.num)
 
         glDisableClientState(GL_COLOR_ARRAY)
         glDisableClientState(GL_VERTEX_ARRAY)

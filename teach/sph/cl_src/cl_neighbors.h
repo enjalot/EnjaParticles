@@ -43,7 +43,6 @@ void IterateParticlesInCell(
     {
         return;
     }
-    //even with cellHash in bounds we are still getting out of bounds indices
 
     /* get start/end positions for this cell/bucket */
     uint startIndex = FETCH(cell_indexes_start,cellHash);

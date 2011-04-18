@@ -47,8 +47,6 @@ namespace rtps
         k_permute.setArg(iarg++, color_u.getDevicePtr());
         k_permute.setArg(iarg++, color_s.getDevicePtr());
         k_permute.setArg(iarg++, indices.getDevicePtr());
-        //k_permute.setArg(iarg++, sphp.getDevicePtr());
-        k_permute.setArg(iarg++, gp.getDevicePtr());
 
         int workSize = 64;
         

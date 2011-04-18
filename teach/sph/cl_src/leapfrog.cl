@@ -16,7 +16,8 @@ __kernel void leapfrog(
                       __global int* sort_indices,  
                       //		__global float4* color,
                       __constant struct SPHParams* sphp, 
-                      float dt)
+                      float dt
+                      )
 {
     unsigned int i = get_global_id(0);
     //int num = get_global_size(0); // for access functions in cl_macros.h
@@ -37,7 +38,8 @@ __kernel void leapfrog(
 
 
     //external force is gravity
-    f.z += sphp->gravity;
+    //f.z += sphp->gravity;
+    f.y += sphp->gravity;
     f.w = 0.f;
 
     float speed = length(f);

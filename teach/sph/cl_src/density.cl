@@ -36,6 +36,7 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
     r.w = 0.f; // I stored density in 4th component
     // |r|
     float rlen = length(r);
+    //pt->density.y += 1.;
 
     // is this particle within cutoff?
     if (rlen <= sphp->smoothing_distance)
@@ -92,7 +93,16 @@ __kernel void density_update(
     clf[index].z = sphp->smoothing_distance;
     clf[index].w = sphp->mass;
     */
-    clf[index].w = density[index];
+
+    //int4 cell = calcGridCell(pos[index], gp->grid_min, gp->grid_delta);
+    /*
+    int4 cell = calcGridCell(pos[index] * sphp->simulation_scale, gp->grid_min, gp->grid_delta);
+    uint cellHash = calcGridHash(cell, gp->grid_res, false);
+    clf[index].x = cellHash;
+    clf[index].y = pt.density.y;
+    clf[index].z = pt.density.z;
+    clf[index].w = pt.density.w;
+    */
 #endif
 }
 

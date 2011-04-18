@@ -1,7 +1,7 @@
 #ifndef _CL_SPH_STRUCTURES_H_
 #define _CL_SPH_STRUCTURES_H_
 
-#include "../cl_common/cl_structs.h"
+#include "cl_common_structs.h"
 
 typedef struct SPHParams
 {

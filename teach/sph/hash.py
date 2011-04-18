@@ -74,7 +74,17 @@ class Domain(object):
         s += "number of cells: %s\n" % self.nb_cells
         return s
 
-    def make_struct(self):
+    def make_struct(self, scale_factor):
+
+        print("scale factor", scale_factor)
+        size = self.size * scale_factor
+        min = self.min * scale_factor
+        max = self.max * scale_factor
+        bnd_min = self.bnd_min * scale_factor
+        bnd_max = self.bnd_max * scale_factor
+        res = self.res
+        delta = self.delta / scale_factor
+
         import struct
         gpstruct = struct.pack('ffff'+
                                 'ffff'+
@@ -84,13 +94,13 @@ class Domain(object):
                                 'ffff'+
                                 'ffff'+
                                 'i',
-                                self.size.x, self.size.y, self.size.z, 0.,
-                                self.min.x, self.min.y, self.min.z, 0.,
-                                self.max.x, self.max.y, self.max.z, 0.,
-                                self.bnd_min.x, self.bnd_min.y, self.bnd_min.z, 0.,
-                                self.bnd_max.x, self.bnd_max.y, self.bnd_max.z, 0.,
-                                self.res.x, self.res.y, self.res.z, 0.,
-                                self.delta.x, self.delta.y, self.delta.z, 0.,
+                                size.x, size.y, size.z, 0.,
+                                min.x, min.y, min.z, 0.,
+                                max.x, max.y, max.z, 0.,
+                                bnd_min.x, bnd_min.y, bnd_min.z, 0.,
+                                bnd_max.x, bnd_max.y, bnd_max.z, 0.,
+                                res.x, res.y, res.z, 0.,
+                                delta.x, delta.y, delta.z, 0.,
                                 self.nb_cells
                             )
         return gpstruct
