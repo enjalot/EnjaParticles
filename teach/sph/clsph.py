@@ -30,8 +30,10 @@ class CLSPH:
 
         self.prgs = {}  #store our programs
         #of course hardcoding paths here is terrible
-        self.clsph_dir = "/Users/enjalot/code/sph/teach/sph/cl_src"
-        self.clcommon_dir = "/Users/enjalot/code/sph/teach/sph/cl_common"
+        #self.clsph_dir = "/Users/enjalot/code/sph/teach/sph/cl_src"
+        self.clsph_dir = "cl_src"
+        #self.clcommon_dir = "/Users/enjalot/code/sph/teach/sph/cl_common"
+        self.clcommon_dir = "cl_common"
 
         self.global_color = [1., 1., 1., 1.]
         
@@ -431,14 +433,17 @@ class CLSPH:
         #print fstr
         #create the program
         prg_name = filename.split(".")[0]   #e.g. wave from wave.cl
+        print prg_name
         prg_name = prg_name.split("/")[-1]
+        print prg_name
         optionstr = "-I%s/ -I%s/" % (self.clsph_dir, self.clcommon_dir)
         #print optionstr
 
         plat = cl.get_platforms()[0]
         device = plat.get_devices()[0]
 
-        #print prg_name
+        print "prg name", prg_name
+        print filename
         self.prgs[prg_name] = cl.Program(self.ctx, fstr).build(options=optionstr)
         options = self.prgs[prg_name].get_build_info(device, cl.program_build_info.OPTIONS)
         #print "options: ", options

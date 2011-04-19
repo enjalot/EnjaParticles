@@ -17,7 +17,7 @@ import hash
 import forces
 import sph
 import clsph
-import clghost
+#import clghost
 
 dt = .001
 subintervals = 1
@@ -251,8 +251,9 @@ class window(object):
         dx = x - self.mouse_old.x
         dy = y - self.mouse_old.y
         if self.mouse_down and self.button == 0: #left button
-            self.rotate.x += dy * .2
-            self.rotate.y += dx * .2
+            pass
+            #self.rotate.x += dy * .2
+            #self.rotate.y += dx * .2
         elif self.mouse_down and self.button == 2: #right button
             self.translate.z -= dy * .01 
         self.mouse_old.x = x
