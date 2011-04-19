@@ -9,12 +9,12 @@ from kernels import Kernel
 screen_scale = 160
 
 class SPH:
-    def __init__(self, max_num, domain):
+    def __init__(self, max_num, domain, ghost_factor=1.):
         self.max_num = max_num
 
         rho0 = 1000.                #rest density [ kg/m^3 ]
         VF = .0262144               #simulation volume [ m^3 ]
-        VP = VF / max_num           #particle volume [ m^3 ]
+        VP = ghost_factor * VF / max_num           #particle volume [ m^3 ]
         m = rho0 * VP               #particle mass [ kg ]
         re = (VP)**(1/3.)           #particle radius [ m ]
         #re = (VP)**(1/2.)           #particle radius [ m ]
@@ -140,13 +140,13 @@ class Particle:
         #pygame.draw.line(self.surface, pj.col, self.pos, vec)
 
 #std::vector<float4> addRect(int num, float4 min, float4 max, float spacing, float scale)
-def addRect(num, pmin, pmax, sphp):
+def addRect(num, pmin, pmax, sphp, global_color):
     #Create a rectangle with at most num particles in it.  The size of the return
     #vector will be the actual number of particles used to fill the rectangle
     print "**** addRect ****"
     print "rest dist:", sphp.rest_distance
     print "sim_scale:", sphp.sim_scale
-    spacing = 1.0 * sphp.rest_distance / sphp.sim_scale;
+    spacing = .99 * sphp.rest_distance / sphp.sim_scale;
     print "spacing", spacing
 
     xmin = pmin.x# * scale
@@ -155,18 +155,77 @@ def addRect(num, pmin, pmax, sphp):
     ymax = pmax.y# * scale
 
     print "min, max", xmin, xmax, ymin, ymax
-    rvec = [];
-    i=0;
+    rvec = []
+    color = []
+    i=0
     for y in np.arange(ymin, ymax, spacing):
         for x in np.arange(xmin, xmax, spacing):
             if i >= num: break
-            print "x, y", x, y
+            #print "x, y", x, y
             #rvec += [ Vec([x,y]) * sphp.sim_scale];
             rvec += [[x, y, 0., 1.]]
+            color += [global_color]
+
             i+=1;
     print "%d particles added" % i
     rvecnp = np.array(rvec, dtype=np.float32)
-    return rvecnp;
+    colornp = np.array(color, dtype=np.float32)
+    return rvecnp, colornp
+
+def addPic(image, num, pmin, pmax, sphp):
+    #Create a rectangle with at most num particles in it.  The size of the return
+    #vector will be the actual number of particles used to fill the rectangle
+    print "**** addPic ****"
+    print "rest dist:", sphp.rest_distance
+    print "sim_scale:", sphp.sim_scale
+    spacing = .99 * sphp.rest_distance / sphp.sim_scale;
+    print "spacing", spacing
+
+    xmin = pmin.x# * scale
+    xmax = pmax.x# * scale
+    ymin = pmin.y# * scale
+    ymax = pmax.y# * scale
+
+    print "min, max", xmin, xmax, ymin, ymax
+    rvec = []
+    color = []
+    i=0
+
+    ima = np.array(image)
+    #ima.shape = (ima.shape[0] * ima.shape[1], )
+    print ima.shape
+    print dir(image)
+    print image.layers
+    print "COLORNP"
+    yi = 0
+    for y in np.arange(ymax, ymin, -spacing):
+        xi = 0
+        for x in np.arange(xmin, xmax, spacing):
+            if i >= num: break
+            xi += 1
+            if xi > image.size[0]:
+                break
+
+            #print "x, y", x, y
+            #rvec += [ Vec([x,y]) * sphp.sim_scale];
+            rvec += [[x, y, 0., 1.]]
+            intensity = image.getpixel((xi, yi))/255.
+            #g = ima.getpixl(xi, yi)/255.
+            #b = ima[i*3+2]/255.
+            r = intensity
+            g = intensity
+            b = intensity
+            a = 1.
+            color += [[r, g, b, a]]
+            i+=1;
+        yi += 1
+    print "%d particles added" % i
+    rvecnp = np.array(rvec, dtype=np.float32)
+    colornp = np.array(color, dtype=np.float32)
+
+    return rvecnp, colornp;
+
+
 
 def addRect3D(num, pmin, pmax, sphp):
     #Create a rectangle with at most num particles in it.  The size of the return

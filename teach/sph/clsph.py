@@ -13,18 +13,26 @@ import cldensity
 import clforce
 import clcollision_wall
 import clleapfrog
+import clghost_density
+import clghost_force
 
 class CLSPH:
     def __init__(self, dt, sph, is_ghost=False, ghost_system=None):
+        #ghost system is just a regular system that doesn't do all the steps of the sph update
         self.is_ghost = is_ghost
-        self.ghost_system = None
-        self.clinit()
+        #our real system has access to the arrays from the ghost system
+        self.ghost_system = ghost_system
+        if is_ghost or ghost_system is None:
+            self.clinit()
+        else:
+            self.ctx = self.ghost_system.ctx
+            self.queue = self.ghost_system.queue
         self.prgs = {}  #store our programs
         #of course hardcoding paths here is terrible
         self.clsph_dir = "/Users/enjalot/code/sph/teach/sph/cl_src"
         self.clcommon_dir = "/Users/enjalot/code/sph/teach/sph/cl_common"
 
-        self.global_color = [0., 1., 0., 1.]
+        self.global_color = [1., 1., 1., 1.]
         
         self.dt = dt
         self.num = 0
@@ -40,6 +48,9 @@ class CLSPH:
         self.force = clforce.CLForce(self)
         self.collision_wall = clcollision_wall.CLCollisionWall(self)
         self.leapfrog = clleapfrog.CLLeapFrog(self)
+        
+        self.ghost_density = clghost_density.CLDensity(self)
+        self.ghost_force = clghost_force.CLForce(self)
        
     
     def acquire_gl(self):
@@ -110,6 +121,9 @@ class CLSPH:
 
         if not self.is_ghost:
 
+        #if True:
+
+
             self.density.execute(   self.num, 
                                     self.position_s,
                                     self.density_s,
@@ -122,10 +136,28 @@ class CLSPH:
                                     self.cli_debug
                                 )
 
+ 
+            if self.ghost_system is not None:
+                self.ghost_density.execute(   self.num, 
+                                    self.position_s,
+                                    self.ghost_system.position_s,
+                                    self.density_s,
+                                    self.ghost_density_s,
+                                    self.ghost_system.color_s,
+                                    self.sphp,
+                                    self.ghost_system.ci_start,
+                                    self.ghost_system.ci_end,
+                                    self.ghost_system.gp_scaled,
+                                    self.ghost_system.sphp,
+                                    self.clf_debug,
+                                    self.cli_debug
+                                )
+
             """
             density = numpy.ndarray((self.num,), dtype=numpy.float32)
-            cl.enqueue_read_buffer(self.queue, self.density_s, density)
+            cl.enqueue_read_buffer(self.queue, self.ghost_density_s, density)
             print density.T
+
             clf = numpy.ndarray((self.num,4), dtype=numpy.float32)
             cl.enqueue_read_buffer(self.queue, self.clf_debug, clf)
             print clf
@@ -144,6 +176,32 @@ class CLSPH:
                                   self.clf_debug,
                                   self.cli_debug
                               )
+           
+            if self.ghost_system is not None:
+                self.ghost_force.execute(   self.num, 
+                                    self.position_s,
+                                    self.ghost_system.position_s,
+                                    self.density_s,
+                                    self.ghost_density_s,
+                                    self.ghost_system.color_s,
+                                    self.veleval_s,
+                                    self.force_s,
+                                    self.xsph_s,
+                                    self.sphp,
+                                    self.ghost_system.ci_start,
+                                    self.ghost_system.ci_end,
+                                    self.ghost_system.gp_scaled,
+                                    self.ghost_system.sphp,
+                                    self.clf_debug,
+                                    self.cli_debug
+                )
+                """
+                clf = numpy.ndarray((self.num,4), dtype=numpy.float32)
+                cl.enqueue_read_buffer(self.queue, self.clf_debug, clf)
+                print clf.T
+                """
+     
+ 
 
             self.collision_wall.execute(  self.num, 
                                           self.position_s,
@@ -205,6 +263,9 @@ class CLSPH:
         self.force_s = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp)
         self.xsph_s = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp)
 
+        if not self.is_ghost or self.ghost_system is not None:
+            self.ghost_density_s = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp_dens)
+
         import sys
         tmp_uint = numpy.ones((self.sph.max_num,), dtype=numpy.uint32)
         tmp_uint = tmp_uint * sys.maxint
@@ -255,10 +316,12 @@ class CLSPH:
 
         self.acquire_gl()
         cl.enqueue_write_buffer(self.queue, self.position_u, pos, self.num)
+        cl.enqueue_write_buffer(self.queue, self.color_u, color, self.num)
         self.release_gl()
 
         self.num += nn
         self.update_sphp()
+
         self.queue.finish()
 
  
@@ -312,15 +375,18 @@ class CLSPH:
     def render(self):
 
         gc = self.global_color
-        glColor4f(gc[0],gc[1], gc[2],gc[3])
+        #glColor4f(gc[0],gc[1], gc[2],gc[3])
         glEnable(GL_POINT_SMOOTH)
-        glPointSize(5)
+        if self.is_ghost:
+            glPointSize(1)
+        else:
+            glPointSize(5)
 
-        #glEnable(GL_BLEND)
+        glEnable(GL_BLEND)
         #glBlendFunc(GL_ONE, GL_ONE)
-        #glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         #glEnable(GL_DEPTH_TEST)
-        #glDisable(GL_DEPTH_TEST)
+        glDisable(GL_DEPTH_TEST)
         #glDepthMask(GL_FALSE)
 
         """
@@ -332,14 +398,14 @@ class CLSPH:
         glEnd()
         """
 
-        #self.col_vbo.bind()
-        #glColorPointer(4, GL_FLOAT, 0, None)
+        self.col_vbo.bind()
+        glColorPointer(4, GL_FLOAT, 0, None)
 
         self.pos_vbo.bind()
         glVertexPointer(4, GL_FLOAT, 0, None)
 
         glEnableClientState(GL_VERTEX_ARRAY)
-        #glEnableClientState(GL_COLOR_ARRAY)
+        glEnableClientState(GL_COLOR_ARRAY)
         glDrawArrays(GL_POINTS, 0, self.num)
 
         glDisableClientState(GL_COLOR_ARRAY)

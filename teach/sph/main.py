@@ -6,6 +6,8 @@ from OpenGL.GLU import *
 from OpenGL.GLUT import *
 import sys
 
+import Image
+
 #helper modules
 import glutil
 from vector import Vec
@@ -28,7 +30,7 @@ class window(object):
         self.translate = Vec([0., 0., 0.])
         #self.initrans = Vec([0., 0., -2.])
         self.init_persp_trans = Vec([-.5, -0.5, -2.5])
-        self.init_ortho_trans = Vec([0., 0., 0.])
+        self.init_ortho_trans = Vec([0., 0., 1.])
         self.init_persp_rotate = Vec([0., 0., 0.])
         #self.init_ortho_rotate = Vec([90., -90., 0.])
         self.init_ortho_rotate = Vec([0., 0., 0.])
@@ -63,7 +65,8 @@ class window(object):
 
 
         #########################################################################
-        #max_num = 16384
+        #ghost_max_num = 262144
+        ghost_max_num = 65536
         max_num = 8192
         #max_num = 2**12 #4096
         #max_num = 2**10 #1024
@@ -72,26 +75,41 @@ class window(object):
 
         dmin = Vec([0,0,0])
         dmax = Vec([1,1,1])
+        print "SPH System"
+        print "-------------------------------------------------------------"
         self.domain = Domain(dmin, dmax)
         self.system = sph.SPH(max_num, self.domain)
+        
+        print "Ghost System"
+        print "-------------------------------------------------------------"
         self.ghost_domain = Domain(dmin, dmax)
-        self.ghost = sph.SPH(max_num * 36, self.ghost_domain)
-        ipos = sph.addRect(512, Vec([0.1, 0.1, 0.,0.]), Vec([1.,1.,0.,0.]), self.system)
-        gpos = sph.addRect(8192, Vec([0.1, 0.1, 0.,0.]), Vec([1.,1.,0.,0.]), self.ghost)
-        #print ipos, "LEN", len(ipos)
-        #print gpos, "LEN", len(gpos)
+        self.ghost = sph.SPH(ghost_max_num, self.ghost_domain, ghost_factor=.01)
+
+
         self.clghost_system = clsph.CLSPH(dt, self.ghost, is_ghost=True)
-        self.clsystem = clsph.CLSPH(dt, self.system)
+        #self.clsystem = clsph.CLSPH(dt, self.system, ghost_system=self.clghost_system)
+        self.clsystem = clsph.CLSPH(dt, self.system, ghost_system=None)
 
-        #ipos = sph.addRect3D(50, Vec([1.2, 1.2, .2,0.]), Vec([2.,2.,1.,0.]), self.system)
-        self.clghost_system.push_particles(gpos, None, None)
-        #self.clghost_system.update()
-        self.clsystem.push_particles(ipos, None, None)
-
-        color = [1., 0., 0., 1.]
+        color = [1., 0., 0., .75]
         self.clsystem.set_color(color)
-        color = [.75, 0.75, 0.75, 1.]
+        ipos, icolor = sph.addRect(512, Vec([0.1, 0.1, 0.,0.]), Vec([1.,1.,0.,0.]), self.system, color)
+        self.clsystem.push_particles(ipos, None, icolor)
+        
+        gmin = Vec([0., 0., 0.,0.])
+        gmax = Vec([1.,1.,0.,0.])
+        color = [.1, 0.75, 0.75, .5]
         self.clghost_system.set_color(color)
+        #ghost_pos, ghost_color = sph.addRect(512, Vec([0.1, 0.1, 0.,0.]), Vec([1.,1.,0.,0.]), self.system, color)
+        ghost_pos, ghost_color = sph.addRect(ghost_max_num, gmin, gmax, self.ghost, color)
+
+        #img = Image.open('test.jpg')
+        #print img.size
+        #img.show()
+        #ghost_pos, ghost_color = sph.addPic(img, ghost_max_num, gmin, gmax, self.ghost)
+
+        self.clghost_system.push_particles(ghost_pos, None, ghost_color)
+        self.clghost_system.update()
+        self.clsystem.update()
 
         #########################################################################
         glutMainLoop()
@@ -106,7 +124,8 @@ class window(object):
         
         #update or particle positions by calling the OpenCL kernel
         for i in range(subintervals):
-            self.clsystem.update()
+            #self.clsystem.update()
+            pass
         #self.cle.execute(subintervals) 
         glFlush()
 
@@ -121,8 +140,8 @@ class window(object):
         glTranslatef(self.translate.x, self.translate.y, self.translate.z)
         
         #render the particles
-        self.clsystem.render()
         self.clghost_system.render()
+        self.clsystem.render()
 
         #draw the x, y and z axis as lines
         glutil.draw_axes()
