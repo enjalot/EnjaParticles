@@ -83,11 +83,13 @@ class window(object):
         #self.clsystem = clsph.CLSPH(dt, self.system, ghost_system=None)
         self.clsystem = clsph.CLSPH(dt, self.system, ghost_system=self.clghost_system)
 
+        """
         color = [1., 0., 0., .75]
         self.clsystem.set_color(color)
         ipos, icolor = sph.addRect(512, Vec([.5, .5, 0.,0.]), Vec([1., 1., 0.,0.]), self.system, color)
         print "pushing clsystem particles"
         self.clsystem.push_particles(ipos, None, icolor)
+        """
 
 
  
@@ -216,6 +218,10 @@ class window(object):
                 self.translate = self.init_persp_trans.copy()
                 self.rotate = self.init_persp_rotate.copy()
             self.glprojection()
+        elif args[0] == 'd':
+            self.clsystem.with_ghost_density = not self.clsystem.with_ghost_density
+        elif args[0] == 'f':
+            self.clsystem.with_ghost_force = not self.clsystem.with_ghost_force
              
 
     def on_click(self, button, state, x, y):
@@ -229,12 +235,12 @@ class window(object):
 
         print x, y, self.width, self.height
         cx = x / (1.0 * self.width)
-        cy = y / (1.0 * self.height)
+        cy = (self.height - y) / (1.0 * self.height)
         print cx, cy
 
         color = [1., 0., 0., .75]
         self.clsystem.set_color(color)
-        ipos, icolor = sph.addRect(512, Vec([cx - .2, cy -.2, 0.,0.]), Vec([cx + .2, cy + .2, 0.,0.]), self.system, color)
+        ipos, icolor = sph.addRect(512, Vec([cx - .1, cy -.1, 0.,0.]), Vec([cx + .1, cy + .1, 0.,0.]), self.system, color)
         print "pushing clsystem particles"
         self.clsystem.push_particles(ipos, None, icolor)
 

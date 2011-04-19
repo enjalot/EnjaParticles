@@ -39,6 +39,8 @@ class CLSPH:
         self.num = 0
         self.sph = sph
 
+        self.with_ghost_density = True
+        self.with_ghost_force = True
         
         self.loadData()
 
@@ -83,6 +85,18 @@ class CLSPH:
                                 self.cli_debug
                             )
 
+        """
+        hashes = numpy.ndarray((self.num,), dtype=numpy.int32)
+        cl.enqueue_read_buffer(self.queue, self.sort_hashes, hashes)
+        print "hashes"
+        print hashes.T
+        indices = numpy.ndarray((self.num,), dtype=numpy.int32)
+        cl.enqueue_read_buffer(self.queue, self.sort_indices, indices)
+        print "indices"
+        print indices.T
+        """
+ 
+
         self.radix.sort(    self.sph.max_num,
                             self.sort_hashes,
                             self.sort_indices
@@ -94,6 +108,8 @@ class CLSPH:
         negone = numpy.ones((self.sph.domain.nb_cells+1,), dtype=numpy.int32)
         negone *= -1
         cl.enqueue_write_buffer(self.queue, self.ci_start, negone)
+
+        cl.enqueue_write_buffer(self.queue, self.ci_end, numpy.zeros((self.sph.domain.nb_cells+1), dtype=numpy.int32))
         self.queue.finish()
 
         self.cellindices.execute(   self.num,
@@ -149,7 +165,7 @@ class CLSPH:
                                 )
 
  
-            if self.ghost_system is not None:
+            if self.ghost_system is not None and self.with_ghost_density:
                 self.ghost_density.execute(   self.num, 
                                     self.position_s,
                                     self.ghost_system.position_s,
@@ -210,7 +226,7 @@ class CLSPH:
  
 
 
-            if self.ghost_system is not None:
+            if self.ghost_system is not None and self.with_ghost_force:
                 self.ghost_force.execute(   self.num, 
                                     self.position_s,
                                     self.ghost_system.position_s,
@@ -228,8 +244,8 @@ class CLSPH:
                                     self.clf_debug,
                                     self.cli_debug
                 )
-                """
 
+                """
                 force = numpy.ndarray((self.num,4), dtype=numpy.float32)
                 cl.enqueue_read_buffer(self.queue, self.force_s, force)
                 print force.T[0:100] 
@@ -253,16 +269,8 @@ class CLSPH:
             print "velocity_s before leapfrog"
             print pos.T[0:100] 
 
-            hashes = numpy.ndarray((self.num,), dtype=numpy.int32)
-            cl.enqueue_read_buffer(self.queue, self.sort_hashes, hashes)
-            print "hashes"
-            print hashes.T
-            indices = numpy.ndarray((self.num,), dtype=numpy.int32)
-            cl.enqueue_read_buffer(self.queue, self.sort_indices, indices)
-            print "indices"
-            print indices.T
             """
- 
+
 
             self.collision_wall.execute(  self.num, 
                                           self.position_s,
@@ -275,7 +283,6 @@ class CLSPH:
                                        )
 
 
-    
             self.leapfrog.execute(    self.num, 
                                       self.position_u,
                                       self.position_s,
@@ -377,6 +384,7 @@ class CLSPH:
 
     def update_sphp(self):
         self.sphp_struct = self.sph.make_struct(self.num)
+        print "update sphp", self.num
         cl.enqueue_write_buffer(self.queue, self.sphp, self.sphp_struct).wait()
 
 
@@ -389,8 +397,9 @@ class CLSPH:
             return
 
         self.acquire_gl()
-        cl.enqueue_write_buffer(self.queue, self.position_u, pos, self.num)
-        cl.enqueue_write_buffer(self.queue, self.color_u, color, self.num)
+        offset = self.num * numpy.float32(0).itemsize*4
+        cl.enqueue_write_buffer(self.queue, self.position_u, pos, device_offset=offset)
+        cl.enqueue_write_buffer(self.queue, self.color_u, color, device_offset=offset)
         self.release_gl()
 
         self.num += nn
@@ -398,14 +407,6 @@ class CLSPH:
 
         self.queue.finish()
 
- 
-    def reloadData(self):
-        import pyopencl as cl
-        cl.enqueue_acquire_gl_objects(self.queue, self.gl_objects)
-        cl.enqueue_copy_buffer(self.queue, self.pos_cl, self.pos_n1_cl).wait()
-        cl.enqueue_copy_buffer(self.queue, self.pos_cl, self.pos_n2_cl).wait()
-        cl.enqueue_release_gl_objects(self.queue, self.gl_objects)
-        
 
 
  

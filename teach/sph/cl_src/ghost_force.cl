@@ -49,8 +49,9 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
 
         float dWijdr = Wspiky_dr(rlen, particle_sphp->smoothing_distance, sphp);
 
-        float di = ghost_density[index_i];  // should not repeat di=
-        float dj = 1000 * (1.7 - casper);
+        float di = ghost_density[index_i];  
+        //float di = density[index_i];
+        float dj = 1000;// * (1.7 - casper);
         float idi = 1.0/di;
         float idj = 1.0/dj;
 
@@ -80,7 +81,8 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
 #endif
 
         //force *= sphp->mass/(di*dj);  // original
-        force *= sphp->mass/(di*dj) * (1.5f - casper);
+        //force *= sphp->mass/(di*dj) * (1.1f-casper)*(1.1f-casper);
+        force *= sphp->mass/(di*dj) * (1.1f - casper)*(1.1f-casper)*(1.1f-casper);
         ///force *= sphp->mass/(di*dj); 
 
 #if 1
@@ -141,9 +143,9 @@ __kernel void ghost_force_update(
 
     //IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
     IterateParticlesInNearbyCells(ARGV, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
-    force[index] += pt.force; 
+    force[index] += pt.force ; 
     clf[index].xyz = pt.force.xyz;
-    xsph[index] += sphp->wpoly6_coef * pt.xsph * .00001f;
+    //xsph[index] += sphp->wpoly6_coef * pt.xsph * .00001f;
 }
 
 /*-------------------------------------------------------------- */
