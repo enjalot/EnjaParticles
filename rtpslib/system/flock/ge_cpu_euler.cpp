@@ -18,7 +18,6 @@ void FLOCK::ge_loadEuler()
     k_euler.setArg(iargs++, ps->settings.min_dist);     //desired separation distance
     k_euler.setArg(iargs++, ps->settings.search_radius);//searching radius for neighbors
     k_euler.setArg(iargs++, ps->settings.max_speed);    //max speed for the boids
-
 	// ONLY IF DEBUGGING
 	k_euler.setArg(iargs++, clf_debug.getDevicePtr());
 	k_euler.setArg(iargs++, cli_debug.getDevicePtr());
@@ -64,7 +63,7 @@ void FLOCK::ge_cpuEuler()
 		    dist = d.length();
 
             // is boid j a flockmate?
-            if(dist <= ps->settings.search_radius){
+            if(dist <= ps->settings->search_radius){
                 (*flockmates).push_back(j);
             }
         }
@@ -82,7 +81,7 @@ void FLOCK::ge_cpuEuler()
         		float4 separation =  positions[i] - positions[(*flockmates)[j]];
 			    
                 float d = separation.length();
-        		if(d < ps->settings.min_dist){
+        		if(d < ps->settings->min_dist){
                 		separation = normalize3(separation);
 				        separation = separation / d;
 				        acc_separation = acc_separation + separation;
@@ -128,9 +127,9 @@ void FLOCK::ge_cpuEuler()
         // Step 6. Constrain acceleration
         float  acc_mag  = acc.length();
 	    float4 acc_norm = normalize3(acc);
-        if(acc_mag > ps->settings.max_speed){
+        if(acc_mag > ps->settings->max_speed){
                 // set magnitude to max speed 
-                acc = acc_norm * ps->settings.max_speed;
+                acc = acc_norm * ps->settings->max_speed;
         }
 
 
@@ -140,7 +139,7 @@ void FLOCK::ge_cpuEuler()
         velocities[i] = v + acc;
 
     	// Step 7. Integrate        
-	    positions[i] = positions[i] + ps->settings.dt*velocities[i];
+	    positions[i] = positions[i] + ps->settings->dt*velocities[i];
         positions[i].w = 1.0f; //just in case
 
     	// Step 8. Check boundary conditions

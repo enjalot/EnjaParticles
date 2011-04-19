@@ -1,4 +1,4 @@
-#include "SPH.h"
+#include "Hash.h"
 #include <string>
 
 namespace rtps
@@ -9,7 +9,7 @@ namespace rtps
         cli = cli_;
         timer = timer_;
         printf("create hash kernel\n");
-        std::string path(SPH_CL_SOURCE_DIR);
+        std::string path(COMMON_CL_SOURCE_DIR);
         path = path + "/hash.cl";
         k_hash = Kernel(cli, path, "hash");
     }
@@ -23,7 +23,7 @@ namespace rtps
                     Buffer<unsigned int>& hashes,
                     Buffer<unsigned int>& indices,
                     //params
-                    Buffer<SPHParams>& sphp,
+                    //Buffer<SPHParams>& sphp,
                     Buffer<GridParams>& gp,
                     //debug params
                     Buffer<float4>& clf_debug,
@@ -32,10 +32,11 @@ namespace rtps
 
         int args = 0;
         //k_hash.setArg(args++, uvars.getDevicePtr()); // positions + other variables
+        k_hash.setArg(args++, num);
         k_hash.setArg(args++, pos_u.getDevicePtr()); 
         k_hash.setArg(args++, hashes.getDevicePtr());
         k_hash.setArg(args++, indices.getDevicePtr());
-        k_hash.setArg(args++, sphp.getDevicePtr());
+        //k_hash.setArg(args++, sphp.getDevicePtr());
         k_hash.setArg(args++, gp.getDevicePtr());
         /*
         printf("about to make debug buffers\n");

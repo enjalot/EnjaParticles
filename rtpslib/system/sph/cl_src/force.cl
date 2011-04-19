@@ -30,7 +30,7 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
     int num = sphp->num;
 
     // get the particle info (in the current grid) to test against
-    float4 position_j = pos[index_j]; 
+    float4 position_j = pos[index_j] * sphp->simulation_scale; 
     float4 r = (position_i - position_j); 
     r.w = 0.f; // I stored density in 4th component
     // |r|
@@ -140,7 +140,7 @@ __kernel void force_update(
     int index = get_global_id(0);
     if (index >= num) return;
 
-    float4 position_i = pos[index];
+    float4 position_i = pos[index] * sphp->simulation_scale;
 
     //debuging
     clf[index] = (float4)(99,0,0,0);

@@ -22,8 +22,7 @@ namespace rtps
     {
         //store the particle system framework
         ps = psfr;
-        settings = &ps->settings;
-
+        settings = ps->settings;
         max_num = n;
         num = 0;
         nb_var = 10;
@@ -39,7 +38,7 @@ namespace rtps
         std::vector<SPHParams> vparams(0);
         vparams.push_back(sphp);
         cl_sphp = Buffer<SPHParams>(ps->cli, vparams);
-
+        
         calculate();
         updateSPHP();
 
@@ -111,6 +110,7 @@ namespace rtps
         lifetime = Lifetime(ps->cli, timers["lifetime_gpu"], lt_file);
 
 
+
 #endif
 
         // settings defaults to 0
@@ -137,6 +137,15 @@ namespace rtps
             glBindBuffer(1, col_vbo);
             glDeleteBuffers(1, (GLuint*)&col_vbo);
             col_vbo = 0;
+        }
+
+        Hose* hose;
+        int hs = hoses.size();  
+        for(int i = 0; i < hs; i++)
+        {
+            hose = hoses[i];
+            delete hose;
+
         }
 
     }
@@ -189,7 +198,6 @@ namespace rtps
 
         timers["update"]->start();
         glFinish();
-
         if (settings->has_changed()) updateSPHP();
 
         //settings->printSettings();
@@ -240,19 +248,21 @@ namespace rtps
                 cli_debug);
             timers["datastructures"]->stop();
             */
+            //printf("cellindices\n");
             timers["cellindices"]->start();
             int nc = cellindices.execute(   num,
                 cl_sort_hashes,
                 cl_sort_indices,
                 cl_cell_indices_start,
                 cl_cell_indices_end,
-                cl_sphp,
+                //cl_sphp,
                 cl_GridParams,
                 grid_params.nb_cells,
                 clf_debug,
                 cli_debug);
             timers["cellindices"]->stop();
        
+            //printf("permute\n");
             timers["permute"]->start();
             permute.execute(   num,
                 cl_position_u,
@@ -264,7 +274,7 @@ namespace rtps
                 cl_color_u,
                 cl_color_s,
                 cl_sort_indices,
-                cl_sphp,
+                //cl_sphp,
                 cl_GridParams,
                 clf_debug,
                 cli_debug);
@@ -373,7 +383,7 @@ namespace rtps
                 cl_position_u,
                 cl_sort_hashes,
                 cl_sort_indices,
-                cl_sphp,
+                //cl_sphp,
                 cl_GridParams,
                 clf_debug,
                 cli_debug);
@@ -482,6 +492,7 @@ namespace rtps
 
     void SPH::call_prep(int stage)
     {
+            //Replace with enqueueCopyBuffer
 
             prep.execute(num,
                     stage,
@@ -544,7 +555,7 @@ namespace rtps
 
     void SPH::prepareSorted()
     {
-#include "sph/cl_src/cl_macros.h"
+//#include "sph/cl_src/cl_macros.h"
 
         positions.resize(max_num);
         colors.resize(max_num);
@@ -665,16 +676,16 @@ namespace rtps
 
     void SPH::setupDomain()
     {
-        grid.calculateCells(sphp.smoothing_distance / sphp.simulation_scale);
+        grid->calculateCells(sphp.smoothing_distance / sphp.simulation_scale);
 
 
-        grid_params.grid_min = grid.getMin();
-        grid_params.grid_max = grid.getMax();
-        grid_params.bnd_min  = grid.getBndMin();
-        grid_params.bnd_max  = grid.getBndMax();
-        grid_params.grid_res = grid.getRes();
-        grid_params.grid_size = grid.getSize();
-        grid_params.grid_delta = grid.getDelta();
+        grid_params.grid_min = grid->getMin();
+        grid_params.grid_max = grid->getMax();
+        grid_params.bnd_min  = grid->getBndMin();
+        grid_params.bnd_max  = grid->getBndMax();
+        grid_params.grid_res = grid->getRes();
+        grid_params.grid_size = grid->getSize();
+        grid_params.grid_delta = grid->getDelta();
         grid_params.nb_cells = (int) (grid_params.grid_res.x*grid_params.grid_res.y*grid_params.grid_res.z);
 
         //printf("gp nb_cells: %d\n", grid_params.nb_cells);
@@ -736,7 +747,7 @@ namespace rtps
         printf("wtf for real\n");
         //in sph we just use sph spacing
         radius *= spacing;
-        Hose hose = Hose(ps, total_n, center, velocity, radius, spacing, color);
+        Hose *hose = new Hose(ps, total_n, center, velocity, radius, spacing, color);
         printf("wtf\n");
         hoses.push_back(hose);
         printf("size of hoses: %d\n", hoses.size());
@@ -748,9 +759,9 @@ namespace rtps
         std::vector<float4> parts;
         for (int i = 0; i < hoses.size(); i++)
         {
-            parts = hoses[i].spray();
+            parts = hoses[i]->spray();
             if (parts.size() > 0)
-                pushParticles(parts, hoses[i].getVelocity(), hoses[i].getColor());
+                pushParticles(parts, hoses[i]->getVelocity(), hoses[i]->getColor());
         }
     }
 
@@ -786,7 +797,7 @@ namespace rtps
         {
             return;
         }
-        float rr = (rand() % 255)/255.0f;
+        //float rr = (rand() % 255)/255.0f;
         //float4 color(rr, 0.0f, 1.0f - rr, 1.0f);
         //printf("random: %f\n", rr);
         //float4 color(1.0f,1.0f,1.0f,1.0f);
@@ -841,28 +852,28 @@ namespace rtps
 
     void SPH::render()
     {
-        renderer->render_box(grid.getBndMin(), grid.getBndMax());
-        renderer->render_table(grid.getBndMin(), grid.getBndMax());
+        renderer->render_box(grid->getBndMin(), grid->getBndMax());
+        renderer->render_table(grid->getBndMin(), grid->getBndMax());
         System::render();
     }
     void SPH::setRenderer()
     {
-        switch(ps->settings.getRenderType())
+        switch(ps->settings->getRenderType())
         {
             case RTPSettings::SPRITE_RENDER:
-                renderer = new SpriteRender(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+                renderer = new SpriteRender(pos_vbo,col_vbo,num,ps->cli, ps->settings);
                 printf("spacing for radius %f\n", spacing);
                 break;
             case RTPSettings::SCREEN_SPACE_RENDER:
                 //renderer = new ScreenSpaceRender();
-                renderer = new SSFRender(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+                renderer = new SSFRender(pos_vbo,col_vbo,num,ps->cli, ps->settings);
                 break;
             case RTPSettings::RENDER:
-                renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+                renderer = new Render(pos_vbo,col_vbo,num,ps->cli, ps->settings);
                 break;
             default:
                 //should be an error
-                renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+                renderer = new Render(pos_vbo,col_vbo,num,ps->cli, ps->settings);
                 break;
         }
         //renderer->setParticleRadius(spacing*0.5);

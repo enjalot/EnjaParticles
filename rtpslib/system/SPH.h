@@ -37,8 +37,15 @@
 //#include <timege.h>
 #include <timer_eb.h>
 
-#include "../rtps_common.h"
-
+#ifdef WIN32
+    #if defined(rtps_EXPORTS)
+        #define RTPS_EXPORT __declspec(dllexport)
+    #else
+        #define RTPS_EXPORT __declspec(dllimport)
+	#endif 
+#else
+    #define RTPS_EXPORT
+#endif
 
 namespace rtps
 {
@@ -60,7 +67,7 @@ namespace rtps
 
         virtual void render();
 
-        void loadTriangles(std::vector<Triangle> triangles);
+        void loadTriangles(std::vector<Triangle> &triangles);
 
         void testDelete();
         int cut; //for debugging DEBUG
@@ -95,7 +102,7 @@ namespace rtps
 
 
         //keep track of hoses
-        std::vector<Hose> hoses;
+        std::vector<Hose*> hoses;
 
         //needs to be called when particles are added
         void calculateSPHSettings();

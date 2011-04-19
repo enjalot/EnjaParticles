@@ -327,7 +327,7 @@ namespace rtps
     {
 
         glEnable(GL_DEPTH_TEST);
-        glColor4f(0.5f, 0.5f, 0.5f, 1.0f);
+        glColor4f(0.0f, 0.4f, 0.0f, 1.0f);
         //glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT2,GL_TEXTURE_2D,0,0);
         //glBindTexture(GL_TEXTURE_2D,gl_framebuffer_texs["normalColor"]);
         //glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT2,GL_TEXTURE_2D,gl_framebuffer_texs["normalColor"],0);
@@ -335,22 +335,22 @@ namespace rtps
         //glBegin(GL_TRIANGLE_STRIP);
         glBegin(GL_QUADS);
         float4 scale = float4((0.25f)*(max.x-min.x),(0.25f)*(max.y-min.y),(0.25f)*(max.z-min.z),0.0f);
-        glTexCoord2f(0.f,0.f);
+        /*glTexCoord2f(0.f,0.f);
         glVertex3f(min.x-scale.x, min.y-scale.y, min.z);
         glTexCoord2f(1.f,0.f);
         glVertex3f(max.x+scale.x, min.y-scale.y, min.z);
         glTexCoord2f(1.f,1.f);
         glVertex3f(max.x+scale.x, max.y+scale.y, min.z);
         glTexCoord2f(0.f,1.f);
-        glVertex3f(min.x-scale.x, max.y+scale.y, min.z);
-        /*glTexCoord2f(0.f,0.f);
+        glVertex3f(min.x-scale.x, max.y+scale.y, min.z);*/
+        glTexCoord2f(0.f,0.f);
         glVertex3f(-10000., -10000., min.z);
         glTexCoord2f(1.f,0.f);
         glVertex3f(10000., -10000., min.z); 
         glTexCoord2f(1.f,1.f);
         glVertex3f(10000., 10000., min.z);
         glTexCoord2f(0.f,1.f);
-        glVertex3f(-10000., 10000., min.z);*/
+        glVertex3f(-10000., 10000., min.z);
         glEnd();
         glBindTexture(GL_TEXTURE_2D,0);
         //glDisable(GL_DEPTH_TEST);
@@ -626,7 +626,6 @@ namespace rtps
         }
         else if (channels == 4)
         {
-            printf("%d %d %d %d\n", im[0], im[1], im[2], im[3]);
              glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
                   GL_RGBA, GL_UNSIGNED_BYTE, &im[0]);
         }

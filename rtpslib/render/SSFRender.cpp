@@ -162,7 +162,7 @@ namespace rtps
         {
             //glDepthMask(GL_FALSE);
             glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glBlendFunc(GL_ONE, GL_ONE);
         }
 
         
@@ -185,6 +185,7 @@ namespace rtps
         {
             //glDepthMask(GL_FALSE);
             glDisable(GL_BLEND);
+            //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         }
         //GLenum buffers[] = {GL_COLOR_ATTACHMENT4,GL_COLOR_ATTACHMENT5};
         //Render depth and thickness to a textures
@@ -195,8 +196,6 @@ namespace rtps
         renderPointsAsSpheres();
         //smoothDepth();
 
-
-        //glDisable(GL_DEPTH_TEST);
 
         //Smooth the depth texture to emulate a surface.
         //glDrawBuffer(GL_COLOR_ATTACHMENT1);
@@ -219,6 +218,7 @@ namespace rtps
 
 
         glDisable(GL_DEPTH_TEST);
+        glDepthMask(GL_FALSE);
 
         if (blending)
         {
@@ -247,6 +247,7 @@ namespace rtps
         glBindTexture(GL_TEXTURE_2D,0);
         */
 
+        glDepthMask(GL_TRUE);
         glEnable(GL_DEPTH_TEST);
 
         glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT,0);
@@ -281,7 +282,6 @@ namespace rtps
         glBindTexture(GL_TEXTURE_2D,0);
         //printf("done rendering, clean up\n");
 
-        glDepthMask(GL_TRUE);
 
         //glDisable(GL_POINT_SMOOTH);
         if (blending)

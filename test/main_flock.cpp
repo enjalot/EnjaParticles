@@ -92,11 +92,11 @@ void *font = GLUT_BITMAP_8_BY_13;
 rtps::RTPS* ps;
 
 //#define NUM_PARTICLES 524288
-#define NUM_PARTICLES 262144
+//#define NUM_PARTICLES 262144
 //#define NUM_PARTICLES 65536
 //#define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 10000
-//#define NUM_PARTICLES 8192
+#define NUM_PARTICLES 8192
 //#define NUM_PARTICLES 4096
 //#define NUM_PARTICLES 2048
 //#define NUM_PARTICLES 1024
@@ -118,7 +118,7 @@ int main(int argc, char** argv)
 {
     //initialize glut
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+    glutInitDisplayMode(GLUT_RGB | GLUT_ALPHA | GLUT_DOUBLE | GLUT_DEPTH);
     glutInitWindowSize(window_width, window_height);
     glutInitWindowPosition (glutGet(GLUT_SCREEN_WIDTH)/2 - window_width/2, 
                             glutGet(GLUT_SCREEN_HEIGHT)/2 - window_height/2);
@@ -151,8 +151,9 @@ int main(int argc, char** argv)
     float w_coh = .1f;    // 0.00003f
     
     //default constructor
-    rtps::Domain grid = Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
-    rtps::RTPSettings settings(rtps::RTPSettings::FLOCK, NUM_PARTICLES, DT, grid, maxspeed, mindist, searchradius, color, w_sep, w_align, w_coh);
+    rtps::Domain* grid = Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
+    //rtps::RTPSettings* settings(rtps::RTPSettings::FLOCK, NUM_PARTICLES, DT, grid, maxspeed, mindist, searchradius, color, w_sep, w_align, w_coh);
+    rtps::RTPSettings* settings(rtps::RTPSettings::FLOCK, NUM_PARTICLES, DT, grid);
 
     settings.setRenderType(RTPSettings::RENDER);
     //settings.setRenderType(RTPSettings::SPRITE_RENDER);
@@ -170,6 +171,13 @@ int main(int argc, char** argv)
     settings.SetSetting("lt_cl", "lifetime.cl");
 
     ps = new rtps::RTPS(settings);
+
+    ps->settings->SetSetting("Max Speed", maxspeed);
+    ps->settings->SetSetting("Min Separation Distance", mindist);
+    ps->settings->SetSetting("Searching Radius", searchradius);
+    ps->settings->SetSetting("Separation Weight", w_sep);
+    ps->settings->SetSetting("Alignment Weight", w_align);
+    ps->settings->SetSetting("Cohesion Weight", w_coh);
 
     //initialize the OpenGL scene for rendering
     init_gl();
@@ -232,7 +240,7 @@ void appKeyboard(unsigned char key, int x, int y)
             nn = 2000;
             min = float4(.1, .1, .1, 1.0f);
             max = float4(3.9, 3.9, 3.9, 1.0f);
-            ps->system->addBox(nn, min, max, false);
+            ps->system->addBox(nn, min, max, false,color);
             return;
         case 'p': //print timers
             ps->system->printTimers();
@@ -250,6 +258,10 @@ void appKeyboard(unsigned char key, int x, int y)
             ps->system->sprayHoses();
             return;
 
+        case 'b':
+            printf("deleting willy nilly\n");
+            ps->system->testDelete();
+            return;
 
         case 't': //place a cube for collision
             {
@@ -268,8 +280,8 @@ void appKeyboard(unsigned char key, int x, int y)
             }
         case 'r': //drop a rectangle
         {
-            nn = 65536;
-	    //nn = 1024;
+            //nn = 65536;
+	        nn = 1024;
             //nn = 8192;
             //nn = 4;
             //max = float4(2.5, 2.5, 2.5, 1.0f);
@@ -302,7 +314,12 @@ void appKeyboard(unsigned char key, int x, int y)
             ps->system->addHose(5000, center, velocity, 4, color);
             return;
         }
-
+        case 'n':
+            render_movie=!render_movie;
+            break;
+        case '`':
+            stereo_enabled = !stereo_enabled;
+            break;
         case 'o':
             ps->system->getRenderer()->writeBuffersToDisk();
             return;

@@ -14,13 +14,13 @@ namespace rtps
         k_euler.setArg(1, cl_velocity.getDevicePtr());
         k_euler.setArg(2, cl_force.getDevicePtr());
         k_euler.setArg(3, cl_color.getDevicePtr());
-        k_euler.setArg(4, ps->settings.dt); //time step
+        k_euler.setArg(4, ps->settings->dt); //time step
 
     } 
     void Simple::cpuEuler()
     {
         //printf("in cpuEuler\n");
-        float h = ps->settings.dt;
+        float h = ps->settings->dt;
         //printf("h: %f\n", h);
 
 

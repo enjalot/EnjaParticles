@@ -14,22 +14,23 @@
 #include <Buffer.h>
 
 #include <Domain.h>
-#include <SPHSettings.h>
+#include <FLOCKSettings.h>
 
 
-#include <Prep.h>
+#include <flock/Prep.h>
 #include <Hash.h>
 #include <BitonicSort.h>
 //#include <DataStructures.h>
 #include <CellIndices.h>
 #include <Permute.h>
-#include <Density.h>
-#include <Force.h>
-#include <Collision_wall.h>
-#include <Collision_triangle.h>
-#include <LeapFrog.h>
-#include <Lifetime.h>
-#include <Euler.h>
+//#include <Density.h>
+//#include <Force.h>
+//#include <Collision_wall.h>
+//#include <Collision_triangle.h>
+//#include <LeapFrog.h>
+//#include <Lifetime.h>
+#include <flock/Rules.h>
+#include <flock/Euler.h>
 
 //#include "../util.h"
 #include <Hose.h>
@@ -38,7 +39,6 @@
 #include <timer_eb.h>
 
 #include "../rtps_common.h"
-                                          41         
 
 // Added by GE, March 16, 2011
 #include "boids.h"
@@ -118,6 +118,8 @@ public:
 
     virtual void render();
     
+    void testDelete();
+    
     // timers
     /*enum {
             TI_HASH=0, TI_BITONIC_SORT, TI_BUILD, TI_NEIGH, 
@@ -138,7 +140,7 @@ protected:
 private:
     //the particle system framework
     RTPS *ps;
-    RTPSettins *settings;
+    RTPSettings *settings;
 
 	//Boids *boids;
 
@@ -182,9 +184,12 @@ private:
     std::vector<float4> velocities;
     std::vector<float4> veleval;
     
-    std::vector<float>  densities;
-    std::vector<float4> forces;
-    std::vector<float4> xflocks;
+    //std::vector<float>  densities;
+    //std::vector<float4> forces;
+    //std::vector<float4> xflocks;
+    std::vector<float4> separation;
+    std::vector<float4> alignment;
+    std::vector<float4> cohesion;
 
     Buffer<float4>      cl_position_u;
     Buffer<float4>      cl_position_s;
@@ -195,9 +200,12 @@ private:
     Buffer<float4>      cl_veleval_u;
     Buffer<float4>      cl_veleval_s;
     
-    Buffer<float>       cl_density_s;
-    Buffer<float4>      cl_force_s;
-    Buffer<float4>      cl_xflock_s;
+    //Buffer<float>       cl_density_s;
+    //Buffer<float4>      cl_force_s;
+    //Buffer<float4>      cl_xflock_s;
+    Buffer<float4>      cl_separation_s;
+    Buffer<float4>      cl_alignment_s;
+    Buffer<float4>      cl_cohesion_s;
 
     //Neighbor Search related arrays
 	//Buffer<float4> 	    cl_vars_sorted;
@@ -235,8 +243,8 @@ private:
     //Buffer<float4> cl_error_check;
 
     //these are defined in flock/ folder 
-    void loadEuler();
-	void ge_loadEuler();
+    //void loadEuler();
+	//void ge_loadEuler();
 
     //Nearest Neighbors search related kernels
     //void loadPrep();
@@ -246,6 +254,7 @@ private:
     //void loadNeighbors();
 
     //CPU functions
+    void cpuRules();
     void cpuEuler();
 	void ge_cpuEuler();
 
@@ -267,12 +276,13 @@ private:
     Permute permute;
     void hash_and_sort();
     void bitonic_sort();
-    Density density;
+    //Density density;
     //Force force;
     //void collision();
     //CollisionWall collision_wall;
     //CollisionTriangle collision_tri;
-    void integrate();
+    Rules rules;
+    //void integrate();
     //LeapFrog leapfrog;
     Euler euler;
     

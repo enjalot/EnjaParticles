@@ -403,7 +403,7 @@ __kernel void collision_triangle(   //__global float4* vars_sorted,
     float4 v = vel(i);
     float4 f = force(i);
     */
-    float4 p = pos_s[i];
+    float4 p = pos_s[i] * sphp->simulation_scale;
     float4 v = vel_s[i];
     float4 f = force_s[i];
 
@@ -439,12 +439,14 @@ __kernel void collision_triangle(   //__global float4* vars_sorted,
     if(i > num) return;
 
 
+    /*
     clf[i] = rf;
     //clf[i].w = pos(i).z / sphp->simulation_scale;
     clf[i].w = pos_s[i].z / sphp->simulation_scale;
     cli[i].x = (int)rf.w;
     cli[i].y = sphp->num;
     cli[i].z = get_local_size(0);
+    */
     
     /*
     float mag = sqrt(rf.x*rf.x + rf.y*rf.y + rf.z*rf.z); //store the magnitude of the velocity

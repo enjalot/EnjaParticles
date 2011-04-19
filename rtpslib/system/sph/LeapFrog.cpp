@@ -98,7 +98,7 @@ namespace rtps
 
     void SPH::cpuLeapFrog()
     {
-        float h = ps->settings.dt;
+        float h = ps->settings->dt;
         for (int i = 0; i < num; i++)
         {
             float4 p = positions[i];

@@ -4,17 +4,15 @@
 #include "cl_hash.h"
 
 //----------------------------------------------------------------------
-void zeroPoint(PointData* pt)
+void zeroPoint(Boid* pt)
 {
-	pt->density = (float4)(0.,0.,0.,0.);
-	pt->color = (float4)(0.,0.,0.,0.);
-	pt->color_normal = (float4)(0.,0.,0.,0.);
-	pt->force = (float4)(0.,0.,0.,0.);
-	pt->surf_tens = (float4)(0.,0.,0.,0.);
-	pt->color_lapl = 0.;
-	pt->xflock = (float4)(0.,0.,0.,0.);
-//	pt->center_of_mass = (float4)(0.,0.,0.,0.);
-//	pt->num_neighbors = 0;
+	pt->separation= (float4)(0.,0.,0.,0.);
+	pt->alignment= (float4)(0.,0.,0.,0.);
+	pt->cohesion= (float4)(0.,0.,0.,0.);
+	pt->acceleration= (float4)(0.,0.,0.,0.);
+	pt->color= (float4)(0.,0.,0.,0.);
+	pt->num_flockmates = 0;
+    pt->num_nearestFlockamtes = 0;
 }
 
 /*--------------------------------------------------------------*/
@@ -22,7 +20,7 @@ void zeroPoint(PointData* pt)
 */
 void IterateParticlesInCell(
     __global float4*    vars_sorted,
-    PointData* pt,
+    Boid* pt,
     uint num,
     int4 	cellPos,
     uint 	index_i,
@@ -66,7 +64,7 @@ void IterateParticlesInCell(
  */
 void IterateParticlesInNearbyCells(
     __global float4* vars_sorted,
-    PointData* pt,
+    Boid* pt,
     uint num,
     int 	index_i, 
     float4   position_i, 

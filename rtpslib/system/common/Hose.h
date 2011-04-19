@@ -1,8 +1,9 @@
 #ifndef HOSE_H_INCLUDED
 #define HOSE_H_INCLUDED
 
-#include "../../RTPS.h"
-#include "../../structs.h"
+#include <RTPS.h>
+//#include "../../RTPS.h"
+//#include "../../structs.h"
 #include <vector>
 
 #include "../../rtps_common.h"

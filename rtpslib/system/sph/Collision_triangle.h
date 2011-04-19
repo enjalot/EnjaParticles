@@ -28,7 +28,7 @@ namespace rtps
                         Buffer<int4>& cli_debug);
             
            
-        void loadTriangles(std::vector<Triangle> triangles);
+        void loadTriangles(std::vector<Triangle> &triangles);
 
         private:
             CL* cli;

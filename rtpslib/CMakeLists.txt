@@ -10,7 +10,9 @@ project(rtpslib C CXX)
 SET( CMAKE_MODULE_PATH ${RTPS_CMAKE_MODULE_PATH})
 message("cmake_module_path: ${CMAKE_MODULE_PATH}\n")
 
+#this mostly affects the preprocessing of cl files
 SET(RTPS_DEBUG TRUE)
+#SET(RTPS_DEBUG FALSE)
 
 ###### SETTING RELATED TO GPU VS CPU IMPLEMENTATIONS ##########################
 SET(WITH_OPENCL TRUE)
@@ -91,7 +93,15 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/domain/IV
     ${rtpslib_SOURCE_DIR}/system/common/Hose
     
-	# Simple
+
+    # common use for all systems
+    ${rtpslib_SOURCE_DIR}/system/common/Hose
+    ${rtpslib_SOURCE_DIR}/system/common/Hash
+    ${rtpslib_SOURCE_DIR}/system/common/CellIndices
+    ${rtpslib_SOURCE_DIR}/system/common/Permute
+	
+    
+    # Simple
     ${rtpslib_SOURCE_DIR}/system/Simple.cpp
     ${rtpslib_SOURCE_DIR}/system/simple/ForceField
     ${rtpslib_SOURCE_DIR}/system/simple/Euler
@@ -103,7 +113,12 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/sph/LeapFrog
     ${rtpslib_SOURCE_DIR}/system/sph/Lifetime
     
-    ${rtpslib_SOURCE_DIR}/system/common/Hose
+    ${rtpslib_SOURCE_DIR}/system/sph/Prep
+    ${rtpslib_SOURCE_DIR}/system/sph/Sort
+    ${rtpslib_SOURCE_DIR}/system/sph/Density
+    ${rtpslib_SOURCE_DIR}/system/sph/Force
+    ${rtpslib_SOURCE_DIR}/system/sph/Collision_wall
+    ${rtpslib_SOURCE_DIR}/system/sph/Collision_triangle
 
     #### these are CPU only
     ${rtpslib_SOURCE_DIR}/system/sph/Pressure
@@ -111,23 +126,11 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/sph/XSPH
     ####
 
-    ${rtpslib_SOURCE_DIR}/system/sph/Collision_wall
-    ${rtpslib_SOURCE_DIR}/system/sph/Collision_triangle
-    
-    #Neighbor datastructures
-    ${rtpslib_SOURCE_DIR}/system/sph/Prep
-    ${rtpslib_SOURCE_DIR}/system/sph/Hash
-    ${rtpslib_SOURCE_DIR}/system/sph/BitonicSort
-    #${rtpslib_SOURCE_DIR}/system/sph/DataStructures
-    ${rtpslib_SOURCE_DIR}/system/sph/CellIndices
-    ${rtpslib_SOURCE_DIR}/system/sph/Permute
-    #${rtpslib_SOURCE_DIR}/system/sph/Neighbors
-    ${rtpslib_SOURCE_DIR}/system/sph/Density
-    ${rtpslib_SOURCE_DIR}/system/sph/Force
 
 	# FLOCK
     ${rtpslib_SOURCE_DIR}/system/FLOCK.cpp
     ${rtpslib_SOURCE_DIR}/system/flock/Euler
+    ${rtpslib_SOURCE_DIR}/system/flock/Rules
     #${rtpslib_SOURCE_DIR}/system/flock/LeapFrog
     #${rtpslib_SOURCE_DIR}/system/flock/Density
     #${rtpslib_SOURCE_DIR}/system/flock/Pressure
@@ -141,10 +144,10 @@ set (rtpslib_SOURCES
     
     # neighbors
     ${rtpslib_SOURCE_DIR}/system/flock/Prep
-    ${rtpslib_SOURCE_DIR}/system/flock/Hash
-    ${rtpslib_SOURCE_DIR}/system/flock/BitonicSort
-    ${rtpslib_SOURCE_DIR}/system/flock/DataStructures
-    ${rtpslib_SOURCE_DIR}/system/flock/Neighbors
+    #${rtpslib_SOURCE_DIR}/system/flock/Hash
+    #${rtpslib_SOURCE_DIR}/system/flock/BitonicSort
+    #${rtpslib_SOURCE_DIR}/system/flock/DataStructures
+    #${rtpslib_SOURCE_DIR}/system/flock/Neighbors
     #${rtpslib_SOURCE_DIR}/particle
     )
 
@@ -206,10 +209,10 @@ add_custom_target(doc DEPENDS ${DOXYGEN_OUTPUT})
 
 
 
+ADD_SUBDIRECTORY(system/common)
 ADD_SUBDIRECTORY(system/simple)
 ADD_SUBDIRECTORY(system/sph)
 ADD_SUBDIRECTORY(system/flock)
-ADD_SUBDIRECTORY(system/common)
 
 MAKE_DIRECTORY(${rtpslib_BINARY_DIR}/shaders)
 FILE(COPY ${rtpslib_SOURCE_DIR}/render/shaders/ DESTINATION ${rtpslib_BINARY_DIR}/shaders/)

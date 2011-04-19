@@ -106,6 +106,9 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 256
 #define DT .001f
 
+float4 color = float4(0.1, 0.1, 0.73, .05);
+
+
 
 
 
@@ -128,7 +131,7 @@ int main(int argc, char** argv)
 
     //initialize glut
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH
+    glutInitDisplayMode(GLUT_RGB | GLUT_ALPHA | GLUT_DOUBLE | GLUT_DEPTH
 		//|GLUT_STEREO //if you want stereo you must uncomment this.
 		);
     glutInitWindowSize(window_width, window_height);
@@ -161,45 +164,51 @@ int main(int argc, char** argv)
     //default constructor
     //rtps::RTPSettings settings;
     //rtps::Domain grid = Domain(float4(-5,-.3,0,0), float4(2, 2, 12, 0));
-    rtps::Domain grid = Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
+    rtps::Domain* grid = new Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
     //rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
-    rtps::RTPSettings settings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
+	rtps::RTPSettings* settings = new rtps::RTPSettings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
 
-    //settings.setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
-    settings.setRenderType(RTPSettings::RENDER);
+    settings->setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
+    //settings->setRenderType(RTPSettings::RENDER);
     //settings.setRenderType(RTPSettings::SPRITE_RENDER);
-    settings.setRadiusScale(1.0);
-    settings.setBlurScale(1.0);
-    settings.setUseGLSL(1);
+    settings->setRadiusScale(1.0);
+    settings->setBlurScale(1.0);
+    settings->setUseGLSL(1);
 
-    settings.SetSetting("render_texture", "firejet_blast.png");
-    settings.SetSetting("render_frag_shader", "sprite_tex_frag.glsl");
-    settings.SetSetting("render_use_alpha", true);
+    settings->SetSetting("render_texture", "firejet_blast.png");
+    settings->SetSetting("render_frag_shader", "sprite_tex_frag.glsl");
+    settings->SetSetting("render_use_alpha", true);
     //settings.SetSetting("render_use_alpha", false);
-    settings.SetSetting("render_alpha_function", "add");
-    settings.SetSetting("lt_increment", -.00);
-    settings.SetSetting("lt_cl", "lifetime.cl");
+    settings->SetSetting("render_alpha_function", "add");
+    settings->SetSetting("lt_increment", -.00);
+    settings->SetSetting("lt_cl", "lifetime.cl");
 
 
 
 
+printf("creating new system\n");
     ps = new rtps::RTPS(settings);
+    //ps = new rtps::RTPS();
+printf("system created\n");
+printf("system created\n");
+printf("system created\n");
 
-    ps->settings.SetSetting("Gravity", -9.8f); // -9.8 m/sec^2
-    ps->settings.SetSetting("Gas Constant", 15.0f);
-    ps->settings.SetSetting("Viscosity", .01f);
-    ps->settings.SetSetting("Velocity Limit", 600.0f);
-    ps->settings.SetSetting("XSPH Factor", .2f);
-    ps->settings.SetSetting("Friction Kinetic", 0.0f);
-    ps->settings.SetSetting("Friction Static", 0.0f);
-    ps->settings.SetSetting("Boundary Stiffness", 20000.0f);
-    ps->settings.SetSetting("Boundary Dampening", 256.0f);
+    ps->settings->SetSetting("Gravity", -9.8f); // -9.8 m/sec^2
+    ps->settings->SetSetting("Gas Constant", 15.0f);
+    ps->settings->SetSetting("Viscosity", .01f);
+    ps->settings->SetSetting("Velocity Limit", 600.0f);
+    ps->settings->SetSetting("XSPH Factor", .2f);
+    ps->settings->SetSetting("Friction Kinetic", 0.0f);
+    ps->settings->SetSetting("Friction Static", 0.0f);
+    ps->settings->SetSetting("Boundary Stiffness", 20000.0f);
+    ps->settings->SetSetting("Boundary Dampening", 256.0f);
 
+printf("initializing gl\n");
 
     //initialize the OpenGL scene for rendering
     init_gl();
 
-
+printf("about to start main loop\n");
     glutMainLoop();
     return 0;
 }
@@ -223,7 +232,7 @@ void init_gl()
 
     // set view matrix
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glClearColor(.6, .6, .6, 1.0);
+    glClearColor(.2, .2, .6, 1.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     ps->system->getRenderer()->setWindowDimensions(window_width,window_height);
@@ -250,11 +259,14 @@ void appKeyboard(unsigned char key, int x, int y)
     switch (key)
     {
         case 'e': //dam break
-            nn = 16384;
-            min = float4(.1, .1, .1, 1.0f);
-            max = float4(3.9, 3.9, 3.9, 1.0f);
-            ps->system->addBox(nn, min, max, false);
-            return;
+            {
+                nn = 16384;
+                min = float4(.1, .1, .1, 1.0f);
+                max = float4(3.9, 3.9, 3.9, 1.0f);
+                //float4 color = float4(0.1, 0.1, 0.3, .01);
+                ps->system->addBox(nn, min, max, false,color);
+                return;
+            }
         case 'p': //print timers
             ps->system->printTimers();
             return;
@@ -278,7 +290,8 @@ void appKeyboard(unsigned char key, int x, int y)
             //float4 velocity(2., 5., -.8, 0);
             float4 velocity(2., .5, 2., 0);
             //sph sets spacing and multiplies by radius value
-            float4 color = float4(.0, 0.0, 1.0, 1.0);
+            //float4 color = float4(.0, 0.0, 1.0, 1.0);
+            //float4 color = float4(0.1, 0.1, 0.3, .01);
             ps->system->addHose(5000, center, velocity, 4, color);
             return;
 		}
@@ -323,7 +336,8 @@ void appKeyboard(unsigned char key, int x, int y)
 
                 min = float4(1.2, 1.2, 1.2, 1.0f);
                 max = float4(2., 2., 2., 1.0f);
-                float4 color = float4(1.0, 0.0, 0.0, 1.0);
+                
+                //float4 color = float4(rand()/(10.*RAND_MAX), rand()/(RAND_MAX+1.0), rand()/(RAND_MAX+1.0), 0.2);
                 ps->system->addBox(nn, min, max, false, color);
                 return;
             }
@@ -663,7 +677,8 @@ void draw_collision_boxes()
 {
     glColor4f(0,0,1,.5);
 
-    //glDepthMask(GL_FALSE);
+    //glDisable(GL_DEPTH_TEST);
+    //glDepthMask(GL_TRUE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -681,4 +696,6 @@ void draw_collision_boxes()
     glEnd();
 
     glDisable(GL_BLEND);
+    //glEnable(GL_DEPTH_TEST);
+    //glDepthMask(GL_TRUE);
 }

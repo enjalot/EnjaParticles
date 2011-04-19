@@ -2,7 +2,8 @@
 #define RTPS_CELLINDICES_H_INCLUDED
 
 
-#include <CLL.h>
+#include <RTPS.h>
+//#include <CLL.h>
 #include <Buffer.h>
 
 
@@ -19,7 +20,7 @@ namespace rtps
                     Buffer<unsigned int>& ci_start,
                     Buffer<unsigned int>& ci_stop,
                     //params
-                    Buffer<SPHParams>& sphp,
+                    //Buffer<SPHParams>& sphp,
                     Buffer<GridParams>& gp,
                     int nb_cells,
                     //debug params

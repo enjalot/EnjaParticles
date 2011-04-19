@@ -41,19 +41,25 @@ namespace rtps
 
         RTPSettings();
         RTPSettings(SysType system, int max_particles, float dt);
-        RTPSettings(SysType system, int max_particles, float dt, Domain grid);
+        RTPSettings(SysType system, int max_particles, float dt, Domain *grid);
 
         //collision
-        RTPSettings(SysType system, int max_particles, float dt, Domain grid, bool tri_collision);
+        //RTPSettings(SysType system, int max_particles, float dt, Domain grid, bool tri_collision);
+        RTPSettings(SysType system, int max_particles, float dt, Domain *grid, bool tri_collision);
 
         //flock
-        RTPSettings(SysType system, int max_particles, float dt, Domain grid, float maxspeed, float mindist, float searchradius, float color[], float w_sep, float w_align, float w_coh);
+        RTPSettings(SysType system, int max_particles, float dt, Domain* grid, float maxspeed, float mindist, float searchradius, float color[], float w_sep, float w_align, float w_coh);
+
+        //without this, windows was crashing with a ValidHeapPointer
+        //assertion error. Indicates the heap may be corrupted by 
+        //something in here
+        ~RTPSettings();
 
         //TODO get rid of all variables, just use map
         //maximum number of particles a system can hold
         int max_particles;
         //the bounding domain of the system
-        Domain grid; //TODO keep this and make private
+        Domain *grid; //TODO keep this and make private
         //time step per iteration
         float dt;
         //triangle collision?
@@ -145,11 +151,11 @@ namespace rtps
 
 
     public:
-        Domain getDomain()
+        Domain* getDomain()
         {
             return grid;
         }
-        void setDomain(Domain domain)//should this pass by reference?
+        void setDomain(Domain *domain)//should this pass by reference?
         {
             grid = domain;
         }

@@ -7,6 +7,23 @@ float magnitude(float4 vec)
 }       
         
 __kernel void euler(
+                    float dt
+                   //__global float4* vars_unsorted, 
+                   //__global float4* vars_sorted, 
+                   //__global float4* positions,  // for VBO 
+                   __global float4* pos_u, 
+                   __global float4* pos_s, 
+                   __global float4* vel_u, 
+                   __global float4* vel_s, 
+                   __global float4* separation_s, 
+                   __global float4* alignment_s, 
+                   __global float4* cohesion_s, 
+                   __global int* sort_indices,  
+                   //		__global float4* color,
+                   __constant struct FLOCKParameters* flockp)
+                   
+{
+/*__kernel void euler(
         __global int* sort_indices,  
 		__global float4* vars_unsorted, 
 		__global float4* vars_sorted, 
@@ -15,7 +32,7 @@ __kernel void euler(
 		float dt
 		DEBUG_ARGS
         )
-{
+{*/
     unsigned int i = get_global_id(0);
     int num = flockp->num;
     
@@ -23,10 +40,10 @@ __kernel void euler(
 	    return;
 
 	// positions
-	float4 pi = pos(i);
+	float4 pi = pos_s[i];
 
 	// velocities
-    float4 vi = vel(i);
+    float4 vi = vel_s[i];
 
 	// acceleration vectors
     float4 acc     = (float4)(0.f, 0.f, 0.f, 1.f);
@@ -35,13 +52,13 @@ __kernel void euler(
     float4 acc_coh = (float4)(0.f, 0.f, 0.f, 1.f);
 
     // getting the values of the rules computed in cl_density
-	float4 separation = force(i);
-	float4 alignment = surface(i);
-	float4 cohesion = xflock(i);
+	float4 separation = separation_s[i] 
+	float4 alignment = alignment_s[i] 
+	float4 cohesion = cohesion_s[i]; 
 	
     // getting number of flockmates and how many flockmates were within the separation dist
-	float numFlockmates = den(i).x;
-    float count =  den(i).y;
+	float numFlockmates = num_flockmates;
+    float count =  num_nearestFlockmates;
 
     // weights for the rules
 	float w_sep = flockp->w_sep;    //0.10f;  // 0.3f
@@ -133,14 +150,15 @@ __kernel void euler(
 	}
 #endif
 
+
 	// SORT STUFF FOR THE NEIGHBOR SEARCH
     uint originalIndex = sort_indices[i];
-    unsorted_vel(originalIndex) = vi;	
-    unsorted_pos(originalIndex) = (float4)(pi.xyz, 1.f);    // changed the last component to 1 for my boids, im not using density
-    positions[originalIndex] = (float4)(pi.xyz, 1.f);       // for plotting
+    vel_u(originalIndex) = vi;	
+    pos_u(originalIndex) = (float4)(pi.xyz, 1.f);    // changed the last component to 1 for my boids, im not using density
+    //positions[originalIndex] = (float4)(pi.xyz, 1.f);       // for plotting
     
     // debugging vectors
-    int4 iden = (int4)((int)den(i).x, (int)den(i).y, 0, 0);
-    cli[originalIndex] = iden;
-    clf[originalIndex] = pi; 
+    //int4 iden = (int4)((int)den(i).x, (int)den(i).y, 0, 0);
+    //cli[originalIndex] = iden;
+    //clf[originalIndex] = pi; 
 }
