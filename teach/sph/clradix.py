@@ -3,6 +3,7 @@
 import pyopencl as cl
 import numpy as np
 import struct
+from clsph import timings
 
 #ctx = cl.create_some_context()
 mf = cl.mem_flags
@@ -98,6 +99,7 @@ class Radix:
         self.queue.finish()
 
 
+    @timings("Radix: block")
     def blocks(self, nbits, startbit, num):
         totalBlocks = num/4/self.cta_size
         global_size = (self.cta_size*totalBlocks,)
