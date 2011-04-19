@@ -4,6 +4,8 @@ from OpenGL.GL import *
 import numpy
 import pyopencl as cl
 import glutil
+import util
+timings = util.timings
 
 import clhash
 import clradix
@@ -15,10 +17,6 @@ import clcollision_wall
 import clleapfrog
 import clghost_density
 import clghost_force
-
-import timing
-timings = timing.Timing()
-import util
 
 class CLSPH:
     def __init__(self, dt, sph, is_ghost=False, ghost_system=None):

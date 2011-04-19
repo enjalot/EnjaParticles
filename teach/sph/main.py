@@ -27,9 +27,9 @@ class window(object):
 
     def make_ghost_system(self):
         #########################################################################
-        ghost_max_num = 262144
+        #ghost_max_num = 262144
         #ghost_max_num = 65536
-        #ghost_max_num = 16384
+        ghost_max_num = 16384
         #ghost_max_num = 8192
 
         print "Ghost System"
@@ -48,16 +48,25 @@ class window(object):
         ##self.clghost_system = clghost.CLGHOST(dt, self.ghost)
 
         gmin = Vec([0., 0., 0.,0.])
-        gmax = Vec([1.,1.,0.,0.])
-        color = [1., 0.75, 0.75, .5]
+        gmax = Vec([.5,1.,0.,0.])
+        color = [1., 1., 1., .5]
         #self.clghost_system.set_color(color)
         #ghost_pos, ghost_color = sph.addRect(512, Vec([0.1, 0.1, 0.,0.]), Vec([1.,1.,0.,0.]), self.system, color)
-        #ghost_pos, ghost_color = sph.addRect(ghost_max_num, gmin, gmax, self.ghost, color)
+        ghost_pos, ghost_color = sph.addRect(ghost_max_num/2, gmin, gmax, self.ghost, color)
+        self.clghost_system.push_particles(ghost_pos, None, ghost_color)
 
-        img = Image.open('test.jpg')
-        print img.size
+        color = [0.1, 0.0, 1.0, .5]
+        gmin = Vec([.5, 0., 0.,0.])
+        gmax = Vec([1.,1.,0.,0.])
+        ghost_pos, ghost_color = sph.addRect(ghost_max_num/2, gmin, gmax, self.ghost, color)
+
+
+        #img = Image.open('test.jpg')
+        #print img.size
         #img.show()
-        ghost_pos, ghost_color = sph.addPic(img, ghost_max_num, gmin, gmax, self.ghost)
+        #gmin = Vec([0., 0., 0.,0.])
+        #gmax = Vec([1.,1.,0.,0.])
+        #ghost_pos, ghost_color = sph.addPic(img, ghost_max_num, gmin, gmax, self.ghost)
         #print ghost_pos
         self.clghost_system.push_particles(ghost_pos, None, ghost_color)
 
@@ -65,10 +74,11 @@ class window(object):
     def make_sph_system(self):
 
         #ghost_max_num = 8192
-        max_num = 32768
+        #max_num = 32768*4
+        #max_num = 32768
         #max_num = 16384
         #max_num = 8192
-        #max_num = 2**12 #4096
+        max_num = 2**12 #4096
         #max_num = 2**10 #1024
         #max_num = 2**8 #256
         #max_num = 2**7 #128
@@ -221,8 +231,10 @@ class window(object):
             self.glprojection()
         elif args[0] == 'd':
             self.clsystem.with_ghost_density = not self.clsystem.with_ghost_density
+            print "density:", self.clsystem.with_ghost_density
         elif args[0] == 'f':
             self.clsystem.with_ghost_force = not self.clsystem.with_ghost_force
+            print "force:", self.clsystem.with_ghost_force
              
 
     def on_click(self, button, state, x, y):
@@ -239,7 +251,7 @@ class window(object):
         cy = (self.height - y) / (1.0 * self.height)
         print cx, cy
 
-        color = [1., 0., 0., .75]
+        color = [1., 0., 0., .5]
         self.clsystem.set_color(color)
         ipos, icolor = sph.addRect(512, Vec([cx - .1, cy -.1, 0.,0.]), Vec([cx + .1, cy + .1, 0.,0.]), self.system, color)
         print "pushing clsystem particles"

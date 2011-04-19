@@ -3,7 +3,8 @@
 import pyopencl as cl
 import numpy as np
 import struct
-from clsph import timings
+import util
+timings = util.timings
 
 #ctx = cl.create_some_context()
 mf = cl.mem_flags
@@ -119,6 +120,7 @@ class Radix:
         #self.radix_prg.radixSortBlocksKeysOnly(self.queue, global_size, local_size, *(blocks_args)).wait()
 
 
+    @timings("Radix: offsets")
     def find_offsets(self, startbit, num):
         totalBlocks = num/2/self.cta_size
         global_size = (self.cta_size*totalBlocks,)
@@ -135,6 +137,7 @@ class Radix:
         self.radix_prg.findRadixOffsets(self.queue, global_size, local_size, *(offsets_args)).wait()
 
 
+    @timings("Radix: naive scan")
     def naive_scan(self, num):
         nhist = num/2/self.cta_size*16
         global_size = (nhist,)
@@ -148,7 +151,7 @@ class Radix:
                     )
         self.radix_prg.scanNaive(self.queue, global_size, local_size, *(scan_args)).wait()
 
-
+    @timings("Radix: scan")
     def scan(self, dst, src, batch_size, array_length):
         self.scan_local1(   dst, 
                             src, 
@@ -164,7 +167,7 @@ class Radix:
         self.scan_update(dst, batch_size * array_length / (4 * self.SCAN_WG_SIZE))
         self.queue.finish()
 
-    
+    @timings("Radix: scan local 1") 
     def scan_local1(self, dst, src, n, size):
         global_size = (n * size / 4,)
         local_size = (self.SCAN_WG_SIZE,)
@@ -175,7 +178,7 @@ class Radix:
                     )
         self.scan_prg.scanExclusiveLocal1(self.queue, global_size, local_size, *(scan_args)).wait()
 
-
+    @timings("Radix: scan local 2")
     def scan_local2(self, dst, src, n, size):
         elements = n * size
         dividend = elements
@@ -196,6 +199,7 @@ class Radix:
         self.scan_prg.scanExclusiveLocal2(self.queue, global_size, local_size, *(scan_args)).wait()
 
 
+    @timings("Radix: scan udpate")
     def scan_update(self, dst, n):
         global_size = (n * self.SCAN_WG_SIZE,)
         local_size = (self.SCAN_WG_SIZE,)
@@ -205,6 +209,7 @@ class Radix:
         self.scan_prg.uniformUpdate(self.queue, global_size, local_size, *(scan_args)).wait()
 
 
+    @timings("Radix: scan reorder")
     def reorder(self, startbit, num):
         totalBlocks = num/2/self.cta_size
         global_size = (self.cta_size*totalBlocks,)
