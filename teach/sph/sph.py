@@ -160,13 +160,18 @@ def addRect(num, pmin, pmax, sphp, global_color):
     rvec = []
     color = []
     i=0
+    import copy
     for y in np.arange(ymin, ymax, spacing):
+        gcolor = copy.copy(global_color)
         for x in np.arange(xmin, xmax, spacing):
             if i >= num: break
             #print "x, y", x, y
             #rvec += [ Vec([x,y]) * sphp.sim_scale];
             rvec += [[x, y, 0., 1.]]
-            color += [global_color]
+            #gcolor[3] += x / (xmax - xmin) *.0001
+            #gcolor[0] = gcolor[3]
+            color += [gcolor]
+            
 
             i+=1;
     print "%d particles added" % i
@@ -214,10 +219,10 @@ def addPic(image, num, pmin, pmax, sphp):
             intensity = image.getpixel((xi, yi))/255.
             #g = ima.getpixl(xi, yi)/255.
             #b = ima[i*3+2]/255.
-            r = intensity
-            g = intensity
-            b = intensity
-            a = .5
+            r = intensity*.1
+            g = intensity*.1
+            b = intensity*.1
+            a = intensity
             color += [[r, g, b, a]]
             i+=1;
         yi += 1

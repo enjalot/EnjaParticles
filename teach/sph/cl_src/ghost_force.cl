@@ -45,7 +45,7 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
         int rlencheck = rlen != 0.;
         iej *= rlencheck;
 
-        float casper = ghost_intensity[index_j].x;
+        float casper = ghost_intensity[index_j].w;
 
         float dWijdr = Wspiky_dr(rlen, particle_sphp->smoothing_distance, sphp);
 
