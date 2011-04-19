@@ -1,0 +1,7 @@
+----------------------------------------------------------------------
+March 16, 2011
+Added ge_cpu_euler.cpp
+#included in Euler for better development
+Use my boid system (to compare against what Myrna has).
+Convert my boid system (Gordon's) to 3D
+----------------------------------------------------------------------
