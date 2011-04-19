@@ -65,7 +65,8 @@ class window(object):
     def make_sph_system(self):
 
         #ghost_max_num = 8192
-        max_num = 16384
+        max_num = 32768
+        #max_num = 16384
         #max_num = 8192
         #max_num = 2**12 #4096
         #max_num = 2**10 #1024
@@ -208,7 +209,7 @@ class window(object):
         if args[0] == ESCAPE or args[0] == 'q':
             sys.exit()
         elif args[0] == 't':
-            print initialize.timings
+            print clsph.timings
         elif args[0] == 'o':
             self.ortho = not self.ortho
             if self.ortho:

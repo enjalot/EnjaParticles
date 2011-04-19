@@ -9,7 +9,6 @@ class CLHash:
         self.clsph.loadProgram(self.clsph.clcommon_dir + "/hash.cl")
 
     
-    #@timings
     def execute(self, num, *args, **argv):
         if num > 0:
             worksize = 128

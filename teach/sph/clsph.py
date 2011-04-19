@@ -16,6 +16,10 @@ import clleapfrog
 import clghost_density
 import clghost_force
 
+import timing
+timings = timing.Timing()
+import util
+
 class CLSPH:
     def __init__(self, dt, sph, is_ghost=False, ghost_system=None):
         #ghost system is just a regular system that doesn't do all the steps of the sph update
@@ -30,10 +34,13 @@ class CLSPH:
 
         self.prgs = {}  #store our programs
         #of course hardcoding paths here is terrible
+        import os
         #self.clsph_dir = "/Users/enjalot/code/sph/teach/sph/cl_src"
-        self.clsph_dir = "cl_src"
+        #self.clsph_dir = os.path.join(util.pwd(), "cl_src")
         #self.clcommon_dir = "/Users/enjalot/code/sph/teach/sph/cl_common"
-        self.clcommon_dir = "cl_common"
+        #self.clcommon_dir = os.path.join(util.pwd(), "cl_common")
+        self.clsph_dir = util.execution_path("cl_src")
+        self.clcommon_dir = util.execution_path("cl_common")
 
         self.global_color = [1., 1., 1., 1.]
         
@@ -77,15 +84,7 @@ class CLSPH:
         print pos.T[0:100] 
         """
 
-
-        self.hash.execute(      self.num,
-                                self.position_u,
-                                self.sort_hashes,
-                                self.sort_indices,
-                                self.gp,
-                                self.clf_debug,
-                                self.cli_debug
-                            )
+        self.exec_hash()
 
         """
         hashes = numpy.ndarray((self.num,), dtype=numpy.int32)
@@ -99,12 +98,7 @@ class CLSPH:
         """
  
 
-        self.radix.sort(    self.sph.max_num,
-                            self.sort_hashes,
-                            self.sort_indices
-                        )
-
-
+        self.exec_sort()
  
 
         negone = numpy.ones((self.sph.domain.nb_cells+1,), dtype=numpy.int32)
@@ -114,15 +108,8 @@ class CLSPH:
         cl.enqueue_write_buffer(self.queue, self.ci_end, numpy.zeros((self.sph.domain.nb_cells+1), dtype=numpy.int32))
         self.queue.finish()
 
-        self.cellindices.execute(   self.num,
-                                    self.sort_hashes,
-                                    self.sort_indices,
-                                    self.ci_start,
-                                    self.ci_end,
-                                    self.gp,
-                                    #self.clf_debug,
-                                    #self.cli_debug
-                                )
+        self.exec_cellindices()
+
 
         """
         tmp_start = numpy.ndarray((self.sph.domain.nb_cells,), dtype=numpy.uint32)
@@ -135,53 +122,14 @@ class CLSPH:
                 print i, tmp_start[i], tmp_end[i]
         """
 
-        self.permute.execute(   self.num, 
-                                self.position_u,
-                                self.position_s,
-                                self.velocity_u,
-                                self.velocity_s,
-                                self.veleval_u,
-                                self.veleval_s,
-                                self.color_u,
-                                self.color_s,
-                                self.sort_indices
-                                #self.clf_debug,
-                                #self.cli_debug
-                            )
-
+        self.exec_permute()
+        
         if not self.is_ghost:
-
         #if True:
-
-
-            self.density.execute(   self.num, 
-                                    self.position_s,
-                                    self.density_s,
-                                    self.ci_start,
-                                    self.ci_end,
-                                    #self.gp,
-                                    self.gp_scaled,
-                                    self.sphp,
-                                    self.clf_debug,
-                                    self.cli_debug
-                                )
-
- 
+            self.exec_density()
+             
             if self.ghost_system is not None and self.with_ghost_density:
-                self.ghost_density.execute(   self.num, 
-                                    self.position_s,
-                                    self.ghost_system.position_s,
-                                    self.density_s,
-                                    self.ghost_density_s,
-                                    self.ghost_system.color_s,
-                                    self.sphp,
-                                    self.ghost_system.ci_start,
-                                    self.ghost_system.ci_end,
-                                    self.ghost_system.gp_scaled,
-                                    self.ghost_system.sphp,
-                                    self.clf_debug,
-                                    self.cli_debug
-                                )
+                self.exec_ghost_density()
 
 
 
@@ -205,19 +153,7 @@ class CLSPH:
             print pos.T[0:100] 
             """
  
-            self.force.execute(   self.num, 
-                                  self.position_s,
-                                  self.density_s,
-                                  self.veleval_s,
-                                  self.force_s,
-                                  self.xsph_s,
-                                  self.ci_start,
-                                  self.ci_end,
-                                  self.gp_scaled,
-                                  self.sphp,
-                                  self.clf_debug,
-                                  self.cli_debug
-                              )
+            self.exec_force()
 
             """
             clf = numpy.ndarray((self.num,4), dtype=numpy.float32)
@@ -229,23 +165,7 @@ class CLSPH:
 
 
             if self.ghost_system is not None and self.with_ghost_force:
-                self.ghost_force.execute(   self.num, 
-                                    self.position_s,
-                                    self.ghost_system.position_s,
-                                    self.density_s,
-                                    self.ghost_density_s,
-                                    self.ghost_system.color_s,
-                                    self.veleval_s,
-                                    self.force_s,
-                                    self.xsph_s,
-                                    self.sphp,
-                                    self.ghost_system.ci_start,
-                                    self.ghost_system.ci_end,
-                                    self.ghost_system.gp_scaled,
-                                    self.ghost_system.sphp,
-                                    self.clf_debug,
-                                    self.cli_debug
-                )
+                self.exec_ghost_force()
 
                 """
                 force = numpy.ndarray((self.num,4), dtype=numpy.float32)
@@ -273,32 +193,9 @@ class CLSPH:
 
             """
 
-
-            self.collision_wall.execute(  self.num, 
-                                          self.position_s,
-                                          self.velocity_s,
-                                          self.force_s,
-                                          self.gp_scaled,
-                                          self.sphp,
-                                          #self.clf_debug,
-                                         # self.cli_debug
-                                       )
-
-
-            self.leapfrog.execute(    self.num, 
-                                      self.position_u,
-                                      self.position_s,
-                                      self.velocity_u,
-                                      self.velocity_s,
-                                      self.veleval_u,
-                                      self.force_s,
-                                      self.xsph_s,
-                                      self.sort_indices,
-                                      self.sphp,
-                                      #self.clf_debug,
-                                      #self.cli_debug
-                                      numpy.float32(self.dt)
-                                 )
+            self.exec_collision_wall()
+           
+            self.exec_leapfrog()
 
             """
             cl.enqueue_read_buffer(self.queue, self.position_u, pos)
@@ -311,6 +208,159 @@ class CLSPH:
 
 
         self.release_gl()
+
+    @timings("Hash")
+    def exec_hash(self):
+        self.hash.execute(      self.num,
+                                self.position_u,
+                                self.sort_hashes,
+                                self.sort_indices,
+                                self.gp,
+                                self.clf_debug,
+                                self.cli_debug
+                            )
+
+    @timings("Sort")
+    def exec_sort(self):
+        self.radix.sort(    self.sph.max_num,
+                            self.sort_hashes,
+                            self.sort_indices
+                        )
+
+
+    
+
+    @timings("Cell Indices")
+    def exec_cellindices(self):
+        self.cellindices.execute(   self.num,
+                                    self.sort_hashes,
+                                    self.sort_indices,
+                                    self.ci_start,
+                                    self.ci_end,
+                                    self.gp,
+                                    #self.clf_debug,
+                                    #self.cli_debug
+                                )
+
+    @timings("Permute")
+    def exec_permute(self):
+        self.permute.execute(   self.num, 
+                                self.position_u,
+                                self.position_s,
+                                self.velocity_u,
+                                self.velocity_s,
+                                self.veleval_u,
+                                self.veleval_s,
+                                self.color_u,
+                                self.color_s,
+                                self.sort_indices
+                                #self.clf_debug,
+                                #self.cli_debug
+                            )
+
+    @timings("Density")
+    def exec_density(self):
+        self.density.execute(   self.num, 
+                                self.position_s,
+                                self.density_s,
+                                self.ci_start,
+                                self.ci_end,
+                                #self.gp,
+                                self.gp_scaled,
+                                self.sphp,
+                                self.clf_debug,
+                                self.cli_debug
+                            )
+
+
+
+    @timings("Ghost Density")
+    def exec_ghost_density(self):
+        self.ghost_density.execute( self.num, 
+                                    self.position_s,
+                                    self.ghost_system.position_s,
+                                    self.density_s,
+                                    self.ghost_density_s,
+                                    self.ghost_system.color_s,
+                                    self.sphp,
+                                    self.ghost_system.ci_start,
+                                    self.ghost_system.ci_end,
+                                    self.ghost_system.gp_scaled,
+                                    self.ghost_system.sphp,
+                                    self.clf_debug,
+                                    self.cli_debug
+                                )
+
+
+    @timings("Force")
+    def exec_force(self):
+        self.force.execute(   self.num, 
+                              self.position_s,
+                              self.density_s,
+                              self.veleval_s,
+                              self.force_s,
+                              self.xsph_s,
+                              self.ci_start,
+                              self.ci_end,
+                              self.gp_scaled,
+                              self.sphp,
+                              self.clf_debug,
+                              self.cli_debug
+                          )
+
+    @timings("Ghost Force")
+    def exec_ghost_force(self):
+        self.ghost_force.execute(   self.num, 
+                                    self.position_s,
+                                    self.ghost_system.position_s,
+                                    self.density_s,
+                                    self.ghost_density_s,
+                                    self.ghost_system.color_s,
+                                    self.veleval_s,
+                                    self.force_s,
+                                    self.xsph_s,
+                                    self.sphp,
+                                    self.ghost_system.ci_start,
+                                    self.ghost_system.ci_end,
+                                    self.ghost_system.gp_scaled,
+                                    self.ghost_system.sphp,
+                                    self.clf_debug,
+                                    self.cli_debug
+                )
+
+    @timings("Collision Wall")
+    def exec_collision_wall(self):
+        self.collision_wall.execute(  self.num, 
+                                      self.position_s,
+                                      self.velocity_s,
+                                      self.force_s,
+                                      self.gp_scaled,
+                                      self.sphp,
+                                      #self.clf_debug,
+                                      #self.cli_debug
+                                   )
+
+
+
+    @timings("Leapfrog")
+    def exec_leapfrog(self):
+        self.leapfrog.execute(    self.num, 
+                                  self.position_u,
+                                  self.position_s,
+                                  self.velocity_u,
+                                  self.velocity_s,
+                                  self.veleval_u,
+                                  self.force_s,
+                                  self.xsph_s,
+                                  self.sort_indices,
+                                  self.sphp,
+                                  #self.clf_debug,
+                                  #self.cli_debug
+                                  numpy.float32(self.dt)
+                             )
+
+
+
 
     def loadData(self):#, pos_vbo, col_vbo):
         import pyopencl as cl
