@@ -15,12 +15,16 @@ import clcollision_wall
 import clleapfrog
 
 class CLSPH:
-    def __init__(self, dt, sph):
+    def __init__(self, dt, sph, is_ghost=False, ghost_system=None):
+        self.is_ghost = is_ghost
+        self.ghost_system = None
         self.clinit()
         self.prgs = {}  #store our programs
         #of course hardcoding paths here is terrible
         self.clsph_dir = "/Users/enjalot/code/sph/teach/sph/cl_src"
         self.clcommon_dir = "/Users/enjalot/code/sph/teach/sph/cl_common"
+
+        self.global_color = [0., 1., 0., 1.]
         
         self.dt = dt
         self.num = 0
@@ -45,7 +49,6 @@ class CLSPH:
 
 
     def update(self):
-
         self.acquire_gl()
 
         self.hash.execute(      self.num,
@@ -105,72 +108,71 @@ class CLSPH:
                                 #self.cli_debug
                             )
 
+        if not self.is_ghost:
 
-        self.density.execute(   self.num, 
-                                self.position_s,
-                                self.density_s,
-                                self.ci_start,
-                                self.ci_end,
-                                #self.gp,
-                                self.gp_scaled,
-                                self.sphp,
-                                self.clf_debug,
-                                self.cli_debug
-                            )
+            self.density.execute(   self.num, 
+                                    self.position_s,
+                                    self.density_s,
+                                    self.ci_start,
+                                    self.ci_end,
+                                    #self.gp,
+                                    self.gp_scaled,
+                                    self.sphp,
+                                    self.clf_debug,
+                                    self.cli_debug
+                                )
 
-        """
-        density = numpy.ndarray((self.num,), dtype=numpy.float32)
-        cl.enqueue_read_buffer(self.queue, self.density_s, density)
-        print density.T
-        clf = numpy.ndarray((self.num,4), dtype=numpy.float32)
-        cl.enqueue_read_buffer(self.queue, self.clf_debug, clf)
-        print clf
-        """
- 
-        self.force.execute(   self.num, 
-                              self.position_s,
-                              self.density_s,
-                              self.veleval_s,
-                              self.force_s,
-                              self.xsph_s,
-                              self.ci_start,
-                              self.ci_end,
-                              self.gp_scaled,
-                              self.sphp,
-                              self.clf_debug,
-                              self.cli_debug
-                          )
-
-        self.collision_wall.execute(  self.num, 
-                                      self.position_s,
-                                      self.velocity_s,
-                                      self.force_s,
-                                      self.gp_scaled,
-                                      self.sphp,
-                                      #self.clf_debug,
-                                     # self.cli_debug
-                                   )
-
-        self.leapfrog.execute(    self.num, 
-                                  self.position_u,
+            """
+            density = numpy.ndarray((self.num,), dtype=numpy.float32)
+            cl.enqueue_read_buffer(self.queue, self.density_s, density)
+            print density.T
+            clf = numpy.ndarray((self.num,4), dtype=numpy.float32)
+            cl.enqueue_read_buffer(self.queue, self.clf_debug, clf)
+            print clf
+            """
+     
+            self.force.execute(   self.num, 
                                   self.position_s,
-                                  self.velocity_u,
-                                  self.velocity_s,
-                                  self.veleval_u,
+                                  self.density_s,
+                                  self.veleval_s,
                                   self.force_s,
                                   self.xsph_s,
-                                  self.sort_indices,
+                                  self.ci_start,
+                                  self.ci_end,
+                                  self.gp_scaled,
                                   self.sphp,
-                                  #self.clf_debug,
-                                  #self.cli_debug
-                                  numpy.float32(self.dt)
-                             )
-        #"""                
+                                  self.clf_debug,
+                                  self.cli_debug
+                              )
+
+            self.collision_wall.execute(  self.num, 
+                                          self.position_s,
+                                          self.velocity_s,
+                                          self.force_s,
+                                          self.gp_scaled,
+                                          self.sphp,
+                                          #self.clf_debug,
+                                         # self.cli_debug
+                                       )
+
+            self.leapfrog.execute(    self.num, 
+                                      self.position_u,
+                                      self.position_s,
+                                      self.velocity_u,
+                                      self.velocity_s,
+                                      self.veleval_u,
+                                      self.force_s,
+                                      self.xsph_s,
+                                      self.sort_indices,
+                                      self.sphp,
+                                      #self.clf_debug,
+                                      #self.cli_debug
+                                      numpy.float32(self.dt)
+                                 )
+            #"""                
 
 
         self.release_gl()
- 
-
 
     def loadData(self):#, pos_vbo, col_vbo):
         import pyopencl as cl
@@ -241,8 +243,7 @@ class CLSPH:
         self.gl_objects = [self.position_u, self.color_u]
 
 
-
-    def updateSPHP(self):
+    def update_sphp(self):
         self.sphp_struct = self.sph.make_struct(self.num)
         cl.enqueue_write_buffer(self.queue, self.sphp, self.sphp_struct).wait()
 
@@ -257,7 +258,7 @@ class CLSPH:
         self.release_gl()
 
         self.num += nn
-        self.updateSPHP()
+        self.update_sphp()
         self.queue.finish()
 
  
@@ -305,11 +306,13 @@ class CLSPH:
         #print "options: ", options
         #print "kernel", dir(self.prgs[prg_name])
 
+    def set_color(self, color):
+        self.global_color = color
 
     def render(self):
 
-
-        glColor3f(1,0,0)
+        gc = self.global_color
+        glColor4f(gc[0],gc[1], gc[2],gc[3])
         glEnable(GL_POINT_SMOOTH)
         glPointSize(5)
 

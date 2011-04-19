@@ -74,11 +74,24 @@ class window(object):
         dmax = Vec([1,1,1])
         self.domain = Domain(dmin, dmax)
         self.system = sph.SPH(max_num, self.domain)
+        self.ghost_domain = Domain(dmin, dmax)
+        self.ghost = sph.SPH(max_num * 36, self.ghost_domain)
+        ipos = sph.addRect(512, Vec([0.1, 0.1, 0.,0.]), Vec([1.,1.,0.,0.]), self.system)
+        gpos = sph.addRect(8192, Vec([0.1, 0.1, 0.,0.]), Vec([1.,1.,0.,0.]), self.ghost)
+        #print ipos, "LEN", len(ipos)
+        #print gpos, "LEN", len(gpos)
+        self.clghost_system = clsph.CLSPH(dt, self.ghost, is_ghost=True)
         self.clsystem = clsph.CLSPH(dt, self.system)
 
-        ipos = sph.addRect(1024, Vec([0.1, 0.1, 0.,0.]), Vec([1.,1.,0.,0.]), self.system)
         #ipos = sph.addRect3D(50, Vec([1.2, 1.2, .2,0.]), Vec([2.,2.,1.,0.]), self.system)
+        self.clghost_system.push_particles(gpos, None, None)
+        #self.clghost_system.update()
         self.clsystem.push_particles(ipos, None, None)
+
+        color = [1., 0., 0., 1.]
+        self.clsystem.set_color(color)
+        color = [.75, 0.75, 0.75, 1.]
+        self.clghost_system.set_color(color)
 
         #########################################################################
         glutMainLoop()
@@ -109,6 +122,7 @@ class window(object):
         
         #render the particles
         self.clsystem.render()
+        self.clghost_system.render()
 
         #draw the x, y and z axis as lines
         glutil.draw_axes()
