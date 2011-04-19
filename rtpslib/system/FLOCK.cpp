@@ -121,7 +121,7 @@ FLOCK::~FLOCK()
     int hs = hoses.size();  
     for(int i = 0; i < hs; i++)
     {
-        hose = hoses[i];
+        hose = &hoses[i];
         delete hose;
     }
 
@@ -219,7 +219,7 @@ void FLOCK::updateGPU()
             cl_sort_indices,
             cl_cell_indices_start,
             cl_cell_indices_end,
-            cl_FLOCKParameters,
+            //cl_FLOCKParameters,
             cl_GridParams,
             grid_params.nb_cells,
             clf_debug,
@@ -237,7 +237,7 @@ void FLOCK::updateGPU()
             cl_color_u,
             cl_color_s,
             cl_sort_indices,
-            cl_FLOCKParameters,
+            //cl_FLOCKParameters,
             cl_GridParams,
             clf_debug,
             cli_debug);
@@ -318,7 +318,7 @@ void FLOCK::hash_and_sort()
         cl_position_u,
         cl_sort_hashes,
         cl_sort_indices,
-        cl_FLOCKParameters,
+        //cl_FLOCKParameters,
         cl_GridParams,
         clf_debug,
         cli_debug);
