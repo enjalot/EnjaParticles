@@ -1,6 +1,6 @@
 import pyopencl as cl
 
-class CLForce:
+class CLGhostForce:
     def __init__(self, clsph):
         self.clsph = clsph
         self.queue = self.clsph.queue

@@ -23,7 +23,6 @@ __kernel void leapfrog(
     //int num = get_global_size(0); // for access functions in cl_macros.h
     int num = sphp->num;
     if (i >= num) return;
-
     /*
     float4 p = pos(i);
     float4 v = vel(i);
@@ -36,10 +35,11 @@ __kernel void leapfrog(
 
 
 
+#if 1
 
     //external force is gravity
     //f.z += sphp->gravity;
-    f.y += sphp->gravity;
+    //f.y += sphp->gravity;
     f.w = 0.f;
 
     float speed = length(f);
@@ -108,6 +108,7 @@ __kernel void leapfrog(
     //unsorted_force(originalIndex) 	= f; // FOR DEBUGGING ONLY
     //unsorted_density(originalIndex) = dens; // FOR DEBUGGING ONLY
     //positions[originalIndex] 		= (float4)(p.xyz, dens);  // for plotting
+#endif
 }
 
 

@@ -75,8 +75,8 @@ class Domain(object):
         return s
 
     def make_struct(self, scale_factor):
-
-        print("scale factor", scale_factor)
+        print "MAKING STRUCT"
+        print "scale factor", scale_factor
         size = self.size * scale_factor
         min = self.min * scale_factor
         max = self.max * scale_factor

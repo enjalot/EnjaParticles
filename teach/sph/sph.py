@@ -6,7 +6,7 @@ from vector import Vec
 from hash import Domain
 from kernels import Kernel
 
-screen_scale = 160
+#screen_scale = 160
 
 class SPH:
     def __init__(self, max_num, domain, ghost_factor=1.):
@@ -63,7 +63,7 @@ class SPH:
         self.attraction = 0.
         self.spring = 0.
 
-        self.velocity_limit = 600.
+        self.velocity_limit = 100.
         self.xsph_factor = .05
 
         self.viscosity = .01
@@ -74,12 +74,14 @@ class SPH:
         #Domain
         self.domain = domain
         self.domain.setup(self.smoothing_radius / self.sim_scale)
+        print domain
 
         #Kernels
         self.kernels = Kernel(self.smoothing_radius)
 
     def make_struct(self, num):
         import struct
+        print "make sph struct", num, self.max_num
         sphstruct = struct.pack('ffff'+
                     'ffff'+
                     'ffff'+
@@ -215,7 +217,7 @@ def addPic(image, num, pmin, pmax, sphp):
             r = intensity
             g = intensity
             b = intensity
-            a = 1.
+            a = .5
             color += [[r, g, b, a]]
             i+=1;
         yi += 1

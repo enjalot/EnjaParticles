@@ -83,7 +83,7 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
         force *= sphp->mass/(di*dj) * (1.5f - casper);
         ///force *= sphp->mass/(di*dj); 
 
-#if 0
+#if 1
         // Add XSPH stabilization term
         // the poly6 kernel calculation seems to be wrong, using rlen as a vector when it is a float...
         //float Wijpol6 = Wpoly6(r, particle_sphp->smoothing_distance, sphp) * sphp->wpoly6_coeff;
@@ -94,7 +94,7 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
         */
         float Wijpol6 = Wpoly6(r, particle_sphp->smoothing_distance, sphp);
         //float Wijpol6 = sphp->wpoly6_coef * Wpoly6(rlen, sphp->smoothing_distance, sphp);
-        float4 xsph = (2.f * sphp->mass * Wijpol6 * (velj-veli)/(di+dj));
+        float4 xsph = (2.f * sphp->mass * Wijpol6 * (velj-veli)/(di+dj)) * (1.5f-casper);
         pt->xsph += xsph * (float)iej;
         pt->xsph.w = 0.f;
 #endif
@@ -141,9 +141,9 @@ __kernel void ghost_force_update(
 
     //IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
     IterateParticlesInNearbyCells(ARGV, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
-    force[index] += .0001f*pt.force; 
+    force[index] += pt.force; 
     clf[index].xyz = pt.force.xyz;
-    //xsph[index] += sphp->wpoly6_coef * pt.xsph;
+    xsph[index] += sphp->wpoly6_coef * pt.xsph * .00001f;
 }
 
 /*-------------------------------------------------------------- */

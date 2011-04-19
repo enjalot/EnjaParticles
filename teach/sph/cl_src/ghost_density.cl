@@ -45,7 +45,7 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
         float Wij = Wpoly6(r, particle_sphp->smoothing_distance, sphp);
 
         float casper = ghost_intensity[index_j].x;
-        pt->density.x += sphp->mass*Wij * (1.7 - casper);
+        pt->density.x += sphp->mass*Wij * (1.5 - casper)*(1.5-casper)*(1.5-casper);
         //pt->density.x += sphp->mass*Wij;
     }
 }
@@ -86,8 +86,8 @@ __kernel void ghost_density_update(
 
     //IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
     IterateParticlesInNearbyCells(ARGV, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
-    density[index] += sphp->wpoly6_coef * pt.density.x* .0000001f;
-    ghost_density[index] = sphp->wpoly6_coef * pt.density.x* .0000001f;
+    density[index] += sphp->wpoly6_coef * pt.density.x* .0001f;
+    ghost_density[index] = sphp->wpoly6_coef * pt.density.x* .0001f;
     /*
     clf[index].x = pt.density.x * sphp->wpoly6_coef;
     clf[index].y = pt.density.y;

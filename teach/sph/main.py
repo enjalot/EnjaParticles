@@ -13,15 +13,84 @@ import glutil
 from vector import Vec
 
 #from forces import *
+import hash
 import forces
 import sph
 import clsph
-from hash import Domain
+import clghost
 
 dt = .001
 subintervals = 1
 
+
 class window(object):
+
+    def make_ghost_system(self):
+        #########################################################################
+        ghost_max_num = 262144
+        #ghost_max_num = 65536
+        #ghost_max_num = 16384
+        #ghost_max_num = 8192
+
+        print "Ghost System"
+        print "-------------------------------------------------------------"
+        gdmin = Vec([0.,0.,0.])
+        gdmax = Vec([1.,1.,1.])
+        self.ghost_domain = hash.Domain(gdmin, gdmax)
+        self.ghost = sph.SPH(ghost_max_num, self.ghost_domain, ghost_factor=.01)
+        #self.ghost = sph.SPH(max_num, self.ghost_domain, ghost_factor=.01)
+
+        print "making ghost system"
+        self.clghost_system = clsph.CLSPH(dt, self.ghost, is_ghost=True)
+        #self.clghost_system = clsph.CLSPH(dt, self.system, is_ghost=True)
+        #self.clsystem = clsph.CLSPH(dt, self.system, ghost_system=self.clghost_system)
+        #self.clsystem = clsph.CLSPH(dt, self.system, ghost_system=None)
+        ##self.clghost_system = clghost.CLGHOST(dt, self.ghost)
+
+        gmin = Vec([0., 0., 0.,0.])
+        gmax = Vec([1.,1.,0.,0.])
+        color = [1., 0.75, 0.75, .5]
+        #self.clghost_system.set_color(color)
+        #ghost_pos, ghost_color = sph.addRect(512, Vec([0.1, 0.1, 0.,0.]), Vec([1.,1.,0.,0.]), self.system, color)
+        #ghost_pos, ghost_color = sph.addRect(ghost_max_num, gmin, gmax, self.ghost, color)
+
+        img = Image.open('test.jpg')
+        print img.size
+        #img.show()
+        ghost_pos, ghost_color = sph.addPic(img, ghost_max_num, gmin, gmax, self.ghost)
+        #print ghost_pos
+        self.clghost_system.push_particles(ghost_pos, None, ghost_color)
+
+
+    def make_sph_system(self):
+
+        #ghost_max_num = 8192
+        max_num = 16384
+        #max_num = 8192
+        #max_num = 2**12 #4096
+        #max_num = 2**10 #1024
+        #max_num = 2**8 #256
+        #max_num = 2**7 #128
+
+        dmin = Vec([0.,0.,0.])
+        dmax = Vec([1.,1.,1.])
+        print "SPH System"
+        print "-------------------------------------------------------------"
+        self.domain = hash.Domain(dmin, dmax)
+        self.system = sph.SPH(max_num, self.domain)
+        
+        print "making particle system"
+        #self.clsystem = clsph.CLSPH(dt, self.system, ghost_system=None)
+        self.clsystem = clsph.CLSPH(dt, self.system, ghost_system=self.clghost_system)
+
+        color = [1., 0., 0., .75]
+        self.clsystem.set_color(color)
+        ipos, icolor = sph.addRect(512, Vec([.5, .5, 0.,0.]), Vec([1., 1., 0.,0.]), self.system, color)
+        print "pushing clsystem particles"
+        self.clsystem.push_particles(ipos, None, icolor)
+
+
+ 
     def __init__(self, *args, **kwargs):
         #mouse handling for transforming scene
         self.mouse_down = False
@@ -64,52 +133,14 @@ class window(object):
         self.glprojection()
 
 
-        #########################################################################
-        #ghost_max_num = 262144
-        ghost_max_num = 65536
-        max_num = 8192
-        #max_num = 2**12 #4096
-        #max_num = 2**10 #1024
-        #max_num = 2**8 #256
-        #max_num = 2**7 #128
-
-        dmin = Vec([0,0,0])
-        dmax = Vec([1,1,1])
-        print "SPH System"
-        print "-------------------------------------------------------------"
-        self.domain = Domain(dmin, dmax)
-        self.system = sph.SPH(max_num, self.domain)
-        
-        print "Ghost System"
-        print "-------------------------------------------------------------"
-        self.ghost_domain = Domain(dmin, dmax)
-        self.ghost = sph.SPH(ghost_max_num, self.ghost_domain, ghost_factor=.01)
+        self.make_ghost_system()
+        self.make_sph_system()
 
 
-        self.clghost_system = clsph.CLSPH(dt, self.ghost, is_ghost=True)
-        #self.clsystem = clsph.CLSPH(dt, self.system, ghost_system=self.clghost_system)
-        self.clsystem = clsph.CLSPH(dt, self.system, ghost_system=None)
-
-        color = [1., 0., 0., .75]
-        self.clsystem.set_color(color)
-        ipos, icolor = sph.addRect(512, Vec([0.1, 0.1, 0.,0.]), Vec([1.,1.,0.,0.]), self.system, color)
-        self.clsystem.push_particles(ipos, None, icolor)
-        
-        gmin = Vec([0., 0., 0.,0.])
-        gmax = Vec([1.,1.,0.,0.])
-        color = [.1, 0.75, 0.75, .5]
-        self.clghost_system.set_color(color)
-        #ghost_pos, ghost_color = sph.addRect(512, Vec([0.1, 0.1, 0.,0.]), Vec([1.,1.,0.,0.]), self.system, color)
-        ghost_pos, ghost_color = sph.addRect(ghost_max_num, gmin, gmax, self.ghost, color)
-
-        #img = Image.open('test.jpg')
-        #print img.size
-        #img.show()
-        #ghost_pos, ghost_color = sph.addPic(img, ghost_max_num, gmin, gmax, self.ghost)
-
-        self.clghost_system.push_particles(ghost_pos, None, ghost_color)
+        print "ghost system update"
         self.clghost_system.update()
-        self.clsystem.update()
+        #print"clsystem update"
+        #self.clsystem.update()
 
         #########################################################################
         glutMainLoop()
@@ -124,7 +155,7 @@ class window(object):
         
         #update or particle positions by calling the OpenCL kernel
         for i in range(subintervals):
-            #self.clsystem.update()
+            self.clsystem.update()
             pass
         #self.cle.execute(subintervals) 
         glFlush()
@@ -195,6 +226,19 @@ class window(object):
             self.mouse_down = False
         self.mouse_old.x = x
         self.mouse_old.y = y
+
+        print x, y, self.width, self.height
+        cx = x / (1.0 * self.width)
+        cy = y / (1.0 * self.height)
+        print cx, cy
+
+        color = [1., 0., 0., .75]
+        self.clsystem.set_color(color)
+        ipos, icolor = sph.addRect(512, Vec([cx - .2, cy -.2, 0.,0.]), Vec([cx + .2, cy + .2, 0.,0.]), self.system, color)
+        print "pushing clsystem particles"
+        self.clsystem.push_particles(ipos, None, icolor)
+
+
 
     
     def on_mouse_motion(self, x, y):

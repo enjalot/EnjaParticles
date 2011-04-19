@@ -19,6 +19,7 @@ class Radix:
         self.clsph = clsph
         self.ctx = self.clsph.ctx
         self.queue = self.clsph.queue
+        print "RADIX", max_elements
 
         self.loadProgram()
 

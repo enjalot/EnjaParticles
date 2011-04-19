@@ -27,6 +27,7 @@ class CLSPH:
         else:
             self.ctx = self.ghost_system.ctx
             self.queue = self.ghost_system.queue
+
         self.prgs = {}  #store our programs
         #of course hardcoding paths here is terrible
         self.clsph_dir = "/Users/enjalot/code/sph/teach/sph/cl_src"
@@ -38,20 +39,21 @@ class CLSPH:
         self.num = 0
         self.sph = sph
 
+        
         self.loadData()
-       
+
         self.hash = clhash.CLHash(self)
         self.radix = clradix.Radix(self, self.sph.max_num, 128, numpy.uint32(0))
         self.cellindices = clcellindices.CLCellIndices(self)
         self.permute = clpermute.CLPermute(self)
-        self.density = cldensity.CLDensity(self)
-        self.force = clforce.CLForce(self)
-        self.collision_wall = clcollision_wall.CLCollisionWall(self)
-        self.leapfrog = clleapfrog.CLLeapFrog(self)
-        
-        self.ghost_density = clghost_density.CLDensity(self)
-        self.ghost_force = clghost_force.CLForce(self)
-       
+        if not is_ghost:
+            self.density = cldensity.CLDensity(self)
+            self.force = clforce.CLForce(self)
+            self.collision_wall = clcollision_wall.CLCollisionWall(self)
+            self.leapfrog = clleapfrog.CLLeapFrog(self)
+            self.ghost_density = clghost_density.CLGhostDensity(self)
+            self.ghost_force = clghost_force.CLGhostForce(self)
+           
     
     def acquire_gl(self):
         cl.enqueue_acquire_gl_objects(self.queue, self.gl_objects)
@@ -61,6 +63,16 @@ class CLSPH:
 
     def update(self):
         self.acquire_gl()
+
+
+        numpy.set_printoptions(precision=6, linewidth=1000)
+        """
+        pos = numpy.ndarray((self.num,4), dtype=numpy.float32)
+        cl.enqueue_read_buffer(self.queue, self.position_u, pos)
+        print "pos_u at begining"
+        print pos.T[0:100] 
+        """
+
 
         self.hash.execute(      self.num,
                                 self.position_u,
@@ -153,16 +165,28 @@ class CLSPH:
                                     self.cli_debug
                                 )
 
+
+
             """
             density = numpy.ndarray((self.num,), dtype=numpy.float32)
-            cl.enqueue_read_buffer(self.queue, self.ghost_density_s, density)
+            cl.enqueue_read_buffer(self.queue, self.density_s, density)
+            print "density"
             print density.T
+
+
+            gdensity = numpy.ndarray((self.num,), dtype=numpy.float32)
+            cl.enqueue_read_buffer(self.queue, self.ghost_density_s, gdensity)
+            print gdensity.T
+
 
             clf = numpy.ndarray((self.num,4), dtype=numpy.float32)
             cl.enqueue_read_buffer(self.queue, self.clf_debug, clf)
             print clf
+            cl.enqueue_read_buffer(self.queue, self.xsph_s, pos)
+            print "xpsh_s before force"
+            print pos.T[0:100] 
             """
-     
+ 
             self.force.execute(   self.num, 
                                   self.position_s,
                                   self.density_s,
@@ -176,7 +200,16 @@ class CLSPH:
                                   self.clf_debug,
                                   self.cli_debug
                               )
-           
+
+            """
+            clf = numpy.ndarray((self.num,4), dtype=numpy.float32)
+            cl.enqueue_read_buffer(self.queue, self.clf_debug, clf)
+            print "clf"
+            print clf[0:100].T
+            """
+ 
+
+
             if self.ghost_system is not None:
                 self.ghost_force.execute(   self.num, 
                                     self.position_s,
@@ -196,11 +229,39 @@ class CLSPH:
                                     self.cli_debug
                 )
                 """
+
+                force = numpy.ndarray((self.num,4), dtype=numpy.float32)
+                cl.enqueue_read_buffer(self.queue, self.force_s, force)
+                print force.T[0:100] 
+
+
                 clf = numpy.ndarray((self.num,4), dtype=numpy.float32)
                 cl.enqueue_read_buffer(self.queue, self.clf_debug, clf)
                 print clf.T
                 """
      
+ 
+            """
+            cl.enqueue_read_buffer(self.queue, self.force_s, pos)
+            print "force_s after force"
+            print pos.T[0:100] 
+            cl.enqueue_read_buffer(self.queue, self.position_u, pos)
+            print "position_u before leapfrog"
+            print pos.T[0:100] 
+            print "num", self.num
+            cl.enqueue_read_buffer(self.queue, self.velocity_s, pos)
+            print "velocity_s before leapfrog"
+            print pos.T[0:100] 
+
+            hashes = numpy.ndarray((self.num,), dtype=numpy.int32)
+            cl.enqueue_read_buffer(self.queue, self.sort_hashes, hashes)
+            print "hashes"
+            print hashes.T
+            indices = numpy.ndarray((self.num,), dtype=numpy.int32)
+            cl.enqueue_read_buffer(self.queue, self.sort_indices, indices)
+            print "indices"
+            print indices.T
+            """
  
 
             self.collision_wall.execute(  self.num, 
@@ -213,6 +274,8 @@ class CLSPH:
                                          # self.cli_debug
                                        )
 
+
+    
             self.leapfrog.execute(    self.num, 
                                       self.position_u,
                                       self.position_s,
@@ -227,6 +290,14 @@ class CLSPH:
                                       #self.cli_debug
                                       numpy.float32(self.dt)
                                  )
+
+            """
+            cl.enqueue_read_buffer(self.queue, self.position_u, pos)
+            print "position_u after leapfrog"
+            print pos.T[0:100] 
+            """
+ 
+
             #"""                
 
 
@@ -238,7 +309,7 @@ class CLSPH:
         
         #placeholder array used to fill cl buffers
         #could just specify size but might want some initial values later
-        tmp = numpy.ndarray((self.sph.max_num, 4), dtype=numpy.float32)
+        tmp = numpy.zeros((self.sph.max_num, 4), dtype=numpy.float32)
         self.pos_vbo = glutil.VBO(tmp)
         self.col_vbo = glutil.VBO(tmp)
 
@@ -258,7 +329,7 @@ class CLSPH:
         self.position_s = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp)
         self.color_s = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp)
 
-        tmp_dens = numpy.ndarray((self.sph.max_num,), dtype=numpy.float32)
+        tmp_dens = numpy.zeros((self.sph.max_num,), dtype=numpy.float32)
         self.density_s = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp_dens)
         self.force_s = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp)
         self.xsph_s = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp)
@@ -294,7 +365,7 @@ class CLSPH:
         cl.enqueue_write_buffer(self.queue, self.gp_scaled, self.gp_struct_scaled)
 
         #debug arrays
-        tmp_int = numpy.ndarray((self.sph.max_num, 4), dtype=numpy.int32)
+        tmp_int = numpy.zeros((self.sph.max_num, 4), dtype=numpy.int32)
         self.clf_debug = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp)
         self.cli_debug = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp_int)
 
@@ -311,6 +382,9 @@ class CLSPH:
 
     def push_particles(self, pos, vel, color):
         nn = pos.shape[0]
+        print "NN", nn
+        print self.num
+        print self.sph.max_num
         if self.num + nn > self.sph.max_num:
             return
 
@@ -375,10 +449,10 @@ class CLSPH:
     def render(self):
 
         gc = self.global_color
-        #glColor4f(gc[0],gc[1], gc[2],gc[3])
+        glColor4f(gc[0],gc[1], gc[2],gc[3])
         glEnable(GL_POINT_SMOOTH)
         if self.is_ghost:
-            glPointSize(1)
+            glPointSize(2)
         else:
             glPointSize(5)
 

@@ -1,6 +1,6 @@
 import pyopencl as cl
 
-class CLDensity:
+class CLGhostDensity:
     def __init__(self, clsph):
         self.clsph = clsph
         self.queue = self.clsph.queue
