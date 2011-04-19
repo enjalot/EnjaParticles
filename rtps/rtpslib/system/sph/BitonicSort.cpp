@@ -23,6 +23,7 @@ namespace rtps
 
 void SPH::loadBitonicSort()
 {
+<<<<<<< HEAD
     //not sure i like this technique... but while the bitonic sort is still
     //using the C interface probably necessary
     static bool first_time = true;
@@ -40,6 +41,17 @@ void SPH::loadBitonicSort()
         printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
         exit(0);
     }
+=======
+
+    printf("about to instantiate sorting\n");
+    
+    bitonic = Bitonic<int>( ps->cli,    
+                            &cl_sort_output_hashes,
+                            &cl_sort_output_indices,
+                            &cl_sort_hashes,
+                            &cl_sort_indices);
+    
+>>>>>>> 0c48835a5c20dfa6e1fcb2ca9211f679aabe5a26
 }
 
 void SPH::bitonic_sort(bool ghosts)
@@ -53,19 +65,7 @@ void SPH::bitonic_sort(bool ghosts)
             int arrayLength = nb_ghosts;
             int batch = nb_ghosts / arrayLength;
 
-
-            size_t szWorkgroup = bitonicSort(
-                    NULL,
-                    //d_OutputKey,
-                    //d_OutputVal,
-                    cl_ghosts_sort_output_hashes.getDevicePtr(), 
-                    cl_ghosts_sort_output_indices.getDevicePtr(), 
-                    cl_ghosts_sort_hashes.getDevicePtr(), 
-                    cl_ghosts_sort_indices.getDevicePtr(), 
-                    batch,
-                    arrayLength,
-                    dir
-            );
+            ghost_bitonic.Sort(batch, arrayLength, dir);
 
         }
         else
@@ -74,20 +74,13 @@ void SPH::bitonic_sort(bool ghosts)
 		    int arrayLength = max_num;
             int batch = max_num / arrayLength;
 
-
-            size_t szWorkgroup = bitonicSort(
-                    NULL,
-                    //d_OutputKey,
-                    //d_OutputVal,
-                    cl_sort_output_hashes.getDevicePtr(), 
-                    cl_sort_output_indices.getDevicePtr(), 
-                    cl_sort_hashes.getDevicePtr(), 
-                    cl_sort_indices.getDevicePtr(), 
-                    batch,
-                    arrayLength,
-                    dir
-                );
+            //printf("about to try sorting\n");
+            bitonic.Sort(batch, arrayLength, dir);
         }
+<<<<<<< HEAD
+=======
+    
+>>>>>>> 0c48835a5c20dfa6e1fcb2ca9211f679aabe5a26
 	} catch (cl::Error er) {
         printf("ERROR(bitonic sort): %s(%s)\n", er.what(), oclErrorString(er.err()));
 		exit(0);
@@ -114,6 +107,23 @@ void SPH::bitonic_sort(bool ghosts)
                      cl_sort_indices.getDevicePtr());
     }
     
+<<<<<<< HEAD
+=======
+    /*
+    int nbc = 10;
+    std::vector<int> sh = cl_sort_hashes.copyToHost(nbc);
+    std::vector<int> eci = cl_cell_indices_end.copyToHost(nbc);
+
+    for(int i = 0; i < nbc; i++)
+    {
+        printf("before[%d] %d eci: %d\n; ", i, sh[i], eci[i]);
+    }
+    printf("\n");
+    */
+
+
+	/*
+>>>>>>> 0c48835a5c20dfa6e1fcb2ca9211f679aabe5a26
     ps->cli->queue.finish();
 }
 

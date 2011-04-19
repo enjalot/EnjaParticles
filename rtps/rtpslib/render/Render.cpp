@@ -22,7 +22,7 @@ Render::Render(GLuint pos, GLuint col, int n)
     ghosts = true;
     if(glsl)
     {
-        loadTexture();
+        //loadTexture();
         glsl_program = compileShaders();
     }
     if(ghosts)
@@ -100,7 +100,10 @@ void Render::drawArrays()
 
 void Render::drawGhosts()
 {
+<<<<<<< HEAD
     
+=======
+>>>>>>> 0c48835a5c20dfa6e1fcb2ca9211f679aabe5a26
 
     if(true)
     {
@@ -159,10 +162,7 @@ void Render::render()
 {
     // Render the particles with OpenGL
 
-    for(int i= 0; i < 10; i++)
-    {
-        timers[TI_RENDER]->start();
-    }
+    timers[TI_RENDER]->start();
 
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);

@@ -9,7 +9,10 @@
 #ifndef uint
 #define uint unsigned int
 #endif
+<<<<<<< HEAD:rtpslib/system/common/BitonicSort.h
 
+=======
+>>>>>>> 0c48835a5c20dfa6e1fcb2ca9211f679aabe5a26:rtps/rtpslib/opencl/bitonic_sort/src/BitonicSort.h
 static const uint LOCAL_SIZE_LIMIT = 512U;
 
 namespace rtps

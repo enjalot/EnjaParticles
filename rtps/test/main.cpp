@@ -30,7 +30,7 @@ float translate_y = 0.f;//-200.0f;//300.f;
 float translate_z = 1.5f;//200.f;
 */
 float translate_x = -1.00;
-float translate_y = -2.00f;//300.f;
+float translate_y = -1.00f;//300.f;
 float translate_z = 2.00f;
 
 // mouse controls
@@ -66,6 +66,12 @@ void *font = GLUT_BITMAP_8_BY_13;
 rtps::RTPS* ps;
 //#define NUM_PARTICLES 262144
 //#define NUM_PARTICLES 131072
+<<<<<<< HEAD
+=======
+//#define NUM_PARTICLES 524288
+//#define NUM_PARTICLES 262144
+//#define NUM_PARTICLES 65536
+>>>>>>> 0c48835a5c20dfa6e1fcb2ca9211f679aabe5a26
 #define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 8192
 //#define NUM_PARTICLES 4096
@@ -147,15 +153,15 @@ void init_gl()
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     //gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 100.0);
-    gluPerspective(90.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 10000.0); //for lorentz
+    gluPerspective(65.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 10000.0); //for lorentz
 
     // set view matrix
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glRotatef(-90, 1.0, 0.0, 0.0);
-    glTranslatef(translate_x, translate_z, translate_y);
     //glTranslatef(0, 10, 0);
+    glTranslatef(translate_x, translate_z, translate_y);
     /*
     gluLookAt(  0,10,0,
                 0,0,0,
@@ -176,11 +182,21 @@ void appKeyboard(unsigned char key, int x, int y)
     {
         case '\033': // escape quits
         case '\015': // Enter quits    
+<<<<<<< HEAD
         case 'p':
+=======
+        case 'h':
+>>>>>>> 0c48835a5c20dfa6e1fcb2ca9211f679aabe5a26
             ps->render_particles = !ps->render_particles;
             break;
         case 'g':
             ps->render_ghosts = !ps->render_ghosts;
+<<<<<<< HEAD
+=======
+            break;
+        case 'p': //print timers
+            ps->printTimers();
+>>>>>>> 0c48835a5c20dfa6e1fcb2ca9211f679aabe5a26
             break;
         case 'Q':    // Q quits
         case 'q':    // q (or escape) quits
@@ -188,6 +204,10 @@ void appKeyboard(unsigned char key, int x, int y)
             appDestroy();
             break;
         case 'r': //drop a rectangle
+<<<<<<< HEAD
+=======
+        {
+>>>>>>> 0c48835a5c20dfa6e1fcb2ca9211f679aabe5a26
             int nn = 32;
             int sd = 100;
             //float4 min = float4(-150/sd, 50/sd, 675/sd, 0.0f);
@@ -196,18 +216,77 @@ void appKeyboard(unsigned char key, int x, int y)
             //float4 max = float4(.9, .5, .9, 1.0f);
             //float4 min = float4(.3, .3, .3, 1.0f);
             //float4 max = float4(.8, .8, .8, 1.0f);
+<<<<<<< HEAD
             float4 min = float4(1. , 1., .7, 1.0f);
             float4 max = float4(1.5, 1.5, 1.1, 1.0f);
+=======
+            float4 min = float4(.9 , .9, .8, 1.0f);
+            float4 max = float4(1.4, 1.4, 1.2, 1.0f);
+>>>>>>> 0c48835a5c20dfa6e1fcb2ca9211f679aabe5a26
             ps->system->addBox(nn, min, max, false);
             break;
-               
+        }
+        case 'w':
+            translate_z -= 0.1;
+            break;
+        case 'a':
+            translate_x += 0.1;
+            break;
+        case 's':
+            translate_z += 0.1;
+            break;
+        case 'd':
+            translate_x -= 0.1;
+            break;
+        case 'z':
+            translate_y += 0.1;
+            break;
+        case 'x':
+            translate_y -= 0.1;
+            break;
+
 
     }
+    // set view matrix
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glRotatef(-90, 1.0, 0.0, 0.0);
+    glRotatef(rotate_x, 1.0, 0.0, 0.0);
+    glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
+    glTranslatef(translate_x, translate_z, translate_y);
+
 }
 
 void appRender()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+
+    /*
+    glMatrixMode(GL_PROJECTION);        // switch to projection matrix
+    glPushMatrix();
+    glLoadIdentity();                   // reset modelview matrix
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();                   // reset modelview matrix
+    */
+    glPushMatrix();
+    glTranslatef(0,0,0);
+    glScalef(.005,.005,0);
+    char *p;
+    char *text1 ="enjalot";
+    for (p = text1; *p; p++)
+        glutStrokeCharacter(GLUT_STROKE_ROMAN, *p);
+    glPopMatrix();
+    /*
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);        // switch to projection matrix
+    glPopMatrix();
+    */
+
+
 
     ps->update();
 	
@@ -275,10 +354,10 @@ void appMotion(int x, int y)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glRotatef(-90, 1.0, 0.0, 0.0);
-    glTranslatef(translate_x, translate_z, translate_y);
     //glTranslatef(0, translate_z, translate_y);
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
+    glTranslatef(translate_x, translate_z, translate_y);
     //glutPostRedisplay();
 }
 

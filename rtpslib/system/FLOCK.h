@@ -178,13 +178,17 @@ private:
     std::vector<float4> xflocks;
 
     //all ghost stuff here
+//GHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOST
     void pushGhosts(vector<float4> gs);
     void sortGhosts();
+    void loadGhostBitonic();
     void loadGhostHash();
     void loadGhostDataStructures();
     void ghost_hash();
     void build_ghost_datastructures();
     void printGhostHashDiagnostics();
+    void prepareGhosts();
+
 
     Kernel k_ghost_hash, k_ghost_datastructures;
 
@@ -196,9 +200,9 @@ private:
 	Buffer<int> 		cl_ghosts_sort_indices;
 	Buffer<int>         cl_ghosts_sort_output_hashes;
 	Buffer<int>         cl_ghosts_sort_output_indices;
-    
 
-
+    Bitonic<int> ghost_bitonic;
+//GHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOSTGHOST
 
 
 
