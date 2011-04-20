@@ -6,7 +6,7 @@ float magnitude(float4 vec)
     return sqrt(vec.x*vec.x + vec.y*vec.y + vec.z*vec.z);
 }       
         
-__kernel void euler(
+__kernel void averageRules(
                     float dt
                    //__global float4* vars_unsorted, 
                    //__global float4* vars_sorted, 
@@ -23,7 +23,7 @@ __kernel void euler(
                    __constant struct FLOCKParameters* flockp)
                    
 {
-/*__kernel void euler(
+/*__kernel void averageRules(
         __global int* sort_indices,  
 		__global float4* vars_unsorted, 
 		__global float4* vars_sorted, 
@@ -125,7 +125,7 @@ __kernel void euler(
     vi.w =0.f;
 
 	// INTEGRATION
-    pi += dt*vi; 	// euler integration, add the velocity times the timestep
+    pi += dt*vi; 	// averageRules integration, add the velocity times the timestep
 
 #if 1
 	// apply periodic boundary conditions

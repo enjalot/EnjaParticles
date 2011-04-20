@@ -12,7 +12,8 @@
 //for random
 #include<time.h>
 
-namespace rtps {
+namespace rtps{
+using namespace flock;
 
 //----------------------------------------------------------------------
 FLOCK::FLOCK(RTPS *psfr, int n)
@@ -91,7 +92,8 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     cellindices = CellIndices(ps->cli, timers["ci_gpu"]);
     permute = Permute(ps->cli, timers["perm_gpu"]);
     
-    rules = Rules(ps->cli, timers["rules_gpu"]);
+    computeRules = ComputeRules(ps->cli, timers["computeRules_gpu"]);
+    averageRules = AverageRules(ps->cli, timers["averageRules_gpu"]);
 
 
 #endif
@@ -143,7 +145,8 @@ void FLOCK::updateCPU()
 {
     //timers[TI_UPDATE]->start();
     
-    cpuEuler();  // based on my boids program
+    //cpuComputeRules();  // based on my boids program
+    cpuAverageRules();
 
     // mymese debugging
 #if 0
@@ -278,8 +281,8 @@ void FLOCK::updateGPU()
         }
 
         //if(num >0) printf("density\n");
-        timers["rules"]->start();
-        rules.execute(   num,
+        timers["computeRules"]->start();
+        computeRules.execute(   num,
             //cl_vars_sorted,
             cl_position_s,
             cl_separation_s,
@@ -289,7 +292,7 @@ void FLOCK::updateGPU()
             cl_GridParamsScaled,
             clf_debug,
             cli_debug);
-       timers["rules"]->stop();
+       timers["computeRules"]->stop();
             
        //collision();
        timers["integrate"]->start();
@@ -305,7 +308,7 @@ void FLOCK::updateGPU()
     cl_color_u.release();
 
     //timers[TI_UPDATE]->end();
-    timers["update"]->stop;
+    timers["update"]->stop();
 }
 
 //----------------------------------------------------------------------
@@ -334,7 +337,7 @@ void FLOCK::hash_and_sort()
 //----------------------------------------------------------------------
 void FLOCK::integrate()
 {
-    euler.execute(num,
+    averageRules.execute(num,
         settings->dt,
         cl_position_u,
         cl_position_s,
@@ -378,6 +381,31 @@ void FLOCK::integrate()
 }
 
 //----------------------------------------------------------------------
+void FLOCK::call_prep(int stage)
+{
+    //Replace with enqueueCopyBuffer
+    prep.execute(num,
+        stage,
+        cl_position_u,
+        cl_position_s,
+        cl_velocity_u,
+        cl_velocity_s,
+        cl_veleval_u,
+        cl_veleval_s,
+        cl_color_u,
+        cl_color_s,
+        //cl_vars_unsorted, 
+        //cl_vars_sorted, 
+        cl_sort_indices,
+        //params
+        cl_FLOCKParameters,
+        //Buffer<GridParams>& gp,
+        //debug params
+        clf_debug,
+        cli_debug);
+}
+
+//----------------------------------------------------------------------
 int FLOCK::setupTimers()
 {
     int print_freq = 1000; //one second
@@ -407,14 +435,15 @@ int FLOCK::setupTimers()
     timers["ds_gpu"] = new EB::Timer("DataStructures GPU kernel execution", time_offset);
     timers["bitonic"] = new EB::Timer("Bitonic Sort function", time_offset);
     //timers["neighbor"] = new EB::Timer("Neighbor Total", time_offset);
-    timers["rules"] = new EB::Timer("Density function", time_offset);
-    timers["rules_gpu"] = new EB::Timer("Density GPU kernel execution", time_offset);
+    timers["computeRules"] = new EB::Timer("Compute Rules function", time_offset);
+    timers["computeRules_gpu"] = new EB::Timer("Compute Rules GPU kernel execution", time_offset);
     //timers["collision_wall"] = new EB::Timer("Collision wall function", time_offset);
     //timers["cw_gpu"] = new EB::Timer("Collision Wall GPU kernel execution", time_offset);
     //timers["collision_tri"] = new EB::Timer("Collision triangles function", time_offset);
     //timers["ct_gpu"] = new EB::Timer("Collision Triangle GPU kernel execution", time_offset);
     timers["integrate"] = new EB::Timer("Integration kernel execution", time_offset);
-    timers["euler_gpu"] = new EB::Timer("Euler Integration GPU kernel execution", time_offset);
+    timers["averageRules"] = new EB::Timer("Average Rules function", time_offset);
+    timers["averageRules_gpu"] = new EB::Timer("Average Rules GPU kernel execution", time_offset);
     timers["prep_gpu"] = new EB::Timer("Prep GPU kernel execution", time_offset);
 	return 0;
 }
@@ -681,7 +710,7 @@ void FLOCK::addHose(int total_n, float4 center, float4 velocity, float radius, f
     printf("wtf for real\n");
     //in sph we just use sph spacing
     radius *= spacing;
-    Hose *hose = new Hose(ps, total_n, center, velocity, radius, spacing, color);
+    Hose hose = Hose(ps, total_n, center, velocity, radius, spacing, color);
     printf("wtf\n");
     hoses.push_back(hose);
     printf("size of hoses: %d\n", hoses.size());
@@ -796,8 +825,8 @@ void FLOCK::updateFLOCKP()
 //----------------------------------------------------------------------
 void FLOCK::render()
 {
-    renderer->render_box(grid.getBndMin(), grid.getBndMax());
-    renderer->render_table(grid.getBndMin(), grid.getBndMax());
+    renderer->render_box(grid->getBndMin(), grid->getBndMax());
+    renderer->render_table(grid->getBndMin(), grid->getBndMax());
     System::render();
 }
 

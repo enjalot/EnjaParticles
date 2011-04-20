@@ -1,6 +1,6 @@
 #include "FLOCK.h"
 
-namespace rtps
+namespace rtps 
 {
 
     void FLOCK::bitonic_sort()

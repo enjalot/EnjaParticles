@@ -1,19 +1,19 @@
 #include "../FLOCK.h"
 
-namespace rtps
+namespace rtps 
 {
-    Euler::Euler(CL* cli_, EB::Timer* timer_)
+    AverageRules::AverageRules(CL* cli_, EB::Timer* timer_)
     {
         cli = cli_;
         timer = timer_;
  
-        printf("create euler kernel\n");
+        printf("create averageRules kernel\n");
         std::string path(FLOCK_CL_SOURCE_DIR);
-        path += "/euler.cl";
-        k_euler = Kernel(cli, path, "euler");
+        path += "/averageRules.cl";
+        k_averageRules = Kernel(cli, path, "averageRules");
     } 
     
-    void Euler::execute(int num,
+    void AverageRules::execute(int num,
                     float dt,
                     Buffer<float4>& pos_u,
                     Buffer<float4>& pos_s,
@@ -31,25 +31,25 @@ namespace rtps
     {
 
         int iargs = 0;
-        k_euler.setArg(iargs++, dt); //time step
-        k_euler.setArg(iargs++, pos_u.getDevicePtr());
-        k_euler.setArg(iargs++, pos_s.getDevicePtr());
-        k_euler.setArg(iargs++, vel_u.getDevicePtr());
-        k_euler.setArg(iargs++, vel_s.getDevicePtr());
-        k_euler.setArg(iargs++, separation_s.getDevicePtr());
-        k_euler.setArg(iargs++, alignment_s.getDevicePtr());
-        k_euler.setArg(iargs++, cohesion_s.getDevicePtr());
-        k_euler.setArg(iargs++, indices.getDevicePtr());
-        k_euler.setArg(iargs++, flockp.getDevicePtr());
+        k_averageRules.setArg(iargs++, dt); //time step
+        k_averageRules.setArg(iargs++, pos_u.getDevicePtr());
+        k_averageRules.setArg(iargs++, pos_s.getDevicePtr());
+        k_averageRules.setArg(iargs++, vel_u.getDevicePtr());
+        k_averageRules.setArg(iargs++, vel_s.getDevicePtr());
+        k_averageRules.setArg(iargs++, separation_s.getDevicePtr());
+        k_averageRules.setArg(iargs++, alignment_s.getDevicePtr());
+        k_averageRules.setArg(iargs++, cohesion_s.getDevicePtr());
+        k_averageRules.setArg(iargs++, indices.getDevicePtr());
+        k_averageRules.setArg(iargs++, flockp.getDevicePtr());
 
 
         int local_size = 128;
-        k_euler.execute(num, local_size);
+        k_averageRules.execute(num, local_size);
 
     }
 
 
-    void FLOCK::cpuEuler()
+    void FLOCK::cpuAverageRules()
     {
         float4 acc;
         float dist;
@@ -57,14 +57,14 @@ namespace rtps
         float4 vel_sep, vel_aln, vel_coh;
         float4 acc_separation, acc_alignment, acc_cohesion;
 
-        float w_sep = flock_parameters->w_sep;   //0.0001f;  //.0003f;
-        float w_aln = flock_parameters->w_algn;  //0.0001f;  //0.0001f;
-        float w_coh = flock_parameters->w_coh;   //0.00003f;  //0.00003f;
+        float w_sep = flock_params.w_sep;   //0.0001f;  //.0003f;
+        float w_aln = flock_params.w_align;  //0.0001f;  //0.0001f;
+        float w_coh = flock_params.w_coh;   //0.00003f;  //0.00003f;
 
-        float4 bndMax = flock_parameters->grid_max;
-        float4 bndMin = flock_parameters->grid_min;
+        float4 bndMax = flock_params.grid_max;
+        float4 bndMin = flock_params.grid_min;
 
-	    float spacing = flock_parameters->spacing;
+	    float spacing = spacing;
 	    spacing *= 2;
 
         int nb_cells = (int)((bndMax.x-bndMin.x)/spacing) * (int)((bndMax.y-bndMin.y)/spacing) * (int)((bndMax.z-bndMin.z)/spacing);
@@ -85,7 +85,7 @@ namespace rtps
 		        dist = d.length();
 
                 // is boid j a flockmate?
-                if(dist <= flock_parameters->search_radius){
+                if(dist <= flock_params.search_radius){
                     (*flockmates).push_back(j);
                 }
             }   
@@ -103,7 +103,7 @@ namespace rtps
         		    float4 separation =  positions[i] - positions[(*flockmates)[j]];
 			    
                     float d = separation.length();
-        		    if(d < flock_parameters->min_dist){
+        		    if(d < flock_params.min_dist){
                 		separation = normalize3(separation);
 				        separation = separation / d;
 				        acc_separation = acc_separation + separation;
@@ -149,9 +149,9 @@ namespace rtps
             // Step 6. Constrain acceleration
             float  acc_mag  = acc.length();
 	        float4 acc_norm = normalize3(acc);
-            if(acc_mag > flock_parameters->max_speed){
+            if(acc_mag > flock_params.max_speed){
                 // set magnitude to max speed 
-                acc = acc_norm * flock_parameters->max_speed;
+                acc = acc_norm * flock_params.max_speed;
             }
 
 
@@ -161,7 +161,7 @@ namespace rtps
             velocities[i] = v + acc;
 
     	    // Step 7. Integrate        
-	        positions[i] = positions[i] + dt*velocities[i];
+	        positions[i] = positions[i] + ps->settings->dt*velocities[i];
             positions[i].w = 1.0f; //just in case
 
     	    // Step 8. Check boundary conditions

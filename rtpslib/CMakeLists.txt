@@ -129,8 +129,9 @@ set (rtpslib_SOURCES
 
 	# FLOCK
     ${rtpslib_SOURCE_DIR}/system/FLOCK.cpp
-    ${rtpslib_SOURCE_DIR}/system/flock/Euler
-    ${rtpslib_SOURCE_DIR}/system/flock/Rules
+    #${rtpslib_SOURCE_DIR}/system/flock/Euler
+    ${rtpslib_SOURCE_DIR}/system/flock/ComputeRules
+    ${rtpslib_SOURCE_DIR}/system/flock/AverageRules
     #${rtpslib_SOURCE_DIR}/system/flock/LeapFrog
     #${rtpslib_SOURCE_DIR}/system/flock/Density
     #${rtpslib_SOURCE_DIR}/system/flock/Pressure

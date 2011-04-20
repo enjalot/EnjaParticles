@@ -1,18 +1,18 @@
-#ifndef RTPS_EULER_H_INCLUDED
-#define RTPS_EULER_H_INCLUDED
+#ifndef RTPS_AVERAGERULES_H_INCLUDED
+#define RTPS_AVERAGERULES_H_INCLUDED
 
 
 #include <CLL.h>
 #include <Buffer.h>
 
 
-namespace rtps
+namespace rtps 
 {
-    class Euler
+    class AverageRules
     {
         public:
-            Euler() { cli = NULL; timer = NULL; };
-            Euler(CL* cli, EB::Timer* timer);
+            AverageRules() { cli = NULL; timer = NULL; };
+            AverageRules(CL* cli, EB::Timer* timer);
             void execute(int num,
                         float dt,
                         Buffer<float4>& pos_u,
@@ -33,7 +33,7 @@ namespace rtps
 
         private:
             CL* cli;
-            Kernel k_euler;
+            Kernel k_averageRules;
             EB::Timer* timer;
     };
 }

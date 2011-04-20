@@ -1,18 +1,18 @@
-#ifndef RTPS_RULES_H_INCLUDED
-#define RTPS_RULES_H_INCLUDED
+#ifndef RTPS_COMPUTERULES_H_INCLUDED
+#define RTPS_COMPUTERULES_H_INCLUDED
 
 
 #include <CLL.h>
 #include <Buffer.h>
 
 
-namespace rtps
+namespace rtps 
 {
-    class Rules
+    class ComputeRules
     {
         public:
-            Rules() { cli = NULL; timer = NULL; };
-            Rules(CL* cli, EB::Timer* timer);
+            ComputeRules() { cli = NULL; timer = NULL; };
+            ComputeRules(CL* cli, EB::Timer* timer);
             void execute(int num,
                     //input
                     //Buffer<float4>& svars, 
@@ -30,7 +30,7 @@ namespace rtps
 
         private:
             CL* cli;
-            Kernel k_rules;
+            Kernel k_computeRules;
             EB::Timer* timer;
     };
 }

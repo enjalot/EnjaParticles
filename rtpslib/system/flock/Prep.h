@@ -6,8 +6,10 @@
 #include <Buffer.h>
 
 
-namespace rtps
+namespace rtps 
 {
+    namespace flock{
+
     class Prep 
     {
         public:
@@ -38,6 +40,8 @@ namespace rtps
             Kernel k_prep;
             EB::Timer* timer;
     };
+   
+    }// namespace flock
 }
 
 #endif

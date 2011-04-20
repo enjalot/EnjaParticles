@@ -29,8 +29,8 @@
 //#include <Collision_triangle.h>
 //#include <LeapFrog.h>
 //#include <Lifetime.h>
-#include <flock/Rules.h>
-#include <flock/Euler.h>
+#include <flock/ComputeRules.h>
+#include <flock/AverageRules.h>
 
 //#include "../util.h"
 #include <Hose.h>
@@ -43,7 +43,10 @@
 // Added by GE, March 16, 2011
 #include "boids.h"
 
-namespace rtps {
+
+namespace rtps{
+using namespace flock;
+
 //----------------------------------------------------------------------
 //keep track of the flock settings
 /*typedef struct FLOCKSettings
@@ -96,8 +99,11 @@ typedef struct FLOCKParameters
 #endif 
 */
 //----------------------------------------------------------------------
+
 class RTPS_EXPORT FLOCK : public System
 {
+
+
 public:
     FLOCK(RTPS *ps, int num);
     ~FLOCK();
@@ -254,9 +260,9 @@ private:
     //void loadNeighbors();
 
     //CPU functions
-    void cpuRules();
-    void cpuEuler();
-	void ge_cpuEuler();
+    void cpuComputeRules();
+    void cpuAverageRules();
+	//void ge_cpuEuler();
 
     void updateCPU();
     void updateGPU();
@@ -281,10 +287,11 @@ private:
     //void collision();
     //CollisionWall collision_wall;
     //CollisionTriangle collision_tri;
-    Rules rules;
+    ComputeRules computeRules;
+    AverageRules averageRules;
     //void integrate();
     //LeapFrog leapfrog;
-    Euler euler;
+    //Euler euler;
     
     void integrate();
 

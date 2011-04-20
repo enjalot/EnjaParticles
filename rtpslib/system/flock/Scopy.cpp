@@ -1,20 +1,20 @@
-#include "SPH.h"
+#include "FLOCK.h"
 
 #include <string>
 
-namespace rtps
+namespace rtps 
 {
 
-    void SPH::loadScopy()
+    void FLOCK::loadScopy()
     {
         printf("create scopy kernel\n");
-        std::string path(SPH_CL_SOURCE_DIR);
+        std::string path(FLOCK_CL_SOURCE_DIR);
         path = path + "/scopy.cl";
         k_scopy = Kernel(ps->cli, path, "scopy");
 
     }
 
-    void SPH::scopy(int n, cl_mem xsrc, cl_mem ydst)
+    void FLOCK::scopy(int n, cl_mem xsrc, cl_mem ydst)
     {
         int args = 0;
         k_scopy.setArg(args++, n);

@@ -12,7 +12,7 @@
 #include <Buffer.h>
 #include <Domain.h>
 
-namespace rtps
+namespace rtps 
 {
 
 #ifdef WIN32

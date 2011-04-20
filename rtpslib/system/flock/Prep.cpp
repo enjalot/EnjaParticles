@@ -2,8 +2,9 @@
 
 #include <string>
 
-namespace rtps
+namespace rtps 
 {
+    namespace flock{
 
     Prep::Prep(CL* cli_, EB::Timer* timer_)
     {
@@ -71,5 +72,7 @@ namespace rtps
         }
 
     }
+
+    } // namespace flock
 
 }
