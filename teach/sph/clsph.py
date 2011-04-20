@@ -347,6 +347,8 @@ class CLSPH:
                                   self.position_s,
                                   self.velocity_u,
                                   self.velocity_s,
+                                  self.color_u,
+                                  self.color_s,
                                   self.veleval_u,
                                   self.force_s,
                                   self.xsph_s,

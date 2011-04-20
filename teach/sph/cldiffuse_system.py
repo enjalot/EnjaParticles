@@ -14,16 +14,28 @@ import cldiffuse
 import clforce
 import clcollision_wall
 import clleapfrog
+import clleapfrog_diffuse
+import clghost_density
+import clghost_force
+
+
 
 class CLDiffuseSystem(CLSystem):
     def __init__(self, sph, dt=.001, is_ghost=False, ghost_system=None):
         CLSystem.__init__(self, sph, dt, is_ghost, ghost_system)
        
+        self.with_ghost_density = True
+        self.with_ghost_force = True
+ 
         self.density = cldensity.CLDensity(self)
         self.diffuse = cldiffuse.CLDiffuse(self)
         self.force = clforce.CLForce(self)
         self.collision_wall = clcollision_wall.CLCollisionWall(self)
-        self.leapfrog = clleapfrog.CLLeapFrog(self)
+        #self.leapfrog = clleapfrog.CLLeapFrog(self)
+        self.leapfrog = clleapfrog_diffuse.CLLeapFrogDiffuse(self)
+        self.ghost_density = clghost_density.CLGhostDensity(self)
+        self.ghost_force = clghost_force.CLGhostForce(self)
+ 
        
     
     def acquire_gl(self):
@@ -88,7 +100,12 @@ class CLDiffuseSystem(CLSystem):
         #if True:
             self.exec_density()
             
-            #self.exec_diffuse()
+            self.exec_diffuse()
+            """
+            color = numpy.ndarray((self.num,4), dtype=numpy.float32)
+            cl.enqueue_read_buffer(self.queue, self.color_s, color)
+            print color.T
+            """
              
             if self.ghost_system is not None and self.with_ghost_density:
                 self.exec_ghost_density()
@@ -296,6 +313,8 @@ class CLDiffuseSystem(CLSystem):
                                   self.position_s,
                                   self.velocity_u,
                                   self.velocity_s,
+                                  self.color_u,
+                                  self.color_s,
                                   self.veleval_u,
                                   self.force_s,
                                   self.xsph_s,

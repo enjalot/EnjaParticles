@@ -33,12 +33,15 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
     // get the particle info (in the current grid) to test against
     float4 position_j = pos[index_j] * sphp->simulation_scale; 
     float4 colj = color[index_j];
+    colj.y = 0.f;
+    float densj = density[index_j] + sphp->EPSILON;
     float4 r = (position_i - position_j); 
     r.w = 0.f; // I stored density in 4th component
     // |r|
     float rlen = length(r);
     //pt->density.y += 1.;
 
+    int iej = index_i != index_j;
     // is this particle within cutoff?
     if (rlen <= sphp->smoothing_distance)
     {
@@ -46,8 +49,12 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
         //float Wij = sphp->wpoly6_coef * Wpoly6(r, sphp->smoothing_distance, sphp);
         //float Wij = Wpoly6(r, sphp->smoothing_distance, sphp);
         float dWijlapl = sphp->wvisc_dd_coef * Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
-        pt->color += sphp->mass * colj * dWijlapl *.001f;//diffusioin coefficient needs to be moved to parameters
+        //float dWijlapl = Wpoly6_lapl(rlen, sphp->smoothing_distance, sphp);
         //pt->density.x += sphp->mass*Wij;
+        //diffusioin coefficient needs to be moved to parameters
+        float diffuse_coeff = .00000001f;
+        pt->color += diffuse_coeff * sphp->mass * colj * dWijlapl / densj; 
+        pt->color = pt->color * (float)iej;
     }
 }
 //Contains Iterate...Cells methods and ZeroPoint
@@ -87,7 +94,8 @@ __kernel void diffuse(
 
     //IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
     IterateParticlesInNearbyCells(ARGV, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
-    color[index] = pt.color;
+    color[index] = pt.color * density[index];
+    color[index].y = 0.f;
     /*
     clf[index].x = pt.density.x * sphp->wpoly6_coef;
     clf[index].y = pt.density.y;

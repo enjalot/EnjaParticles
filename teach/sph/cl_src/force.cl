@@ -66,16 +66,16 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
 
         float dWijdr = Wspiky_dr(rlen, sphp->smoothing_distance, sphp);
 
-        float4 di = density[index_i];  // should not repeat di=
-        float4 dj = density[index_j];
-        float idi = 1.0/di.x;
-        float idj = 1.0/dj.x;
+        float di = density[index_i];  
+        float dj = density[index_j];
+        float idi = 1.0/di;
+        float idj = 1.0/dj;
 
         //form simple SPH in Krog's thesis
 
         float rest_density = 1000.f;
-        float Pi = sphp->K*(di.x - rest_density);
-        float Pj = sphp->K*(dj.x - rest_density);
+        float Pi = sphp->K*(di - rest_density);
+        float Pj = sphp->K*(dj - rest_density);
 
         float kern = -.5 * dWijdr * (Pi + Pj) * sphp->wspiky_d_coef;
         //float kern = dWijdr * (Pi * idi * idi + Pj * idj * idj) * sphp->wspiky_d_coef;
@@ -91,7 +91,7 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
         force += vvisc * (velj-veli) * dWijlapl;
 #endif
 
-        force *=  sphp->mass/(di.x*dj.x);  // original
+        force *=  sphp->mass/(di*dj);  // original
         //force *=  sphp->mass;// /(di.x*dj.x); 
 
 #if 1
@@ -105,7 +105,7 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
         */
         float Wijpol6 = Wpoly6(r, sphp->smoothing_distance, sphp);
         //float Wijpol6 = sphp->wpoly6_coef * Wpoly6(rlen, sphp->smoothing_distance, sphp);
-        float4 xsph = (2.f * sphp->mass * Wijpol6 * (velj-veli)/(di.x+dj.x));
+        float4 xsph = (2.f * sphp->mass * Wijpol6 * (velj-veli)/(di+dj));
         pt->xsph += xsph * (float)iej;
         pt->xsph.w = 0.f;
 #endif

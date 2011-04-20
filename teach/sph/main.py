@@ -17,6 +17,7 @@ import hash
 import forces
 import sph
 import clsph
+from cldiffuse_system import CLDiffuseSystem, timings
 #import clghost
 
 dt = .001
@@ -93,7 +94,8 @@ class window(object):
         
         print "making particle system"
         #self.clsystem = clsph.CLSPH(dt, self.system, ghost_system=None)
-        self.clsystem = clsph.CLSPH(dt, self.system, ghost_system=self.clghost_system)
+        #self.clsystem = clsph.CLSPH(dt, self.system, ghost_system=self.clghost_system)
+        self.clsystem = CLDiffuseSystem(self.system, dt, ghost_system=self.clghost_system)
 
         """
         color = [1., 0., 0., .75]
@@ -242,22 +244,31 @@ class window(object):
         if state == GLUT_DOWN:
             self.mouse_down = True
             self.button = button
+
+            print x, y, self.width, self.height
+            cx = x / (1.0 * self.width)
+            cy = (self.height - y) / (1.0 * self.height)
+            print cx, cy
+
+            import random
+            rr = random.random()
+            rb = random.random()
+            #rr *= .1
+            #rb *= .1
+            color = [rr, 0., rb, .5]
+
+            #color = [.2, 0., 0., .5]
+            self.clsystem.set_color(color)
+            ipos, icolor = sph.addRect(512, Vec([cx - .1, cy -.1, 0.1,0.]), Vec([cx + .1, cy + .1, 0.2,0.]), self.system, color)
+            print "pushing clsystem particles"
+            self.clsystem.push_particles(ipos, None, icolor)
+
+
+ 
         else:
             self.mouse_down = False
         self.mouse_old.x = x
         self.mouse_old.y = y
-
-        print x, y, self.width, self.height
-        cx = x / (1.0 * self.width)
-        cy = (self.height - y) / (1.0 * self.height)
-        print cx, cy
-
-        color = [.2, 0., 0., .5]
-        self.clsystem.set_color(color)
-        ipos, icolor = sph.addRect(512, Vec([cx - .1, cy -.1, 0.1,0.]), Vec([cx + .1, cy + .1, 0.2,0.]), self.system, color)
-        print "pushing clsystem particles"
-        self.clsystem.push_particles(ipos, None, icolor)
-
 
 
     
