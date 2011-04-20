@@ -16,6 +16,7 @@
 
 namespace rtps
 {
+    using namespace sph;
 
 
     SPH::SPH(RTPS *psfr, int n)

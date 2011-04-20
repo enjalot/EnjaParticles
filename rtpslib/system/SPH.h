@@ -49,6 +49,7 @@
 
 namespace rtps
 {
+    using namespace sph;
 
     class RTPS_EXPORT SPH : public System
     {

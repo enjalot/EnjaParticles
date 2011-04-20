@@ -8,6 +8,9 @@
 
 namespace rtps
 {
+namespace sph
+{
+
     class LeapFrog
     {
         public:
@@ -37,6 +40,8 @@ namespace rtps
             Kernel k_leapfrog;
             EB::Timer* timer;
     };
+
+}
 }
 
 #endif
