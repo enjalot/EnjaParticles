@@ -28,8 +28,8 @@ class window(object):
 
     def make_ghost_system(self):
         #########################################################################
-        ghost_max_num = 262144
-        #ghost_max_num = 65536
+        #ghost_max_num = 262144
+        ghost_max_num = 65536
         #ghost_max_num = 16384
         #ghost_max_num = 8192
 
@@ -53,13 +53,13 @@ class window(object):
         color = [.0, .1, .0, 1.]
         #self.clghost_system.set_color(color)
         #ghost_pos, ghost_color = sph.addRect(512, Vec([0.1, 0.1, 0.,0.]), Vec([1.,1.,0.,0.]), self.system, color)
-        #ghost_pos, ghost_color = sph.addRect(ghost_max_num/2, gmin, gmax, self.ghost, color)
-        #self.clghost_system.push_particles(ghost_pos, None, ghost_color)
+        ghost_pos, ghost_color = sph.addRect(ghost_max_num/2, gmin, gmax, self.ghost, color)
+        self.clghost_system.push_particles(ghost_pos, None, ghost_color)
 
         color = [0., 0.0, .1, .1]
         gmin = Vec([.5, 0., 0.,0.])
         gmax = Vec([1.,1.,0.,0.])
-        #ghost_pos, ghost_color = sph.addRect(ghost_max_num/2, gmin, gmax, self.ghost, color)
+        ghost_pos, ghost_color = sph.addRect(ghost_max_num/2, gmin, gmax, self.ghost, color)
 
 
         img = Image.open('test.jpg')
@@ -67,7 +67,7 @@ class window(object):
         #img.show()
         gmin = Vec([0., 0., 0.,0.])
         gmax = Vec([1.,1.,0.,0.])
-        ghost_pos, ghost_color = sph.addPic(img, ghost_max_num, gmin, gmax, self.ghost)
+        #ghost_pos, ghost_color = sph.addPic(img, ghost_max_num, gmin, gmax, self.ghost)
         #print ghost_pos
         self.clghost_system.push_particles(ghost_pos, None, ghost_color)
 
@@ -75,9 +75,9 @@ class window(object):
     def make_sph_system(self):
 
         #ghost_max_num = 8192
-        max_num = 32768*4
+        #max_num = 32768*4
         #max_num = 32768
-        #max_num = 16384
+        max_num = 16384
         #max_num = 8192
         #max_num = 2**12 #4096
         #max_num = 2**10 #1024

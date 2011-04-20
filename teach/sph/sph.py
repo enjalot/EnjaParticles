@@ -53,8 +53,8 @@ class SPH:
 
         #Other parameters
         self.K = 25.    #Gas constant
-        self.boundary_stiffness = 200000.
-        self.boundary_dampening = 256.
+        self.boundary_stiffness = 20000.
+        self.boundary_dampening = 512.
         #friction
         self.friction_coef = 0.
         self.restitution_coef = 0.
@@ -64,7 +64,7 @@ class SPH:
         self.spring = 0.
 
         self.velocity_limit = 100.
-        self.xsph_factor = 1.
+        self.xsph_factor = .5
 
         self.viscosity = .1
         self.gravity = -9.8
@@ -219,9 +219,9 @@ def addPic(image, num, pmin, pmax, sphp):
             intensity = image.getpixel((xi, yi))/255.
             #g = ima.getpixl(xi, yi)/255.
             #b = ima[i*3+2]/255.
-            r = intensity*.1
-            g = intensity*.1
-            b = intensity*.1
+            r = intensity*.3
+            g = intensity*.3
+            b = intensity*.3
             a = intensity
             color += [[r, g, b, a]]
             i+=1;

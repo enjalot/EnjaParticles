@@ -274,7 +274,7 @@ class CLSystem:
         tmp_grid = numpy.ones((self.system.domain.nb_cells+1, ), dtype=numpy.int32)
         tmp_grid += -1
         #grid size
-        self.ci_start= cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp_grid)
+        self.ci_start = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp_grid)
         self.ci_end = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp_grid)
 
         #make struct buffers

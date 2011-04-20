@@ -4,8 +4,8 @@
 
 //These are passed along through cl_neighbors.h
 //only used inside ForNeighbor defined in this file
-#define ARGS __global float4* pos, __global float* density, __global float4* veleval, __global float4* force, __global float4* xsph
-#define ARGV pos, density, veleval, force, xsph
+#define ARGS __global float4* pos, __global float* density, __global float4* veleval, __global float4* force, __global float4* xsph, int psri
+#define ARGV pos, density, veleval, force, xsph, psri
 
 /*----------------------------------------------------------------------*/
 
@@ -14,6 +14,16 @@
 //Contains all of the Smoothing Kernels for SPH
 #include "cl_kernels.h"
 
+
+int pseudo_random(int input)
+{
+    return ((input * 1103515245) + 12345) & 0x7fffffff;
+}
+
+float random(int input)
+{
+    return (float)pseudo_random(input) / (float)0x7fffffff;
+}
 
 //----------------------------------------------------------------------
 inline void ForNeighbor(//__global float4*  vars_sorted,
@@ -64,6 +74,11 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
         int rlencheck = rlen != 0.;
         iej *= rlencheck;
 
+        //trying to get rid of collapsing
+        rlen = max(rlen, .0001);
+        //rlen += rr * .1;
+
+        //rlen += index_j * .000001;
         float dWijdr = Wspiky_dr(rlen, sphp->smoothing_distance, sphp);
 
         float di = density[index_i];  
@@ -112,6 +127,13 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
 
         pt->force += force * (float)iej;
 
+
+        float rr = random(psri + index_i) * 2.f - 1.f;
+        rr *= 100.0f;
+        pt->density.w = rr;
+
+        pt->force += (float4)(rr, rr, rr, 0.);
+
     }
 }
 
@@ -157,6 +179,8 @@ __kernel void force_update(
     //clf[index].x = sphp->num;
     //clf[index].y = gp->nb_cells;
     //clf[index] = density[index];
+    clf[index].x = pt.density.w;
+    clf[index].y = 99.;
     xsph[index] = sphp->wpoly6_coef * pt.xsph;
 }
 

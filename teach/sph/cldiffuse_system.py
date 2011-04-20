@@ -19,7 +19,6 @@ import clghost_density
 import clghost_force
 
 
-
 class CLDiffuseSystem(CLSystem):
     def __init__(self, sph, dt=.001, is_ghost=False, ghost_system=None):
         CLSystem.__init__(self, sph, dt, is_ghost, ghost_system)
@@ -35,6 +34,8 @@ class CLDiffuseSystem(CLSystem):
         self.leapfrog = clleapfrog_diffuse.CLLeapFrogDiffuse(self)
         self.ghost_density = clghost_density.CLGhostDensity(self)
         self.ghost_force = clghost_force.CLGhostForce(self)
+
+        self.random_inc = 0
  
        
     
@@ -134,13 +135,12 @@ class CLDiffuseSystem(CLSystem):
  
             self.exec_force()
 
-            """
-            clf = numpy.ndarray((self.num,4), dtype=numpy.float32)
-            cl.enqueue_read_buffer(self.queue, self.clf_debug, clf)
-            print "clf"
-            print clf[0:100].T
-            """
- 
+            if self.num > 0:
+                clf = numpy.ndarray((self.num,4), dtype=numpy.float32)
+                cl.enqueue_read_buffer(self.queue, self.clf_debug, clf)
+                print "clf"
+                print clf[0:100][0]
+     
 
 
             if self.ghost_system is not None and self.with_ghost_force:
@@ -222,18 +222,21 @@ class CLDiffuseSystem(CLSystem):
 
     @timings("Diffuse")
     def exec_diffuse(self):
-        self.diffuse.execute(   self.num, 
-                                self.position_s,
-                                self.density_s,
-                                self.color_s,
-                                self.ci_start,
-                                self.ci_end,
-                                #self.gp,
-                                self.gp_scaled,
-                                self.systemp,
-                                self.clf_debug,
-                                self.cli_debug
-                            )
+        for i in xrange(10):
+            dt = self.dt * .1
+            self.diffuse.execute(   self.num, 
+                                    self.position_s,
+                                    self.density_s,
+                                    self.color_s,
+                                    numpy.float32(dt),
+                                    self.ci_start,
+                                    self.ci_end,
+                                    #self.gp,
+                                    self.gp_scaled,
+                                    self.systemp,
+                                    self.clf_debug,
+                                    self.cli_debug
+                                )
 
 
 
@@ -258,12 +261,14 @@ class CLDiffuseSystem(CLSystem):
 
     @timings("Force")
     def exec_force(self):
+        self.random_inc += 1
         self.force.execute(   self.num, 
                               self.position_s,
                               self.density_s,
                               self.veleval_s,
                               self.force_s,
                               self.xsph_s,
+                              numpy.int32(self.random_inc),
                               self.ci_start,
                               self.ci_end,
                               self.gp_scaled,

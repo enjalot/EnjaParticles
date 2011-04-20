@@ -4,8 +4,8 @@
 
 //These are passed along through cl_neighbors.h
 //only used inside ForNeighbor defined in this file
-#define ARGS __global float4* pos, __global float* density, __global float4* color
-#define ARGV pos, density, color
+#define ARGS __global float4* pos, __global float* density, __global float4* color, float dt
+#define ARGV pos, density, color, dt
 
 
 /*----------------------------------------------------------------------*/
@@ -52,7 +52,8 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
         //float dWijlapl = Wpoly6_lapl(rlen, sphp->smoothing_distance, sphp);
         //pt->density.x += sphp->mass*Wij;
         //diffusioin coefficient needs to be moved to parameters
-        float diffuse_coeff = .00000001f;
+        //float diffuse_coeff = .00000001f;
+        float diffuse_coeff = .0000001f;
         pt->color += diffuse_coeff * sphp->mass * colj * dWijlapl / densj; 
         pt->color = pt->color * (float)iej;
     }
@@ -94,8 +95,9 @@ __kernel void diffuse(
 
     //IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
     IterateParticlesInNearbyCells(ARGV, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
-    color[index] = pt.color * density[index];
-    color[index].y = 0.f;
+    color[index] += pt.color * density[index] * dt - .0003;
+    color[index].y = .3;
+    //color[index].y = 0.5f;
     /*
     clf[index].x = pt.density.x * sphp->wpoly6_coef;
     clf[index].y = pt.density.y;
