@@ -4,7 +4,8 @@
 
 namespace rtps 
 {
-    namespace flock{
+namespace flock 
+{
 
     Prep::Prep(CL* cli_, EB::Timer* timer_)
     {
@@ -73,6 +74,6 @@ namespace rtps
 
     }
 
-    } // namespace flock
+} // namespace flock
 
 }

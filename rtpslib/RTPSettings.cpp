@@ -1,6 +1,16 @@
 #include "RTPSettings.h"
 namespace rtps
 {
+    unsigned int nlpo2(register unsigned int x)
+    {
+        x |= (x >> 1);
+        x |= (x >> 2);
+        x |= (x >> 4);
+        x |= (x >> 8);
+        x |= (x >> 16);
+        return(x+1);
+    }
+
 
 
     RTPSettings::RTPSettings()
@@ -25,7 +35,7 @@ namespace rtps
     {
         changed = false;
         this->system = system;
-        this->max_particles = max_particles;
+        this->max_particles = nlpo2(max_particles);
         this->dt = dt;
         this->grid = grid;
     }

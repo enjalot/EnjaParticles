@@ -10,9 +10,12 @@ project(rtpslib C CXX)
 SET( CMAKE_MODULE_PATH ${RTPS_CMAKE_MODULE_PATH})
 message("cmake_module_path: ${CMAKE_MODULE_PATH}\n")
 
-#this mostly affects the preprocessing of cl files
-SET(RTPS_DEBUG TRUE)
+#this mostly affects the path to cl files
+SET(RTPS_DEBUG FALSE)
 #SET(RTPS_DEBUG FALSE)
+
+#only works on mac/linux
+SET(PREPROCESS_CL TRUE)
 
 ###### SETTING RELATED TO GPU VS CPU IMPLEMENTATIONS ##########################
 SET(WITH_OPENCL TRUE)
@@ -28,21 +31,23 @@ ENDIF(WITH_OPENCL)
 ##############################################################################
 
 ##### Source Paths ############################################################
-IF(WIN32)
-ADD_DEFINITIONS(-DSIMPLE_CL_SOURCE_DIR="./cl_simple")
-ADD_DEFINITIONS(-DSPH_CL_SOURCE_DIR="./cl_sph")
-ADD_DEFINITIONS(-DFLOCK_CL_SOURCE_DIR="./cl_flock")
-ADD_DEFINITIONS(-DCOMMON_CL_SOURCE_DIR="./cl_common")
-ADD_DEFINITIONS(-DGLSL_BIN_DIR="./shaders")
-ADD_DEFINITIONS(-DGLSL_SOURCE_DIR="./render/")
-ELSE(WIN32)
+IF(RTPS_DEBUG)
 ADD_DEFINITIONS(-DSIMPLE_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_simple")
 ADD_DEFINITIONS(-DSPH_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_sph")
 ADD_DEFINITIONS(-DFLOCK_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_flock")
 ADD_DEFINITIONS(-DCOMMON_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_common")
 ADD_DEFINITIONS(-DGLSL_BIN_DIR="${rtpslib_BINARY_DIR}/shaders")
 ADD_DEFINITIONS(-DGLSL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/render/")
-ENDIF(WIN32)
+ELSE(RTPS_DEBUG)
+ADD_DEFINITIONS(-DSIMPLE_CL_SOURCE_DIR="${RTPS_INSTALL_DIR_REL}/cl_simple")
+ADD_DEFINITIONS(-DSPH_CL_SOURCE_DIR="${RTPS_INSTALL_DIR_REL}/cl_sph")
+ADD_DEFINITIONS(-DFLOCK_CL_SOURCE_DIR="${RTPS_INSTALL_DIR_REL}/cl_flock")
+ADD_DEFINITIONS(-DCOMMON_CL_SOURCE_DIR="${RTPS_INSTALL_DIR_REL}/cl_common")
+ADD_DEFINITIONS(-DGLSL_BIN_DIR="${RTPS_INSTALL_DIR_REL}/shaders")
+ADD_DEFINITIONS(-DGLSL_SOURCE_DIR="${RTPS_INSTALL_DIR_REL}/render/")
+ENDIF(RTPS_DEBUG)
+
+
 
 
 ##############################################################################
@@ -63,14 +68,15 @@ set (rtpslib_INCLUDES
     ${rtpslib_SOURCE_DIR}
     ${rtpslib_SOURCE_DIR}/system
     ${rtpslib_SOURCE_DIR}/system/sph
+    ${rtpslib_SOURCE_DIR}/system/flock
     ${rtpslib_SOURCE_DIR}/system/common
     ${rtpslib_SOURCE_DIR}/render
     ${rtpslib_SOURCE_DIR}/render/util
     ${rtpslib_SOURCE_DIR}/domain
     ${rtpslib_SOURCE_DIR}/opencl
     #${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src
-    
-)
+)    
+
 
 
 #library source files (don't explicitly give file extension, inferred from source type)
@@ -129,6 +135,7 @@ set (rtpslib_SOURCES
 
 	# FLOCK
     ${rtpslib_SOURCE_DIR}/system/FLOCK.cpp
+    ${rtpslib_SOURCE_DIR}/system/FLOCKSettings.cpp
     #${rtpslib_SOURCE_DIR}/system/flock/Euler
     ${rtpslib_SOURCE_DIR}/system/flock/ComputeRules
     ${rtpslib_SOURCE_DIR}/system/flock/AverageRules
@@ -145,6 +152,7 @@ set (rtpslib_SOURCES
     
     # neighbors
     ${rtpslib_SOURCE_DIR}/system/flock/Prep
+    ${rtpslib_SOURCE_DIR}/system/flock/Sort
     #${rtpslib_SOURCE_DIR}/system/flock/Hash
     #${rtpslib_SOURCE_DIR}/system/flock/BitonicSort
     #${rtpslib_SOURCE_DIR}/system/flock/DataStructures
@@ -177,7 +185,8 @@ ENDIF(WITH_OPENCL)
 
 
 INCLUDE_DIRECTORIES(${rtpslib_INCLUDES})
-ADD_LIBRARY(rtps SHARED ${rtpslib_SOURCES})
+#ADD_LIBRARY(rtps SHARED ${rtpslib_SOURCES})
+ADD_LIBRARY(rtps STATIC ${rtpslib_SOURCES})
 
 TARGET_LINK_LIBRARIES (rtps
     #${GLUT_LIBRARIES}
@@ -220,6 +229,8 @@ FILE(COPY ${rtpslib_SOURCE_DIR}/render/shaders/ DESTINATION ${rtpslib_BINARY_DIR
 
 #IF(WIN32)
 install (TARGETS rtps DESTINATION ${rtpsuite_BINARY_DIR}/bin)
+#install (TARGETS rtps DESTINATION ${RTPS_INSTALL_DIR})
 #this should probably be done in a different way
-install (DIRECTORY ${rtpslib_BINARY_DIR}/shaders/ DESTINATION ${rtpsuite_BINARY_DIR}/bin/shaders/)
+INSTALL(CODE "FILE(MAKE_DIRECTORY ${RTPS_INSTALL_DIR}/shaders)")
+install (DIRECTORY ${rtpslib_BINARY_DIR}/shaders/ DESTINATION ${RTPS_INSTALL_DIR}/shaders/)
 #ENDIF(WIN32)

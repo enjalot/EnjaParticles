@@ -12,7 +12,8 @@
 //for random
 #include<time.h>
 
-namespace rtps{
+namespace rtps
+{
 using namespace flock;
 
 //----------------------------------------------------------------------
@@ -20,7 +21,7 @@ FLOCK::FLOCK(RTPS *psfr, int n)
 {
     //store the particle system framework
     ps = psfr;
-
+    settings = ps->settings;
     max_num = n;
     num = 0;
     nb_var = 10;
@@ -123,7 +124,7 @@ FLOCK::~FLOCK()
     int hs = hoses.size();  
     for(int i = 0; i < hs; i++)
     {
-        hose = &hoses[i];
+        hose = hoses[i];
         delete hose;
     }
 
@@ -705,7 +706,7 @@ void FLOCK::addBall(int nn, float4 center, float radius, bool scaled)
 }
 
 //----------------------------------------------------------------------
-void FLOCK::addHose(int total_n, float4 center, float4 velocity, float radius, float4 color)
+int FLOCK::addHose(int total_n, float4 center, float4 velocity, float radius, float4 color)
 {
     printf("wtf for real\n");
     //in sph we just use sph spacing
@@ -714,6 +715,18 @@ void FLOCK::addHose(int total_n, float4 center, float4 velocity, float radius, f
     printf("wtf\n");
     hoses.push_back(hose);
     printf("size of hoses: %d\n", hoses.size());
+    return hoses.size()-1;
+}
+
+//----------------------------------------------------------------------
+void FLOCK::updateHose(int index, float4 center, float4 velocity, float radius, float4 color)
+{
+    //we need to expose the vector of hoses somehow
+    //doesn't seem right to make user manage an index
+    //in sph we just use sph spacing
+    radius *= spacing;
+    hoses[index]->update(center, velocity, radius, spacing, color);
+    //printf("size of hoses: %d\n", hoses.size());
 }
 
 //----------------------------------------------------------------------

@@ -22,6 +22,8 @@
 
 namespace rtps
 {
+    //next largest power of 2. hack required for BitonicSort
+    unsigned int nlpo2(register unsigned int x);
 
     class RTPS_EXPORT RTPSettings 
     {

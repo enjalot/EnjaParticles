@@ -14,6 +14,19 @@ SET( OPENCL_INCLUDE_DIR
 
 message("rtps_cmake_module_path: ${RTPS_CMAKE_MODULE_PATH}\n")
 
+IF(RTPS_INSTALL_DIR)
+    #message("rtps install dir: ${RTPS_INSTALL_DIR}")
+    #message("rtps install dir relative: ${RTPS_INSTALL_DIR_REL}")
+ELSE(RTPS_INSTALL_DIR)
+    set(RTPS_INSTALL_DIR ${rtpsuite_BINARY_DIR}/bin)
+    set(RTPS_INSTALL_DIR_REL .)
+ENDIF(RTPS_INSTALL_DIR)
+
+message("rtps install dir: ${RTPS_INSTALL_DIR}")
+message("rtps install dir relative: ${RTPS_INSTALL_DIR_REL}")
+#INSTALL(CODE "FILE(MAKE_DIRECTORY \${ENV}\${CMAKE_INSTALL_PREFIX}${mydir})")
+INSTALL(CODE "FILE(MAKE_DIRECTORY ${RTPS_INSTALL_DIR})")
+#INSTALL(CODE "message(\"hmm: ${RTPS_INSTALL_DIR}\")")
 
 ADD_SUBDIRECTORY (${rtpsuite_SOURCE_DIR}/rtpslib)
 ADD_SUBDIRECTORY (${rtpsuite_SOURCE_DIR}/test)

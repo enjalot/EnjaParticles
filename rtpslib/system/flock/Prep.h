@@ -8,7 +8,8 @@
 
 namespace rtps 
 {
-    namespace flock{
+namespace flock 
+{
 
     class Prep 
     {
@@ -41,7 +42,7 @@ namespace rtps
             EB::Timer* timer;
     };
    
-    }// namespace flock
+}// namespace flock
 }
 
 #endif

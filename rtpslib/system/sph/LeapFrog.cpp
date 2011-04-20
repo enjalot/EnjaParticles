@@ -2,6 +2,8 @@
 
 namespace rtps
 {
+namespace sph
+{
 
     LeapFrog::LeapFrog(CL* cli_, EB::Timer* timer_)
     {
@@ -54,6 +56,7 @@ namespace rtps
             timer->set(gputime);
 
 
+} //namespace sph
 
 #if 0
 #define DENS 0
@@ -143,4 +146,4 @@ namespace rtps
         //printf("v.z %f p.z %f \n", velocities[0].z, positions[0].z);
     }
 
-}
+} //namespace rtps
