@@ -89,6 +89,7 @@ class window(object):
         print "-------------------------------------------------------------"
         self.domain = hash.Domain(dmin, dmax)
         self.system = sph.SPH(max_num, self.domain)
+        self.system.gravity = 0.0
         
         print "making particle system"
         #self.clsystem = clsph.CLSPH(dt, self.system, ghost_system=None)
