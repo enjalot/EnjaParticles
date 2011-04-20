@@ -25,7 +25,7 @@ namespace rtps
 
     void CL::setIncludeDir(std::string path)
     {
-        this->inc_dir = " -I" + path + " -I" + std::string(COMMON_CL_SOURCE_DIR);
+        this->inc_dir = " -I./" + path + " -I./" + std::string(COMMON_CL_SOURCE_DIR);
     }
 
     //----------------------------------------------------------------------
