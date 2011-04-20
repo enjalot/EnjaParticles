@@ -22,9 +22,11 @@ namespace rtps
                     Buffer<float4>& separation_s,
                     Buffer<float4>& alignment_s, 
                     Buffer<float4>& cohesion_s, 
+                    Buffer<int4>& flockmates_s, 
                     Buffer<unsigned int>& indices,
                     //params
                     Buffer<FLOCKParameters>& flockp,
+                    Buffer<GridParams>& gridp,
                     //debug params
                     Buffer<float4>& clf_debug,
                     Buffer<int4>& cli_debug)
@@ -39,8 +41,10 @@ namespace rtps
         k_averageRules.setArg(iargs++, separation_s.getDevicePtr());
         k_averageRules.setArg(iargs++, alignment_s.getDevicePtr());
         k_averageRules.setArg(iargs++, cohesion_s.getDevicePtr());
+        k_averageRules.setArg(iargs++, flockmates_s.getDevicePtr());
         k_averageRules.setArg(iargs++, indices.getDevicePtr());
         k_averageRules.setArg(iargs++, flockp.getDevicePtr());
+        k_averageRules.setArg(iargs++, gridp.getDevicePtr());
 
 
         int local_size = 128;
@@ -61,8 +65,8 @@ namespace rtps
         float w_aln = flock_params.w_align;  //0.0001f;  //0.0001f;
         float w_coh = flock_params.w_coh;   //0.00003f;  //0.00003f;
 
-        float4 bndMax = flock_params.grid_max;
-        float4 bndMin = flock_params.grid_min;
+        float4 bndMax = grid_params.bnd_max;
+        float4 bndMin = grid_params.bnd_min;
 
 	    float spacing = spacing;
 	    spacing *= 2;

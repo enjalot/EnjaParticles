@@ -30,9 +30,9 @@ typedef struct FLOCKParameters
     float smoothing_distance;
 //    float spacing;
     
-    // grid dimensions for boundary conditions
-    float4 grid_min;
-    float4 grid_max;
+    // USE GRID PARAMS INSTEAD grid dimensions for boundary conditions
+    //float4 grid_min;
+    //float4 grid_max;
     
     // CL parameters 
     int num;

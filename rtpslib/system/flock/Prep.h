@@ -1,5 +1,5 @@
-#ifndef RTPS_PREP_H_INCLUDED
-#define RTPS_PREP_H_INCLUDED
+#ifndef RTPS_FLOCK_PREP_H_INCLUDED
+#define RTPS_FLOCK_PREP_H_INCLUDED
 
 
 #include <CLL.h>

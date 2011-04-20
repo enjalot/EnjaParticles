@@ -286,11 +286,15 @@ void FLOCK::updateGPU()
         computeRules.execute(   num,
             //cl_vars_sorted,
             cl_position_s,
+            cl_velocity_s,
             cl_separation_s,
+            cl_alignment_s,
+            cl_cohesion_s,
+            cl_flockmates_s,
             cl_cell_indices_start,
             cl_cell_indices_end,
-            cl_FLOCKParameters,
             cl_GridParamsScaled,
+            cl_FLOCKParameters,
             clf_debug,
             cli_debug);
        timers["computeRules"]->stop();
@@ -347,8 +351,10 @@ void FLOCK::integrate()
         cl_separation_s,
         cl_alignment_s,
         cl_cohesion_s,
+        cl_flockmates_s,
         cl_sort_indices,
         cl_FLOCKParameters,
+        cl_GridParamsScaled,
         //debug
         clf_debug,
         cli_debug);
@@ -524,6 +530,7 @@ void FLOCK::prepareSorted()
     separation.resize(max_num);
     alignment.resize(max_num);
     cohesion.resize(max_num);
+    flockmates.resize(max_num);
     
     //for reading back different values from the kernel
     std::vector<float4> error_check(max_num);
@@ -534,6 +541,7 @@ void FLOCK::prepareSorted()
     std::fill(separation.begin(), separation.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     std::fill(alignment.begin(), alignment.end(), float4(0.0f, 0.f, 0.f, 0.f));
     std::fill(cohesion.begin(), cohesion.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
+    std::fill(flockmates.begin(), flockmates.end(),int4(0, 0, 0, 0));
     
     std::fill(error_check.begin(), error_check.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
 
@@ -562,6 +570,7 @@ void FLOCK::prepareSorted()
     cl_separation_s = Buffer<float4>(ps->cli, separation);
     cl_alignment_s = Buffer<float4>(ps->cli, alignment);
     cl_cohesion_s = Buffer<float4>(ps->cli, cohesion);
+    cl_flockmates_s= Buffer<int4>(ps->cli, flockmates);
 
     // FLOCK Parameters
     //std::vector<FLOCKParameters> vparams(0);
@@ -711,7 +720,7 @@ int FLOCK::addHose(int total_n, float4 center, float4 velocity, float radius, fl
     printf("wtf for real\n");
     //in sph we just use sph spacing
     radius *= spacing;
-    Hose hose = Hose(ps, total_n, center, velocity, radius, spacing, color);
+    Hose* hose = new Hose(ps, total_n, center, velocity, radius, spacing, color);
     printf("wtf\n");
     hoses.push_back(hose);
     printf("size of hoses: %d\n", hoses.size());
@@ -735,10 +744,10 @@ void FLOCK::sprayHoses()
     std::vector<float4> parts;
     for (int i = 0; i < hoses.size(); i++)
     {
-        parts = hoses[i].spray();
+        parts = hoses[i]->spray();
         
         if (parts.size() > 0)
-            pushParticles(parts, hoses[i].getVelocity(), hoses[i].getColor());
+            pushParticles(parts, hoses[i]->getVelocity(), hoses[i]->getColor());
     }
 }
 
@@ -839,7 +848,7 @@ void FLOCK::updateFLOCKP()
 void FLOCK::render()
 {
     renderer->render_box(grid->getBndMin(), grid->getBndMax());
-    renderer->render_table(grid->getBndMin(), grid->getBndMax());
+    //renderer->render_table(grid->getBndMin(), grid->getBndMax());
     System::render();
 }
 

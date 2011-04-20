@@ -17,13 +17,17 @@ namespace rtps
                     //input
                     //Buffer<float4>& svars, 
                     Buffer<float4>& pos_s, 
+                    Buffer<float4>& vel_s, 
                     Buffer<float4>& sep_s, 
+                    Buffer<float4>& align_s, 
+                    Buffer<float4>& coh_s, 
+                    Buffer<int4>& neigh_s, 
                     //output
                     Buffer<unsigned int>& ci_start,
                     Buffer<unsigned int>& ci_end,
                     //params
-                    Buffer<FLOCKParameters>& flockp,
                     Buffer<GridParams>& gp,
+                    Buffer<FLOCKParameters>& flockp,
                     //debug params
                     Buffer<float4>& clf_debug,
                     Buffer<int4>& cli_debug);

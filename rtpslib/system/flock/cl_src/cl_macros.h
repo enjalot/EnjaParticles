@@ -1,11 +1,12 @@
 // HOW TO INCLUDE WHEN COMPILING? ?
 
-#ifndef _CL_SPH_MACROS_H_
-#define _CL_SPH_MACROS_H_
+#ifndef _CL_FLOCK_MACROS_H_
+#define _CL_FLOCK_MACROS_H_
 
 #include "../cl_common/cl_macros.h"
 
 
+#define FETCH(t, i) t[i]
 
 //All of the below is depracated and not used
 #if 0
@@ -28,7 +29,7 @@
 //#define numParticles num
 #define numParticles sphp->max_num
 
-#define FETCH(t, i) t[i]
+
 #define FETCH_VAR(t, i, ivar) t[i+ivar*numParticles]
 #define FETCH_VEL(t, i) t[i+VEL*numParticles]
 #define FETCH_DENS(t, i) t[i+DENS*numParticles]

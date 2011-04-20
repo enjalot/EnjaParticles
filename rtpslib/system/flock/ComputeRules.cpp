@@ -15,7 +15,7 @@ namespace rtps
         {
             string path(FLOCK_CL_SOURCE_DIR);
             path = path + "/computeRules.cl";
-            k_computeRules= Kernel(cli, path, "computeRules_update");
+            k_computeRules= Kernel(cli, path, "computeRules");
         }
         catch (cl::Error er)
         {
@@ -29,20 +29,28 @@ namespace rtps
     void ComputeRules::execute(int num,
                     //input
                     Buffer<float4>& pos_s,
+                    Buffer<float4>& vel_s,
                     Buffer<float4>& sep_s,
+                    Buffer<float4>& align_s, 
+                    Buffer<float4>& coh_s, 
+                    Buffer<int4>& neigh_s, 
                     //output
                     Buffer<unsigned int>& ci_start,
                     Buffer<unsigned int>& ci_end,
                     //params
-                    Buffer<FLOCKParameters>& flockp,
                     Buffer<GridParams>& gp,
+                    Buffer<FLOCKParameters>& flockp,
                     //debug params
                     Buffer<float4>& clf_debug,
                     Buffer<int4>& cli_debug)
     { 
         int iarg = 0;
         k_computeRules.setArg(iarg++, pos_s.getDevicePtr());
+        k_computeRules.setArg(iarg++, vel_s.getDevicePtr());
         k_computeRules.setArg(iarg++, sep_s.getDevicePtr());
+        k_computeRules.setArg(iarg++, align_s.getDevicePtr());
+        k_computeRules.setArg(iarg++, coh_s.getDevicePtr());
+        k_computeRules.setArg(iarg++, neigh_s.getDevicePtr());
         k_computeRules.setArg(iarg++, ci_start.getDevicePtr());
         k_computeRules.setArg(iarg++, ci_end.getDevicePtr());
         k_computeRules.setArg(iarg++, gp.getDevicePtr());

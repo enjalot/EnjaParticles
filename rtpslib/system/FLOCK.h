@@ -46,7 +46,7 @@
 
 namespace rtps
 {
-using namespace flock;
+//using namespace flock;
 
 //----------------------------------------------------------------------
 //keep track of the flock settings
@@ -164,7 +164,7 @@ private:
     std::vector<float4> deleted_vel;
     
     //keep track of hoses
-    std::vector<Hose> hoses;   
+    std::vector<Hose*> hoses;   
     
     //needs to be called when particles are added
     void calculateFLOCKSettings();
@@ -198,6 +198,7 @@ private:
     std::vector<float4> separation;
     std::vector<float4> alignment;
     std::vector<float4> cohesion;
+    std::vector<int4> flockmates; //x will store the num of flockmates and y will store the num of flockmates within the min dist (for separation rule)
 
     Buffer<float4>      cl_position_u;
     Buffer<float4>      cl_position_s;
@@ -214,6 +215,7 @@ private:
     Buffer<float4>      cl_separation_s;
     Buffer<float4>      cl_alignment_s;
     Buffer<float4>      cl_cohesion_s;
+    Buffer<int4>        cl_flockmates_s;
 
     //Neighbor Search related arrays
 	//Buffer<float4> 	    cl_vars_sorted;
@@ -276,7 +278,7 @@ private:
     void updateFLOCKP();
 
     //Nearest Neighbors search related functions
-    Prep prep;
+    flock::Prep prep;
     void call_prep(int stage);
     Hash hash;
     //DataStructures datastructures;

@@ -1,5 +1,5 @@
-#ifndef __NEIGHBORS_CL_K_
-#define __NEIGHBORS_CL_K_
+#ifndef _CL_FLOCK_NEIGHBORS_H_
+#define _CL_FLOCK_NEIGHBORS_H_
 
 #include "cl_hash.h"
 
@@ -12,25 +12,25 @@ void zeroPoint(Boid* pt)
 	pt->acceleration= (float4)(0.,0.,0.,0.);
 	pt->color= (float4)(0.,0.,0.,0.);
 	pt->num_flockmates = 0;
-    pt->num_nearestFlockamtes = 0;
+    pt->num_nearestFlockmates = 0;
 }
 
 /*--------------------------------------------------------------*/
 /* Iterate over particles found in the nearby cells (including cell of position_i)
 */
 void IterateParticlesInCell(
-    __global float4*    vars_sorted,
-    Boid* pt,
-    uint num,
-    int4 	cellPos,
-    uint 	index_i,
-    float4 	position_i,
-    __global int* 		cell_indexes_start,
-    __global int* 		cell_indexes_end,
-    __constant struct GridParams* gp,
-    //__constant struct FluidParams* fp,
-    __constant struct FLOCKParameters* flockp
-    DEBUG_ARGS
+                            // __global float4*    vars_sorted,
+                            ARGS,
+                            Boid* pt,
+                            uint num,
+                            int4 	cellPos,
+                            uint 	index_i,
+                            float4 	position_i,
+                            __global int* 		cell_indexes_start,
+                            __global int* 		cell_indexes_end,
+                            __constant struct GridParams* gp,
+                            __constant struct FLOCKParameters* flockp
+                            DEBUG_ARGS
 )
 {
 	//clf[index] = position_i; 
@@ -39,6 +39,12 @@ void IterateParticlesInCell(
     // get hash (of position) of current cell
     uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
 
+    //need to check cellHash to make sure its not out of bounds
+    if(cellHash >= gp->nb_cells)
+    {
+        return;
+    }
+    
     /* get start/end positions for this cell/bucket */
     uint startIndex = FETCH(cell_indexes_start,cellHash);
     /* check cell is not empty
@@ -52,7 +58,7 @@ void IterateParticlesInCell(
 #if 1
             //***** UPDATE pt (sum)
             //ForPossibleNeighbor(vars_sorted, pt, num, index_i, index_j, position_i, gp, /*fp,*/ flockp DEBUG_ARGV);
-            ForNeighbor(vars_sorted, pt, index_i, index_j, position_i, gp, /*fp,*/ flockp DEBUG_ARGV);
+            ForNeighbor(/*vars_sorted*/ARGV, pt, index_i, index_j, position_i, gp, /*fp,*/ flockp DEBUG_ARGV);
 #endif
         }
         //clf[index_i] = pt->force;
@@ -63,18 +69,18 @@ void IterateParticlesInCell(
 /* Iterate over particles found in the nearby cells (including cell of position_i) 
  */
 void IterateParticlesInNearbyCells(
-    __global float4* vars_sorted,
-    Boid* pt,
-    uint num,
-    int 	index_i, 
-    float4   position_i, 
-    __global int* 		cell_indices_start,
-    __global int* 		cell_indices_end,
-    __constant struct GridParams* gp,
-    //__constant struct FluidParams* fp,
-    __constant struct FLOCKParameters* flockp
-    DEBUG_ARGS
-    )
+                                //__global float4* vars_sorted,
+                                ARGS,
+                                Boid* pt,
+                                uint num,
+                                int 	index_i, 
+                                float4   position_i, 
+                                __global int* 		cell_indices_start,
+                                __global int* 		cell_indices_end,
+                                __constant struct GridParams* gp,
+                                __constant struct FLOCKParameters* flockp
+                                DEBUG_ARGS
+                                )       
 {
 	//clf[index_i] = position_i; 
     // initialize force on particle (collisions)
@@ -91,7 +97,7 @@ void IterateParticlesInNearbyCells(
                 int4 ipos = (int4) (x,y,z,1);
 
                 // **** SUMMATION/UPDATE
-                IterateParticlesInCell(vars_sorted, pt, num, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp,/* fp,*/ flockp DEBUG_ARGV);
+                IterateParticlesInCell(/*vars_sorted*/ARGV, pt, num, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp,/* fp,*/ flockp DEBUG_ARGV);
 
             //barrier(CLK_LOCAL_MEM_FENCE); // DEBUG
             // SERIOUS PROBLEM: Results different than results with cli = 5 (bottom of this file)

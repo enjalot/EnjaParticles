@@ -1,5 +1,5 @@
-#ifndef _CL_FLOCK_STRUCTURES_H_
-#define _CL_FLOCK_STRUCTURES_H_
+#ifndef _CL_FLOCK_STRUCTS_H_
+#define _CL_FLOCK_STRUCTS_H_
 
 #include "../cl_common/cl_structs.h"
 
@@ -34,14 +34,6 @@ typedef struct FLOCKParameters
     float w_sep;
     float w_align;
     float w_coh;
-
-    // print
-    void print() {
-		printf("----- FLOCKParameters ----\n");
-		printf("min_dist: %f\n", min_dist);
-		printf("search_radius: %f\n", search_radius);
-		printf("max_speed: %f\n", max_speed);
-	}
 } FLOCKParameters;
 
 // Will be local variable

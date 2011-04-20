@@ -1,3 +1,6 @@
+#ifndef _AVERAGERULES_CL_
+#define _AVERAGERULES_CL_
+
 #include "cl_macros.h"
 #include "cl_structs.h"
  
@@ -7,7 +10,7 @@ float magnitude(float4 vec)
 }       
         
 __kernel void averageRules(
-                    float dt
+                    float dt,
                    //__global float4* vars_unsorted, 
                    //__global float4* vars_sorted, 
                    //__global float4* positions,  // for VBO 
@@ -18,9 +21,11 @@ __kernel void averageRules(
                    __global float4* separation_s, 
                    __global float4* alignment_s, 
                    __global float4* cohesion_s, 
+                   __global int4* flockmates_s, 
                    __global int* sort_indices,  
                    //		__global float4* color,
-                   __constant struct FLOCKParameters* flockp)
+                   __constant struct FLOCKParameters* flockp,
+                   __constant struct GridParams* gridp)
                    
 {
 /*__kernel void averageRules(
@@ -52,13 +57,13 @@ __kernel void averageRules(
     float4 acc_coh = (float4)(0.f, 0.f, 0.f, 1.f);
 
     // getting the values of the rules computed in cl_density
-	float4 separation = separation_s[i] 
-	float4 alignment = alignment_s[i] 
+	float4 separation = separation_s[i]; 
+	float4 alignment = alignment_s[i]; 
 	float4 cohesion = cohesion_s[i]; 
 	
     // getting number of flockmates and how many flockmates were within the separation dist
-	float numFlockmates = num_flockmates;
-    float count =  num_nearestFlockmates;
+	float numFlockmates = flockmates_s[i].x;
+    float count =  flockmates_s[i].y;
 
     // weights for the rules
 	float w_sep = flockp->w_sep;    //0.10f;  // 0.3f
@@ -66,8 +71,8 @@ __kernel void averageRules(
 	float w_coh = flockp->w_coh;    //0.0001f;  // 3.f
 	
     // boundary limits, used to computed boundary conditions    
-	float4 bndMax = flockp->grid_max;
-	float4 bndMin = flockp->grid_min;
+	float4 bndMax = gridp->grid_max;
+	float4 bndMin = gridp->grid_min;
 
 
 	// RULE 1. SEPARATION
@@ -153,8 +158,8 @@ __kernel void averageRules(
 
 	// SORT STUFF FOR THE NEIGHBOR SEARCH
     uint originalIndex = sort_indices[i];
-    vel_u(originalIndex) = vi;	
-    pos_u(originalIndex) = (float4)(pi.xyz, 1.f);    // changed the last component to 1 for my boids, im not using density
+    vel_u[originalIndex] = vi;	
+    pos_u[originalIndex] = (float4)(pi.xyz, 1.f);    // changed the last component to 1 for my boids, im not using density
     //positions[originalIndex] = (float4)(pi.xyz, 1.f);       // for plotting
     
     // debugging vectors
@@ -162,3 +167,5 @@ __kernel void averageRules(
     //cli[originalIndex] = iden;
     //clf[originalIndex] = pi; 
 }
+
+#endif
