@@ -93,7 +93,7 @@ class CLSystem:
     @timings("Sort")
     def exec_sort(self):
         #if radix
-        """
+        #"""
         self.radix.sort(    self.system.max_num,
                             self.sort_hashes,
                             self.sort_indices
@@ -103,7 +103,7 @@ class CLSystem:
                             self.sort_hashes,
                             self.sort_indices
                         )
-        #"""
+        """
 
 
 
