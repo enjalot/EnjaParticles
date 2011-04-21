@@ -9,6 +9,7 @@ timings = util.timings
 
 import clhash
 import clradix
+import clbitonic
 import clcellindices
 import clpermute
 
@@ -19,6 +20,7 @@ class CLSystem:
         #our real system has access to the arrays from the ghost system
         self.ghost_system = ghost_system
         if is_ghost or ghost_system is None:
+            print "clinit"
             self.clinit()
         else:
             self.ctx = self.ghost_system.ctx
@@ -47,6 +49,7 @@ class CLSystem:
 
         self.hash = clhash.CLHash(self)
         self.radix = clradix.Radix(self, self.system.max_num, 128, numpy.uint32(0))
+        #self.bitonic = clbitonic.Bitonic(self, self.system.max_num, 128, numpy.uint32(0))
         self.cellindices = clcellindices.CLCellIndices(self)
         self.permute = clpermute.CLPermute(self)
           
@@ -90,10 +93,21 @@ class CLSystem:
 
     @timings("Sort")
     def exec_sort(self):
+        #if radix
+        #"""
         self.radix.sort(    self.system.max_num,
                             self.sort_hashes,
                             self.sort_indices
                         )
+        """
+        self.bitonic.sort(    self.system.max_num,
+                            self.sort_hashes,
+                            self.sort_indices
+                        )
+                        """
+
+
+
 
 
     
@@ -335,6 +349,7 @@ class CLSystem:
         from pyopencl.tools import get_gl_sharing_context_properties
         import sys 
         if sys.platform == "darwin":
+            print "setting ctx"
             self.ctx = cl.Context(properties=get_gl_sharing_context_properties(),
                              devices=[])
         else:
@@ -344,7 +359,7 @@ class CLSystem:
                 
         self.queue = cl.CommandQueue(self.ctx)
 
-    def loadProgram(self, filename):
+    def loadProgram(self, filename, options=""):
         #read in the OpenCL source file as a string
         f = open(filename, 'r')
         fstr = "".join(f.readlines())
@@ -354,7 +369,7 @@ class CLSystem:
         print prg_name
         prg_name = prg_name.split("/")[-1]
         print prg_name
-        optionstr = "-I%s/ -I%s/" % (self.clsph_dir, self.clcommon_dir)
+        optionstr = options + " -I%s/ -I%s/" % (self.clsph_dir, self.clcommon_dir)
         #print optionstr
 
         plat = cl.get_platforms()[0]

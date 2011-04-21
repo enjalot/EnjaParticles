@@ -185,7 +185,8 @@ def addPic(image, num, pmin, pmax, sphp):
     print "**** addPic ****"
     print "rest dist:", sphp.rest_distance
     print "sim_scale:", sphp.sim_scale
-    spacing = .99 * sphp.rest_distance / sphp.sim_scale;
+    #spacing = .99 * sphp.rest_distance / sphp.sim_scale;
+    spacing = 1.09 * sphp.rest_distance / sphp.sim_scale;
     print "spacing", spacing
 
     xmin = pmin.x# * scale
@@ -200,34 +201,55 @@ def addPic(image, num, pmin, pmax, sphp):
 
     ima = np.array(image)
     #ima.shape = (ima.shape[0] * ima.shape[1], )
-    print ima.shape
+    print ima.size
     print dir(image)
-    print image.layers
     print "COLORNP"
     yi = 0
+    print image.size
+    if len(image.size) == 2:
+        ima = ima.T
+    print image.size[0], image.size[1]
+
     for y in np.arange(ymax, ymin, -spacing):
         xi = 0
+        if yi >= image.size[1]:
+            break
         for x in np.arange(xmin, xmax, spacing):
             if i >= num: break
             xi += 1
-            if xi > image.size[0]:
+            if xi >= image.size[0]:
                 break
 
             #print "x, y", x, y
             #rvec += [ Vec([x,y]) * sphp.sim_scale];
             rvec += [[x, y, 0., 1.]]
-            intensity = image.getpixel((xi, yi))/255.
-            #g = ima.getpixl(xi, yi)/255.
-            #b = ima[i*3+2]/255.
-            r = intensity*.3
-            g = intensity*.3
-            b = intensity*.3
-            a = intensity
+            #print len(image.getpixel((xi,yi)))
+            if len(image.size) == 2:
+                #intensity = image.getpixel((xi, yi))/255.
+                #g = ima.getpixl(xi, yi)/255.
+                #b = ima[i*3+2]/255.
+                intensity = ima[xi, yi] / 255. * .3
+                r = intensity
+                g = intensity
+                b = intensity
+                a = intensity
+                #print ima[xi]
+                #print xi, yi
+                color += [[r, g, b, a]]
+            else:
+                color += [ ima[yi, xi] /255. * .4 ]
+            """
+            r = ima[x,y,0]/255. * .1
+            g = ima[x,y,1]/255. * .1
+            b = ima[x,y,2]/255. * .1
+            a = ima[x,y,3]/255. * .1
             color += [[r, g, b, a]]
+            """
             i+=1;
         yi += 1
     print "%d particles added" % i
     rvecnp = np.array(rvec, dtype=np.float32)
+    #print color
     colornp = np.array(color, dtype=np.float32)
 
     return rvecnp, colornp;

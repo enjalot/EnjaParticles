@@ -28,15 +28,15 @@ class window(object):
 
     def make_ghost_system(self):
         #########################################################################
-        #ghost_max_num = 262144
-        ghost_max_num = 65536
+        ghost_max_num = 262144
+        #ghost_max_num = 65536
         #ghost_max_num = 16384
         #ghost_max_num = 8192
 
         print "Ghost System"
         print "-------------------------------------------------------------"
         gdmin = Vec([0.,0.,0.])
-        gdmax = Vec([1.,1.,1.])
+        gdmax = Vec([2.,1.,1.])
         self.ghost_domain = hash.Domain(gdmin, gdmax)
         self.ghost = sph.SPH(ghost_max_num, self.ghost_domain, ghost_factor=.01)
         #self.ghost = sph.SPH(max_num, self.ghost_domain, ghost_factor=.01)
@@ -53,21 +53,24 @@ class window(object):
         color = [.0, .1, .0, 1.]
         #self.clghost_system.set_color(color)
         #ghost_pos, ghost_color = sph.addRect(512, Vec([0.1, 0.1, 0.,0.]), Vec([1.,1.,0.,0.]), self.system, color)
-        ghost_pos, ghost_color = sph.addRect(ghost_max_num/2, gmin, gmax, self.ghost, color)
-        self.clghost_system.push_particles(ghost_pos, None, ghost_color)
+        #ghost_pos, ghost_color = sph.addRect(ghost_max_num/2, gmin, gmax, self.ghost, color)
+        #self.clghost_system.push_particles(ghost_pos, None, ghost_color)
 
         color = [0., 0.0, .1, .1]
         gmin = Vec([.5, 0., 0.,0.])
         gmax = Vec([1.,1.,0.,0.])
-        ghost_pos, ghost_color = sph.addRect(ghost_max_num/2, gmin, gmax, self.ghost, color)
+        #ghost_pos, ghost_color = sph.addRect(ghost_max_num/2, gmin, gmax, self.ghost, color)
 
 
         img = Image.open('test.jpg')
+        #img = Image.open('turtle_nom.png')
+        #img = Image.open('tallydroiddev_logo_trans_small.png')
+        print "image opened"
         #print img.size
         #img.show()
         gmin = Vec([0., 0., 0.,0.])
-        gmax = Vec([1.,1.,0.,0.])
-        #ghost_pos, ghost_color = sph.addPic(img, ghost_max_num, gmin, gmax, self.ghost)
+        gmax = Vec([2.,1.,0.,0.])
+        ghost_pos, ghost_color = sph.addPic(img, ghost_max_num, gmin, gmax, self.ghost)
         #print ghost_pos
         self.clghost_system.push_particles(ghost_pos, None, ghost_color)
 
@@ -201,7 +204,7 @@ class window(object):
         glLoadIdentity()
 
         if self.ortho:
-            glOrtho(-.1, 1.2, -.1, 1.2, -2.5,2.5)
+            glOrtho(-.1, 2.2, -.1, 1.2, -2.5,2.5)
             self.translate = self.init_ortho_trans.copy()
             self.rotate = self.init_ortho_rotate.copy()
         else:

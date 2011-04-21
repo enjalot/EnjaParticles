@@ -135,11 +135,13 @@ class CLDiffuseSystem(CLSystem):
  
             self.exec_force()
 
+            """
             if self.num > 0:
                 clf = numpy.ndarray((self.num,4), dtype=numpy.float32)
                 cl.enqueue_read_buffer(self.queue, self.clf_debug, clf)
                 print "clf"
                 print clf[0:100][0]
+            """
      
 
 
@@ -222,7 +224,7 @@ class CLDiffuseSystem(CLSystem):
 
     @timings("Diffuse")
     def exec_diffuse(self):
-        for i in xrange(10):
+        for i in xrange(3):
             dt = self.dt * .1
             self.diffuse.execute(   self.num, 
                                     self.position_s,

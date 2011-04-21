@@ -71,11 +71,12 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
         }
         */
         //this should 0 force between two particles if they get the same position
-        int rlencheck = rlen != 0.;
-        iej *= rlencheck;
+        //int rlencheck = rlen != 0.f; //bad idea
+        //iej *= rlencheck;
 
         //trying to get rid of collapsing
-        rlen = max(rlen, .0001);
+        rlen = max(rlen, .000001f);
+        //rlen = clamp(rlen, .000001f, sphp->smoothing_distance*3.0f);
         //rlen += rr * .1;
 
         //rlen += index_j * .000001;
@@ -127,13 +128,13 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
 
         pt->force += force * (float)iej;
 
-
+/*
         float rr = random(psri + index_i) * 2.f - 1.f;
         rr *= 100.0f;
         pt->density.w = rr;
 
         pt->force += (float4)(rr, rr, rr, 0.);
-
+*/
     }
 }
 
