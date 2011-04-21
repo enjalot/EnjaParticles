@@ -28,6 +28,9 @@ class window(object):
 
     def make_ghost_system(self):
         #########################################################################
+        self.gdmin = Vec([0., 0., 0.,0.])
+        self.gdmax = Vec([1.,1.,0.,0.])
+ 
         ghost_max_num = 262144
         #ghost_max_num = 65536
         #ghost_max_num = 16384
@@ -35,9 +38,7 @@ class window(object):
 
         print "Ghost System"
         print "-------------------------------------------------------------"
-        gdmin = Vec([0.,0.,0.])
-        gdmax = Vec([2.,1.,1.])
-        self.ghost_domain = hash.Domain(gdmin, gdmax)
+        self.ghost_domain = hash.Domain(self.gdmin, self.gdmax)
         self.ghost = sph.SPH(ghost_max_num, self.ghost_domain, ghost_factor=.01)
         #self.ghost = sph.SPH(max_num, self.ghost_domain, ghost_factor=.01)
 
@@ -68,30 +69,29 @@ class window(object):
         print "image opened"
         #print img.size
         #img.show()
-        gmin = Vec([0., 0., 0.,0.])
-        gmax = Vec([2.,1.,0.,0.])
-        ghost_pos, ghost_color = sph.addPic(img, ghost_max_num, gmin, gmax, self.ghost)
+        ghost_pos, ghost_color = sph.addPic(img, ghost_max_num, self.gdmin, self.gdmax, self.ghost)
         #print ghost_pos
         self.clghost_system.push_particles(ghost_pos, None, ghost_color)
+        self.draw_ghosts = True
 
 
     def make_sph_system(self):
 
         #ghost_max_num = 8192
-        #max_num = 32768*4
+        max_num = 32768*4
         #max_num = 32768
-        max_num = 16384
+        #max_num = 16384
         #max_num = 8192
         #max_num = 2**12 #4096
         #max_num = 2**10 #1024
         #max_num = 2**8 #256
         #max_num = 2**7 #128
 
-        dmin = Vec([0.,0.,0.])
-        dmax = Vec([1.,1.,1.])
+        #dmin = Vec([0.,0.,0.])
+        #dmax = Vec([1.,1.,1.])
         print "SPH System"
         print "-------------------------------------------------------------"
-        self.domain = hash.Domain(dmin, dmax)
+        self.domain = hash.Domain(self.gdmin, self.gdmax)
         self.system = sph.SPH(max_num, self.domain)
         self.system.gravity = 0.0
         
@@ -107,6 +107,7 @@ class window(object):
         print "pushing clsystem particles"
         self.clsystem.push_particles(ipos, None, icolor)
         """
+        self.draw_particles = True
 
 
  
@@ -143,14 +144,15 @@ class window(object):
         glutKeyboardFunc(self.on_key)
         glutMouseFunc(self.on_click)
         glutMotionFunc(self.on_mouse_motion)
+        glutReshapeFunc(self.on_resize)
         
         #this will call draw every 30 ms
         glutTimerFunc(30, self.timer, 30)
 
         glViewport(0, 0, self.width, self.height)
         #setup OpenGL scene
-        self.glprojection()
 
+        #########################################################################
 
         self.make_ghost_system()
         self.make_sph_system()
@@ -162,6 +164,8 @@ class window(object):
         #self.clsystem.update()
 
         #########################################################################
+
+        self.glprojection()
         glutMainLoop()
  
 
@@ -190,8 +194,10 @@ class window(object):
         glTranslatef(self.translate.x, self.translate.y, self.translate.z)
         
         #render the particles
-        self.clghost_system.render()
-        self.clsystem.render()
+        if self.draw_ghosts:
+            self.clghost_system.render()
+        if self.draw_particles:
+            self.clsystem.render()
 
         #draw the x, y and z axis as lines
         glutil.draw_axes()
@@ -204,7 +210,11 @@ class window(object):
         glLoadIdentity()
 
         if self.ortho:
-            glOrtho(-.1, 2.2, -.1, 1.2, -2.5,2.5)
+            xmin = self.gdmin.x
+            xmax = self.gdmax.x
+            ymin = self.gdmin.y
+            ymax = self.gdmax.y
+            glOrtho(xmin, xmax, ymin, ymax, -2.5,2.5)
             self.translate = self.init_ortho_trans.copy()
             self.rotate = self.init_ortho_rotate.copy()
         else:
@@ -241,6 +251,19 @@ class window(object):
         elif args[0] == 'f':
             self.clsystem.with_ghost_force = not self.clsystem.with_ghost_force
             print "force:", self.clsystem.with_ghost_force
+        elif args[0] == 'a':
+            #add particles
+            pass
+        elif args[0] == 'w':
+            #whirlpool
+            pass
+        elif args[0] == 'g':
+            self.draw_ghosts = not self.draw_ghosts
+        elif args[0] == 'p':
+            self.draw_particles = not self.draw_draw_particles
+
+
+
              
 
     def on_click(self, button, state, x, y):
@@ -249,9 +272,9 @@ class window(object):
             self.button = button
 
             print x, y, self.width, self.height
-            cx = x / (1.0 * self.width)
-            cy = (self.height - y) / (1.0 * self.height)
-            print cx, cy
+            cx = self.gdmax.x * x / (1.*self.width)
+            cy = (self.height - y) / (self.gdmax.y * self.height)
+            print "CX, CY", cx, cy
 
             import random
             rr = random.random()
@@ -288,6 +311,11 @@ class window(object):
         self.mouse_old.y = y
     ###END GL CALLBACKS
 
+    def on_resize(self, width, height):
+        self.width = width
+        self.height = height
+        glViewport(0, 0, self.width, self.height)
+        glutPostRedisplay()
 
 
 

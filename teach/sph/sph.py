@@ -63,7 +63,7 @@ class SPH:
         self.attraction = 0.
         self.spring = 0.
 
-        self.velocity_limit = 100.
+        self.velocity_limit = 200.
         self.xsph_factor = .5
 
         self.viscosity = .1
@@ -186,7 +186,7 @@ def addPic(image, num, pmin, pmax, sphp):
     print "rest dist:", sphp.rest_distance
     print "sim_scale:", sphp.sim_scale
     #spacing = .99 * sphp.rest_distance / sphp.sim_scale;
-    spacing = 1.09 * sphp.rest_distance / sphp.sim_scale;
+    spacing = .70 * sphp.rest_distance / sphp.sim_scale;
     print "spacing", spacing
 
     xmin = pmin.x# * scale
@@ -228,11 +228,11 @@ def addPic(image, num, pmin, pmax, sphp):
                 #intensity = image.getpixel((xi, yi))/255.
                 #g = ima.getpixl(xi, yi)/255.
                 #b = ima[i*3+2]/255.
-                intensity = ima[xi, yi] / 255. * .3
+                intensity = ima[xi, yi] / 255. * .1
                 r = intensity
                 g = intensity
                 b = intensity
-                a = intensity
+                a = intensity / .1
                 #print ima[xi]
                 #print xi, yi
                 color += [[r, g, b, a]]

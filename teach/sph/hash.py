@@ -22,20 +22,20 @@ class Domain(object):
     def setup(self, cell_size):
         #we create 2 cells of padding around the bounds
         s2 = 2.*cell_size;
-        self.min = self.bnd_min - Vec([s2, s2, s2])
-        self.max = self.bnd_max + Vec([s2, s2, s2])
+        self.min = self.bnd_min - Vec([s2, s2, s2, 0.])
+        self.max = self.bnd_max + Vec([s2, s2, s2, 0.])
 
         self.size = self.max - self.min
         self.res = Vec([    math.ceil(self.size.x / cell_size),
                             math.ceil(self.size.y / cell_size),
-                            math.ceil(self.size.z / cell_size) ])
+                            math.ceil(self.size.z / cell_size), 0. ])
 
         self.size = self.res * cell_size
         self.max = self.min + self.size
 
         self.delta = Vec([  self.res.x / self.size.x,
                             self.res.y / self.size.y,
-                            self.res.z / self.size.z ])
+                            self.res.z / self.size.z, 0. ])
 
         self.nb_cells = int(self.res.x * self.res.y * self.res.z)
 
@@ -109,8 +109,8 @@ class Domain(object):
 if __name__ == "__main__":
 
     #doing some testing on hashing out of bounds
-    dmin = Vec([0,0,0])
-    dmax = Vec([5,5,5])
+    dmin = Vec([0,0,0,0])
+    dmax = Vec([5,5,5,0])
     domain = Domain(dmin, dmax)
 
 
