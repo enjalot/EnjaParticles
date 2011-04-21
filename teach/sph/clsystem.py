@@ -49,7 +49,7 @@ class CLSystem:
 
         self.hash = clhash.CLHash(self)
         self.radix = clradix.Radix(self, self.system.max_num, 128, numpy.uint32(0))
-        #self.bitonic = clbitonic.Bitonic(self, self.system.max_num, 128, numpy.uint32(0))
+        self.bitonic = clbitonic.Bitonic(self, self.system.max_num, 128, numpy.uint32(0))
         self.cellindices = clcellindices.CLCellIndices(self)
         self.permute = clpermute.CLPermute(self)
           
@@ -62,7 +62,6 @@ class CLSystem:
 
     def update(self):
         self.acquire_gl()
-
 
         numpy.set_printoptions(precision=6, linewidth=1000)
         self.exec_hash()
@@ -94,7 +93,7 @@ class CLSystem:
     @timings("Sort")
     def exec_sort(self):
         #if radix
-        #"""
+        """
         self.radix.sort(    self.system.max_num,
                             self.sort_hashes,
                             self.sort_indices
@@ -104,7 +103,7 @@ class CLSystem:
                             self.sort_hashes,
                             self.sort_indices
                         )
-                        """
+        #"""
 
 
 

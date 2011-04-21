@@ -11,28 +11,17 @@ mf = cl.mem_flags
 
 class Bitonic:
     def __init__(self, clsph, max_elements, cta_size, dtype):
-        self.WARP_SIZE = 32
-        self.SCAN_WG_SIZE = 256
-        self.MIN_LARGE_ARRAY_SIZE = 4 * self.SCAN_WG_SIZE
-        self.bit_step = 4
-        self.cta_size = cta_size
-        self.uintsz = dtype.itemsize
 
         self.clsph = clsph
         self.ctx = self.clsph.ctx
         self.queue = self.clsph.queue
         self.dt = self.clsph.dt
  
-        self.local_size_limit = 512
+        self.local_size_limit = 256
         options = "-D LOCAL_SIZE_LIMIT=%d" % (self.local_size_limit,)
         self.clsph.loadProgram(self.clsph.clcommon_dir + "/bitonic.cl", options)
 
-        if (max_elements % (cta_size * 4)) == 0:
-            num_blocks = max_elements / (cta_size * 4)
-        else:
-            num_blocks = max_elements / (cta_size * 4) + 1
-
-        print "num_blocks: ", num_blocks
+        self.uintsz = dtype.itemsize
         self.d_tempKeys = cl.Buffer(self.ctx, mf.READ_WRITE, size=self.uintsz * max_elements)
         self.d_tempValues = cl.Buffer(self.ctx, mf.READ_WRITE, size=self.uintsz * max_elements)
 
@@ -80,17 +69,23 @@ class Bitonic:
                 stride = size / 2
                 while stride > 0:
                     if stride >= self.local_size_limit:
-                        self.merge_global(batch, array_length, size, stride, dir)
+                        #self.merge_global(batch, array_length, size, stride, dir)
+                        pass
                     else:
-                        self.merge_local(batch, array_length, size, stride, dir)
+                        #self.merge_local(batch, array_length, size, stride, dir)
+                        pass
 
 
                     stride >>= 1
                 size <<= 1
 
+        print "do we get here?"
         self.queue.finish()
-        #cl.enqueue_read_buffer(self.queue, self.keys, keys_np).wait()
-        #cl.enqueue_read_buffer(self.queue, self.values, values_np).wait()
+        #need to copy back
+        print "copying buffers"
+        cl.enqueue_copy_buffer(self.queue, self.keys, self.d_tempKeys).wait()
+        cl.enqueue_copy_buffer(self.queue, self.values, self.d_tempValues).wait()
+        self.queue.finish()
 
 
 
@@ -138,13 +133,17 @@ class Bitonic:
     def local1(self, batch, array_length, dir):
         local_size = (self.local_size_limit / 2,)
         global_size = (batch * array_length / 2,)
+        print global_size, local_size
+        print "local1 args"
         local1_args = (
                         self.d_tempKeys,
                         self.d_tempValues,
                         self.keys,
                         self.values
                     )
-        self.clsph.prgs["bitonic"].bitonicSortLocal1(self.queue, global_size, local_size, *(local1_args)).wait()
+        print "local1 sort"
+        self.clsph.prgs["bitonic"].bitonicSortLocal1(self.clsph.queue, global_size, local_size, *(local1_args)).wait()
+        print "queue finish"
         self.queue.finish()
 
 
