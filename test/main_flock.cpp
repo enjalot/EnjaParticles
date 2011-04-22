@@ -151,24 +151,24 @@ int main(int argc, char** argv)
     float w_coh = .1f;    // 0.00003f
     
     //default constructor
-    rtps::Domain* grid = Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
+    rtps::Domain* grid = new Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
     //rtps::RTPSettings* settings(rtps::RTPSettings::FLOCK, NUM_PARTICLES, DT, grid, maxspeed, mindist, searchradius, color, w_sep, w_align, w_coh);
-    rtps::RTPSettings* settings(rtps::RTPSettings::FLOCK, NUM_PARTICLES, DT, grid);
+    rtps::RTPSettings* settings = new rtps::RTPSettings(rtps::RTPSettings::FLOCK, NUM_PARTICLES, DT, grid);
 
-    settings.setRenderType(RTPSettings::RENDER);
-    //settings.setRenderType(RTPSettings::SPRITE_RENDER);
+    settings->setRenderType(RTPSettings::RENDER);
+    //settings->setRenderType(RTPSettings::SPRITE_RENDER);
     
-    settings.setRadiusScale(1.0);
-    settings.setBlurScale(1.0);
-    settings.setUseGLSL(1);
+    settings->setRadiusScale(1.0);
+    settings->setBlurScale(1.0);
+    settings->setUseGLSL(1);
 
-    settings.SetSetting("render_texture", "boid3.png");
-    settings.SetSetting("render_frag_shader", "boid_tex_frag.glsl");
-    //settings.SetSetting("render_use_alpha", true);
-    settings.SetSetting("render_use_alpha", false);
-    //settings.SetSetting("render_alpha_function", "add");
-    settings.SetSetting("lt_increment", -.00);
-    settings.SetSetting("lt_cl", "lifetime.cl");
+    settings->SetSetting("render_texture", "boid3.png");
+    settings->SetSetting("render_frag_shader", "boid_tex_frag.glsl");
+    //settings->SetSetting("render_use_alpha", true);
+    settings->SetSetting("render_use_alpha", false);
+    //settings->SetSetting("render_alpha_function", "add");
+    settings->SetSetting("lt_increment", -.00);
+    settings->SetSetting("lt_cl", "lifetime.cl");
 
     ps = new rtps::RTPS(settings);
 
@@ -240,7 +240,7 @@ void appKeyboard(unsigned char key, int x, int y)
             nn = 2000;
             min = float4(.1, .1, .1, 1.0f);
             max = float4(3.9, 3.9, 3.9, 1.0f);
-            ps->system->addBox(nn, min, max, false,color);
+            ps->system->addBox(nn, min, max, false);
             return;
         case 'p': //print timers
             ps->system->printTimers();

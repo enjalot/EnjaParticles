@@ -711,7 +711,7 @@ int FLOCK::addHose(int total_n, float4 center, float4 velocity, float radius, fl
     printf("wtf for real\n");
     //in sph we just use sph spacing
     radius *= spacing;
-    Hose hose = Hose(ps, total_n, center, velocity, radius, spacing, color);
+    Hose* hose = new Hose(ps, total_n, center, velocity, radius, spacing, color);
     printf("wtf\n");
     hoses.push_back(hose);
     printf("size of hoses: %d\n", hoses.size());
@@ -735,10 +735,10 @@ void FLOCK::sprayHoses()
     std::vector<float4> parts;
     for (int i = 0; i < hoses.size(); i++)
     {
-        parts = hoses[i].spray();
+        parts = hoses[i]->spray();
         
         if (parts.size() > 0)
-            pushParticles(parts, hoses[i].getVelocity(), hoses[i].getColor());
+            pushParticles(parts, hoses[i]->getVelocity(), hoses[i]->getColor());
     }
 }
 

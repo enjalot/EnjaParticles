@@ -61,8 +61,8 @@ namespace rtps
         float w_aln = flock_params.w_align;  //0.0001f;  //0.0001f;
         float w_coh = flock_params.w_coh;   //0.00003f;  //0.00003f;
 
-        float4 bndMax = flock_params.grid_max;
-        float4 bndMin = flock_params.grid_min;
+        float4 bndMax = grid_params.grid_max;
+        float4 bndMin = grid_params.grid_min;
 
 	    float spacing = spacing;
 	    spacing *= 2;

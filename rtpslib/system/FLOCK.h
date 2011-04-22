@@ -164,7 +164,7 @@ private:
     std::vector<float4> deleted_vel;
     
     //keep track of hoses
-    std::vector<Hose> hoses;   
+    std::vector<Hose*> hoses;   
     
     //needs to be called when particles are added
     void calculateFLOCKSettings();
@@ -276,7 +276,7 @@ private:
     void updateFLOCKP();
 
     //Nearest Neighbors search related functions
-    Prep prep;
+    flock::Prep prep;
     void call_prep(int stage);
     Hash hash;
     //DataStructures datastructures;

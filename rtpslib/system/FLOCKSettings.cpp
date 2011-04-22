@@ -17,8 +17,8 @@ namespace rtps{
         float spacing = rest_distance/ simulation_scale;
     
         // PARAMETERS 
-        float grid_min = grid.getBndMin();
-        float grid_max = grid.getBndMax();
+        //float grid_min = grid.getBndMin();
+        //float grid_max = grid.getBndMax();
 
         // SET THE SETTINGS
         settings->SetSetting("Maximum Number of Particles", max_num);
@@ -37,33 +37,33 @@ namespace rtps{
         settings->SetSetting("Spacing", spacing);
 
         // GRID SIZE
-        settings->SetSetting("Grid Min", grid_min);
-        settings->SetSetting("Grid Max", grid_max);
+        //settings->SetSetting("Grid Min", grid_min);
+        //settings->SetSetting("Grid Max", grid_max);
 
         // BOID SETTINGS
-        if(!settings->Exist("Min Separation Distance"))
+        if(!settings->Exists("Min Separation Distance"))
             settings->SetSetting("Min Separation Distance", 1.f);
-        if(!settings->Exist("Searching Radius"))
+        if(!settings->Exists("Searching Radius"))
             settings->SetSetting("Searching Radius", 1.f);
-        if(!settings->Exist("Max Speed"))
+        if(!settings->Exists("Max Speed"))
             settings->SetSetting("Max Speed", 5.f);
 
         // BOID WEIGHTS
-        if(!settings->Exist("Separation Weight"))
+        if(!settings->Exists("Separation Weight"))
             settings->SetSetting("Separation Weight", 1.50f);
-        if(!settings->Exist("Alignment Weight"))
+        if(!settings->Exists("Alignment Weight"))
             settings->SetSetting("Alignment Weight", 0.75f);
-        if(!settings->Exist("Cohesion Weight"))
+        if(!settings->Exists("Cohesion Weight"))
             settings->SetSetting("Cohesion Weight", 0.5f);
     }
 
     void FLOCK::updateFLOCKP(){
         
         // SET THE SETTINGS
-        flock_params.max_num = settigs->GetSettingAs<int>("Maximum Number of Particles");
+        flock_params.max_num = settings->GetSettingAs<int>("Maximum Number of Particles");
         
         // CL SETTINGS
-        flock_parms.num = settings->GetSettingAs<int>("Number of Particles");
+        flock_params.num = settings->GetSettingAs<int>("Number of Particles");
         flock_params.nb_vars = settings->GetSettingAs<int>("Number of Variables");
         flock_params.choice = settings->GetSettingAs<int>("Choice");
 
@@ -73,11 +73,11 @@ namespace rtps{
         flock_params.simulation_scale = settings->GetSettingAs<float>("Simulation Scale");
 
         // SPACING
-        flock_params.spacing = settings->GetSettingAs<float>("Spacing");
+        spacing = settings->GetSettingAs<float>("Spacing");
 
         // GRID SIZE
-        flock_params.grid_min = settings->GetSettingAs<float>("Grid Min");
-        flock_params.grid_max = settings->GetSettingAs<float>("Grid Max");
+        //flock_params.grid_min = settings->GetSettingAs<float>("Grid Min");
+        //flock_params.grid_max = settings->GetSettingAs<float>("Grid Max");
 
         // BOID SETTINGS
         flock_params.min_dist = 0.5f * flock_params.smoothing_distance * settings->GetSettingAs<float>("Min Separation Distance");
@@ -86,16 +86,15 @@ namespace rtps{
 
         // BOID WEIGHTS
         flock_params.w_sep = settings->GetSettingAs<float>("Separation Weight");
-        flock_params.w_algn = settings->GetSettingAs<float>("Alignment Weight");
+        flock_params.w_align = settings->GetSettingAs<float>("Alignment Weight");
         flock_params.w_coh = settings->GetSettingAs<float>("Cohesion Weight");
     
         // update the OpenCL buffer
         std::vector<FLOCKParameters> vparams(0);
         vparams.push_back(flock_params);
-        cl_FLOCKParams.copyToDevice(vparams);
+        cl_FLOCKParameters.copyToDevice(vparams);
 
         settings->updated();
     }
 
 }
-#endif

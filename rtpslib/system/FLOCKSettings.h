@@ -31,8 +31,8 @@ typedef struct FLOCKParameters
 //    float spacing;
     
     // grid dimensions for boundary conditions
-    float4 grid_min;
-    float4 grid_max;
+    //float4 grid_min;
+    //float4 grid_max;
     
     // CL parameters 
     int num;
