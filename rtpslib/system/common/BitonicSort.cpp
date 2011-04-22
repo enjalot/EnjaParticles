@@ -5,7 +5,7 @@
 
 
 template <class T>
-Bitonic<T>::Bitonic(CL *cli )
+Bitonic<T>::Bitonic(std::string source_dir, CL *cli )
 {
     this->cli = cli;
     /*
@@ -14,18 +14,16 @@ Bitonic<T>::Bitonic(CL *cli )
     this->cl_srckey = srckey;
     this->cl_srcval = srcval;
     */
-    loadKernels();
+    loadKernels(source_dir);
 }
 
 template <class T>
-void Bitonic<T>::loadKernels()
+void Bitonic<T>::loadKernels(std::string source_dir)
 {
-
-    std::string path(COMMON_CL_SOURCE_DIR);
-    path += "/bitonic.cl";
+    source_dir += "/bitonic.cl";
 
     std::string options = "-D LOCAL_SIZE_LIMIT=512";
-    cl::Program prog = cli->loadProgram(path, options);
+    cl::Program prog = cli->loadProgram(source_dir, options);
     k_bitonicSortLocal = Kernel(cli, prog, "bitonicSortLocal");
     //k_bitonicSortLocal = Kernel(cli, path, "bitonicSortLocal");
     k_bitonicSortLocal1 = Kernel(cli, prog, "bitonicSortLocal1");

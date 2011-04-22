@@ -31,25 +31,12 @@ ENDIF(WITH_OPENCL)
 ##############################################################################
 
 ##### Source Paths ############################################################
-IF(RTPS_DEBUG)
-ADD_DEFINITIONS(-DSIMPLE_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_simple")
-ADD_DEFINITIONS(-DSPH_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_sph")
-ADD_DEFINITIONS(-DFLOCK_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_flock")
-ADD_DEFINITIONS(-DCOMMON_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_common")
-ADD_DEFINITIONS(-DGLSL_BIN_DIR="${rtpslib_BINARY_DIR}/shaders")
-ADD_DEFINITIONS(-DGLSL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/render/")
-ELSE(RTPS_DEBUG)
-ADD_DEFINITIONS(-DSIMPLE_CL_SOURCE_DIR="${RTPS_INSTALL_DIR_REL}/cl_simple")
-ADD_DEFINITIONS(-DSPH_CL_SOURCE_DIR="${RTPS_INSTALL_DIR_REL}/cl_sph")
-ADD_DEFINITIONS(-DFLOCK_CL_SOURCE_DIR="${RTPS_INSTALL_DIR_REL}/cl_flock")
-ADD_DEFINITIONS(-DCOMMON_CL_SOURCE_DIR="${RTPS_INSTALL_DIR_REL}/cl_common")
-ADD_DEFINITIONS(-DGLSL_BIN_DIR="${RTPS_INSTALL_DIR_REL}/shaders")
-ADD_DEFINITIONS(-DGLSL_SOURCE_DIR="${RTPS_INSTALL_DIR_REL}/render/")
-ENDIF(RTPS_DEBUG)
-
-
-
-
+ADD_DEFINITIONS(-DSIMPLE_CL_SOURCE_DIR="cl_simple")
+ADD_DEFINITIONS(-DSPH_CL_SOURCE_DIR="cl_sph")
+ADD_DEFINITIONS(-DFLOCK_CL_SOURCE_DIR="cl_flock")
+ADD_DEFINITIONS(-DCOMMON_CL_SOURCE_DIR="cl_common")
+ADD_DEFINITIONS(-DGLSL_BIN_DIR="shaders")
+ADD_DEFINITIONS(-DGLSL_SOURCE_DIR="render")
 ##############################################################################
 
 

@@ -97,6 +97,7 @@ namespace rtps
         Integrator integrator;
         float spacing; //Particle rest distance in world coordinates
 
+        std::string sph_source_dir;
         int nb_var;
 
         std::vector<float4> deleted_pos;

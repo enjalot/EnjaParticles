@@ -21,12 +21,12 @@ class Bitonic
 public:
     Bitonic(){ cli=NULL; };
     //create an OpenCL buffer from existing data
-    Bitonic( CL *cli );
+    Bitonic( std::string source_dir, CL *cli );
 
     int Sort(int batch, int arrayLength, int dir,
                 Buffer<T> *dstkey, Buffer<T> *dstval, 
                 Buffer<T> *srckey, Buffer<T> *srcval);
-    void loadKernels();
+    void loadKernels(std::string source_dir);
 
 
 

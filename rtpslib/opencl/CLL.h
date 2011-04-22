@@ -55,7 +55,7 @@ namespace rtps
         cl::Kernel loadKernel(cl::Program program, std::string kernel_name);
 
         //TODO make more general
-        void setIncludeDir(std::string);
+        void addIncludeDir(std::string);
 
         //TODO add oclErrorString to the class
         //move from util.h/cpp

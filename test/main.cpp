@@ -166,6 +166,15 @@ int main(int argc, char** argv)
     //rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
 	rtps::RTPSettings* settings = new rtps::RTPSettings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
 
+    //should be argv[0]
+#ifdef WIN32
+    settings->SetSetting("rtps_path", ".");
+#else
+    settings->SetSetting("rtps_path", ".");
+    //settings->SetSetting("rtps_path", argv[0]);
+    //printf("arvg[0]: %s\n", argv[0]);
+#endif
+
     settings->setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
     //settings->setRenderType(RTPSettings::RENDER);
     //settings.setRenderType(RTPSettings::SPRITE_RENDER);
