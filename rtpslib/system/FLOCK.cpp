@@ -286,7 +286,11 @@ void FLOCK::updateGPU()
         computeRules.execute(   num,
             //cl_vars_sorted,
             cl_position_s,
+            cl_velocity_s,
             cl_separation_s,
+            cl_alignment_s,
+            cl_cohesion_s,
+            cl_flockmates_s,
             cl_cell_indices_start,
             cl_cell_indices_end,
             cl_FLOCKParameters,
@@ -347,8 +351,10 @@ void FLOCK::integrate()
         cl_separation_s,
         cl_alignment_s,
         cl_cohesion_s,
+        cl_flockmates_s,
         cl_sort_indices,
         cl_FLOCKParameters,
+        cl_GridParams,
         //debug
         clf_debug,
         cli_debug);
@@ -524,6 +530,7 @@ void FLOCK::prepareSorted()
     separation.resize(max_num);
     alignment.resize(max_num);
     cohesion.resize(max_num);
+    flockmates.resize(max_num);
     
     //for reading back different values from the kernel
     std::vector<float4> error_check(max_num);
@@ -534,6 +541,7 @@ void FLOCK::prepareSorted()
     std::fill(separation.begin(), separation.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     std::fill(alignment.begin(), alignment.end(), float4(0.0f, 0.f, 0.f, 0.f));
     std::fill(cohesion.begin(), cohesion.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
+    std::fill(flockmates.begin(), flockmates.end(), int4(0, 0, 0, 0));
     
     std::fill(error_check.begin(), error_check.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
 
@@ -562,6 +570,7 @@ void FLOCK::prepareSorted()
     cl_separation_s = Buffer<float4>(ps->cli, separation);
     cl_alignment_s = Buffer<float4>(ps->cli, alignment);
     cl_cohesion_s = Buffer<float4>(ps->cli, cohesion);
+    cl_flockmates_s = Buffer<int4>(ps->cli, flockmates);
 
     // FLOCK Parameters
     //std::vector<FLOCKParameters> vparams(0);
