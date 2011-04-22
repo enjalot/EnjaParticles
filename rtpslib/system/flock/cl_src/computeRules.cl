@@ -3,15 +3,19 @@
 
 //These are passed along through cl_neighbors.h
 //only used inside ForNeighbor defined in this file
-#define ARGS __global float4* pos, __global float* density
-#define ARGV pos, density
+#define ARGS __global float4* pos,__global float4* vel,  __global float4* separation, __global float4* alignment, __global float4* cohesion, __global int4* flockmates         
+#define ARGV pos, vel, separation, alignment, cohesion, flockmates 
+
+//#define ARGS __global float4* pos, __global float* density
+//#define ARGV pos, density
 
 #include "cl_macros.h"
 #include "cl_structs.h"
 
 //----------------------------------------------------------------------
-inline void ForNeighbor(__global float4*  vars_sorted,
-				Boid *pt,
+inline void ForNeighbor(//__global float4*  vars_sorted,
+				ARGS,
+                Boid *pt,
 				uint index_i,
 				uint index_j,
 				float4 position_i,
@@ -23,7 +27,7 @@ inline void ForNeighbor(__global float4*  vars_sorted,
     int num = flockp->num;
 	
 	// get the particle info (in the current grid) to test against
-	float4 position_j = pos(index_j); 
+	float4 position_j = pos[index_j]; 
 
 	float4 r = (position_i - position_j); 
 	r.w = 0.f; 
@@ -37,16 +41,16 @@ inline void ForNeighbor(__global float4*  vars_sorted,
 
 
     // is this particle within cutoff?
-    if (smooth_dist >= radius && rlen <= radius) 
+    if (flockp->smoothing_distance >= flockp->search_radius && rlen <= flockp->search_radius) 
     {
         
         if(index_i != index_j){
 	
 	        // positions
-	        float4 pj = positions[index_j];
+	        float4 pj = pos[index_j];
 	
             // velocities
-	        float4 vj = velocities[index_j];
+	        float4 vj = vel[index_j];
             
 
 	        // number of flockmates
@@ -57,7 +61,7 @@ inline void ForNeighbor(__global float4*  vars_sorted,
             float4 s = r;       //pi - pj;
 	        float  d = rlen;    //length(s);
 	
-            if(smooth_dist >= min_dist && d <= min_dist){
+            if(flockp->smoothing_distance >= flockp->min_dist && d <= flockp->min_dist){
 		        s.w = 0.0f;
                 s = normalize(s);
                 s /= d;
@@ -68,7 +72,7 @@ inline void ForNeighbor(__global float4*  vars_sorted,
 	        // setup for rule 2. alignment
 	        // surf_tens is the alignment vector
             pt->alignment+= vj;   // desired velocity
-	        pt->alignement.w = 1.f;
+	        pt->alignment.w = 1.f;
 
 	        // setup for rule 3. cohesion
             // xflock is the cohesion vector
@@ -86,7 +90,7 @@ inline void ForNeighbor(__global float4*  vars_sorted,
 //--------------------------------------------------------------
 // compute forces on particles
 
-__kernel void neighbors(
+__kernel void computeRules_update(
 				//__global float4* vars_sorted,
                 ARGS,
         		__global int*    cell_indexes_start,
@@ -106,20 +110,20 @@ __kernel void neighbors(
 	//clf[index] = (float4)(0.,0.,0.,10.);
 	//cli[index] = (int4)(0.,0.,0.,0.);
 
-    //float4 position_i = pos(index);
+    float4 position_i = pos[index];
 
     // Do calculations on particles in neighboring cells
 	Boid pt;
 	zeroPoint(&pt);
 
 	//if (flockp->choice == 0) { // update density
-    	IterateParticlesInNearbyCells(/*vars_sorted*/ ARGS, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ flockp DEBUG_ARGV);
+    	IterateParticlesInNearbyCells(/*vars_sorted*/ ARGV, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ flockp DEBUG_ARGV);
 		
         separation[index] = pt.separation;
         alignment[index] = pt.alignment;
         cohesion[index] = pt.cohesion;
-        num_flockmates = pt.num_flockmates;
-        num_nearestFlockmates = pt.num_nearestFlockmates;
+        flockmates[index].x = pt.num_flockmates;
+        flockmates[index].y = pt.num_nearestFlockmates;
 
         //den(index) = pt.density;
 		//xflock(index) = pt.xflock;

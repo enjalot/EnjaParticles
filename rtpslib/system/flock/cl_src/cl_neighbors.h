@@ -12,14 +12,15 @@ void zeroPoint(Boid* pt)
 	pt->acceleration= (float4)(0.,0.,0.,0.);
 	pt->color= (float4)(0.,0.,0.,0.);
 	pt->num_flockmates = 0;
-    pt->num_nearestFlockamtes = 0;
+    pt->num_nearestFlockmates = 0;
 }
 
 /*--------------------------------------------------------------*/
 /* Iterate over particles found in the nearby cells (including cell of position_i)
 */
 void IterateParticlesInCell(
-    __global float4*    vars_sorted,
+    //__global float4*    vars_sorted,
+    ARGS,
     Boid* pt,
     uint num,
     int4 	cellPos,
@@ -52,7 +53,7 @@ void IterateParticlesInCell(
 #if 1
             //***** UPDATE pt (sum)
             //ForPossibleNeighbor(vars_sorted, pt, num, index_i, index_j, position_i, gp, /*fp,*/ flockp DEBUG_ARGV);
-            ForNeighbor(vars_sorted, pt, index_i, index_j, position_i, gp, /*fp,*/ flockp DEBUG_ARGV);
+            ForNeighbor(/*vars_sorted*/ ARGV, pt, index_i, index_j, position_i, gp, /*fp,*/ flockp DEBUG_ARGV);
 #endif
         }
         //clf[index_i] = pt->force;
@@ -63,7 +64,8 @@ void IterateParticlesInCell(
 /* Iterate over particles found in the nearby cells (including cell of position_i) 
  */
 void IterateParticlesInNearbyCells(
-    __global float4* vars_sorted,
+    //__global float4* vars_sorted,
+    ARGS, 
     Boid* pt,
     uint num,
     int 	index_i, 
@@ -91,7 +93,7 @@ void IterateParticlesInNearbyCells(
                 int4 ipos = (int4) (x,y,z,1);
 
                 // **** SUMMATION/UPDATE
-                IterateParticlesInCell(vars_sorted, pt, num, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp,/* fp,*/ flockp DEBUG_ARGV);
+                IterateParticlesInCell(/*vars_sorted*/ ARGV, pt, num, ipos, index_i, position_i, cell_indices_start, cell_indices_end, gp,/* fp,*/ flockp DEBUG_ARGV);
 
             //barrier(CLK_LOCAL_MEM_FENCE); // DEBUG
             // SERIOUS PROBLEM: Results different than results with cli = 5 (bottom of this file)

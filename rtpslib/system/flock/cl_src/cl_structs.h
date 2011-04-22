@@ -34,14 +34,6 @@ typedef struct FLOCKParameters
     float w_sep;
     float w_align;
     float w_coh;
-
-    // print
-    void print() {
-		printf("----- FLOCKParameters ----\n");
-		printf("min_dist: %f\n", min_dist);
-		printf("search_radius: %f\n", search_radius);
-		printf("max_speed: %f\n", max_speed);
-	}
 } FLOCKParameters;
 
 // Will be local variable

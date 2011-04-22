@@ -6,6 +6,7 @@
 #include "../cl_common/cl_macros.h"
 
 
+#define FETCH(t, i) t[i]
 
 //All of the below is depracated and not used
 #if 0
