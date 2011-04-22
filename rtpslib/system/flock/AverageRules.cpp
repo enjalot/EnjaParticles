@@ -41,8 +41,10 @@ namespace rtps
         k_averageRules.setArg(iargs++, separation_s.getDevicePtr());
         k_averageRules.setArg(iargs++, alignment_s.getDevicePtr());
         k_averageRules.setArg(iargs++, cohesion_s.getDevicePtr());
+        k_averageRules.setArg(iargs++, flockmates_s.getDevicePtr());
         k_averageRules.setArg(iargs++, indices.getDevicePtr());
         k_averageRules.setArg(iargs++, flockp.getDevicePtr());
+        k_averageRules.setArg(iargs++, gridp.getDevicePtr());
 
 
         int local_size = 128;
