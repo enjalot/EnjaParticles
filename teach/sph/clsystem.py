@@ -257,54 +257,54 @@ class CLSystem:
         self.color_u = cl.GLBuffer(self.ctx, mf.READ_WRITE, int(self.col_vbo.vbo_id))
 
         #pure OpenCL arrays
-        self.velocity_u = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp)
-        self.velocity_s = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp)
-        self.veleval_u = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp)
-        self.veleval_s = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp)
+        self.velocity_u = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR, hostbuf=tmp)
+        self.velocity_s = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR, hostbuf=tmp)
+        self.veleval_u = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR, hostbuf=tmp)
+        self.veleval_s = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR, hostbuf=tmp)
 
-        self.position_s = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp)
-        self.color_s = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp)
+        self.position_s = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR, hostbuf=tmp)
+        self.color_s = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR, hostbuf=tmp)
 
         tmp_dens = numpy.zeros((self.system.max_num,), dtype=numpy.float32)
-        self.density_s = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp_dens)
-        self.force_s = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp)
-        self.xsph_s = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp)
+        self.density_s = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR, hostbuf=tmp_dens)
+        self.force_s = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR, hostbuf=tmp)
+        self.xsph_s = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR, hostbuf=tmp)
 
         if not self.is_ghost or self.ghost_system is not None:
-            self.ghost_density_s = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp_dens)
+            self.ghost_density_s = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR, hostbuf=tmp_dens)
 
         import sys
         tmp_uint = numpy.ndarray((self.system.max_num,), dtype=numpy.uint32)
         tmp_uint[:] = sys.maxint
         #tmp_uint = tmp_uint * sys.maxint
 
-        self.sort_indices = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp_uint)
-        self.sort_hashes = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp_uint)
+        self.sort_indices = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR, hostbuf=tmp_uint)
+        self.sort_hashes = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR, hostbuf=tmp_uint)
 
         tmp_grid = numpy.ones((self.system.domain.nb_cells+1, ), dtype=numpy.int32)
         tmp_grid += -1
         #grid size
-        self.ci_start = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp_grid)
-        self.ci_end = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp_grid)
+        self.ci_start = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR, hostbuf=tmp_grid)
+        self.ci_end = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR, hostbuf=tmp_grid)
 
         #make struct buffers
 
         self.systemp_struct = self.system.make_struct(self.num)
-        self.systemp = cl.Buffer(self.ctx, mf.READ_ONLY, len(self.systemp_struct))
+        self.systemp = cl.Buffer(self.ctx, mf.READ_WRITE, len(self.systemp_struct))
         cl.enqueue_write_buffer(self.queue, self.systemp, self.systemp_struct).wait()
 
         self.gp_struct = self.system.domain.make_struct(1.0)
-        self.gp = cl.Buffer(self.ctx, mf.READ_ONLY, len(self.gp_struct))
+        self.gp = cl.Buffer(self.ctx, mf.READ_WRITE, len(self.gp_struct))
         cl.enqueue_write_buffer(self.queue, self.gp, self.gp_struct)
 
         self.gp_struct_scaled = self.system.domain.make_struct(self.system.sim_scale)
-        self.gp_scaled = cl.Buffer(self.ctx, mf.READ_ONLY, len(self.gp_struct_scaled))
+        self.gp_scaled = cl.Buffer(self.ctx, mf.READ_WRITE, len(self.gp_struct_scaled))
         cl.enqueue_write_buffer(self.queue, self.gp_scaled, self.gp_struct_scaled)
 
         #debug arrays
         tmp_int = numpy.zeros((self.system.max_num, 4), dtype=numpy.int32)
-        self.clf_debug = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp)
-        self.cli_debug = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp_int)
+        self.clf_debug = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR, hostbuf=tmp)
+        self.cli_debug = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR, hostbuf=tmp_int)
 
         self.queue.finish()
 
