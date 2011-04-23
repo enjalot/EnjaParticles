@@ -105,7 +105,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/sph/LeapFrog
     ${rtpslib_SOURCE_DIR}/system/sph/Lifetime
     
-    ${rtpslib_SOURCE_DIR}/system/sph/Prep
+    #${rtpslib_SOURCE_DIR}/system/sph/Prep
     ${rtpslib_SOURCE_DIR}/system/sph/Sort
     ${rtpslib_SOURCE_DIR}/system/sph/Density
     ${rtpslib_SOURCE_DIR}/system/sph/Force
@@ -159,8 +159,8 @@ SET(rtpslib_SOURCES ${rtpslib_SOURCES}
     #${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src/oclBitonicSort_launcher
     #${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src/BitonicSort #template class
     #these should probably be in the OpenCL classes
-    ${rtpslib_SOURCE_DIR}/system/sph/Scopy
-    ${rtpslib_SOURCE_DIR}/system/flock/Scopy
+    #${rtpslib_SOURCE_DIR}/system/sph/Scopy
+    #${rtpslib_SOURCE_DIR}/system/flock/Scopy
     #${rtpslib_SOURCE_DIR}/system/sph/SetInt
     )
 ENDIF(WITH_OPENCL)

@@ -21,12 +21,12 @@ namespace rtps
         printf("path: %s\n", path.c_str());
         settings->printSettings();
         loadTexture(path, "texture");
-        string vert(GLSL_BIN_DIR);
-        string frag(GLSL_BIN_DIR);
+        //string vert(GLSL_BIN_DIR);
+        //string frag(GLSL_BIN_DIR);
         //vert+="/sphere_vert.glsl";
         //frag+="/sphere_tex_frag.glsl";
-        vert+="/sprite_vert.glsl";
-        frag+="/" + settings->GetSettingAs<string>("render_frag_shader");
+        string vert = shader_source_dir + "/sprite_vert.glsl";
+        string frag = shader_source_dir + "/" + settings->GetSettingAs<string>("render_frag_shader");
 
         glsl_program[SPHERE_SHADER] = compileShaders(vert.c_str(),frag.c_str());
     }

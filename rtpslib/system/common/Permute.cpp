@@ -5,12 +5,11 @@
 namespace rtps
 {
 
-    Permute::Permute(CL* cli_, EB::Timer* timer_)
+    Permute::Permute(std::string path, CL* cli_, EB::Timer* timer_)
     {
         cli = cli_;
         timer = timer_;
         printf("create permute kernel\n");
-        std::string path(COMMON_CL_SOURCE_DIR);
         path = path + "/permute.cl";
         k_permute = Kernel(cli, path, "permute");
         

@@ -157,9 +157,6 @@ int main(int argc, char** argv)
     printf("GLEW supported?: %d\n", bGLEW);
 
 
-    printf("before we call enjas functions\n");
-
-
     //default constructor
     //rtps::RTPSettings settings;
     //rtps::Domain grid = Domain(float4(-5,-.3,0,0), float4(2, 2, 12, 0));
@@ -171,13 +168,13 @@ int main(int argc, char** argv)
 #ifdef WIN32
     settings->SetSetting("rtps_path", ".");
 #else
-    settings->SetSetting("rtps_path", ".");
+    settings->SetSetting("rtps_path", "./bin");
     //settings->SetSetting("rtps_path", argv[0]);
     //printf("arvg[0]: %s\n", argv[0]);
 #endif
 
-    settings->setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
-    //settings->setRenderType(RTPSettings::RENDER);
+    //settings->setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
+    settings->setRenderType(RTPSettings::RENDER);
     //settings.setRenderType(RTPSettings::SPRITE_RENDER);
     settings->setRadiusScale(1.0);
     settings->setBlurScale(1.0);
@@ -191,15 +188,8 @@ int main(int argc, char** argv)
     settings->SetSetting("lt_increment", -.00);
     settings->SetSetting("lt_cl", "lifetime.cl");
 
-
-
-
-printf("creating new system\n");
     ps = new rtps::RTPS(settings);
     //ps = new rtps::RTPS();
-printf("system created\n");
-printf("system created\n");
-printf("system created\n");
 
     ps->settings->SetSetting("Gravity", -9.8f); // -9.8 m/sec^2
     ps->settings->SetSetting("Gas Constant", 15.0f);
@@ -211,7 +201,6 @@ printf("system created\n");
     ps->settings->SetSetting("Boundary Stiffness", 20000.0f);
     ps->settings->SetSetting("Boundary Dampening", 256.0f);
 
-printf("initializing gl\n");
 
     //initialize the OpenGL scene for rendering
     init_gl();

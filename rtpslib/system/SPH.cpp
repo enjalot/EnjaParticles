@@ -28,9 +28,8 @@ namespace rtps
         num = 0;
         nb_var = 10;
 
-
         resource_path = settings->GetSettingAs<string>("rtps_path");
-        printf("resource path: %s\n", resource_path);
+        printf("resource path: %s\n", resource_path.c_str());
 
         //seed random
         srand ( time(NULL) );
@@ -77,14 +76,13 @@ namespace rtps
         sph_source_dir = resource_path + "/" + std::string(SPH_CL_SOURCE_DIR);
         common_source_dir = resource_path + "/" + std::string(COMMON_CL_SOURCE_DIR);
 
-        std::string cl_includes(SPH_CL_SOURCE_DIR);
         ps->cli->addIncludeDir(sph_source_dir);
         ps->cli->addIncludeDir(common_source_dir);
 
-        loadScopy();
+        //loadScopy();
 
         //loadPrep();
-        prep = Prep(common_source_dir, ps->cli, timers["prep_gpu"]);
+        //prep = Prep(common_source_dir, ps->cli, timers["prep_gpu"]);
         //loadHash();
         hash = Hash(common_source_dir, ps->cli, timers["hash_gpu"]);
         bitonic = Bitonic<unsigned int>(common_source_dir, ps->cli );
@@ -531,7 +529,7 @@ namespace rtps
         timers["leapfrog_gpu"] = new EB::Timer("LeapFrog Integration GPU kernel execution", time_offset);
         timers["euler_gpu"] = new EB::Timer("Euler Integration GPU kernel execution", time_offset);
         timers["lifetime_gpu"] = new EB::Timer("Lifetime GPU kernel execution", time_offset);
-        timers["prep_gpu"] = new EB::Timer("Prep GPU kernel execution", time_offset);
+        //timers["prep_gpu"] = new EB::Timer("Prep GPU kernel execution", time_offset);
 		return 0;
     }
 

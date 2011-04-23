@@ -5,12 +5,11 @@
 namespace rtps
 {
 
-    CellIndices::CellIndices(CL* cli_, EB::Timer* timer_)
+    CellIndices::CellIndices(std::string path, CL* cli_, EB::Timer* timer_)
     {
         cli = cli_;
         timer = timer_;
         printf("create cellindices kernel\n");
-        std::string path(COMMON_CL_SOURCE_DIR);
         path = path + "/cellindices.cl";
         k_cellindices = Kernel(cli, path, "cellindices");
         

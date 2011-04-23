@@ -2,7 +2,7 @@
 
 namespace rtps {
 
-    CollisionTriangle::CollisionTriangle(std::string source_dir, CL* cli_, EB::Timer* timer_, int max_triangles)
+    CollisionTriangle::CollisionTriangle(std::string path, CL* cli_, EB::Timer* timer_, int max_triangles)
     {
         cli = cli_;
         timer = timer_;
@@ -12,8 +12,8 @@ namespace rtps {
 
         triangles_loaded = false;
         printf("create collision wall kernel\n");
-        source_dir += "/collision_tri.cl";
-        k_collision_tri = Kernel(cli, source_dir, "collision_triangle");
+        path += "/collision_tri.cl";
+        k_collision_tri = Kernel(cli, path, "collision_triangle");
     } 
 
     //TODO: avoid need for this function?

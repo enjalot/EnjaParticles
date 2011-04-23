@@ -13,7 +13,7 @@ namespace rtps
     {
         public:
             Permute() { cli = NULL; timer = NULL; };
-            Permute(CL* cli, EB::Timer* timer);
+            Permute(std::string path, CL* cli, EB::Timer* timer);
             void execute(int num,
                     //input
                     Buffer<float4>& pos_u,

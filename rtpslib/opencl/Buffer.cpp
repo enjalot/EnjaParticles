@@ -142,13 +142,16 @@ void Buffer<T>::copyToHost(std::vector<T> &data, int start)
 }
 
 template <class T>
-void Buffer<T>::copyFromBuffer(Buffer<T> dst, size_t start_src, size_t start_dst, size_t size)
+void Buffer<T>::copyFromBuffer(Buffer<T> src, size_t start_src, size_t start_dst, size_t size)
 {
+    /* 
+     * copies contents from the source buffer to this buffer
+     */
 
     cl::Event event;
     //TODO clean up this memory/buffer issue (nasty pointer casting)
-    cl::Buffer* src_buffer = (cl::Buffer*)&cl_buffer[0];
-    cl::Buffer* dst_buffer = (cl::Buffer*)&dst.getBuffer(0);
+    cl::Buffer* dst_buffer = (cl::Buffer*)&cl_buffer[0];
+    cl::Buffer* src_buffer = (cl::Buffer*)&src.getBuffer(0);
     cli->err = cli->queue.enqueueCopyBuffer(*src_buffer, *dst_buffer, start_src*sizeof(T), start_dst*sizeof(T), size*sizeof(T), NULL, &event);
     cli->queue.finish();
 

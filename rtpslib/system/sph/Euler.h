@@ -12,7 +12,7 @@ namespace rtps
     {
         public:
             Euler() { cli = NULL; timer = NULL; };
-            Euler(CL* cli, EB::Timer* timer);
+            Euler(std::string path, CL* cli, EB::Timer* timer);
             void execute(int num,
                         float dt,
                         Buffer<float4>& pos_u,

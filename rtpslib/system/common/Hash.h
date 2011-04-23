@@ -13,7 +13,7 @@ namespace rtps
     {
         public:
             Hash() { cli = NULL; timer = NULL; };
-            Hash(CL* cli, EB::Timer* timer);
+            Hash(std::string path, CL* cli, EB::Timer* timer);
             void execute(int num,
                         //input
                         //Buffer<float4>& uvars, 

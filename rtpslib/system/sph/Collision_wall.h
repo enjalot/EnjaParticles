@@ -12,7 +12,7 @@ namespace rtps
     {
         public:
             CollisionWall() { cli = NULL; timer = NULL; };
-            CollisionWall(CL* cli, EB::Timer* timer);
+            CollisionWall(std::string path, CL* cli, EB::Timer* timer);
             void execute(int num,
                         Buffer<float4>& pos_s, 
                         Buffer<float4>& vel_s, 

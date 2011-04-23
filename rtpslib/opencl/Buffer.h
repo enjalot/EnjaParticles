@@ -44,7 +44,7 @@ namespace rtps
         ~Buffer();
 
         cl_mem getDevicePtr() { return cl_buffer[0](); }
-        cl::Memory getBuffer(int index) {return cl_buffer[index];};
+        cl::Memory& getBuffer(int index) {return cl_buffer[index];};
        
         //need to acquire and release arrays from OpenGL context if we have a VBO
         void acquire();

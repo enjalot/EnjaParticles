@@ -22,6 +22,10 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     num = 0;
     nb_var = 10;
 
+    resource_path = ps->settings->GetSettingAs<std::string>("rtps_path");
+    printf("resource path: %s\n", resource_path.c_str());
+
+
     positions.resize(max_num);
     colors.resize(max_num);
     forces.resize(max_num);
@@ -49,8 +53,6 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     //setup the sorted and unsorted arrays
     prepareSorted();
 
-    std::string cl_includes(FLOCK_CL_SOURCE_DIR);
-    ps->cli->setIncludeDir(cl_includes);
 
 #ifdef CPU
     printf("RUNNING ON THE CPU\n");
@@ -58,9 +60,22 @@ FLOCK::FLOCK(RTPS *psfr, int n)
 #ifdef GPU
     printf("RUNNING ON THE GPU\n");
 
+    //should be more cross platform
+    flock_source_dir = resource_path + "/" + std::string(FLOCK_CL_SOURCE_DIR);
+    common_source_dir = resource_path + "/" + std::string(COMMON_CL_SOURCE_DIR);
+
+    ps->cli->addIncludeDir(flock_source_dir);
+    ps->cli->addIncludeDir(common_source_dir);
+
+
+    //std::string cl_includes(FLOCK_CL_SOURCE_DIR);
+    //ps->cli->addIncludeDir(cl_includes);
+
+
+
     loadEuler();
 
-    loadScopy();
+    //loadScopy();
 
     loadPrep();
     loadHash();

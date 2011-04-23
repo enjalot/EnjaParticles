@@ -25,6 +25,10 @@ namespace rtps
     {
         this->settings = _settings;
      
+        shader_source_dir = settings->GetSettingAs<string>("rtps_path");
+        shader_source_dir += "/shaders";
+        printf("SHADER SOURCE DIR\n", shader_source_dir.c_str());
+
         rtype = POINTS;
         pos_vbo = pos;
         col_vbo = col;

@@ -142,6 +142,8 @@ namespace rtps
         // property for a reference
         RTPSettings* settings; 
 
+        std::string shader_source_dir;
+
 
         int generateCheckerBoardTex(GLubyte* color1,GLubyte* color2,int num_squares, int length);
         int generateCircleTexture(GLubyte r, GLubyte g, GLubyte b, GLubyte alpha, int diameter);
