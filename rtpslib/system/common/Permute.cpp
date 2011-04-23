@@ -47,13 +47,8 @@ namespace rtps
         k_permute.setArg(iarg++, color_u.getDevicePtr());
         k_permute.setArg(iarg++, color_s.getDevicePtr());
         k_permute.setArg(iarg++, indices.getDevicePtr());
-        //k_permute.setArg(iarg++, sphp.getDevicePtr());
-        k_permute.setArg(iarg++, gp.getDevicePtr());
 
         int workSize = 64;
-        int nb_bytes = (workSize+1)*sizeof(int);
-        k_permute.setArgShared(iarg++, nb_bytes);
-
         
         //printf("about to data structures\n");
         try

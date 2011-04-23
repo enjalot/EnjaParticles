@@ -96,8 +96,8 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 262144
 //#define NUM_PARTICLES 131072
 //#define NUM_PARTICLES 65536
-#define NUM_PARTICLES 32768
-//#define NUM_PARTICLES 16384
+//#define NUM_PARTICLES 32768
+#define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 10000
 //#define NUM_PARTICLES 8192
 //#define NUM_PARTICLES 4096
@@ -106,7 +106,8 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 256
 #define DT .001f
 
-float4 color = float4(0.1, 0.1, 0.73, .05);
+//float4 color = float4(0.1, 0.1, 0.73, .05);
+float4 color = float4(1., 0.5, 0.0, 1.);
 int hindex; 
 
 

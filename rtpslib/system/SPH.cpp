@@ -497,25 +497,10 @@ namespace rtps
     {
             //Replace with enqueueCopyBuffer
 
-            prep.execute(num,
-                    stage,
-                    cl_position_u,
-                    cl_position_s,
-                    cl_velocity_u,
-                    cl_velocity_s,
-                    cl_veleval_u,
-                    cl_veleval_s,
-                    cl_color_u,
-                    cl_color_s,
-                    //cl_vars_unsorted, 
-                    //cl_vars_sorted, 
-                    cl_sort_indices,
-                    //params
-                    cl_sphp,
-                    //Buffer<GridParams>& gp,
-                    //debug params
-                    clf_debug,
-                    cli_debug);
+            cl_position_u.copyFromBuffer(cl_position_s, 0, 0, num);
+            cl_velocity_u.copyFromBuffer(cl_velocity_s, 0, 0, num);
+            cl_veleval_u.copyFromBuffer(cl_veleval_s, 0, 0, num);
+            cl_color_u.copyFromBuffer(cl_color_s, 0, 0, num);
     }
 
     int SPH::setupTimers()

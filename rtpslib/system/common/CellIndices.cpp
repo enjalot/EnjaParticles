@@ -98,7 +98,10 @@ namespace rtps
             {
                 //nb = ie[i] - is[i];
                 //nb_particles += nb;
-                printf("cell: %d indices start: %d indices stop: %d\n", i, is[i], ie[i]);
+                if(is[i] < 8000 || ie[i] > 0)
+                {
+                    printf("cell: %d indices start: %d indices stop: %d\n", i, is[i], ie[i]);
+                }
             }
         }
 
