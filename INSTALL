@@ -8,6 +8,13 @@ We encourage an out-of-source build, so in the base directory of the repo do:
     cd build
     cmake ..
     make
+    make install
+
+You can run by executing
+    ./bin/sph.x
+
+(currently you set the path for resource files in main.cpp, this really should automatically get it using argv[0]
+so for now you'll need to run from build so that relative paths are eg ./bin/cl_common)
 
 the library will be in rtpslib/
 

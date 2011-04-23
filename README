@@ -24,9 +24,10 @@ rtpslib/
     Usage:
 
     You can execute the test program like:
-    ./test/sph.x
-    ./test/flock.x
-    ./test/multi.x
+    cd bin
+        ./bin/sph.x
+        ./bin/flock.x
+        ./bin/multi.x
 
     The test program has simple mouse interaction:
         Left-Click and drag to rotate the view
