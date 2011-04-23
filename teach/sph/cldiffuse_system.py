@@ -60,19 +60,34 @@ class CLDiffuseSystem(CLSystem):
         self.exec_hash()
 
         """
-        hashes = numpy.ndarray((self.num,), dtype=numpy.int32)
-        cl.enqueue_read_buffer(self.queue, self.sort_hashes, hashes)
-        print "hashes"
-        print hashes.T
-        indices = numpy.ndarray((self.num,), dtype=numpy.int32)
-        cl.enqueue_read_buffer(self.queue, self.sort_indices, indices)
-        print "indices"
-        print indices.T
-        """
- 
+        print "hashes before"
+        hashes = numpy.ndarray((self.system.max_num,), dtype=numpy.uint32)
+        cl.enqueue_read_buffer(self.queue, self.sort_hashes, hashes).wait()
+        print hashes[0:100].T
 
-        self.exec_sort()
+        print "indices before"
+        indices = numpy.ndarray((self.system.max_num,), dtype=numpy.uint32)
+        cl.enqueue_read_buffer(self.queue, self.sort_indices, indices).wait()
+        print indices[0:100].T
+        """
+        #self.queue.finish()
+
+        if self.num > 0:
+            self.exec_sort()
  
+        """
+        print "hashes after"
+        #hashes = numpy.ndarray((self.system.max_num,), dtype=numpy.int32)
+        cl.enqueue_read_buffer(self.queue, self.sort_hashes, hashes).wait()
+        print hashes[0:100].T
+
+        print "indices after"
+        #indices = numpy.ndarray((self.system.max_num,), dtype=numpy.int32)
+        cl.enqueue_read_buffer(self.queue, self.sort_indices, indices).wait()
+        print indices[0:100].T
+        """
+
+
 
         negone = numpy.ones((self.system.domain.nb_cells+1,), dtype=numpy.int32)
         negone *= -1

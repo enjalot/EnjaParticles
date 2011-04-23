@@ -17,6 +17,7 @@ import hash
 import forces
 import sph
 import clsph
+import clsystem
 from cldiffuse_system import CLDiffuseSystem, timings
 #import clghost
 
@@ -43,6 +44,7 @@ class window(object):
         #self.ghost = sph.SPH(max_num, self.ghost_domain, ghost_factor=.01)
 
         print "making ghost system"
+        #self.clghost_system = clsystem.CLSystem(dt, self.ghost, is_ghost=True)
         self.clghost_system = clsph.CLSPH(dt, self.ghost, is_ghost=True)
         #self.clghost_system = clsph.CLSPH(dt, self.system, is_ghost=True)
         #self.clsystem = clsph.CLSPH(dt, self.system, ghost_system=self.clghost_system)

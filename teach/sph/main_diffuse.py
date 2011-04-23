@@ -28,17 +28,17 @@ class window(object):
     def make_sph_system(self):
 
         #ghost_max_num = 8192
-        #max_num = 32768*4
+        max_num = 32768*4
         #max_num = 32768
         #max_num = 16384
-        max_num = 8192
+        #max_num = 8192
         #max_num = 2**12 #4096
         #max_num = 2**10 #1024
         #max_num = 2**8 #256
         #max_num = 2**7 #128
 
-        dmin = Vec([0.,0.,0.])
-        dmax = Vec([1.,1.,1.])
+        dmin = Vec([0.,0.,0.,0.])
+        dmax = Vec([1.,1.,1.,0.])
         print "SPH System"
         print "-------------------------------------------------------------"
         self.domain = hash.Domain(dmin, dmax)

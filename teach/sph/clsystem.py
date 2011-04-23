@@ -66,7 +66,8 @@ class CLSystem:
         numpy.set_printoptions(precision=6, linewidth=1000)
         self.exec_hash()
         self.exec_sort()
-
+        
+        
         negone = numpy.ones((self.system.domain.nb_cells+1,), dtype=numpy.int32)
         negone *= -1
         cl.enqueue_write_buffer(self.queue, self.ci_start, negone)
@@ -93,22 +94,17 @@ class CLSystem:
     @timings("Sort")
     def exec_sort(self):
         #if radix
-        #"""
+        """
         self.radix.sort(    self.system.max_num,
                             self.sort_hashes,
                             self.sort_indices
                         )
         """
-        self.bitonic.sort(    self.system.max_num,
+        self.bitonic.sort(  self.system.max_num,
                             self.sort_hashes,
                             self.sort_indices
                         )
-        """
-
-
-
-
-
+        #"""
     
 
     @timings("Cell Indices")
@@ -278,8 +274,9 @@ class CLSystem:
             self.ghost_density_s = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp_dens)
 
         import sys
-        tmp_uint = numpy.ones((self.system.max_num,), dtype=numpy.uint32)
-        tmp_uint = tmp_uint * sys.maxint
+        tmp_uint = numpy.ndarray((self.system.max_num,), dtype=numpy.uint32)
+        tmp_uint[:] = sys.maxint
+        #tmp_uint = tmp_uint * sys.maxint
 
         self.sort_indices = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp_uint)
         self.sort_hashes = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp_uint)
