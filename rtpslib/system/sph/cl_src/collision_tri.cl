@@ -301,7 +301,17 @@ float4 collisions_triangle(float4 pos,
             //f += calculateRepulsionForce(triangles[j].normal, vel, 1*sphp->boundary_stiffness, 1*sphp->boundary_dampening, distance);
             //f += calculateFrictionForce(vel, force, triangles[j].normal, friction_kinetic, friction_static_limit);
             //Harada boundary wall forces
-            f += distance * triangles[j].normal * dtdt;
+
+            //kind of works
+            //f += distance * triangles[j].normal * dtdt;
+
+            //float repulse_fac = sphp->mass;
+            float repulse_fac = .05f;
+            float drepulse = sphp->rest_distance;
+            //f += repulse_fac*(drepulse - distance) * triangles[j].normal * dtdt;
+            f += repulse_fac*distance*(1 - distance/drepulse) * triangles[j].normal * dtdt;
+
+
             //f += (float4)(1100,1100,1100,1);
 			/*
             //lets do some specular reflection
@@ -313,7 +323,11 @@ float4 collisions_triangle(float4 pos,
  				New velocity = (vp, -vn) = v - (v.n)n - v.n n
                    = v - 2n v.n
 			vel = vel*damping;
-           */
+            */
+            //playing with stickiness
+            float kstick = -.5f;
+            float dstick = sphp->rest_distance;
+            f += kstick*dt*distance*(1 - distance/dstick) * triangles[j].normal;
         }
         f.w += 1;
     }

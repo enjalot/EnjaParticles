@@ -168,7 +168,7 @@ int main(int argc, char** argv)
 #ifdef WIN32
     settings->SetSetting("rtps_path", ".");
 #else
-    settings->SetSetting("rtps_path", ".bin/");
+    settings->SetSetting("rtps_path", "./bin");
     //settings->SetSetting("rtps_path", argv[0]);
     //printf("arvg[0]: %s\n", argv[0]);
 #endif
