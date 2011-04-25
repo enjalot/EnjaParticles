@@ -310,6 +310,9 @@ float4 collisions_triangle(float4 pos,
             float drepulse = sphp->rest_distance;
             //f += repulse_fac*(drepulse - distance) * triangles[j].normal * dtdt;
             f += repulse_fac*distance*(1 - distance/drepulse) * triangles[j].normal * dtdt;
+            //I - vnorm - mu*vtan
+            //vhat = vi - vtri
+            //float4 vnorm = (v
 
 
             //f += (float4)(1100,1100,1100,1);
