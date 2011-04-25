@@ -175,7 +175,8 @@ TARGET_LINK_LIBRARIES (rtps
    ${OPENGL_LIBRARIES}
    ${OPENCL_LIBRARIES}
    ${GLEW_LIBRARY}
-   # /opt/local/lib/libGLEW.a #for staticl linking when distributing. should do this more cmake way
+   # /opt/local/lib/libGLEW.a #for static linking when distributing on mac. should do this more cmake way
+   #/usr/lib/libGLEW.a #for static linking when distributing on linux. should do this more cmake way
 )
 
 
