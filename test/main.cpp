@@ -94,10 +94,10 @@ rtps::RTPS* ps;
 
 //#define NUM_PARTICLES 524288
 //#define NUM_PARTICLES 262144
-//#define NUM_PARTICLES 131072
+#define NUM_PARTICLES 131072
 //#define NUM_PARTICLES 65536
 //#define NUM_PARTICLES 32768
-#define NUM_PARTICLES 16384
+//#define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 10000
 //#define NUM_PARTICLES 8192
 //#define NUM_PARTICLES 4096
@@ -183,7 +183,7 @@ int main(int argc, char** argv)
     settings->SetSetting("render_texture", "firejet_blast.png");
     settings->SetSetting("render_frag_shader", "sprite_tex_frag.glsl");
     settings->SetSetting("render_use_alpha", true);
-    //settings.SetSetting("render_use_alpha", false);
+    //settings->SetSetting("render_use_alpha", false);
     settings->SetSetting("render_alpha_function", "add");
     settings->SetSetting("lt_increment", -.00);
     settings->SetSetting("lt_cl", "lifetime.cl");
@@ -193,9 +193,9 @@ int main(int argc, char** argv)
 
     ps->settings->SetSetting("Gravity", -9.8f); // -9.8 m/sec^2
     ps->settings->SetSetting("Gas Constant", 15.0f);
-    ps->settings->SetSetting("Viscosity", .01f);
+    ps->settings->SetSetting("Viscosity", .0001f);
     ps->settings->SetSetting("Velocity Limit", 600.0f);
-    ps->settings->SetSetting("XSPH Factor", .2f);
+    ps->settings->SetSetting("XSPH Factor", .09f);
     ps->settings->SetSetting("Friction Kinetic", 0.0f);
     ps->settings->SetSetting("Friction Static", 0.0f);
     ps->settings->SetSetting("Boundary Stiffness", 20000.0f);
