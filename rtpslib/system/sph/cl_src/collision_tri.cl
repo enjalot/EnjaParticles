@@ -284,20 +284,20 @@ float4 collisions_triangle(float4 pos,
     float eps = .000001;
     float distance = 0.0f;
     float4 f = (float4)(0,0,0,0); //returning the force
-    int tc = 0;
-    float dtdt = 1.0/dt;
-    dtdt *= dtdt;
+    //int tc = 0;
+    //float dtdt = 1.0/dt;
+    //dtdt *= dtdt;
     for (int j=0; j < (last-first); j++)
     {
         //distance = intersect_triangle_ge(pos, vel, &triangles[j], sphp->boundary_distance, eps, sphp->simulation_scale);
         float bnd_scale = 2; //(this needs to scale with # of particles, bigger for more particles (because of smaller radius, not enough time to react to forces)
         //ideally we would make this scale with the timestep, or do other more sophisticated collision detection routines
-        float bound_dist = 2 * sphp->boundary_distance;
+        float bound_dist = bnd_scale * sphp->boundary_distance;
         distance = intersect_triangle_segment(pos, vel, &triangles[j], bound_dist, sphp->EPSILON, sphp->simulation_scale);
         //distance = intersect_triangle_ge(pos, vel, &triangles[j], dt, eps);
         //if ( distance != -1)
         //distance = sphp->boundary_distance - distance;
-        distance = 2 * bound_dist - distance;
+        distance = 2*bound_dist - distance;
         //distance = sphp->rest_distance - distance;
         if (distance > eps)// && distance < sphp->boundary_distance)
         {
