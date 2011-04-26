@@ -166,6 +166,12 @@ void FLOCK::updateCPU()
 //----------------------------------------------------------------------
 void FLOCK::updateGPU()
 {
+#if 0 
+    //mymese debbug
+    printf("smoth_dist: %f\n", flock_params.smoothing_distance);
+    printf("radius: %f\n", flock_params.search_radius);
+    printf("min dist: %f \n", flock_params.min_dist);
+#endif
 
     //timers[TI_UPDATE]->start();
     timers["update"]->start();
@@ -274,13 +280,28 @@ void FLOCK::updateGPU()
             renderer->setNum(flock_params.num);
             //need to copy sorted arrays into unsorted arrays
             call_prep(2);
-            printf("HOW MANY NOW? %d\n", num);
+            //printf("HOW MANY NOW? %d\n", num);
             hash_and_sort();
             //we've changed num and copied sorted to unsorted. skip this iteration and do next one
             //this doesn't work because sorted force etc. are having an effect?
             //continue; 
         }
 
+        //mymese debbug
+        #if 0 
+            flock_params.smoothing_distance = 333.;
+            flock_params.search_radius = 222.;
+            flock_params.min_dist = 111.;
+
+            std::vector<FLOCKParameters> vparams(0);
+            vparams.push_back(flock_params);
+            cl_FLOCKParameters.copyToDevice(vparams);
+        #endif
+
+//cl_FLOCKParameters.smoothing_distance = 200.f;
+//cl_FLOCKParameters.search_radius = 100.f;
+//cl_FLOCKParameters.min_dist = 50.f;
+  
         //if(num >0) printf("density\n");
         timers["computeRules"]->start();
         computeRules.execute(   num,
@@ -366,7 +387,7 @@ void FLOCK::integrate()
     //timers[TI_EULER]->end();
 
     // mymese debugging
-#if 0 
+#if 1 
     if(num > 0)
     {
         std::vector<int4> cli(num);
@@ -591,7 +612,7 @@ void FLOCK::prepareSorted()
     std::vector<float4> clfv(max_num);
     std::fill(clfv.begin(), clfv.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     std::vector<int4> cliv(max_num);
-    std::fill(cliv.begin(), cliv.end(),int4(0.0f, 0.0f, 0.0f, 0.0f));
+    std::fill(cliv.begin(), cliv.end(),int4(0, 0, 0, 0));
     clf_debug = Buffer<float4>(ps->cli, clfv);
     cli_debug = Buffer<int4>(ps->cli, cliv);
 
@@ -710,21 +731,20 @@ void FLOCK::addBall(int nn, float4 center, float radius, bool scaled)
     
     float4 velo(0.f,0.f,0.f,0.f);
     float4 color(255.f,0.f,0.f,0.f);
-    vector<float4> flockere = addSphere(nn, center, radius, spacing, scale);
-    pushParticles(flockere, velo, color);
+    vector<float4> sphere = addSphere(nn, center, radius, spacing, scale);
+    pushParticles(sphere, velo, color);
 }
 
 //----------------------------------------------------------------------
 int FLOCK::addHose(int total_n, float4 center, float4 velocity, float radius, float4 color)
 {
-    printf("wtf for real\n");
     //in sph we just use sph spacing
     radius *= spacing;
     Hose* hose = new Hose(ps, total_n, center, velocity, radius, spacing, color);
-    printf("wtf\n");
     hoses.push_back(hose);
-    printf("size of hoses: %d\n", hoses.size());
+    //printf("size of hoses: %d\n", hoses.size());
     return hoses.size()-1;
+
 }
 
 //----------------------------------------------------------------------
@@ -859,7 +879,7 @@ void FLOCK::setRenderer()
     {
         case RTPSettings::SPRITE_RENDER:
             renderer = new SpriteRender(pos_vbo,col_vbo,num,ps->cli, ps->settings);
-            printf("spacing for radius %f\n", spacing);
+            //printf("spacing for radius %f\n", spacing);
             break;
         case RTPSettings::SCREEN_SPACE_RENDER:
             renderer = new SSFRender(pos_vbo,col_vbo,num,ps->cli, ps->settings);
@@ -872,7 +892,7 @@ void FLOCK::setRenderer()
             renderer = new Render(pos_vbo,col_vbo,num,ps->cli, ps->settings);
         break;
     }
-    renderer->setParticleRadius(spacing/2);
+    renderer->setParticleRadius(spacing);
 }
 
 

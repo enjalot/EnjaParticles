@@ -38,11 +38,20 @@
 //#include <timege.h>
 #include <timer_eb.h>
 
-#include "../rtps_common.h"
+//#include "../rtps_common.h"
 
 // Added by GE, March 16, 2011
 #include "boids.h"
 
+#ifdef WIN32
+    #if defined(rtps_EXPORTS)
+        #define RTPS_EXPORT __declspec(dllexport)
+    #else
+        #define RTPS_EXPORT __declspec(dllimport)
+	#endif 
+#else
+    #define RTPS_EXPORT
+#endif
 
 namespace rtps
 {

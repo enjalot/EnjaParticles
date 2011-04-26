@@ -104,7 +104,7 @@ rtps::RTPS* ps;
 
 #define DT              0.001f
 
-#define maxspeed        100.0f
+#define maxspeed        10.0f
 #define mindist         1.f
 #define searchradius    1.f
 

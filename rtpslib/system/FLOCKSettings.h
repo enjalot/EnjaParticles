@@ -28,17 +28,11 @@ typedef struct FLOCKParameters
     float simulation_scale;
     float rest_distance;
     float smoothing_distance;
-//    float spacing;
-    
-    // USE GRID PARAMS INSTEAD grid dimensions for boundary conditions
-    //float4 grid_min;
-    //float4 grid_max;
     
     // CL parameters 
-    int num;
-    int nb_vars;    // for combined variables (vars_sorted, etc.)
-	int choice;     // which kind of calculation to invoke
-    int max_num;
+    //int nb_vars;    // for combined variables (vars_sorted, etc.)
+	//int choice;     // which kind of calculation to invoke
+    //int max_num;
 
     // Boids parameters
     float min_dist;  // desired separation between boids
@@ -50,13 +44,7 @@ typedef struct FLOCKParameters
     float w_align;
     float w_coh;
 
-    // print
-    void print() {
-		printf("----- FLOCKParameters ----\n");
-		printf("min_dist: %f\n", min_dist);
-		printf("search_radius: %f\n", search_radius);
-		printf("max_speed: %f\n", max_speed);
-	}
+    int num;
 } FLOCKParameters
 #ifndef WIN32
     __attribute__((aligned(16)));

@@ -31,6 +31,8 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
 	
     // |r|
 	float rlen = length(r);
+	
+
 
     //float min_dist = flockp->min_dist;
     //float smooth_dist = flockp->smoothing_distance;
@@ -38,11 +40,12 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
 
 
     // is this particle within cutoff?
-    if (flockp->smoothing_distance >= flockp->search_radius && rlen <= flockp->search_radius) 
+    //if (flockp->smoothing_distance >= flockp->search_radius && rlen <= flockp->search_radius) 
+    //clf[index_i] = (float4)(rlen,flockp->search_radius,10.,10.);
+	//cli[index_i] = (int4)(20.,20.,20.,20.);
+    if(rlen <= flockp->search_radius)
     {
-        
         if(index_i != index_j){
-	
 	        // positions
 	        float4 pj = pos[index_j];
 	
@@ -58,8 +61,9 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
             float4 s = r;       //pi - pj;
 	        float  d = rlen;    //length(s);
 	
-            if(flockp->smoothing_distance >= flockp->min_dist && d <= flockp->min_dist){
-		        s.w = 0.0f;
+            //if(flockp->smoothing_distance >= flockp->min_dist && d <= flockp->min_dist){
+		     if(d <= flockp->min_dist){ 
+                s.w = 0.0f;
                 s = normalize(s);
                 s /= d;
 	            pt->separation+= s;        // accumulate the separation vector
@@ -98,12 +102,19 @@ __kernel void computeRules(
 				)
 {
     // particle index
-	int nb_vars = flockp->nb_vars;
+	//int nb_vars = flockp->nb_vars;
 	int num = flockp->num;
 
     int index = get_global_id(0);
     if (index >= num) return;
 
+    //flockp->search_radius = .8f;
+    //flockp->min_dist = 0.5f;
+    //flockp->smoothing_distance = 1.f;
+
+
+    clf[index] = (float4)(flockp->smoothing_distance,flockp->min_dist, flockp->search_radius, 10.);
+	cli[index] = (int4)(flockp->num,flockp->num,0,0);
 	//clf[index] = (float4)(0.,0.,0.,10.);
 	//cli[index] = (int4)(0.,0.,0.,0.);
 
@@ -122,6 +133,13 @@ __kernel void computeRules(
         flockmates[index].x = pt.num_flockmates;
         flockmates[index].y = pt.num_nearestFlockmates;
 
+
+	    //flockmates[index] = (int4)(20,20,20,20);
+	    //separation[index] = (float4)(10.,10.,10.,10.);
+        
+        //cli[index] = flockmates[index];
+        //clf[index] = separation[index];
+        
         //den(index) = pt.density;
 		//xflock(index) = pt.xflock;
         //force(index) = pt.force;
