@@ -61,6 +61,11 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
         float Pi = sphp->K*(di - rest_density);
         float Pj = sphp->K*(dj - rest_density);
 
+        //playing with quartic kernel
+        //dWijdr = 2.0f/3.0f  - 9.0f * q*q / 8.0f + 19.0f * q*q*q / 24.0f - 5.0f * q*q*q*q / 32.0f; (need derivative of this)
+        //quartic_coef = 
+        
+
         float kern = -.5 * dWijdr * (Pi + Pj) * sphp->wspiky_d_coef * idi * idj;
         //float kern = -1.0f * dWijdr * (Pi * idi * idi + Pj * idj * idj) * sphp->wspiky_d_coef;
         float4 force = kern*r; 
