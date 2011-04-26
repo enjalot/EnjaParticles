@@ -92,10 +92,12 @@ void *font = GLUT_BITMAP_8_BY_13;
 
 rtps::RTPS* ps;
 
+//#define NUM_PARTICLES 2000000
+//#define NUM_PARTICLES 1000000
 //#define NUM_PARTICLES 524288
 //#define NUM_PARTICLES 262144
-#define NUM_PARTICLES 131072
-//#define NUM_PARTICLES 65536
+//#define NUM_PARTICLES 131072
+#define NUM_PARTICLES 65536
 //#define NUM_PARTICLES 32768
 //#define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 10000
@@ -192,10 +194,10 @@ int main(int argc, char** argv)
     //ps = new rtps::RTPS();
 
     ps->settings->SetSetting("Gravity", -9.8f); // -9.8 m/sec^2
-    ps->settings->SetSetting("Gas Constant", 15.0f);
-    ps->settings->SetSetting("Viscosity", .0001f);
+    ps->settings->SetSetting("Gas Constant", 1.0f);
+    ps->settings->SetSetting("Viscosity", .001f);
     ps->settings->SetSetting("Velocity Limit", 600.0f);
-    ps->settings->SetSetting("XSPH Factor", .09f);
+    ps->settings->SetSetting("XSPH Factor", .05f);
     ps->settings->SetSetting("Friction Kinetic", 0.0f);
     ps->settings->SetSetting("Friction Static", 0.0f);
     ps->settings->SetSetting("Boundary Stiffness", 20000.0f);
