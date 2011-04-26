@@ -184,8 +184,8 @@ int main(int argc, char** argv)
 
     settings->SetSetting("render_texture", "firejet_blast.png");
     settings->SetSetting("render_frag_shader", "sprite_tex_frag.glsl");
-    settings->SetSetting("render_use_alpha", true);
-    //settings->SetSetting("render_use_alpha", false);
+    //settings->SetSetting("render_use_alpha", true);
+    settings->SetSetting("render_use_alpha", false);
     settings->SetSetting("render_alpha_function", "add");
     settings->SetSetting("lt_increment", -.00);
     settings->SetSetting("lt_cl", "lifetime.cl");
@@ -327,6 +327,10 @@ void appKeyboard(unsigned char key, int x, int y)
                 make_cube(triangles, cen, cw);
                 cen = float4(3.5, 3.5, cw-.1, 1.0f);
                 make_cube(triangles, cen, cw);
+
+                cen = float4(1.5, 1.5, cw-.1, 1.0f);
+                make_cube(triangles, cen, 1.);
+
                 ps->system->loadTriangles(triangles);
                 return;
             }
@@ -348,8 +352,8 @@ void appKeyboard(unsigned char key, int x, int y)
                 //min = float4(15.8, 15.8, 15.8, 1.0f);
                 //max = float4(16.5, 16.5, 16.5, 1.0f);
 
-                min = float4(1.2, 1.2, 1.2, 1.0f);
-                max = float4(2., 2., 2., 1.0f);
+                min = float4(1.2, 1.2, 3.2, 1.0f);
+                max = float4(2., 2., 4., 1.0f);
                 
                 //float4 color = float4(rand()/(10.*RAND_MAX), rand()/(RAND_MAX+1.0), rand()/(RAND_MAX+1.0), 0.2);
                 ps->system->addBox(nn, min, max, false, color);
