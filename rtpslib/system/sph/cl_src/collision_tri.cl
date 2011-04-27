@@ -290,20 +290,20 @@ float4 collisions_triangle(float4 pos,
     for (int j=0; j < (last-first); j++)
     {
         //distance = intersect_triangle_ge(pos, vel, &triangles[j], sphp->boundary_distance, eps, sphp->simulation_scale);
-        float bnd_scale = 2; //(this needs to scale with # of particles, bigger for more particles (because of smaller radius, not enough time to react to forces)
+        float bnd_scale = 1.0f; //(this needs to scale with # of particles, bigger for more particles (because of smaller radius, not enough time to react to forces)
         //ideally we would make this scale with the timestep, or do other more sophisticated collision detection routines
         float bound_dist = bnd_scale * sphp->boundary_distance;
         distance = intersect_triangle_segment(pos, vel, &triangles[j], bound_dist, sphp->EPSILON, sphp->simulation_scale);
         //distance = intersect_triangle_ge(pos, vel, &triangles[j], dt, eps);
         //if ( distance != -1)
         //distance = sphp->boundary_distance - distance;
-        distance = 2*bound_dist - distance;
+        distance = bound_dist - distance;
         //distance = sphp->rest_distance - distance;
         if (distance > eps)// && distance < sphp->boundary_distance)
         {
             //Krog boundary forces
             f += calculateRepulsionForce(triangles[j].normal, vel, sphp->boundary_stiffness, sphp->boundary_dampening, distance);
-            //f += calculateFrictionForce(vel, force, triangles[j].normal, friction_kinetic, friction_static_limit);
+            f += calculateFrictionForce(vel, force, triangles[j].normal, friction_kinetic, friction_static_limit);
             //Harada boundary wall forces
 
             //kind of works (but should use mass in calculation)

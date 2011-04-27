@@ -48,8 +48,6 @@ __kernel void leapfrog(
 
     float4 vnext = v + dt*f;
     //float4 vnext = v;// + dt*f;
-    // WHY IS MY CORRECTION NEGATIVE and IAN's POSITIVE? 
-    //vnext += sphp->xsph_factor * xsph(i);
     vnext += sphp->xsph_factor * xsph_s[i];
 
     float4 veval = 0.5f*(v+vnext);
