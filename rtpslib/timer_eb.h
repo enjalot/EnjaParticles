@@ -9,6 +9,7 @@
 #include <Windows.h>
 #include "gtod_windows.h"
 #include <time.h>
+//#include <Winsock2.h>
 #else
 #include <sys/time.h>
 #endif
@@ -37,7 +38,9 @@ public:
 	static std::vector<Timer*> timeList;
 
 private:
+#if 0
 	struct timeval t_start, t_end;
+#endif
 	double elapsed;
 	float t;
 	clock_t t1;

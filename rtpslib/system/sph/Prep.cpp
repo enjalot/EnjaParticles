@@ -4,6 +4,8 @@
 
 namespace rtps
 {
+namespace sph
+{
 
     Prep::Prep(CL* cli_, EB::Timer* timer_)
     {
@@ -72,4 +74,5 @@ namespace rtps
 
     }
 
-}
+}//namespace sph
+}//namespace rtps

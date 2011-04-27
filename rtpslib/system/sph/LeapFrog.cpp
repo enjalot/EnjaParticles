@@ -2,14 +2,15 @@
 
 namespace rtps
 {
+namespace sph
+{
 
-    LeapFrog::LeapFrog(CL* cli_, EB::Timer* timer_)
+    LeapFrog::LeapFrog(std::string path, CL* cli_, EB::Timer* timer_)
     {
         cli = cli_;
         timer = timer_;
  
         printf("create leapfrog kernel\n");
-        std::string path(SPH_CL_SOURCE_DIR);
         path += "/leapfrog.cl";
         k_leapfrog = Kernel(cli, path, "leapfrog");
 
@@ -54,6 +55,7 @@ namespace rtps
             timer->set(gputime);
 
 
+} //namespace sph
 
 #if 0
 #define DENS 0
@@ -98,7 +100,7 @@ namespace rtps
 
     void SPH::cpuLeapFrog()
     {
-        float h = ps->settings.dt;
+        float h = ps->settings->dt;
         for (int i = 0; i < num; i++)
         {
             float4 p = positions[i];
@@ -143,4 +145,4 @@ namespace rtps
         //printf("v.z %f p.z %f \n", velocities[0].z, positions[0].z);
     }
 
-}
+} //namespace rtps

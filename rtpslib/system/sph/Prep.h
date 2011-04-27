@@ -8,6 +8,8 @@
 
 namespace rtps
 {
+namespace sph
+{
     class Prep 
     {
         public:
@@ -38,6 +40,7 @@ namespace rtps
             Kernel k_prep;
             EB::Timer* timer;
     };
+}
 }
 
 #endif

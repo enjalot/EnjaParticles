@@ -20,12 +20,13 @@ namespace rtps
 
     CL::CL()
     {
+        inc_dir = "";
         setup_gl_cl();
     }
 
-    void CL::setIncludeDir(std::string path)
+    void CL::addIncludeDir(std::string path)
     {
-        this->inc_dir = " -I" + path;
+        this->inc_dir += " -I" + path;// + " -I./" + std::string(COMMON_CL_SOURCE_DIR);
     }
 
     //----------------------------------------------------------------------

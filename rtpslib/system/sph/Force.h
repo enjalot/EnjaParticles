@@ -12,7 +12,7 @@ namespace rtps
     {
         public:
             Force() { cli = NULL; timer = NULL; };
-            Force(CL* cli, EB::Timer* timer);
+            Force(std::string path, CL* cli, EB::Timer* timer);
             void execute(int num,
                     Buffer<float4>& pos_s, 
                     Buffer<float>& dens_s, 

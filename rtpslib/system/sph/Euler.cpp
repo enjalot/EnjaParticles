@@ -2,13 +2,12 @@
 
 namespace rtps
 {
-    Euler::Euler(CL* cli_, EB::Timer* timer_)
+    Euler::Euler(std::string path, CL* cli_, EB::Timer* timer_)
     {
         cli = cli_;
         timer = timer_;
  
         printf("create euler kernel\n");
-        std::string path(SPH_CL_SOURCE_DIR);
         path += "/euler.cl";
         k_euler = Kernel(cli, path, "euler");
     } 
@@ -49,7 +48,7 @@ namespace rtps
 
     void SPH::cpuEuler()
     {
-        float h = ps->settings.dt;
+        float h = ps->settings->dt;
         for (int i = 0; i < num; i++)
         {
             float4 p = positions[i];

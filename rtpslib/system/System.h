@@ -31,7 +31,7 @@ namespace rtps
             delete renderer;
         }
 
-        virtual Domain getGrid()
+        virtual Domain* getGrid()
         {
             return grid;
         }
@@ -76,9 +76,14 @@ namespace rtps
         virtual void addBall(int nn, float4 center, float radius, bool scaled)
         {
         };
-        virtual void addHose(int total_n, float4 center, float4 velocity, float radius, float4 color=float4(1., 0., 0., 1.))
+        virtual int addHose(int total_n, float4 center, float4 velocity, float radius, float4 color=float4(1., 0., 0., 1.))
+        {
+            return 0;
+        };
+        virtual void updateHose(int index, float4 center, float4 velocity, float radius, float4 color=float4(1., 0., 0., 1.))
         {
         };
+ 
         /*
         virtual void addHose(int total_n, float4 center, float4 velocity, float radius, float spacing)
         {
@@ -92,7 +97,7 @@ namespace rtps
         };
 
 
-        virtual void loadTriangles(std::vector<Triangle> triangles)
+        virtual void loadTriangles(std::vector<Triangle> &triangles)
         {
         };
         virtual void addForceField(ForceField ff)
@@ -121,9 +126,12 @@ namespace rtps
         //flag is true if the system's constructor creates the VBOs for the system
         bool managed;
 
-        Domain grid;
+        Domain* grid;
 
         Render* renderer;
+
+        std::string resource_path;
+        std::string common_source_dir;
 
         virtual void setRenderer()
         {

@@ -1,4 +1,4 @@
-#include "../../common/cl_src/cl_macros.h"
+#include "cl_macros.h"
 #include "cl_structs.h"
 #include "cl_collision.h"
 
@@ -284,24 +284,41 @@ float4 collisions_triangle(float4 pos,
     float eps = .000001;
     float distance = 0.0f;
     float4 f = (float4)(0,0,0,0); //returning the force
-    int tc = 0;
-    float dtdt = 1.0/dt;
-    dtdt *= dtdt;
+    //int tc = 0;
+    //float dtdt = 1.0/dt;
+    //dtdt *= dtdt;
     for (int j=0; j < (last-first); j++)
     {
         //distance = intersect_triangle_ge(pos, vel, &triangles[j], sphp->boundary_distance, eps, sphp->simulation_scale);
-        distance = intersect_triangle_segment(pos, vel, &triangles[j], sphp->boundary_distance, eps, sphp->simulation_scale);
+        float bnd_scale = 1.0f; //(this needs to scale with # of particles, bigger for more particles (because of smaller radius, not enough time to react to forces)
+        //ideally we would make this scale with the timestep, or do other more sophisticated collision detection routines
+        float bound_dist = bnd_scale * sphp->boundary_distance;
+        distance = intersect_triangle_segment(pos, vel, &triangles[j], bound_dist, sphp->EPSILON, sphp->simulation_scale);
         //distance = intersect_triangle_ge(pos, vel, &triangles[j], dt, eps);
         //if ( distance != -1)
         //distance = sphp->boundary_distance - distance;
-        distance = sphp->rest_distance - distance;
+        distance = bound_dist - distance;
+        //distance = sphp->rest_distance - distance;
         if (distance > eps)// && distance < sphp->boundary_distance)
         {
             //Krog boundary forces
-            //f += calculateRepulsionForce(triangles[j].normal, vel, 1*sphp->boundary_stiffness, 1*sphp->boundary_dampening, distance);
-            //f += calculateFrictionForce(vel, force, triangles[j].normal, friction_kinetic, friction_static_limit);
+            f += calculateRepulsionForce(triangles[j].normal, vel, sphp->boundary_stiffness, sphp->boundary_dampening, distance);
+            f += calculateFrictionForce(vel, force, triangles[j].normal, friction_kinetic, friction_static_limit);
             //Harada boundary wall forces
-            f += distance * triangles[j].normal * dtdt;
+
+            //kind of works (but should use mass in calculation)
+            //f += distance * triangles[j].normal * dtdt;
+
+            //float repulse_fac = sphp->mass;
+            /*
+            //doesn't really work
+            float repulse_fac = .05f;
+            float drepulse = sphp->rest_distance;
+            //f += repulse_fac*(drepulse - distance) * triangles[j].normal * dtdt;
+            f += repulse_fac*distance*(1 - distance/drepulse) * triangles[j].normal * dtdt;
+            */
+
+
             //f += (float4)(1100,1100,1100,1);
 			/*
             //lets do some specular reflection
@@ -313,7 +330,14 @@ float4 collisions_triangle(float4 pos,
  				New velocity = (vp, -vn) = v - (v.n)n - v.n n
                    = v - 2n v.n
 			vel = vel*damping;
-           */
+            */
+
+#if 0
+            //playing with stickiness
+            float kstick = -.5f;
+            float dstick = sphp->rest_distance;
+            f += kstick*dt*distance*(1 - distance/dstick) * triangles[j].normal;
+#endif
         }
         f.w += 1;
     }

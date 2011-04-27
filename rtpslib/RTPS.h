@@ -43,15 +43,15 @@ namespace rtps
         //default constructor
         RTPS();
         //Setup CL, Render, initial values and System based on settings
-        RTPS(RTPSettings s);
-        RTPS(RTPSettings s, CL* _cli);
+        RTPS(RTPSettings *s);
+        RTPS(RTPSettings *s, CL* _cli);
 
         ~RTPS();
 
         void Init();
 
         //Keep track of settings
-        RTPSettings settings;
+        RTPSettings *settings;
         
         //OpenCL abstraction instance
         //TODO shouldn't be public

@@ -2,7 +2,7 @@
 
 namespace rtps {
 
-    CollisionTriangle::CollisionTriangle(CL* cli_, EB::Timer* timer_, int max_triangles)
+    CollisionTriangle::CollisionTriangle(std::string path, CL* cli_, EB::Timer* timer_, int max_triangles)
     {
         cli = cli_;
         timer = timer_;
@@ -12,18 +12,17 @@ namespace rtps {
 
         triangles_loaded = false;
         printf("create collision wall kernel\n");
-        std::string path(SPH_CL_SOURCE_DIR);
         path += "/collision_tri.cl";
         k_collision_tri = Kernel(cli, path, "collision_triangle");
     } 
 
     //TODO: avoid need for this function?
-    void SPH::loadTriangles(std::vector<Triangle> triangles)
+    void SPH::loadTriangles(std::vector<Triangle> &triangles)
     {
         collision_tri.loadTriangles(triangles);
     }
 
-    void CollisionTriangle::loadTriangles(std::vector<Triangle> triangles)
+    void CollisionTriangle::loadTriangles(std::vector<Triangle> &triangles)
     {
         int n_triangles = triangles.size();
         //printf("n triangles: %d\n", n_triangles);

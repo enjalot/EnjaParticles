@@ -17,7 +17,7 @@
 #include <SPHSettings.h>
 
 
-#include <Prep.h>
+//#include <Prep.h>
 #include <Hash.h>
 #include <BitonicSort.h>
 //#include <DataStructures.h>
@@ -37,11 +37,19 @@
 //#include <timege.h>
 #include <timer_eb.h>
 
-#include "../rtps_common.h"
-
+#ifdef WIN32
+    #if defined(rtps_EXPORTS)
+        #define RTPS_EXPORT __declspec(dllexport)
+    #else
+        #define RTPS_EXPORT __declspec(dllimport)
+	#endif 
+#else
+    #define RTPS_EXPORT
+#endif
 
 namespace rtps
 {
+    using namespace sph;
 
     class RTPS_EXPORT SPH : public System
     {
@@ -55,12 +63,13 @@ namespace rtps
         //wrapper around IV.h addSphere
         void addBall(int nn, float4 center, float radius, bool scaled);
         //wrapper around Hose.h 
-        void addHose(int total_n, float4 center, float4 velocity, float radius, float4 color=float4(1.0, 0.0, 0.0, 1.0f));
+        int addHose(int total_n, float4 center, float4 velocity, float radius, float4 color=float4(1.0, 0.0, 0.0, 1.0f));
+        void updateHose(int index, float4 center, float4 velocity, float radius, float4 color=float4(1.0, 0.0, 0.0, 1.0f));
         void sprayHoses();
 
         virtual void render();
 
-        void loadTriangles(std::vector<Triangle> triangles);
+        void loadTriangles(std::vector<Triangle> &triangles);
 
         void testDelete();
         int cut; //for debugging DEBUG
@@ -88,6 +97,7 @@ namespace rtps
         Integrator integrator;
         float spacing; //Particle rest distance in world coordinates
 
+        std::string sph_source_dir;
         int nb_var;
 
         std::vector<float4> deleted_pos;
@@ -95,7 +105,7 @@ namespace rtps
 
 
         //keep track of hoses
-        std::vector<Hose> hoses;
+        std::vector<Hose*> hoses;
 
         //needs to be called when particles are added
         void calculateSPHSettings();
@@ -104,7 +114,7 @@ namespace rtps
         //void popParticles();
 
         //This should be in OpenCL classes
-        Kernel k_scopy;
+        //Kernel k_scopy;
 
         std::vector<float4> positions;
         std::vector<float4> colors;
@@ -176,7 +186,7 @@ namespace rtps
         void updateSPHP();
 
         //Nearest Neighbors search related functions
-        Prep prep;
+        //Prep prep;
         void call_prep(int stage);
         Hash hash;
         //DataStructures datastructures;
@@ -201,8 +211,8 @@ namespace rtps
         float Wviscosity(float4 r, float h);
 
         //OpenCL helper functions, should probably be part of the OpenCL classes
-        void loadScopy();
-        void scopy(int n, cl_mem xsrc, cl_mem ydst); 
+        //void loadScopy();
+        //void scopy(int n, cl_mem xsrc, cl_mem ydst); 
 
         //void sset_int(int n, int val, cl_mem xdst);
 

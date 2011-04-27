@@ -146,6 +146,8 @@ private:
     GridParams grid_params;
     GridParams grid_params_scaled;
 
+    std::string flock_source_dir;
+
     int nb_var;
 
     //needs to be called when particles are added
@@ -247,8 +249,8 @@ private:
     void integrate();
 
     //OpenCL helper functions, should probably be part of the OpenCL classes
-    void loadScopy();
-	void scopy(int n, cl_mem xsrc, cl_mem ydst); 
+    //void loadScopy();
+	//void scopy(int n, cl_mem xsrc, cl_mem ydst); 
    
 };
 

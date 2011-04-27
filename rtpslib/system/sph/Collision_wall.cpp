@@ -3,12 +3,11 @@
 namespace rtps
 {
 
-    CollisionWall::CollisionWall(CL* cli_, EB::Timer* timer_)
+    CollisionWall::CollisionWall(std::string path, CL* cli_, EB::Timer* timer_)
     {
         cli = cli_;
         timer = timer_;
         printf("create collision wall kernel\n");
-        std::string path(SPH_CL_SOURCE_DIR);
         path += "/collision_wall.cl";
         k_collision_wall = Kernel(cli, path, "collision_wall");
 

@@ -22,8 +22,8 @@ namespace rtps
         float smoothing_distance = 2.0f * rest_distance;//interaction radius
 
 
-        float4 dmin = grid.getBndMin();
-        float4 dmax = grid.getBndMax();
+        float4 dmin = grid->getBndMin();
+        float4 dmax = grid->getBndMax();
         //printf("dmin: %f %f %f\n", dmin.x, dmin.y, dmin.z);
         //printf("dmax: %f %f %f\n", dmax.x, dmax.y, dmax.z);
         float domain_vol = (dmax.x - dmin.x) * (dmax.y - dmin.y) * (dmax.z - dmin.z);
@@ -42,7 +42,8 @@ namespace rtps
         settings->SetSetting("Simulation Scale", simulation_scale);
 
 
-        float boundary_distance = .5f * rest_distance;
+        //float boundary_distance = .5f * rest_distance;
+        float boundary_distance =  smoothing_distance;
         settings->SetSetting("Boundary Distance", boundary_distance);
         float spacing = rest_distance/ simulation_scale;
         settings->SetSetting("Spacing", spacing);

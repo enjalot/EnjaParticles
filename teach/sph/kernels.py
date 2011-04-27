@@ -18,6 +18,7 @@ class Kernel(object):
         self.coeffs = {}
         self.coeffs["poly6"] = 315./(64.*pi*h9)
         self.coeffs["dspiky"] = -45./(pi*h6)
+        self.coeffs["ddvisc"] = 45./(pi*h6)
 
     def poly6(self, r):
         mr2 = mag2(r)

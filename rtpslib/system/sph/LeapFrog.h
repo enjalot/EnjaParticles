@@ -8,11 +8,14 @@
 
 namespace rtps
 {
+namespace sph
+{
+
     class LeapFrog
     {
         public:
             LeapFrog() { cli = NULL; timer = NULL; };
-            LeapFrog(CL* cli, EB::Timer* timer);
+            LeapFrog(std::string path, CL* cli, EB::Timer* timer);
             void execute(int num,
                         float dt,
                         //input
@@ -37,6 +40,8 @@ namespace rtps
             Kernel k_leapfrog;
             EB::Timer* timer;
     };
+
+}
 }
 
 #endif

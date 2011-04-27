@@ -50,36 +50,39 @@ namespace rtps
         */ 
 
         //TODO: All theses shader loads should be pushed to other sub classes or to some sort of shader class
-        string vert(GLSL_BIN_DIR);
-        string frag(GLSL_BIN_DIR);
+        //string vert(GLSL_BIN_DIR);
+        //string frag(GLSL_BIN_DIR);
+        
+        string vert = shader_source_dir;
+        string frag = shader_source_dir;
+        printf("vert: %s\n", shader_source_dir.c_str());
         vert+="/sphere_vert.glsl";
 
         frag+="/sphere_frag.glsl";
         glsl_program[SPHERE_SHADER] = compileShaders(vert.c_str(),frag.c_str());
-        vert = string(GLSL_BIN_DIR);
-        frag = string(GLSL_BIN_DIR);
+        vert = shader_source_dir;
+        frag = shader_source_dir;
         vert+="/depth_vert.glsl";
         frag+="/depth_frag.glsl";
         glsl_program[DEPTH_SHADER] = compileShaders(vert.c_str(),frag.c_str());
-        vert = string(GLSL_BIN_DIR);
-        frag = string(GLSL_BIN_DIR);
+        vert = shader_source_dir;
+        frag = shader_source_dir;
         vert+="/gaussian_blur_vert.glsl";
         frag+="/gaussian_blur_x_frag.glsl";
         glsl_program[GAUSSIAN_X_SHADER] = compileShaders(vert.c_str(),frag.c_str());
-        frag = string(GLSL_BIN_DIR);
+        frag = shader_source_dir;
         frag+="/gaussian_blur_y_frag.glsl";
         glsl_program[GAUSSIAN_Y_SHADER] = compileShaders(vert.c_str(),frag.c_str());
-        frag = string(GLSL_BIN_DIR);
+        frag = shader_source_dir;
         frag+="/bilateral_blur_frag.glsl";
         glsl_program[BILATERAL_GAUSSIAN_SHADER] = compileShaders(vert.c_str(),frag.c_str());
-        vert = string(GLSL_BIN_DIR);
-        frag = string(GLSL_BIN_DIR);
+        vert = shader_source_dir;
+        frag = shader_source_dir;
         vert+="/normal_vert.glsl";
         frag+="/normal_frag.glsl";
         glsl_program[NORMAL_SHADER] = compileShaders(vert.c_str(),frag.c_str()); 
-
-        vert = string(GLSL_BIN_DIR);
-        frag = string(GLSL_BIN_DIR);
+        vert = shader_source_dir;
+        frag = shader_source_dir;
         vert+="/copy_vert.glsl";
         frag+="/copy_frag.glsl";
         glsl_program[COPY_TO_FB] = compileShaders(vert.c_str(),frag.c_str()); 

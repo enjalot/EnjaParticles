@@ -2,7 +2,7 @@ import math
 from vector import Vec
 
 class Domain(object):
-    def __init__(self, bnd_min, bnd_max, surface):
+    def __init__(self, bnd_min, bnd_max):#, surface):
 
         #the boundary we want particles to stay within
         self.bnd_min = bnd_min
@@ -16,7 +16,7 @@ class Domain(object):
 
         self.V = self.width * self.height * self.depth
 
-        self.surface = surface
+        #self.surface = surface
 
 
     def setup(self, cell_size):
@@ -73,6 +73,38 @@ class Domain(object):
         s += "delta: %s\n" % self.delta
         s += "number of cells: %s\n" % self.nb_cells
         return s
+
+    def make_struct(self, scale_factor):
+
+        print("scale factor", scale_factor)
+        size = self.size * scale_factor
+        min = self.min * scale_factor
+        max = self.max * scale_factor
+        bnd_min = self.bnd_min * scale_factor
+        bnd_max = self.bnd_max * scale_factor
+        res = self.res
+        delta = self.delta / scale_factor
+
+        import struct
+        gpstruct = struct.pack('ffff'+
+                                'ffff'+
+                                'ffff'+
+                                'ffff'+
+                                'ffff'+
+                                'ffff'+
+                                'ffff'+
+                                'i',
+                                size.x, size.y, size.z, 0.,
+                                min.x, min.y, min.z, 0.,
+                                max.x, max.y, max.z, 0.,
+                                bnd_min.x, bnd_min.y, bnd_min.z, 0.,
+                                bnd_max.x, bnd_max.y, bnd_max.z, 0.,
+                                res.x, res.y, res.z, 0.,
+                                delta.x, delta.y, delta.z, 0.,
+                                self.nb_cells
+                            )
+        return gpstruct
+
 
 if __name__ == "__main__":
 

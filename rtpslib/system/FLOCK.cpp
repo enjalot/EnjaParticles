@@ -22,6 +22,10 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     num = 0;
     nb_var = 10;
 
+    resource_path = ps->settings->GetSettingAs<std::string>("rtps_path");
+    printf("resource path: %s\n", resource_path.c_str());
+
+
     positions.resize(max_num);
     colors.resize(max_num);
     forces.resize(max_num);
@@ -33,7 +37,7 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     //seed random
     srand ( time(NULL) );
 
-    grid = ps->settings.grid;
+    grid = ps->settings->grid;
 
     //FLOCKSettings depend on number of particles used
 	// Must be called before load kernel methods!
@@ -49,8 +53,6 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     //setup the sorted and unsorted arrays
     prepareSorted();
 
-    std::string cl_includes(FLOCK_CL_SOURCE_DIR);
-    ps->cli->setIncludeDir(cl_includes);
 
 #ifdef CPU
     printf("RUNNING ON THE CPU\n");
@@ -58,9 +60,22 @@ FLOCK::FLOCK(RTPS *psfr, int n)
 #ifdef GPU
     printf("RUNNING ON THE GPU\n");
 
+    //should be more cross platform
+    flock_source_dir = resource_path + "/" + std::string(FLOCK_CL_SOURCE_DIR);
+    common_source_dir = resource_path + "/" + std::string(COMMON_CL_SOURCE_DIR);
+
+    ps->cli->addIncludeDir(flock_source_dir);
+    ps->cli->addIncludeDir(common_source_dir);
+
+
+    //std::string cl_includes(FLOCK_CL_SOURCE_DIR);
+    //ps->cli->addIncludeDir(cl_includes);
+
+
+
     loadEuler();
 
-    loadScopy();
+    //loadScopy();
 
     loadPrep();
     loadHash();
@@ -236,8 +251,8 @@ void FLOCK::printTimers()
 void FLOCK::calculateFLOCKSettings()
 {
 
-    float4 dmin = grid.getBndMin();
-    float4 dmax = grid.getBndMax();
+    float4 dmin = grid->getBndMin();
+    float4 dmax = grid->getBndMax();
 
     //constant .87 is magic
     //flock_settings.particle_rest_distance = .87 * pow(particle_vol, 1./3.);
@@ -263,9 +278,9 @@ void FLOCK::calculateFLOCKSettings()
     params.num = num;
     
     // Boids parameters
-	params.min_dist     = 0.5f * params.smoothing_distance * ps->settings.min_dist; // desired separation between boids
-    params.search_radius= 0.8f * params.smoothing_distance * ps->settings.search_radius;
-    params.max_speed    = 1.0f * ps->settings.max_speed;
+	params.min_dist     = 0.5f * params.smoothing_distance * ps->settings->min_dist; // desired separation between boids
+    params.search_radius= 0.8f * params.smoothing_distance * ps->settings->search_radius;
+    params.max_speed    = 1.0f * ps->settings->max_speed;
 
     // debug mymese
 #if 0
@@ -378,15 +393,15 @@ void FLOCK::prepareSorted()
 //----------------------------------------------------------------------
 void FLOCK::setupDomain()
 {
-    grid.calculateCells(flock_settings.smoothing_distance / flock_settings.simulation_scale);
+    grid->calculateCells(flock_settings.smoothing_distance / flock_settings.simulation_scale);
 
-	grid_params.grid_min = grid.getMin();
-	grid_params.grid_max = grid.getMax();
-	grid_params.bnd_min  = grid.getBndMin();
-	grid_params.bnd_max  = grid.getBndMax();
-	grid_params.grid_res = grid.getRes();
-	grid_params.grid_size = grid.getSize();
-	grid_params.grid_delta = grid.getDelta();
+	grid_params.grid_min = grid->getMin();
+	grid_params.grid_max = grid->getMax();
+	grid_params.bnd_min  = grid->getBndMin();
+	grid_params.bnd_max  = grid->getBndMax();
+	grid_params.grid_res = grid->getRes();
+	grid_params.grid_size = grid->getSize();
+	grid_params.grid_delta = grid->getDelta();
 	grid_params.nb_cells = (int) (grid_params.grid_res.x*grid_params.grid_res.y*grid_params.grid_res.z);
 
     printf("gp nb_cells: %d\n", grid_params.nb_cells);
@@ -519,27 +534,27 @@ void FLOCK::updateFLOCKP()
 void FLOCK::render()
 {
 	System::render();
-	renderer->render_box(grid.getBndMin(), grid.getBndMax());
+	renderer->render_box(grid->getBndMin(), grid->getBndMax());
 }
 
 //----------------------------------------------------------------------
 void FLOCK::setRenderer()
 {
-    switch(ps->settings.getRenderType())
+    switch(ps->settings->getRenderType())
     {
         case RTPSettings::SPRITE_RENDER:
-            renderer = new SpriteRender(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+            renderer = new SpriteRender(pos_vbo,col_vbo,num,ps->cli, ps->settings);
             printf("spacing for radius %f\n", flock_settings.spacing);
             break;
         case RTPSettings::SCREEN_SPACE_RENDER:
-            renderer = new SSFRender(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+            renderer = new SSFRender(pos_vbo,col_vbo,num,ps->cli, ps->settings);
             break;
         case RTPSettings::RENDER:
-            renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+            renderer = new Render(pos_vbo,col_vbo,num,ps->cli, ps->settings);
             break;
         default:
             //should be an error
-            renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+            renderer = new Render(pos_vbo,col_vbo,num,ps->cli, ps->settings);
         break;
     }
     renderer->setParticleRadius(flock_settings.spacing);

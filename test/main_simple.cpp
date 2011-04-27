@@ -118,8 +118,8 @@ int main(int argc, char** argv)
     printf("dt: %f\n", DT);
 
     
-    rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
-    rtps::RTPSettings settings(rtps::RTPSettings::Simple, NUM_PARTICLES, DT, grid);
+    rtps::Domain* grid = new Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
+	rtps::RTPSettings *settings = new rtps::RTPSettings(rtps::RTPSettings::Simple, NUM_PARTICLES, DT, grid);
     ps = new rtps::RTPS(settings);
 
     glutMainLoop();

@@ -4,7 +4,7 @@ namespace rtps
 {
 
     //----------------------------------------------------------------------
-    Force::Force(CL* cli_, EB::Timer* timer_)
+    Force::Force(std::string path, CL* cli_, EB::Timer* timer_)
     {
         cli = cli_;
         timer = timer_;
@@ -13,7 +13,6 @@ namespace rtps
 
         try
         {
-            string path(SPH_CL_SOURCE_DIR);
             path = path + "/force.cl";
             k_force = Kernel(cli, path, "force_update");
         }

@@ -12,7 +12,7 @@ namespace rtps
     {
         public:
             CollisionTriangle() { cli = NULL; timer = NULL; };
-            CollisionTriangle(CL* cli, EB::Timer* timer, int max_triangles);
+            CollisionTriangle(std::string path, CL* cli, EB::Timer* timer, int max_triangles);
             void execute(int num,
                         float dt,
                         //input
@@ -28,7 +28,7 @@ namespace rtps
                         Buffer<int4>& cli_debug);
             
            
-        void loadTriangles(std::vector<Triangle> triangles);
+        void loadTriangles(std::vector<Triangle> &triangles);
 
         private:
             CL* cli;

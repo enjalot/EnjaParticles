@@ -3,13 +3,12 @@
 namespace rtps
 {
 
-    Lifetime::Lifetime(CL* cli_, EB::Timer* timer_, std::string filename)
+    Lifetime::Lifetime(std::string path, CL* cli_, EB::Timer* timer_, std::string filename)
     {
         cli = cli_;
         timer = timer_;
  
         printf("create liftime kernel\n");
-        std::string path(SPH_CL_SOURCE_DIR);
         path += "/" + filename;
         k_lifetime = Kernel(cli, path, "lifetime");
 

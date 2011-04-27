@@ -25,6 +25,10 @@ namespace rtps
     {
         this->settings = _settings;
      
+        shader_source_dir = settings->GetSettingAs<string>("rtps_path");
+        shader_source_dir += "/shaders";
+        printf("SHADER SOURCE DIR\n", shader_source_dir.c_str());
+
         rtype = POINTS;
         pos_vbo = pos;
         col_vbo = col;
@@ -106,9 +110,14 @@ namespace rtps
 
         if (blending)
         {
+            //glDisable(GL_DEPTH_TEST);
             glDepthMask(GL_FALSE);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        }
+        else
+        {
+            //glEnable(GL_DEPTH_TEST);
         }
 
 

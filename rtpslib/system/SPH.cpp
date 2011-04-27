@@ -16,17 +16,20 @@
 
 namespace rtps
 {
+    using namespace sph;
 
 
     SPH::SPH(RTPS *psfr, int n)
     {
         //store the particle system framework
         ps = psfr;
-        settings = &ps->settings;
-
+        settings = ps->settings;
         max_num = n;
         num = 0;
         nb_var = 10;
+
+        resource_path = settings->GetSettingAs<string>("rtps_path");
+        printf("resource path: %s\n", resource_path.c_str());
 
         //seed random
         srand ( time(NULL) );
@@ -39,7 +42,7 @@ namespace rtps
         std::vector<SPHParams> vparams(0);
         vparams.push_back(sphp);
         cl_sphp = Buffer<SPHParams>(ps->cli, vparams);
-
+        
         calculate();
         updateSPHP();
 
@@ -69,46 +72,44 @@ namespace rtps
         //setup the sorted and unsorted arrays
         prepareSorted();
 
+        //should be more cross platform
+        sph_source_dir = resource_path + "/" + std::string(SPH_CL_SOURCE_DIR);
+        common_source_dir = resource_path + "/" + std::string(COMMON_CL_SOURCE_DIR);
 
-        std::string cl_includes(SPH_CL_SOURCE_DIR);
-        ps->cli->setIncludeDir(cl_includes);
+        ps->cli->addIncludeDir(sph_source_dir);
+        ps->cli->addIncludeDir(common_source_dir);
 
-        loadScopy();
+        //loadScopy();
 
         //loadPrep();
-        prep = Prep(ps->cli, timers["prep_gpu"]);
+        //prep = Prep(common_source_dir, ps->cli, timers["prep_gpu"]);
         //loadHash();
-        hash = Hash(ps->cli, timers["hash_gpu"]);
-        bitonic = Bitonic<unsigned int>( ps->cli );
+        hash = Hash(common_source_dir, ps->cli, timers["hash_gpu"]);
+        bitonic = Bitonic<unsigned int>(common_source_dir, ps->cli );
         //datastructures = DataStructures( ps->cli, timers["ds_gpu"] );
-        cellindices = CellIndices( ps->cli, timers["ci_gpu"] );
-        permute = Permute( ps->cli, timers["perm_gpu"] );
+        cellindices = CellIndices(common_source_dir, ps->cli, timers["ci_gpu"] );
+        permute = Permute( common_source_dir, ps->cli, timers["perm_gpu"] );
 
-        //loadBitonicSort();
-        //loadDataStructures();
-        //loadNeighbors();
-        density = Density(ps->cli, timers["density_gpu"]);
-        force = Force(ps->cli, timers["force_gpu"]);
-
-        //loadCollision_wall();
-        collision_wall = CollisionWall(ps->cli, timers["cw_gpu"]);
-        collision_tri = CollisionTriangle(ps->cli, timers["ct_gpu"], 2048); //TODO expose max_triangles as a parameter
-        //loadCollision_tri();
+        density = Density(sph_source_dir, ps->cli, timers["density_gpu"]);
+        force = Force(sph_source_dir, ps->cli, timers["force_gpu"]);
+        collision_wall = CollisionWall(sph_source_dir, ps->cli, timers["cw_gpu"]);
+        collision_tri = CollisionTriangle(sph_source_dir, ps->cli, timers["ct_gpu"], 2048); //TODO expose max_triangles as a parameter
 
         //could generalize this to other integration methods later (leap frog, RK4)
         if (integrator == LEAPFROG)
         {
             //loadLeapFrog();
-            leapfrog = LeapFrog(ps->cli, timers["leapfrog_gpu"]);
+            leapfrog = LeapFrog(sph_source_dir, ps->cli, timers["leapfrog_gpu"]);
         }
         else if (integrator == EULER)
         {
             //loadEuler();
-            euler = Euler(ps->cli, timers["euler_gpu"]);
+            euler = Euler(sph_source_dir, ps->cli, timers["euler_gpu"]);
         }
 
         string lt_file = settings->GetSettingAs<string>("lt_cl");
-        lifetime = Lifetime(ps->cli, timers["lifetime_gpu"], lt_file);
+        lifetime = Lifetime(sph_source_dir, ps->cli, timers["lifetime_gpu"], lt_file);
+
 
 
 #endif
@@ -137,6 +138,15 @@ namespace rtps
             glBindBuffer(1, col_vbo);
             glDeleteBuffers(1, (GLuint*)&col_vbo);
             col_vbo = 0;
+        }
+
+        Hose* hose;
+        int hs = hoses.size();  
+        for(int i = 0; i < hs; i++)
+        {
+            hose = hoses[i];
+            delete hose;
+
         }
 
     }
@@ -189,7 +199,6 @@ namespace rtps
 
         timers["update"]->start();
         glFinish();
-
         if (settings->has_changed()) updateSPHP();
 
         //settings->printSettings();
@@ -300,7 +309,7 @@ namespace rtps
                 renderer->setNum(sphp.num);
                 //need to copy sorted arrays into unsorted arrays
                 call_prep(2);
-                printf("HOW MANY NOW? %d\n", num);
+                //printf("HOW MANY NOW? %d\n", num);
                 hash_and_sort();
                                 //we've changed num and copied sorted to unsorted. skip this iteration and do next one
                 //this doesn't work because sorted force etc. are having an effect?
@@ -486,25 +495,10 @@ namespace rtps
     {
             //Replace with enqueueCopyBuffer
 
-            prep.execute(num,
-                    stage,
-                    cl_position_u,
-                    cl_position_s,
-                    cl_velocity_u,
-                    cl_velocity_s,
-                    cl_veleval_u,
-                    cl_veleval_s,
-                    cl_color_u,
-                    cl_color_s,
-                    //cl_vars_unsorted, 
-                    //cl_vars_sorted, 
-                    cl_sort_indices,
-                    //params
-                    cl_sphp,
-                    //Buffer<GridParams>& gp,
-                    //debug params
-                    clf_debug,
-                    cli_debug);
+            cl_position_u.copyFromBuffer(cl_position_s, 0, 0, num);
+            cl_velocity_u.copyFromBuffer(cl_velocity_s, 0, 0, num);
+            cl_veleval_u.copyFromBuffer(cl_veleval_s, 0, 0, num);
+            cl_color_u.copyFromBuffer(cl_color_s, 0, 0, num);
     }
 
     int SPH::setupTimers()
@@ -535,7 +529,7 @@ namespace rtps
         timers["leapfrog_gpu"] = new EB::Timer("LeapFrog Integration GPU kernel execution", time_offset);
         timers["euler_gpu"] = new EB::Timer("Euler Integration GPU kernel execution", time_offset);
         timers["lifetime_gpu"] = new EB::Timer("Lifetime GPU kernel execution", time_offset);
-        timers["prep_gpu"] = new EB::Timer("Prep GPU kernel execution", time_offset);
+        //timers["prep_gpu"] = new EB::Timer("Prep GPU kernel execution", time_offset);
 		return 0;
     }
 
@@ -547,7 +541,7 @@ namespace rtps
 
     void SPH::prepareSorted()
     {
-#include "sph/cl_src/cl_macros.h"
+//#include "sph/cl_src/cl_macros.h"
 
         positions.resize(max_num);
         colors.resize(max_num);
@@ -668,16 +662,16 @@ namespace rtps
 
     void SPH::setupDomain()
     {
-        grid.calculateCells(sphp.smoothing_distance / sphp.simulation_scale);
+        grid->calculateCells(sphp.smoothing_distance / sphp.simulation_scale);
 
 
-        grid_params.grid_min = grid.getMin();
-        grid_params.grid_max = grid.getMax();
-        grid_params.bnd_min  = grid.getBndMin();
-        grid_params.bnd_max  = grid.getBndMax();
-        grid_params.grid_res = grid.getRes();
-        grid_params.grid_size = grid.getSize();
-        grid_params.grid_delta = grid.getDelta();
+        grid_params.grid_min = grid->getMin();
+        grid_params.grid_max = grid->getMax();
+        grid_params.bnd_min  = grid->getBndMin();
+        grid_params.bnd_max  = grid->getBndMax();
+        grid_params.grid_res = grid->getRes();
+        grid_params.grid_size = grid->getSize();
+        grid_params.grid_delta = grid->getDelta();
         grid_params.nb_cells = (int) (grid_params.grid_res.x*grid_params.grid_res.y*grid_params.grid_res.z);
 
         //printf("gp nb_cells: %d\n", grid_params.nb_cells);
@@ -734,16 +728,27 @@ namespace rtps
         pushParticles(sphere,velo);
     }
 
-    void SPH::addHose(int total_n, float4 center, float4 velocity, float radius, float4 color)
+    int SPH::addHose(int total_n, float4 center, float4 velocity, float radius, float4 color)
     {
-        printf("wtf for real\n");
         //in sph we just use sph spacing
         radius *= spacing;
-        Hose hose = Hose(ps, total_n, center, velocity, radius, spacing, color);
-        printf("wtf\n");
+        Hose *hose = new Hose(ps, total_n, center, velocity, radius, spacing, color);
         hoses.push_back(hose);
-        printf("size of hoses: %d\n", hoses.size());
+        //return the index
+        return hoses.size()-1;
+        //printf("size of hoses: %d\n", hoses.size());
     }
+    void SPH::updateHose(int index, float4 center, float4 velocity, float radius, float4 color)
+    {
+        //we need to expose the vector of hoses somehow
+        //doesn't seem right to make user manage an index
+        //in sph we just use sph spacing
+        radius *= spacing;
+        hoses[index]->update(center, velocity, radius, spacing, color);
+        //printf("size of hoses: %d\n", hoses.size());
+    }
+
+
 
     void SPH::sprayHoses()
     {
@@ -751,9 +756,9 @@ namespace rtps
         std::vector<float4> parts;
         for (int i = 0; i < hoses.size(); i++)
         {
-            parts = hoses[i].spray();
+            parts = hoses[i]->spray();
             if (parts.size() > 0)
-                pushParticles(parts, hoses[i].getVelocity(), hoses[i].getColor());
+                pushParticles(parts, hoses[i]->getVelocity(), hoses[i]->getColor());
         }
     }
 
@@ -795,7 +800,7 @@ namespace rtps
         //float4 color(1.0f,1.0f,1.0f,1.0f);
 
         std::vector<float4> cols(nn);
-        printf("color: %f %f %f %f\n", color.x, color.y, color.z, color.w);
+        //printf("color: %f %f %f %f\n", color.x, color.y, color.z, color.w);
 
         std::fill(cols.begin(), cols.end(),color);
         //float v = .5f;
@@ -844,28 +849,28 @@ namespace rtps
 
     void SPH::render()
     {
-        renderer->render_box(grid.getBndMin(), grid.getBndMax());
-        renderer->render_table(grid.getBndMin(), grid.getBndMax());
+        renderer->render_box(grid->getBndMin(), grid->getBndMax());
+        //renderer->render_table(grid->getBndMin(), grid->getBndMax());
         System::render();
     }
     void SPH::setRenderer()
     {
-        switch(ps->settings.getRenderType())
+        switch(ps->settings->getRenderType())
         {
             case RTPSettings::SPRITE_RENDER:
-                renderer = new SpriteRender(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
-                printf("spacing for radius %f\n", spacing);
+                renderer = new SpriteRender(pos_vbo,col_vbo,num,ps->cli, ps->settings);
+                //printf("spacing for radius %f\n", spacing);
                 break;
             case RTPSettings::SCREEN_SPACE_RENDER:
                 //renderer = new ScreenSpaceRender();
-                renderer = new SSFRender(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+                renderer = new SSFRender(pos_vbo,col_vbo,num,ps->cli, ps->settings);
                 break;
             case RTPSettings::RENDER:
-                renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+                renderer = new Render(pos_vbo,col_vbo,num,ps->cli, ps->settings);
                 break;
             default:
                 //should be an error
-                renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
+                renderer = new Render(pos_vbo,col_vbo,num,ps->cli, ps->settings);
                 break;
         }
         //renderer->setParticleRadius(spacing*0.5);
