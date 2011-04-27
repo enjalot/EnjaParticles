@@ -14,7 +14,7 @@
 
 namespace rtps
 {
-using namespace flock;
+//using namespace flock;
 
 //----------------------------------------------------------------------
 FLOCK::FLOCK(RTPS *psfr, int n)
@@ -26,9 +26,12 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     num = 0;
     nb_var = 10;
 
+    resource_path = ps->settings->GetSettingAs<std::string>("rtps_path");
+    printf("resource path: %s\n", resource_path.c_str());
+
     //seed random
     srand ( time(NULL) );
-    
+
     /*
     positions.resize(max_num);
     colors.resize(max_num);
@@ -38,7 +41,6 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     densities.resize(max_num);
     xflocks.resize(max_num);
     */
-
 
     grid = settings->grid;
 
@@ -73,28 +75,40 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     //setup the sorted and unsorted arrays
     prepareSorted();
 
-    std::string cl_includes(FLOCK_CL_SOURCE_DIR);
-    ps->cli->setIncludeDir(cl_includes);
+    //should be more cross platform
+    flock_source_dir = resource_path + "/" + std::string(FLOCK_CL_SOURCE_DIR);
+    common_source_dir = resource_path + "/" + std::string(COMMON_CL_SOURCE_DIR);
+
+    ps->cli->addIncludeDir(flock_source_dir);
+    ps->cli->addIncludeDir(common_source_dir);
+
+
+    //std::string cl_includes(FLOCK_CL_SOURCE_DIR);
+    //ps->cli->addIncludeDir(cl_includes);
+
+
 
     //loadEuler();
-
-    loadScopy();
-
+    //loadScopy();
     //loadPrep();
-    prep = Prep(ps->cli, timers["prep_gpu"]);
     //loadHash();
-    hash = Hash(ps->cli, timers["hash_gpu"]);
     //loadBitonicSort();
-    bitonic = Bitonic<unsigned int>(ps->cli);
-    
     //loadDataStructures();
     //loadNeighbors();
     
-    cellindices = CellIndices(ps->cli, timers["ci_gpu"]);
-    permute = Permute(ps->cli, timers["perm_gpu"]);
+    //prep = Prep(ps->cli, timers["prep_gpu"]);
+    //hash = Hash(ps->cli, timers["hash_gpu"]);
+    //bitonic = Bitonic<unsigned int>(ps->cli);
+    //cellindices = CellIndices(ps->cli, timers["ci_gpu"]);
+    //permute = Permute(ps->cli, timers["perm_gpu"]);
     
-    computeRules = ComputeRules(ps->cli, timers["computeRules_gpu"]);
-    averageRules = AverageRules(ps->cli, timers["averageRules_gpu"]);
+    hash = Hash(common_source_dir, ps->cli, timers["hash_gpu"]);
+    bitonic = Bitonic<unsigned int>(common_source_dir, ps->cli );
+    cellindices = CellIndices(common_source_dir, ps->cli, timers["ci_gpu"] );
+    permute = Permute( common_source_dir, ps->cli, timers["perm_gpu"] );
+    
+    computeRules = ComputeRules(flock_source_dir, ps->cli, timers["computeRules_gpu"]);
+    averageRules = AverageRules(flock_source_dir, ps->cli, timers["averageRules_gpu"]);
 
 
 #endif
@@ -412,7 +426,7 @@ void FLOCK::integrate()
 void FLOCK::call_prep(int stage)
 {
     //Replace with enqueueCopyBuffer
-    prep.execute(num,
+/*    prep.execute(num,
         stage,
         cl_position_u,
         cl_position_s,
@@ -430,7 +444,16 @@ void FLOCK::call_prep(int stage)
         //Buffer<GridParams>& gp,
         //debug params
         clf_debug,
-        cli_debug);
+        cli_debug);*/
+
+
+        //Replace with enqueueCopyBuffer
+
+        cl_position_u.copyFromBuffer(cl_position_s, 0, 0, num);
+        cl_velocity_u.copyFromBuffer(cl_velocity_s, 0, 0, num);
+        cl_veleval_u.copyFromBuffer(cl_veleval_s, 0, 0, num);
+        cl_color_u.copyFromBuffer(cl_color_s, 0, 0, num);
+
 }
 
 //----------------------------------------------------------------------
@@ -472,7 +495,7 @@ int FLOCK::setupTimers()
     timers["integrate"] = new EB::Timer("Integration kernel execution", time_offset);
     timers["averageRules"] = new EB::Timer("Average Rules function", time_offset);
     timers["averageRules_gpu"] = new EB::Timer("Average Rules GPU kernel execution", time_offset);
-    timers["prep_gpu"] = new EB::Timer("Prep GPU kernel execution", time_offset);
+    //timers["prep_gpu"] = new EB::Timer("Prep GPU kernel execution", time_offset);
 	return 0;
 }
 

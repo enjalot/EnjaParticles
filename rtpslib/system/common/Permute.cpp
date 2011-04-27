@@ -5,12 +5,11 @@
 namespace rtps
 {
 
-    Permute::Permute(CL* cli_, EB::Timer* timer_)
+    Permute::Permute(std::string path, CL* cli_, EB::Timer* timer_)
     {
         cli = cli_;
         timer = timer_;
         printf("create permute kernel\n");
-        std::string path(COMMON_CL_SOURCE_DIR);
         path = path + "/permute.cl";
         k_permute = Kernel(cli, path, "permute");
         
@@ -47,13 +46,8 @@ namespace rtps
         k_permute.setArg(iarg++, color_u.getDevicePtr());
         k_permute.setArg(iarg++, color_s.getDevicePtr());
         k_permute.setArg(iarg++, indices.getDevicePtr());
-        //k_permute.setArg(iarg++, sphp.getDevicePtr());
-        k_permute.setArg(iarg++, gp.getDevicePtr());
 
         int workSize = 64;
-        int nb_bytes = (workSize+1)*sizeof(int);
-        k_permute.setArgShared(iarg++, nb_bytes);
-
         
         //printf("about to data structures\n");
         try

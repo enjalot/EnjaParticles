@@ -75,6 +75,8 @@ SET(LINK_LIBS
     ${OPENGL_LIBRARIES}
     ${OPENCL_LIBRARIES}
     ${GLEW_LIBRARY}
+    # /opt/local/lib/libGLEW.a #for staticl linking when distributing. should do this more cmake way
+    # /usr/lib/libGLEW.a #for static linking when distributing on linux. should do this more cmake way
 )
 message(RTPS_EXPORTS "${rtps_EXPORTS}")
 

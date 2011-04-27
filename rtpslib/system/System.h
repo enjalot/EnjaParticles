@@ -130,6 +130,9 @@ namespace rtps
 
         Render* renderer;
 
+        std::string resource_path;
+        std::string common_source_dir;
+
         virtual void setRenderer()
         {
             //delete renderer;

@@ -4,7 +4,7 @@
 namespace rtps
 {
     //----------------------------------------------------------------------
-    Density::Density(CL* cli_, EB::Timer* timer_)
+    Density::Density(std::string path, CL* cli_, EB::Timer* timer_)
     {
         cli = cli_;
         timer = timer_;
@@ -13,7 +13,6 @@ namespace rtps
 
         try
         {
-            string path(SPH_CL_SOURCE_DIR);
             path = path + "/density.cl";
             k_density = Kernel(cli, path, "density_update");
         }

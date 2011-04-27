@@ -12,7 +12,7 @@ namespace rtps
     {
         public:
             ComputeRules() { cli = NULL; timer = NULL; };
-            ComputeRules(CL* cli, EB::Timer* timer);
+            ComputeRules(std::string path, CL* cli, EB::Timer* timer);
             void execute(int num,
                     //input
                     //Buffer<float4>& svars, 

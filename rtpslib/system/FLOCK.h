@@ -17,7 +17,7 @@
 #include <FLOCKSettings.h>
 
 
-#include <flock/Prep.h>
+//#include <flock/Prep.h>
 #include <Hash.h>
 #include <BitonicSort.h>
 //#include <DataStructures.h>
@@ -167,6 +167,8 @@ private:
     GridParams      grid_params_scaled;
     float spacing; //Particle rest distance in world coordinates
 
+    std::string flock_source_dir;
+
     int nb_var;
 
     std::vector<float4> deleted_pos;
@@ -287,7 +289,7 @@ private:
     void updateFLOCKP();
 
     //Nearest Neighbors search related functions
-    flock::Prep prep;
+    //flock::Prep prep;
     void call_prep(int stage);
     Hash hash;
     //DataStructures datastructures;
@@ -309,10 +311,9 @@ private:
     void integrate();
 
     //OpenCL helper functions, should probably be part of the OpenCL classes
-    void loadScopy();
-	void scopy(int n, cl_mem xsrc, cl_mem ydst); 
-
-
+    //void loadScopy();
+	//void scopy(int n, cl_mem xsrc, cl_mem ydst); 
+   
 };
 
 }

@@ -12,7 +12,7 @@ namespace rtps
     {
         public:
             AverageRules() { cli = NULL; timer = NULL; };
-            AverageRules(CL* cli, EB::Timer* timer);
+            AverageRules(std::string path, CL* cli, EB::Timer* timer);
             void execute(int num,
                         float dt,
                         Buffer<float4>& pos_u,

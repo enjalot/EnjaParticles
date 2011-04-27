@@ -28,6 +28,9 @@ namespace rtps
         num = 0;
         nb_var = 10;
 
+        resource_path = settings->GetSettingAs<string>("rtps_path");
+        printf("resource path: %s\n", resource_path.c_str());
+
         //seed random
         srand ( time(NULL) );
 
@@ -69,46 +72,43 @@ namespace rtps
         //setup the sorted and unsorted arrays
         prepareSorted();
 
+        //should be more cross platform
+        sph_source_dir = resource_path + "/" + std::string(SPH_CL_SOURCE_DIR);
+        common_source_dir = resource_path + "/" + std::string(COMMON_CL_SOURCE_DIR);
 
-        std::string cl_includes(SPH_CL_SOURCE_DIR);
-        ps->cli->setIncludeDir(cl_includes);
+        ps->cli->addIncludeDir(sph_source_dir);
+        ps->cli->addIncludeDir(common_source_dir);
 
-        loadScopy();
+        //loadScopy();
 
         //loadPrep();
-        prep = Prep(ps->cli, timers["prep_gpu"]);
+        //prep = Prep(common_source_dir, ps->cli, timers["prep_gpu"]);
         //loadHash();
-        hash = Hash(ps->cli, timers["hash_gpu"]);
-        bitonic = Bitonic<unsigned int>( ps->cli );
+        hash = Hash(common_source_dir, ps->cli, timers["hash_gpu"]);
+        bitonic = Bitonic<unsigned int>(common_source_dir, ps->cli );
         //datastructures = DataStructures( ps->cli, timers["ds_gpu"] );
-        cellindices = CellIndices( ps->cli, timers["ci_gpu"] );
-        permute = Permute( ps->cli, timers["perm_gpu"] );
+        cellindices = CellIndices(common_source_dir, ps->cli, timers["ci_gpu"] );
+        permute = Permute( common_source_dir, ps->cli, timers["perm_gpu"] );
 
-        //loadBitonicSort();
-        //loadDataStructures();
-        //loadNeighbors();
-        density = Density(ps->cli, timers["density_gpu"]);
-        force = Force(ps->cli, timers["force_gpu"]);
-
-        //loadCollision_wall();
-        collision_wall = CollisionWall(ps->cli, timers["cw_gpu"]);
-        collision_tri = CollisionTriangle(ps->cli, timers["ct_gpu"], 2048); //TODO expose max_triangles as a parameter
-        //loadCollision_tri();
+        density = Density(sph_source_dir, ps->cli, timers["density_gpu"]);
+        force = Force(sph_source_dir, ps->cli, timers["force_gpu"]);
+        collision_wall = CollisionWall(sph_source_dir, ps->cli, timers["cw_gpu"]);
+        collision_tri = CollisionTriangle(sph_source_dir, ps->cli, timers["ct_gpu"], 2048); //TODO expose max_triangles as a parameter
 
         //could generalize this to other integration methods later (leap frog, RK4)
         if (integrator == LEAPFROG)
         {
             //loadLeapFrog();
-            leapfrog = LeapFrog(ps->cli, timers["leapfrog_gpu"]);
+            leapfrog = LeapFrog(sph_source_dir, ps->cli, timers["leapfrog_gpu"]);
         }
         else if (integrator == EULER)
         {
             //loadEuler();
-            euler = Euler(ps->cli, timers["euler_gpu"]);
+            euler = Euler(sph_source_dir, ps->cli, timers["euler_gpu"]);
         }
 
         string lt_file = settings->GetSettingAs<string>("lt_cl");
-        lifetime = Lifetime(ps->cli, timers["lifetime_gpu"], lt_file);
+        lifetime = Lifetime(sph_source_dir, ps->cli, timers["lifetime_gpu"], lt_file);
 
 
 
@@ -495,25 +495,10 @@ namespace rtps
     {
             //Replace with enqueueCopyBuffer
 
-            prep.execute(num,
-                    stage,
-                    cl_position_u,
-                    cl_position_s,
-                    cl_velocity_u,
-                    cl_velocity_s,
-                    cl_veleval_u,
-                    cl_veleval_s,
-                    cl_color_u,
-                    cl_color_s,
-                    //cl_vars_unsorted, 
-                    //cl_vars_sorted, 
-                    cl_sort_indices,
-                    //params
-                    cl_sphp,
-                    //Buffer<GridParams>& gp,
-                    //debug params
-                    clf_debug,
-                    cli_debug);
+            cl_position_u.copyFromBuffer(cl_position_s, 0, 0, num);
+            cl_velocity_u.copyFromBuffer(cl_velocity_s, 0, 0, num);
+            cl_veleval_u.copyFromBuffer(cl_veleval_s, 0, 0, num);
+            cl_color_u.copyFromBuffer(cl_color_s, 0, 0, num);
     }
 
     int SPH::setupTimers()
@@ -544,7 +529,7 @@ namespace rtps
         timers["leapfrog_gpu"] = new EB::Timer("LeapFrog Integration GPU kernel execution", time_offset);
         timers["euler_gpu"] = new EB::Timer("Euler Integration GPU kernel execution", time_offset);
         timers["lifetime_gpu"] = new EB::Timer("Lifetime GPU kernel execution", time_offset);
-        timers["prep_gpu"] = new EB::Timer("Prep GPU kernel execution", time_offset);
+        //timers["prep_gpu"] = new EB::Timer("Prep GPU kernel execution", time_offset);
 		return 0;
     }
 

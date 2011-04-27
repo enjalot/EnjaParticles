@@ -158,6 +158,14 @@ int main(int argc, char** argv)
     //rtps::RTPSettings* settings(rtps::RTPSettings::FLOCK, NUM_PARTICLES, DT, grid, maxspeed, mindist, searchradius, color, w_sep, w_align, w_coh);
     rtps::RTPSettings* settings = new rtps::RTPSettings(rtps::RTPSettings::FLOCK, NUM_PARTICLES, DT, grid);
 
+#ifdef WIN32
+    settings->SetSetting("rtps_path", ".");
+#else
+    settings->SetSetting("rtps_path", "./bin");
+    //settings->SetSetting("rtps_path", argv[0]);
+    //printf("arvg[0]: %s\n", argv[0]);
+#endif
+
     settings->setRenderType(RTPSettings::RENDER);
     //settings->setRenderType(RTPSettings::SPRITE_RENDER);
     
@@ -165,7 +173,7 @@ int main(int argc, char** argv)
     settings->setBlurScale(1.0);
     settings->setUseGLSL(1);
 
-    settings->SetSetting("render_texture", "boid3.png");
+    settings->SetSetting("render_texture", "nemo.png");
     settings->SetSetting("render_frag_shader", "boid_tex_frag.glsl");
     //settings->SetSetting("render_use_alpha", true);
     settings->SetSetting("render_use_alpha", false);

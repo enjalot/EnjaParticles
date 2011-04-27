@@ -2,13 +2,12 @@
 
 namespace rtps 
 {
-    AverageRules::AverageRules(CL* cli_, EB::Timer* timer_)
+    AverageRules::AverageRules(std::string path, CL* cli_, EB::Timer* timer_)
     {
         cli = cli_;
         timer = timer_;
  
         printf("create averageRules kernel\n");
-        std::string path(FLOCK_CL_SOURCE_DIR);
         path += "/averageRules.cl";
         k_averageRules = Kernel(cli, path, "averageRules");
     } 

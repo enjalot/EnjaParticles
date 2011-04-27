@@ -4,12 +4,11 @@
 namespace rtps
 {
 
-    Hash::Hash(CL* cli_, EB::Timer* timer_)
+    Hash::Hash(std::string path, CL* cli_, EB::Timer* timer_)
     {
         cli = cli_;
         timer = timer_;
         printf("create hash kernel\n");
-        std::string path(COMMON_CL_SOURCE_DIR);
         path = path + "/hash.cl";
         k_hash = Kernel(cli, path, "hash");
     }

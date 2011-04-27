@@ -5,13 +5,12 @@ namespace rtps
 namespace sph
 {
 
-    LeapFrog::LeapFrog(CL* cli_, EB::Timer* timer_)
+    LeapFrog::LeapFrog(std::string path, CL* cli_, EB::Timer* timer_)
     {
         cli = cli_;
         timer = timer_;
  
         printf("create leapfrog kernel\n");
-        std::string path(SPH_CL_SOURCE_DIR);
         path += "/leapfrog.cl";
         k_leapfrog = Kernel(cli, path, "leapfrog");
 

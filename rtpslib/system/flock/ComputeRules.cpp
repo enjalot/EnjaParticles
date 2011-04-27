@@ -4,7 +4,7 @@
 namespace rtps 
 {
     //----------------------------------------------------------------------
-    ComputeRules::ComputeRules(CL* cli_, EB::Timer* timer_)
+    ComputeRules::ComputeRules(std::string path, CL* cli_, EB::Timer* timer_)
     {
         cli = cli_;
         timer = timer_;
@@ -13,7 +13,6 @@ namespace rtps
 
         try
         {
-            string path(FLOCK_CL_SOURCE_DIR);
             path = path + "/computeRules.cl";
             k_computeRules= Kernel(cli, path, "computeRules");
         }

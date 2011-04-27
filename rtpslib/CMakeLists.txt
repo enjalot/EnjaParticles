@@ -31,25 +31,12 @@ ENDIF(WITH_OPENCL)
 ##############################################################################
 
 ##### Source Paths ############################################################
-IF(RTPS_DEBUG)
-ADD_DEFINITIONS(-DSIMPLE_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_simple")
-ADD_DEFINITIONS(-DSPH_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_sph")
-ADD_DEFINITIONS(-DFLOCK_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_flock")
-ADD_DEFINITIONS(-DCOMMON_CL_SOURCE_DIR="${rtpslib_BINARY_DIR}/cl_common")
-ADD_DEFINITIONS(-DGLSL_BIN_DIR="${rtpslib_BINARY_DIR}/shaders")
-ADD_DEFINITIONS(-DGLSL_SOURCE_DIR="${rtpslib_SOURCE_DIR}/render/")
-ELSE(RTPS_DEBUG)
-ADD_DEFINITIONS(-DSIMPLE_CL_SOURCE_DIR="${RTPS_INSTALL_DIR_REL}/cl_simple")
-ADD_DEFINITIONS(-DSPH_CL_SOURCE_DIR="${RTPS_INSTALL_DIR_REL}/cl_sph")
-ADD_DEFINITIONS(-DFLOCK_CL_SOURCE_DIR="${RTPS_INSTALL_DIR_REL}/cl_flock")
-ADD_DEFINITIONS(-DCOMMON_CL_SOURCE_DIR="${RTPS_INSTALL_DIR_REL}/cl_common")
-ADD_DEFINITIONS(-DGLSL_BIN_DIR="${RTPS_INSTALL_DIR_REL}/shaders")
-ADD_DEFINITIONS(-DGLSL_SOURCE_DIR="${RTPS_INSTALL_DIR_REL}/render/")
-ENDIF(RTPS_DEBUG)
-
-
-
-
+ADD_DEFINITIONS(-DSIMPLE_CL_SOURCE_DIR="cl_simple")
+ADD_DEFINITIONS(-DSPH_CL_SOURCE_DIR="cl_sph")
+ADD_DEFINITIONS(-DFLOCK_CL_SOURCE_DIR="cl_flock")
+ADD_DEFINITIONS(-DCOMMON_CL_SOURCE_DIR="cl_common")
+ADD_DEFINITIONS(-DGLSL_BIN_DIR="shaders")
+ADD_DEFINITIONS(-DGLSL_SOURCE_DIR="render")
 ##############################################################################
 
 
@@ -97,7 +84,7 @@ set (rtpslib_SOURCES
 
     ${rtpslib_SOURCE_DIR}/domain/Domain
     ${rtpslib_SOURCE_DIR}/domain/IV
-    ${rtpslib_SOURCE_DIR}/system/common/Hose
+    # ${rtpslib_SOURCE_DIR}/system/common/Hose
     
 
     # common use for all systems
@@ -119,7 +106,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/sph/LeapFrog
     ${rtpslib_SOURCE_DIR}/system/sph/Lifetime
     
-    ${rtpslib_SOURCE_DIR}/system/sph/Prep
+    #${rtpslib_SOURCE_DIR}/system/sph/Prep
     ${rtpslib_SOURCE_DIR}/system/sph/Sort
     ${rtpslib_SOURCE_DIR}/system/sph/Density
     ${rtpslib_SOURCE_DIR}/system/sph/Force
@@ -151,7 +138,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/boids
     
     # neighbors
-    ${rtpslib_SOURCE_DIR}/system/flock/Prep
+    #${rtpslib_SOURCE_DIR}/system/flock/Prep
     ${rtpslib_SOURCE_DIR}/system/flock/Sort
     #${rtpslib_SOURCE_DIR}/system/flock/Hash
     #${rtpslib_SOURCE_DIR}/system/flock/BitonicSort
@@ -177,8 +164,8 @@ SET(rtpslib_SOURCES ${rtpslib_SOURCES}
     #${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src/oclBitonicSort_launcher
     #${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src/BitonicSort #template class
     #these should probably be in the OpenCL classes
-    ${rtpslib_SOURCE_DIR}/system/sph/Scopy
-    ${rtpslib_SOURCE_DIR}/system/flock/Scopy
+    #${rtpslib_SOURCE_DIR}/system/sph/Scopy
+    #${rtpslib_SOURCE_DIR}/system/flock/Scopy
     #${rtpslib_SOURCE_DIR}/system/sph/SetInt
     )
 ENDIF(WITH_OPENCL)
@@ -193,6 +180,8 @@ TARGET_LINK_LIBRARIES (rtps
    ${OPENGL_LIBRARIES}
    ${OPENCL_LIBRARIES}
    ${GLEW_LIBRARY}
+   # /opt/local/lib/libGLEW.a #for static linking when distributing on mac. should do this more cmake way
+   #/usr/lib/libGLEW.a #for static linking when distributing on linux. should do this more cmake way
 )
 
 

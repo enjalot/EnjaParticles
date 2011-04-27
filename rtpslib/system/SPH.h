@@ -17,7 +17,7 @@
 #include <SPHSettings.h>
 
 
-#include <Prep.h>
+//#include <Prep.h>
 #include <Hash.h>
 #include <BitonicSort.h>
 //#include <DataStructures.h>
@@ -97,6 +97,7 @@ namespace rtps
         Integrator integrator;
         float spacing; //Particle rest distance in world coordinates
 
+        std::string sph_source_dir;
         int nb_var;
 
         std::vector<float4> deleted_pos;
@@ -113,7 +114,7 @@ namespace rtps
         //void popParticles();
 
         //This should be in OpenCL classes
-        Kernel k_scopy;
+        //Kernel k_scopy;
 
         std::vector<float4> positions;
         std::vector<float4> colors;
@@ -185,7 +186,7 @@ namespace rtps
         void updateSPHP();
 
         //Nearest Neighbors search related functions
-        Prep prep;
+        //Prep prep;
         void call_prep(int stage);
         Hash hash;
         //DataStructures datastructures;
@@ -210,8 +211,8 @@ namespace rtps
         float Wviscosity(float4 r, float h);
 
         //OpenCL helper functions, should probably be part of the OpenCL classes
-        void loadScopy();
-        void scopy(int n, cl_mem xsrc, cl_mem ydst); 
+        //void loadScopy();
+        //void scopy(int n, cl_mem xsrc, cl_mem ydst); 
 
         //void sset_int(int n, int val, cl_mem xdst);
 

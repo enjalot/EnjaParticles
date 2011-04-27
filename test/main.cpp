@@ -92,11 +92,13 @@ void *font = GLUT_BITMAP_8_BY_13;
 
 rtps::RTPS* ps;
 
+//#define NUM_PARTICLES 2000000
+//#define NUM_PARTICLES 1000000
 //#define NUM_PARTICLES 524288
 //#define NUM_PARTICLES 262144
 //#define NUM_PARTICLES 131072
-//#define NUM_PARTICLES 65536
-#define NUM_PARTICLES 32768
+#define NUM_PARTICLES 65536
+//#define NUM_PARTICLES 32768
 //#define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 10000
 //#define NUM_PARTICLES 8192
@@ -106,7 +108,8 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 256
 #define DT .001f
 
-float4 color = float4(0.1, 0.1, 0.73, .05);
+//float4 color = float4(0.1, 0.1, 0.73, .05);
+float4 color = float4(1., 0.5, 0.0, 1.);
 int hindex; 
 
 
@@ -156,9 +159,6 @@ int main(int argc, char** argv)
     printf("GLEW supported?: %d\n", bGLEW);
 
 
-    printf("before we call enjas functions\n");
-
-
     //default constructor
     //rtps::RTPSettings settings;
     //rtps::Domain grid = Domain(float4(-5,-.3,0,0), float4(2, 2, 12, 0));
@@ -166,8 +166,17 @@ int main(int argc, char** argv)
     //rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
 	rtps::RTPSettings* settings = new rtps::RTPSettings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
 
-    settings->setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
-    //settings->setRenderType(RTPSettings::RENDER);
+    //should be argv[0]
+#ifdef WIN32
+    settings->SetSetting("rtps_path", ".");
+#else
+    settings->SetSetting("rtps_path", "./bin");
+    //settings->SetSetting("rtps_path", argv[0]);
+    //printf("arvg[0]: %s\n", argv[0]);
+#endif
+
+    //settings->setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
+    settings->setRenderType(RTPSettings::RENDER);
     //settings.setRenderType(RTPSettings::SPRITE_RENDER);
     settings->setRadiusScale(1.0);
     settings->setBlurScale(1.0);
@@ -175,33 +184,25 @@ int main(int argc, char** argv)
 
     settings->SetSetting("render_texture", "firejet_blast.png");
     settings->SetSetting("render_frag_shader", "sprite_tex_frag.glsl");
-    settings->SetSetting("render_use_alpha", true);
-    //settings.SetSetting("render_use_alpha", false);
+    //settings->SetSetting("render_use_alpha", true);
+    settings->SetSetting("render_use_alpha", false);
     settings->SetSetting("render_alpha_function", "add");
     settings->SetSetting("lt_increment", -.00);
     settings->SetSetting("lt_cl", "lifetime.cl");
 
-
-
-
-printf("creating new system\n");
     ps = new rtps::RTPS(settings);
     //ps = new rtps::RTPS();
-printf("system created\n");
-printf("system created\n");
-printf("system created\n");
 
     ps->settings->SetSetting("Gravity", -9.8f); // -9.8 m/sec^2
-    ps->settings->SetSetting("Gas Constant", 15.0f);
-    ps->settings->SetSetting("Viscosity", .01f);
+    ps->settings->SetSetting("Gas Constant", 1.0f);
+    ps->settings->SetSetting("Viscosity", .001f);
     ps->settings->SetSetting("Velocity Limit", 600.0f);
-    ps->settings->SetSetting("XSPH Factor", .2f);
+    ps->settings->SetSetting("XSPH Factor", .05f);
     ps->settings->SetSetting("Friction Kinetic", 0.0f);
     ps->settings->SetSetting("Friction Static", 0.0f);
     ps->settings->SetSetting("Boundary Stiffness", 20000.0f);
     ps->settings->SetSetting("Boundary Dampening", 256.0f);
 
-printf("initializing gl\n");
 
     //initialize the OpenGL scene for rendering
     init_gl();
@@ -326,6 +327,10 @@ void appKeyboard(unsigned char key, int x, int y)
                 make_cube(triangles, cen, cw);
                 cen = float4(3.5, 3.5, cw-.1, 1.0f);
                 make_cube(triangles, cen, cw);
+
+                cen = float4(1.5, 1.5, cw-.1, 1.0f);
+                make_cube(triangles, cen, 1.);
+
                 ps->system->loadTriangles(triangles);
                 return;
             }
@@ -347,8 +352,8 @@ void appKeyboard(unsigned char key, int x, int y)
                 //min = float4(15.8, 15.8, 15.8, 1.0f);
                 //max = float4(16.5, 16.5, 16.5, 1.0f);
 
-                min = float4(1.2, 1.2, 1.2, 1.0f);
-                max = float4(2., 2., 2., 1.0f);
+                min = float4(1.2, 1.2, 3.2, 1.0f);
+                max = float4(2., 2., 4., 1.0f);
                 
                 //float4 color = float4(rand()/(10.*RAND_MAX), rand()/(RAND_MAX+1.0), rand()/(RAND_MAX+1.0), 0.2);
                 ps->system->addBox(nn, min, max, false, color);
