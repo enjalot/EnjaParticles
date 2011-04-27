@@ -103,13 +103,18 @@ namespace rtps
             glUseProgram(glsl_program[GAUSSIAN_X_SHADER]);
             glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "depthTex"),0);
             glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "del_x"),1.0f/window_width);
-            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "sig"),settings->GetSettingAs<float>("blur_scale"));
+            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "sig"),8.0f);//settings->GetSettingAs<float>("blur_scale"));
             fullscreenQuad();
+
+            glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["depth"],0);
+            //glClear(GL_DEPTH_BUFFER_BIT);
+            //glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D,gl_framebuffer_texs["depth2"]);
 
             glUseProgram(glsl_program[GAUSSIAN_Y_SHADER]);
             glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "depthTex"),0);
             glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "del_y"),1.0f/window_height);
-            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "sig"),settings->GetSettingAs<float>("blur_scale"));
+            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "sig"),8.0f);//settings->GetSettingAs<float>("blur_scale"));
         }
         else if (smoothing == BILATERAL_GAUSSIAN_SHADER)
         {
@@ -212,11 +217,16 @@ namespace rtps
         glBindTexture(GL_TEXTURE_2D,gl_framebuffer_texs["depth"]);
 
         smoothDepth();
-        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["depth"],0);
         //If no shader was used to smooth then we need the original depth texture
-        if (smoothing!=NO_SHADER)
+        if (smoothing!=NO_SHADER && smoothing!=GAUSSIAN_X_SHADER)
         {
             glBindTexture(GL_TEXTURE_2D,gl_framebuffer_texs["depth2"]);
+            glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["depth"],0);
+        }
+        else
+        {
+            glBindTexture(GL_TEXTURE_2D,gl_framebuffer_texs["depth"]);
+            glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["depth2"],0);
         }
         //glCopyTexSubImage2D(GL_TEXTURE_2D,0,0,0,0,0,800,600);
 
@@ -266,7 +276,7 @@ namespace rtps
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D,gl_framebuffer_texs["normalColor"]);
         glActiveTexture(GL_TEXTURE1);
-        if (smoothing!=NO_SHADER)
+        if (smoothing!=NO_SHADER && smoothing!=GAUSSIAN_X_SHADER)
         {
             glBindTexture(GL_TEXTURE_2D,gl_framebuffer_texs["depth2"]);
         }

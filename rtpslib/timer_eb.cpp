@@ -15,7 +15,7 @@ std::vector<EB::Timer*> EB::Timer::timeList;
 //----------------------------------------------------------------------
 Timer::Timer()
 {
-#if 0
+#if 1
 	static int const_count = 0; 
 	if (!const_count) {
 		timeList.resize(0); 
@@ -36,7 +36,7 @@ Timer::Timer()
 //----------------------------------------------------------------------
 Timer::Timer(const char* name_, int offset, int nbCalls)
 {
-#if 0
+#if 1
 	name = name_;
 
 	switch (CLOCKS_PER_SEC) {
@@ -67,7 +67,7 @@ Timer::Timer(const char* name_, int offset, int nbCalls)
 //----------------------------------------------------------------------
 Timer::Timer(const Timer& t)
 {
-#if 0
+#if 1
 	name = t.name;
 	scale = t.scale;
 	count = t.count;
@@ -87,7 +87,7 @@ Timer::~Timer()
 //----------------------------------------------------------------------
 void Timer::reset()
 {
-#if 0
+#if 1
 	t = 0.0;
 	t1 = clock();
 	count = 0;
@@ -96,7 +96,7 @@ void Timer::reset()
 //----------------------------------------------------------------------
 void Timer::begin()
 {
-#if 0
+#if 1
 	if (count < offset) {
 		count++;
 		return;
@@ -110,7 +110,7 @@ void Timer::begin()
 //----------------------------------------------------------------------
 void Timer::end()
 {
-#if 0
+#if 1
 	if (count <= offset) return;
 
 	gettimeofday(&t_end, NULL);
@@ -130,7 +130,7 @@ void Timer::end()
 
 void Timer::set(float tt)
 {
-#if 0
+#if 1
     count++;
     if (count <= offset) return;
     t += tt;
@@ -143,7 +143,7 @@ void Timer::set(float tt)
 //----------------------------------------------------------------------
 void Timer::print(FILE* fd, int label_width)
 {
-#if 0
+#if 1
 	if (count <= 0) return;
 	int real_count = count - offset;
 	if (name.length() > label_width) { 
@@ -160,7 +160,7 @@ void Timer::print(FILE* fd, int label_width)
 //----------------------------------------------------------------------
 void Timer::printReset()
 {
-#if 0
+#if 1
 	//end();
 	// I would rather control end() myself
 	print();
@@ -170,7 +170,7 @@ void Timer::printReset()
 //----------------------------------------------------------------------
 void Timer::printAll(FILE* fd, int label_width)
 {
-#if 0
+#if 1
 	fprintf(fd, "====================================\n"); 
 	fprintf(fd, "Timers [All times in ms (1/1000 s)]: \n"); 		
 	fprintf(fd, "====================================\n\n");     
@@ -186,7 +186,7 @@ void Timer::printAll(FILE* fd, int label_width)
 //----------------------------------------------------------------------
 void Timer::writeAllToFile(std::string filename) 
 {
-#if 0
+#if 1
     // Get the max label width so we can show all columns the same
     // width and show the FULL label for each timer
     int label_width = 50; 

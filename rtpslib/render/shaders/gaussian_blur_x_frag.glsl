@@ -1,6 +1,7 @@
-uniform sampler2D depth; // the texture with the scene you want to blur
+uniform sampler2D depthTex; // the texture with the scene you want to blur
 uniform float del_x;
 uniform float sig;
+const float pi = 3.141592654;
  
 void main(void)
 {
@@ -17,7 +18,7 @@ void main(void)
    float sum = 0.0;	
    for(int i=-width/2; i<width/2; i++ )
    {
-		float tmp = texture2D(depthTex,gl_TexCoord[0].st+vec2(float(i)*del_x,0.0).x;
+		float tmp = texture2D(depthTex,gl_TexCoord[0].st+vec2(float(i)*del_x,0.0)).x;
 		sum += tmp * gauss *exp(-(pow(float(i),2.))/denom);
    }
    gl_FragData[0] = vec4(sum,sum,sum,1.0);

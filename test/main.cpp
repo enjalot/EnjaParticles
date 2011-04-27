@@ -176,8 +176,8 @@ int main(int argc, char** argv)
     //printf("arvg[0]: %s\n", argv[0]);
 #endif
 
-    //settings->setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
-    settings->setRenderType(RTPSettings::RENDER);
+    settings->setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
+    //settings->setRenderType(RTPSettings::RENDER);
     //settings.setRenderType(RTPSettings::SPRITE_RENDER);
     settings->setRadiusScale(1.0);
     settings->setBlurScale(1.0);
@@ -372,6 +372,7 @@ void appKeyboard(unsigned char key, int x, int y)
             return;
         case 'v':
             ps->system->getRenderer()->setDepthSmoothing(Render::GAUSSIAN_X_SHADER);
+            return;
         case 'w':
             translate_z -= 0.1;
             break;
