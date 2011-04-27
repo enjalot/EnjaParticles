@@ -176,6 +176,7 @@ int main(int argc, char** argv)
     settings.SetSetting("render_texture", "firejet_blast.png");
     settings.SetSetting("render_frag_shader", "sprite_tex_frag.glsl");
     settings.SetSetting("render_use_alpha", true);
+    settings.SetSetting("blur_scale",8.0f);
     //settings.SetSetting("render_use_alpha", false);
     settings.SetSetting("render_alpha_function", "add");
     settings.SetSetting("lt_increment", -.00);
@@ -342,6 +343,8 @@ void appKeyboard(unsigned char key, int x, int y)
         case 'C':
             ps->system->getRenderer()->setDepthSmoothing(Render::BILATERAL_GAUSSIAN_SHADER);
             return;
+        case 'v':
+            ps->system->getRenderer()->setDepthSmoothing(Render::GAUSSIAN_X_SHADER);
         case 'w':
             translate_z -= 0.1;
             break;

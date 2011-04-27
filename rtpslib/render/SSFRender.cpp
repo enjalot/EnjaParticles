@@ -95,17 +95,18 @@ namespace rtps
         {
             return;
         }
-        else if (smoothing == GAUSSIAN_X_SHADER ||smoothing == GAUSSIAN_X_SHADER)
+        else if (smoothing == GAUSSIAN_X_SHADER ||smoothing == GAUSSIAN_Y_SHADER)
         {
-            /*glUseProgram(glsl_program[GAUSSIAN_X_SHADER]);
+            glUseProgram(glsl_program[GAUSSIAN_X_SHADER]);
             glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "depthTex"),0);
-            glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "width"),window_width);
+            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "del_x"),1.0f/window_width);
+            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "sig"),settings->GetSettingAs<float>("blur_scale"));
             fullscreenQuad();
 
             glUseProgram(glsl_program[GAUSSIAN_Y_SHADER]);
             glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "depthTex"),0);
-            glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "height"),window_height);*/
-            return; 
+            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "del_y"),1.0f/window_height);
+            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "sig"),settings->GetSettingAs<float>("blur_scale"));
         }
         else if (smoothing == BILATERAL_GAUSSIAN_SHADER)
         {
