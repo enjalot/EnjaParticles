@@ -4,8 +4,8 @@
 
 //These are passed along through cl_neighbors.h
 //only used inside ForNeighbor defined in this file
-#define ARGS __global float4* pos, __global float4* ghost_pos, __global float* density, __global float* ghost_density, __global float4* ghost_intensity, __global float4* veleval, __global float4* force, __global float4* xsph, __constant struct SPHParams* particle_sphp
-#define ARGV pos, ghost_pos, density, ghost_density, ghost_intensity, veleval, force, xsph, particle_sphp
+#define ARGS __global float4* pos, __global float4* ghost_pos, __global float* density, __global float* ghost_density, __global float4* ghost_intensity, __global float4* veleval, __global float4* force, __global float4* xsph, __constant struct SPHParams* particle_sphp, float target_intensity
+#define ARGV pos, ghost_pos, density, ghost_density, ghost_intensity, veleval, force, xsph, particle_sphp, target_intensity
 
 /*----------------------------------------------------------------------*/
 
@@ -48,7 +48,7 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
         //float ghost_factor = casper(ghost_intensity[index_j].w, 1.1);
         //float ghost_factor = casper_square(ghost_intensity[index_j].w, .5);
         //float ghost_factor = casper_cubic(ghost_intensity[index_j].w, .5);
-        float ghost_factor = casper_poly6(ghost_intensity[index_j].w, .5);
+        float ghost_factor = casper_poly6(ghost_intensity[index_j].w, target_intensity);
 
         float dWijdr = Wspiky_dr(rlen, particle_sphp->smoothing_distance, sphp);
 

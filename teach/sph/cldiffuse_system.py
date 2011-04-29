@@ -36,6 +36,7 @@ class CLDiffuseSystem(CLSystem):
         self.ghost_force = clghost_force.CLGhostForce(self)
 
         self.random_inc = 0
+        self.target_intensity = 1.0
  
        
     
@@ -267,6 +268,7 @@ class CLDiffuseSystem(CLSystem):
                                     self.ghost_density_s,
                                     self.ghost_system.color_s,
                                     self.systemp,
+                                    numpy.float32(self.target_intensity),
                                     self.ghost_system.ci_start,
                                     self.ghost_system.ci_end,
                                     self.ghost_system.gp_scaled,
@@ -306,6 +308,7 @@ class CLDiffuseSystem(CLSystem):
                                     self.force_s,
                                     self.xsph_s,
                                     self.systemp,
+                                    numpy.float32(self.target_intensity),
                                     self.ghost_system.ci_start,
                                     self.ghost_system.ci_end,
                                     self.ghost_system.gp_scaled,

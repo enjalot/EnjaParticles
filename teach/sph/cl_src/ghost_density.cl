@@ -4,8 +4,8 @@
 
 //These are passed along through cl_neighbors.h
 //only used inside ForNeighbor defined in this file
-#define ARGS __global float4* pos, __global float4* ghost_pos, __global float* density, __global float* ghost_density, __global float4* ghost_intensity, __constant struct SPHParams* particle_sphp
-#define ARGV pos, ghost_pos, density, ghost_density, ghost_intensity, particle_sphp
+#define ARGS __global float4* pos, __global float4* ghost_pos, __global float* density, __global float* ghost_density, __global float4* ghost_intensity, __constant struct SPHParams* particle_sphp, float target_intensity
+#define ARGV pos, ghost_pos, density, ghost_density, ghost_intensity, particle_sphp, target_intensity
 
 
 /*----------------------------------------------------------------------*/
@@ -48,7 +48,7 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
         //float ghost_factor = casper(ghost_intensity[index_j].w, 1.1);
         //float ghost_factor = casper_square(ghost_intensity[index_j].w, .5);
         //float ghost_factor = casper_cubic(ghost_intensity[index_j].w, .5);
-        float ghost_factor = casper_poly6(ghost_intensity[index_j].w, .5);
+        float ghost_factor = casper_poly6(ghost_intensity[index_j].w, target_intensity);
         pt->density.x += sphp->mass*Wij * ghost_factor;
         //pt->density.x += sphp->mass*Wij * (1.5 - casper)*(1.5-casper)*(1.5-casper);
         //pt->density.x += sphp->mass*Wij;
@@ -91,7 +91,11 @@ __kernel void ghost_density_update(
 
     //IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
     IterateParticlesInNearbyCells(ARGV, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
-    //density[index] += sphp->wpoly6_coef * pt.density.x* .0001f;
+    
+    //doing this makes particles in non-target region go crazy (when doing ghost forces only using ghost_density
+    //density[index] -= sphp->wpoly6_coef * pt.density.x* .000001f;
+
+
     ghost_density[index] = sphp->wpoly6_coef * pt.density.x * .0001f;
     /*
     clf[index].x = pt.density.x * sphp->wpoly6_coef;

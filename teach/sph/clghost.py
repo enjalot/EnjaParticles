@@ -258,7 +258,7 @@ class GhostSystem:
         gc = self.global_color
         glColor4f(gc[0],gc[1], gc[2],gc[3])
         glEnable(GL_POINT_SMOOTH)
-        glPointSize(2)
+        glPointSize(1)
 
         glEnable(GL_BLEND)
         glBlendFunc(GL_ONE, GL_ONE)

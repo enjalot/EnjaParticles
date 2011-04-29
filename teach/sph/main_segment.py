@@ -153,6 +153,11 @@ class window(object):
         self.init_persp_rotate = Vec([0., 0., 0.])
         #self.init_ortho_rotate = Vec([90., -90., 0.])
         self.init_ortho_rotate = Vec([0., 0., 0.])
+
+        self.draw_brush = True
+        self.brush_radius = .1
+        self.cx = 0.
+        self.cy = 0.
  
 
         self.ortho = True
@@ -174,6 +179,7 @@ class window(object):
         glutKeyboardFunc(self.on_key)
         glutMouseFunc(self.on_click)
         glutMotionFunc(self.on_mouse_motion)
+        glutPassiveMotionFunc(self.on_mouse_move)
         glutReshapeFunc(self.on_resize)
         
         #this will call draw every 30 ms
@@ -232,7 +238,51 @@ class window(object):
         #draw the x, y and z axis as lines
         glutil.draw_axes()
 
+        #draw a box around cursor as "brush"
+        if self.draw_brush:
+            glColor3f(0., 1., 0.)
+            cx = self.cx
+            cy = self.cy
+            r = self.brush_radius
+            #print cx, cy, r
+            glBegin(GL_LINES)
+            glVertex2f(cx - r, cy - r)
+            glVertex2f(cx + r, cy - r)
+
+            glVertex2f(cx + r, cy + r)
+            glVertex2f(cx - r, cy + r)
+
+            glVertex2f(cx + r, cy - r)
+            glVertex2f(cx + r, cy + r)
+
+            glVertex2f(cx - r, cy - r)
+            glVertex2f(cx - r, cy + r)
+
+            glEnd()
+
+
+        if self.mouse_down and self.button == 0:
+            self.add_particles()
+
         glutSwapBuffers()
+
+    def add_particles(self):
+        import random
+        rr = random.random()
+        rb = random.random()
+        #rr *= .1
+        #rb *= .1
+        color = [rr, 0.3, rb, .5]
+
+        #color = [.2, 0., 0., .5]
+        self.clsystem.set_color(color)
+        cx = self.cx
+        cy = self.cy
+        r = self.brush_radius
+        ipos, icolor = sph.addRect(512, Vec([cx - r, cy - r, 0.0,0.]), Vec([cx + r, cy + r, 0.0,0.]), self.system, color)
+        print "pushing clsystem particles"
+        self.clsystem.push_particles(ipos, None, icolor)
+
 
 
     def glprojection(self):
@@ -292,6 +342,19 @@ class window(object):
         elif args[0] == 'p':
             self.draw_particles = not self.draw_particles
 
+        #begin mouse UI commands
+        elif args[0] == '-':
+            self.brush_radius -= .02
+        elif args[0] == '=':
+            self.brush_radius += .02
+
+        #change target intensity
+        elif args[0] == '[':
+            self.clsystem.target_intensity -= .05
+            print "target intensity:", self.clsystem.target_intensity
+        elif args[0] == ']':
+            self.clsystem.target_intensity += .05
+            print "target intensity:", self.clsystem.target_intensity
 
 
              
@@ -304,22 +367,11 @@ class window(object):
             print x, y, self.width, self.height
             cx = self.gdmax.x * x / (1.*self.width)
             cy = (self.height - y) / (self.gdmax.y * self.height)
+            self.cx = cx
+            self.cy = cy
             print "CX, CY", cx, cy
 
-            import random
-            rr = random.random()
-            rb = random.random()
-            #rr *= .1
-            #rb *= .1
-            color = [rr, 0., rb, .5]
-
-            #color = [.2, 0., 0., .5]
-            self.clsystem.set_color(color)
-            ipos, icolor = sph.addRect(512, Vec([cx - .1, cy -.1, 0.1,0.]), Vec([cx + .1, cy + .1, 0.2,0.]), self.system, color)
-            print "pushing clsystem particles"
-            self.clsystem.push_particles(ipos, None, icolor)
-
-
+            self.add_particles() 
  
         else:
             self.mouse_down = False
@@ -329,6 +381,7 @@ class window(object):
 
     
     def on_mouse_motion(self, x, y):
+        print "mouse motion"
         dx = x - self.mouse_old.x
         dy = y - self.mouse_old.y
         if self.mouse_down and self.button == 0: #left button
@@ -339,6 +392,23 @@ class window(object):
             self.translate.z -= dy * .01 
         self.mouse_old.x = x
         self.mouse_old.y = y
+
+        cx = self.gdmax.x * x / (1.*self.width)
+        cy = (self.height - y) / (self.gdmax.y * self.height)
+        self.cx = cx
+        self.cy = cy
+
+
+
+        glutPostRedisplay()
+
+    def on_mouse_move(self, x, y):
+        #print "MOTION"
+        cx = self.gdmax.x * x / (1.*self.width)
+        cy = (self.height - y) / (self.gdmax.y * self.height)
+        self.cx = cx
+        self.cy = cy
+
     ###END GL CALLBACKS
 
     def on_resize(self, width, height):

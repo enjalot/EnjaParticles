@@ -52,7 +52,7 @@ class SPH:
         print "=====================================================" 
 
         #Other parameters
-        self.K = 25.    #Gas constant
+        self.K = 20.    #Gas constant
         self.boundary_stiffness = 100000.
         self.boundary_dampening = 512.
         #friction
@@ -67,7 +67,7 @@ class SPH:
         self.xsph_factor = .5
 
         self.viscosity = .1
-        #self.gravity = -9.8
+        #self.gravity = -98
         self.gravity = 0.
 
         self.EPSILON = 10E-6
