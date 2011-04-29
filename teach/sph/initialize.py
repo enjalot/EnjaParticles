@@ -179,11 +179,12 @@ def addPic(image, num, pmin, pmax, sphp):
                 #intensity = image.getpixel((xi, yi))/255.
                 #g = ima.getpixl(xi, yi)/255.
                 #b = ima[i*3+2]/255.
-                intensity = ima[xi, yi] / 255. * .1
+                mult = .1
+                intensity = ima[xi, yi] / 255. * mult
                 r = intensity
                 g = intensity
                 b = intensity
-                a = intensity / .1
+                a = intensity / mult
                 #print ima[xi]
                 #print xi, yi
                 color += [[r, g, b, a]]

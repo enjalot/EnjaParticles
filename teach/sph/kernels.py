@@ -103,8 +103,8 @@ def main():
         #dY += [dWspiky(h, [0,x])]
         #Y += [Wpoly6(h, [0,x])]
         #Y += [Wspiky(h,[0., x-.25])]
-        #Y += [casper_cubic(x, .75)]
-        Y += [casper_poly6(x, 1.)]
+        #Y += [casper_cubic(x, .5)]
+        Y += [casper_poly6(x, .5)]
 
     wy = np.array(Y)
     ymax = np.max(wy)

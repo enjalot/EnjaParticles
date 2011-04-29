@@ -47,8 +47,8 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
         //float casper = ghost_intensity[index_j].w;
         //float ghost_factor = casper(ghost_intensity[index_j].w, 1.1);
         //float ghost_factor = casper_square(ghost_intensity[index_j].w, .5);
-        //float ghost_factor = casper_cubic(ghost_intensity[index_j].w, .5);
-        float ghost_factor = casper_poly6(ghost_intensity[index_j].w, target_intensity);
+        float ghost_factor = casper_cubic(ghost_intensity[index_j].w, target_intensity);
+        //float ghost_factor = casper_poly6(ghost_intensity[index_j].w, target_intensity);
 
         float dWijdr = Wspiky_dr(rlen, particle_sphp->smoothing_distance, sphp);
 

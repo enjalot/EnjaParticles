@@ -92,10 +92,12 @@ class window(object):
 
         elif test == 3:
             ghost_max_num = 262144
+            #ghost_max_num = 65536
             self.ghost = sph.SPH(ghost_max_num, self.ghost_domain, ghost_factor=.01)
             self.clghost_system = GhostSystem(dt, self.ghost)
 
             img = Image.open('images/test.jpg')
+            #img = Image.open('images/shark.gif')
             #img = Image.open('images/vein.png')
             #img = Image.open('images/turtle_nom.png')
             #img = Image.open('images/tallydroiddev_logo_trans_small.png')
