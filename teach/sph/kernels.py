@@ -74,22 +74,44 @@ def dWspiky(h, r):
         return coeff*hr2*hr2
     return 0
 
+def casper_cubic(gi, ti):
+    #gi = ghost intensity (value from pixel)
+    #ti = target intensity (value we are trying to segment)
+    dist = abs(ti - gi)
+    h = 1
+    return h - (h - dist)**3
+    #return (ti - gi)**3
+
+def casper_poly6(gi, ti):
+    #gi = ghost intensity (value from pixel)
+    #ti = target intensity (value we are trying to segment)
+    dist = abs(ti - gi)
+    h = 1
+    return h - (h**2 - dist**2)**6
+ 
+
 def main():
     import numpy as np
     import pylab
 
     h = 1
 
-    X = np.linspace(-h, h, 100)
+    X = np.linspace(0, h, 100)
     Y = []
     dY = []
     for x in X:
+        #dY += [dWspiky(h, [0,x])]
         #Y += [Wpoly6(h, [0,x])]
-        Y += [Wspiky(h,[0, x])]
-        dY += [dWspiky(h, [0,x])]
+        #Y += [Wspiky(h,[0., x-.25])]
+        #Y += [casper_cubic(x, .75)]
+        Y += [casper_poly6(x, 1.)]
 
-    #pylab.plot(X,Y)
-    pylab.plot(X,dY)
+    wy = np.array(Y)
+    ymax = np.max(wy)
+    print ymax 
+    wy /= ymax
+    pylab.plot(X,wy)
+    #pylab.plot(X,dY)
     pylab.show()
 
 

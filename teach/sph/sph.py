@@ -67,7 +67,8 @@ class SPH:
         self.xsph_factor = .5
 
         self.viscosity = .1
-        self.gravity = -9.8
+        #self.gravity = -9.8
+        self.gravity = 0.
 
         self.EPSILON = 10E-6
 

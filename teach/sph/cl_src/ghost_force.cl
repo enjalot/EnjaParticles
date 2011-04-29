@@ -42,15 +42,18 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
         // update pressure
         // gradient
         int iej = 1;
-        int rlencheck = rlen != 0.;
-        iej *= rlencheck;
+        max(rlen, sphp->EPSILON);
 
-        float casper = ghost_intensity[index_j].w;
+        //float casper = ghost_intensity[index_j].w;
+        //float ghost_factor = casper(ghost_intensity[index_j].w, 1.1);
+        //float ghost_factor = casper_square(ghost_intensity[index_j].w, .5);
+        //float ghost_factor = casper_cubic(ghost_intensity[index_j].w, .5);
+        float ghost_factor = casper_poly6(ghost_intensity[index_j].w, .5);
 
         float dWijdr = Wspiky_dr(rlen, particle_sphp->smoothing_distance, sphp);
 
-        //float di = ghost_density[index_i];  
-        float di = density[index_i];
+        float di = ghost_density[index_i];  
+        //float di = density[index_i];
         float dj = 1000;// * (1.7 - casper);
         float idi = 1.0/di;
         float idj = 1.0/dj;
@@ -65,13 +68,8 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
         float kern = -.5 * dWijdr * (Pi + Pj) * sphp->wspiky_d_coef;
         //float kern = dWijdr * (Pi * idi * idi + Pj * idj * idj) * sphp->wspiky_d_coef;
         float4 force = kern*r; 
-
-        //float4 force = (float4)(di, dj, di*dj, 0,);
-
-
-        float4 veli = veleval[index_i]; // sorted
-        float4 velj = -veli;
-         
+        force *= sphp->mass * idi * idj * ghost_factor;
+        //force *= sphp->mass * idi * idj * (1.5f - casper)*(1.5f - casper)*(1.5f - casper)*(1.5f - casper);
         
 #if 0
        // Add viscous forces
@@ -81,11 +79,14 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
 #endif
 
         //force *= sphp->mass/(di*dj);  // original
-        //force *= sphp->mass/(di*dj) * (1.1f-casper)*(1.1f-casper);
-        force *= sphp->mass/(di*dj) * (1.1f - casper)*(1.1f-casper)*(1.1f-casper);
+        //force *= sphp->mass * idi * idj * (1.5f - casper);
+        //force *= sphp->mass/(di*dj) * (1.1f - casper)*(1.1f-casper)*(1.1f-casper);
         ///force *= sphp->mass/(di*dj); 
 
-#if 1
+#if 0
+        float4 veli = veleval[index_i]; // sorted
+        float4 velj = -veli;
+     
         // Add XSPH stabilization term
         // the poly6 kernel calculation seems to be wrong, using rlen as a vector when it is a float...
         //float Wijpol6 = Wpoly6(r, particle_sphp->smoothing_distance, sphp) * sphp->wpoly6_coeff;

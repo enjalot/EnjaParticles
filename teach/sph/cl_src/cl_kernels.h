@@ -1,6 +1,35 @@
 #ifndef _WPOLY6_CL_
 #define _WPOLY6_CL_
 
+float casper(float gi, float ti)
+{
+    float gt = (ti - gi)*(ti-gi)*(ti-gi);
+    return gt;
+}
+float casper_square(float gi, float ti)
+{
+    float r = fabs(ti - gi);
+    float h = 1.f;
+    float hr = h - r;
+    return h - hr*hr;
+}
+float casper_cubic(float gi, float ti)
+{
+    float r = fabs(ti - gi);
+    float h = 1.f;
+    float hr = h - r;
+    return h - hr*hr*hr;
+}
+float casper_poly6(float gi, float ti)
+{
+    float r = fabs(ti - gi);
+    float h = 1.f;
+    float hr = h*h - r*r;
+    return h - hr*hr*hr*hr*hr*hr;
+}
+
+
+
 //----------------------------------------------------------------------
 float Wpoly6(float4 r, float h, __constant struct SPHParams* params)
 {

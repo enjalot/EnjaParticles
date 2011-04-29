@@ -116,7 +116,7 @@ class CLDiffuseSystem(CLSystem):
         #if True:
             self.exec_density()
             
-            self.exec_diffuse()
+            #self.exec_diffuse()
             """
             color = numpy.ndarray((self.num,4), dtype=numpy.float32)
             cl.enqueue_read_buffer(self.queue, self.color_s, color)

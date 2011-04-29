@@ -16,7 +16,7 @@ import clleapfrog
 import clghost_density
 import clghost_force
 
-class CLGHOST:
+class GhostSystem:
     def __init__(self, dt, sph):
         #ghost system is just a regular system that doesn't do all the steps of the sph update
         #our real system has access to the arrays from the ghost system
@@ -205,8 +205,9 @@ class CLGHOST:
             return
 
         self.acquire_gl()
-        cl.enqueue_write_buffer(self.queue, self.position_u, pos, self.num)
-        cl.enqueue_write_buffer(self.queue, self.color_u, color, self.num)
+        offset = self.num * numpy.float32(0).itemsize*4
+        cl.enqueue_write_buffer(self.queue, self.position_u, pos, device_offset=offset)
+        cl.enqueue_write_buffer(self.queue, self.color_u, color, device_offset=offset)
         self.release_gl()
 
         self.num += nn
@@ -257,11 +258,11 @@ class CLGHOST:
         gc = self.global_color
         glColor4f(gc[0],gc[1], gc[2],gc[3])
         glEnable(GL_POINT_SMOOTH)
-        glPointSize(1)
+        glPointSize(2)
 
         glEnable(GL_BLEND)
-        #glBlendFunc(GL_ONE, GL_ONE)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        glBlendFunc(GL_ONE, GL_ONE)
+        #glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         #glEnable(GL_DEPTH_TEST)
         glDisable(GL_DEPTH_TEST)
         #glDepthMask(GL_FALSE)
@@ -275,14 +276,14 @@ class CLGHOST:
         glEnd()
         """
 
-        #self.col_vbo.bind()
-        #glColorPointer(4, GL_FLOAT, 0, None)
+        self.col_vbo.bind()
+        glColorPointer(4, GL_FLOAT, 0, None)
 
         self.pos_vbo.bind()
         glVertexPointer(4, GL_FLOAT, 0, None)
 
         glEnableClientState(GL_VERTEX_ARRAY)
-        #glEnableClientState(GL_COLOR_ARRAY)
+        glEnableClientState(GL_COLOR_ARRAY)
         glDrawArrays(GL_POINTS, 0, self.num)
 
         glDisableClientState(GL_COLOR_ARRAY)
