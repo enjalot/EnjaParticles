@@ -4,6 +4,7 @@ from OpenGL.GL import *
 import numpy
 import pyopencl as cl
 import glutil
+import util
 
 import clhash
 import clradix
@@ -24,8 +25,8 @@ class GhostSystem:
 
         self.prgs = {}  #store our programs
         #of course hardcoding paths here is terrible
-        self.clsph_dir = "/Users/enjalot/code/sph/teach/sph/cl_src"
-        self.clcommon_dir = "/Users/enjalot/code/sph/teach/sph/cl_common"
+        self.clsph_dir = util.execution_path("cl_src")
+        self.clcommon_dir = util.execution_path("cl_common")
 
         self.global_color = [1., 1., 1., 1.]
         

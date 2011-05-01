@@ -28,6 +28,8 @@ from clghost import GhostSystem
 dt = .001
 subintervals = 1
 
+#why are particles dissapearing when intensity == 1. 
+
 test = 3
 
 class window(object):
