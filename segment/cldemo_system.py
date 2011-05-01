@@ -390,9 +390,11 @@ class CLDemoSystem(CLSystem):
 
 
 
-
-
     def render(self):
+        self.draw()
+        self.draw()
+
+    def draw(self):
         if self.num <= 0:
             return
         gc = self.global_color
@@ -402,8 +404,15 @@ class CLDemoSystem(CLSystem):
         #print glGetString(GL_VERSION)
         radius = self.system.smoothing_radius / self.system.sim_scale
 
-        glUseProgram(self.program)
-        glUniform1f(glGetUniformLocation(self.program, "radius"), radius)
+        if self.arrow_pass:
+            glUseProgram(self.program_arrow)
+            glUniform1f(glGetUniformLocation(self.program_arrow, "radius"), radius)
+            glUniform1f(glGetUniformLocation(self.program_arrow, "speed_limit"), self.system.velocity_limit)
+        else:
+            glUseProgram(self.program)
+            glUniform1f(glGetUniformLocation(self.program, "radius"), radius)
+            glUniform1f(glGetUniformLocation(self.program, "speed_limit"), self.system.velocity_limit)
+        self.arrow_pass = not self.arrow_pass
 
         #glEnable(GL_POINT_SPRITE);
         #glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
@@ -547,6 +556,114 @@ class CLDemoSystem(CLSystem):
 
 
         """
+ 
+        geometrysource_arrow = """
+            #version 330
+
+            //#version 150
+            //#extension GL_EXT_geometry_shader4 : enable
+
+            layout(points) in;
+            layout(triangle_strip) out;
+
+            out vec2 texCoord;
+
+            in vec4 geom_color[1];
+
+            out vec4 frag_color;
+
+            //#define radius 0.1
+            uniform float radius;
+            uniform float speed_limit;
+
+            void main(void) 
+            {
+                //for(int i = 0; i < gl_in.length(); i++) {  // avoid duplicate draw
+                int j = 0;
+                vec4 p = gl_in[0].gl_Position;
+
+                //for (int j=0; j < gl_in.length(); j++) 
+                {
+
+/*
+                    texCoord = vec2(1.0,1.0);
+                    gl_Position = vec4(p.r+radius, p.g+radius+j*0.05, p.b, p.a);
+                    frag_color = geom_color[0];
+                    EmitVertex();
+
+                    texCoord = vec2(0.0,1.0);
+                    gl_Position = vec4(p.r-radius, p.g+radius+j*0.05, p.b, p.a);
+                    frag_color = geom_color[0];
+                    EmitVertex();
+
+                    texCoord = vec2(1.0,0.0);
+                    gl_Position = vec4(p.r+radius, p.g-radius+j*0.05, p.b, p.a);
+                    frag_color = geom_color[0];
+                    EmitVertex();
+
+                    texCoord = vec2(0.0,0.0);
+                    gl_Position = vec4(p.r-radius, p.g-radius+j*0.05, p.b, p.a);
+                    frag_color = geom_color[0];
+                    EmitVertex();
+                    
+                    //arrow
+                    texCoord = vec2(1.0,1.0);
+                    gl_Position = vec4(p.r+radius, p.g+radius+j*0.05, p.b, p.a);
+                    frag_color = geom_color[0];
+                    EmitVertex();
+
+
+*/
+
+                    texCoord = vec2(1.0,1.0);
+                    float x = 0.;//-.05;
+                    float y = 0.;
+                    vec4 base = vec4(p.r + x, p.g + y, p.b, p.a); 
+                    texCoord = vec2(1.0,1.0);
+                    gl_Position = base;
+                    frag_color = vec4( 0., 1., 0., 1.);
+                    EmitVertex();
+ 
+                    texCoord = vec2(.0,.0);
+                    base.x += .005;
+                    base.y += .005;
+                    gl_Position = base;
+                    frag_color = vec4( 0., 1., 0., 1.);
+                    EmitVertex();
+
+
+/*
+                    texCoord = vec2(1.0,.0);
+                    base.x += .05;
+                    //base.y -= .05;
+                    gl_Position = base;
+                    frag_color = vec4( 0., 1., 0., 1.);
+                    EmitVertex();
+*/
+
+                    texCoord = vec2(.0,1.0);
+                    base.x += geom_color[0].x / speed_limit * .5;
+                    base.y += geom_color[0].y / speed_limit * .5;
+                    //base.x += .05;
+                    //base.y += -.1;
+                    gl_Position = base;
+                    frag_color = vec4( 0., 1., 0., 1.);
+                    EmitVertex();
+                   
+
+
+
+
+
+
+                    EndPrimitive();
+                }
+            //}
+            }
+
+
+
+        """
        
         fragmentsource = """
             #version 330
@@ -554,6 +671,7 @@ class CLDemoSystem(CLSystem):
             out vec4 outColor;
 
             in vec4 frag_color;
+            uniform float speed_limit;
 
             //uniform sampler2D col;
 
@@ -567,22 +685,82 @@ class CLDemoSystem(CLSystem):
                 float mag = dot(n.xy, n.xy);
 
                 if (mag > 1.) discard;   // kill pixels outside circle
+               
+                if (mag > .95 && mag < 1.)
+                {
+                    vec4 color = vec4(0.,.2,0.,1.);
+                    outColor = color;
+                }
+                else
+                {
 
-                // load color texture
-                //vec4 color = vec4(1.,0.,0.,1.);
-                //color = texture2D(col, texCoord);
-                
-                float snorm = frag_color.x;
-                float dnorm = frag_color.w;
-                vec4 color = vec4(snorm, 0., 1. - snorm, 1.);
-                color *= dnorm  * .1;
-                //vec4 color = vec4(1., 0., 0., 1.);
-                //vec4 color = vec4(0., frag_color.x, frag_color.w, 1.);
+                    // load color texture
+                    //color = texture2D(col, texCoord);
+                    
+                    //float snorm = frag_color.x;
+                    float slsq = speed_limit * speed_limit;
+                    //float snorm = dot(frag_color.xyz, frag_color.xyz) / speed_limit;
+                    float snorm = length(frag_color.xy) / speed_limit * 15.;
+                    float dnorm = frag_color.w;
+                    //vec4 color = vec4(snorm, 0., 1. - snorm, 1.);
+                    //vec4 color = vec4(snorm, 0., 1. - snorm, 1.);
+                    vec4 color = vec4(0., 0., 1., 1.);
+                    color *= dnorm  * .2;
+                    //vec4 color = vec4(0., frag_color.x, frag_color.w, 1.);
 
-                outColor = color;
-                //outColor = frag_color;
+                    outColor = color;
+                    //outColor = frag_color;
+                }
             }
         """ 
+        fragmentsource_arrow = """
+            #version 330
+            in vec2 texCoord;
+            out vec4 outColor;
+
+            in vec4 frag_color;
+
+            uniform float speed_limit;
+            //uniform sampler2D col;
+
+            void main(void) 
+            {
+
+                vec3 n;
+                //n.xy = gl_PointCoord.st*vec2(2.0, -2.0) + vec2(-1.0, 1.0);
+                n.xy = texCoord*vec2(2.0, -2.0) + vec2(-1.0, 1.0);
+                
+                float mag = dot(n.xy, n.xy);
+
+                //if (mag > 1.) discard;   // kill pixels outside circle
+               
+               /*
+                if (mag > .95 && mag < 1.)
+                {
+                    vec4 color = vec4(0.,.1,0.,1.);
+                    outColor = color;
+                }
+                else
+                {
+               */ 
+
+                    // load color texture
+                    //color = texture2D(col, texCoord);
+                    
+                    //float snorm = frag_color.x;
+                    //float snorm = dot(frag_color.xy, frag_color.xy) / speed_limit * 15.;
+                    //float dnorm = frag_color.w;
+                    //vec4 color = vec4(snorm, 0., 1. - snorm, 1.);
+                    //color *= dnorm  * .1;
+                    vec4 color = vec4(0., 0.7, 0., 1.);
+                    //vec4 color = vec4(0., frag_color.x, frag_color.w, 1.);
+
+                    outColor = color;
+                    //outColor = frag_color;
+               // }
+            }
+        """ 
+
 
         vshader = compileShader( vertexsource, GL_VERTEX_SHADER )
         fshader = compileShader( fragmentsource, GL_FRAGMENT_SHADER )
@@ -597,7 +775,20 @@ class CLDemoSystem(CLSystem):
         glProgramParameteriARB(self.program, GL_GEOMETRY_VERTICES_OUT_ARB, 200)
 
 
-        self.compileProgram( vshader, fshader, gshader)
+        self.compileProgram( self.program, vshader, fshader, gshader)
+
+        vshader = compileShader( vertexsource, GL_VERTEX_SHADER )
+        fshader = compileShader( fragmentsource_arrow, GL_FRAGMENT_SHADER )
+        gshader = compileShader( geometrysource_arrow, GL_GEOMETRY_SHADER )
+        self.program_arrow = glCreateProgram()
+        glProgramParameteriARB(self.program_arrow, GL_GEOMETRY_INPUT_TYPE_ARB, GL_POINTS)
+        glProgramParameteriARB(self.program_arrow, GL_GEOMETRY_OUTPUT_TYPE_ARB, GL_POINTS) #not sure why this works
+        glProgramParameteriARB(self.program_arrow, GL_GEOMETRY_VERTICES_OUT_ARB, 200)
+
+
+        self.compileProgram( self.program_arrow, vshader, fshader, gshader)
+ 
+        self.arrow_pass = False
            
         
 
@@ -647,31 +838,31 @@ class CLDemoSystem(CLSystem):
         self.program = compileProgram( vshader, fshader )
 
 
-    def compileProgram(self, vertex_shader, fragment_shader, geometry_shader=None):
+    def compileProgram(self, program, vertex_shader, fragment_shader, geometry_shader=None):
         from OpenGL.GL import *
 
-        glAttachShader(self.program, vertex_shader);
-        glAttachShader(self.program, fragment_shader);
+        glAttachShader(program, vertex_shader);
+        glAttachShader(program, fragment_shader);
         if geometry_shader is not None:
-            glAttachShader(self.program, geometry_shader)
+            glAttachShader(program, geometry_shader)
 
         
-        glLinkProgram(self.program);
+        glLinkProgram(program);
 
-        glValidateProgram( self.program )
-        validation = glGetProgramiv( self.program, GL_VALIDATE_STATUS )
+        glValidateProgram( program )
+        validation = glGetProgramiv( program, GL_VALIDATE_STATUS )
         if validation == GL_FALSE:
             raise RuntimeError(
                 """Validation failure (%s): %s"""%(
                 validation,
-                glGetProgramInfoLog( self.program ),
+                glGetProgramInfoLog( program ),
             ))
-        link_status = glGetProgramiv( self.program, GL_LINK_STATUS )
+        link_status = glGetProgramiv( program, GL_LINK_STATUS )
         if link_status == GL_FALSE:
             raise RuntimeError(
                 """Link failure (%s): %s"""%(
                 link_status,
-                glGetProgramInfoLog( self.program ),
+                glGetProgramInfoLog( program ),
             ))
 
 
@@ -680,5 +871,11 @@ class CLDemoSystem(CLSystem):
         glDeleteShader(fragment_shader)
         if geometry_shader is not None:
             glDeleteShader(geometry_shader)
+
+
+
+
+
+
 
 

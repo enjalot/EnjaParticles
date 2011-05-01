@@ -29,8 +29,8 @@ from clghost import GhostSystem
 dt = .001
 subintervals = 5
 
-test = 1
-with_ghost = True
+test = 2
+with_ghost = False
 
 class window(object):
 
@@ -135,8 +135,8 @@ class window(object):
         self.domain = hash.Domain(self.gdmin, self.gdmax)
         self.system = sph.SPH(max_num, self.domain)
         self.system.gravity = -9.8
-        self.system.K = 3.
-        self.system.xsph_factor = .02
+        self.system.K = 15.
+        self.system.xsph_factor = .05
         
         print "making particle system"
         #self.clsystem = clsph.CLSPH(dt, self.system, ghost_system=None)
@@ -159,7 +159,7 @@ class window(object):
         self.translate = Vec([0., 0., 0.])
         #self.initrans = Vec([0., 0., -2.])
         self.init_persp_trans = Vec([-.5, -0.5, -2.5])
-        self.init_ortho_trans = Vec([0., 0., 1.])
+        self.init_ortho_trans = Vec([0., 0., .05])
         self.init_persp_rotate = Vec([0., 0., 0.])
         #self.init_ortho_rotate = Vec([90., -90., 0.])
         self.init_ortho_rotate = Vec([0., 0., 0.])

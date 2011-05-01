@@ -23,15 +23,15 @@ __kernel void update(
     float d = density_s[i];
 
     float speed = length(f);
-    float fnorm = speed / sphp->velocity_limit * 10.0f;
+    float fnorm = speed / sphp->velocity_limit * 15.0f;
 
     float dnorm = d / 2000.f;
     dnorm = 1.4f - clamp(dnorm, 0.0f, 1.0f);
 
-    //col_u[i].xyz = f.xyz;
-    col_u[i].x = fnorm;
-    col_u[i].y = d;
-    col_u[i].z = 0.f;
+    col_u[i].xyz = f.xyz;
+    //col_u[i].x = fnorm;
+    //col_u[i].y = d;
+    //col_u[i].z = 0.f;
     col_u[i].w = dnorm;
    
 }
