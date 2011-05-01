@@ -621,14 +621,16 @@ class CLDemoSystem(CLSystem):
                     vec4 base = vec4(p.r + x, p.g + y, p.b, p.a); 
                     texCoord = vec2(1.0,1.0);
                     gl_Position = base;
-                    frag_color = vec4( 0., 1., 0., 1.);
+                    //frag_color = vec4( 0., 1., 0., 1.);
+                    frag_color = geom_color[0];
                     EmitVertex();
  
                     texCoord = vec2(.0,.0);
                     base.x += .005;
                     base.y += .005;
                     gl_Position = base;
-                    frag_color = vec4( 0., 1., 0., 1.);
+                    //frag_color = vec4( 0., 1., 0., 1.);
+                    frag_color = geom_color[0];
                     EmitVertex();
 
 
@@ -642,12 +644,13 @@ class CLDemoSystem(CLSystem):
 */
 
                     texCoord = vec2(.0,1.0);
-                    base.x += geom_color[0].x / speed_limit * .5;
-                    base.y += geom_color[0].y / speed_limit * .5;
+                    base.x += geom_color[0].x / speed_limit * .3;
+                    base.y += geom_color[0].y / speed_limit * .3;
                     //base.x += .05;
                     //base.y += -.1;
                     gl_Position = base;
-                    frag_color = vec4( 0., 1., 0., 1.);
+                    //frag_color = vec4( 0., 1., 0., 1.);
+                    frag_color = geom_color[0];
                     EmitVertex();
                    
 
@@ -684,9 +687,13 @@ class CLDemoSystem(CLSystem):
                 
                 float mag = dot(n.xy, n.xy);
 
+                //normalized density
+                float dnorm = frag_color.w;
+
+                //if (mag > 1. - dnorm * .5) discard;   // kill pixels outside circle
                 if (mag > 1.) discard;   // kill pixels outside circle
                
-                if (mag > .95 && mag < 1.)
+                if (mag > 1.95 && mag < 1.)
                 {
                     vec4 color = vec4(0.,.2,0.,1.);
                     outColor = color;
@@ -698,14 +705,11 @@ class CLDemoSystem(CLSystem):
                     //color = texture2D(col, texCoord);
                     
                     //float snorm = frag_color.x;
-                    float slsq = speed_limit * speed_limit;
                     //float snorm = dot(frag_color.xyz, frag_color.xyz) / speed_limit;
                     float snorm = length(frag_color.xy) / speed_limit * 15.;
-                    float dnorm = frag_color.w;
-                    //vec4 color = vec4(snorm, 0., 1. - snorm, 1.);
-                    //vec4 color = vec4(snorm, 0., 1. - snorm, 1.);
-                    vec4 color = vec4(0., 0., 1., 1.);
-                    color *= dnorm  * .2;
+                    vec4 color = vec4(snorm, 0., 1. - snorm, 1.);
+                    //vec4 color = vec4(0., 0., 1., 1.);
+                    color *= dnorm  * .1;
                     //vec4 color = vec4(0., frag_color.x, frag_color.w, 1.);
 
                     outColor = color;
@@ -748,11 +752,12 @@ class CLDemoSystem(CLSystem):
                     //color = texture2D(col, texCoord);
                     
                     //float snorm = frag_color.x;
-                    //float snorm = dot(frag_color.xy, frag_color.xy) / speed_limit * 15.;
-                    //float dnorm = frag_color.w;
-                    //vec4 color = vec4(snorm, 0., 1. - snorm, 1.);
+                    //float snorm = dot(frag_color.xy, frag_color.xy) / speed_limit * 5.;
+                    float snorm = length(frag_color.xy) / speed_limit * 10.;
+                    float dnorm = frag_color.w;
+                    vec4 color = vec4(snorm, 0., 1. - snorm, 1.);
                     //color *= dnorm  * .1;
-                    vec4 color = vec4(0., 0.7, 0., 1.);
+                    //vec4 color = vec4(0., 0.7, 0., 1.);
                     //vec4 color = vec4(0., frag_color.x, frag_color.w, 1.);
 
                     outColor = color;

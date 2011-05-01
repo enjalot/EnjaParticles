@@ -144,7 +144,7 @@ __kernel void ghost_force_update(
 
     //IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
     IterateParticlesInNearbyCells(ARGV, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
-    force[index] += pt.force * .0001f; 
+    force[index] += pt.force * .0002f; 
     clf[index].xyz = pt.force.xyz;
     //xsph[index] += sphp->wpoly6_coef * pt.xsph * .00001f;
 }

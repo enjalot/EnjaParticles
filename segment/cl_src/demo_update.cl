@@ -7,6 +7,7 @@ __kernel void update(
                       __global float4* vel_u,
                       __global float4* col_u,
                       __global float4* force_s,
+                      //__global float4* ghost_force_s,
                       __global float* density_s,
                       __global int* sort_indices,  
                       __constant struct SPHParams* sphp, 

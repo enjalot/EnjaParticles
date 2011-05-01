@@ -87,13 +87,14 @@ def addRectGradient(num, pmin, pmax, sphp, color1, color2):
 
 
 #std::vector<float4> addRect(int num, float4 min, float4 max, float spacing, float scale)
-def addRect(num, pmin, pmax, sphp, global_color):
+def addRect(num, pmin, pmax, sphp, global_color, spacing_factor=.99):
     #Create a rectangle with at most num particles in it.  The size of the return
     #vector will be the actual number of particles used to fill the rectangle
     print "**** addRect ****"
     print "rest dist:", sphp.rest_distance
     print "sim_scale:", sphp.sim_scale
-    spacing = .99 * sphp.rest_distance / sphp.sim_scale;
+    #spacing_factor = 1.5
+    spacing = spacing_factor * sphp.rest_distance / sphp.sim_scale;
     print "spacing", spacing
 
     xmin = pmin.x# * scale

@@ -29,8 +29,8 @@ from clghost import GhostSystem
 dt = .001
 subintervals = 5
 
-test = 2
-with_ghost = False
+test = 0
+with_ghost = True 
 
 class window(object):
 
@@ -117,7 +117,8 @@ class window(object):
         #ghost_max_num = 8192
         #max_num = 32768
         if test == 0 or test == 1 or test == 2:
-            max_num = 16384
+            max_num = 16384 * 4 
+            #max_num = 16384
             #max_num = 4096 
         elif test == 3:
             max_num = 32768*4
@@ -134,9 +135,10 @@ class window(object):
         print "-------------------------------------------------------------"
         self.domain = hash.Domain(self.gdmin, self.gdmax)
         self.system = sph.SPH(max_num, self.domain)
-        self.system.gravity = -9.8
-        self.system.K = 15.
-        self.system.xsph_factor = .05
+        #self.system.gravity = -9.8
+        self.system.gravity = 0.0
+        self.system.K = 5.
+        self.system.xsph_factor = .35
         
         print "making particle system"
         #self.clsystem = clsph.CLSPH(dt, self.system, ghost_system=None)
@@ -291,7 +293,7 @@ class window(object):
         cx = self.cx
         cy = self.cy
         r = self.brush_radius
-        ipos, icolor = sph.addRect(512, Vec([cx - r, cy - r, 0.0,0.]), Vec([cx + r, cy + r, 0.0,0.]), self.system, color)
+        ipos, icolor = initialize.addRect(512, Vec([cx - r, cy - r, 0.0,0.]), Vec([cx + r, cy + r, 0.0,0.]), self.system, color, spacing_factor=1.7)
         print "pushing clsystem particles"
         self.clsystem.push_particles(ipos, None, icolor)
 
