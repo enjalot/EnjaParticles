@@ -7,8 +7,9 @@ __kernel void update(
                       __global float4* vel_u,
                       __global float4* col_u,
                       __global float4* force_s,
-                      //__global float4* ghost_force_s,
+                      __global float4* ghost_force_s,
                       __global float* density_s,
+                      __global float* ghost_density_s,
                       __global int* sort_indices,  
                       __constant struct SPHParams* sphp, 
                       float dt
@@ -22,6 +23,10 @@ __kernel void update(
     //int index = sort_indices[i];
     float4 f = force_s[i];
     float d = density_s[i];
+
+    //for viz force
+    //float4 f = ghost_force_s[i];
+    //float d = ghost_density_s[i];
 
     float speed = length(f);
     float fnorm = speed / sphp->velocity_limit * 15.0f;

@@ -38,8 +38,8 @@ class CLDemoSystem(CLSystem):
         self.diffuse = cldiffuse.CLDiffuse(self)
         self.force = clforce.CLForce(self)
         self.collision_wall = clcollision_wall.CLCollisionWall(self)
-        #self.leapfrog = clleapfrog.CLLeapFrog(self)
-        self.leapfrog = clleapfrog_diffuse.CLLeapFrogDiffuse(self)
+        self.leapfrog = clleapfrog.CLLeapFrog(self)
+        #self.leapfrog = clleapfrog_diffuse.CLLeapFrogDiffuse(self)
         self.ghost_density = clghost_density.CLGhostDensity(self)
         self.ghost_force = clghost_force.CLGhostForce(self)
         
@@ -327,6 +327,7 @@ class CLDemoSystem(CLSystem):
                                     self.ghost_system.position_s,
                                     self.density_s,
                                     self.ghost_density_s,
+                                    self.ghost_system.force_s,
                                     self.ghost_system.color_s,
                                     self.veleval_s,
                                     self.force_s,
@@ -366,6 +367,7 @@ class CLDemoSystem(CLSystem):
                                   self.color_s,
                                   self.veleval_u,
                                   self.force_s,
+                                  self.ghost_system.force_s,
                                   self.xsph_s,
                                   self.sort_indices,
                                   self.systemp,
@@ -380,7 +382,9 @@ class CLDemoSystem(CLSystem):
                                   self.velocity_u,
                                   self.color_u,
                                   self.force_s,
+                                  self.ghost_system.force_s,
                                   self.density_s,
+                                  self.ghost_density_s,
                                   self.sort_indices,
                                   self.systemp,
                                   #self.clf_debug,
@@ -565,6 +569,7 @@ class CLDemoSystem(CLSystem):
 
             layout(points) in;
             layout(triangle_strip) out;
+            //layout(line_strip) out;
 
             out vec2 texCoord;
 
@@ -585,46 +590,18 @@ class CLDemoSystem(CLSystem):
                 //for (int j=0; j < gl_in.length(); j++) 
                 {
 
-/*
-                    texCoord = vec2(1.0,1.0);
-                    gl_Position = vec4(p.r+radius, p.g+radius+j*0.05, p.b, p.a);
-                    frag_color = geom_color[0];
-                    EmitVertex();
-
-                    texCoord = vec2(0.0,1.0);
-                    gl_Position = vec4(p.r-radius, p.g+radius+j*0.05, p.b, p.a);
-                    frag_color = geom_color[0];
-                    EmitVertex();
-
-                    texCoord = vec2(1.0,0.0);
-                    gl_Position = vec4(p.r+radius, p.g-radius+j*0.05, p.b, p.a);
-                    frag_color = geom_color[0];
-                    EmitVertex();
-
-                    texCoord = vec2(0.0,0.0);
-                    gl_Position = vec4(p.r-radius, p.g-radius+j*0.05, p.b, p.a);
-                    frag_color = geom_color[0];
-                    EmitVertex();
-                    
-                    //arrow
-                    texCoord = vec2(1.0,1.0);
-                    gl_Position = vec4(p.r+radius, p.g+radius+j*0.05, p.b, p.a);
-                    frag_color = geom_color[0];
-                    EmitVertex();
-
-
-*/
-
-                    texCoord = vec2(1.0,1.0);
                     float x = 0.;//-.05;
                     float y = 0.;
                     vec4 base = vec4(p.r + x, p.g + y, p.b, p.a); 
+
+                    texCoord = vec2(.0,.0);
                     texCoord = vec2(1.0,1.0);
                     gl_Position = base;
                     //frag_color = vec4( 0., 1., 0., 1.);
                     frag_color = geom_color[0];
                     EmitVertex();
  
+
                     texCoord = vec2(.0,.0);
                     base.x += .005;
                     base.y += .005;
@@ -632,7 +609,6 @@ class CLDemoSystem(CLSystem):
                     //frag_color = vec4( 0., 1., 0., 1.);
                     frag_color = geom_color[0];
                     EmitVertex();
-
 
 /*
                     texCoord = vec2(1.0,.0);
@@ -643,9 +619,12 @@ class CLDemoSystem(CLSystem):
                     EmitVertex();
 */
 
-                    texCoord = vec2(.0,1.0);
-                    base.x += geom_color[0].x / speed_limit * .3;
-                    base.y += geom_color[0].y / speed_limit * .3;
+                    x = geom_color[0].x / speed_limit * .3;
+                    y = geom_color[0].y / speed_limit * .3;
+                    texCoord = vec2(1.0,1.0);
+                    float mm = radius * 1.5;
+                    base.x += clamp(x, -mm, mm);
+                    base.y += clamp(y, -mm, mm);
                     //base.x += .05;
                     //base.y += -.1;
                     gl_Position = base;
@@ -692,6 +671,7 @@ class CLDemoSystem(CLSystem):
 
                 //if (mag > 1. - dnorm * .5) discard;   // kill pixels outside circle
                 if (mag > 1.) discard;   // kill pixels outside circle
+                //if (mag > .1) discard;   // kill pixels outside circle
                
                 if (mag > 1.95 && mag < 1.)
                 {
@@ -707,6 +687,7 @@ class CLDemoSystem(CLSystem):
                     //float snorm = frag_color.x;
                     //float snorm = dot(frag_color.xyz, frag_color.xyz) / speed_limit;
                     float snorm = length(frag_color.xy) / speed_limit * 15.;
+                    snorm = clamp(snorm, 0., 1.);
                     vec4 color = vec4(snorm, 0., 1. - snorm, 1.);
                     //vec4 color = vec4(0., 0., 1., 1.);
                     color *= dnorm  * .1;
@@ -756,9 +737,11 @@ class CLDemoSystem(CLSystem):
                     float snorm = length(frag_color.xy) / speed_limit * 10.;
                     float dnorm = frag_color.w;
                     vec4 color = vec4(snorm, 0., 1. - snorm, 1.);
-                    //color *= dnorm  * .1;
+                    //color *= dnorm  * .1 * (1. - length(texCoord));
+                    //color *= length(texCoord);
                     //vec4 color = vec4(0., 0.7, 0., 1.);
                     //vec4 color = vec4(0., frag_color.x, frag_color.w, 1.);
+                    //vec4 color = vec4(texCoord.x, texCoord.y, 0., 1.);
 
                     outColor = color;
                     //outColor = frag_color;

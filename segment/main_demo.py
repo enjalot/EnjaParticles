@@ -46,8 +46,8 @@ class window(object):
         print "-------------------------------------------------------------"
         self.ghost_domain = hash.Domain(self.gdmin, self.gdmax)
         if test == 0:
-            ghost_max_num = 65536
-            self.ghost = sph.SPH(ghost_max_num, self.ghost_domain, ghost_factor=.01)
+            ghost_max_num = 65536 * 4
+            self.ghost = sph.SPH(ghost_max_num, self.ghost_domain, ghost_factor=.05)
             self.clghost_system = GhostSystem(dt, self.ghost)
 
 
@@ -80,8 +80,8 @@ class window(object):
             self.clghost_system.push_particles(ghost_pos, None, ghost_color)
 
         elif test == 2:
-            ghost_max_num = 65536
-            self.ghost = sph.SPH(ghost_max_num, self.ghost_domain, ghost_factor=.01)
+            ghost_max_num = 65536 * 4
+            self.ghost = sph.SPH(ghost_max_num, self.ghost_domain, ghost_factor=.02)
             self.clghost_system = GhostSystem(dt, self.ghost)
 
             high_color = [.3, .3, .3, 1.]
@@ -117,6 +117,7 @@ class window(object):
         #ghost_max_num = 8192
         #max_num = 32768
         if test == 0 or test == 1 or test == 2:
+            #max_num = 16384 * 32 
             max_num = 16384 * 4 
             #max_num = 16384
             #max_num = 4096 
@@ -137,8 +138,8 @@ class window(object):
         self.system = sph.SPH(max_num, self.domain)
         #self.system.gravity = -9.8
         self.system.gravity = 0.0
-        self.system.K = 5.
-        self.system.xsph_factor = .35
+        self.system.K = 1.
+        self.system.xsph_factor = .15
         
         print "making particle system"
         #self.clsystem = clsph.CLSPH(dt, self.system, ghost_system=None)

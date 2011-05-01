@@ -14,6 +14,7 @@ __kernel void leapfrog(
                       __global float4* col_s,
                       __global float4* veleval_u,
                       __global float4* force_s,
+                      __global float4* ghost_force_s,
                       __global float4* xsph_s,
                       __global int* sort_indices,  
                       //		__global float4* color,
@@ -39,6 +40,7 @@ __kernel void leapfrog(
 
 #if 1
 
+    f += ghost_force_s[i];
     //external force is gravity
     //f.z += sphp->gravity;
     f.y += sphp->gravity;

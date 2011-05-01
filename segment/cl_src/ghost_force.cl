@@ -4,8 +4,8 @@
 
 //These are passed along through cl_neighbors.h
 //only used inside ForNeighbor defined in this file
-#define ARGS __global float4* pos, __global float4* ghost_pos, __global float* density, __global float* ghost_density, __global float4* ghost_intensity, __global float4* veleval, __global float4* force, __global float4* xsph, __constant struct SPHParams* particle_sphp, float target_intensity
-#define ARGV pos, ghost_pos, density, ghost_density, ghost_intensity, veleval, force, xsph, particle_sphp, target_intensity
+#define ARGS __global float4* pos, __global float4* ghost_pos, __global float* density, __global float* ghost_density, __global float4* ghost_force, __global float4* ghost_intensity, __global float4* veleval, __global float4* force, __global float4* xsph, __constant struct SPHParams* particle_sphp, float target_intensity
+#define ARGV pos, ghost_pos, density, ghost_density, ghost_force, ghost_intensity, veleval, force, xsph, particle_sphp, target_intensity
 
 /*----------------------------------------------------------------------*/
 
@@ -144,7 +144,8 @@ __kernel void ghost_force_update(
 
     //IterateParticlesInNearbyCells(vars_sorted, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
     IterateParticlesInNearbyCells(ARGV, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ sphp DEBUG_ARGV);
-    force[index] += pt.force * .0002f; 
+    //force[index] += pt.force * .0002f; 
+    ghost_force[index] = pt.force * .0002f; 
     clf[index].xyz = pt.force.xyz;
     //xsph[index] += sphp->wpoly6_coef * pt.xsph * .00001f;
 }
