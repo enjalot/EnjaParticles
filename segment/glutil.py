@@ -4,6 +4,10 @@ from OpenGL.GLU import *
 from OpenGL.raw.GL.VERSION.GL_1_5 import glBufferData as rawGlBufferData
 from OpenGL.arrays import ArrayDatatype as ADT
 
+from OpenGL.GL.ARB.geometry_shader4 import *
+
+
+
 from vector import Vec
 
 
@@ -100,4 +104,68 @@ def draw_axes():
     draw_line(v1, v2)
 
 
+
+#had to basically pull these from PyOpenGL not sure why my package doesn't have shaders.py
+def compileShader(source, shaderType):
+        from OpenGL.GL import *
+
+        shader = glCreateShader(shaderType);
+        glShaderSource(shader, source);
+        glCompileShader(shader);
+
+        result = glGetShaderiv( shader, GL_COMPILE_STATUS )
+        if not(result):
+            # TODO: this will be wrong if the user has
+            # disabled traditional unpacking array support.
+            raise RuntimeError(
+                """Shader compile failure (%s): %s"""%(
+                    result,
+                    glGetShaderInfoLog( shader ),
+                ),
+                source,
+                shaderType,
+            )
+        return shader
+
+def compileProgram(vertex_shader, fragment_shader, geometry_shader=None):
+        from OpenGL.GL import *
+
+        program = glCreateProgram()
+        glAttachShader(program, vertex_shader);
+        glAttachShader(program, fragment_shader);
+        if geometry_shader is not None:
+            glAttachShader(program, geometry_shader)
+
+ 
+        glProgramParameteriARB(self.program, GL_GEOMETRY_INPUT_TYPE_ARB, GL_POINTS)
+        glProgramParameteriARB(self.program, GL_GEOMETRY_OUTPUT_TYPE_ARB, GL_POINTS)
+        glProgramParameteriARB(self.program, GL_GEOMETRY_VERTICES_OUT_ARB, 200)
+
+        
+        glLinkProgram(program);
+
+        glValidateProgram( program )
+        validation = glGetProgramiv( program, GL_VALIDATE_STATUS )
+        if validation == GL_FALSE:
+            raise RuntimeError(
+                """Validation failure (%s): %s"""%(
+                validation,
+                glGetProgramInfoLog( program ),
+            ))
+        link_status = glGetProgramiv( program, GL_LINK_STATUS )
+        if link_status == GL_FALSE:
+            raise RuntimeError(
+                """Link failure (%s): %s"""%(
+                link_status,
+                glGetProgramInfoLog( program ),
+            ))
+
+
+        #cleanup
+        glDeleteShader(vertex_shader)
+        glDeleteShader(fragment_shader)
+        if geometry_shader is not None:
+            glDeleteShader(geometry_shader)
+
+        return program
 

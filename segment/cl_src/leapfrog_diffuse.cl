@@ -42,6 +42,7 @@ __kernel void leapfrog(
     //external force is gravity
     //f.z += sphp->gravity;
     f.y += sphp->gravity;
+    //f.y += -9.8f;
     f.w = 0.f;
 
     float speed = length(f);
@@ -49,6 +50,7 @@ __kernel void leapfrog(
     {
         f *= sphp->velocity_limit/speed;
     }
+
 
     float4 vnext = v + dt*f;
     //float4 vnext = v;// + dt*f;
