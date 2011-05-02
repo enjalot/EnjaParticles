@@ -139,7 +139,7 @@ class window(object):
         #self.system.gravity = -9.8
         self.system.gravity = 0.0
         self.system.K = 1.
-        self.system.xsph_factor = .15
+        self.system.xsph_factor = .05
         
         print "making particle system"
         #self.clsystem = clsph.CLSPH(dt, self.system, ghost_system=None)
@@ -294,7 +294,7 @@ class window(object):
         cx = self.cx
         cy = self.cy
         r = self.brush_radius
-        ipos, icolor = initialize.addRect(512, Vec([cx - r, cy - r, 0.0,0.]), Vec([cx + r, cy + r, 0.0,0.]), self.system, color, spacing_factor=1.7)
+        ipos, icolor = initialize.addRect(512, Vec([cx - r, cy - r, 0.0,0.]), Vec([cx + r, cy + r, 0.0,0.]), self.system, color, spacing_factor=1.4)
         print "pushing clsystem particles"
         self.clsystem.push_particles(ipos, None, icolor)
 
