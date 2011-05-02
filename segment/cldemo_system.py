@@ -761,8 +761,6 @@ class CLDemoSystem(CLSystem):
         glProgramParameteriARB(self.program, GL_GEOMETRY_INPUT_TYPE_ARB, GL_POINTS)
         glProgramParameteriARB(self.program, GL_GEOMETRY_OUTPUT_TYPE_ARB, GL_POINTS) #not sure why this works
         glProgramParameteriARB(self.program, GL_GEOMETRY_VERTICES_OUT_ARB, 20)
-
-
         self.compileProgram( self.program, vshader, fshader, gshader)
 
         vshader = compileShader( vertexsource, GL_VERTEX_SHADER )
