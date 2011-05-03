@@ -401,7 +401,7 @@ void FLOCK::integrate()
     //timers[TI_EULER]->end();
 
     // mymese debugging
-#if 1 
+#if 0 
     if(num > 0)
     {
         std::vector<int4> cli(num);

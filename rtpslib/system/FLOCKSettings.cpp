@@ -90,8 +90,9 @@ namespace rtps{
         flock_params.w_sep = settings->GetSettingAs<float>("Separation Weight");
         flock_params.w_align = settings->GetSettingAs<float>("Alignment Weight");
         flock_params.w_coh = settings->GetSettingAs<float>("Cohesion Weight");
-#if 1    
+
     //mymese debbug
+#if 0    
     printf("***\ninside FLOCKSettings\n***\n"); 
     printf("smoth_dist: %f\n", flock_params.smoothing_distance);
     printf("radius: %f\n", flock_params.search_radius);

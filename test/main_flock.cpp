@@ -149,9 +149,9 @@ int main(int argc, char** argv)
     printf("before we call enjas functions\n");
 
 
-    float w_sep = 5.f;     // 0.0001f
-    float w_align = 1.f;   // 0.0001f
-    float w_coh = .1f;    // 0.00003f
+    float w_sep = 15.f;     // 0.0001f
+    float w_align = 7.5f;   // 0.0001f
+    float w_coh = 2.5f;    // 0.00003f
     
     //default constructor
     rtps::Domain* grid = new Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
