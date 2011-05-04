@@ -31,6 +31,8 @@
 //#include <Lifetime.h>
 #include <flock/ComputeRules.h>
 #include <flock/AverageRules.h>
+#include <flock/Rules.h>
+#include <flock/EulerIntegration.h>
 
 //#include "../util.h"
 #include <Hose.h>
@@ -55,7 +57,7 @@
 
 namespace rtps
 {
-//using namespace flock;
+    //using namespace flock;
 
 //----------------------------------------------------------------------
 //keep track of the flock settings
@@ -277,7 +279,8 @@ private:
     //CPU functions
     void cpuComputeRules();
     void cpuAverageRules();
-	//void ge_cpuEuler();
+	void cpuRules();
+	void cpuEulerIntegration();
 
     void updateCPU();
     void updateGPU();
@@ -304,9 +307,8 @@ private:
     //CollisionTriangle collision_tri;
     ComputeRules computeRules;
     AverageRules averageRules;
-    //void integrate();
-    //LeapFrog leapfrog;
-    //Euler euler;
+    Rules rules;
+    EulerIntegration euler_integration;
     
     void integrate();
 

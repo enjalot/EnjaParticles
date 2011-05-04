@@ -123,7 +123,8 @@ set (rtpslib_SOURCES
 	# FLOCK
     ${rtpslib_SOURCE_DIR}/system/FLOCK.cpp
     ${rtpslib_SOURCE_DIR}/system/FLOCKSettings.cpp
-    #${rtpslib_SOURCE_DIR}/system/flock/Euler
+    ${rtpslib_SOURCE_DIR}/system/flock/EulerIntegration
+    ${rtpslib_SOURCE_DIR}/system/flock/Rules
     ${rtpslib_SOURCE_DIR}/system/flock/ComputeRules
     ${rtpslib_SOURCE_DIR}/system/flock/AverageRules
     #${rtpslib_SOURCE_DIR}/system/flock/LeapFrog

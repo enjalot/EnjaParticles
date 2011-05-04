@@ -2,17 +2,18 @@
 
 namespace rtps 
 {
-    AverageRules::AverageRules(std::string path, CL* cli_, EB::Timer* timer_)
+
+    EulerIntegration::EulerIntegration(std::string path, CL* cli_, EB::Timer* timer_)
     {
         cli = cli_;
         timer = timer_;
  
-        printf("create averageRules kernel\n");
-        path += "/averageRules.cl";
-        k_averageRules = Kernel(cli, path, "averageRules");
+        printf("create EulerIntegration kernel\n");
+        path += "/euler_integration.cl";
+        k_euler_integration = Kernel(cli, path, "EulerIntegration");
     } 
     
-    void AverageRules::execute(int num,
+    void EulerIntegration::execute(int num,
                     float dt,
                     Buffer<float4>& pos_u,
                     Buffer<float4>& pos_s,
@@ -21,7 +22,6 @@ namespace rtps
                     Buffer<float4>& separation_s,
                     Buffer<float4>& alignment_s, 
                     Buffer<float4>& cohesion_s, 
-                    Buffer<int4>& flockmates_s, 
                     Buffer<unsigned int>& indices,
                     //params
                     Buffer<FLOCKParameters>& flockp,
@@ -32,27 +32,25 @@ namespace rtps
     {
 
         int iargs = 0;
-        k_averageRules.setArg(iargs++, dt); //time step
-        k_averageRules.setArg(iargs++, pos_u.getDevicePtr());
-        k_averageRules.setArg(iargs++, pos_s.getDevicePtr());
-        k_averageRules.setArg(iargs++, vel_u.getDevicePtr());
-        k_averageRules.setArg(iargs++, vel_s.getDevicePtr());
-        k_averageRules.setArg(iargs++, separation_s.getDevicePtr());
-        k_averageRules.setArg(iargs++, alignment_s.getDevicePtr());
-        k_averageRules.setArg(iargs++, cohesion_s.getDevicePtr());
-        k_averageRules.setArg(iargs++, flockmates_s.getDevicePtr());
-        k_averageRules.setArg(iargs++, indices.getDevicePtr());
-        k_averageRules.setArg(iargs++, flockp.getDevicePtr());
-        k_averageRules.setArg(iargs++, gridp.getDevicePtr());
+        k_euler_integration.setArg(iargs++, dt); //time step
+        k_euler_integration.setArg(iargs++, pos_u.getDevicePtr());
+        k_euler_integration.setArg(iargs++, pos_s.getDevicePtr());
+        k_euler_integration.setArg(iargs++, vel_u.getDevicePtr());
+        k_euler_integration.setArg(iargs++, vel_s.getDevicePtr());
+        k_euler_integration.setArg(iargs++, separation_s.getDevicePtr());
+        k_euler_integration.setArg(iargs++, alignment_s.getDevicePtr());
+        k_euler_integration.setArg(iargs++, cohesion_s.getDevicePtr());
+        k_euler_integration.setArg(iargs++, indices.getDevicePtr());
+        k_euler_integration.setArg(iargs++, flockp.getDevicePtr());
+        k_euler_integration.setArg(iargs++, gridp.getDevicePtr());
 
 
         int local_size = 128;
-        k_averageRules.execute(num, local_size);
+        k_euler_integration.execute(num, local_size);
 
     }
 
-
-    void FLOCK::cpuAverageRules()
+    void FLOCK::cpuEulerIntegration()
     {
         float4 acc;
         float dist;
@@ -163,7 +161,7 @@ namespace rtps
             v = v*.000; // 0.0005
             velocities[i] = v + acc;
 
-    	    // Step 7. Integrate        
+    	    // Step 7. Integration 
 	        positions[i] = positions[i] + ps->settings->dt*velocities[i];
             positions[i].w = 1.0f; //just in case
 

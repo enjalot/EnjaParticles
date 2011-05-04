@@ -1,5 +1,5 @@
-#ifndef RTPS_AVERAGERULES_H_INCLUDED
-#define RTPS_AVERAGERULES_H_INCLUDED
+#ifndef RTPS_INTEGRATE_H_
+#define RTPS_INTEGRATE_H_
 
 
 #include <CLL.h>
@@ -8,11 +8,11 @@
 
 namespace rtps 
 {
-    class AverageRules
+    class EulerIntegration
     {
         public:
-            AverageRules() { cli = NULL; timer = NULL; };
-            AverageRules(std::string path, CL* cli, EB::Timer* timer);
+            EulerIntegration() { cli = NULL; timer = NULL; };
+            EulerIntegration(std::string path, CL* cli, EB::Timer* timer);
             void execute(int num,
                         float dt,
                         Buffer<float4>& pos_u,
@@ -22,7 +22,6 @@ namespace rtps
                         Buffer<float4>& separation_s,
                         Buffer<float4>& alignment_s,
                         Buffer<float4>& cohesion_s,
-                        Buffer<int4>& flockmates_s,
                         Buffer<unsigned int>& indices,
                         //params
                         Buffer<FLOCKParameters>& flockp,
@@ -35,7 +34,7 @@ namespace rtps
 
         private:
             CL* cli;
-            Kernel k_averageRules;
+            Kernel k_euler_integration;
             EB::Timer* timer;
     };
 }

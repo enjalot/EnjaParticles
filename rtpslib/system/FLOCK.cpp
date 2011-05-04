@@ -109,6 +109,8 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     
     computeRules = ComputeRules(flock_source_dir, ps->cli, timers["computeRules_gpu"]);
     averageRules = AverageRules(flock_source_dir, ps->cli, timers["averageRules_gpu"]);
+    rules = Rules(flock_source_dir, ps->cli, timers["rules_gpu"]);
+    euler_integration = EulerIntegration(flock_source_dir, ps->cli, timers["integrate_gpu"]);
 
 
 #endif
@@ -161,7 +163,8 @@ void FLOCK::updateCPU()
     //timers[TI_UPDATE]->start();
     
     //cpuComputeRules();  // based on my boids program
-    cpuAverageRules();
+    //cpuAverageRules();
+    cpuRules();
 
     // mymese debugging
 #if 0
@@ -312,12 +315,8 @@ void FLOCK::updateGPU()
             cl_FLOCKParameters.copyToDevice(vparams);
         #endif
 
-//cl_FLOCKParameters.smoothing_distance = 200.f;
-//cl_FLOCKParameters.search_radius = 100.f;
-//cl_FLOCKParameters.min_dist = 50.f;
-  
-        //if(num >0) printf("density\n");
-        timers["computeRules"]->start();
+        
+      /*  timers["computeRules"]->start();
         computeRules.execute(   num,
             //cl_vars_sorted,
             cl_position_s,
@@ -332,16 +331,64 @@ void FLOCK::updateGPU()
             cl_FLOCKParameters,
             clf_debug,
             cli_debug);
-       timers["computeRules"]->stop();
+       timers["computeRules"]->stop();*/
             
-       //collision();
-       timers["integrate"]->start();
-       integrate();
-       timers["integrate"]->stop();
+        timers["rules"]->start();
+        // add a bool variable for each rule
+        if(1){
+            rules.executeFlockmates(   num,
+                cl_flockmates_s,
+                cl_cell_indices_start,
+                cl_cell_indices_end,
+                cl_GridParamsScaled,
+                cl_FLOCKParameters,
+                clf_debug,
+                cli_debug);
+        }
+        if(1){
+            rules.executeSeparation(   num,
+                cl_position_s,
+                cl_separation_s,
+                cl_flockmates_s,
+                cl_cell_indices_start,
+                cl_cell_indices_end,
+                cl_GridParamsScaled,
+                cl_FLOCKParameters,
+                clf_debug,
+                cli_debug);
+        }
+        if(1){
+            rules.executeAlignment(   num,
+                cl_velocity_s,
+                cl_alignment_s,
+                cl_flockmates_s,
+                cl_cell_indices_start,
+                cl_cell_indices_end,
+                cl_GridParamsScaled,
+                cl_FLOCKParameters,
+                clf_debug,
+                cli_debug);
+        }
+        if(1){
+            rules.executeCohesion(   num,
+                cl_position_s,
+                cl_cohesion_s,
+                cl_flockmates_s,
+                cl_cell_indices_start,
+                cl_cell_indices_end,
+                cl_GridParamsScaled,
+                cl_FLOCKParameters,
+                clf_debug,
+                cli_debug);
+        }
+        timers["rules"]->stop();
+        
+        //collision();
+        
+        timers["integrate"]->start();
+        integrate();
+        timers["integrate"]->stop();
 
-
-        //printf("integrate\n");
-        //integrate();		// compute the rules and itegrate
     }
 
     cl_position_u.release();
@@ -357,11 +404,9 @@ void FLOCK::hash_and_sort()
     //printf("hash\n");
     timers["hash"]->start();
     hash.execute(   num,
-        //cl_vars_unsorted,
         cl_position_u,
         cl_sort_hashes,
         cl_sort_indices,
-        //cl_FLOCKParameters,
         cl_GridParams,
         clf_debug,
         cli_debug);
@@ -377,7 +422,7 @@ void FLOCK::hash_and_sort()
 //----------------------------------------------------------------------
 void FLOCK::integrate()
 {
-    averageRules.execute(num,
+    euler_integration.execute(num,
         settings->dt,
         cl_position_u,
         cl_position_s,
@@ -386,7 +431,6 @@ void FLOCK::integrate()
         cl_separation_s,
         cl_alignment_s,
         cl_cohesion_s,
-        cl_flockmates_s,
         cl_sort_indices,
         cl_FLOCKParameters,
         cl_GridParamsScaled,
@@ -394,11 +438,6 @@ void FLOCK::integrate()
         clf_debug,
         cli_debug);
 
-    //int local_size = 128;
-        
-    //timers[TI_EULER]->start();
-    //k_euler.execute(num, local_size);
-    //timers[TI_EULER]->end();
 
     // mymese debugging
 #if 0 
@@ -496,6 +535,7 @@ int FLOCK::setupTimers()
     timers["averageRules"] = new EB::Timer("Average Rules function", time_offset);
     timers["averageRules_gpu"] = new EB::Timer("Average Rules GPU kernel execution", time_offset);
     //timers["prep_gpu"] = new EB::Timer("Prep GPU kernel execution", time_offset);
+    timers["rules"] = new EB::Timer("Computes all the rules", time_offset);
 	return 0;
 }
 
