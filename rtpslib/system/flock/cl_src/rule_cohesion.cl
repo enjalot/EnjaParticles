@@ -79,10 +79,10 @@ __kernel void rule_cohesion(
     IterateParticlesInNearbyCells(/*vars_sorted*/ ARGV, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ flockp DEBUG_ARGV);
 	
 	// dividing by the number of flockmates to get the actual average
-	pt.cohesion = flockmates[index].x > 0 ? pt.cohesion/flockmates[index].x: pt.cohesion;
+	pt.cohesion = flockmates[index].x > 0 ? pt.cohesion/(float)flockmates[index].x: pt.cohesion;
 
 	// steering towards the average velocity 
-	pt.cohesion -= vi;
+	pt.cohesion -= position_i;
     pt.cohesion.w = 0.f;
 	pt.cohesion = normalize(pt.cohesion);
 

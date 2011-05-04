@@ -4,17 +4,18 @@
 namespace rtps 
 {
     //----------------------------------------------------------------------
-    Rules::Rules(std::string path, CL* cli_, EB::Timer* timer_)
+    Rules::Rules(std::string wpath, CL* cli_, EB::Timer* timer_)
     {
         cli = cli_;
         timer = timer_;
-     
+        std::string path;
+
         printf("load rules\n");
 
         // flockmates 
         try
         {
-            path = path + "/flockmates.cl";
+            path = wpath + "/flockmates.cl";
             k_flockmates= Kernel(cli, path, "flockmates");
         }
         catch (cl::Error er)
@@ -25,7 +26,7 @@ namespace rtps
         // separation
         try
         {
-            path = path + "/rule_separation.cl";
+            path = wpath + "/rule_separation.cl";
             k_rule_separation= Kernel(cli, path, "rule_separation");
         }
         catch (cl::Error er)
@@ -36,7 +37,7 @@ namespace rtps
         // alignment
         try
         {
-            path = path + "/rule_alignment.cl";
+            path = wpath + "/rule_alignment.cl";
             k_rule_alignment= Kernel(cli, path, "rule_alignment");
         }
         catch (cl::Error er)
@@ -47,7 +48,7 @@ namespace rtps
         // cohesion
         try
         {
-            path = path + "/rule_cohesion.cl";
+            path = wpath + "/rule_cohesion.cl";
             k_rule_cohesion= Kernel(cli, path, "rule_cohesion");
         }
         catch (cl::Error er)
@@ -59,6 +60,7 @@ namespace rtps
     //----------------------------------------------------------------------
     void Rules::executeFlockmates(int num,
                     //input
+                    Buffer<float4>& pos_s, 
                     Buffer<int4>& neigh_s, 
                     //output
                     Buffer<unsigned int>& ci_start,
@@ -71,6 +73,7 @@ namespace rtps
                     Buffer<int4>& cli_debug)
     { 
         int iarg = 0;
+        k_flockmates.setArg(iarg++, pos_s.getDevicePtr());
         k_flockmates.setArg(iarg++, neigh_s.getDevicePtr());
         k_flockmates.setArg(iarg++, ci_start.getDevicePtr());
         k_flockmates.setArg(iarg++, ci_end.getDevicePtr());
@@ -143,6 +146,7 @@ namespace rtps
     //----------------------------------------------------------------------
     void Rules::executeAlignment(int num,
                     //input
+                    Buffer<float4>& pos_s, 
                     Buffer<float4>& vel_s,
                     Buffer<float4>& align_s, 
                     Buffer<int4>& neigh_s, 
@@ -157,6 +161,7 @@ namespace rtps
                     Buffer<int4>& cli_debug)
     { 
         int iarg = 0;
+        k_rule_alignment.setArg(iarg++, pos_s.getDevicePtr());
         k_rule_alignment.setArg(iarg++, vel_s.getDevicePtr());
         k_rule_alignment.setArg(iarg++, align_s.getDevicePtr());
         k_rule_alignment.setArg(iarg++, neigh_s.getDevicePtr());

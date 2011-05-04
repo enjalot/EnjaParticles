@@ -110,7 +110,7 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     //computeRules = ComputeRules(flock_source_dir, ps->cli, timers["computeRules_gpu"]);
     //averageRules = AverageRules(flock_source_dir, ps->cli, timers["averageRules_gpu"]);
     rules = Rules(flock_source_dir, ps->cli, timers["rules_gpu"]);
-    euler_integration = EulerIntegration(flock_source_dir, ps->cli, timers["integrate_gpu"]);
+    euler_integration = EulerIntegration(flock_source_dir, ps->cli, timers["euler_gpu"]);
 
 
 #endif
@@ -337,6 +337,7 @@ void FLOCK::updateGPU()
         // add a bool variable for each rule
         if(1){
             rules.executeFlockmates(   num,
+                cl_position_s,
                 cl_flockmates_s,
                 cl_cell_indices_start,
                 cl_cell_indices_end,
@@ -359,6 +360,7 @@ void FLOCK::updateGPU()
         }
         if(1){
             rules.executeAlignment(   num,
+                cl_position_s,
                 cl_velocity_s,
                 cl_alignment_s,
                 cl_flockmates_s,
@@ -532,10 +534,13 @@ int FLOCK::setupTimers()
     //timers["collision_tri"] = new EB::Timer("Collision triangles function", time_offset);
     //timers["ct_gpu"] = new EB::Timer("Collision Triangle GPU kernel execution", time_offset);
     timers["integrate"] = new EB::Timer("Integration kernel execution", time_offset);
+    timers["euler_gpu"] = new EB::Timer("Euler integration", time_offset);
     timers["averageRules"] = new EB::Timer("Average Rules function", time_offset);
     timers["averageRules_gpu"] = new EB::Timer("Average Rules GPU kernel execution", time_offset);
     //timers["prep_gpu"] = new EB::Timer("Prep GPU kernel execution", time_offset);
     timers["rules"] = new EB::Timer("Computes all the rules", time_offset);
+    timers["rules_gpu"] = new EB::Timer("Computes all the rules in the GPU", time_offset);
+
 	return 0;
 }
 

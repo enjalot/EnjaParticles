@@ -15,6 +15,7 @@ namespace rtps
             Rules(std::string path, CL* cli, EB::Timer* timer);
             void executeFlockmates(int num,
                     //input
+                    Buffer<float4>& pos_s, 
                     Buffer<int4>& neigh_s, 
                     //output
                     Buffer<unsigned int>& ci_start,
@@ -41,6 +42,7 @@ namespace rtps
                     Buffer<int4>& cli_debug);
             void executeAlignment(int num,
                     //input
+                    Buffer<float4>& pos_s, 
                     Buffer<float4>& vel_s, 
                     Buffer<float4>& align_s, 
                     Buffer<int4>& neigh_s, 

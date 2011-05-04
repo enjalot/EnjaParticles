@@ -3,8 +3,8 @@
 
 //These are passed along through cl_neighbors.h
 //only used inside ForNeighbor defined in this file
-#define ARGS __global int4* flockmates 
-#define ARGV flockmates 
+#define ARGS __global float4* pos, __global int4* flockmates 
+#define ARGV pos, flockmates 
 
 #include "cl_macros.h"
 #include "cl_structs.h"

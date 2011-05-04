@@ -1,5 +1,5 @@
-#ifndef RTPS_INTEGRATE_H_
-#define RTPS_INTEGRATE_H_
+#ifndef RTPS_EULER_INTEGRATION_H_
+#define RTPS_EULER_INTEGRATION_H_
 
 
 #include <CLL.h>

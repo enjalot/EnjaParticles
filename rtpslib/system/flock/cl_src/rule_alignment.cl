@@ -3,8 +3,8 @@
 
 //These are passed along through cl_neighbors.h
 //only used inside ForNeighbor defined in this file
-#define ARGS __global float4* vel, __global float4* alignment, __global int4* flockmates
-#define ARGV vel, alignment, flockmates 
+#define ARGS __global float4* pos, __global float4* vel, __global float4* alignment, __global int4* flockmates
+#define ARGV pos, vel, alignment, flockmates 
 
 #include "cl_macros.h"
 #include "cl_structs.h"
@@ -70,7 +70,9 @@ __kernel void rule_alignment(
     if (index >= num) return;
 
 
-    float4 vi = vel[index];
+    float4 position_i = pos[index];
+    float4 velocity_i = vel[index];
+    
 
     // Do calculations on particles in neighboring cells
 	Boid pt;
@@ -79,10 +81,10 @@ __kernel void rule_alignment(
     IterateParticlesInNearbyCells(/*vars_sorted*/ ARGV, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ flockp DEBUG_ARGV);
 	
 	// dividing by the number of flockmates to get the actual average
-	pt.alignment = flockmates[index].x > 0 ? pt.alignment/flockmates[index].x: pt.alignment;
+	pt.alignment = flockmates[index].x > 0 ? pt.alignment/(float)flockmates[index].x: pt.alignment;
 
 	// steering towards the average velocity 
-	pt.alignment -= vi;
+	pt.alignment -= velocity_i;
     pt.alignment.w = 0.f;
 	pt.alignment = normalize(pt.alignment);
 

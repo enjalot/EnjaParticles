@@ -91,7 +91,7 @@ __kernel void rule_separation(
 
     // TODO: finish the computation of the separation
     if(pt.num_nearestFlockmates > 0){
-        pt.separation /= pt.num_nearestFlockmates;
+        pt.separation /= (float)pt.num_nearestFlockmates;
         pt.separation.w =0.f;
         pt.separation = normalize(pt.separation);
     }

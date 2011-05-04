@@ -43,7 +43,7 @@
 //#include "../rtps_common.h"
 
 // Added by GE, March 16, 2011
-#include "boids.h"
+//#include "boids.h"
 
 #ifdef WIN32
     #if defined(rtps_EXPORTS)

@@ -43,6 +43,10 @@ namespace rtps
         k_euler_integration.setArg(iargs++, indices.getDevicePtr());
         k_euler_integration.setArg(iargs++, flockp.getDevicePtr());
         k_euler_integration.setArg(iargs++, gridp.getDevicePtr());
+        
+        // ONLY IF DEBUGGING
+        k_euler_integration.setArg(iargs++, clf_debug.getDevicePtr());
+        k_euler_integration.setArg(iargs++, cli_debug.getDevicePtr());
 
 
         int local_size = 128;

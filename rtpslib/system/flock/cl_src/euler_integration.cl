@@ -16,7 +16,9 @@ __kernel void euler_integration(
                    __global float4* cohesion_s, 
                    __global int* sort_indices,  
                    __constant struct FLOCKParameters* flockp,
-                   __constant struct GridParams* gridp)
+                   __constant struct GridParams* gridp
+                    DEBUG_ARGS
+                    )
                    
 {
     unsigned int i = get_global_id(0);
