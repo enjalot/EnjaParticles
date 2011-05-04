@@ -29,8 +29,8 @@
 //#include <Collision_triangle.h>
 //#include <LeapFrog.h>
 //#include <Lifetime.h>
-#include <flock/ComputeRules.h>
-#include <flock/AverageRules.h>
+//#include <flock/ComputeRules.h>
+//#include <flock/AverageRules.h>
 #include <flock/Rules.h>
 #include <flock/EulerIntegration.h>
 
@@ -305,8 +305,8 @@ private:
     //void collision();
     //CollisionWall collision_wall;
     //CollisionTriangle collision_tri;
-    ComputeRules computeRules;
-    AverageRules averageRules;
+    //ComputeRules computeRules;
+    //AverageRules averageRules;
     Rules rules;
     EulerIntegration euler_integration;
     

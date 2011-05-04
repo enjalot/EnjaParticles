@@ -107,8 +107,8 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     cellindices = CellIndices(common_source_dir, ps->cli, timers["ci_gpu"] );
     permute = Permute( common_source_dir, ps->cli, timers["perm_gpu"] );
     
-    computeRules = ComputeRules(flock_source_dir, ps->cli, timers["computeRules_gpu"]);
-    averageRules = AverageRules(flock_source_dir, ps->cli, timers["averageRules_gpu"]);
+    //computeRules = ComputeRules(flock_source_dir, ps->cli, timers["computeRules_gpu"]);
+    //averageRules = AverageRules(flock_source_dir, ps->cli, timers["averageRules_gpu"]);
     rules = Rules(flock_source_dir, ps->cli, timers["rules_gpu"]);
     euler_integration = EulerIntegration(flock_source_dir, ps->cli, timers["integrate_gpu"]);
 
