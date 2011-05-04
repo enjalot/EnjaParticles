@@ -10,7 +10,7 @@ namespace rtps
         timer = timer_;
         std::string path;
 
-        printf("load rules\n");
+        printf("create rules kernel\n");
 
         // flockmates 
         try

@@ -8,9 +8,9 @@ namespace rtps
         cli = cli_;
         timer = timer_;
  
-        printf("create EulerIntegration kernel\n");
+        printf("create euler_integration kernel\n");
         path += "/euler_integration.cl";
-        k_euler_integration = Kernel(cli, path, "EulerIntegration");
+        k_euler_integration = Kernel(cli, path, "euler_integration");
     } 
     
     void EulerIntegration::execute(int num,
