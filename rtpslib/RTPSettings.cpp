@@ -40,34 +40,38 @@ namespace rtps
         this->grid = grid;
     }
 
-//with triangle collision
-RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain* grid, bool tri_collision)
-{
-    changed = false;
-    this->system = system;
-    this->max_particles = nlpo2(max_particles);
-    this->dt = dt;
-    this->grid = grid;
-    this->tri_collision = tri_collision;
-}
-RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain* grid, float maxspeed, float mindist, float searchradius, float color[])
-{
-    changed = false;
-    this->system = system;
-    this->max_particles = nlpo2(max_particles);
-    this->dt = dt;
-    this->grid = grid;
-    this->max_speed = maxspeed;
-    this->min_dist = mindist;
-    this->search_radius = searchradius;
-    float r = color[0]; float g = color[1]; float b = color[2]; 
-    this->color = float4(r,g,b,1.f);
-}
+    //with triangle collision
+    RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain* grid, bool tri_collision)
+    {
+        changed = false;
+        this->system = system;
+        this->max_particles = max_particles;
+        this->dt = dt;
+        this->grid = grid;
+        this->tri_collision = tri_collision;
+    }
+    
+    RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain* grid, float maxspeed, float mindist, float searchradius, float color[], float w_sep, float w_align, float w_coh)
+    {
+        changed = false;
+        this->system = system;
+        this->system = system;
+        this->max_particles = max_particles;
+        this->dt = dt;
+        this->grid = grid;
+        this->max_speed = maxspeed;
+        this->min_dist = mindist;
+        this->search_radius = searchradius;
+        this->color = float4(color[0]/255, color[1]/255, color[2]/255,1.f);
+        this->w_sep = w_sep;
+        this->w_align = w_align;
+        this->w_coh = w_coh;
+    }
 
-RTPSettings::~RTPSettings()
-{
-    printf("settings destructing!\n");
-}
+    RTPSettings::~RTPSettings()
+    {
+        printf("settings destructing!\n");
+    }
 
     void RTPSettings::printSettings()
     {
@@ -80,6 +84,5 @@ RTPSettings::~RTPSettings()
             printf("%s: %s\n", it->first.c_str(), it->second.c_str());
         }
     }
-
 
 }

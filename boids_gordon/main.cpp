@@ -128,19 +128,21 @@ void display()
    glEnd();
 
 	#if 1
-   // Draw velocity field
+    // Draw velocity field
 
-   VF& vc = boids->vel_coh;
-   glColor3f(1., 0., 0.);
-   //vector_field(pos, boids->vel_coh, 100.); // vel, scale
-   glColor3f(0., 1., 0.);
-   //vector_field(pos, boids->vel_sep, 100.); // vel, scale
-   glColor3f(1.,1.,0.);
-   VF& va = boids->vel_align;
-   //vector_field(pos, va, 100.); // vel, scale
-   //for (int i=0; i < va.size(); i++) {
-   	 //va[i].print("va");
-   //}
+    //VF& vc = boids->vel_coh;
+    //glColor3f(1., 0., 0.);
+    //vector_field(pos, boids->vel_coh, 100.); // vel, scale
+   
+    glColor3f(0., 1., 0.);
+    //vector_field(pos, boids->vel_sep, 100.); // vel, scale
+    
+    glColor3f(1.,1.,0.);
+    //VF& va = boids->vel_align;
+    //vector_field(pos, boids->vel_align, 10.); // vel, scale
+    //for (int i=0; i < va.size(); i++) {
+   	    //va[i].print("va");
+    //}
 
    #endif
 
