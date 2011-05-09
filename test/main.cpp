@@ -108,8 +108,8 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 256
 #define DT .001f
 
-//float4 color = float4(0.1, 0.1, 0.73, .05);
-float4 color = float4(1., 0.5, 0.0, 1.);
+float4 color = float4(0.1, 0.1, 0.73, .05);
+//float4 color = float4(1., 0.5, 0.0, 1.);
 int hindex; 
 
 
@@ -185,9 +185,9 @@ int main(int argc, char** argv)
 
     settings->SetSetting("render_texture", "firejet_blast.png");
     settings->SetSetting("render_frag_shader", "sprite_tex_frag.glsl");
-    //settings->SetSetting("render_use_alpha", true);
-    settings->SetSetting("blur_scale",8.0f);
-    settings->SetSetting("render_use_alpha", false);
+    settings->SetSetting("render_use_alpha", true);
+    settings->SetSetting("blur_scale",1.0f);
+    //settings->SetSetting("render_use_alpha", false);
     settings->SetSetting("render_alpha_function", "add");
     settings->SetSetting("lt_increment", -.00);
     settings->SetSetting("lt_cl", "lifetime.cl");
@@ -391,6 +391,12 @@ void appKeyboard(unsigned char key, int x, int y)
         case 'x':
             translate_y -= 0.1;
             break;
+        case '+':
+           ps->settings->SetSetting("blur_scale",ps->settings->GetSettingAs<float>("blur_scale")+1.0f);
+           return;
+        case '-':
+           ps->settings->SetSetting("blur_scale",ps->settings->GetSettingAs<float>("blur_scale")-1.0f);
+           return;
         default:
             return;
     }

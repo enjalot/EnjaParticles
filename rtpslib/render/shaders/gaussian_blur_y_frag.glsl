@@ -14,9 +14,9 @@ void main(void)
     float sigmasq = sig*sig;
     float gauss = (1./(2.*pi*sigmasq));
     float denom = (2.*sigmasq);
-    int width = int(2*3*sig);
+    int width = int(3*sig);
    float sum = 0.0;	
-   for(int i=-width/2; i<width/2; i++ )
+   for(int i=-width; i<width; i++ )
    {
 		float tmp = texture2D(depthTex,gl_TexCoord[0].st+vec2(0.0,float(i)*del_y)).x;
 		sum += tmp * gauss *exp(-(pow(float(i),2.))/denom);
