@@ -1,5 +1,5 @@
 //#define KERNEL_SIZE 10000
-#define KERNEL_DIAMETER 60 
+#define KERNEL_DIAMETER 31 
 const float sigmasq = 64. ;//0.84089642*0.84089642;
 const float pi = 3.141592654;
 
@@ -22,18 +22,16 @@ void main(void)
 		//return;
 	}
    float sum = 0.0;	
+   float gauss =(1./(2.*pi*sigmasq));
+   float denom = (2.*sigmasq);
    for(int i=0; i<KERNEL_DIAMETER; i++ )
    {
 	   for(int j=0; j<KERNEL_DIAMETER; j++ )
 	   {
-			float tmp = texture2D(depthTex,gl_TexCoord[0].st+vec2(float(i-(KERNEL_DIAMETER/2))*del_x,float(j-(KERNEL_DIAMETER/2))*del_y)).x;//texture2D(depthTex, gl_TexCoord[0].st + offset[(i*KERNEL_DIAMETER)+j]).x;
-			//if(tmp-depth>threshold)
-			//	tmp=depth;//+(sign(tmp-depth))*threshold;//continue;
-			sum += tmp * (1./(2.*pi*sigmasq))*exp(-(pow(float(i-(KERNEL_DIAMETER/2)),2.)+pow(float(j-(KERNEL_DIAMETER/2)),2.))/(2.*sigmasq));
+			float tmp = texture2D(depthTex,gl_TexCoord[0].st+vec2(float(i-(KERNEL_DIAMETER/2))*del_x,float(j-(KERNEL_DIAMETER/2))*del_y)).x;
+			sum += tmp * gauss *exp(-(pow(float(i-(KERNEL_DIAMETER/2)),2.)+pow(float(j-(KERNEL_DIAMETER/2)),2.))/denom);
 		}
    }
-   //if(sum<0.05)
-	//	sum=1.0;
    gl_FragData[0] = vec4(sum,sum,sum,1.0);
    gl_FragDepth = sum;
 }

@@ -11,10 +11,9 @@ void main(void)
 	{
 		discard;
 	}
-    float sigmasq = sig*sig;
-    float gauss = (1./(2.*pi*sigmasq));
-    float denom = (2.*sigmasq);
-    int width = int(3*sig);
+    float gauss = (1./(sqrt(2.*pi)*sig));
+    float denom = (2.*sig*sig);
+    int width = int(2.*sig);
    float sum = 0.0;	
    for(int i=-width; i<width; i++ )
    {

@@ -100,10 +100,16 @@ namespace rtps
         }
         else if (smoothing == GAUSSIAN_X_SHADER ||smoothing == GAUSSIAN_Y_SHADER)
         {
+            glUseProgram(glsl_program[GAUSSIAN_Y_SHADER]);
+            glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "depthTex"),0);
+            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "del_y"),1.0f/window_height);
+            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "sig"),settings->GetSettingAs<float>("blur_scale"));
+            /*
             glUseProgram(glsl_program[GAUSSIAN_X_SHADER]);
             glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "depthTex"),0);
             glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "del_x"),1.0f/window_width);
-            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "sig"),settings->GetSettingAs<float>("blur_scale"));
+            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "sig"),settings->GetSettingAs<float>("blur_scale")); 
+            */ 
             fullscreenQuad();
 
             glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["depth"],0);
@@ -111,10 +117,16 @@ namespace rtps
             //glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D,gl_framebuffer_texs["depth2"]);
 
+            /*
             glUseProgram(glsl_program[GAUSSIAN_Y_SHADER]);
             glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "depthTex"),0);
             glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "del_y"),1.0f/window_height);
-            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "sig"),settings->GetSettingAs<float>("blur_scale"));
+            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "sig"),settings->GetSettingAs<float>("blur_scale")); 
+            */ 
+            glUseProgram(glsl_program[GAUSSIAN_X_SHADER]);
+            glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "depthTex"),0);
+            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "del_x"),1.0f/window_width);
+            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "sig"),settings->GetSettingAs<float>("blur_scale")); 
         }
         else if (smoothing == BILATERAL_GAUSSIAN_SHADER)
         {

@@ -186,7 +186,7 @@ int main(int argc, char** argv)
     settings->SetSetting("render_texture", "firejet_blast.png");
     settings->SetSetting("render_frag_shader", "sprite_tex_frag.glsl");
     settings->SetSetting("render_use_alpha", true);
-    settings->SetSetting("blur_scale",1.0f);
+    settings->SetSetting("blur_scale",8.0f);
     //settings->SetSetting("render_use_alpha", false);
     settings->SetSetting("render_alpha_function", "add");
     settings->SetSetting("lt_increment", -.00);
