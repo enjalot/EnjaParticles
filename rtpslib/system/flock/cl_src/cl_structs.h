@@ -1,72 +1,51 @@
-#ifndef _CL_STRUCTURES_H_
-#define _CL_STRUCTURES_H_
+#ifndef _CL_FLOCK_STRUCTS_H_
+#define _CL_FLOCK_STRUCTS_H_
 
+#include "../cl_common/cl_structs.h"
 
-typedef struct FLOCKParams
+//Struct which gets passed to OpenCL routines
+typedef struct FLOCKParameters
 {
-    float4 grid_min;            //float3s are really float4 in opencl 1.0 & 1.1
-    float4 grid_max;            //so we have padding in C++ definition
+    // use it later
     float mass;
+   
+    // simulation settings 
+    float simulation_scale;
     float rest_distance;
     float smoothing_distance;
-    float simulation_scale;
-    float boundary_stiffness;
-    float boundary_dampening;
-    float boundary_distance;
-    float EPSILON;
-    float PI;       //delicious
-    float K;        //speed of sound
-    float viscosity;
-    float velocity_limit;
-    float xflock_factor;
-
-
-	
-	float gravity; // -9.8 m/sec^2
-    float friction_coef;
-	float restitution_coef;
-	float shear;
-	float attraction;
-	float spring;
-	//float surface_threshold;
     
-    float wpoly6_coef;
-	float wpoly6_d_coef;
-	float wpoly6_dd_coef; // laplacian
-	float wspiky_coef;
-	float wspiky_d_coef;
-	float wspiky_dd_coef;
-	float wvisc_coef;
-	float wvisc_d_coef;
-	float wvisc_dd_coef;
+    // CL parameters 
+    //int nb_vars;    // for combined variables (vars_sorted, etc.)
+	//int choice;     // which kind of calculation to invoke
+    //int max_num;
 
-    int num;
-    int nb_vars; // for combined variables (vars_sorted, etc.)
-	int choice; // which kind of calculation to invoke
-
-	float min_dist; // separation distance
+    // Boids parameters
+    float min_dist;  // desired separation between boids
     float search_radius;
     float max_speed; 
-} FLOCKParams;
-
+    
+    // Boid rules' weights
+    float w_sep;
+    float w_align;
+    float w_coh;
+    
+    int num;
+} FLOCKParameters;
 
 // Will be local variable
 // used to output multiple variables per point
-typedef struct PointData
+typedef struct Boid 
 {
-	// density.x: density
-	// density.y: denominator: sum_i (m_j/rho_j W_j)
-	float4 density;
-	float4 color;  // x component
-	float4 color_normal;
-	float4 color_lapl;
-	float4 force;
-	float4 surf_tens;
-	float4 xflock;
-//	float4 center_of_mass;
-//	int num_neighbors;
-} PointData;
+	float4 separation;
+	float4 alignment;  
+	float4 cohesion;
+	float4 acceleration;
+	float4 color;
+    int num_flockmates;
+    int num_nearestFlockmates;
+} Boid;
 
+/*
 //----------------------------------------------------------------------
 struct GridParams
 {
@@ -79,27 +58,32 @@ struct GridParams
     // number of cells in each dimension/side of grid
     float4          grid_res;
     float4          grid_delta;
-    //float4          grid_inv_delta;
 
     int nb_cells;
 };
 
-//----------------------------------------------------------------------
-#if 0
-struct FluidParams
+struct FLOCKParameters
 {
-	float smoothing_length; // FLOCK radius
-	float scale_to_simulation;
-	//float mass;
-	//float dt; // Time step, not necessarily best location
-	float friction_coef;
-	float restitution_coef;
-	float damping;
-	float shear;
-	float attraction;
-	float spring;
-	float gravity; // -9.8 m/sec^2
-	int choice; // EASY WAY TO SELECT KERNELS
+
+    float4 grid_min;
+    float4 grid_max;
+    
+    float rest_distance;
+    float smoothing_distance;
+    
+    int num;
+    int nb_vars; // for combined variables (vars_sorted, etc.)
+	int choice; // which kind of calculation to invoke
+    
+    // Boids
+    float min_dist;  // desired separation between boids
+    float search_radius;
+    float max_speed; 
+    
+    float w_sep;
+    float w_align;
+    float w_coh;
 };
-#endif
+*/
+
 #endif

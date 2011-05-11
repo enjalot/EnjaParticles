@@ -23,7 +23,7 @@ SET(WITH_OPENCL TRUE)
 ADD_DEFINITIONS(-g )
 #ADD_DEFINITIONS(-DDEBUG)
 IF(WITH_OPENCL)
-    ADD_DEFINITIONS(-DGPU)
+        ADD_DEFINITIONS(-DGPU)
 ENDIF(WITH_OPENCL)
 #might want to have CPU even if we have OpenCL available
 #ADD_DEFINITIONS(-DCPU)
@@ -55,14 +55,15 @@ set (rtpslib_INCLUDES
     ${rtpslib_SOURCE_DIR}
     ${rtpslib_SOURCE_DIR}/system
     ${rtpslib_SOURCE_DIR}/system/sph
+    ${rtpslib_SOURCE_DIR}/system/flock
     ${rtpslib_SOURCE_DIR}/system/common
     ${rtpslib_SOURCE_DIR}/render
     ${rtpslib_SOURCE_DIR}/render/util
     ${rtpslib_SOURCE_DIR}/domain
     ${rtpslib_SOURCE_DIR}/opencl
     #${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src
-    
-)
+)    
+
 
 
 #library source files (don't explicitly give file extension, inferred from source type)
@@ -83,7 +84,7 @@ set (rtpslib_SOURCES
 
     ${rtpslib_SOURCE_DIR}/domain/Domain
     ${rtpslib_SOURCE_DIR}/domain/IV
-    ${rtpslib_SOURCE_DIR}/system/common/Hose
+    # ${rtpslib_SOURCE_DIR}/system/common/Hose
     
 
     # common use for all systems
@@ -121,7 +122,11 @@ set (rtpslib_SOURCES
 
 	# FLOCK
     ${rtpslib_SOURCE_DIR}/system/FLOCK.cpp
-    ${rtpslib_SOURCE_DIR}/system/flock/Euler
+    ${rtpslib_SOURCE_DIR}/system/FLOCKSettings.cpp
+    ${rtpslib_SOURCE_DIR}/system/flock/EulerIntegration
+    ${rtpslib_SOURCE_DIR}/system/flock/Rules
+    #${rtpslib_SOURCE_DIR}/system/flock/ComputeRules
+    #${rtpslib_SOURCE_DIR}/system/flock/AverageRules
     #${rtpslib_SOURCE_DIR}/system/flock/LeapFrog
     #${rtpslib_SOURCE_DIR}/system/flock/Density
     #${rtpslib_SOURCE_DIR}/system/flock/Pressure
@@ -134,11 +139,12 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/boids
     
     # neighbors
-    ${rtpslib_SOURCE_DIR}/system/flock/Prep
-    ${rtpslib_SOURCE_DIR}/system/flock/Hash
-    ${rtpslib_SOURCE_DIR}/system/flock/BitonicSort
-    ${rtpslib_SOURCE_DIR}/system/flock/DataStructures
-    ${rtpslib_SOURCE_DIR}/system/flock/Neighbors
+    #${rtpslib_SOURCE_DIR}/system/flock/Prep
+    ${rtpslib_SOURCE_DIR}/system/flock/Sort
+    #${rtpslib_SOURCE_DIR}/system/flock/Hash
+    #${rtpslib_SOURCE_DIR}/system/flock/BitonicSort
+    #${rtpslib_SOURCE_DIR}/system/flock/DataStructures
+    #${rtpslib_SOURCE_DIR}/system/flock/Neighbors
     #${rtpslib_SOURCE_DIR}/particle
     )
 

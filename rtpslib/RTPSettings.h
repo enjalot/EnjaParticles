@@ -46,10 +46,11 @@ namespace rtps
         RTPSettings(SysType system, int max_particles, float dt, Domain *grid);
 
         //collision
+        //RTPSettings(SysType system, int max_particles, float dt, Domain grid, bool tri_collision);
         RTPSettings(SysType system, int max_particles, float dt, Domain *grid, bool tri_collision);
 
         //flock
-        RTPSettings(SysType system, int max_particles, float dt, Domain *grid, float maxspeed, float mindist, float searchradius, float color[]);
+        RTPSettings(SysType system, int max_particles, float dt, Domain* grid, float maxspeed, float mindist, float searchradius, float color[], float w_sep, float w_align, float w_coh);
 
         //without this, windows was crashing with a ValidHeapPointer
         //assertion error. Indicates the heap may be corrupted by 
@@ -76,6 +77,10 @@ namespace rtps
         // color of the flock
         float4 color;
 
+        // weights
+        float w_sep;
+        float w_align;
+        float w_coh;
 
         bool has_changed() { return changed; };
         void updated() { changed = false; }; //for now we are assuming only one consumer (one system using the settings)
