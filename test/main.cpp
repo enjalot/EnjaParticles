@@ -392,10 +392,22 @@ void appKeyboard(unsigned char key, int x, int y)
             translate_y -= 0.1;
             break;
         case '+':
-           ps->settings->SetSetting("blur_scale",ps->settings->GetSettingAs<float>("blur_scale")+1.0f);
+           {
+               float blur = ps->settings->GetSettingAs<float>("blur_scale");
+               if(blur<16.0f)
+               {
+                   ps->settings->SetSetting("blur_scale",blur+1.0f);
+               }
+           }
            return;
         case '-':
-           ps->settings->SetSetting("blur_scale",ps->settings->GetSettingAs<float>("blur_scale")-1.0f);
+            {
+                float blur = ps->settings->GetSettingAs<float>("blur_scale");
+                if(blur>1.0f)
+                {
+                    ps->settings->SetSetting("blur_scale",blur-1.0f);
+                }
+            }
            return;
         default:
             return;
