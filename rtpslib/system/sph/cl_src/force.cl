@@ -45,40 +45,29 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
         //by iej to avoid branching
         int iej = index_i != index_j;
 
-        // update pressure
-        // gradient
-        // need to be careful, this kernel divides by rlen which could be 0
-        // once two particles assume the same position we will get a lot of branching
-        // and they won't split... how can we account for this?
-        //
-        // FIXED? I added 10E-6 to rlen during the division in Wspiky_dr kernel -IJ
-        // hacks, need to find the original cause (besides adding particles too fast)
-        /*
-        if(rlen == 0.0)
-        {
-            rlen = 1.0;
-            iej = 0;
-        }
-        */
-        //this should 0 force between two particles if they get the same position
-        int rlencheck = rlen != 0.;
-        iej *= rlencheck;
+        // avoid divide by 0 in Wspiky_dr
+        rlen = max(rlen, sphp->EPSILON);
 
         float dWijdr = Wspiky_dr(rlen, sphp->smoothing_distance, sphp);
 
-        float4 di = density[index_i];  // should not repeat di=
-        float4 dj = density[index_j];
-        float idi = 1.0/di.x;
-        float idj = 1.0/dj.x;
+        float di = density[index_i];  // should not repeat di
+        float dj = density[index_j];
+        float idi = 1.0/di;
+        float idj = 1.0/dj;
 
         //form simple SPH in Krog's thesis
 
         float rest_density = 1000.f;
-        float Pi = sphp->K*(di.x - rest_density);
-        float Pj = sphp->K*(dj.x - rest_density);
+        float Pi = sphp->K*(di - rest_density);
+        float Pj = sphp->K*(dj - rest_density);
 
-        float kern = -.5 * dWijdr * (Pi + Pj) * sphp->wspiky_d_coef;
-        //float kern = dWijdr * (Pi * idi * idi + Pj * idj * idj) * sphp->wspiky_d_coef;
+        //playing with quartic kernel
+        //dWijdr = 2.0f/3.0f  - 9.0f * q*q / 8.0f + 19.0f * q*q*q / 24.0f - 5.0f * q*q*q*q / 32.0f; (need derivative of this)
+        //quartic_coef = 
+        
+
+        float kern = -.5 * dWijdr * (Pi + Pj) * sphp->wspiky_d_coef * idi * idj;
+        //float kern = -1.0f * dWijdr * (Pi * idi * idi + Pj * idj * idj) * sphp->wspiky_d_coef;
         float4 force = kern*r; 
 
         float4 veli = veleval[index_i]; // sorted
@@ -88,10 +77,13 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
         // Add viscous forces
         float vvisc = sphp->viscosity;
         float dWijlapl = sphp->wvisc_dd_coef * Wvisc_lapl(rlen, sphp->smoothing_distance, sphp);
-        force += vvisc * (velj-veli) * dWijlapl;
+        float4 visc = vvisc * (velj-veli) * dWijlapl * idj * idi;
+        force += visc;
+
 #endif
 
-        force *=  sphp->mass/(di.x*dj.x);  // original
+        //force *=  sphp->mass/(di.x*dj.x);  // original
+        force *= sphp->mass;// * idi * idj;
         //force *=  sphp->mass;// /(di.x*dj.x); 
 
 #if 1
@@ -105,7 +97,7 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
         */
         float Wijpol6 = Wpoly6(r, sphp->smoothing_distance, sphp);
         //float Wijpol6 = sphp->wpoly6_coef * Wpoly6(rlen, sphp->smoothing_distance, sphp);
-        float4 xsph = (2.f * sphp->mass * Wijpol6 * (velj-veli)/(di.x+dj.x));
+        float4 xsph = (2.f * sphp->mass * Wijpol6 * (velj-veli)/(di+dj));
         pt->xsph += xsph * (float)iej;
         pt->xsph.w = 0.f;
 #endif

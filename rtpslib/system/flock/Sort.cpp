@@ -1,21 +1,16 @@
-#include "SPH.h"
+#include "FLOCK.h"
 
 namespace rtps
 {
 
-    void SPH::bitonic_sort()
+    void FLOCK::bitonic_sort()
     {
         try
         {
             int dir = 1;        // dir: direction
             //int batch = num;
-
-            int arrayLength = nlpo2(num);
-            //printf("num: %d\n", num);
-            //printf("nlpo2(num): %d\n", arrayLength);
-            //int arrayLength = max_num;
-            //int batch = max_num / arrayLength;
-            int batch = 1;
+            int arrayLength = max_num;
+            int batch = max_num / arrayLength;
 
             //printf("about to try sorting\n");
             bitonic.Sort(batch, 

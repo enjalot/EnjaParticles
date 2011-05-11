@@ -19,37 +19,55 @@
 
 #include <RTPS.h>
 //#include "timege.h"
+#include "../rtpslib/render/util/stb_image_write.h"
+
 using namespace rtps;
 
-int window_width = 1200;
-int window_height = 600;
-float fov = 65.;
+int window_width = 640;
+int window_height = 480;
 int glutWindowHandle = 0;
-/*
-float translate_x = -.5f;
-float translate_y = 0.f;//-200.0f;//300.f;
-float translate_z = 1.5f;//200.f;
-*/
+
+#define DTR 0.0174532925
+
+struct camera
+{
+    GLdouble leftfrustum;
+    GLdouble rightfrustum;
+    GLdouble bottomfrustum;
+    GLdouble topfrustum;
+    GLfloat modeltranslation;
+} leftCam, rightCam;
+
+bool stereo_enabled = false;
+bool render_movie = false;
+GLubyte* image = new GLubyte[window_width*window_height*4];
+const char* render_dir = "./frames/";
+
+char filename[512] = {'\0'};
+unsigned int frame_counter = 0;
+float depthZ = -10.0;                                      //depth of the object drawing
+
+double fovy = 65.;                                          //field of view in y-axis
+double aspect = double(window_width)/double(window_height);  //screen aspect ratio
+double nearZ = 0.3;                                        //near clipping plane
+double farZ = 100.0;                                        //far clipping plane
+double screenZ = 10.0;                                     //screen projection plane
+double IOD = 0.5;                                          //intraocular distance
+
 float translate_x = -2.00f;
-float translate_y = -3.00f;//300.f;
-float translate_z = 3.00f;
+float translate_y = -2.70f;//300.f;
+float translate_z = 3.50f;
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
 int mouse_buttons = 0;
 float rotate_x = 0.0, rotate_y = 0.0;
 std::vector<Triangle> triangles;
-//std::vector<Box> boxes;
-
-// offsets into the triangle list. tri_offsets[i] corresponds to the 
-// triangle list for box[i]. Number of triangles for triangles[i] is
-//    tri_offsets[i+1]-tri_offsets[i]
-// Add one more offset so that the number of triangles in 
-//   boxes[boxes.size()-1] is tri_offsets[boxes.size()]-tri_offsets[boxes.size()-1]
-//std::vector<int> tri_offsets;
 
 
 void init_gl();
+void render_stereo();
+void setFrustum();
 
 void appKeyboard(unsigned char key, int x, int y);
 void keyUp(unsigned char key, int x, int y);
@@ -64,6 +82,11 @@ void timerCB(int ms);
 
 void drawString(const char *str, int x, int y, float color[4], void *font);
 void showFPS(float fps, std::string *report);
+
+int write_movie_frame(const char* name);
+void draw_collision_boxes();
+void rotate_img(GLubyte* img, int size);
+
 void *font = GLUT_BITMAP_8_BY_13;
 
 rtps::RTPS* ps;
@@ -78,14 +101,14 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 2048
 //#define NUM_PARTICLES 1024
 //#define NUM_PARTICLES 256
-#define DT .01f
-#define maxspeed        0.1f
+
+#define DT              0.001f
+
+#define maxspeed        10.0f
 #define mindist         1.f
 #define searchradius    1.f
 
-
-//================
-//#include "materials_lights.h"
+float color[4] =   {255.f, 0.f, 0.f, 0.f};
 
 //----------------------------------------------------------------------
 float rand_float(float mn, float mx)
@@ -96,10 +119,9 @@ float rand_float(float mn, float mx)
 //----------------------------------------------------------------------
 int main(int argc, char** argv)
 {
-
     //initialize glut
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+    glutInitDisplayMode(GLUT_RGB | GLUT_ALPHA | GLUT_DOUBLE | GLUT_DEPTH);
     glutInitWindowSize(window_width, window_height);
     glutInitWindowPosition (glutGet(GLUT_SCREEN_WIDTH)/2 - window_width/2, 
                             glutGet(GLUT_SCREEN_HEIGHT)/2 - window_height/2);
@@ -126,27 +148,47 @@ int main(int argc, char** argv)
 
     printf("before we call enjas functions\n");
 
-    float color[4] = {1.f, 0.f, 0.f, 0.f};
+
+    float w_sep = 15.f;     // 0.0001f
+    float w_align = 7.5f;   // 0.0001f
+    float w_coh = 2.5f;    // 0.00003f
     
     //default constructor
     rtps::Domain* grid = new Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
-	rtps::RTPSettings *settings = new rtps::RTPSettings(rtps::RTPSettings::FLOCK, NUM_PARTICLES, DT, grid, maxspeed, mindist, searchradius, color);
+    //rtps::RTPSettings* settings(rtps::RTPSettings::FLOCK, NUM_PARTICLES, DT, grid, maxspeed, mindist, searchradius, color, w_sep, w_align, w_coh);
+    rtps::RTPSettings* settings = new rtps::RTPSettings(rtps::RTPSettings::FLOCK, NUM_PARTICLES, DT, grid);
 
-    settings->setRadiusScale(1.0);
+#ifdef WIN32
+    settings->SetSetting("rtps_path", ".");
+#else
+    settings->SetSetting("rtps_path", "./bin");
+    //settings->SetSetting("rtps_path", argv[0]);
+    //printf("arvg[0]: %s\n", argv[0]);
+#endif
+
     settings->setRenderType(RTPSettings::RENDER);
+    //settings->setRenderType(RTPSettings::SPRITE_RENDER);
     
+    settings->setRadiusScale(1.0);
     settings->setBlurScale(1.0);
     settings->setUseGLSL(1);
-    settings->setUseAlphaBlending(1);    
+
+    settings->SetSetting("render_texture", "nemo.png");
+    settings->SetSetting("render_frag_shader", "boid_tex_frag.glsl");
+    //settings->SetSetting("render_use_alpha", true);
+    settings->SetSetting("render_use_alpha", false);
+    //settings->SetSetting("render_alpha_function", "add");
+    settings->SetSetting("lt_increment", -.00);
+    settings->SetSetting("lt_cl", "lifetime.cl");
 
     ps = new rtps::RTPS(settings);
 
-    //printf("about to make hose\n");
-    //float4 center(2., 2., 2., 1.);
-    //float4 velocity(.6, -.6, -.6, 0);
-
-    //sph sets spacing and multiplies by radius value
-    //ps->system->addHose(2048, center, velocity, 5);
+    ps->settings->SetSetting("Max Speed", maxspeed);
+    ps->settings->SetSetting("Min Separation Distance", mindist);
+    ps->settings->SetSetting("Searching Radius", searchradius);
+    ps->settings->SetSetting("Separation Weight", w_sep);
+    ps->settings->SetSetting("Alignment Weight", w_align);
+    ps->settings->SetSetting("Cohesion Weight", w_coh);
 
     //initialize the OpenGL scene for rendering
     init_gl();
@@ -154,8 +196,6 @@ int main(int argc, char** argv)
     glutMainLoop();
     return 0;
 }
-
-
 
 void init_gl()
 {
@@ -169,17 +209,18 @@ void init_gl()
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     //gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 100.0);
-    gluPerspective(fov, (GLfloat)window_width / (GLfloat) window_height, 0.3, 100.0);
+    //gluPerspective(fov, (GLfloat)window_width / (GLfloat) window_height, 0.3, 100.0);
     //gluPerspective(90.0, (GLfloat)window_width / (GLfloat) window_height, 0.1, 10000.0); //for lorentz
 
     // set view matrix
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(.6, .6, .6, 1.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glRotatef(-90, 1.0, 0.0, 0.0);
-    glRotatef(rotate_x, 1.0, 0.0, 0.0);
-    glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
-    glTranslatef(translate_x, translate_z, translate_y);
+    //glRotatef(-90, 1.0, 0.0, 0.0);
+    //glRotatef(rotate_x, 1.0, 0.0, 0.0);
+    //glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
+    //glTranslatef(translate_x, translate_z, translate_y);
     ps->system->getRenderer()->setWindowDimensions(window_width,window_height);
     //glTranslatef(0, 10, 0);
     /*
@@ -228,6 +269,10 @@ void appKeyboard(unsigned char key, int x, int y)
             ps->system->sprayHoses();
             return;
 
+        case 'b':
+            printf("deleting willy nilly\n");
+            ps->system->testDelete();
+            return;
 
         case 't': //place a cube for collision
             {
@@ -246,12 +291,13 @@ void appKeyboard(unsigned char key, int x, int y)
             }
         case 'r': //drop a rectangle
         {
-            nn = 2000;
-            //nn = 4096;
+            //nn = 65536;
+	        nn = 1024;
+            //nn = 8192;
             //nn = 4;
             //max = float4(2.5, 2.5, 2.5, 1.0f);
             //min = float4(2., 2., 2., 1.0f);
-            max = float4(3.5, 3., 3.5, 1.0f);
+            max = float4(4.5, 3., 4.5, 1.0f);
             min = float4(1.5, 2., 1.5, 1.0f);
             //max = float4(1.1,1.1, 1.1, 1.0f);
             //min = float4(1., 1., 1., 1.0f);
@@ -265,7 +311,26 @@ void appKeyboard(unsigned char key, int x, int y)
             radius = .3f;
             ps->system->addBall(nn, center, radius, false);
             return;
-        } 
+        }
+        case 'h':
+        {
+            //spray hose
+            printf("about to make hose\n");
+            float4 center(1., 2., 2., 1.);
+            //float4 velocity(.6, -.6, -.6, 0);
+            //float4 velocity(2., 5., -.8, 0);
+            float4 velocity(2., .5, 2., 0);
+            //sph sets spacing and multiplies by radius value
+            float4 color = float4(.0, 0.0, 1.0, 1.0);
+            ps->system->addHose(5000, center, velocity, 4, color);
+            return;
+        }
+        case 'n':
+            render_movie=!render_movie;
+            break;
+        case '`':
+            stereo_enabled = !stereo_enabled;
+            break;
         case 'o':
             ps->system->getRenderer()->writeBuffersToDisk();
             return;
@@ -297,45 +362,63 @@ void appKeyboard(unsigned char key, int x, int y)
             return;
     }
 
+    glutPostRedisplay();
+
     // set view matrix
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    /*glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glRotatef(-90, 1.0, 0.0, 0.0);
     glRotatef(rotate_x, 1.0, 0.0, 0.0);
     glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
     glTranslatef(translate_x, translate_z, translate_y);
+    */
+}
+
+void timerCB(int ms)
+{
+    glutTimerFunc(ms, timerCB, ms);
+    ps->update();
+    glutPostRedisplay();
 }
 
 void appRender()
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    ps->update();
+    //ps->system->sprayHoses();
 
     glEnable(GL_DEPTH_TEST);
-
-    ps->render();
-    glColor4f(0,0,1,.5);
-
-    //glDepthMask(GL_FALSE);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glBegin(GL_TRIANGLES);
-    //printf("num triangles %zd\n", triangles.size());
-    for (int i=0; i < triangles.size(); i++)
+    if (stereo_enabled)
     {
-        //for (int i=0; i < 20; i++) {
-        Triangle& tria = triangles[i];
-        glNormal3fv(&tria.normal.x);
-        glVertex3f(tria.verts[0].x, tria.verts[0].y, tria.verts[0].z);
-        glVertex3f(tria.verts[1].x, tria.verts[1].y, tria.verts[1].z);
-        glVertex3f(tria.verts[2].x, tria.verts[2].y, tria.verts[2].z);
+        render_stereo();
     }
-    glEnd();
+    else
+    {
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        gluPerspective(fovy, aspect, nearZ, farZ);
 
-    glDisable(GL_BLEND);
+        // set view matrix
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        glRotatef(-90, 1.0, 0.0, 0.0);
+        glRotatef(rotate_x, 1.0, 0.0, 0.0);
+        glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
+        glTranslatef(translate_x, translate_z, translate_y);
+        ps->render();
+        draw_collision_boxes();
+        if(render_movie)
+        {
+            write_movie_frame("image");
+        }
+
+    }
+
+    if(render_movie)
+    {
+        frame_counter++;
+    }
     //showFPS(enjas->getFPS(), enjas->getReport());
     glutSwapBuffers();
 
@@ -353,13 +436,6 @@ void appDestroy()
 
     exit(0);
 }
-
-void timerCB(int ms)
-{
-    glutTimerFunc(ms, timerCB, ms);
-    glutPostRedisplay();
-}
-
 
 void appMouse(int button, int state, int x, int y)
 {
@@ -398,16 +474,7 @@ void appMotion(int x, int y)
     mouse_old_y = y;
 
     // set view matrix
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    //glTranslatef(-translate_x, -translate_y, -translate_z);
-    glRotatef(-90, 1.0, 0.0, 0.0);
-    glRotatef(rotate_x, 1.0, 0.0, 0.0);
-    glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
-    glTranslatef(translate_x, translate_z, translate_y);
-    //glTranslatef(0, translate_z, translate_y);
-    //glutPostRedisplay();
+    glutPostRedisplay();
 }
 
 
@@ -481,18 +548,140 @@ void resizeWindow(int w, int h)
     // projection
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(fov, (GLfloat)w / (GLfloat) h, 0.3, 100.0);
-
-    // set view matrix
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glRotatef(-90, 1.0, 0.0, 0.0);
-    glRotatef(rotate_x, 1.0, 0.0, 0.0);
-    glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
-    glTranslatef(translate_x, translate_z, translate_y);
+    //gluPerspective(fov, aspect, nearZ, farZ);
     ps->system->getRenderer()->setWindowDimensions(w,h);
     window_width = w;
     window_height = h;
+    delete[] image;
+    image = new GLubyte[w*h*4];
+    setFrustum();
     glutPostRedisplay();
+}
+
+void render_stereo()
+{
+
+    glDrawBuffer(GL_BACK_LEFT);                              //draw into back left buffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();                                        //reset projection matrix
+    glFrustum(leftCam.leftfrustum, leftCam.rightfrustum,     //set left view frustum
+              leftCam.bottomfrustum, leftCam.topfrustum,
+              nearZ, farZ);
+    glTranslatef(leftCam.modeltranslation, 0.0, 0.0);        //translate to cancel parallax
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glPushMatrix();
+    {
+        //glTranslatef(0.0, 0.0, depthZ);                        //translate to screenplane
+        glRotatef(-90, 1.0, 0.0, 0.0);
+        glRotatef(rotate_x, 1.0, 0.0, 0.0);
+        glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
+        glTranslatef(translate_x, translate_z, translate_y);
+        ps->render();
+        draw_collision_boxes();
+    }
+    glPopMatrix();
+
+    if(render_movie)
+    {
+        write_movie_frame("stereo/image_left_");
+    }
+
+    glDrawBuffer(GL_BACK_RIGHT);                             //draw into back right buffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();                                        //reset projection matrix
+    glFrustum(rightCam.leftfrustum, rightCam.rightfrustum,   //set left view frustum
+              rightCam.bottomfrustum, rightCam.topfrustum,
+              nearZ, farZ);
+    glTranslatef(rightCam.modeltranslation, 0.0, 0.0);       //translate to cancel parallax
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    glPushMatrix();
+    {
+        glRotatef(-90, 1.0, 0.0, 0.0);
+        glRotatef(rotate_x, 1.0, 0.0, 0.0);
+        glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
+        glTranslatef(translate_x, translate_z, translate_y);
+        ps->render();
+        draw_collision_boxes();
+    }
+    glPopMatrix();
+    if(render_movie)
+    {
+        write_movie_frame("stereo/image_right_");
+    }
+}
+
+
+void setFrustum(void)
+{
+    double top = nearZ*tan(DTR*fovy/2);                    //sets top of frustum based on fovy and near clipping plane
+    double right = aspect*top;                             //sets right of frustum based on aspect ratio
+    double frustumshift = (IOD/2)*nearZ/screenZ;
+
+    leftCam.topfrustum = top;
+    leftCam.bottomfrustum = -top;
+    leftCam.leftfrustum = -right + frustumshift;
+    leftCam.rightfrustum = right + frustumshift;
+    leftCam.modeltranslation = IOD/2;
+
+    rightCam.topfrustum = top;
+    rightCam.bottomfrustum = -top;
+    rightCam.leftfrustum = -right - frustumshift;
+    rightCam.rightfrustum = right - frustumshift;
+    rightCam.modeltranslation = -IOD/2;
+}
+
+int write_movie_frame(const char* name)
+{
+        sprintf(filename,"%s%s_%08d.png",render_dir,name,frame_counter);
+        glReadPixels(0, 0, window_width, window_height, GL_RGBA, GL_UNSIGNED_BYTE, image);
+        if (!stbi_write_png(filename,window_width,window_height,4,(void*)image,0))
+        {
+            printf("failed to write image %s\n",filename);
+            return -1;
+        }
+        return 0;
+}
+void rotate_img(GLubyte* img, int size)
+{
+    GLubyte tmp=0;
+    for(int i = 0; i<size; i++)
+    {
+        for(int j = 0; j<4; j++)
+        {
+            tmp = img[(i*4)+j];
+            img[(i*4)+j] = img[size-((i*4)+j)-1];
+            img[size-((i*4)+j)-1] = tmp;
+        }
+    }
+}
+
+void draw_collision_boxes()
+{
+    glColor4f(0,0,1,.5);
+
+    //glDepthMask(GL_FALSE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glBegin(GL_TRIANGLES);
+    //printf("num triangles %zd\n", triangles.size());
+    for (int i=0; i < triangles.size(); i++)
+    {
+        //for (int i=0; i < 20; i++) {
+        Triangle& tria = triangles[i];
+        glNormal3fv(&tria.normal.x);
+        glVertex3f(tria.verts[0].x, tria.verts[0].y, tria.verts[0].z);
+        glVertex3f(tria.verts[1].x, tria.verts[1].y, tria.verts[1].z);
+        glVertex3f(tria.verts[2].x, tria.verts[2].y, tria.verts[2].z);
+    }
+    glEnd();
+
+    glDisable(GL_BLEND);
 }

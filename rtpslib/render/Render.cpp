@@ -110,9 +110,14 @@ namespace rtps
 
         if (blending)
         {
+            //glDisable(GL_DEPTH_TEST);
             glDepthMask(GL_FALSE);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        }
+        else
+        {
+            //glEnable(GL_DEPTH_TEST);
         }
 
 
@@ -595,7 +600,7 @@ namespace rtps
     {
 
         //std::string path(GLSL_SOURCE_DIR);
-        //path += "../../../sprites/tomek.jpg";
+        //path += "../../../sprites/boid.png";
         //path += "../../../sprites/enjalot.jpg";
         printf("LOAD TEXTURE!!!!!!!!!!!!!!\n");
         //printf("path: %s\n", path.c_str());
@@ -621,6 +626,7 @@ namespace rtps
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        
         //better way to do this?
         if(channels == 3)
         {

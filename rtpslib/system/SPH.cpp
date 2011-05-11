@@ -1,6 +1,9 @@
 
 #include <GL/glew.h>
 #include <math.h>
+#include <sstream>
+#include <iomanip>
+#include <string>
 
 #include "System.h"
 #include "SPH.h"
@@ -79,14 +82,8 @@ namespace rtps
         ps->cli->addIncludeDir(sph_source_dir);
         ps->cli->addIncludeDir(common_source_dir);
 
-        //loadScopy();
-
-        //loadPrep();
-        //prep = Prep(common_source_dir, ps->cli, timers["prep_gpu"]);
-        //loadHash();
         hash = Hash(common_source_dir, ps->cli, timers["hash_gpu"]);
         bitonic = Bitonic<unsigned int>(common_source_dir, ps->cli );
-        //datastructures = DataStructures( ps->cli, timers["ds_gpu"] );
         cellindices = CellIndices(common_source_dir, ps->cli, timers["ci_gpu"] );
         permute = Permute( common_source_dir, ps->cli, timers["perm_gpu"] );
 
@@ -108,7 +105,7 @@ namespace rtps
         }
 
         string lt_file = settings->GetSettingAs<string>("lt_cl");
-        lifetime = Lifetime(sph_source_dir, ps->cli, timers["lifetime_gpu"], lt_file);
+        //lifetime = Lifetime(sph_source_dir, ps->cli, timers["lifetime_gpu"], lt_file);
 
 
 
@@ -203,8 +200,8 @@ namespace rtps
 
         //settings->printSettings();
 
-        //GE
-        int sub_intervals = 3;  //should be a setting
+        //int sub_intervals = 3;  //should be a setting
+        int sub_intervals =  settings->GetSettingAs<float>("sub_intervals");
         //this should go in the loop but avoiding acquiring and releasing each sub
         //interval for all the other calls.
         //this does end up acquire/release everytime sprayHoses calls pushparticles
@@ -353,6 +350,7 @@ namespace rtps
             integrate();
             timers["integrate"]->stop();
 
+            /*
             lifetime.execute( num,
                               settings->GetSettingAs<float>("lt_increment"),
                               cl_position_u,
@@ -362,6 +360,8 @@ namespace rtps
                               clf_debug,
                               cli_debug
                               );
+
+            */
 
             //
             //Andrew's rendering emporium
@@ -493,8 +493,6 @@ namespace rtps
 
     void SPH::call_prep(int stage)
     {
-            //Replace with enqueueCopyBuffer
-
             cl_position_u.copyFromBuffer(cl_position_s, 0, 0, num);
             cl_velocity_u.copyFromBuffer(cl_velocity_s, 0, 0, num);
             cl_veleval_u.copyFromBuffer(cl_veleval_s, 0, 0, num);
@@ -509,14 +507,12 @@ namespace rtps
         timers["update"] = new EB::Timer("Update loop", time_offset);
         timers["hash"] = new EB::Timer("Hash function", time_offset);
         timers["hash_gpu"] = new EB::Timer("Hash GPU kernel execution", time_offset);
-        //timers["datastructures"] = new EB::Timer("Datastructures function", time_offset);
         timers["cellindices"] = new EB::Timer("CellIndices function", time_offset);
         timers["ci_gpu"] = new EB::Timer("CellIndices GPU kernel execution", time_offset);
         timers["permute"] = new EB::Timer("Permute function", time_offset);
         timers["perm_gpu"] = new EB::Timer("Permute GPU kernel execution", time_offset);
         timers["ds_gpu"] = new EB::Timer("DataStructures GPU kernel execution", time_offset);
         timers["bitonic"] = new EB::Timer("Bitonic Sort function", time_offset);
-        //timers["neighbor"] = new EB::Timer("Neighbor Total", time_offset);
         timers["density"] = new EB::Timer("Density function", time_offset);
         timers["density_gpu"] = new EB::Timer("Density GPU kernel execution", time_offset);
         timers["force"] = new EB::Timer("Force function", time_offset);
@@ -525,18 +521,23 @@ namespace rtps
         timers["cw_gpu"] = new EB::Timer("Collision Wall GPU kernel execution", time_offset);
         timers["collision_tri"] = new EB::Timer("Collision triangles function", time_offset);
         timers["ct_gpu"] = new EB::Timer("Collision Triangle GPU kernel execution", time_offset);
-        timers["integrate"] = new EB::Timer("Integration kernel execution", time_offset);
+        timers["integrate"] = new EB::Timer("Integration function", time_offset);
         timers["leapfrog_gpu"] = new EB::Timer("LeapFrog Integration GPU kernel execution", time_offset);
         timers["euler_gpu"] = new EB::Timer("Euler Integration GPU kernel execution", time_offset);
-        timers["lifetime_gpu"] = new EB::Timer("Lifetime GPU kernel execution", time_offset);
+        //timers["lifetime_gpu"] = new EB::Timer("Lifetime GPU kernel execution", time_offset);
         //timers["prep_gpu"] = new EB::Timer("Prep GPU kernel execution", time_offset);
 		return 0;
     }
 
     void SPH::printTimers()
     {
+        printf("Number of Particles: %d\n", num);
         timers.printAll();
-        timers.writeToFile("sph_timer_log"); 
+        std::ostringstream oss; 
+        oss << "sph_timer_log_" << std::setw( 7 ) << std::setfill( '0' ) <<  num; 
+        //printf("oss: %s\n", (oss.str()).c_str());
+
+        timers.writeToFile(oss.str()); 
     }
 
     void SPH::prepareSorted()
@@ -746,6 +747,10 @@ namespace rtps
         radius *= spacing;
         hoses[index]->update(center, velocity, radius, spacing, color);
         //printf("size of hoses: %d\n", hoses.size());
+    }
+    void SPH::refillHose(int index, int refill)
+    {
+        hoses[index]->refill(refill);
     }
 
 
