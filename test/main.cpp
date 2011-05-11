@@ -97,7 +97,7 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 524288
 //#define NUM_PARTICLES 262144
 //#define NUM_PARTICLES 131072
-#define NUM_PARTICLES 65536
+//#define NUM_PARTICLES 65536
 //#define NUM_PARTICLES 32768
 //#define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 10000
@@ -106,7 +106,11 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 2048
 //#define NUM_PARTICLES 1024
 //#define NUM_PARTICLES 256
-#define DT .001f
+//
+//
+#define NUM_PARTICLES 4000
+
+#define DT .003f
 
 //float4 color = float4(0.1, 0.1, 0.73, .05);
 float4 color = float4(1., 0.5, 0.0, 1.);
@@ -140,8 +144,9 @@ int main(int argc, char** argv)
                             glutGet(GLUT_SCREEN_HEIGHT)/2 - window_height/2);
 
 
+    int max_num = rtps::nlpo2(NUM_PARTICLES);
     std::stringstream ss;
-    ss << "Real-Time Particle System: " << NUM_PARTICLES << std::ends;
+    ss << "Real-Time Particle System: " << max_num << std::ends;
     glutWindowHandle = glutCreateWindow(ss.str().c_str());
 
     glutDisplayFunc(appRender); //main rendering function
@@ -182,6 +187,7 @@ int main(int argc, char** argv)
     settings->setBlurScale(1.0);
     settings->setUseGLSL(1);
 
+    settings->SetSetting("sub_intervals", 1);
     settings->SetSetting("render_texture", "firejet_blast.png");
     settings->SetSetting("render_frag_shader", "sprite_tex_frag.glsl");
     //settings->SetSetting("render_use_alpha", true);
@@ -197,7 +203,7 @@ int main(int argc, char** argv)
     ps->settings->SetSetting("Gas Constant", 1.0f);
     ps->settings->SetSetting("Viscosity", .001f);
     ps->settings->SetSetting("Velocity Limit", 600.0f);
-    ps->settings->SetSetting("XSPH Factor", .05f);
+    ps->settings->SetSetting("XSPH Factor", .15f);
     ps->settings->SetSetting("Friction Kinetic", 0.0f);
     ps->settings->SetSetting("Friction Static", 0.0f);
     ps->settings->SetSetting("Boundary Stiffness", 20000.0f);

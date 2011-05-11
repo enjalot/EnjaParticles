@@ -38,7 +38,7 @@ public:
 	static std::vector<Timer*> timeList;
 
 private:
-#if 0
+#if 1
 	struct timeval t_start, t_end;
 #endif
 	double elapsed;

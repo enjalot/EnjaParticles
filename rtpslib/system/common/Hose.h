@@ -20,6 +20,7 @@ public:
     //~Hose();
 
     void update(float4 center, float4 velocity, float radius, float spacing, float4 color);
+    void refill(int num);
     std::vector<float4> spray();
     //refill();
     float4 getVelocity(){ return velocity;}
