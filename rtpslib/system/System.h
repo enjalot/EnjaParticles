@@ -83,6 +83,9 @@ namespace rtps
         virtual void updateHose(int index, float4 center, float4 velocity, float radius, float4 color=float4(1., 0., 0., 1.))
         {
         };
+        virtual void refillHose(int index, int refill)
+        {
+        };
  
         /*
         virtual void addHose(int total_n, float4 center, float4 velocity, float radius, float spacing)

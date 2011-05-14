@@ -9,8 +9,13 @@ namespace rtps
         {
             int dir = 1;        // dir: direction
             //int batch = num;
-            int arrayLength = max_num;
-            int batch = max_num / arrayLength;
+
+            int arrayLength = nlpo2(num);
+            //printf("num: %d\n", num);
+            //printf("nlpo2(num): %d\n", arrayLength);
+            //int arrayLength = max_num;
+            //int batch = max_num / arrayLength;
+            int batch = 1;
 
             //printf("about to try sorting\n");
             bitonic.Sort(batch, 

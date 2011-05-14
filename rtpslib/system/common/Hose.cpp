@@ -32,6 +32,12 @@ void Hose::update(float4 center, float4 velocity, float radius, float spacing, f
     calc_vectors();
 }
 
+void Hose::refill(int num)
+{
+    total_n = num;
+    n_count = num;
+}
+
 void Hose::calc_vectors()
 {
     /*
