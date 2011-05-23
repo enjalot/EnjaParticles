@@ -9,7 +9,7 @@ void zeroPoint(Boid* pt)
 	pt->separation= (float4)(0.,0.,0.,0.);
 	pt->alignment= (float4)(0.,0.,0.,0.);
 	pt->cohesion= (float4)(0.,0.,0.,0.);
-	pt->acceleration= (float4)(0.,0.,0.,0.);
+	pt->leaderfollowing= (float4)(0.,0.,0.,0.);
 	pt->color= (float4)(0.,0.,0.,0.);
 	pt->num_flockmates = 0;
     pt->num_nearestFlockmates = 0;

@@ -29,11 +29,6 @@ typedef struct FLOCKParameters
     float rest_distance;
     float smoothing_distance;
     
-    // CL parameters 
-    //int nb_vars;    // for combined variables (vars_sorted, etc.)
-	//int choice;     // which kind of calculation to invoke
-    //int max_num;
-
     // Boids parameters
     float min_dist;  // desired separation between boids
     float search_radius;
@@ -43,6 +38,10 @@ typedef struct FLOCKParameters
     float w_sep;
     float w_align;
     float w_coh;
+    float w_leadfoll;
+
+    // Boid rule's settings
+    float slowing_distance;
 
     int num;
 } FLOCKParameters

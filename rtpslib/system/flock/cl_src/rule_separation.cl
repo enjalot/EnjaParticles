@@ -48,7 +48,6 @@ inline void ForNeighbor(
                 s = normalize(s);
                 s /= d;
 	            pt->separation+= s;        // accumulate the separation vector
-                pt->num_nearestFlockmates++;  // count how many flockmates are with in the separation distance
 	        }
         }
     }
@@ -97,7 +96,7 @@ __kernel void rule_separation(
     }
 
     separation[index] = pt.separation;
-    flockmates[index].y = pt.num_nearestFlockmates;
+
 }
 
 #endif

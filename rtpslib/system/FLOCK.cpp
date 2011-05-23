@@ -24,7 +24,7 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     settings = ps->settings;
     max_num = n;
     num = 0;
-    nb_var = 10;
+//    nb_var = 10;
 
     resource_path = ps->settings->GetSettingAs<std::string>("rtps_path");
     printf("resource path: %s\n", resource_path.c_str());
@@ -383,6 +383,19 @@ void FLOCK::updateGPU()
                 clf_debug,
                 cli_debug);
         }
+        if(1){
+            rules.executeLeaderFollowing(   num,
+                cl_position_s,
+                cl_velocity_s,
+                cl_leaderfollowing_s,
+                cl_flockmates_s,
+                cl_cell_indices_start,
+                cl_cell_indices_end,
+                cl_GridParamsScaled,
+                cl_FLOCKParameters,
+                clf_debug,
+                cli_debug);
+        }
         timers["rules"]->stop();
         
         //collision();
@@ -433,13 +446,13 @@ void FLOCK::integrate()
         cl_separation_s,
         cl_alignment_s,
         cl_cohesion_s,
+        cl_leaderfollowing_s,
         cl_sort_indices,
         cl_FLOCKParameters,
         cl_GridParamsScaled,
         //debug
         clf_debug,
         cli_debug);
-
 
     // mymese debugging
 #if 0 
@@ -616,10 +629,15 @@ void FLOCK::prepareSorted()
     velocities.resize(max_num);
     veleval.resize(max_num);
     colors.resize(max_num);
+    //float4 leadcolor = (float4)(0.1f,0.4f,0.7f,1.0f);
+    //colors[0] = leadcolor;
+
+    flockmates.resize(max_num);
     separation.resize(max_num);
     alignment.resize(max_num);
     cohesion.resize(max_num);
-    flockmates.resize(max_num);
+    leaderfollowing.resize(max_num);
+
     
     //for reading back different values from the kernel
     std::vector<float4> error_check(max_num);
@@ -627,10 +645,11 @@ void FLOCK::prepareSorted()
     std::fill(velocities.begin(), velocities.end(), float4(0.0f, 0.0f, 0.0f, 0.f));
     std::fill(veleval.begin(), veleval.end(), float4(0.0f, 0.0f, 0.0f, 0.f));
     
+    std::fill(flockmates.begin(), flockmates.end(),int4(0, 0, 0, 0));
     std::fill(separation.begin(), separation.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     std::fill(alignment.begin(), alignment.end(), float4(0.0f, 0.f, 0.f, 0.f));
     std::fill(cohesion.begin(), cohesion.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
-    std::fill(flockmates.begin(), flockmates.end(),int4(0, 0, 0, 0));
+    std::fill(leaderfollowing.begin(), leaderfollowing.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     
     std::fill(error_check.begin(), error_check.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
 
@@ -656,10 +675,11 @@ void FLOCK::prepareSorted()
     cl_veleval_u = Buffer<float4>(ps->cli, veleval);
     cl_veleval_s = Buffer<float4>(ps->cli, veleval);
     
+    cl_flockmates_s= Buffer<int4>(ps->cli, flockmates);
     cl_separation_s = Buffer<float4>(ps->cli, separation);
     cl_alignment_s = Buffer<float4>(ps->cli, alignment);
     cl_cohesion_s = Buffer<float4>(ps->cli, cohesion);
-    cl_flockmates_s= Buffer<int4>(ps->cli, flockmates);
+    cl_leaderfollowing_s = Buffer<float4>(ps->cli, leaderfollowing);
 
     // FLOCK Parameters
     //std::vector<FLOCKParameters> vparams(0);

@@ -55,6 +55,17 @@ namespace rtps
         {
             printf("ERROR(rule_cohesion): %s(%s)\n", er.what(), oclErrorString(er.err()));
         }
+
+        // leader following 
+        try
+        {
+            path = wpath + "/rule_leaderfollowing.cl";
+            k_rule_leaderfollowing= Kernel(cli, path, "rule_leaderfollowing");
+        }
+        catch (cl::Error er)
+        {
+            printf("ERROR(rule_leaderfollowing): %s(%s)\n", er.what(), oclErrorString(er.err()));
+        }
     }
 
     //----------------------------------------------------------------------
@@ -230,6 +241,52 @@ namespace rtps
         catch (cl::Error er)
         {
             printf("ERROR(rule_cohesion): %s(%s)\n", er.what(), oclErrorString(er.err()));
+        }
+    }
+
+    //----------------------------------------------------------------------
+    void Rules::executeLeaderFollowing(int num,
+                    //input
+                    Buffer<float4>& pos_s,
+                    Buffer<float4>& vel_s,
+                    Buffer<float4>& leadfoll_s,
+                    Buffer<int4>& neigh_s, 
+                    //output
+                    Buffer<unsigned int>& ci_start,
+                    Buffer<unsigned int>& ci_end,
+                    //params
+                    Buffer<GridParams>& gp,
+                    Buffer<FLOCKParameters>& flockp,
+                    //debug params
+                    Buffer<float4>& clf_debug,
+                    Buffer<int4>& cli_debug)
+    { 
+        int iarg = 0;
+        k_rule_leaderfollowing.setArg(iarg++, pos_s.getDevicePtr());
+        k_rule_leaderfollowing.setArg(iarg++, vel_s.getDevicePtr());
+        k_rule_leaderfollowing.setArg(iarg++, leadfoll_s.getDevicePtr());
+        k_rule_leaderfollowing.setArg(iarg++, neigh_s.getDevicePtr());
+        k_rule_leaderfollowing.setArg(iarg++, ci_start.getDevicePtr());
+        k_rule_leaderfollowing.setArg(iarg++, ci_end.getDevicePtr());
+        k_rule_leaderfollowing.setArg(iarg++, gp.getDevicePtr());
+        k_rule_leaderfollowing.setArg(iarg++, flockp.getDevicePtr());
+
+        // ONLY IF DEBUGGING
+        k_rule_leaderfollowing.setArg(iarg++, clf_debug.getDevicePtr());
+        k_rule_leaderfollowing.setArg(iarg++, cli_debug.getDevicePtr());
+
+        int local = 64;
+        try
+        {
+            float gputime = k_rule_leaderfollowing.execute(num, local);
+            if(gputime > 0)
+                timer->set(gputime);
+
+        }
+
+        catch (cl::Error er)
+        {
+            printf("ERROR(rule_leaderfollowing): %s(%s)\n", er.what(), oclErrorString(er.err()));
         }
     }
 

@@ -40,6 +40,9 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
 	        // number of flockmates
             pt->num_flockmates++;
 
+		    if(rlen <= flockp->min_dist){
+               pt->num_nearestFlockmates++;
+            } 
         }
     }
 }
@@ -76,6 +79,7 @@ __kernel void flockmates(
     IterateParticlesInNearbyCells(/*vars_sorted*/ ARGV, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ flockp DEBUG_ARGV);
 		
     flockmates[index].x = pt.num_flockmates;
+    flockmates[index].y = pt.num_nearestFlockmates;
 }
 
 #endif

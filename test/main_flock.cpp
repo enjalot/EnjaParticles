@@ -104,7 +104,7 @@ rtps::RTPS* ps;
 
 #define DT              0.001f
 
-#define maxspeed        10.0f
+#define maxspeed       10.0f
 #define mindist         1.f
 #define searchradius    1.f
 
@@ -149,10 +149,13 @@ int main(int argc, char** argv)
     printf("before we call enjas functions\n");
 
 
-    float w_sep = 15.f;     // 0.0001f
-    float w_align = 7.5f;   // 0.0001f
-    float w_coh = 2.5f;    // 0.00003f
+    float w_sep = 0.1f;     //15
+    float w_align = 0.f;   //7.5
+    float w_coh = 0.f;     //2.5
+    float w_leadfoll = 0.f;
     
+    float slow_dist = .01f;
+
     //default constructor
     rtps::Domain* grid = new Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
     //rtps::RTPSettings* settings(rtps::RTPSettings::FLOCK, NUM_PARTICLES, DT, grid, maxspeed, mindist, searchradius, color, w_sep, w_align, w_coh);
@@ -186,13 +189,17 @@ int main(int argc, char** argv)
     ps->settings->SetSetting("Max Speed", maxspeed);
     ps->settings->SetSetting("Min Separation Distance", mindist);
     ps->settings->SetSetting("Searching Radius", searchradius);
+    ps->settings->SetSetting("Slowing Distance", slow_dist);
+
     ps->settings->SetSetting("Separation Weight", w_sep);
     ps->settings->SetSetting("Alignment Weight", w_align);
     ps->settings->SetSetting("Cohesion Weight", w_coh);
+    ps->settings->SetSetting("LeaderFollowing Weight", w_leadfoll);
 
     //initialize the OpenGL scene for rendering
     init_gl();
-
+    
+    printf("about to start mainloop\n");
     glutMainLoop();
     return 0;
 }

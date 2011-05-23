@@ -1,0 +1,4 @@
+In this folder you can find the implementation of the systems availables in RTPS:
+- Simple: used for testing and debugging (created and used by I. Johnson)
+- SPH: main system of RTPS, simulates fluids using the SPH formulation (created and maintained by I. Johson)
+- FLOCK: system that simulates flocking, particles acts like boids (created and maintained by M. Merced)

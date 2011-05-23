@@ -28,7 +28,11 @@ typedef struct FLOCKParameters
     float w_sep;
     float w_align;
     float w_coh;
-    
+    float w_leadfoll;
+
+    // Boid rule's settings
+    float slowing_distance;
+
     int num;
 } FLOCKParameters;
 
@@ -39,7 +43,7 @@ typedef struct Boid
 	float4 separation;
 	float4 alignment;  
 	float4 cohesion;
-	float4 acceleration;
+	float4 leaderfollowing;
 	float4 color;
     int num_flockmates;
     int num_nearestFlockmates;
