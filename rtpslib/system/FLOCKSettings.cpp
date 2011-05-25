@@ -15,8 +15,8 @@ namespace rtps{
         float domain_vol = (dmax.x - dmin.x) * (dmax.y - dmin.y) * (dmax.z - dmin.z);
         float VP = 2 * .0262144 / max_num;              //Particle Volume [ m^3 ]
         
-        float simulation_scale = pow(.5f * VP * max_num / domain_vol, 1.f/3.f) * 2.f; 
-        //float simulation_scale = 5.0f;
+        float simulation_scale = pow(.5f * VP * max_num / domain_vol, 1.f/3.f) * 5.f; 
+        //float simulation_scale = 1.0f;
 printf("SIMULATION SCALE = %f\n",  simulation_scale);
         // must be less than smoothing_distance
         float spacing = rest_distance/ simulation_scale;

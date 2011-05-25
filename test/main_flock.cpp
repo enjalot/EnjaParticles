@@ -104,8 +104,8 @@ rtps::RTPS* ps;
 
 #define DT              0.001f
 
-#define maxspeed        1.0f
-#define mindist         1.0f
+#define maxspeed        3.0f
+#define mindist         .10f
 #define searchradius    1.0f
 
 float4 color =   float4(255.f, 0.f, 0.f, 0.f);
@@ -149,8 +149,8 @@ int main(int argc, char** argv)
     printf("before we call enjas functions\n");
 
 
-    float w_sep = .0f;     //15
-    float w_align = .0f;   //7.5
+    float w_sep = .40f;     //15
+    float w_align = .80f;   //7.5
     float w_coh = 1.0f;     //2.5
     float w_leadfoll = 0.f;
     
@@ -341,8 +341,8 @@ void appKeyboard(unsigned char key, int x, int y)
             //nn = 4;
             //max = float4(4.5, 2.5 , 4.5, 1.0f);
             //min = float4(0.5, 2.0 , 0.5, 1.0f);
-            max = float4(3., 1., 3., 1.0f);
-            min = float4(2., 1., 2., 1.0f);
+            max = float4(3.5, 1., 3.5, 1.0f);
+            min = float4(1.5, 1., 1.5, 1.0f);
             //max = float4(1.1,1.1, 1.1, 1.0f);
             //min = float4(1., 1., 1., 1.0f);
             ps->system->addBox(nn, min, max, false, color);

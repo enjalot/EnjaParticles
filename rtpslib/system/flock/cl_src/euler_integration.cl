@@ -82,8 +82,8 @@ __kernel void euler_integration(
     }
 
     // add circular velocity field
-    float4 v = (float4)(-pi.z, 0.f, pi.x, 0.f);
-    v *= 0.0f;     // TODO: Add this parameter to Blender
+    float4 v = (float4)(-3*pi.z, 0.f , pi.x, 0.f);
+    v *= 0.01f;     // TODO: Add this parameter to Blender
 
     // add acceleration to velocity
     vi = v + acc;
