@@ -29,7 +29,7 @@ __kernel void euler_integration(
 	    return;
 
 	// positions
-	float4 pi = pos_s[i];
+	float4 pi = pos_s[i] * flockp->simulation_scale;
 
 	// velocities
     float4 vi = vel_s[i];
@@ -83,7 +83,7 @@ __kernel void euler_integration(
 
     // add circular velocity field
     float4 v = (float4)(-pi.z, 0.f, pi.x, 0.f);
-    v *= 0.00f;     // TODO: Add this parameter to Blender
+    v *= 0.0f;     // TODO: Add this parameter to Blender
 
     // add acceleration to velocity
     vi = v + acc;
@@ -118,7 +118,7 @@ __kernel void euler_integration(
 	// STORE THE NEW POSITION AND NEW VELOCITY 
     uint originalIndex = sort_indices[i];
     vel_u[originalIndex] = vi;	
-    pos_u[originalIndex] = (float4)(pi.xyz, 1.f);    // changed the last component to 1 for my boids, im not using density
+    pos_u[originalIndex] = (float4)(pi.xyz/flockp->simulation_scale, 1.f);    // changed the last component to 1 for my boids, im not using density
 }
 
 #endif

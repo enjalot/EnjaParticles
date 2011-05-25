@@ -24,7 +24,7 @@ inline void ForNeighbor(
     int num = flockp->num;
 	
 	// get the particle info (in the current grid) to test against
-	float4 position_j = pos[index_j]; 
+	float4 position_j = pos[index_j] * flockp->simulation_scale; 
 
 	float4 r = (position_i - position_j); 
 	r.w = 0.f; 
@@ -37,7 +37,7 @@ inline void ForNeighbor(
     {
         if(index_i != index_j){
 	        // positions
-	        float4 pj = pos[index_j];
+	        float4 pj = position_j;
 	
 	        // setup for Rule 1. Separation
             float4 s = r;       //pi - pj;
@@ -80,7 +80,7 @@ __kernel void rule_separation(
     //clf[index] = (float4)(flockp->smoothing_distance,flockp->min_dist, flockp->search_radius, 10.);
 	//cli[index] = (int4)(flockp->num,flockp->num,0,0);
 
-    float4 position_i = pos[index];
+    float4 position_i = pos[index] * flockp->simulation_scale;
 
     // Do calculations on particles in neighboring cells
 	Boid pt;

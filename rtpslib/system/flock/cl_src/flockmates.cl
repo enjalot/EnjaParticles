@@ -24,7 +24,7 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
     int num = flockp->num;
 	
 	// get the particle info (in the current grid) to test against
-	float4 position_j = pos[index_j]; 
+	float4 position_j = pos[index_j] * flockp->simulation_scale; 
 
 	float4 r = (position_i - position_j); 
 	r.w = 0.f; 
@@ -70,7 +70,7 @@ __kernel void flockmates(
     int index = get_global_id(0);
     if (index >= num) return;
 
-    float4 position_i = pos[index];
+    float4 position_i = pos[index] * flockp->simulation_scale;
 
     // Do calculations on particles in neighboring cells
 	Boid pt;

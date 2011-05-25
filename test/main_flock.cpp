@@ -93,10 +93,10 @@ rtps::RTPS* ps;
 
 //#define NUM_PARTICLES 524288
 //#define NUM_PARTICLES 262144
-//#define NUM_PARTICLES 65536
+#define NUM_PARTICLES 65536
 //#define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 10000
-#define NUM_PARTICLES 8192
+//#define NUM_PARTICLES 8192
 //#define NUM_PARTICLES 4096
 //#define NUM_PARTICLES 2048
 //#define NUM_PARTICLES 1024
@@ -104,12 +104,12 @@ rtps::RTPS* ps;
 
 #define DT              0.001f
 
-#define maxspeed       10.0f
-#define mindist         1.f
-#define searchradius    1.f
+#define maxspeed        1.0f
+#define mindist         1.0f
+#define searchradius    1.0f
 
-float color[4] =   {255.f, 0.f, 0.f, 0.f};
-
+float4 color =   float4(255.f, 0.f, 0.f, 0.f);
+int hindex;
 //----------------------------------------------------------------------
 float rand_float(float mn, float mx)
 {
@@ -149,9 +149,9 @@ int main(int argc, char** argv)
     printf("before we call enjas functions\n");
 
 
-    float w_sep = 0.1f;     //15
-    float w_align = 0.f;   //7.5
-    float w_coh = 0.f;     //2.5
+    float w_sep = .0f;     //15
+    float w_align = .0f;   //7.5
+    float w_coh = 1.0f;     //2.5
     float w_leadfoll = 0.f;
     
     float slow_dist = .01f;
@@ -176,7 +176,7 @@ int main(int argc, char** argv)
     settings->setBlurScale(1.0);
     settings->setUseGLSL(1);
 
-    settings->SetSetting("render_texture", "nemo.png");
+    settings->SetSetting("render_texture", "boid.png");
     settings->SetSetting("render_frag_shader", "boid_tex_frag.glsl");
     //settings->SetSetting("render_use_alpha", true);
     settings->SetSetting("render_use_alpha", false);
@@ -255,10 +255,10 @@ void appKeyboard(unsigned char key, int x, int y)
     switch (key)
     {
         case 'e': //dam break
-            nn = 2000;
+            nn = 16384;
             min = float4(.1, .1, .1, 1.0f);
             max = float4(3.9, 3.9, 3.9, 1.0f);
-            ps->system->addBox(nn, min, max, false);
+            ps->system->addBox(nn, min, max, false, color);
             return;
         case 'p': //print timers
             ps->system->printTimers();
@@ -270,17 +270,49 @@ void appKeyboard(unsigned char key, int x, int y)
             // Cleanup up and quit
             appDestroy();
             return;
-        case 'm':
-            //spray hose
-            printf("about to spray\n");
-            ps->system->sprayHoses();
-            return;
-
+        
         case 'b':
             printf("deleting willy nilly\n");
             ps->system->testDelete();
             return;
 
+        case 'h':
+        {
+            //spray hose
+            printf("about to make hose\n");
+            float4 center(1., 2., 2., 1.);
+            //float4 velocity(.6, -.6, -.6, 0);
+            //float4 velocity(2., 5., -.8, 0);
+            float4 velocity(2., .5, 2., 0);
+            //sph sets spacing and multiplies by radius value
+            //float4 color = float4(.0, 0.0, 1.0, 1.0);
+            hindex = ps->system->addHose(5000, center, velocity, 4, color);
+            return;
+        }
+        
+        case 'H':
+        {
+            //spray hose
+            printf("about to move hose\n");
+            float4 center(.1, 2., 1., 1.);
+            //float4 velocity(.6, -.6, -.6, 0);
+            //float4 velocity(2., 5., -.8, 0);
+            float4 velocity(2., -.5, -1., 0);
+            //sph sets spacing and multiplies by radius value
+            //float4 color = float4(.0, 0.0, 1.0, 1.0);
+            //float4 color = float4(0.1, 0.1, 0.3, .01);
+            ps->system->updateHose(hindex, center, velocity, 4, color);
+            return;
+		}
+        
+        case 'n':
+            render_movie=!render_movie;
+            break;
+        
+        case '`':
+            stereo_enabled = !stereo_enabled;
+            break;
+        
         case 't': //place a cube for collision
             {
                 nn = 512;
@@ -293,78 +325,76 @@ void appKeyboard(unsigned char key, int x, int y)
                 make_cube(triangles, cen, cw);
                 cen = float4(3.5, 3.5, cw-.1, 1.0f);
                 make_cube(triangles, cen, cw);
+                
+                cen = float4(1.5, 1.5, cw-.1, 1.f);
+                make_cube(triangles, cen, 1.);
+                
                 ps->system->loadTriangles(triangles);
                 return;
             }
+
         case 'r': //drop a rectangle
         {
-            //nn = 65536;
-	        nn = 1024;
+            nn = 65536;
+	        //nn = 1024;
             //nn = 8192;
             //nn = 4;
-            //max = float4(2.5, 2.5, 2.5, 1.0f);
-            //min = float4(2., 2., 2., 1.0f);
-            max = float4(4.5, 3., 4.5, 1.0f);
-            min = float4(1.5, 2., 1.5, 1.0f);
+            //max = float4(4.5, 2.5 , 4.5, 1.0f);
+            //min = float4(0.5, 2.0 , 0.5, 1.0f);
+            max = float4(3., 1., 3., 1.0f);
+            min = float4(2., 1., 2., 1.0f);
             //max = float4(1.1,1.1, 1.1, 1.0f);
             //min = float4(1., 1., 1., 1.0f);
-            ps->system->addBox(nn, min, max, false);
+            ps->system->addBox(nn, min, max, false, color);
             return;
         }
-        case 'R': //add a sphere
+
+        case 'k': //add a sphere
         {
-            nn = 64;
+            nn = 1000;
             center = float4(2.5f, 2.5f, 2.5f, 1.0f);
-            radius = .3f;
+            radius = 10.f;
+            printf("added a spehere at: %f %f %f with radius %f\n", center.x, center.y, center.z, radius);
             ps->system->addBall(nn, center, radius, false);
             return;
         }
-        case 'h':
-        {
-            //spray hose
-            printf("about to make hose\n");
-            float4 center(1., 2., 2., 1.);
-            //float4 velocity(.6, -.6, -.6, 0);
-            //float4 velocity(2., 5., -.8, 0);
-            float4 velocity(2., .5, 2., 0);
-            //sph sets spacing and multiplies by radius value
-            float4 color = float4(.0, 0.0, 1.0, 1.0);
-            ps->system->addHose(5000, center, velocity, 4, color);
-            return;
-        }
-        case 'n':
-            render_movie=!render_movie;
-            break;
-        case '`':
-            stereo_enabled = !stereo_enabled;
-            break;
+
         case 'o':
             ps->system->getRenderer()->writeBuffersToDisk();
             return;
+        
         case 'c':
             ps->system->getRenderer()->setDepthSmoothing(Render::NO_SHADER);
             return;
+        
         case 'C':
             ps->system->getRenderer()->setDepthSmoothing(Render::BILATERAL_GAUSSIAN_SHADER);
             return;
+        
         case 'w':
             translate_z -= 0.1;
             break;
+        
         case 'a':
             translate_x += 0.1;
             break;
+        
         case 's':
             translate_z += 0.1;
             break;
+        
         case 'd':
             translate_x -= 0.1;
             break;
+        
         case 'z':
             translate_y += 0.1;
             break;
+        
         case 'x':
             translate_y -= 0.1;
             break;
+        
         default:
             return;
     }

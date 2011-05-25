@@ -44,6 +44,7 @@ typedef struct FLOCKParameters
     float slowing_distance;
 
     int num;
+    int max_num;
 } FLOCKParameters
 #ifndef WIN32
     __attribute__((aligned(16)));

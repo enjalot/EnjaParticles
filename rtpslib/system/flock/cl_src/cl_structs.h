@@ -34,6 +34,7 @@ typedef struct FLOCKParameters
     float slowing_distance;
 
     int num;
+    int max_num;
 } FLOCKParameters;
 
 // Will be local variable

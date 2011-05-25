@@ -24,7 +24,7 @@ inline void ForNeighbor(
     int num = flockp->num;
 	
 	// get the particle info (in the current grid) to test against
-	float4 position_j = pos[index_j]; 
+	float4 position_j = pos[index_j] * flockp->simulation_scale; 
 
 	float4 r = (position_i - position_j); 
 	r.w = 0.f; 
@@ -37,7 +37,7 @@ inline void ForNeighbor(
     {
         if(index_i != index_j){
 	        // positions
-	        float4 pj = pos[index_j];
+	        float4 pj = position_j;
 	
 	        // setup for rule 3. cohesion
             // xflock is the cohesion vector
@@ -70,7 +70,7 @@ __kernel void rule_cohesion(
     int index = get_global_id(0);
     if (index >= num) return;
 
-    float4 position_i = pos[index];
+    float4 position_i = pos[index] * flockp->simulation_scale;
 
     // Do calculations on particles in neighboring cells
 	Boid pt;
@@ -82,9 +82,12 @@ __kernel void rule_cohesion(
 	pt.cohesion = flockmates[index].x > 0 ? pt.cohesion/(float)flockmates[index].x: pt.cohesion;
 
 	// steering towards the average velocity 
-	pt.cohesion -= position_i;
+	//pt.cohesion = normalize(pt.cohesion);
+	//pt.cohesion *= flockp->max_speed;
+
+    pt.cohesion -= position_i;
     pt.cohesion.w = 0.f;
-	pt.cohesion = normalize(pt.cohesion);
+	//pt.cohesion = normalize(pt.cohesion);
 
     cohesion[index] = pt.cohesion;
 

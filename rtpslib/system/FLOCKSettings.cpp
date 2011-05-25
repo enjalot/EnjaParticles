@@ -10,9 +10,14 @@ namespace rtps{
         //messing with smoothing distance, making it really small to remove interaction still results in weird force values
         float smoothing_distance = 2.0f * rest_distance;
 
-        // float simulation_scale = pow(particle_vol * max_num / domain_vol, 1./3.); 
-        float simulation_scale = 1.0f;
-
+        float4 dmin = grid->getBndMin();
+        float4 dmax = grid->getBndMax();
+        float domain_vol = (dmax.x - dmin.x) * (dmax.y - dmin.y) * (dmax.z - dmin.z);
+        float VP = 2 * .0262144 / max_num;              //Particle Volume [ m^3 ]
+        
+        float simulation_scale = pow(.5f * VP * max_num / domain_vol, 1.f/3.f) * 2.f; 
+        //float simulation_scale = 5.0f;
+printf("SIMULATION SCALE = %f\n",  simulation_scale);
         // must be less than smoothing_distance
         float spacing = rest_distance/ simulation_scale;
     
@@ -38,13 +43,14 @@ namespace rtps{
         // BOID RULE'S SETTINGS 
         settings->SetSetting("Slowing Distance", 0.025f);
         
-        
+        settings->SetSetting("Maximum Number of Particles", max_num);
         settings->SetSetting("Number of Particles", 0);
     }
 
     void FLOCK::updateFLOCKP(){
         
         // CL SETTINGS
+        flock_params.max_num = settings->GetSettingAs<int>("Maximum Number of Particles");
         flock_params.num = settings->GetSettingAs<int>("Number of Particles");
 
         // SIMULATION SETTINGS
