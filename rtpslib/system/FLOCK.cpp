@@ -335,7 +335,7 @@ void FLOCK::updateGPU()
             
         timers["rules"]->start();
         // add a bool variable for each rule
-        if(1){
+        if(flock_params.w_sep > 0.f || flock_params.w_align > 0.f || flock_params.w_coh > 0.f){
             rules.executeFlockmates(   num,
                 cl_position_s,
                 cl_flockmates_s,
@@ -346,7 +346,7 @@ void FLOCK::updateGPU()
                 clf_debug,
                 cli_debug);
         }
-        if(1){
+        if(flock_params.w_sep > 0.f){
             rules.executeSeparation(   num,
                 cl_position_s,
                 cl_separation_s,
@@ -358,7 +358,7 @@ void FLOCK::updateGPU()
                 clf_debug,
                 cli_debug);
         }
-        if(1){
+        if(flock_params.w_align > 0.f){
             rules.executeAlignment(   num,
                 cl_position_s,
                 cl_velocity_s,
@@ -371,7 +371,7 @@ void FLOCK::updateGPU()
                 clf_debug,
                 cli_debug);
         }
-        if(1){
+        if(flock_params.w_coh > 0.f){
             rules.executeCohesion(   num,
                 cl_position_s,
                 cl_cohesion_s,
@@ -383,7 +383,7 @@ void FLOCK::updateGPU()
                 clf_debug,
                 cli_debug);
         }
-        if(1){
+        if(0){
             rules.executeLeaderFollowing(   num,
                 cl_position_s,
                 cl_velocity_s,
@@ -878,7 +878,16 @@ void FLOCK::pushParticles(vector<float4> pos, float4 velo, float4 color)
 {
     int nn = pos.size();
     std::vector<float4> vels(nn);
-    std::fill(vels.begin(), vels.end(), velo);
+    float ms = flock_params.max_speed;
+    //std::fill(vels.begin(), vels.end(), velo);
+    for(int i=0; i < nn; i++){
+        vels[i] = float4(rand()/*(ms - velo.x) + rand()/double(RAND_MAX)*/, /*(ms + velo.y) + rand()/double(RAND_MAX)*/ rand(), rand()/*(ms - velo.z) + rand()/double(RAND_MAX)*/, velo.w);
+        vels[i] = normalize3(vels[i]);
+        vels[i] = vels[i] *  ms;
+    }
+    vels[1].print("\n\n *** vel 1 ***\n");
+    vels[2].print("*** vel 2 ***\n");
+    vels[3].print("*** vel 3 ***\n\n");
     pushParticles(pos, vels, color);
 }
 

@@ -611,6 +611,7 @@ namespace rtps
 
         unsigned char *im = stbi_load( texture_file.c_str(), &w, &h, &channels, force_channels );
         printf("after load w: %d h: %d channels: %d\n", w, h, channels);
+        printf("im looking for the image at %s\n", texture_file.c_str());
         if (im == NULL)
         {
             printf("fail!: %s\n", stbi_failure_reason());
