@@ -2,11 +2,11 @@ uniform sampler2D depthTex; // the texture with the scene you want to blur
 uniform float del_y;
 uniform float sig;
 const float pi = 3.141592654;
+const float maxDepth=0.9999999;
  
 void main(void)
 {
 	float depth=texture2D(depthTex, gl_TexCoord[0].st).x;
-	float maxDepth=0.9999999;
 	if(depth>maxDepth)
 	{
 		discard;

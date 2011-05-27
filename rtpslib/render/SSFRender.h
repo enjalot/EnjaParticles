@@ -26,6 +26,8 @@ namespace rtps
     protected:
         virtual void deleteFramebufferTextures();
         virtual void createFramebufferTextures();
+    private:
+        std::string cur_depth;
     };
 };
 

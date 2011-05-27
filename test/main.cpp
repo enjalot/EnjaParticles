@@ -108,7 +108,7 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 256
 //
 //
-#define NUM_PARTICLES 4000
+//#define NUM_PARTICLES 4000
 
 #define DT .003f
 
@@ -184,7 +184,7 @@ int main(int argc, char** argv)
     settings->setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
     //settings->setRenderType(RTPSettings::RENDER);
     //settings.setRenderType(RTPSettings::SPRITE_RENDER);
-    settings->setRadiusScale(1.0);
+    settings->setRadiusScale(0.5);
     settings->setBlurScale(1.0);
     settings->setUseGLSL(1);
 
@@ -192,7 +192,10 @@ int main(int argc, char** argv)
     settings->SetSetting("render_texture", "firejet_blast.png");
     settings->SetSetting("render_frag_shader", "sprite_tex_frag.glsl");
     settings->SetSetting("render_use_alpha", true);
+    settings->SetSetting("blur_depth_falloff",1.0f);
     settings->SetSetting("blur_scale",8.0f);
+    settings->SetSetting("curvature_flow_iterations", 1);
+    settings->SetSetting("curvature_flow_dt", 0.1);
     //settings->SetSetting("render_use_alpha", false);
     settings->SetSetting("render_alpha_function", "add");
     settings->SetSetting("lt_increment", -.00);
@@ -374,11 +377,16 @@ void appKeyboard(unsigned char key, int x, int y)
             ps->system->getRenderer()->setDepthSmoothing(Render::NO_SHADER);
             return;
         case 'C':
-            ps->system->getRenderer()->setDepthSmoothing(Render::BILATERAL_GAUSSIAN_SHADER);
+            ps->system->getRenderer()->setDepthSmoothing(Render::GAUSSIAN_SHADER);
             return;
         case 'v':
             ps->system->getRenderer()->setDepthSmoothing(Render::GAUSSIAN_X_SHADER);
             return;
+        case 'V':
+            ps->system->getRenderer()->setDepthSmoothing(Render::BILATERAL_GAUSSIAN_SHADER);
+            return;
+        case '/':
+            ps->system->getRenderer()->setDepthSmoothing(Render::CURVATURE_FLOW_SHADER);
         case 'w':
             translate_z -= 0.1;
             break;
@@ -397,6 +405,24 @@ void appKeyboard(unsigned char key, int x, int y)
         case 'x':
             translate_y -= 0.1;
             break;
+        case '>':
+           {
+               float falloff = ps->settings->GetSettingAs<float>("blur_depth_falloff");
+               if(falloff<10.0f)
+               {
+                   ps->settings->SetSetting("blur_depth_falloff",falloff+0.01f);
+               }
+           }
+           return;
+        case '<':
+           {
+               float falloff = ps->settings->GetSettingAs<float>("blur_depth_falloff");
+               if(falloff>0.01f)
+               {
+                   ps->settings->SetSetting("blur_depth_falloff",falloff-0.01f);
+               }
+           }
+           return;
         case '+':
            {
                float blur = ps->settings->GetSettingAs<float>("blur_scale");
@@ -413,7 +439,7 @@ void appKeyboard(unsigned char key, int x, int y)
                 {
                     ps->settings->SetSetting("blur_scale",blur-1.0f);
                 }
-            }
+           }
            return;
         default:
             return;

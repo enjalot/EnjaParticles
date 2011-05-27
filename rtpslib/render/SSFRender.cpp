@@ -23,6 +23,7 @@ namespace rtps
 
         createFramebufferTextures();
 
+        cur_depth = "d1";
         glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT,fbos[0]);
         glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["thickness"],0);
         glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT1_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["depthColor"],0);
@@ -30,7 +31,7 @@ namespace rtps
         glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT3_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["lightColor"],0);
         glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT4_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["Color"],0);
         glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT5_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["depthColorSmooth"],0);
-        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["depth"],0);
+        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D,gl_framebuffer_texs[cur_depth],0);
         glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT,0);
 
 
@@ -74,8 +75,14 @@ namespace rtps
         frag+="/gaussian_blur_y_frag.glsl";
         glsl_program[GAUSSIAN_Y_SHADER] = compileShaders(vert.c_str(),frag.c_str());
         frag = shader_source_dir;
+        frag+="/gaussian_blur_frag.glsl";
+        glsl_program[GAUSSIAN_SHADER] = compileShaders(vert.c_str(),frag.c_str());
+        frag = shader_source_dir;
         frag+="/bilateral_blur_frag.glsl";
         glsl_program[BILATERAL_GAUSSIAN_SHADER] = compileShaders(vert.c_str(),frag.c_str());
+        frag = shader_source_dir;
+        frag+="/curvature_flow_frag.glsl";
+        glsl_program[CURVATURE_FLOW_SHADER] = compileShaders(vert.c_str(),frag.c_str());
         vert = shader_source_dir;
         frag = shader_source_dir;
         vert+="/normal_vert.glsl";
@@ -100,52 +107,83 @@ namespace rtps
         }
         else if (smoothing == GAUSSIAN_X_SHADER ||smoothing == GAUSSIAN_Y_SHADER)
         {
-            glUseProgram(glsl_program[GAUSSIAN_Y_SHADER]);
+            glUseProgram(glsl_program[GAUSSIAN_X_SHADER]);
+            glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "depthTex"),0);
+            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "del_x"),1.0f/window_width);
+            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "sig"),settings->GetSettingAs<float>("blur_scale")); 
+            fullscreenQuad();
+
+            glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["d1"],0);
+            glBindTexture(GL_TEXTURE_2D,gl_framebuffer_texs["d2"]);
+
+glUseProgram(glsl_program[GAUSSIAN_Y_SHADER]);
             glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "depthTex"),0);
             glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "del_y"),1.0f/window_height);
             glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "sig"),settings->GetSettingAs<float>("blur_scale"));
-            /*
-            glUseProgram(glsl_program[GAUSSIAN_X_SHADER]);
-            glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "depthTex"),0);
-            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "del_x"),1.0f/window_width);
-            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "sig"),settings->GetSettingAs<float>("blur_scale")); 
-            */ 
+            cur_depth = "d1";
+            
+        }
+        else if (smoothing == GAUSSIAN_SHADER)
+        {
+            glUseProgram(glsl_program[GAUSSIAN_SHADER]);
+            glUniform1i(glGetUniformLocation(glsl_program[GAUSSIAN_SHADER],"depthTex"),0);
+            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_SHADER], "del_x"),1.0/((float)window_width));
+            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_SHADER], "del_y"),1.0/((float)window_height));
+            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_SHADER], "sig"),settings->GetSettingAs<float>("blur_scale"));
+            cur_depth = "d2";
+        }
+        else if(smoothing == BILATERAL_GAUSSIAN_SHADER)
+        {
+            float xdir[] = {1.0f/window_height,0.0f};
+            float ydir[] = {0.0f,1.0f/window_width};
+            glUseProgram(glsl_program[BILATERAL_GAUSSIAN_SHADER]);
+            glUniform1i( glGetUniformLocation(glsl_program[BILATERAL_GAUSSIAN_SHADER], "depthTex"),0);
+            glUniform2fv( glGetUniformLocation(glsl_program[BILATERAL_GAUSSIAN_SHADER], "blurDir"),1,xdir);
+            glUniform1f( glGetUniformLocation(glsl_program[BILATERAL_GAUSSIAN_SHADER], "blurDepthFallOff"),settings->GetSettingAs<float>("blur_depth_falloff"));
+            glUniform1f( glGetUniformLocation(glsl_program[BILATERAL_GAUSSIAN_SHADER], "sig"),settings->GetSettingAs<float>("blur_scale"));
             fullscreenQuad();
 
-            glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["depth"],0);
-            //glClear(GL_DEPTH_BUFFER_BIT);
-            //glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D,gl_framebuffer_texs["depth2"]);
+            glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["d1"],0);
+            glBindTexture(GL_TEXTURE_2D,gl_framebuffer_texs["d2"]);
 
-            /*
-            glUseProgram(glsl_program[GAUSSIAN_Y_SHADER]);
-            glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "depthTex"),0);
-            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "del_y"),1.0f/window_height);
-            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "sig"),settings->GetSettingAs<float>("blur_scale")); 
-            */ 
-            glUseProgram(glsl_program[GAUSSIAN_X_SHADER]);
-            glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "depthTex"),0);
-            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "del_x"),1.0f/window_width);
-            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "sig"),settings->GetSettingAs<float>("blur_scale")); 
-        }
-        else if (smoothing == BILATERAL_GAUSSIAN_SHADER)
-        {
             glUseProgram(glsl_program[BILATERAL_GAUSSIAN_SHADER]);
-            glUniform1i(glGetUniformLocation(glsl_program[BILATERAL_GAUSSIAN_SHADER],"depthTex"),0);
-            glUniform1f( glGetUniformLocation(glsl_program[BILATERAL_GAUSSIAN_SHADER], "del_x"),1.0/((float)window_width));
-            glUniform1f( glGetUniformLocation(glsl_program[BILATERAL_GAUSSIAN_SHADER], "del_y"),1.0/((float)window_height));
+            glUniform1i( glGetUniformLocation(glsl_program[BILATERAL_GAUSSIAN_SHADER], "depthTex"),0);
+            glUniform2fv( glGetUniformLocation(glsl_program[BILATERAL_GAUSSIAN_SHADER], "blurDir"),1,ydir);
+            glUniform1f( glGetUniformLocation(glsl_program[BILATERAL_GAUSSIAN_SHADER], "blurDepthFallOff"),settings->GetSettingAs<float>("blur_depth_falloff"));
             glUniform1f( glGetUniformLocation(glsl_program[BILATERAL_GAUSSIAN_SHADER], "sig"),settings->GetSettingAs<float>("blur_scale"));
-            //glUniform1i(glGetUniformLocation(glsl_program[BILATERAL_GAUSSIAN_SHADER],"width"),window_width);
-            //glUniform1i(glGetUniformLocation(glsl_program[BILATERAL_GAUSSIAN_SHADER],"height"),window_height);
+            cur_depth = "d1";
         }
         else if (smoothing == CURVATURE_FLOW_SHADER)
         {
-            /*glUseProgram(glsl_program[CURVATURE_FLOW_SHADER]);
+            int iter = settings->GetSettingAs<int>("curvature_flow_iterations");
+            float pmat[16];
+            glGetFloatv(GL_PROJECTION_MATRIX,pmat);
+            float focal_x = (pmat[0]*window_width)/2.0f;
+            float focal_y = (pmat[5]*window_height)/2.0f;
+            /*for(int i = 0;i<16;i++)
+            {
+                printf("pmat[%d] = %f\n",i,pmat[i]);
+            }
+            printf("focal_x = %f, focal_y = %f\n",focal_x,focal_y);*/
+            glUseProgram(glsl_program[CURVATURE_FLOW_SHADER]);
             glUniform1i(glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER],"depthTex"),0);
             glUniform1i(glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER],"width"),window_width);
             glUniform1i(glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER],"height"),window_height); 
-            glUniform1i(glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER],"iterations"),40); 
-            */
+            glUniform1f( glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER], "del_x"),1.0/((float)window_width));
+            glUniform1f( glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER], "del_y"),1.0/((float)window_height));
+            glUniform1f( glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER], "focal_x"),focal_x);
+            glUniform1f( glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER], "focal_y"),focal_y);
+            glUniform1f( glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER], "dt"),settings->GetSettingAs<float>("curvature_flow_dt"));
+            for(int i = 0; i < iter; i++)
+            {
+                fullscreenQuad();
+                glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D,gl_framebuffer_texs[cur_depth],0);
+                if(cur_depth=="d1")
+                    cur_depth="d2";
+                else
+                    cur_depth="d1";
+                glBindTexture(GL_TEXTURE_2D,gl_framebuffer_texs[cur_depth]);
+            }
             return;
         }
         fullscreenQuad();
@@ -224,22 +262,23 @@ namespace rtps
         //glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);
         glDrawBuffer(GL_COLOR_ATTACHMENT5_EXT);
 
-        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["depth2"],0);
+        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["d2"],0);
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D,gl_framebuffer_texs["depth"]);
+        cur_depth = "d1";
+        glBindTexture(GL_TEXTURE_2D,gl_framebuffer_texs[cur_depth]);
 
         smoothDepth();
-        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["depth"],0);
+        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["d1"],0);
         //If no shader was used to smooth then we need the original depth texture
-        if (smoothing!=NO_SHADER && smoothing!=GAUSSIAN_X_SHADER)
+        /*if (smoothing!=NO_SHADER && smoothing!=GAUSSIAN_X_SHADER && smoothing!=BILATERAL_GAUSSIAN_SHADER)
         {
             glBindTexture(GL_TEXTURE_2D,gl_framebuffer_texs["depth2"]);
         }
         else
-        {
-            glBindTexture(GL_TEXTURE_2D,gl_framebuffer_texs["depth"]);
-        }
+        {*/
+            glBindTexture(GL_TEXTURE_2D,gl_framebuffer_texs[cur_depth]);
+        //}
         //glCopyTexSubImage2D(GL_TEXTURE_2D,0,0,0,0,0,800,600);
 
 
@@ -288,14 +327,14 @@ namespace rtps
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D,gl_framebuffer_texs["normalColor"]);
         glActiveTexture(GL_TEXTURE1);
-        if (smoothing!=NO_SHADER && smoothing!=GAUSSIAN_X_SHADER)
+        /*if (smoothing!=NO_SHADER && smoothing!=GAUSSIAN_X_SHADER && smoothing!=BILATERAL_GAUSSIAN_SHADER)
         {
             glBindTexture(GL_TEXTURE_2D,gl_framebuffer_texs["depth2"]);
         }
         else
-        {
-            glBindTexture(GL_TEXTURE_2D,gl_framebuffer_texs["depth"]);
-        }
+        {*/
+            glBindTexture(GL_TEXTURE_2D,gl_framebuffer_texs[cur_depth]);
+        //}
         glUseProgram(glsl_program[COPY_TO_FB]);
         glUniform1i( glGetUniformLocation(glsl_program[COPY_TO_FB], "normalTex"),0);
         glUniform1i( glGetUniformLocation(glsl_program[COPY_TO_FB], "depthTex"),1);
@@ -335,8 +374,8 @@ namespace rtps
 
     void SSFRender::deleteFramebufferTextures()
     {
-        glDeleteTextures(1,&gl_framebuffer_texs["depth"]);
-        glDeleteTextures(1,&gl_framebuffer_texs["depth2"]);
+        glDeleteTextures(1,&gl_framebuffer_texs["d1"]);
+        glDeleteTextures(1,&gl_framebuffer_texs["d2"]);
         glDeleteTextures(1,&gl_framebuffer_texs["thickness"]);
         glDeleteTextures(1,&gl_framebuffer_texs["depthColor"]);
         glDeleteTextures(1,&gl_framebuffer_texs["depthColorSmooth"]);
@@ -347,15 +386,15 @@ namespace rtps
 
     void SSFRender::createFramebufferTextures()
     {
-        glGenTextures(1, &gl_framebuffer_texs["depth"]);
-        glBindTexture(GL_TEXTURE_2D, gl_framebuffer_texs["depth"]);
+        glGenTextures(1, &gl_framebuffer_texs["d1"]);
+        glBindTexture(GL_TEXTURE_2D, gl_framebuffer_texs["d1"]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT32,window_width,window_height,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
-        glGenTextures(1, &gl_framebuffer_texs["depth2"]);
-        glBindTexture(GL_TEXTURE_2D, gl_framebuffer_texs["depth2"]);
+        glGenTextures(1, &gl_framebuffer_texs["d2"]);
+        glBindTexture(GL_TEXTURE_2D, gl_framebuffer_texs["d2"]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -425,7 +464,7 @@ namespace rtps
         glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT3_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["lightColor"],0);
         glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT4_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["Color"],0);
         glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT5_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["depthColorSmooth"],0);
-        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["depth"],0);
+        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D,gl_framebuffer_texs[cur_depth],0);
         glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT,0);
     }
 };

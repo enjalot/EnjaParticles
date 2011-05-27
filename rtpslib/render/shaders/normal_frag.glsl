@@ -13,9 +13,6 @@ vec3 uvToEye(vec2 texCoord,float z)
 	vec4 clipPos = vec4( xyPos, z, 1.0 );
 
 	// transform from clip space to view (eye) space
-	// NOTE: this assumes that you've precomputed the
-	// inverse of the view->clip transform matrix and
-	// provided it to the shader as a constant.
 	vec4 viewPos =  (gl_ProjectionMatrixInverse * clipPos);
 	return(viewPos.xyz/viewPos.w);
 }

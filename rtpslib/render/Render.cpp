@@ -42,7 +42,10 @@ namespace rtps
         GLubyte col1[] = {0,0,0,255};
         GLubyte col2[] = {255,255,255,255};
 
-        generateCheckerBoardTex(col1,col2,8, 640);
+        //string path(GLSL_SOURCE_DIR);
+        //path += "../../sprites/conecrete-pattern-texture.jpg";
+        //loadTexture(path,"concrete");
+        //generateCheckerBoardTex(col1,col2,8, 640);
         printf("GL VERSION %s\n", glGetString(GL_VERSION));
         //blending = settings.GetSettingAs<bool>("Render: Blending");
         //blending = settings->getUseAlphaBlending();
@@ -340,10 +343,10 @@ namespace rtps
         //glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT2,GL_TEXTURE_2D,0,0);
         //glBindTexture(GL_TEXTURE_2D,gl_framebuffer_texs["normalColor"]);
         //glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,GL_COLOR_ATTACHMENT2,GL_TEXTURE_2D,gl_framebuffer_texs["normalColor"],0);
-        //glBindTexture(GL_TEXTURE_2D,gl_textures["checker_board"]);
+        //glBindTexture(GL_TEXTURE_2D,gl_textures["concrete"]);
         //glBegin(GL_TRIANGLE_STRIP);
         glBegin(GL_QUADS);
-        float4 scale = float4((0.25f)*(max.x-min.x),(0.25f)*(max.y-min.y),(0.25f)*(max.z-min.z),0.0f);
+        //float4 scale = float4((0.25f)*(max.x-min.x),(0.25f)*(max.y-min.y),(0.25f)*(max.z-min.z),0.0f);
         /*glTexCoord2f(0.f,0.f);
         glVertex3f(min.x-scale.x, min.y-scale.y, min.z);
         glTexCoord2f(1.f,0.f);
