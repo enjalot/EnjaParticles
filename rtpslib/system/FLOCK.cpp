@@ -967,16 +967,24 @@ void FLOCK::setRenderer()
     {
         case RTPSettings::SPRITE_RENDER:
             renderer = new SpriteRender(pos_vbo,col_vbo,num,ps->cli, ps->settings);
+			printf("new SpriteRender\n");
             //printf("spacing for radius %f\n", spacing);
             break;
         case RTPSettings::SCREEN_SPACE_RENDER:
+			printf("new SSFRender\n");
             renderer = new SSFRender(pos_vbo,col_vbo,num,ps->cli, ps->settings);
             break;
         case RTPSettings::RENDER:
+			printf("new Render\n");
             renderer = new Render(pos_vbo,col_vbo,num,ps->cli, ps->settings);
+            break;
+        case RTPSettings::SPHERE3D_RENDER:
+			printf("new Sphere3DRender\n");
+            renderer = new Sphere3DRender(pos_vbo,col_vbo,num,ps->cli, ps->settings);
             break;
         default:
             //should be an error
+			printf("new Render in default\n");
             renderer = new Render(pos_vbo,col_vbo,num,ps->cli, ps->settings);
         break;
     }

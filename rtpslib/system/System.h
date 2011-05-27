@@ -6,6 +6,7 @@
 #include "../render/Render.h"
 #include "../render/SpriteRender.h"
 #include "../render/SSFRender.h"
+#include "../render/Sphere3DRender.h"
 
 #ifdef WIN32
     #if defined(rtps_EXPORTS)
