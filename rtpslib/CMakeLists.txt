@@ -79,6 +79,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/render/Render
     ${rtpslib_SOURCE_DIR}/render/SpriteRender
     ${rtpslib_SOURCE_DIR}/render/SSFRender
+    ${rtpslib_SOURCE_DIR}/render/Sphere3DRender
     ${rtpslib_SOURCE_DIR}/render/util/stb_image.c
     ${rtpslib_SOURCE_DIR}/render/util/stb_image_write.h
 

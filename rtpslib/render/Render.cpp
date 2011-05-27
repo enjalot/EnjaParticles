@@ -255,6 +255,7 @@ namespace rtps
         perspectiveProjection();
     }
 
+	//----------------------------------------------------------------------
     void Render::renderPointsAsSpheres()
     {
 
@@ -282,6 +283,7 @@ namespace rtps
         glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
         glDisable(GL_POINT_SPRITE);
     }
+	//----------------------------------------------------------------------
 
     void Render::render_box(float4 min, float4 max)
     {
@@ -365,6 +367,7 @@ namespace rtps
         //glDisable(GL_DEPTH_TEST);
     }
 
+	//----------------------------------------------------------------------
     int Render::generateCheckerBoardTex(GLubyte* color1,GLubyte* color2,int num_squares, int length)
     {
         unsigned int imageSize = length*length;

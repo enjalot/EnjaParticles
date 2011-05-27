@@ -37,7 +37,7 @@ namespace rtps
 
         enum RenderType
         {
-            RENDER = 0, SPRITE_RENDER, SCREEN_SPACE_RENDER
+            RENDER = 0, SPRITE_RENDER, SCREEN_SPACE_RENDER, SPHERE3D_RENDER
         };
 
 
