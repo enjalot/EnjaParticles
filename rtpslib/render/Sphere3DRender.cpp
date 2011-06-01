@@ -25,11 +25,11 @@ namespace rtps
 
         glEnable(GL_LIGHTING);
 
-	printf("enter Sphere3DRender::render\n");
+	//printf("enter Sphere3DRender::render\n");
 
     #if 1
-	//glBindBuffer(GL_ARRAY_BUFFER, col_vbo);
-	//glColorPointer(4, GL_FLOAT, 0, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, col_vbo);
+	glColorPointer(4, GL_FLOAT, 0, 0);
 
     glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
     glVertexPointer(4, GL_FLOAT, 0, 0);
@@ -47,7 +47,7 @@ namespace rtps
 	// Need to take blender scale into account
 
 	for (int i=0; i < num; i++, count+=4) {
-    	printf("Pos PTR: %f, %f, %f\n", ((float*)ptr)[i], ((float*)ptr)[i+1], ((float*)ptr)[i+2]);
+    	//printf("Pos PTR: %f, %f, %f\n", ((float*)ptr)[i], ((float*)ptr)[i+1], ((float*)ptr)[i+2]);
 		glPushMatrix();
 		glTranslatef(ptr[count], ptr[count+1], ptr[count+2]);
 		//float dens = ptr[count+3];
@@ -56,13 +56,15 @@ namespace rtps
 		scale *= 1.5;
 		//printf("dens= %f, scale= %f\n", dens, scale);
 		glScalef(scale, scale, scale);
-		glColor3f(1.,0.8,.5);
+		//glColor3f(.0, 1.0, .0);
+
         float radius_scale = settings->getRadiusScale(); //GE
-		printf("radius_scale= %f\n", radius_scale);
+		//printf("radius_scale= %f\n", radius_scale);
 		//radius_scale = 10.;
 		gluSphere(qu, radius_scale, 10, 10); // radius, slices, stacks
 		glPopMatrix();
 	}
+    glUnmapBufferARB(GL_ARRAY_BUFFER); 
     glUnmapBufferARB(GL_ARRAY_BUFFER); 
     #endif
 

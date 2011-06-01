@@ -24,7 +24,7 @@
 using namespace rtps;
 
 int window_width = 640;
-int window_height = 480;
+int window_height = 640;
 int glutWindowHandle = 0;
 
 #define DTR 0.0174532925
@@ -54,9 +54,9 @@ double farZ = 100.0;                                        //far clipping plane
 double screenZ = 10.0;                                     //screen projection plane
 double IOD = 0.5;                                          //intraocular distance
 
-float translate_x = -2.00f;
-float translate_y = -2.70f;//300.f;
-float translate_z = 3.50f;
+float translate_x = -2.5f;  //-2.00f;
+float translate_y = -2.5f;  //-2.70f;//300.f;
+float translate_z =  4.0f;  //3.50f;
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -149,8 +149,8 @@ int main(int argc, char** argv)
     printf("before we call enjas functions\n");
 
 
-    float w_sep = .0f;     //15
-    float w_align = 1.0f;   //7.5
+    float w_sep = 1.0f;     //15
+    float w_align = .0f;   //7.5
     float w_coh = .0f;     //2.5
     float w_leadfoll = 0.f;
     
@@ -170,7 +170,8 @@ int main(int argc, char** argv)
 #endif
 
     //settings->setRenderType(RTPSettings::RENDER);
-    settings->setRenderType(RTPSettings::SPRITE_RENDER);
+    //settings->setRenderType(RTPSettings::SPRITE_RENDER);
+    settings->setRenderType(RTPSettings::SPHERE3D_RENDER);
     
     settings->setRadiusScale(1.0);
     settings->setBlurScale(1.0);
@@ -221,7 +222,7 @@ void init_gl()
 
     // set view matrix
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glClearColor(.6, .6, .6, 1.0);
+    glClearColor(1.0, 1.0, 1.0, 1.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     //glRotatef(-90, 1.0, 0.0, 0.0);
@@ -423,6 +424,24 @@ void appRender()
 {
 
     //ps->system->sprayHoses();
+    GLfloat *ambient, *diffuse, *specular, *position;
+
+    ambient = new GLfloat[4];   //(.9,.9,.9,1.);
+    position = new GLfloat[4];  //(5,1,3,1);
+    diffuse = new GLfloat[4];
+    specular = new GLfloat[4];
+
+    ambient[0] = 1.0f;   diffuse[0] = 1.f;  specular[0] = .0f;  position[0] = 3.50f;
+    ambient[1] = 1.0f;   diffuse[1] = .0f;  specular[1] = .0f;  position[1] = 0.0f;
+    ambient[2] = 1.0f;   diffuse[2] = .0f;  specular[2] = 1.f;  position[2] = 1.50f;
+    ambient[3] = 1.0f;   diffuse[3] = 1.f;  specular[3] = 1.f;  position[3] = 1.f;
+
+    glEnable(GL_LIGHT0);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, ambient); 
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse); 
+    glLightfv(GL_LIGHT0, GL_SPECULAR, specular); 
+    glLightfv(GL_LIGHT0, GL_POSITION, position); 
+
 
     glEnable(GL_DEPTH_TEST);
     if (stereo_enabled)

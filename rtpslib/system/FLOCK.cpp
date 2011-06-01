@@ -879,15 +879,22 @@ void FLOCK::pushParticles(vector<float4> pos, float4 velo, float4 color)
     int nn = pos.size();
     std::vector<float4> vels(nn);
     float ms = flock_params.max_speed;
-    //std::fill(vels.begin(), vels.end(), velo);
+    
+#if 1 
+    std::fill(vels.begin(), vels.end(), velo);
+#endif    
+
+#if 0
     for(int i=0; i < nn; i++){
-        vels[i] = float4(rand()/*(ms - velo.x) + rand()/double(RAND_MAX)*/, /*(ms + velo.y) + rand()/double(RAND_MAX)*/ rand(), rand()/*(ms - velo.z) + rand()/double(RAND_MAX)*/, velo.w);
+        vels[i] = float4(rand(), rand(), rand(), velo.w);
         vels[i] = normalize3(vels[i]);
         vels[i] = vels[i] *  ms;
     }
-    vels[1].print("\n\n *** vel 1 ***\n");
-    vels[2].print("*** vel 2 ***\n");
-    vels[3].print("*** vel 3 ***\n\n");
+#endif
+
+    //vels[1].print("\n\n *** vel 1 ***\n");
+    //vels[2].print("*** vel 2 ***\n");
+    //vels[3].print("*** vel 3 ***\n\n");
     pushParticles(pos, vels, color);
 }
 
