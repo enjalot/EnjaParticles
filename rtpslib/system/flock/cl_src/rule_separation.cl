@@ -33,24 +33,25 @@ inline void ForNeighbor(
 	float rlen = length(r);
 
     // neighbor within the radius?    
-    if(rlen <= flockp->search_radius)
-    {
-        if(index_i != index_j){
+    //if(rlen <= flockp->search_radius)
+    //{
+
 	        // positions
-	        float4 pj = position_j;
+	        //float4 pj = position_j;
 	
 	        // setup for Rule 1. Separation
-            float4 s = r;       //pi - pj;
-	        float  d = rlen;    //length(s);
+            //float4 s = r;       //pi - pj;
+	        //float  d = rlen;    //length(s);
 	
-		     if(d <= flockp->min_dist){ 
-                s.w = 0.0f;
-                s = normalize(s);
-                s /= d;
-	            pt->separation+= s;        // accumulate the separation vector
-	        }
-        }
-    }
+		     if(rlen <= flockp->min_dist){ 
+                if(index_i != index_j){
+//                  s.w = 0.0f;
+                   // r = normalize(r);
+                    r /= rlen;
+	                pt->separation+= r;        // accumulate the separation vector
+	            }
+            }
+    //}
 }
 
 
@@ -92,7 +93,7 @@ __kernel void rule_separation(
     if(pt.num_nearestFlockmates > 0){
         pt.separation /= (float)pt.num_nearestFlockmates;
         pt.separation.w =0.f;
-        pt.separation = normalize(pt.separation);
+   //     pt.separation = normalize(pt.separation);
     }
 
     separation[index] = pt.separation;

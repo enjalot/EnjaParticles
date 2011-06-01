@@ -23,7 +23,8 @@ typedef struct FLOCKParameters
     float min_dist;  // desired separation between boids
     float search_radius;
     float max_speed; 
-    
+    float ang_vel;
+
     // Boid rules' weights
     float w_sep;
     float w_align;

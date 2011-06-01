@@ -33,6 +33,7 @@ printf("SIMULATION SCALE = %f\n",  simulation_scale);
         settings->SetSetting("Min Separation Distance", 1.f);
         settings->SetSetting("Searching Radius", 1.f);
         settings->SetSetting("Max Speed", 5.f);
+        settings->SetSetting("Angular Velocity", 0.f);
 
         // BOID WEIGHTS
         settings->SetSetting("Separation Weight", 1.50f);
@@ -65,7 +66,7 @@ printf("SIMULATION SCALE = %f\n",  simulation_scale);
         flock_params.min_dist = 0.5f * flock_params.smoothing_distance * settings->GetSettingAs<float>("Min Separation Distance");
         flock_params.search_radius = 0.8f * flock_params.smoothing_distance * settings->GetSettingAs<float>("Searching Radius");
         flock_params.max_speed = settings->GetSettingAs<float>("Max Speed");
-
+        flock_params.ang_vel = settings->GetSettingAs<float>("Angular Velocity");
         // BOID WEIGHTS
         flock_params.w_sep = settings->GetSettingAs<float>("Separation Weight");
         flock_params.w_align = settings->GetSettingAs<float>("Alignment Weight");

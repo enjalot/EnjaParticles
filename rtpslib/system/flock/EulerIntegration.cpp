@@ -164,7 +164,7 @@ namespace rtps
 
             // (Optional Step) Add circular velocity
             float4 v = float4(-positions[i].z, 0., positions[i].x, 0.);
-            v = v*.000; // 0.0005
+            v = v*flock_params.ang_vel; // 0.0005
             velocities[i] = v + acc;
 
     	    // Step 7. Integration 

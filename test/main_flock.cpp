@@ -105,7 +105,7 @@ rtps::RTPS* ps;
 #define DT              0.001f
 
 #define maxspeed        2.0f
-#define mindist         1.0f
+#define mindist         1.50f
 #define searchradius    1.0f
 
 float4 color =   float4(255.f, 0.f, 0.f, 0.f);
@@ -149,11 +149,12 @@ int main(int argc, char** argv)
     printf("before we call enjas functions\n");
 
 
-    float w_sep = 1.0f;     //15
-    float w_align = .0f;   //7.5
-    float w_coh = .0f;     //2.5
+    float w_sep = .40f;     //15
+    float w_align = .80f;   //7.5
+    float w_coh = 1.0f;     //2.5
     float w_leadfoll = 0.f;
-    
+   
+    float ang_vel = 0.3f; 
     float slow_dist = .01f;
 
     //default constructor
@@ -190,6 +191,7 @@ int main(int argc, char** argv)
     ps->settings->SetSetting("Max Speed", maxspeed);
     ps->settings->SetSetting("Min Separation Distance", mindist);
     ps->settings->SetSetting("Searching Radius", searchradius);
+    ps->settings->SetSetting("Angular Velocity", ang_vel);
     ps->settings->SetSetting("Slowing Distance", slow_dist);
 
     ps->settings->SetSetting("Separation Weight", w_sep);
