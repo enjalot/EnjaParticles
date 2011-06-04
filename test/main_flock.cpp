@@ -93,10 +93,10 @@ rtps::RTPS* ps;
 
 //#define NUM_PARTICLES 524288
 //#define NUM_PARTICLES 262144
-#define NUM_PARTICLES 65536
+//#define NUM_PARTICLES 65536
 //#define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 10000
-//#define NUM_PARTICLES 8192
+#define NUM_PARTICLES 8192
 //#define NUM_PARTICLES 4096
 //#define NUM_PARTICLES 2048
 //#define NUM_PARTICLES 1024
@@ -338,16 +338,16 @@ void appKeyboard(unsigned char key, int x, int y)
 
         case 'r': //drop a rectangle
         {
-            nn = 65536;
+            //nn = 65536;
 	        //nn = 1024;
-            //nn = 8192;
-            //nn = 4;
-            //max = float4(4.5, 2.5 , 4.5, 1.0f);
-            //min = float4(0.5, 2.0 , 0.5, 1.0f);
-            max = float4(3.5, 1., 3.5, 1.0f);
-            min = float4(1.5, 1., 1.5, 1.0f);
-            //max = float4(1.1,1.1, 1.1, 1.0f);
-            //min = float4(1., 1., 1., 1.0f);
+            nn = 8192;
+            //nn = 256;
+            //max = float4(4.5, 4.5 , 4.5, 1.0f);
+            //min = float4(0.5, 0.5 , 0.5, 1.0f);
+            //max = float4(3.5, 1., 3.5, 1.0f);
+            //min = float4(1.5, 1., 1.5, 1.0f);
+            max = float4(4.5, 1., 4.5, 1.0f);
+            min = float4(0.5, 1., 0.5, 1.0f);
             ps->system->addBox(nn, min, max, false, color);
             return;
         }

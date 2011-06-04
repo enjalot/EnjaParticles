@@ -12,6 +12,17 @@ namespace rtps
 
         printf("create rules kernel\n");
 
+        // separation
+        try
+        {
+            path = wpath + "/rules.cl";
+            k_rules= Kernel(cli, path, "rules");
+        }
+        catch (cl::Error er)
+        {
+            printf("ERROR(rules): %s(%s)\n", er.what(), oclErrorString(er.err()));
+        }
+#if 0
         // flockmates 
         try
         {
@@ -66,6 +77,7 @@ namespace rtps
         {
             printf("ERROR(rule_leaderfollowing): %s(%s)\n", er.what(), oclErrorString(er.err()));
         }
+#endif
     }
 
     //----------------------------------------------------------------------
@@ -84,21 +96,25 @@ namespace rtps
                     Buffer<int4>& cli_debug)
     { 
         int iarg = 0;
-        k_flockmates.setArg(iarg++, pos_s.getDevicePtr());
-        k_flockmates.setArg(iarg++, neigh_s.getDevicePtr());
-        k_flockmates.setArg(iarg++, ci_start.getDevicePtr());
-        k_flockmates.setArg(iarg++, ci_end.getDevicePtr());
-        k_flockmates.setArg(iarg++, gp.getDevicePtr());
-        k_flockmates.setArg(iarg++, flockp.getDevicePtr());
+        k_rules.setArg(iarg++, pos_s.getDevicePtr());
+        k_rules.setArg(iarg++, vel_s.getDevicePtr());
+        k_rules.setArg(iarg++, neigh_s.getDevicePtr());
+        k_rules.setArg(iarg++, sep_s.getDevicePtr());
+        k_rules.setArg(iarg++, align_s.getDevicePtr());
+        k_rules.setArg(iarg++, coh_s.getDevicePtr());
+        k_rules.setArg(iarg++, ci_start.getDevicePtr());
+        k_rules.setArg(iarg++, ci_end.getDevicePtr());
+        k_rules.setArg(iarg++, gp.getDevicePtr());
+        k_rules.setArg(iarg++, flockp.getDevicePtr());
 
         // ONLY IF DEBUGGING
-        k_flockmates.setArg(iarg++, clf_debug.getDevicePtr());
-        k_flockmates.setArg(iarg++, cli_debug.getDevicePtr());
+        k_rules.setArg(iarg++, clf_debug.getDevicePtr());
+        k_rules.setArg(iarg++, cli_debug.getDevicePtr());
 
         int local = 64;
         try
         {
-            float gputime = k_flockmates.execute(num, local);
+            float gputime = k_rules.execute(num, local);
             if(gputime > 0)
                 timer->set(gputime);
 
@@ -106,10 +122,11 @@ namespace rtps
 
         catch (cl::Error er)
         {
-            printf("ERROR(flockmates): %s(%s)\n", er.what(), oclErrorString(er.err()));
+            printf("ERROR(rules): %s(%s)\n", er.what(), oclErrorString(er.err()));
         }
     }
 
+#if 0
     //----------------------------------------------------------------------
     void Rules::executeSeparation(int num,
                     //input
@@ -289,7 +306,7 @@ namespace rtps
             printf("ERROR(rule_leaderfollowing): %s(%s)\n", er.what(), oclErrorString(er.err()));
         }
     }
-
+#endif
     void FLOCK::cpuRules()
     {
 

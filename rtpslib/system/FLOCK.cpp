@@ -315,30 +315,17 @@ void FLOCK::updateGPU()
             cl_FLOCKParameters.copyToDevice(vparams);
         #endif
 
-        
-      /*  timers["computeRules"]->start();
-        computeRules.execute(   num,
-            //cl_vars_sorted,
-            cl_position_s,
-            cl_velocity_s,
-            cl_separation_s,
-            cl_alignment_s,
-            cl_cohesion_s,
-            cl_flockmates_s,
-            cl_cell_indices_start,
-            cl_cell_indices_end,
-            cl_GridParamsScaled,
-            cl_FLOCKParameters,
-            clf_debug,
-            cli_debug);
-       timers["computeRules"]->stop();*/
             
         timers["rules"]->start();
         // add a bool variable for each rule
         if(flock_params.w_sep > 0.f || flock_params.w_align > 0.f || flock_params.w_coh > 0.f){
-            rules.executeFlockmates(   num,
+            rules.execute(   num,
                 cl_position_s,
+                cl_velocity_s,
                 cl_flockmates_s,
+                cl_separation_s,
+                cl_alignment_s,
+                cl_cohesion_s,
                 cl_cell_indices_start,
                 cl_cell_indices_end,
                 cl_GridParamsScaled,
@@ -346,6 +333,7 @@ void FLOCK::updateGPU()
                 clf_debug,
                 cli_debug);
         }
+#if 0
         if(flock_params.w_sep > 0.f){
             rules.executeSeparation(   num,
                 cl_position_s,
@@ -396,6 +384,7 @@ void FLOCK::updateGPU()
                 clf_debug,
                 cli_debug);
         }
+#endif
         timers["rules"]->stop();
         
         //collision();
