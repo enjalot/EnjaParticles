@@ -81,10 +81,14 @@ namespace rtps
     }
 
     //----------------------------------------------------------------------
-    void Rules::executeFlockmates(int num,
+    void Rules::execute(int num,
                     //input
                     Buffer<float4>& pos_s, 
+                    Buffer<float4>& vel_s, 
                     Buffer<int4>& neigh_s, 
+                    Buffer<float4>& sep_s, 
+                    Buffer<float4>& align_s, 
+                    Buffer<float4>& coh_s, 
                     //output
                     Buffer<unsigned int>& ci_start,
                     Buffer<unsigned int>& ci_end,

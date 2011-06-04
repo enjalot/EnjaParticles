@@ -1,10 +1,10 @@
-#ifndef _FLOCKMATES_CL_
-#define _FLOCKMATES_CL_
+#ifndef _RULES_CL_
+#define _RULES_CL_
 
 //These are passed along through cl_neighbors.h
 //only used inside ForNeighbor defined in this file
-#define ARGS __global float4* pos, __global int4* flockmates 
-#define ARGV pos, flockmates 
+#define ARGS __global float4* pos,  __global float4* vel, __global int4* flockmates,  __global float4* separation, __global float4* alignment, __global float4* cohesion 
+#define ARGV pos, vel, flockmates, separation, alignment, cohesion
 
 #include "cl_macros.h"
 #include "cl_structs.h"
@@ -37,12 +37,20 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
     {
         if(index_i != index_j){
 	
-	        // number of flockmates
+	        // number of rules
             pt->num_flockmates++;
 
-		    if(rlen <= flockp->min_dist){
-               pt->num_nearestFlockmates++;
-            } 
+            if(flockp->w_sep > 0.f){
+                #include "rule_separation.cl";
+            }
+
+            if(flockp->w_align > 0.f){
+                #include "rule_alignment.cl"
+            }
+
+            if(flockp->w_coh > 0.f){
+                #include "rule_cohesion.cl"
+            }
         }
     }
 }
@@ -53,9 +61,9 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
 
 
 //--------------------------------------------------------------
-// count the number of flockmates 
+// count the number of rules 
 
-__kernel void flockmates(
+__kernel void rules(
                 ARGS,
         		__global int*    cell_indexes_start,
         		__global int*    cell_indexes_end,
@@ -71,6 +79,7 @@ __kernel void flockmates(
     if (index >= num) return;
 
     float4 position_i = pos[index] * flockp->simulation_scale;
+    float4 velocity_i = vel[index];
 
     // Do calculations on particles in neighboring cells
 	Boid pt;
@@ -78,8 +87,34 @@ __kernel void flockmates(
 
     IterateParticlesInNearbyCells(/*vars_sorted*/ ARGV, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ flockp DEBUG_ARGV);
 		
+
+    if(flockp->w_sep > 0.f && pt.num_nearestFlockmates > 0){
+        pt.separation /= (float)pt.num_nearestFlockmates;
+        pt.separation.w = 0.f;
+    }
+
+    if(flockp->w_align > 0.f && pt.num_flockmates > 0){
+	    // dividing by the number of flockmates to get the desired velocity 
+	    pt.alignment /= (float)pt.num_flockmates;
+        pt.alignment -= velocity_i;
+        pt.alignment.w = 0.f;
+    }
+
+    if(flockp->w_coh > 0.f && pt.num_flockmates > 0){
+	    // dividing by the number of flockmates to get the center of mass 
+	    pt.cohesion /= (float)pt.num_flockmates;
+        pt.cohesion -= position_i;
+        pt.cohesion.w = 0.f;
+    }
+   
+
     flockmates[index].x = pt.num_flockmates;
     flockmates[index].y = pt.num_nearestFlockmates;
+
+    separation[index] = pt.separation;
+    alignment[index] = pt.alignment;
+    cohesion[index] = pt.cohesion;
+
 }
 
 #endif
