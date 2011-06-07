@@ -56,7 +56,7 @@ public:
     int addBox(int nn, float4 min, float4 max, bool scaled, float4 color=float4(1., 0., 0., 1.));
     
     //wrapper around IV.h addSphere
-    void addBall(int nn, float4 center, float radius, bool scaled);
+    void addBall(int nn, float4 center, float radius, bool scaled, float4 color=float4(1., 0., 0., 1.));
 
     //wrapper around Hose.h 
     int addHose(int total_n, float4 center, float4 velocity, float radius, float4 color=float4(1.0, 0.0, 0.0, 1.0f));

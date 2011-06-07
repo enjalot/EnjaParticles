@@ -510,7 +510,7 @@ int FLOCK::addBox(int nn, float4 min, float4 max, bool scaled, float4 color)
 }
 
 //----------------------------------------------------------------------
-void FLOCK::addBall(int nn, float4 center, float radius, bool scaled)
+void FLOCK::addBall(int nn, float4 center, float radius, bool scaled, float4 color)
 {
     float scale = 1.0f;
     if(scaled)
@@ -520,9 +520,9 @@ void FLOCK::addBall(int nn, float4 center, float radius, bool scaled)
     
     printf("\n\n ADDING A SPHERE \n\n");
     
-    float4 velo(0.f,0.f,0.f,0.f);
-    float4 color(255.f,0.f,0.f,0.f);
     vector<float4> sphere = addSphere(nn, center, radius, spacing, scale);
+    
+    float4 velo(0.f,0.f,0.f,0.f);
     pushParticles(sphere, velo, color);
 }
 
