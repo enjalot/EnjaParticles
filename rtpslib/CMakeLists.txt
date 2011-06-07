@@ -34,6 +34,7 @@ ENDIF(WITH_OPENCL)
 ADD_DEFINITIONS(-DSIMPLE_CL_SOURCE_DIR="cl_simple")
 ADD_DEFINITIONS(-DSPH_CL_SOURCE_DIR="cl_sph")
 ADD_DEFINITIONS(-DFLOCK_CL_SOURCE_DIR="cl_flock")
+ADD_DEFINITIONS(-DOUTER_CL_SOURCE_DIR="cl_outer")
 ADD_DEFINITIONS(-DCOMMON_CL_SOURCE_DIR="cl_common")
 ADD_DEFINITIONS(-DGLSL_BIN_DIR="shaders")
 ADD_DEFINITIONS(-DGLSL_SOURCE_DIR="render")
@@ -100,6 +101,8 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/simple/Euler
     	
 	# SPH
+    #${rtpslib_SOURCE_DIR}/system/OUTER.cpp
+    ${rtpslib_SOURCE_DIR}/system/OUTERSettings.cpp
     ${rtpslib_SOURCE_DIR}/system/SPH.cpp
     ${rtpslib_SOURCE_DIR}/system/SPHSettings.cpp
     ${rtpslib_SOURCE_DIR}/system/sph/Euler

@@ -1,5 +1,5 @@
-#ifndef RTPS_SPH_H_INCLUDED
-#define RTPS_SPH_H_INCLUDED
+#ifndef RTPS_OUTER_H_INCLUDED
+#define RTPS_OUTER_H_INCLUDED
 
 #ifdef WIN32
 #define _USE_MATH_DEFINES
@@ -14,7 +14,7 @@
 #include <Buffer.h>
 
 #include <Domain.h>
-#include <SPHSettings.h>
+#include <OUTERSettings.h>
 
 
 //#include <Prep.h>
@@ -51,11 +51,11 @@ namespace rtps
 {
     using namespace sph;
 
-    class RTPS_EXPORT SPH : public System
+    class RTPS_EXPORT OUTER : public System
     {
     public:
-        SPH(RTPS *ps, int num);
-        ~SPH();
+        OUTER(RTPS *ps, int num);
+        ~OUTER();
 
         void update();
         //wrapper around IV.h addRect
@@ -91,8 +91,8 @@ namespace rtps
         RTPS* ps;
         RTPSettings* settings;
 
-        //SPHSettings* sphsettings;
-        SPHParams sphp;
+        //OUTERSettings* sphsettings;
+        OUTERParams sphp;
         GridParams grid_params;
         GridParams grid_params_scaled;
         Integrator integrator;
@@ -109,7 +109,7 @@ namespace rtps
         std::vector<Hose*> hoses;
 
         //needs to be called when particles are added
-        void calculateSPHSettings();
+        void calculateOUTERSettings();
         void setupDomain();
         void prepareSorted();
         //void popParticles();
@@ -161,7 +161,7 @@ namespace rtps
         Bitonic<unsigned int> bitonic;
 
         //Parameter structs
-        Buffer<SPHParams>   cl_sphp;
+        Buffer<OUTERParams>   cl_sphp;
         Buffer<GridParams>  cl_GridParams;
         Buffer<GridParams>  cl_GridParamsScaled;
 
@@ -173,7 +173,7 @@ namespace rtps
         void cpuDensity();
         void cpuPressure();
         void cpuViscosity();
-        void cpuXSPH();
+        void cpuXOUTER();
         void cpuCollision_wall();
         void cpuEuler();
         void cpuLeapFrog();
@@ -183,8 +183,8 @@ namespace rtps
 
         //calculate the various parameters that depend on max_num of particles
         void calculate();
-        //copy the SPH parameter struct to the GPU
-        void updateSPHP();
+        //copy the OUTER parameter struct to the GPU
+        void updateOUTERP();
 
         //Nearest Neighbors search related functions
         //Prep prep;

@@ -1,0 +1,5 @@
+OUTER.cpp : handles objects defined by point clouds moving inside the 
+  fluid. For now these objects are rigid, but that could changed if combined
+  with rigging. 
+
+

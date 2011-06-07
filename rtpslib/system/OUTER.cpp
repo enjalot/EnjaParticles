@@ -6,7 +6,7 @@
 #include <string>
 
 #include "System.h"
-#include "SPH.h"
+#include "OUTER.h"
 //#include "../domain/UniformGrid.h"
 #include "Domain.h"
 #include "IV.h"
@@ -22,7 +22,7 @@ namespace rtps
     using namespace sph;
 
 
-    SPH::SPH(RTPS *psfr, int n)
+    OUTER::OUTER(RTPS *psfr, int n)
     {
         //store the particle system framework
         ps = psfr;
@@ -39,22 +39,22 @@ namespace rtps
 
         grid = settings->grid;
 
-        //sphsettings = new SPHSettings(grid, max_num);
+        //sphsettings = new OUTERSettings(grid, max_num);
         //sphsettings->printSettings();
-        //sphsettings->updateSPHP(sphp);
-        std::vector<SPHParams> vparams(0);
+        //sphsettings->updateOUTERP(sphp);
+        std::vector<OUTERParams> vparams(0);
         vparams.push_back(sphp);
-        cl_sphp = Buffer<SPHParams>(ps->cli, vparams);
+        cl_sphp = Buffer<OUTERParams>(ps->cli, vparams);
         
         calculate();
-        updateSPHP();
+        updateOUTERP();
 
         //settings->printSettings();
 
         spacing = settings->GetSettingAs<float>("Spacing");
 
-        //SPH settings depend on number of particles used
-        //calculateSPHSettings();
+        //OUTER settings depend on number of particles used
+        //calculateOUTERSettings();
         //set up the grid
         setupDomain();
 
@@ -76,7 +76,7 @@ namespace rtps
         prepareSorted();
 
         //should be more cross platform
-        sph_source_dir = resource_path + "/" + std::string(SPH_CL_SOURCE_DIR);
+        sph_source_dir = resource_path + "/" + std::string(OUTER_CL_SOURCE_DIR);
         common_source_dir = resource_path + "/" + std::string(COMMON_CL_SOURCE_DIR);
 
         ps->cli->addIncludeDir(sph_source_dir);
@@ -121,9 +121,9 @@ namespace rtps
 
     }
 
-    SPH::~SPH()
+    OUTER::~OUTER()
     {
-        printf("SPH destructor\n");
+        printf("OUTER destructor\n");
         if (pos_vbo && managed)
         {
             glBindBuffer(1, pos_vbo);
@@ -148,7 +148,7 @@ namespace rtps
 
     }
 
-    void SPH::update()
+    void OUTER::update()
     {
         //call kernels
         //TODO: add timings
@@ -160,12 +160,12 @@ namespace rtps
 #endif
     }
 
-    void SPH::updateCPU()
+    void OUTER::updateCPU()
     {
         cpuDensity();
         cpuPressure();
         cpuViscosity();
-        cpuXSPH();
+        cpuXOUTER();
         cpuCollision_wall();
 
         if (integrator == EULER)
@@ -191,12 +191,12 @@ namespace rtps
         glBufferData(GL_ARRAY_BUFFER, num * sizeof(float4), &positions[0], GL_DYNAMIC_DRAW);
     }
 
-    void SPH::updateGPU()
+    void OUTER::updateGPU()
     {
 
         timers["update"]->start();
         glFinish();
-        if (settings->has_changed()) updateSPHP();
+        if (settings->has_changed()) updateOUTERP();
 
         //settings->printSettings();
 
@@ -302,7 +302,7 @@ namespace rtps
                 num = nc;
                 settings->SetSetting("Number of Particles", num);
                 //sphp.num = num;
-                updateSPHP();
+                updateOUTERP();
                 renderer->setNum(sphp.num);
                 //need to copy sorted arrays into unsorted arrays
                 call_prep(2);
@@ -375,7 +375,7 @@ namespace rtps
 
     }
 
-    void SPH::hash_and_sort()
+    void OUTER::hash_and_sort()
     {
         //printf("hash\n");
         timers["hash"]->start();
@@ -398,7 +398,7 @@ namespace rtps
 
     }
 
-    void SPH::collision()
+    void OUTER::collision()
     {
         //when implemented other collision routines can be chosen here
         timers["collision_wall"]->start();
@@ -433,7 +433,7 @@ namespace rtps
 
     }
 
-    void SPH::integrate()
+    void OUTER::integrate()
     {
         if (integrator == EULER)
         {
@@ -491,7 +491,7 @@ namespace rtps
 
     }
 
-    void SPH::call_prep(int stage)
+    void OUTER::call_prep(int stage)
     {
             cl_position_u.copyFromBuffer(cl_position_s, 0, 0, num);
             cl_velocity_u.copyFromBuffer(cl_velocity_s, 0, 0, num);
@@ -499,7 +499,7 @@ namespace rtps
             cl_color_u.copyFromBuffer(cl_color_s, 0, 0, num);
     }
 
-    int SPH::setupTimers()
+    int OUTER::setupTimers()
     {
         //int print_freq = 20000;
         int print_freq = 1000; //one second
@@ -529,7 +529,7 @@ namespace rtps
 		return 0;
     }
 
-    void SPH::printTimers()
+    void OUTER::printTimers()
     {
         printf("Number of Particles: %d\n", num);
         timers.printAll();
@@ -540,7 +540,7 @@ namespace rtps
         timers.writeToFile(oss.str()); 
     }
 
-    void SPH::prepareSorted()
+    void OUTER::prepareSorted()
     {
 //#include "sph/cl_src/cl_macros.h"
 
@@ -661,7 +661,7 @@ namespace rtps
 
      }
 
-    void SPH::setupDomain()
+    void OUTER::setupDomain()
     {
         grid->calculateCells(sphp.smoothing_distance / sphp.simulation_scale);
 
@@ -704,7 +704,7 @@ namespace rtps
 
     }
 
-    int SPH::addBox(int nn, float4 min, float4 max, bool scaled, float4 color)
+    int OUTER::addBox(int nn, float4 min, float4 max, bool scaled, float4 color)
     {
         float scale = 1.0f;
         if (scaled)
@@ -717,7 +717,7 @@ namespace rtps
         return rect.size();
     }
 
-    void SPH::addBall(int nn, float4 center, float radius, bool scaled)
+    void OUTER::addBall(int nn, float4 center, float radius, bool scaled)
     {
         float scale = 1.0f;
         if (scaled)
@@ -729,7 +729,7 @@ namespace rtps
         pushParticles(sphere,velo);
     }
 
-    int SPH::addHose(int total_n, float4 center, float4 velocity, float radius, float4 color)
+    int OUTER::addHose(int total_n, float4 center, float4 velocity, float radius, float4 color)
     {
         //in sph we just use sph spacing
         radius *= spacing;
@@ -739,7 +739,7 @@ namespace rtps
         return hoses.size()-1;
         //printf("size of hoses: %d\n", hoses.size());
     }
-    void SPH::updateHose(int index, float4 center, float4 velocity, float radius, float4 color)
+    void OUTER::updateHose(int index, float4 center, float4 velocity, float radius, float4 color)
     {
         //we need to expose the vector of hoses somehow
         //doesn't seem right to make user manage an index
@@ -748,14 +748,14 @@ namespace rtps
         hoses[index]->update(center, velocity, radius, spacing, color);
         //printf("size of hoses: %d\n", hoses.size());
     }
-    void SPH::refillHose(int index, int refill)
+    void OUTER::refillHose(int index, int refill)
     {
         hoses[index]->refill(refill);
     }
 
 
 
-    void SPH::sprayHoses()
+    void OUTER::sprayHoses()
     {
 
         std::vector<float4> parts;
@@ -767,7 +767,7 @@ namespace rtps
         }
     }
 
-    void SPH::testDelete()
+    void OUTER::testDelete()
     {
 
         //cut = 1;
@@ -782,7 +782,7 @@ namespace rtps
 
 
     }
-    void SPH::pushParticles(vector<float4> pos, float4 velo, float4 color)
+    void OUTER::pushParticles(vector<float4> pos, float4 velo, float4 color)
     {
         int nn = pos.size();
         std::vector<float4> vels(nn);
@@ -790,7 +790,7 @@ namespace rtps
         pushParticles(pos, vels, color);
 
     }
-    void SPH::pushParticles(vector<float4> pos, vector<float4> vels, float4 color)
+    void OUTER::pushParticles(vector<float4> pos, vector<float4> vels, float4 color)
     {
         //cut = 1;
 
@@ -831,7 +831,7 @@ namespace rtps
 
         //sphp.num = num+nn;
         settings->SetSetting("Number of Particles", num+nn);
-        updateSPHP();
+        updateOUTERP();
 
         num += nn;  //keep track of number of particles we use
 
@@ -852,13 +852,13 @@ namespace rtps
     }
 
 
-    void SPH::render()
+    void OUTER::render()
     {
         renderer->render_box(grid->getBndMin(), grid->getBndMax());
         //renderer->render_table(grid->getBndMin(), grid->getBndMax());
         System::render();
     }
-    void SPH::setRenderer()
+    void OUTER::setRenderer()
     {
         switch(ps->settings->getRenderType())
         {
