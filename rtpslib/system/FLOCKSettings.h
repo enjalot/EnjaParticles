@@ -21,9 +21,6 @@ namespace rtps
 //Struct which gets passed to OpenCL routines
 typedef struct FLOCKParameters
 {
-    // use it later
-    float mass;
-   
     // simulation settings 
     float simulation_scale;
     float rest_distance;
@@ -39,6 +36,8 @@ typedef struct FLOCKParameters
     float w_sep;
     float w_align;
     float w_coh;
+    float w_goal;
+    float w_avoid;
     float w_leadfoll;
 
     // Boid rule's settings

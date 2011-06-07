@@ -105,8 +105,8 @@ rtps::RTPS* ps;
 #define DT              0.001f
 
 #define maxspeed        2.0f
-#define mindist         1.50f
-#define searchradius    1.0f
+#define mindist         10.0f
+#define searchradius    20.0f
 
 float4 color =   float4(255.f, 0.f, 0.f, 0.f);
 int hindex;
@@ -340,8 +340,8 @@ void appKeyboard(unsigned char key, int x, int y)
         {
             //nn = 65536;
 	        //nn = 1024;
-            nn = 8192;
-            //nn = 256;
+            //nn = 8192;
+            nn = 256;
             //max = float4(4.5, 4.5 , 4.5, 1.0f);
             //min = float4(0.5, 0.5 , 0.5, 1.0f);
             //max = float4(3.5, 1., 3.5, 1.0f);

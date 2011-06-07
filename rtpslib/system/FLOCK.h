@@ -28,10 +28,6 @@
 
 #include <timer_eb.h>
 
-
-// Added by GE, March 16, 2011
-//#include "boids.h"
-
 #ifdef WIN32
     #if defined(rtps_EXPORTS)
         #define RTPS_EXPORT __declspec(dllexport)
@@ -87,8 +83,6 @@ private:
     RTPS *ps;
     RTPSettings *settings;
 
-	//Boids *boids;
-
     FLOCKParameters flock_params;
     GridParams      grid_params;
     GridParams      grid_params_scaled;
@@ -121,6 +115,8 @@ private:
     std::vector<float4> separation;
     std::vector<float4> alignment;
     std::vector<float4> cohesion;
+    std::vector<float4> goal;
+    std::vector<float4> avoid;
     std::vector<float4> leaderfollowing;
 
     Buffer<float4>      cl_position_u;

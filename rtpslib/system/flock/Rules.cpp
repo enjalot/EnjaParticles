@@ -313,7 +313,92 @@ namespace rtps
 #endif
     void FLOCK::cpuRules()
     {
+        
+	    float spacing1 = spacing;
+
+        float4 bndMax = grid_params.bnd_max;
+        float4 bndMin = grid_params.bnd_min;
+        
+        int nb_cells = (int)((bndMax.x-bndMin.x)/spacing1) * (int)((bndMax.y-bndMin.y)/spacing1) * (int)((bndMax.z-bndMin.z)/spacing1);
+       
+        //printf("*** nb_cells=%d***\n",nb_cells);
+
+        vector<int> flockmates;
+        flockmates.resize(nb_cells);
+        
+        // Step 1. Loop over all boids
+        for(int i = 0; i < num; i++)
+        {
+
+            // Step 2. Search for neighbors
+            for(int j=0; j < num; j++){
+                if(j == i){
+			        continue;
+                }
+                float4 d = positions[i] - positions[j];
+		        float dist = d.length();
+
+                // is boid j a flockmate?
+                if(dist <= flock_params.search_radius){
+                    (flockmates).push_back(j);
+                }
+            }   
+
+            // Step 3. Compute the Rules    
+            if(flock_params.w_sep > 0.f)
+            {
+		        int nearestFlockmates = 0;
+
+                // 3.1 Separation
+		        for(int j=0; j < (flockmates).size(); j++){
+                    float4 s =  positions[i] - positions[(flockmates)[j]];
+                    float dist = s.length();
+        		
+                    if(dist < flock_params.min_dist){
+                        //s = normalize3(s);
+                        s /= dist;
+				        separation[i] += s;
+				        nearestFlockmates++;
+        		    }   
+		        }
+
+		        if(nearestFlockmates > 0){
+			        separation[i] /= nearestFlockmates;
+			        //separation[i] = normalize3(separation[i]);
+		        }
+            }
+
+            if(flock_params.w_align > 0.f)
+            {
+                // 3.2 Alignment
+		        for(int j=0; j < (flockmates).size(); j++){
+                    alignment[i] += velocities[(flockmates)[j]];
+	    	    }   
+		        
+                if((flockmates).size() > 0)
+                    alignment[i] /= (flockmates).size();
+
+		        alignment[i] -= velocities[i];
+		        //alignment[i] = normalize3(alignment[i]); 
+
+            }
+
+            if(flock_params.w_coh > 0.f)
+            {
+                // 3.3 Cohesion
+                for(int j=0; j < (flockmates).size(); j++){
+                    cohesion[i] += positions[(flockmates)[j]];
+                }
+
+                if((flockmates).size() > 0) 
+                    cohesion[i] /= (flockmates).size();
+
+                cohesion[i] -= positions[i];
+                //cohesion[i] = normalize3(cohesion[i]);
+
+                (flockmates).clear();
+	        }
+        }
 
     }
-
 } 

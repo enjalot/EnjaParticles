@@ -16,8 +16,6 @@ namespace rtps{
         float VP = 2 * .0262144 / max_num;              //Particle Volume [ m^3 ]
         
         float simulation_scale = pow(.5f * VP * max_num / domain_vol, 1.f/3.f) * 5.f; 
-        //float simulation_scale = 1.0f;
-printf("SIMULATION SCALE = %f\n",  simulation_scale);
         // must be less than smoothing_distance
         float spacing = rest_distance/ simulation_scale;
     
@@ -39,6 +37,8 @@ printf("SIMULATION SCALE = %f\n",  simulation_scale);
         settings->SetSetting("Separation Weight", 1.50f);
         settings->SetSetting("Alignment Weight", 0.75f);
         settings->SetSetting("Cohesion Weight", 0.5f);
+        settings->SetSetting("Goal Weight", 0.f);
+        settings->SetSetting("Avoid Weight", 0.f);
         settings->SetSetting("LeaderFollowing Weight", 0.f);
        
         // BOID RULE'S SETTINGS 
@@ -71,18 +71,13 @@ printf("SIMULATION SCALE = %f\n",  simulation_scale);
         flock_params.w_sep = settings->GetSettingAs<float>("Separation Weight");
         flock_params.w_align = settings->GetSettingAs<float>("Alignment Weight");
         flock_params.w_coh = settings->GetSettingAs<float>("Cohesion Weight");
+        flock_params.w_goal = settings->GetSettingAs<float>("Goal Weight");
+        flock_params.w_avoid = settings->GetSettingAs<float>("Avoid Weight");
         flock_params.w_leadfoll = settings->GetSettingAs<float>("LeaderFollowing Weight");
         
         // BOID RULE'S SETTINGS 
         flock_params.slowing_distance= settings->GetSettingAs<float>("Slowing Distance");
 
-    //mymese debbug
-#if 0    
-    printf("***\ninside FLOCKSettings\n***\n"); 
-    printf("smoth_dist: %f\n", flock_params.smoothing_distance);
-    printf("radius: %f\n", flock_params.search_radius);
-    printf("min dist: %f \n", flock_params.min_dist);
-#endif
         // update the OpenCL buffer
         std::vector<FLOCKParameters> vparams(0);
         vparams.push_back(flock_params);
@@ -92,4 +87,3 @@ printf("SIMULATION SCALE = %f\n",  simulation_scale);
     }
 
 }
-//#endif

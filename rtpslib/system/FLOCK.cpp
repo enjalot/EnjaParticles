@@ -14,7 +14,6 @@
 
 namespace rtps
 {
-//using namespace flock;
 
 //----------------------------------------------------------------------
 FLOCK::FLOCK(RTPS *psfr, int n)
@@ -24,7 +23,6 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     settings = ps->settings;
     max_num = n;
     num = 0;
-//    nb_var = 10;
 
     resource_path = ps->settings->GetSettingAs<std::string>("rtps_path");
     printf("resource path: %s\n", resource_path.c_str());
@@ -32,28 +30,12 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     //seed random
     srand ( time(NULL) );
 
-    /*
-    positions.resize(max_num);
-    colors.resize(max_num);
-    forces.resize(max_num);
-    velocities.resize(max_num);
-    veleval.resize(max_num);
-    densities.resize(max_num);
-    xflocks.resize(max_num);
-    */
-
     grid = settings->grid;
 
     std::vector<FLOCKParameters> vparams(0);
     vparams.push_back(flock_params);
     cl_FLOCKParameters= Buffer<FLOCKParameters>(ps->cli, vparams);
 
-
-
-    //FLOCKSettings depend on number of particles used
-	// Must be called before load kernel methods!
-    //calculateFLOCKSettings();
-    
     calculate();
     updateFLOCKP();
 
@@ -62,9 +44,11 @@ FLOCK::FLOCK(RTPS *psfr, int n)
     //set up the grid
     setupDomain();
     
-    //*** end Initialization
-
+    //set up the timers 
     setupTimers();
+
+    //setup the sorted and unsorted arrays
+    prepareSorted();
 
 #ifdef CPU
     printf("RUNNING ON THE CPU\n");
@@ -72,47 +56,20 @@ FLOCK::FLOCK(RTPS *psfr, int n)
 #ifdef GPU
     printf("RUNNING ON THE GPU\n");
 
-    //setup the sorted and unsorted arrays
-    prepareSorted();
-
     //should be more cross platform
     flock_source_dir = resource_path + "/" + std::string(FLOCK_CL_SOURCE_DIR);
     common_source_dir = resource_path + "/" + std::string(COMMON_CL_SOURCE_DIR);
 
     ps->cli->addIncludeDir(flock_source_dir);
     ps->cli->addIncludeDir(common_source_dir);
-
-
-    //std::string cl_includes(FLOCK_CL_SOURCE_DIR);
-    //ps->cli->addIncludeDir(cl_includes);
-
-
-
-    //loadEuler();
-    //loadScopy();
-    //loadPrep();
-    //loadHash();
-    //loadBitonicSort();
-    //loadDataStructures();
-    //loadNeighbors();
-    
-    //prep = Prep(ps->cli, timers["prep_gpu"]);
-    //hash = Hash(ps->cli, timers["hash_gpu"]);
-    //bitonic = Bitonic<unsigned int>(ps->cli);
-    //cellindices = CellIndices(ps->cli, timers["ci_gpu"]);
-    //permute = Permute(ps->cli, timers["perm_gpu"]);
     
     hash = Hash(common_source_dir, ps->cli, timers["hash_gpu"]);
     bitonic = Bitonic<unsigned int>(common_source_dir, ps->cli );
     cellindices = CellIndices(common_source_dir, ps->cli, timers["ci_gpu"] );
     permute = Permute( common_source_dir, ps->cli, timers["perm_gpu"] );
     
-    //computeRules = ComputeRules(flock_source_dir, ps->cli, timers["computeRules_gpu"]);
-    //averageRules = AverageRules(flock_source_dir, ps->cli, timers["averageRules_gpu"]);
     rules = Rules(flock_source_dir, ps->cli, timers["rules_gpu"]);
     euler_integration = EulerIntegration(flock_source_dir, ps->cli, timers["euler_gpu"]);
-
-
 #endif
      
     setRenderer();
@@ -162,9 +119,13 @@ void FLOCK::updateCPU()
 {
     //timers[TI_UPDATE]->start();
     
+    if(settings->has_changed())
+        updateFLOCKP();
+    
     //cpuComputeRules();  // based on my boids program
     //cpuAverageRules();
     cpuRules();
+    cpuEulerIntegration();
 
     // mymese debugging
 #if 0
@@ -625,6 +586,8 @@ void FLOCK::prepareSorted()
     separation.resize(max_num);
     alignment.resize(max_num);
     cohesion.resize(max_num);
+    goal.resize(max_num);
+    avoid.resize(max_num);
     leaderfollowing.resize(max_num);
 
     
@@ -638,6 +601,8 @@ void FLOCK::prepareSorted()
     std::fill(separation.begin(), separation.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     std::fill(alignment.begin(), alignment.end(), float4(0.0f, 0.f, 0.f, 0.f));
     std::fill(cohesion.begin(), cohesion.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
+    std::fill(goal.begin(), goal.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
+    std::fill(avoid.begin(), avoid.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     std::fill(leaderfollowing.begin(), leaderfollowing.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     
     std::fill(error_check.begin(), error_check.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -869,11 +834,11 @@ void FLOCK::pushParticles(vector<float4> pos, float4 velo, float4 color)
     std::vector<float4> vels(nn);
     float ms = flock_params.max_speed;
     
-#if 1 
+#if 0 
     std::fill(vels.begin(), vels.end(), velo);
 #endif    
 
-#if 0
+#if 1 
     for(int i=0; i < nn; i++){
         vels[i] = float4(rand(), rand(), rand(), velo.w);
         vels[i] = normalize3(vels[i]);

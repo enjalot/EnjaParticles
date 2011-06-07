@@ -147,6 +147,44 @@ namespace rtps
             (*this).w += a.w;
         }
 
+        void operator-=(float4 a)
+        {
+            (*this).x -= a.x;
+            (*this).y -= a.y;
+            (*this).z -= a.z;
+            (*this).w -= a.w;
+        }
+
+        void operator*=(float4 a)
+        {
+            (*this).x *= a.x;
+            (*this).y *= a.y;
+            (*this).z *= a.z;
+            (*this).w *= a.w;
+        }
+        void operator*=(float a)
+        {
+            (*this).x *= a;
+            (*this).y *= a;
+            (*this).z *= a;
+            (*this).w *= a;
+        }
+
+        void operator/=(float a)
+        {
+            (*this).x /= a;
+            (*this).y /= a;
+            (*this).z /= a;
+            (*this).w /= a;
+        }
+        void operator/=(float4 a)
+        {
+            (*this).x /= a.x;
+            (*this).y /= a.y;
+            (*this).z /= a.z;
+            (*this).w /= a.w;
+        }
+
         friend float4 operator*(float r, float4& b)
         {
             float4 m = float4(r*b.x, r*b.y, r*b.z, r*b.w);
