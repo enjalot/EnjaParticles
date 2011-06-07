@@ -127,6 +127,12 @@ namespace rtps
             return c;
         }
 
+        friend float4 operator-(float4&a)
+        {
+            float4 c = float4(-a.x, -a.y, -a.z, -a.w);
+            return c;
+        }
+
         friend float4 operator+(float4& a, float4& b)
         {
             float4 c = float4(b.x+a.x, b.y+a.y, b.z+a.z, b.w+a.w);

@@ -88,7 +88,7 @@ namespace rtps
         vector<int> flockmates;
         flockmates.resize(nb_cells);
         
-        float4 pi, pj;
+        float4 pi, pj, pt;
         float4 vi, vj;
         
         int numFlockmates;
@@ -161,7 +161,8 @@ namespace rtps
 		            //alignment[i] = normalize3(alignment[i]); 
                 }
            
-            } 
+            }
+
             if(flock_params.w_coh > 0.f)
             {
                 // 3.3 Cohesion
@@ -177,6 +178,24 @@ namespace rtps
                     //cohesion[i] = normalize3(cohesion[i]);
                 }
 	        }
+            
+            if(flock_params.w_goal > 0.f)
+            {
+                pt = float4(3.f, 1.f, 4.f, 0.f);//flock_params.target;
+                float4 dist = normalize3(pi - pt);
+                float4 disiredVel = dist * flock_params.max_speed;
+                goal[i] = (-disiredVel) - vi;
+
+            }
+            
+            if(flock_params.w_avoid > 0.f)
+            {
+                pt = float4(3.f, 2.f, 2.f, 0.f);//flock_params.target;
+                float4 dist = normalize3(pi - pt);
+                float4 disiredVel = dist * flock_params.max_speed;
+                avoid[i] = disiredVel - vi;
+            }
+
         }
     }
 } 

@@ -104,9 +104,9 @@ rtps::RTPS* ps;
 
 #define DT              0.001f
 
-#define maxspeed        2.0f
-#define mindist         10.0f
-#define searchradius    20.0f
+#define maxspeed        5.0f
+#define mindist         1.50f
+#define searchradius    2.0f
 
 float4 color =   float4(255.f, 0.f, 0.f, 0.f);
 int hindex;
@@ -149,13 +149,17 @@ int main(int argc, char** argv)
     printf("before we call enjas functions\n");
 
 
-    float w_sep = 1.0f;     //15
+    float w_sep = .40f;     //15
     float w_align = .80f;   //7.5
-    float w_coh = .40f;     //2.5
+    float w_coh = 1.0f;     //2.5
+
+    float w_goal = 1.0f;
+    float w_avoid = .0f;
+
     float w_leadfoll = 0.f;
    
     float ang_vel = 0.f; 
-    float slow_dist = .01f;
+    float slow_dist = .0f;
 
     //default constructor
     rtps::Domain* grid = new Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
@@ -197,6 +201,8 @@ int main(int argc, char** argv)
     ps->settings->SetSetting("Separation Weight", w_sep);
     ps->settings->SetSetting("Alignment Weight", w_align);
     ps->settings->SetSetting("Cohesion Weight", w_coh);
+    ps->settings->SetSetting("Goal Weight", w_goal);
+    ps->settings->SetSetting("Avoid Weight", w_avoid);
     ps->settings->SetSetting("LeaderFollowing Weight", w_leadfoll);
 
     //initialize the OpenGL scene for rendering
@@ -320,17 +326,17 @@ void appKeyboard(unsigned char key, int x, int y)
             {
                 nn = 512;
                 float cw = .25;
-                float4 cen = float4(cw, cw, cw-.1, 1.0f);
+                float4 cen = float4(3., 1., 4., 1.0f);
                 make_cube(triangles, cen, cw);
-                cen = float4(1+cw, 1+cw, cw-.1, 1.0f);
-                make_cube(triangles, cen, cw);
-                cen = float4(1+3*cw, 1+3*cw, cw-.1, 1.0f);
-                make_cube(triangles, cen, cw);
-                cen = float4(3.5, 3.5, cw-.1, 1.0f);
-                make_cube(triangles, cen, cw);
+                //cen = float4(1+cw, 1+cw, cw-.1, 1.0f);
+                //make_cube(triangles, cen, cw);
+                //cen = float4(1+3*cw, 1+3*cw, cw-.1, 1.0f);
+                //make_cube(triangles, cen, cw);
+                //cen = float4(3.5, 3.5, cw-.1, 1.0f);
+                //make_cube(triangles, cen, cw);
                 
-                cen = float4(1.5, 1.5, cw-.1, 1.f);
-                make_cube(triangles, cen, 1.);
+                //cen = float4(1.5, 1.5, cw-.1, 1.f);
+                //make_cube(triangles, cen, 1.);
                 
                 ps->system->loadTriangles(triangles);
                 return;
@@ -356,7 +362,7 @@ void appKeyboard(unsigned char key, int x, int y)
         {
             nn = 1000;
             center = float4(2.5f, 2.5f, 2.5f, 1.0f);
-            radius = 10.f;
+            radius = 1.f;
             printf("added a spehere at: %f %f %f with radius %f\n", center.x, center.y, center.z, radius);
             ps->system->addBall(nn, center, radius, false);
             return;

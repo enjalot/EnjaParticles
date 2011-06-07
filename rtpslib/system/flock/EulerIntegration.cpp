@@ -61,6 +61,8 @@ namespace rtps
         float w_sep = flock_params.w_sep;   
         float w_aln = flock_params.w_align;
         float w_coh = flock_params.w_coh;  
+        float w_goal = flock_params.w_goal;
+        float w_avoid = flock_params.w_avoid;
 
         float4 bndMax = grid_params.bnd_max;
         float4 bndMin = grid_params.bnd_min;
@@ -73,9 +75,11 @@ namespace rtps
 	        separation[i] *=  w_sep;
 	        alignment[i]  *=  w_aln;
 	        cohesion[i]   *=  w_coh;
+            goal[i]       *=  w_goal;
+            avoid[i]      *=  w_avoid;
 
             // Step 5. Set the final acceleration
-	        velocities[i] += (separation[i] + alignment[i] + cohesion[i]);
+	        velocities[i] += (separation[i] + alignment[i] + cohesion[i] + goal[i] + avoid[i]);
         
             // Step 6. Constrain acceleration
             float  vel_mag  = velocities[i].length();
