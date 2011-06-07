@@ -1,8 +1,7 @@
 #ifndef _RULES_CL_
 #define _RULES_CL_
 
-//These are passed along through cl_neighbors.h
-//only used inside ForNeighbor defined in this file
+//These are passed along through cl_neighbors.h only used inside ForNeighbor defined in this file
 #define ARGS __global float4* pos,  __global float4* vel, __global int4* flockmates,  __global float4* separation, __global float4* alignment, __global float4* cohesion 
 #define ARGV pos, vel, flockmates, separation, alignment, cohesion
 
@@ -10,16 +9,14 @@
 #include "cl_structs.h"
 
 //----------------------------------------------------------------------
-inline void ForNeighbor(//__global float4*  vars_sorted,
-				ARGS,
-                Boid *pt,
-				uint index_i,
-				uint index_j,
-				float4 position_i,
-	  			__constant struct GridParams* gp,
- 	  			__constant struct FLOCKParameters* flockp
-                DEBUG_ARGS
-				)
+inline void ForNeighbor(ARGS,
+                        Boid *pt,
+				        uint index_i,
+				        uint index_j,
+				        float4 position_i,
+	  			        __constant struct GridParams* gp,
+ 	  			        __constant struct FLOCKParameters* flockp
+                        DEBUG_ARGS)
 {
     int num = flockp->num;
 	
@@ -37,7 +34,7 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
     {
         if(index_i != index_j){
 	
-	        // number of rules
+	        // number of flockmates 
             pt->num_flockmates++;
 
             if(flockp->w_sep > 0.f){
@@ -61,8 +58,6 @@ inline void ForNeighbor(//__global float4*  vars_sorted,
 
 
 //--------------------------------------------------------------
-// count the number of rules 
-
 __kernel void rules(
                 ARGS,
         		__global int*    cell_indexes_start,
@@ -85,7 +80,7 @@ __kernel void rules(
 	Boid pt;
 	zeroPoint(&pt);
 
-    IterateParticlesInNearbyCells(/*vars_sorted*/ ARGV, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp,/* fp,*/ flockp DEBUG_ARGV);
+    IterateParticlesInNearbyCells(ARGV, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, flockp DEBUG_ARGV);
 		
 
     if(flockp->w_sep > 0.f && pt.num_nearestFlockmates > 0){
@@ -114,7 +109,6 @@ __kernel void rules(
     separation[index] = pt.separation;
     alignment[index] = pt.alignment;
     cohesion[index] = pt.cohesion;
-
 }
 
 #endif

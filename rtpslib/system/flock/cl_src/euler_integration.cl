@@ -48,9 +48,9 @@ __kernel void euler_integration(
 	float4 leaderfollowing = leaderfollowing_s[i]; 
 
     // weights for the rules
-	float w_sep = flockp->w_sep;    //0.10f;  // 0.3f
-	float w_aln = flockp->w_align;  //0.001f;
-	float w_coh = flockp->w_coh;    //0.0001f;  // 3.f
+	float w_sep = flockp->w_sep;    
+	float w_aln = flockp->w_align; 
+	float w_coh = flockp->w_coh;  
 	float w_leadfoll = flockp->w_leadfoll;   
 	
     // boundary limits, used to computed boundary conditions    
@@ -83,7 +83,7 @@ __kernel void euler_integration(
 
     // add circular velocity field
     float4 v = (float4)(-3*pi.z, 0.f , pi.x, 0.f);
-    v *= flockp->ang_vel;     // TODO: Add this parameter to Blender
+    v *= flockp->ang_vel;    
 
     // add acceleration to velocity
     vi = v + acc;

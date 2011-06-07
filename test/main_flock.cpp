@@ -149,12 +149,12 @@ int main(int argc, char** argv)
     printf("before we call enjas functions\n");
 
 
-    float w_sep = .40f;     //15
+    float w_sep = 1.0f;     //15
     float w_align = .80f;   //7.5
-    float w_coh = 1.0f;     //2.5
+    float w_coh = .40f;     //2.5
     float w_leadfoll = 0.f;
    
-    float ang_vel = 0.3f; 
+    float ang_vel = 0.f; 
     float slow_dist = .01f;
 
     //default constructor
@@ -344,10 +344,10 @@ void appKeyboard(unsigned char key, int x, int y)
             nn = 256;
             //max = float4(4.5, 4.5 , 4.5, 1.0f);
             //min = float4(0.5, 0.5 , 0.5, 1.0f);
-            //max = float4(3.5, 1., 3.5, 1.0f);
-            //min = float4(1.5, 1., 1.5, 1.0f);
-            max = float4(4.5, 1., 4.5, 1.0f);
-            min = float4(0.5, 1., 0.5, 1.0f);
+            max = float4(3.5, 1.5, 3.5, 1.0f);
+            min = float4(1.5, 1., 1.5, 1.0f);
+            //max = float4(4.5, 1., 4.5, 1.0f);
+            //min = float4(0.5, 1., 0.5, 1.0f);
             ps->system->addBox(nn, min, max, false, color);
             return;
         }

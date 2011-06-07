@@ -31,74 +31,9 @@ namespace rtps
                     Buffer<float4>& clf_debug,
                     Buffer<int4>& cli_debug);
             
-#if 0
-            void executeSeparation(int num,
-                    //input
-                    Buffer<float4>& pos_s, 
-                    Buffer<float4>& sep_s, 
-                    Buffer<int4>& neigh_s, 
-                    //output
-                    Buffer<unsigned int>& ci_start,
-                    Buffer<unsigned int>& ci_end,
-                    //params
-                    Buffer<GridParams>& gp,
-                    Buffer<FLOCKParameters>& flockp,
-                    //debug params
-                    Buffer<float4>& clf_debug,
-                    Buffer<int4>& cli_debug);
-            void executeAlignment(int num,
-                    //input
-                    Buffer<float4>& pos_s, 
-                    Buffer<float4>& vel_s, 
-                    Buffer<float4>& align_s, 
-                    Buffer<int4>& neigh_s, 
-                    //output
-                    Buffer<unsigned int>& ci_start,
-                    Buffer<unsigned int>& ci_end,
-                    //params
-                    Buffer<GridParams>& gp,
-                    Buffer<FLOCKParameters>& flockp,
-                    //debug params
-                    Buffer<float4>& clf_debug,
-                    Buffer<int4>& cli_debug);
-            void executeCohesion(int num,
-                    //input
-                    Buffer<float4>& pos_s, 
-                    Buffer<float4>& coh_s, 
-                    Buffer<int4>& neigh_s, 
-                    //output
-                    Buffer<unsigned int>& ci_start,
-                    Buffer<unsigned int>& ci_end,
-                    //params
-                    Buffer<GridParams>& gp,
-                    Buffer<FLOCKParameters>& flockp,
-                    //debug params
-                    Buffer<float4>& clf_debug,
-                    Buffer<int4>& cli_debug);
-            void executeLeaderFollowing(int num,
-                    //input
-                    Buffer<float4>& pos_s, 
-                    Buffer<float4>& vel_s, 
-                    Buffer<float4>& leadfoll_s, 
-                    Buffer<int4>& neigh_s, 
-                    //output
-                    Buffer<unsigned int>& ci_start,
-                    Buffer<unsigned int>& ci_end,
-                    //params
-                    Buffer<GridParams>& gp,
-                    Buffer<FLOCKParameters>& flockp,
-                    //debug params
-                    Buffer<float4>& clf_debug,
-                    Buffer<int4>& cli_debug);
-#endif
         private:
             CL* cli;
             Kernel k_rules;
-            //Kernel k_flockmates;
-            //Kernel k_rule_separation;
-            //Kernel k_rule_alignment;
-            //Kernel k_rule_cohesion;
-            //Kernel k_rule_leaderfollowing;
             EB::Timer* timer;
     };
 }

@@ -66,7 +66,9 @@ namespace rtps
         float4 bndMin = grid_params.bnd_min;
         
         for(int i = 0; i < num; i++)
-        {  
+        { 
+            float4 pi = positions[i]; //* flock_params.simulation_scale;
+
            // Step 4. Weight the steering behaviors
 	        separation[i] *=  w_sep;
 	        alignment[i]  *=  w_aln;
@@ -84,34 +86,36 @@ namespace rtps
             }
 
             // (Optional Step) Add circular velocity
-            float4 v = float4(-positions[i].z, 0., positions[i].x, 0.);
-            v *= flock_params.ang_vel; 
+            float4 v = float4(-pi.z, 0., pi.x, 0.);
+            v *= flock_params.ang_vel;
             velocities[i] += v;
 
-    	    // Step 7. Integration 
-	        positions[i] = positions[i] + ps->settings->dt*velocities[i];
-            positions[i].w = 1.0f; //just in case
+            // Step 7. Integration 
+            pi += ps->settings->dt*velocities[i];
+            pi.w = 1.0f; //just in case
 
     	    // Step 8. Check boundary conditions
-            if(positions[i].x >= bndMax.x){
-                positions[i].x -= bndMax.x;
+            if(pi.x >= bndMax.x){
+                pi.x -= bndMax.x;
             }   
-            else if(positions[i].x <= bndMin.x){
-                positions[i].x += bndMax.x;
+            else if(pi.x <= bndMin.x){
+                pi.x += bndMax.x;
             }
-            else if(positions[i].y >= bndMax.y){
-                positions[i].y -= bndMax.y;
+            else if(pi.y >= bndMax.y){
+                pi.y -= bndMax.y;
             }   
-            else if(positions[i].y <= bndMin.y){
-                positions[i].y += bndMax.y;
+            else if(pi.y <= bndMin.y){
+                pi.y += bndMax.y;
             }
-            else if(positions[i].z >= bndMax.z){
-                positions[i].z -= bndMax.z;
+            else if(pi.z >= bndMax.z){
+                pi.z -= bndMax.z;
             }
-            else if(positions[i].z <= bndMin.z){
-                positions[i].z += bndMax.z;
+            else if(pi.z <= bndMin.z){
+                pi.z += bndMax.z;
             }
-		
+
+            positions[i] = pi; // flock_params.simulation_scale;
+            positions[i].w = 1.0f;	
         }
     }
 

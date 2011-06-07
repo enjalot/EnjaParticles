@@ -46,11 +46,7 @@ namespace rtps
         RTPSettings(SysType system, int max_particles, float dt, Domain *grid);
 
         //collision
-        //RTPSettings(SysType system, int max_particles, float dt, Domain grid, bool tri_collision);
         RTPSettings(SysType system, int max_particles, float dt, Domain *grid, bool tri_collision);
-
-        //flock
-        RTPSettings(SysType system, int max_particles, float dt, Domain* grid, float maxspeed, float mindist, float searchradius, float color[], float w_sep, float w_align, float w_coh);
 
         //without this, windows was crashing with a ValidHeapPointer
         //assertion error. Indicates the heap may be corrupted by 
@@ -67,21 +63,6 @@ namespace rtps
         //triangle collision?
         bool tri_collision;
 
-
-        // max speed of the boids
-        float max_speed;
-        // desired separation distance of the boids
-        float min_dist;
-        // radius to search for flockmates
-        float search_radius;
-        // color of the flock
-        float4 color;
-
-        // weights
-        float w_sep;
-        float w_align;
-        float w_coh;
-
         bool has_changed() { return changed; };
         void updated() { changed = false; }; //for now we are assuming only one consumer (one system using the settings)
 
@@ -95,39 +76,29 @@ namespace rtps
         template <typename RT>
         RT GetSettingAs(std::string key, std::string defaultval = "0") 
         {
-            //std::cout << "[Project Settings] \t"; 
             if (settings.find(key) == settings.end()) 
             {
                 RT ret = ss_typecast<RT>(defaultval);
-                //std::cout << key << " = " << ret;
-                //std::cout << "\t<-- default value." << std::endl;
                 return ret;
             }
-            //std::cout << key << " = " << settings[key] << std::endl;
             return ss_typecast<RT>(settings[key]);
         }
 
         template <typename RT>
         void SetSetting(std::string key, RT value) {
             // TODO: change to stringstream for any type of input that is cast as string
-            //RT oldval = this->GetSettingAs<RT>(key);
-            //if (oldval != value)
-            //{
-                std::ostringstream oss; 
-                oss << value; 
-                settings[key] = oss.str(); 
-                std::cout << "setting: " << key << " | " << value << std::endl;//printf("setting: %s %s\n", settings[key].c_str());
-                changed = true;
-            //}
+            std::ostringstream oss; 
+            oss << value; 
+            settings[key] = oss.str(); 
+            std::cout << "setting: " << key << " | " << value << std::endl;//printf("setting: %s %s\n", settings[key].c_str());
+            changed = true;
         }
     
         bool Exists(std::string key) { if(settings.find(key) == settings.end()) { return false; } else { return true; } }
 
-
     private:
         std::map<std::string, std::string> settings;
         bool changed;
-        
         
         // Added by GE
         float render_radius_scale;
@@ -135,7 +106,6 @@ namespace rtps
         RenderType render_type;
         bool use_glsl;
         bool use_alpha_blending;
-
 
         // This routine is adapted from post on GameDev:
         // http://www.gamedev.net/community/forums/topic.asp?topic_id=190991
@@ -150,8 +120,6 @@ namespace rtps
             return num;
         }
 
-
-
     public:
         Domain* getDomain()
         {
@@ -161,7 +129,6 @@ namespace rtps
         {
             grid = domain;
         }
-
 
         //TODO: remove these when we switch to Map
         float getRadiusScale()
