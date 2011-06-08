@@ -42,6 +42,7 @@ typedef struct FLOCKParameters
 
     // Boid rule's settings
     float slowing_distance;
+    int leader_index;
 
     int num;
     int max_num;

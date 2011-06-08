@@ -6,11 +6,13 @@
 //----------------------------------------------------------------------
 void zeroPoint(Boid* pt)
 {
-	pt->separation= (float4)(0.,0.,0.,0.);
-	pt->alignment= (float4)(0.,0.,0.,0.);
-	pt->cohesion= (float4)(0.,0.,0.,0.);
+	pt->separation  = (float4)(0.,0.,0.,0.);
+	pt->alignment   = (float4)(0.,0.,0.,0.);
+	pt->cohesion    = (float4)(0.,0.,0.,0.);
+	pt->goal        = (float4)(0.,0.,0.,0.);
+	pt->avoid       = (float4)(0.,0.,0.,0.);
 	pt->leaderfollowing= (float4)(0.,0.,0.,0.);
-	pt->color= (float4)(0.,0.,0.,0.);
+	pt->color       = (float4)(0.,0.,0.,0.);
 	pt->num_flockmates = 0;
     pt->num_nearestFlockmates = 0;
 }
@@ -35,10 +37,7 @@ void IterateParticlesInCell(ARGS,
     uint cellHash = calcGridHash(cellPos, gp->grid_res, false);
 
     //need to check cellHash to make sure its not out of bounds
-    if(cellHash >= gp->nb_cells)
-    {
-        return;
-    }
+    if(cellHash >= gp->nb_cells){ return; }
     
     /* get start/end positions for this cell/bucket */
     uint startIndex = FETCH(cell_indexes_start,cellHash);

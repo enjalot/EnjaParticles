@@ -219,15 +219,18 @@ void FLOCK::updateGPU()
         }
 
         timers["rules"]->start();
-        
-        if(flock_params.w_sep > 0.f || flock_params.w_align > 0.f || flock_params.w_coh > 0.f){
+
+        if(flock_params.w_sep > 0.f || flock_params.w_align > 0.f || flock_params.w_coh > 0.f || flock_params.w_goal > 0.f || flock_params.w_avoid > 0.f){
             rules.execute(   num,
+                settings->target,
                 cl_position_s,
                 cl_velocity_s,
                 cl_flockmates_s,
                 cl_separation_s,
                 cl_alignment_s,
                 cl_cohesion_s,
+                cl_goal_s,
+                cl_avoid_s,
                 cl_cell_indices_start,
                 cl_cell_indices_end,
                 cl_GridParamsScaled,
@@ -280,6 +283,8 @@ void FLOCK::integrate()
         cl_separation_s,
         cl_alignment_s,
         cl_cohesion_s,
+        cl_goal_s,
+        cl_avoid_s,
         cl_leaderfollowing_s,
         cl_sort_indices,
         cl_FLOCKParameters,
@@ -289,7 +294,7 @@ void FLOCK::integrate()
         cli_debug);
 
     // mymese debugging
-#if 0 
+#if 0  
     if(num > 0)
     {
         std::vector<int4> cli(num);
@@ -300,7 +305,7 @@ void FLOCK::integrate()
 
         for(int i = 0; i < 4; i++)
         {
-            printf("numFlockmates = %d and count = %d \n", cli[i].x, cli[i].y);
+            printf("w1 = %d\t w2 = %d\t w3 = %d\t w4 = %d\n", cli[i].x, cli[i].y, cli[i].z, cli[i].w);
             printf("clf[%d] = %f %f %f %f\n", i, clf[i].x, clf[i].y, clf[i].z, clf[i].w);
         }
 		printf("num= %d\n", num);
@@ -411,6 +416,8 @@ void FLOCK::prepareSorted()
     cl_separation_s = Buffer<float4>(ps->cli, separation);
     cl_alignment_s = Buffer<float4>(ps->cli, alignment);
     cl_cohesion_s = Buffer<float4>(ps->cli, cohesion);
+    cl_goal_s = Buffer<float4>(ps->cli, goal);
+    cl_avoid_s = Buffer<float4>(ps->cli, avoid);
     cl_leaderfollowing_s = Buffer<float4>(ps->cli, leaderfollowing);
 
     //Setup Grid Parameter structs

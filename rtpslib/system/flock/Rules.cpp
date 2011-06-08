@@ -27,12 +27,15 @@ namespace rtps
     //----------------------------------------------------------------------
     void Rules::execute(int num,
                     //input
+                    float4 target,
                     Buffer<float4>& pos_s, 
                     Buffer<float4>& vel_s, 
                     Buffer<int4>& neigh_s, 
                     Buffer<float4>& sep_s, 
                     Buffer<float4>& align_s, 
                     Buffer<float4>& coh_s, 
+                    Buffer<float4>& goal_s, 
+                    Buffer<float4>& avoid_s, 
                     //output
                     Buffer<unsigned int>& ci_start,
                     Buffer<unsigned int>& ci_end,
@@ -44,12 +47,15 @@ namespace rtps
                     Buffer<int4>& cli_debug)
     { 
         int iarg = 0;
+        k_rules.setArg(iarg++, target); 
         k_rules.setArg(iarg++, pos_s.getDevicePtr());
         k_rules.setArg(iarg++, vel_s.getDevicePtr());
         k_rules.setArg(iarg++, neigh_s.getDevicePtr());
         k_rules.setArg(iarg++, sep_s.getDevicePtr());
         k_rules.setArg(iarg++, align_s.getDevicePtr());
         k_rules.setArg(iarg++, coh_s.getDevicePtr());
+        k_rules.setArg(iarg++, goal_s.getDevicePtr());
+        k_rules.setArg(iarg++, avoid_s.getDevicePtr());
         k_rules.setArg(iarg++, ci_start.getDevicePtr());
         k_rules.setArg(iarg++, ci_end.getDevicePtr());
         k_rules.setArg(iarg++, gp.getDevicePtr());
@@ -181,19 +187,19 @@ namespace rtps
             
             if(flock_params.w_goal > 0.f)
             {
-                pt = float4(3.f, 1.f, 4.f, 0.f);//flock_params.target;
-                float4 dist = normalize3(pi - pt);
-                float4 disiredVel = dist * flock_params.max_speed;
-                goal[i] = (-disiredVel) - vi;
+                pt = ps->settings->target;//float4(3.f, 1.f, 4.f, 0.f);//flock_params.target;
+                float4 dist = normalize3(pt - pi);
+                float4 desiredVel = dist * flock_params.max_speed;
+                goal[i] = desiredVel - vi;
 
             }
             
             if(flock_params.w_avoid > 0.f)
             {
-                pt = float4(3.f, 2.f, 2.f, 0.f);//flock_params.target;
-                float4 dist = normalize3(pi - pt);
-                float4 disiredVel = dist * flock_params.max_speed;
-                avoid[i] = disiredVel - vi;
+                pt = ps->settings->target;//float4(3.f, 2.f, 2.f, 0.f);//flock_params.target;
+                float4 dist = normalize3(pt - pi);
+                float4 desiredVel = dist * flock_params.max_speed;
+                avoid[i] = -desiredVel - vi;
             }
 
         }

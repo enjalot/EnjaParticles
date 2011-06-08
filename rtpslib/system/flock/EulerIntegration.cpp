@@ -22,6 +22,8 @@ namespace rtps
                     Buffer<float4>& separation_s,
                     Buffer<float4>& alignment_s, 
                     Buffer<float4>& cohesion_s, 
+                    Buffer<float4>& goal_s, 
+                    Buffer<float4>& avoid_s, 
                     Buffer<float4>& leaderfollowing_s, 
                     Buffer<unsigned int>& indices,
                     //params
@@ -41,6 +43,8 @@ namespace rtps
         k_euler_integration.setArg(iargs++, separation_s.getDevicePtr());
         k_euler_integration.setArg(iargs++, alignment_s.getDevicePtr());
         k_euler_integration.setArg(iargs++, cohesion_s.getDevicePtr());
+        k_euler_integration.setArg(iargs++, goal_s.getDevicePtr());
+        k_euler_integration.setArg(iargs++, avoid_s.getDevicePtr());
         k_euler_integration.setArg(iargs++, leaderfollowing_s.getDevicePtr());
         k_euler_integration.setArg(iargs++, indices.getDevicePtr());
         k_euler_integration.setArg(iargs++, flockp.getDevicePtr());

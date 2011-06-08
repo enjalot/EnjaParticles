@@ -105,10 +105,11 @@ rtps::RTPS* ps;
 #define DT              0.001f
 
 #define maxspeed        5.0f
-#define mindist         1.50f
+#define mindist         .50f
 #define searchradius    2.0f
 
-float4 color =   float4(255.f, 0.f, 0.f, 0.f);
+float4 color  = float4(255.f, 0.f, 0.f, 0.f);
+float4 target = float4(3.,2.,4.,1.);
 int hindex;
 //----------------------------------------------------------------------
 float rand_float(float mn, float mx)
@@ -153,8 +154,8 @@ int main(int argc, char** argv)
     float w_align = .80f;   //7.5
     float w_coh = 1.0f;     //2.5
 
-    float w_goal = 1.0f;
-    float w_avoid = .0f;
+    float w_goal = .0f;
+    float w_avoid = 1.0f;
 
     float w_leadfoll = 0.f;
    
@@ -181,6 +182,8 @@ int main(int argc, char** argv)
     settings->setRadiusScale(1.0);
     settings->setBlurScale(1.0);
     settings->setUseGLSL(1);
+
+    settings->setTarget(target);
 
     settings->SetSetting("render_texture", "nemo.png");
     settings->SetSetting("render_frag_shader", "boid_tex_frag.glsl");
@@ -325,9 +328,9 @@ void appKeyboard(unsigned char key, int x, int y)
         case 't': //place a cube for collision
             {
                 nn = 512;
-                float cw = .25;
-                float4 cen = float4(3., 1., 4., 1.0f);
-                make_cube(triangles, cen, cw);
+                float cw = .1;
+                //float4 cen = float4(3., 1., 4., 1.0f);
+                make_cube(triangles, target, cw);
                 //cen = float4(1+cw, 1+cw, cw-.1, 1.0f);
                 //make_cube(triangles, cen, cw);
                 //cen = float4(1+3*cw, 1+3*cw, cw-.1, 1.0f);

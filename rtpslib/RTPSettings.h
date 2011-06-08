@@ -63,6 +63,9 @@ namespace rtps
         //triangle collision?
         bool tri_collision;
 
+        // FLOCK: target of goal rule
+        float4 target;
+
         bool has_changed() { return changed; };
         void updated() { changed = false; }; //for now we are assuming only one consumer (one system using the settings)
 
@@ -174,6 +177,16 @@ namespace rtps
         void setUseGLSL(bool use_glsl)
         {
             this->use_glsl = use_glsl;
+        }
+
+        float4 getTarget()
+        {
+            return target;
+        }
+        void setTarget(float4 t)
+        {
+            target = t;
+            target.print("target");
         }
     };
 

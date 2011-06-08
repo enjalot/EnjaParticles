@@ -2,8 +2,8 @@
 #define _RULES_CL_
 
 //These are passed along through cl_neighbors.h only used inside ForNeighbor defined in this file
-#define ARGS __global float4* pos,  __global float4* vel, __global int4* flockmates,  __global float4* separation, __global float4* alignment, __global float4* cohesion 
-#define ARGV pos, vel, flockmates, separation, alignment, cohesion
+#define ARGS __global float4 target, __global float4* pos,  __global float4* vel, __global int4* flockmates,  __global float4* separation, __global float4* alignment, __global float4* cohesion, __global float4* goal, __global float4* avoid 
+#define ARGV target, pos, vel, flockmates, separation, alignment, cohesion, goal, avoid
 
 #include "cl_macros.h"
 #include "cl_structs.h"
@@ -49,6 +49,7 @@ inline void ForNeighbor(ARGS,
                 #include "rule_cohesion.cl"
             }
         }
+
     }
 }
 
@@ -58,14 +59,12 @@ inline void ForNeighbor(ARGS,
 
 
 //--------------------------------------------------------------
-__kernel void rules(
-                ARGS,
+__kernel void rules(ARGS,
         		__global int*    cell_indexes_start,
         		__global int*    cell_indexes_end,
 	  			__constant struct GridParams* gp,
 				__constant struct FLOCKParameters* flockp 
-				DEBUG_ARGS
-				)
+				DEBUG_ARGS)
 {
     // particle index
 	int num = flockp->num;
@@ -81,13 +80,14 @@ __kernel void rules(
 	zeroPoint(&pt);
 
     IterateParticlesInNearbyCells(ARGV, &pt, num, index, position_i, cell_indexes_start, cell_indexes_end, gp, flockp DEBUG_ARGV);
-		
 
+    // average separation
     if(flockp->w_sep > 0.f && pt.num_nearestFlockmates > 0){
         pt.separation /= (float)pt.num_nearestFlockmates;
         pt.separation.w = 0.f;
     }
 
+    // average alignment
     if(flockp->w_align > 0.f && pt.num_flockmates > 0){
 	    // dividing by the number of flockmates to get the desired velocity 
 	    pt.alignment /= (float)pt.num_flockmates;
@@ -95,6 +95,7 @@ __kernel void rules(
         pt.alignment.w = 0.f;
     }
 
+    // average cohesion
     if(flockp->w_coh > 0.f && pt.num_flockmates > 0){
 	    // dividing by the number of flockmates to get the center of mass 
 	    pt.cohesion /= (float)pt.num_flockmates;
@@ -102,13 +103,29 @@ __kernel void rules(
         pt.cohesion.w = 0.f;
     }
    
+    // compute goal
+    if(flockp->w_goal > 0.f){
+        #include "rule_goal.cl"
+    }
+    
+    // compute avoid
+    if(flockp->w_avoid > 0.f){
+        #include "rule_avoid.cl"
+    }
 
+    clf[index] = pt.goal;//(float4)(3.,3.,3.,3.); //pt.separation; 
+    cli[index] = (int4)((int)flockp->w_sep,(int)flockp->w_align,(int)flockp->w_coh,(int)flockp->w_goal);
+    
     flockmates[index].x = pt.num_flockmates;
     flockmates[index].y = pt.num_nearestFlockmates;
 
-    separation[index] = pt.separation;
-    alignment[index] = pt.alignment;
-    cohesion[index] = pt.cohesion;
+
+    
+    separation[index]   = pt.separation;
+    alignment[index]    = pt.alignment;
+    cohesion[index]     = pt.cohesion;
+    goal[index]         = pt.goal;
+    avoid[index]        = pt.avoid;
 }
 
 #endif

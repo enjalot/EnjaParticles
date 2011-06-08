@@ -43,7 +43,8 @@ namespace rtps{
        
         // BOID RULE'S SETTINGS 
         settings->SetSetting("Slowing Distance", 0.025f);
-        
+        settings->SetSetting("Leader Index", 0);
+
         settings->SetSetting("Maximum Number of Particles", max_num);
         settings->SetSetting("Number of Particles", 0);
     }
@@ -67,6 +68,7 @@ namespace rtps{
         flock_params.search_radius = 0.8f * flock_params.smoothing_distance * settings->GetSettingAs<float>("Searching Radius");
         flock_params.max_speed = settings->GetSettingAs<float>("Max Speed");
         flock_params.ang_vel = settings->GetSettingAs<float>("Angular Velocity");
+
         // BOID WEIGHTS
         flock_params.w_sep = settings->GetSettingAs<float>("Separation Weight");
         flock_params.w_align = settings->GetSettingAs<float>("Alignment Weight");
@@ -77,7 +79,8 @@ namespace rtps{
         
         // BOID RULE'S SETTINGS 
         flock_params.slowing_distance= settings->GetSettingAs<float>("Slowing Distance");
-
+        flock_params.leader_index = settings->GetSettingAs<int>("Leader Index");
+        
         // update the OpenCL buffer
         std::vector<FLOCKParameters> vparams(0);
         vparams.push_back(flock_params);

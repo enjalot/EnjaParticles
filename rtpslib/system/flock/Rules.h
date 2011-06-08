@@ -15,12 +15,15 @@ namespace rtps
             Rules(std::string path, CL* cli, EB::Timer* timer);
             void execute(int num,
                     //input
+                    float4 target,
                     Buffer<float4>& pos_s, 
                     Buffer<float4>& vel_s, 
                     Buffer<int4>& neigh_s, 
                     Buffer<float4>& sep_s, 
                     Buffer<float4>& align_s, 
                     Buffer<float4>& coh_s, 
+                    Buffer<float4>& goal_s, 
+                    Buffer<float4>& avoid_s, 
                     //output
                     Buffer<unsigned int>& ci_start,
                     Buffer<unsigned int>& ci_end,

@@ -132,6 +132,8 @@ private:
     Buffer<float4>      cl_separation_s;
     Buffer<float4>      cl_alignment_s;
     Buffer<float4>      cl_cohesion_s;
+    Buffer<float4>      cl_goal_s;
+    Buffer<float4>      cl_avoid_s;
     Buffer<float4>      cl_leaderfollowing_s;
 
     //Neighbor Search related arrays
