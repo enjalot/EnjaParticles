@@ -2,6 +2,8 @@
 
 namespace rtps
 {
+namespace outer
+{
 
     CollisionWall::CollisionWall(std::string path, CL* cli_, EB::Timer* timer_)
     {
@@ -107,7 +109,7 @@ namespace rtps
 
     }
 
-
+} // namespace outer
 
     void OUTER::cpuCollision_wall()
     {

@@ -4,7 +4,7 @@
 
 namespace rtps
 {
-namespace sph
+namespace outer
 {
 
     Prep::Prep(CL* cli_, EB::Timer* timer_)
@@ -74,5 +74,5 @@ namespace sph
 
     }
 
-}//namespace sph
+}//namespace outer
 }//namespace rtps

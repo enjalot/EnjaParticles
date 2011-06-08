@@ -1,5 +1,5 @@
-#ifndef RTPS_DATASTRUCTURES_H_INCLUDED
-#define RTPS_DATASTRUCTURES_H_INCLUDED
+#ifndef RTPS_OUTER_DATASTRUCTURES_H_INCLUDED
+#define RTPS_OUTER_DATASTRUCTURES_H_INCLUDED
 
 
 #include <CLL.h>
@@ -7,6 +7,8 @@
 
 
 namespace rtps
+{
+namespace outer
 {
     class DataStructures 
     {
@@ -44,6 +46,7 @@ namespace rtps
             Kernel k_datastructures;
             EB::Timer* timer;
     };
+}
 }
 
 #endif

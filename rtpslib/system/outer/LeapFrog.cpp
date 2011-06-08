@@ -2,7 +2,7 @@
 
 namespace rtps
 {
-namespace sph
+namespace outer
 {
 
     LeapFrog::LeapFrog(std::string path, CL* cli_, EB::Timer* timer_)

@@ -1,5 +1,5 @@
-#ifndef RTPS_LIFETIME_H_INCLUDED
-#define RTPS_LIFETIME_H_INCLUDED
+#ifndef RTPS_OUTER_LIFETIME_H_INCLUDED
+#define RTPS_OUTER_LIFETIME_H_INCLUDED
 
 
 #include <CLL.h>
@@ -7,6 +7,8 @@
 
 
 namespace rtps
+{
+namespace outer
 {
     class Lifetime
     {
@@ -29,6 +31,7 @@ namespace rtps
             Kernel k_lifetime;
             EB::Timer* timer;
     };
+}
 }
 
 #endif

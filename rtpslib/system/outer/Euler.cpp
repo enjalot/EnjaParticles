@@ -2,6 +2,8 @@
 
 namespace rtps
 {
+namespace outer
+{
     Euler::Euler(std::string path, CL* cli_, EB::Timer* timer_)
     {
         cli = cli_;
@@ -45,6 +47,7 @@ namespace rtps
         k_euler.execute(num, local_size);
 
     }
+} // Namespace
 
     void OUTER::cpuEuler()
     {

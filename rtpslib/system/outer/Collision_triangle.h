@@ -1,5 +1,5 @@
-#ifndef RTPS_COLLISION_TRI_H_INCLUDED
-#define RTPS_COLLISION_TRI_H_INCLUDED
+#ifndef RTPS_OUTER_COLLISION_TRI_H_INCLUDED
+#define RTPS_OUTER_COLLISION_TRI_H_INCLUDED
 
 
 #include <CLL.h>
@@ -7,6 +7,8 @@
 
 
 namespace rtps
+{
+namespace outer
 {
     class CollisionTriangle
     {
@@ -37,6 +39,7 @@ namespace rtps
             Buffer<Triangle> cl_triangles;
             bool triangles_loaded; //keep track if we've loaded triangles yet
     };
+}
 }
 
 #endif

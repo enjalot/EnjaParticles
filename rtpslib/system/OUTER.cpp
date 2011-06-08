@@ -13,13 +13,14 @@
 
 #include "Hose.h"
 
-
 //for random
 #include<time.h>
 
+//namespace outer {} // just to define the namespace
+
 namespace rtps
 {
-    using namespace sph;
+    using namespace outer;
 
 
     OUTER::OUTER(RTPS *psfr, int n)
@@ -27,7 +28,7 @@ namespace rtps
         //store the particle system framework
         ps = psfr;
         settings = ps->settings;
-        max_num = n;
+        max_num = nlpo2(n); // max nb of ghost particles
         num = 0;
         nb_var = 10;
 
@@ -76,10 +77,10 @@ namespace rtps
         prepareSorted();
 
         //should be more cross platform
-        sph_source_dir = resource_path + "/" + std::string(OUTER_CL_SOURCE_DIR);
+        outer_source_dir = resource_path + "/" + std::string(OUTER_CL_SOURCE_DIR);
         common_source_dir = resource_path + "/" + std::string(COMMON_CL_SOURCE_DIR);
 
-        ps->cli->addIncludeDir(sph_source_dir);
+        ps->cli->addIncludeDir(outer_source_dir);
         ps->cli->addIncludeDir(common_source_dir);
 
         hash = Hash(common_source_dir, ps->cli, timers["hash_gpu"]);
@@ -87,25 +88,25 @@ namespace rtps
         cellindices = CellIndices(common_source_dir, ps->cli, timers["ci_gpu"] );
         permute = Permute( common_source_dir, ps->cli, timers["perm_gpu"] );
 
-        density = Density(sph_source_dir, ps->cli, timers["density_gpu"]);
-        force = Force(sph_source_dir, ps->cli, timers["force_gpu"]);
-        collision_wall = CollisionWall(sph_source_dir, ps->cli, timers["cw_gpu"]);
-        collision_tri = CollisionTriangle(sph_source_dir, ps->cli, timers["ct_gpu"], 2048); //TODO expose max_triangles as a parameter
+        density = Density(outer_source_dir, ps->cli, timers["density_gpu"]);
+        force = Force(outer_source_dir, ps->cli, timers["force_gpu"]);
+        collision_wall = CollisionWall(outer_source_dir, ps->cli, timers["cw_gpu"]);
+        collision_tri = CollisionTriangle(outer_source_dir, ps->cli, timers["ct_gpu"], 2048); //TODO expose max_triangles as a parameter
 
         //could generalize this to other integration methods later (leap frog, RK4)
         if (integrator == LEAPFROG)
         {
             //loadLeapFrog();
-            leapfrog = LeapFrog(sph_source_dir, ps->cli, timers["leapfrog_gpu"]);
+            leapfrog = LeapFrog(outer_source_dir, ps->cli, timers["leapfrog_gpu"]);
         }
         else if (integrator == EULER)
         {
             //loadEuler();
-            euler = Euler(sph_source_dir, ps->cli, timers["euler_gpu"]);
+            euler = Euler(outer_source_dir, ps->cli, timers["euler_gpu"]);
         }
 
         string lt_file = settings->GetSettingAs<string>("lt_cl");
-        //lifetime = Lifetime(sph_source_dir, ps->cli, timers["lifetime_gpu"], lt_file);
+        //lifetime = Lifetime(outer_source_dir, ps->cli, timers["lifetime_gpu"], lt_file);
 
 
 
@@ -160,6 +161,7 @@ namespace rtps
 #endif
     }
 
+	#if 0
     void OUTER::updateCPU()
     {
         cpuDensity();
@@ -190,6 +192,7 @@ namespace rtps
         glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
         glBufferData(GL_ARRAY_BUFFER, num * sizeof(float4), &positions[0], GL_DYNAMIC_DRAW);
     }
+	#endif
 
     void OUTER::updateGPU()
     {
@@ -347,7 +350,7 @@ namespace rtps
 
             collision();
             timers["integrate"]->start();
-            integrate();
+            integrate(); // POSSIBLE ADD BACK?
             timers["integrate"]->stop();
 
             /*
@@ -433,6 +436,7 @@ namespace rtps
 
     }
 
+	#if 1
     void OUTER::integrate()
     {
         if (integrator == EULER)
@@ -490,6 +494,7 @@ namespace rtps
 
 
     }
+	#endif
 
     void OUTER::call_prep(int stage)
     {

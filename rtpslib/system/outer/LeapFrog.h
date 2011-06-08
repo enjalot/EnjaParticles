@@ -1,5 +1,5 @@
-#ifndef RTPS_LEAPFROG_H_INCLUDED
-#define RTPS_LEAPFROG_H_INCLUDED
+#ifndef RTPS_OUTER_LEAPFROG_H_INCLUDED
+#define RTPS_OUTER_LEAPFROG_H_INCLUDED
 
 
 #include <CLL.h>
@@ -8,7 +8,7 @@
 
 namespace rtps
 {
-namespace sph
+namespace outer
 {
 
     class LeapFrog
@@ -40,7 +40,6 @@ namespace sph
             Kernel k_leapfrog;
             EB::Timer* timer;
     };
-
 }
 }
 

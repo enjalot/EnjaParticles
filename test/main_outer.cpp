@@ -169,7 +169,10 @@ int main(int argc, char** argv)
     //rtps::Domain grid = Domain(float4(-5,-.3,0,0), float4(2, 2, 12, 0));
     rtps::Domain* grid = new Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
     //rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
-	rtps::RTPSettings* settings = new rtps::RTPSettings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
+
+	// SPH combined with outside particles. Ideally, SPH should be merged
+	// with OUTER. 
+	rtps::RTPSettings* settings = new rtps::RTPSettings(rtps::RTPSettings::OUTER, NUM_PARTICLES, DT, grid);
 
     //should be argv[0]
 #ifdef WIN32
@@ -180,11 +183,11 @@ int main(int argc, char** argv)
     //printf("arvg[0]: %s\n", argv[0]);
 #endif
 
-    //settings->setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
-    settings->setRenderType(RTPSettings::RENDER);
+    settings->setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
+    //settings->setRenderType(RTPSettings::RENDER);
     //settings.setRenderType(RTPSettings::SPRITE_RENDER);
-    settings->setRadiusScale(1.0);
-    settings->setBlurScale(1.0);
+    settings->setRadiusScale(0.2);
+    settings->setBlurScale(2.0);
     settings->setUseGLSL(1);
 
     settings->SetSetting("sub_intervals", 1);
@@ -199,6 +202,7 @@ int main(int argc, char** argv)
     ps = new rtps::RTPS(settings);
     //ps = new rtps::RTPS();
 
+	#if 1
     ps->settings->SetSetting("Gravity", -9.8f); // -9.8 m/sec^2
     ps->settings->SetSetting("Gas Constant", 1.0f);
     ps->settings->SetSetting("Viscosity", .001f);
@@ -208,6 +212,7 @@ int main(int argc, char** argv)
     ps->settings->SetSetting("Friction Static", 0.0f);
     ps->settings->SetSetting("Boundary Stiffness", 20000.0f);
     ps->settings->SetSetting("Boundary Dampening", 256.0f);
+	#endif
 
 
     //initialize the OpenGL scene for rendering

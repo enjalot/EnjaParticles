@@ -2,6 +2,8 @@
 
 namespace rtps
 {
+namespace outer
+{
 
     Lifetime::Lifetime(std::string path, CL* cli_, EB::Timer* timer_, std::string filename)
     {
@@ -79,4 +81,5 @@ namespace rtps
     }
 
 
+}
 }

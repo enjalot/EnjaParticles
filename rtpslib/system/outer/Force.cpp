@@ -2,6 +2,8 @@
 
 namespace rtps 
 {
+namespace outer
+{
 
     //----------------------------------------------------------------------
     Force::Force(std::string path, CL* cli_, EB::Timer* timer_)
@@ -102,5 +104,6 @@ namespace rtps
     }
 
 
+}
 }
 

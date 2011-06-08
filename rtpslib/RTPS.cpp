@@ -72,6 +72,13 @@ printf("done with constructor\n");
             printf("flock system\n");
             system = new FLOCK(this, settings->max_particles);
         }
+        else if (settings->system == RTPSettings::OUTER)
+        {
+            printf("outer system\n");
+            system_outer = new OUTER(this, settings->max_outer_particles);
+            system = new SPH(this, settings->max_particles); //, settings->max_outer_particles);
+			settings->setMaxOuterParticles(10048);
+        }
 
 printf("created system in RTPS\n");
 
@@ -107,7 +114,5 @@ printf("created system in RTPS\n");
     {
             system->printTimers();
     }
-}
-
-
+};
 

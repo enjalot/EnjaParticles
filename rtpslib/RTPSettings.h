@@ -31,7 +31,7 @@ namespace rtps
         //decide which system to use
         enum SysType
         {
-            Simple, SPH, FLOCK 
+            Simple, SPH, FLOCK, OUTER
         };
         SysType system;
 
@@ -52,6 +52,14 @@ namespace rtps
         //flock
         RTPSettings(SysType system, int max_particles, float dt, Domain* grid, float maxspeed, float mindist, float searchradius, float color[], float w_sep, float w_align, float w_coh);
 
+		// (GE) TEMPORARY WHILE WAITING FOR REFACTORING
+		void setMaxOuterParticles(int max_outer_particles) {
+			this->max_outer_particles = nlpo2(max_outer_particles);
+		}
+		int getMaxOuterParticles() {
+			return this->max_outer_particles;
+		}
+
         //without this, windows was crashing with a ValidHeapPointer
         //assertion error. Indicates the heap may be corrupted by 
         //something in here
@@ -60,6 +68,8 @@ namespace rtps
         //TODO get rid of all variables, just use map
         //maximum number of particles a system can hold
         int max_particles;
+        //maximum number of outer (ghost, solid object) particles a system can hold
+        int max_outer_particles; 
         //the bounding domain of the system
         Domain *grid; //TODO keep this and make private
         //time step per iteration

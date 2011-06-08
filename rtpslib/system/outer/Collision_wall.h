@@ -1,5 +1,5 @@
-#ifndef RTPS_COLLISION_WALL_H_INCLUDED
-#define RTPS_COLLISION_WALL_H_INCLUDED
+#ifndef RTPS_OUTER_COLLISION_WALL_H_INCLUDED
+#define RTPS_OUTER_COLLISION_WALL_H_INCLUDED
 
 
 #include <CLL.h>
@@ -7,6 +7,8 @@
 
 
 namespace rtps
+{
+namespace outer
 {
     class CollisionWall
     {
@@ -32,6 +34,7 @@ namespace rtps
             Kernel k_collision_wall;
             EB::Timer* timer;
     };
+}
 }
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef RTPS_EULER_H_INCLUDED
-#define RTPS_EULER_H_INCLUDED
+#ifndef RTPS_OUTER_EULER_H_INCLUDED
+#define RTPS_OUTER_EULER_H_INCLUDED
 
 
 #include <CLL.h>
@@ -7,6 +7,8 @@
 
 
 namespace rtps
+{
+namespace outer
 {
     class Euler
     {
@@ -34,6 +36,7 @@ namespace rtps
             Kernel k_euler;
             EB::Timer* timer;
     };
+}
 }
 
 #endif

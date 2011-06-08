@@ -2,6 +2,8 @@
 
 namespace rtps
 {
+namespace outer
+{
 
     float OUTER::Wpoly6(float4 r, float h)
     {
@@ -26,4 +28,5 @@ namespace rtps
 
 
 
+}
 }

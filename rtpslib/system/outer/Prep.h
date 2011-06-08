@@ -1,5 +1,5 @@
-#ifndef RTPS_PREP_H_INCLUDED
-#define RTPS_PREP_H_INCLUDED
+#ifndef RTPS_OUTER_PREP_H_INCLUDED
+#define RTPS_OUTER_PREP_H_INCLUDED
 
 
 #include <CLL.h>
@@ -8,7 +8,7 @@
 
 namespace rtps
 {
-namespace sph
+namespace outer
 {
     class Prep 
     {

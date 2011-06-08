@@ -23,13 +23,13 @@
 //#include <DataStructures.h>
 #include <CellIndices.h>
 #include <Permute.h>
-#include <Density.h>
-#include <Force.h>
-#include <Collision_wall.h>
-#include <Collision_triangle.h>
-#include <LeapFrog.h>
-#include <Lifetime.h>
-#include <Euler.h>
+#include <sph/Density.h>
+#include <sph/Force.h>
+#include <sph/Collision_wall.h>
+#include <sph/Collision_triangle.h>
+#include <sph/LeapFrog.h>
+#include <sph/Lifetime.h>
+#include <sph/Euler.h>
 
 //#include "../util.h"
 #include <Hose.h>

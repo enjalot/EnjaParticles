@@ -5,6 +5,8 @@ using namespace std;
 
 namespace rtps
 {
+namespace outer
+{
 #if 0 
     //----------------------------------------------------------------------
 
@@ -118,4 +120,5 @@ namespace rtps
     }
 #endif
 
+} // namespace
 } // namespace

@@ -61,6 +61,7 @@ namespace rtps
         //will be instanciated as a specific subclass like SPH or Boids
         //TODO shouldn't be public? right now we expose various methods from the system
         System *system;
+        System *system_outer; // GE: meant for ghost and other non-fluid particles
         //std::vector<System> systems;
 
         //initial value helper

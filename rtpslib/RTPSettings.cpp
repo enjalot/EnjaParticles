@@ -11,13 +11,12 @@ namespace rtps
         return(x+1);
     }
 
-
-
     RTPSettings::RTPSettings()
     {
         changed = false;
         system = SPH;
         max_particles = 2048;
+        max_outer_particles = 2048;
         dt = .001f;
         grid = new Domain(float4(-5,-.3f,0,0), float4(2, 2, 12, 0));
     }
@@ -27,6 +26,7 @@ namespace rtps
         changed = false;
         this->system = system;
         this->max_particles = max_particles;
+        this->max_outer_particles = 0;
         this->dt = dt;
         grid = new Domain(float4(-5,-.3f,0,0), float4(2, 2, 12, 0));
     }
@@ -36,6 +36,7 @@ namespace rtps
         changed = false;
         this->system = system;
         this->max_particles = nlpo2(max_particles);
+        this->max_outer_particles = 0;
         this->dt = dt;
         this->grid = grid;
     }
@@ -46,6 +47,7 @@ namespace rtps
         changed = false;
         this->system = system;
         this->max_particles = max_particles;
+        this->max_outer_particles = 0;
         this->dt = dt;
         this->grid = grid;
         this->tri_collision = tri_collision;
@@ -57,6 +59,7 @@ namespace rtps
         this->system = system;
         this->system = system;
         this->max_particles = max_particles;
+        this->max_outer_particles = 0;
         this->dt = dt;
         this->grid = grid;
         this->max_speed = maxspeed;

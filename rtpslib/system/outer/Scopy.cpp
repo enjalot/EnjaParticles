@@ -4,6 +4,8 @@
 
 namespace rtps
 {
+namespace outer
+{
 
     void OUTER::loadScopy()
     {
@@ -30,4 +32,5 @@ namespace rtps
 
     }
 
+}
 }

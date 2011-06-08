@@ -3,7 +3,6 @@
 namespace rtps
 {
 
-
     void SPH::cpuXSPH()
     {
 

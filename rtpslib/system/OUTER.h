@@ -18,7 +18,7 @@
 #include <SPHSettings.h> // for Integrator enum
 
 
-//#include <Prep.h>
+#include <outer/Prep.h>
 #include <Hash.h>
 #include <BitonicSort.h>
 //#include <DataStructures.h>
@@ -49,9 +49,11 @@
     #define RTPS_EXPORT
 #endif
 
+
+
 namespace rtps
 {
-    using namespace sph;
+	using namespace outer;
 
     class RTPS_EXPORT OUTER : public System
     {
@@ -100,7 +102,7 @@ namespace rtps
         Integrator integrator;
         float spacing; //Particle rest distance in world coordinates
 
-        std::string sph_source_dir;
+        std::string outer_source_dir;
         int nb_var;
 
         std::vector<float4> deleted_pos;
@@ -197,16 +199,16 @@ namespace rtps
         Permute permute;
         void hash_and_sort();
         void bitonic_sort();
-        Density density;
-        Force force;
+        outer::Density density;
+        outer::Force force;
         void collision();
-        CollisionWall collision_wall;
-        CollisionTriangle collision_tri;
+        outer::CollisionWall collision_wall;
+        outer::CollisionTriangle collision_tri;
         void integrate();
-        LeapFrog leapfrog;
-        Euler euler;
+        outer::LeapFrog leapfrog;
+        outer::Euler euler;
 
-        Lifetime lifetime;
+        outer::Lifetime lifetime;
 
 
         float Wpoly6(float4 r, float h);

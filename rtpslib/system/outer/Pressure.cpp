@@ -5,7 +5,6 @@
 
 namespace rtps
 {
-
     float OUTER::Wspiky(float4 r, float h)
     {
         float h6 = h*h*h * h*h*h;
@@ -79,8 +78,6 @@ namespace rtps
 
         }
     }
-
-
 
 
 }

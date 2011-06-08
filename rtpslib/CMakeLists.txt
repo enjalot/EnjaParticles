@@ -102,14 +102,14 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/simple/Euler
     	
 	# SPH
-    #${rtpslib_SOURCE_DIR}/system/OUTER.cpp
+    ${rtpslib_SOURCE_DIR}/system/OUTER.cpp
     ${rtpslib_SOURCE_DIR}/system/OUTERSettings.cpp
     ${rtpslib_SOURCE_DIR}/system/SPH.cpp
     ${rtpslib_SOURCE_DIR}/system/SPHSettings.cpp
+
     ${rtpslib_SOURCE_DIR}/system/sph/Euler
     ${rtpslib_SOURCE_DIR}/system/sph/LeapFrog
     ${rtpslib_SOURCE_DIR}/system/sph/Lifetime
-    
     #${rtpslib_SOURCE_DIR}/system/sph/Prep
     ${rtpslib_SOURCE_DIR}/system/sph/Sort
     ${rtpslib_SOURCE_DIR}/system/sph/Density
@@ -138,9 +138,26 @@ set (rtpslib_SOURCES
     #${rtpslib_SOURCE_DIR}/system/flock/XFLOCK
     #${rtpslib_SOURCE_DIR}/system/flock/Collision_wall
     #${rtpslib_SOURCE_DIR}/system/flock/Collision_triangle
-	
+
     # Added by GE
     ${rtpslib_SOURCE_DIR}/system/boids
+	# OUTER
+    ${rtpslib_SOURCE_DIR}/system/outer/Euler
+    ${rtpslib_SOURCE_DIR}/system/outer/LeapFrog
+    ${rtpslib_SOURCE_DIR}/system/outer/Lifetime
+    ${rtpslib_SOURCE_DIR}/system/outer/Prep
+    ${rtpslib_SOURCE_DIR}/system/outer/Sort
+    ${rtpslib_SOURCE_DIR}/system/outer/Density
+    ${rtpslib_SOURCE_DIR}/system/outer/Force
+    ${rtpslib_SOURCE_DIR}/system/outer/Collision_wall
+    ${rtpslib_SOURCE_DIR}/system/outer/Collision_triangle
+
+    #### these are CPU only
+    ${rtpslib_SOURCE_DIR}/system/outer/Pressure
+    ${rtpslib_SOURCE_DIR}/system/outer/Viscosity
+    ${rtpslib_SOURCE_DIR}/system/outer/XOUTER
+    ####
+
     
     # neighbors
     #${rtpslib_SOURCE_DIR}/system/flock/Prep
@@ -217,6 +234,7 @@ ADD_SUBDIRECTORY(system/common)
 ADD_SUBDIRECTORY(system/simple)
 ADD_SUBDIRECTORY(system/sph)
 ADD_SUBDIRECTORY(system/flock)
+ADD_SUBDIRECTORY(system/outer)
 
 MAKE_DIRECTORY(${rtpslib_BINARY_DIR}/shaders)
 FILE(COPY ${rtpslib_SOURCE_DIR}/render/shaders/ DESTINATION ${rtpslib_BINARY_DIR}/shaders/)

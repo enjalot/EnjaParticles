@@ -1,5 +1,5 @@
-#ifndef RTPS_FORCE_H_INCLUDED
-#define RTPS_FORCE_H_INCLUDED
+#ifndef RTPS_OUTER_FORCE_H_INCLUDED
+#define RTPS_OUTER_FORCE_H_INCLUDED
 
 
 #include <CLL.h>
@@ -7,6 +7,8 @@
 
 
 namespace rtps
+{
+namespace outer
 {
     class Force
     {
@@ -33,6 +35,7 @@ namespace rtps
             Kernel k_force;
             EB::Timer* timer;
     };
+}
 }
 
 #endif

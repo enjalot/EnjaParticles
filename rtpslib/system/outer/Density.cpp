@@ -3,6 +3,8 @@
 
 namespace rtps
 {
+namespace outer
+{
     //----------------------------------------------------------------------
     Density::Density(std::string path, CL* cli_, EB::Timer* timer_)
     {
@@ -99,6 +101,8 @@ namespace rtps
 #endif
 
     }
+
+} // namespace outer
 
 
 

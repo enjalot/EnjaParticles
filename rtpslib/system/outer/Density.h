@@ -1,5 +1,5 @@
-#ifndef RTPS_DENSITY_H_INCLUDED
-#define RTPS_DENSITY_H_INCLUDED
+#ifndef RTPS_OUTER_DENSITY_H_INCLUDED
+#define RTPS_OUTER_DENSITY_H_INCLUDED
 
 
 #include <CLL.h>
@@ -7,6 +7,8 @@
 
 
 namespace rtps
+{
+namespace outer
 {
     class Density
     {
@@ -33,6 +35,7 @@ namespace rtps
             Kernel k_density;
             EB::Timer* timer;
     };
+}
 }
 
 #endif

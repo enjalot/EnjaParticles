@@ -4,6 +4,8 @@
 
 namespace rtps
 {
+namespace outer
+{
 
     DataStructures::DataStructures(CL* cli_, EB::Timer* timer_)
     {
@@ -154,4 +156,5 @@ namespace rtps
         return nc;
     }
 
+}
 }

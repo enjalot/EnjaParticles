@@ -120,9 +120,11 @@ namespace rtps
 
     protected:
         //number of particles
-        int num; 
+        int num;  // USED FOR WHAT? 
         //maximum number of particles (for array allocation)
         int max_num;
+        //maximum number of outer particles (for array allocation)
+        int max_outer_num;
 
         GLuint pos_vbo;
         GLuint col_vbo;

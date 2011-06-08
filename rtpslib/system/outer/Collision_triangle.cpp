@@ -1,6 +1,7 @@
 #include "../OUTER.h"
 
 namespace rtps {
+namespace outer {
 
     CollisionTriangle::CollisionTriangle(std::string path, CL* cli_, EB::Timer* timer_, int max_triangles)
     {
@@ -15,13 +16,6 @@ namespace rtps {
         path += "/collision_tri.cl";
         k_collision_tri = Kernel(cli, path, "collision_triangle");
     } 
-
-    //TODO: avoid need for this function?
-    void OUTER::loadTriangles(std::vector<Triangle> &triangles)
-    {
-        collision_tri.loadTriangles(triangles);
-    }
-
     void CollisionTriangle::loadTriangles(std::vector<Triangle> &triangles)
     {
         int n_triangles = triangles.size();
@@ -142,5 +136,13 @@ namespace rtps {
 
     }
 }
+
+}
+
+    //TODO: avoid need for this function?
+    void OUTER::loadTriangles(std::vector<Triangle> &triangles)
+    {
+        collision_tri.loadTriangles(triangles);
+    }
 
 }
