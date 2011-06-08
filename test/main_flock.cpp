@@ -154,8 +154,8 @@ int main(int argc, char** argv)
     float w_align = .80f;   //7.5
     float w_coh = 1.0f;     //2.5
 
-    float w_goal = .0f;
-    float w_avoid = 1.0f;
+    float w_goal = 1.0f;
+    float w_avoid = .0f;
 
     float w_leadfoll = 0.f;
    
