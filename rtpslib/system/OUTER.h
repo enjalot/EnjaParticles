@@ -15,6 +15,7 @@
 
 #include <Domain.h>
 #include <OUTERSettings.h>
+#include <SPHSettings.h> // for Integrator enum
 
 
 //#include <Prep.h>

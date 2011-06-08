@@ -3,6 +3,7 @@
 #include "system/Simple.h"
 #include "system/SPH.h"
 #include "system/FLOCK.h"
+#include "system/OUTER.h"
 
 
 namespace rtps

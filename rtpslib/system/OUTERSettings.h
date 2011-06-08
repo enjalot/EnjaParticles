@@ -98,10 +98,14 @@ namespace rtps
 #endif
 
 
+	#if 0
+	// Integrator is multiply defined if OUTER.h and SPH.h are both included
+	// Program is not scalable
     enum Integrator
     {
         EULER, LEAPFROG
     };
+	#endif
 };
 
 #endif
