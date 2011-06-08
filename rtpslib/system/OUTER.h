@@ -99,7 +99,7 @@ namespace rtps
         OUTERParams sphp;
         GridParams grid_params;
         GridParams grid_params_scaled;
-        Integrator integrator;
+        //Integrator integrator;
         float spacing; //Particle rest distance in world coordinates
 
         std::string outer_source_dir;

@@ -16,6 +16,8 @@
 #include <Domain.h>
 #include <SPHSettings.h>
 
+class OUTER;
+
 
 //#include <Prep.h>
 #include <Hash.h>
@@ -27,6 +29,7 @@
 #include <sph/Force.h>
 #include <sph/Collision_wall.h>
 #include <sph/Collision_triangle.h>
+#include <sph/Collision_cloud.h>
 #include <sph/LeapFrog.h>
 #include <sph/Lifetime.h>
 #include <sph/Euler.h>
@@ -54,8 +57,13 @@ namespace rtps
     class RTPS_EXPORT SPH : public System
     {
     public:
-        SPH(RTPS *ps, int num);
+        SPH(RTPS *ps, int num, int nb_in_cloud=0);
         ~SPH();
+
+		// GE
+		void setOUTER(OUTER* outer) {
+			this->outer = outer;
+		}
 
         void update();
         //wrapper around IV.h addRect
@@ -175,6 +183,7 @@ namespace rtps
         void cpuViscosity();
         void cpuXSPH();
         void cpuCollision_wall();
+        void cpuCollision_cloud();
         void cpuEuler();
         void cpuLeapFrog();
 
@@ -200,6 +209,7 @@ namespace rtps
         void collision();
         CollisionWall collision_wall;
         CollisionTriangle collision_tri;
+        CollisionCloud collision_cloud;
         void integrate();
         LeapFrog leapfrog;
         Euler euler;
@@ -216,6 +226,10 @@ namespace rtps
         //void scopy(int n, cl_mem xsrc, cl_mem ydst); 
 
         //void sset_int(int n, int val, cl_mem xdst);
+
+		OUTER* outer;
+
+		int nb_in_cloud; // nb of points in cloud
 
     };
 

@@ -116,6 +116,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/sph/Force
     ${rtpslib_SOURCE_DIR}/system/sph/Collision_wall
     ${rtpslib_SOURCE_DIR}/system/sph/Collision_triangle
+    ${rtpslib_SOURCE_DIR}/system/sph/Collision_cloud
 
     #### these are CPU only
     ${rtpslib_SOURCE_DIR}/system/sph/Pressure

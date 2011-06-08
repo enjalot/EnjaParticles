@@ -22,7 +22,7 @@ namespace rtps
     using namespace sph;
 
 
-    SPH::SPH(RTPS *psfr, int n)
+    SPH::SPH(RTPS *psfr, int n, int nb_in_cloud)
     {
         //store the particle system framework
         ps = psfr;
@@ -30,6 +30,7 @@ namespace rtps
         max_num = n;
         num = 0;
         nb_var = 10;
+		this->nb_in_cloud = nb_in_cloud;
 
         resource_path = settings->GetSettingAs<string>("rtps_path");
         printf("resource path: %s\n", resource_path.c_str());
@@ -91,6 +92,11 @@ namespace rtps
         force = Force(sph_source_dir, ps->cli, timers["force_gpu"]);
         collision_wall = CollisionWall(sph_source_dir, ps->cli, timers["cw_gpu"]);
         collision_tri = CollisionTriangle(sph_source_dir, ps->cli, timers["ct_gpu"], 2048); //TODO expose max_triangles as a parameter
+		
+		//  ADD A SWITCH TO HANDLE CLOUD IF PRESENT
+		if (nb_in_cloud > 0) {
+			collision_cloud = CollisionCloud(sph_source_dir, ps->cli, timers["ct_pgu"], 2048); // Last argument is? ??
+		}
 
         //could generalize this to other integration methods later (leap frog, RK4)
         if (integrator == LEAPFROG)
@@ -191,6 +197,7 @@ namespace rtps
         glBufferData(GL_ARRAY_BUFFER, num * sizeof(float4), &positions[0], GL_DYNAMIC_DRAW);
     }
 
+	//----------------------------------------------------------------------
     void SPH::updateGPU()
     {
 
@@ -375,6 +382,7 @@ namespace rtps
 
     }
 
+	//----------------------------------------------------------------------
     void SPH::hash_and_sort()
     {
         //printf("hash\n");
@@ -430,6 +438,20 @@ namespace rtps
                 clf_debug,
                 cli_debug);
         timers["collision_tri"]->stop();
+
+		// NEED TIMER FOR POINT CLOUD COLLISIONS (GE)
+		#if 0
+		collision_cloud.execute(num, num_pts_cloud, 
+			cl_cloud_position_s, 
+			cl_cloud_normals_s,
+			cl_force_s, // output
+			cl_sphp, 
+			cl_GridParamsScaled,
+			// debug
+			clf_debug,
+			cli_debug);
+		)
+		#endif
 
     }
 

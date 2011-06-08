@@ -59,7 +59,7 @@ namespace rtps
         //set up the grid
         setupDomain();
 
-        integrator = LEAPFROG;
+        //integrator = LEAPFROG;
         //integrator = EULER;
 
         //*** end Initialization
@@ -94,6 +94,7 @@ namespace rtps
         collision_tri = CollisionTriangle(outer_source_dir, ps->cli, timers["ct_gpu"], 2048); //TODO expose max_triangles as a parameter
 
         //could generalize this to other integration methods later (leap frog, RK4)
+		#if 0
         if (integrator == LEAPFROG)
         {
             //loadLeapFrog();
@@ -104,6 +105,7 @@ namespace rtps
             //loadEuler();
             euler = Euler(outer_source_dir, ps->cli, timers["euler_gpu"]);
         }
+		#endif
 
         string lt_file = settings->GetSettingAs<string>("lt_cl");
         //lifetime = Lifetime(outer_source_dir, ps->cli, timers["lifetime_gpu"], lt_file);
