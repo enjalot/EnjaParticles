@@ -318,6 +318,7 @@ namespace rtps
 
             //if(num >0) printf("density\n");
             timers["density"]->start();
+			#if 0
             density.execute(   num,
                 //cl_vars_sorted,
                 cl_position_s,
@@ -329,7 +330,9 @@ namespace rtps
                 clf_debug,
                 cli_debug);
             timers["density"]->stop();
+			#endif
             
+			#if 0
             //if(num >0) printf("force\n");
             timers["force"]->start();
             force.execute(   num,
@@ -347,6 +350,7 @@ namespace rtps
                 cli_debug);
 
             timers["force"]->stop();
+			#endif
 
             collision();
             timers["integrate"]->start();
@@ -403,6 +407,7 @@ namespace rtps
 
     void OUTER::collision()
     {
+		#if 0
         //when implemented other collision routines can be chosen here
         timers["collision_wall"]->start();
         //collide_wall();
@@ -433,12 +438,12 @@ namespace rtps
                 clf_debug,
                 cli_debug);
         timers["collision_tri"]->stop();
-
+		#endif
     }
 
-	#if 1
     void OUTER::integrate()
     {
+		#if 0
         if (integrator == EULER)
         {
             //euler();
@@ -493,8 +498,8 @@ namespace rtps
 #endif
 
 
+		#endif
     }
-	#endif
 
     void OUTER::call_prep(int stage)
     {
@@ -551,11 +556,11 @@ namespace rtps
 
         positions.resize(max_num);
         colors.resize(max_num);
-        forces.resize(max_num);
+        //forces.resize(max_num);
         velocities.resize(max_num);
         veleval.resize(max_num);
-        densities.resize(max_num);
-        xsphs.resize(max_num);
+        //densities.resize(max_num);
+        //xsphs.resize(max_num);
 
         //for reading back different values from the kernel
         std::vector<float4> error_check(max_num);
@@ -565,12 +570,12 @@ namespace rtps
 
         //float4 color = float4(0.0, 1.0, 0.0, 1.0f);
         //std::fill(colors.begin(), colors.end(),color);
-        std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 1.0f, 0.0f));
+        //std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 1.0f, 0.0f));
         std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
         std::fill(veleval.begin(), veleval.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
 
-        std::fill(densities.begin(), densities.end(), 0.0f);
-        std::fill(xsphs.begin(), xsphs.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
+        //std::fill(densities.begin(), densities.end(), 0.0f);
+        //std::fill(xsphs.begin(), xsphs.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
         std::fill(error_check.begin(), error_check.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
 
         // VBO creation, TODO: should be abstracted to another class
@@ -593,9 +598,9 @@ namespace rtps
         cl_velocity_s = Buffer<float4>(ps->cli, velocities);
         cl_veleval_u = Buffer<float4>(ps->cli, veleval);
         cl_veleval_s = Buffer<float4>(ps->cli, veleval);
-        cl_density_s = Buffer<float>(ps->cli, densities);
-        cl_force_s = Buffer<float4>(ps->cli, forces);
-        cl_xsph_s = Buffer<float4>(ps->cli, xsphs);
+        //cl_density_s = Buffer<float>(ps->cli, densities);
+        //cl_force_s = Buffer<float4>(ps->cli, forces);
+        //cl_xsph_s = Buffer<float4>(ps->cli, xsphs);
 
         //cl_error_check= Buffer<float4>(ps->cli, error_check);
 

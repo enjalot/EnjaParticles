@@ -113,6 +113,7 @@ namespace outer
 
     void OUTER::cpuCollision_wall()
     {
+		#if 0
 
         float4* vel;
         if (integrator == EULER)
@@ -228,6 +229,7 @@ namespace outer
             forces[i].z += r_f.z + f_f.z;
         }
 
+		#endif
     }
 
 

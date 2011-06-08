@@ -126,9 +126,9 @@ namespace rtps
         std::vector<float4> velocities;
         std::vector<float4> veleval;
 
-        std::vector<float>  densities;
-        std::vector<float4> forces;
-        std::vector<float4> xsphs;
+        //std::vector<float>  densities;
+        //std::vector<float4> forces;
+        //std::vector<float4> xsphs;
 
         Buffer<float4>      cl_position_u;
         Buffer<float4>      cl_position_s;
@@ -139,9 +139,9 @@ namespace rtps
         Buffer<float4>      cl_veleval_u;
         Buffer<float4>      cl_veleval_s;
 
-        Buffer<float>       cl_density_s;
-        Buffer<float4>      cl_force_s;
-        Buffer<float4>      cl_xsph_s;
+        //Buffer<float>       cl_density_s;
+        //Buffer<float4>      cl_force_s;
+        //Buffer<float4>      cl_xsph_s;
 
         //Neighbor Search related arrays
         //Buffer<float4>      cl_vars_sorted;

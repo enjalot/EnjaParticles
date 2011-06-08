@@ -123,6 +123,7 @@ namespace outer
 
     void OUTER::cpuDensity()
     {
+		#if 0
         float h = sphp.smoothing_distance;
         //stuff from Tim's code (need to match #s to papers)
         //float alpha = 315.f/208.f/params.PI/h/h/h;
@@ -183,6 +184,7 @@ namespace outer
             //sum_densities += densities[i];
         }
         //printf("CPU: sum_densities = %f\n", sum_densities);
+		#endif
     }
 
 }

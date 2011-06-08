@@ -24,7 +24,7 @@ namespace rtps
 
     void OUTER::cpuPressure()
     {
-
+		#if 0
         float scale = sphp.simulation_scale;
         float h = sphp.smoothing_distance;
 
@@ -77,6 +77,7 @@ namespace rtps
             forces[i] = f;
 
         }
+		#endif
     }
 
 

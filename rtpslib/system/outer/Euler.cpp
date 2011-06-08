@@ -51,6 +51,7 @@ namespace outer
 
     void OUTER::cpuEuler()
     {
+		#if 0
         float h = ps->settings->dt;
         for (int i = 0; i < num; i++)
         {
@@ -90,6 +91,7 @@ namespace outer
             positions[i] = p;
         }
         //printf("v.z %f p.z %f \n", velocities[0].z, positions[0].z);
+		#endif
     }
 
 }

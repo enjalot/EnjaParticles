@@ -100,6 +100,7 @@ namespace outer
 
     void OUTER::cpuLeapFrog()
     {
+		#if 0
         float h = ps->settings->dt;
         for (int i = 0; i < num; i++)
         {
@@ -143,6 +144,7 @@ namespace outer
 
         }
         //printf("v.z %f p.z %f \n", velocities[0].z, positions[0].z);
+		#endif
     }
 
 } //namespace rtps

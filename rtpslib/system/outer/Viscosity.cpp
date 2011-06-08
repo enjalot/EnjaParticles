@@ -17,6 +17,7 @@ namespace rtps
     void OUTER::cpuViscosity()
     {
 
+		#if 0
         float scale = sphp.simulation_scale;
         float h = sphp.smoothing_distance;
         float mu = 1.001f; //viscosity coefficient (how to select?)
@@ -74,6 +75,7 @@ namespace rtps
             forces[i].y += f.y;
             forces[i].z += f.z;
         }
+		#endif
 
     }
 
