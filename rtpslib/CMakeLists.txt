@@ -57,6 +57,7 @@ set (rtpslib_INCLUDES
     ${rtpslib_SOURCE_DIR}/system
     ${rtpslib_SOURCE_DIR}/system/sph
     ${rtpslib_SOURCE_DIR}/system/flock
+    ${rtpslib_SOURCE_DIR}/system/outer
     ${rtpslib_SOURCE_DIR}/system/common
     ${rtpslib_SOURCE_DIR}/render
     ${rtpslib_SOURCE_DIR}/render/util

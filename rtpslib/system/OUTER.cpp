@@ -11,7 +11,7 @@
 #include "Domain.h"
 #include "IV.h"
 
-#include "common/Hose.h"
+#include "Hose.h"
 
 
 //for random

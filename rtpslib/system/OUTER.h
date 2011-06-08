@@ -21,15 +21,16 @@
 #include <Hash.h>
 #include <BitonicSort.h>
 //#include <DataStructures.h>
+
 #include <CellIndices.h>
 #include <Permute.h>
-#include <Density.h>
-#include <Force.h>
-#include <Collision_wall.h>
-#include <Collision_triangle.h>
-#include <LeapFrog.h>
-#include <Lifetime.h>
-#include <Euler.h>
+#include <outer/Density.h>
+#include <outer/Force.h>
+#include <outer/Collision_wall.h>
+#include <outer/Collision_triangle.h>
+#include <outer/LeapFrog.h>
+#include <outer/Lifetime.h>
+#include <outer/Euler.h>
 
 //#include "../util.h"
 #include <Hose.h>
