@@ -28,27 +28,6 @@ namespace rtps
                         Buffer<float4>& clf_debug,
                         Buffer<int4>& cli_debug);
             
-    void CollisionCloud::execute(int num, int num_pts_cloud, 
-            //input
-            //Buffer<float4>& svars, 
-            Buffer<float4>& pos_s, 
-            Buffer<float4>& cloud_pos_s, 
-            Buffer<float4>& cloud_normals_s,
-            Buffer<float4>& force_s, 
-            //output
-			Buffer<unsigned int>& ci_start,
-			Buffer<unsigned int>& ci_end,
-            //params
-            Buffer<SPHParams>& sphp,
-            Buffer<GridParams>& gp,
-            //debug
-            Buffer<float4>& clf_debug,
-            Buffer<int4>& cli_debug)
-    {
-        int iargs = 0;
-        k_collision_cloud.setArg(iargs++, num_pts_cloud);
-        k_collision_cloud.setArg(iargs++, pos_s.getDevicePtr());
-           
 
         private:
             CL* cli;

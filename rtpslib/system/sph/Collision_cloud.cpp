@@ -44,11 +44,12 @@ namespace rtps
             Buffer<float4>& clf_debug,
             Buffer<int4>& cli_debug)
     {
-        int iargs = 0;
-        k_collision_cloud.setArg(iargs++, num_pts_cloud);
-        k_collision_cloud.setArg(iargs++, pos_s.getDevicePtr());
-        k_collision_cloud.setArg(iargs++, vel_s.getDevicePtr());
-        k_collision_cloud.setArg(iargs++, force_s.getDevicePtr());
+        int iarg = 0;
+        k_collision_cloud.setArg(iarg++, num_pts_cloud);
+        k_collision_cloud.setArg(iarg++, pos_s.getDevicePtr());
+        k_collision_cloud.setArg(iarg++, cloud_pos_s.getDevicePtr());
+        k_collision_cloud.setArg(iarg++, cloud_normals_s.getDevicePtr());
+        k_collision_cloud.setArg(iarg++, force_s.getDevicePtr());
 
         k_collision_cloud.setArg(iarg++, ci_start.getDevicePtr());
         k_collision_cloud.setArg(iarg++, ci_end.getDevicePtr());
@@ -56,8 +57,8 @@ namespace rtps
         k_collision_cloud.setArg(iarg++, sphp.getDevicePtr());
 
         // ONLY IF DEBUGGING
-        k_density.setArg(iarg++, clf_debug.getDevicePtr());
-        k_density.setArg(iarg++, cli_debug.getDevicePtr());
+        k_collision_cloud.setArg(iarg++, clf_debug.getDevicePtr());
+        k_collision_cloud.setArg(iarg++, cli_debug.getDevicePtr());
 
         int local_size = 128;
         float gputime = k_collision_cloud.execute(num, local_size);
