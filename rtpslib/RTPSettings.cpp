@@ -16,7 +16,7 @@ namespace rtps
         changed = false;
         system = SPH;
         max_particles = 2048;
-        max_outer_particles = 2048;
+        max_outer_particles = 0;
         dt = .001f;
         grid = new Domain(float4(-5,-.3f,0,0), float4(2, 2, 12, 0));
     }

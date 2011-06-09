@@ -64,8 +64,10 @@ printf("done with constructor\n");
         }
         else if (settings->system == RTPSettings::SPH)
         {
-            printf("sph system\n");
-            system = new SPH(this, settings->max_particles);
+            printf("*** sph system ***\n");
+			settings->setMaxOuterParticles(2048);
+            system = new SPH(this, settings->max_particles, settings->max_outer_particles);
+			printf("max: %d\n", settings->max_outer_particles);
         }
         else if (settings->system == RTPSettings::FLOCK)
         {
@@ -74,7 +76,7 @@ printf("done with constructor\n");
         }
         else if (settings->system == RTPSettings::OUTER)
         {
-            printf("outer system\n");
+            printf("*** outer system ***\n");
             system_outer = new OUTER(this, settings->max_outer_particles);
             system = new SPH(this, settings->max_particles); //, settings->max_outer_particles);
 			settings->setMaxOuterParticles(10048);

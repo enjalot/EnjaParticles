@@ -97,7 +97,6 @@ namespace rtps
 		
 		//  ADD A SWITCH TO HANDLE CLOUD IF PRESENT
 		if (nb_in_cloud > 0) {
-			exit(0);
 			collision_cloud = CollisionCloud(sph_source_dir, ps->cli, timers["ct_pgu"], 2048); // Last argument is? ??
 		}
 
@@ -614,6 +613,14 @@ namespace rtps
         cl_color_u = Buffer<float4>(ps->cli, col_vbo);
         cl_color_s = Buffer<float4>(ps->cli, colors);
 
+		//CLOUD BUFFERS
+		if (max_outer_num > 0) {
+        	cl_cloud_position_u = Buffer<float4>(ps->cli, cloud_positions);
+        	cl_cloud_position_s = Buffer<float4>(ps->cli, cloud_positions);
+        	cl_cloud_normal_u = Buffer<float4>(ps->cli, cloud_normals);
+        	cl_cloud_normal_s = Buffer<float4>(ps->cli, cloud_normals);
+		}
+
         //pure opencl buffers: these are deprecated
         cl_velocity_u = Buffer<float4>(ps->cli, velocities);
         cl_velocity_s = Buffer<float4>(ps->cli, velocities);
@@ -622,12 +629,6 @@ namespace rtps
         cl_density_s = Buffer<float>(ps->cli, densities);
         cl_force_s = Buffer<float4>(ps->cli, forces);
         cl_xsph_s = Buffer<float4>(ps->cli, xsphs);
-
-		//CLOUD BUFFERS
-        cl_cloud_position_u = Buffer<float4>(ps->cli, cloud_positions);
-        cl_cloud_position_s = Buffer<float4>(ps->cli, cloud_positions);
-        cl_cloud_normal_u = Buffer<float4>(ps->cli, cloud_normals);
-        cl_cloud_normal_s = Buffer<float4>(ps->cli, cloud_normals);
 
         //cl_error_check= Buffer<float4>(ps->cli, error_check);
 
@@ -696,13 +697,16 @@ namespace rtps
 		// Eventually, if I must sort every iteration, I can reuse these arrays. 
 		// Due to potentially, large grid, this is very expensive, and one could run 
 		// out of memory on CPU and GPU. 
-		keys.resize(max_outer_num);
-        cl_cloud_cell_indices_start = Buffer<unsigned int>(ps->cli, gcells);
-        cl_cloud_cell_indices_end   = Buffer<unsigned int>(ps->cli, gcells);
-        cl_cloud_sort_indices       = Buffer<unsigned int>(ps->cli, keys);
-        cl_cloud_sort_hashes        = Buffer<unsigned int>(ps->cli, keys);
-        cl_cloud_sort_output_hashes  = Buffer<unsigned int>(ps->cli, keys);
-        cl_cloud_sort_output_indices = Buffer<unsigned int>(ps->cli, keys);
+
+		if (max_outer_num > 0) {
+			keys.resize(max_outer_num);
+        	cl_cloud_cell_indices_start = Buffer<unsigned int>(ps->cli, gcells);
+        	cl_cloud_cell_indices_end   = Buffer<unsigned int>(ps->cli, gcells);
+        	cl_cloud_sort_indices       = Buffer<unsigned int>(ps->cli, keys);
+        	cl_cloud_sort_hashes        = Buffer<unsigned int>(ps->cli, keys);
+        	cl_cloud_sort_output_hashes  = Buffer<unsigned int>(ps->cli, keys);
+        	cl_cloud_sort_output_indices = Buffer<unsigned int>(ps->cli, keys);
+		}
      }
 
     void SPH::setupDomain()
