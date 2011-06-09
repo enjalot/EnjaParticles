@@ -71,10 +71,11 @@ namespace rtps
 
     }
 
+	//----------------------------------------------------------------------
     std::vector<float4> addSphere(int num, float4 center, float radius, float spacing, float scale)
     {
         /*!
-         * Create a rectangle with at most num particles in it.
+         * Create a sphere with at most num particles in it.
          *  The size of the return vector will be the actual number of particles used to fill the rectangle
          */
         spacing *= 1.9f;
@@ -108,6 +109,7 @@ namespace rtps
 
 
     }
+	//----------------------------------------------------------------------
 
 
     std::vector<float4> addDisc(int num, float4 center, float4 u, float4 v, float radius, float spacing)
@@ -300,8 +302,46 @@ namespace rtps
     }
 
 //----------------------------------------------------------------------
-	std::vector<float4> addHollowSphere(int nn, float4 center, float radius_in, float radius_out, float spacing, float scale, std::vector<float4>& normals)
+	std::vector<float4> addHollowSphere(int num, float4 center, float radius_in, float radius_out, float spacing, float scale, std::vector<float4>& normals)
 	{
+        spacing *= 1.9f;
+        float xmin = (center.x - radius_out) / scale;
+        float xmax = (center.x + radius_out) / scale;
+        float ymin = (center.y - radius_out) / scale;
+        float ymax = (center.y + radius_out) / scale;
+        float zmin = (center.z - radius_out) / scale;
+        float zmax = (center.z + radius_out) / scale;
+        float r2in  = radius_in  * radius_in;
+        float r2out = radius_out * radius_out;
+        float d2 = 0.0f;
+
+        std::vector<float4> rvec; // num
+        //std::vector<float4> nvec; //(num);
+		int i=0;
+
+        for (float z = zmin; z <= zmax; z+=spacing)
+        {
+            for (float y = ymin; y <= ymax; y+=spacing)
+            {
+                for (float x = xmin; x <= xmax; x+=spacing)
+                {
+                    if (i >= num) break;
+					float4 n(x-center.x, y-center.y, z-center.z, 0.);
+                    d2 = (x - center.x)*(x - center.x) + (y - center.y)*(y - center.y) + (z - center.z)*(z - center.z);
+
+					// ideally, replace r2out by r2out-spacing/2 to take radius of particle into 
+					// account. Can fix later when we are refining. 
+                    if (d2 > r2out || d2 < r2in) continue;
+					float4 r(x,y,z,1.0f);
+					rvec.push_back(r);
+					normals.push_back(n);
+					i++;
+                }
+            }
+        }
+        return rvec;
+
+
 		;
 	}
 //----------------------------------------------------------------------

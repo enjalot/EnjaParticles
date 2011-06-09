@@ -31,6 +31,8 @@ namespace rtps
         num = 0;
         nb_var = 10;
 		this->nb_in_cloud = nb_in_cloud;
+		// I should be able to not specify this, but GPU restrictions ...
+		max_outer_num = nb_in_cloud; // max number of cloud particles
 
         resource_path = settings->GetSettingAs<string>("rtps_path");
         printf("resource path: %s\n", resource_path.c_str());
@@ -444,7 +446,7 @@ namespace rtps
 		#if 0
 		collision_cloud.execute(num, num_pts_cloud, 
 			cl_cloud_position_s, 
-			cl_cloud_normals_s,
+			cl_cloud_normal_s,
 			cl_force_s, // output
 			cl_sphp, 
 			cl_GridParamsScaled,
@@ -563,6 +565,7 @@ namespace rtps
         timers.writeToFile(oss.str()); 
     }
 
+	//----------------------------------------------------------------------
     void SPH::prepareSorted()
     {
 //#include "sph/cl_src/cl_macros.h"
@@ -574,6 +577,11 @@ namespace rtps
         veleval.resize(max_num);
         densities.resize(max_num);
         xsphs.resize(max_num);
+
+		// BEGIN CLOUD
+		cloud_positions.resize(max_outer_num); // replace by max_cloud_num
+		cloud_normals.resize(max_outer_num);
+		// END CLOUD
 
         //for reading back different values from the kernel
         std::vector<float4> error_check(max_num);
@@ -614,6 +622,12 @@ namespace rtps
         cl_density_s = Buffer<float>(ps->cli, densities);
         cl_force_s = Buffer<float4>(ps->cli, forces);
         cl_xsph_s = Buffer<float4>(ps->cli, xsphs);
+
+		//CLOUD BUFFERS
+        cl_cloud_position_u = Buffer<float4>(ps->cli, cloud_positions);
+        cl_cloud_position_s = Buffer<float4>(ps->cli, cloud_positions);
+        cl_cloud_normal_u = Buffer<float4>(ps->cli, cloud_normals);
+        cl_cloud_normal_s = Buffer<float4>(ps->cli, cloud_normals);
 
         //cl_error_check= Buffer<float4>(ps->cli, error_check);
 
@@ -673,15 +687,22 @@ namespace rtps
         cl_cell_indices_end   = Buffer<unsigned int>(ps->cli, gcells);
         //printf("gp.nb_points= %d\n", gp.nb_points); exit(0);
 
-
-
         // For bitonic sort. Remove when bitonic sort no longer used
         // Currently, there is an error in the Radix Sort (just run both
         // sorts and compare outputs visually
         cl_sort_output_hashes = Buffer<unsigned int>(ps->cli, keys);
         cl_sort_output_indices = Buffer<unsigned int>(ps->cli, keys);
 
-
+		// Eventually, if I must sort every iteration, I can reuse these arrays. 
+		// Due to potentially, large grid, this is very expensive, and one could run 
+		// out of memory on CPU and GPU. 
+		keys.resize(max_outer_num);
+        cl_cloud_cell_indices_start = Buffer<unsigned int>(ps->cli, gcells);
+        cl_cloud_cell_indices_end   = Buffer<unsigned int>(ps->cli, gcells);
+        cl_cloud_sort_indices       = Buffer<unsigned int>(ps->cli, keys);
+        cl_cloud_sort_hashes        = Buffer<unsigned int>(ps->cli, keys);
+        cl_cloud_sort_output_hashes  = Buffer<unsigned int>(ps->cli, keys);
+        cl_cloud_sort_output_indices = Buffer<unsigned int>(ps->cli, keys);
      }
 
     void SPH::setupDomain()
@@ -752,6 +773,7 @@ namespace rtps
         pushParticles(sphere,velo);
     }
 
+	//----------------------------------------------------------------------
     void SPH::addHollowBall(int nn, float4 center, float radius_in, float radius_out, bool scaled, vector<float4>& normals)
     {
         float scale = 1.0f;
@@ -764,6 +786,7 @@ namespace rtps
         pushParticles(sphere,velo);
     }
 
+	//----------------------------------------------------------------------
     int SPH::addHose(int total_n, float4 center, float4 velocity, float radius, float4 color)
     {
         //in sph we just use sph spacing
@@ -817,6 +840,7 @@ namespace rtps
 
 
     }
+	//----------------------------------------------------------------------
     void SPH::pushParticles(vector<float4> pos, float4 velo, float4 color)
     {
         int nn = pos.size();
@@ -825,6 +849,7 @@ namespace rtps
         pushParticles(pos, vels, color);
 
     }
+	//----------------------------------------------------------------------
     void SPH::pushParticles(vector<float4> pos, vector<float4> vels, float4 color)
     {
         //cut = 1;
@@ -832,6 +857,7 @@ namespace rtps
         int nn = pos.size();
         if (num + nn > max_num)
         {
+			printf("pushParticles: exceeded max nb(%d) of particles allowed\n", max_num);
             return;
         }
         //float rr = (rand() % 255)/255.0f;
@@ -859,7 +885,8 @@ namespace rtps
         //call_prep(0);
         //printf("done with prep 0\n");
 
-
+		// Allocate max_num particles on the GPU. That wastes memory, but is useful. 
+		// There should be a way to update this during the simulation. 
         cl_position_u.copyToDevice(pos, num);
         cl_color_u.copyToDevice(cols, num);
         cl_velocity_u.copyToDevice(vels, num);
@@ -867,8 +894,6 @@ namespace rtps
         //sphp.num = num+nn;
         settings->SetSetting("Number of Particles", num+nn);
         updateSPHP();
-
-        num += nn;  //keep track of number of particles we use
 
         //cl_position.acquire();
         //cl_color_u.acquire();
@@ -880,13 +905,13 @@ namespace rtps
         //printf("done with prep\n");
         cl_position_u.release();
         cl_color_u.release();
-#else
-        num += nn;  //keep track of number of particles we use
 #endif
+        num += nn;  //keep track of number of particles we use
         renderer->setNum(num);
     }
 
 
+	//----------------------------------------------------------------------
     void SPH::render()
     {
         renderer->render_box(grid->getBndMin(), grid->getBndMax());

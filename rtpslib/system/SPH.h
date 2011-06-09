@@ -148,6 +148,22 @@ namespace rtps
         Buffer<float4>      cl_force_s;
         Buffer<float4>      cl_xsph_s;
 
+		// POINT CLOUD ARRAYS
+        std::vector<float4> cloud_positions;
+        std::vector<float4> cloud_normals;
+		Buffer<float4>		cl_cloud_position_u;
+		Buffer<float4>		cl_cloud_position_s;
+		Buffer<float4>		cl_cloud_normal_u;
+		Buffer<float4>		cl_cloud_normal_s; // normalized for now
+        Buffer<unsigned int>         cl_cloud_cell_indices_start;
+        Buffer<unsigned int>         cl_cloud_cell_indices_end;
+        Buffer<unsigned int>         cl_cloud_sort_hashes;
+        Buffer<unsigned int>         cl_cloud_sort_indices;
+        //Two arrays for bitonic sort (sort not done in place)
+        //should be moved to within bitonic
+        Buffer<unsigned int>         cl_cloud_sort_output_hashes;
+        Buffer<unsigned int>         cl_cloud_sort_output_indices;
+
         //Neighbor Search related arrays
         //Buffer<float4>      cl_vars_sorted;
         //Buffer<float4>      cl_vars_unsorted;
