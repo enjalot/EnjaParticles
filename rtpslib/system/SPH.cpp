@@ -95,6 +95,7 @@ namespace rtps
 		
 		//  ADD A SWITCH TO HANDLE CLOUD IF PRESENT
 		if (nb_in_cloud > 0) {
+			exit(0);
 			collision_cloud = CollisionCloud(sph_source_dir, ps->cli, timers["ct_pgu"], 2048); // Last argument is? ??
 		}
 
@@ -751,6 +752,18 @@ namespace rtps
         pushParticles(sphere,velo);
     }
 
+    void SPH::addHollowBall(int nn, float4 center, float radius_in, float radius_out, bool scaled, vector<float4>& normals)
+    {
+        float scale = 1.0f;
+        if (scaled)
+        {
+            scale = sphp.simulation_scale;
+        }
+        vector<float4> sphere = addHollowSphere(nn, center, radius_in, radius_out, spacing, scale, normals);
+        float4 velo(0, 0, 0, 0);
+        pushParticles(sphere,velo);
+    }
+
     int SPH::addHose(int total_n, float4 center, float4 velocity, float radius, float4 color)
     {
         //in sph we just use sph spacing
@@ -903,6 +916,7 @@ namespace rtps
         //renderer->setParticleRadius(spacing*0.5);
         renderer->setParticleRadius(spacing);
     }
+
 
 
 }; //end namespace

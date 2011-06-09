@@ -216,7 +216,7 @@ namespace rtps
 
         srand(time(NULL));	
 
-            printf("random num: %f\n", rand()/RAND_MAX);
+        printf("random num: %f\n", rand()/(float) RAND_MAX);
         spacing *= 1.1f;
     min.print("Box min: ");
     max.print("Box max: ");
@@ -298,6 +298,14 @@ namespace rtps
         rvec.resize(i);
         return rvec;
     }
+
+//----------------------------------------------------------------------
+	std::vector<float4> addHollowSphere(int nn, float4 center, float radius_in, float radius_out, float spacing, float scale, std::vector<float4>& normals)
+	{
+		;
+	}
+//----------------------------------------------------------------------
+
 
 
 }
