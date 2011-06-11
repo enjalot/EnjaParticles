@@ -38,7 +38,7 @@ inline void ForNeighbor(ARGS,
             pt->num_flockmates++;
 
             if(flockp->w_sep > 0.f){
-                #include "rule_separation.cl";
+                #include "rule_separation.cl"
             }
 
             if(flockp->w_align > 0.f){
