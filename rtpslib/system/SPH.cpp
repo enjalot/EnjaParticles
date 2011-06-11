@@ -48,6 +48,7 @@ namespace rtps
         //sphsettings = new SPHSettings(grid, max_num);
         //sphsettings->printSettings();
         //sphsettings->updateSPHP(sphp);
+
         std::vector<SPHParams> vparams(0);
         vparams.push_back(sphp);
         cl_sphp = Buffer<SPHParams>(ps->cli, vparams);
@@ -110,10 +111,6 @@ namespace rtps
         collision_wall = CollisionWall(sph_source_dir, ps->cli, timers["cw_gpu"]);
         collision_tri = CollisionTriangle(sph_source_dir, ps->cli, timers["ct_gpu"], 2048); //TODO expose max_triangles as a parameter
 		
-		//  ADD A SWITCH TO HANDLE CLOUD IF PRESENT
-		if (cloud_num > 0) {
-			collision_cloud = CollisionCloud(sph_source_dir, ps->cli, timers["ct_pgu"], max_cloud_num); // Last argument is? ??
-		}
 
         //could generalize this to other integration methods later (leap frog, RK4)
         if (integrator == LEAPFROG)
@@ -144,6 +141,13 @@ namespace rtps
 
 		// must be called after prepareSorted
 		addHollowBall(500, center, radius_in, radius_out, scaled, cloud_normals);
+
+		//  ADD A SWITCH TO HANDLE CLOUD IF PRESENT
+		// Must be called after a point cloud has been created. 
+		if (cloud_num > 0) {
+			collision_cloud = CollisionCloud(sph_source_dir, ps->cli, timers["ct_pgu"], max_cloud_num); // Last argument is? ??
+			//printf("collision_cloud exit\n"); exit(0);
+		}
     }
 
     SPH::~SPH()
@@ -372,6 +376,7 @@ namespace rtps
 
             timers["force"]->stop();
 
+			printf("before collision\n");
             collision();
             timers["integrate"]->start();
             integrate();

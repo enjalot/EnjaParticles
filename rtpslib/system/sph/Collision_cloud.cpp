@@ -9,6 +9,8 @@ namespace rtps
         timer = timer_;
         printf("create collision wall kernel\n");
         path += "/collision_cloud.cl";
+		//printf("path= %s\n", path.c_str());
+		//exit(0);
         k_collision_cloud = Kernel(cli, path, "collision_cloud");
 
     } 
@@ -33,13 +35,14 @@ namespace rtps
             Buffer<float4>& clf_debug,
             Buffer<int4>& cli_debug)
     {
-		//printf("x COLLISION\n"); exit(1);
+		printf("enter cloud COLLISION\n"); 
 
         int iarg = 0;
 		//printf("num= %d\n", num);
 		//printf("(exit) num_pts_cloud= %d\n", num_pts_cloud);
 		//exit(0);
         //k_collision_cloud.setArg(iarg++, num);
+		printf("num_pts_cloud= %d\n", num_pts_cloud);
         k_collision_cloud.setArg(iarg++, num_pts_cloud);
         k_collision_cloud.setArg(iarg++, pos_s.getDevicePtr());
         k_collision_cloud.setArg(iarg++, cloud_pos_s.getDevicePtr());
@@ -63,6 +66,7 @@ namespace rtps
             timer->set(gputime);
 
 
+		printf("exit cloud COLLISION\n"); 
     }
 
 // DISABLE CPU FUNCTIONS: Duplicate function definitions
