@@ -13,17 +13,6 @@ namespace rtps
 
     } 
 
-	/*  FROM SPH
-        collision_cloud.execute(num, num_pts_cloud,
-            cl_cloud_position_s,
-            cl_cloud_normals_s,
-            cl_force_s, // output
-            cl_sphp,
-            cl_GridParamsScaled,
-            // debug
-            clf_debug,
-            cli_debug);
-	*/
 
     // TO OPTIMIZE, I SHOULD BE ABLE TO COMBINE BOUNDARY SEARCH with 
     // INTERIOR POINT SEARCH. 
@@ -44,7 +33,12 @@ namespace rtps
             Buffer<float4>& clf_debug,
             Buffer<int4>& cli_debug)
     {
+		//printf("x COLLISION\n"); exit(1);
+
         int iarg = 0;
+		printf("num= %d\n", num);
+		printf("num_pts_cloud= %d\n", num_pts_cloud);
+        k_collision_cloud.setArg(iarg++, num);
         k_collision_cloud.setArg(iarg++, num_pts_cloud);
         k_collision_cloud.setArg(iarg++, pos_s.getDevicePtr());
         k_collision_cloud.setArg(iarg++, cloud_pos_s.getDevicePtr());
@@ -61,6 +55,7 @@ namespace rtps
         k_collision_cloud.setArg(iarg++, cli_debug.getDevicePtr());
 
         int local_size = 128;
+		printf("CollisionCloud\n"); exit(1);
         float gputime = k_collision_cloud.execute(num, local_size);
         if(gputime > 0)
             timer->set(gputime);

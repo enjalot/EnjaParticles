@@ -18,6 +18,24 @@ namespace rtps
 #ifdef WIN32
 #pragma pack(push,16)
 #endif
+	typedef struct CLOUDParams
+    //Struct which gets passed to OpenCL routines
+	{
+		int num; // nb cloud points
+		int max_num; // max nb cloud points
+		void print() {
+			printf("---- CLOUDParams----\n");
+			printf("nb points: %d\n", num);
+			printf("max nb points: %d\n", max_num);
+		}
+	}
+#ifndef WIN32
+	__attribute__((aligned(16)));
+#else
+		;
+        #pragma pack(pop)
+#endif
+
     //Struct which gets passed to OpenCL routines
 	typedef struct SPHParams
     {
@@ -67,6 +85,10 @@ namespace rtps
         int nb_vars; // for combined variables (vars_sorted, etc.)
         int choice; // which kind of calculation to invoke
         int max_num;
+
+		//CL parameter, cloud
+        int cloud_num; // nb cloud points
+        int max_cloud_num;
 
 
         void print()

@@ -3,6 +3,11 @@
 
 #include "../cl_common/cl_structs.h"
 
+typedef struct CLOUDParams
+{
+	int num; // nb cloud points
+} CLOUDParams;
+
 typedef struct SPHParams
 {
     float mass;

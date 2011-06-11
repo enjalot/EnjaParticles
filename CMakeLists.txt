@@ -15,8 +15,8 @@ SET( OPENCL_INCLUDE_DIR
 message("rtps_cmake_module_path: ${RTPS_CMAKE_MODULE_PATH}\n")
 
 IF(RTPS_INSTALL_DIR)
-    #message("rtps install dir: ${RTPS_INSTALL_DIR}")
-    #message("rtps install dir relative: ${RTPS_INSTALL_DIR_REL}")
+    message("**rtps install dir: ${RTPS_INSTALL_DIR}")
+    message("**rtps install dir relative: ${RTPS_INSTALL_DIR_REL}")
 ELSE(RTPS_INSTALL_DIR)
     set(RTPS_INSTALL_DIR ${rtpsuite_BINARY_DIR}/bin)
     set(RTPS_INSTALL_DIR_REL .)

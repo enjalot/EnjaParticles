@@ -2,6 +2,7 @@
 #define _CL_COLLISION_H_
 
 
+//----------------------------------------------------------------------
 //from Krog '10
 float4 calculateRepulsionForce(float4 normal, float4 vel, float boundary_stiffness, float boundary_dampening, float distance)
 {
@@ -11,6 +12,7 @@ float4 calculateRepulsionForce(float4 normal, float4 vel, float boundary_stiffne
     return repulsion_force;
 }
 
+//----------------------------------------------------------------------
 //from Krog '10
 float4 calculateFrictionForce(float4 vel, float4 force, float4 normal, float friction_kinetic, float friction_static_limit)
 {
@@ -45,5 +47,18 @@ float4 calculateFrictionForce(float4 vel, float4 force, float4 normal, float fri
 
 }
 
+//----------------------------------------------------------------------
+#if 0
+//Gordon Erlebacher (based on Krog'10)
+float4 calculateRepulsionForce(float4 normal, float4 vel, float boundary_stiffness, float boundary_dampening, float distance)
+{
+    vel.w = 0.0f;
+    float4 repulsion_force = (boundary_stiffness * distance - boundary_dampening * dot(normal, vel))*normal;
+    repulsion_force.w = 0.0f;
+    return repulsion_force;
+}
+#endif
+
 
 #endif
+//----------------------------------------------------------------------

@@ -34,6 +34,8 @@ namespace rtps
         float simulation_scale = pow(.5f * VP * max_num / domain_vol, 1.f/3.f); 
         //float simulation_scale = pow(VP * 16000/ domain_vol, 1.f/3.f); 
 
+		// Cloud update
+        settings->SetSetting("Maximum Number of Cloud Particles", max_cloud_num);
        
         settings->SetSetting("Maximum Number of Particles", max_num);
         settings->SetSetting("Mass", mass);
@@ -93,8 +95,19 @@ namespace rtps
         settings->SetSetting("Choice", 0); // which kind of calculation to invoke //TO be depracated
 
 
+		// CL Cloud parameters
+        settings->SetSetting("Number of Cloud Particles", 0);
+
+
     }
    
+    void SPH::updateCLOUDP()
+	{
+		cloudp.num = settings->GetSettingAs<int>("Number of Cloud Particles");
+		cloudp.max_num = settings->GetSettingAs<int>("Maximum Number of Cloud Particles");
+	}
+
+
     void SPH::updateSPHP()
     {
 

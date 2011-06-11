@@ -124,7 +124,8 @@ namespace rtps
         //maximum number of particles (for array allocation)
         int max_num;
         //maximum number of outer particles (for array allocation)
-        int max_outer_num;
+        int max_cloud_num;
+        int cloud_num;  // USED FOR WHAT? 
 
         GLuint pos_vbo;
         GLuint col_vbo;

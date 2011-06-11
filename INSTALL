@@ -55,3 +55,9 @@ http://go.microsoft.com/?linkid=9709949
     select build
     navigate to build directory copy rtpslib\Debug\rtps.dll to test\Debug
     double-click test\Debug\test.exe
+
+----------------------------------------------------------------------
+Possible ERRORS
+- Make sure that rtpslib/cl_sph/ does not contain directories. That prevents cmake .. from running 
+correctly. When in doubt, remove everything in build/ and start over. 
+

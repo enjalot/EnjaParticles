@@ -101,6 +101,7 @@ namespace rtps
         RTPSettings* settings;
 
         //SPHSettings* sphsettings;
+		CLOUDParams cloudp;
         SPHParams sphp;
         GridParams grid_params;
         GridParams grid_params_scaled;
@@ -190,6 +191,9 @@ namespace rtps
         Buffer<GridParams>  cl_GridParams;
         Buffer<GridParams>  cl_GridParamsScaled;
 
+		//Parameter structs for point cloud
+        Buffer<CLOUDParams>   cl_cloudp;
+
         Buffer<float4>      clf_debug;  //just for debugging cl files
         Buffer<int4>        cli_debug;  //just for debugging cl files
 
@@ -211,6 +215,7 @@ namespace rtps
         void calculate();
         //copy the SPH parameter struct to the GPU
         void updateSPHP();
+        void updateCLOUDP();
 
         //Nearest Neighbors search related functions
         //Prep prep;

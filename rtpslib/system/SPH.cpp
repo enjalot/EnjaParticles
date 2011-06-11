@@ -30,9 +30,14 @@ namespace rtps
         max_num = n;
         num = 0;
         nb_var = 10;
+
+		max_cloud_num = nb_in_cloud; // remove max_outer_num
+		cloud_num = 0;
+		// max_outer_particles defined in RTPSettings (used?)
+
 		this->nb_in_cloud = nb_in_cloud;
 		// I should be able to not specify this, but GPU restrictions ...
-		max_outer_num = nb_in_cloud; // max number of cloud particles
+		//max_outer_num = nb_in_cloud; // max number of cloud particles
 
         resource_path = settings->GetSettingAs<string>("rtps_path");
         printf("resource path: %s\n", resource_path.c_str());
@@ -48,6 +53,10 @@ namespace rtps
         std::vector<SPHParams> vparams(0);
         vparams.push_back(sphp);
         cl_sphp = Buffer<SPHParams>(ps->cli, vparams);
+
+		std::vector<CLOUDParams> vcparams(0);
+		vcparams.push_back(cloudp);
+		cl_cloudp = Buffer<CLOUDParams>(ps->cli, vcparams);
         
         calculate();
         updateSPHP();
@@ -312,6 +321,7 @@ namespace rtps
                 settings->SetSetting("Number of Particles", num);
                 //sphp.num = num;
                 updateSPHP();
+                updateCLOUDP();
                 renderer->setNum(sphp.num);
                 //need to copy sorted arrays into unsorted arrays
                 call_prep(2);
@@ -408,6 +418,7 @@ namespace rtps
 
     }
 
+	//----------------------------------------------------------------------
     void SPH::collision()
     {
         //when implemented other collision routines can be chosen here
@@ -442,20 +453,25 @@ namespace rtps
         timers["collision_tri"]->stop();
 
 		// NEED TIMER FOR POINT CLOUD COLLISIONS (GE)
-		#if 0
-		collision_cloud.execute(num, num_pts_cloud, 
+		#if 1
+		collision_cloud.execute(num, nb_in_cloud, 
+			cl_position_s, 
 			cl_cloud_position_s, 
 			cl_cloud_normal_s,
 			cl_force_s, // output
+
+            cl_cloud_cell_indices_start,
+            cl_cloud_cell_indices_end,
+
 			cl_sphp, 
 			cl_GridParamsScaled,
 			// debug
 			clf_debug,
 			cli_debug);
-		)
 		#endif
 
     }
+	//----------------------------------------------------------------------
 
     void SPH::integrate()
     {
@@ -578,8 +594,8 @@ namespace rtps
         xsphs.resize(max_num);
 
 		// BEGIN CLOUD
-		cloud_positions.resize(max_outer_num); // replace by max_cloud_num
-		cloud_normals.resize(max_outer_num);
+		cloud_positions.resize(max_cloud_num); // replace by max_cloud_num
+		cloud_normals.resize(max_cloud_num);
 		// END CLOUD
 
         //for reading back different values from the kernel
@@ -614,7 +630,7 @@ namespace rtps
         cl_color_s = Buffer<float4>(ps->cli, colors);
 
 		//CLOUD BUFFERS
-		if (max_outer_num > 0) {
+		if (max_cloud_num > 0) {
         	cl_cloud_position_u = Buffer<float4>(ps->cli, cloud_positions);
         	cl_cloud_position_s = Buffer<float4>(ps->cli, cloud_positions);
         	cl_cloud_normal_u = Buffer<float4>(ps->cli, cloud_normals);
@@ -698,8 +714,8 @@ namespace rtps
 		// Due to potentially, large grid, this is very expensive, and one could run 
 		// out of memory on CPU and GPU. 
 
-		if (max_outer_num > 0) {
-			keys.resize(max_outer_num);
+		if (max_cloud_num > 0) {
+			keys.resize(max_cloud_num);
         	cl_cloud_cell_indices_start = Buffer<unsigned int>(ps->cli, gcells);
         	cl_cloud_cell_indices_end   = Buffer<unsigned int>(ps->cli, gcells);
         	cl_cloud_sort_indices       = Buffer<unsigned int>(ps->cli, keys);
@@ -898,6 +914,7 @@ namespace rtps
         //sphp.num = num+nn;
         settings->SetSetting("Number of Particles", num+nn);
         updateSPHP();
+        updateCLOUDP();
 
         //cl_position.acquire();
         //cl_color_u.acquire();
