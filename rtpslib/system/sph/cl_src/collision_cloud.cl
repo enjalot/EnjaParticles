@@ -11,9 +11,27 @@
 #include "cl_structs.h"
 //Contains all of the Smoothing Kernels for SPH
 //#include "cl_kernels.h"
-//#include "cl_collision.h"
+#include "cl_collision.h"
+
+// for zeroPoint (redefine zeroPoint instead)
+//#include "cl_neighbors.h" 
 
 //#define ARGS int pts_in_cloud,  __global float4* pos,  __global float* cloud_pos,  __global float* cloud_normals,  __global float4* force
+
+//----------------------------------------------------------------------
+void zeroPoint(PointData* pt)
+{
+    //pt->density = (float4)(0.,0.,0.,0.);
+    //pt->color = (float4)(0.,0.,0.,0.);
+    pt->color_normal = (float4)(0.,0.,0.,0.);
+    pt->force = (float4)(0.,0.,0.,0.);
+    //pt->surf_tens = (float4)(0.,0.,0.,0.);
+    //pt->color_lapl = 0.;
+    //pt->xsph = (float4)(0.,0.,0.,0.);
+    //	pt->center_of_mass = (float4)(0.,0.,0.,0.);
+    //	pt->num_neighbors = 0;
+}
+
 
 //----------------------------------------------------------------------
 //Collide a fluid particle against a point (and normal). Ideally, the size of the normal
