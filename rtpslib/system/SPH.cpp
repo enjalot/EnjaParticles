@@ -22,7 +22,7 @@ namespace rtps
     using namespace sph;
 
 
-    SPH::SPH(RTPS *psfr, int n, int nb_in_cloud)
+    SPH::SPH(RTPS *psfr, int n, int max_nb_in_cloud)
     {
         //store the particle system framework
         ps = psfr;
@@ -31,13 +31,11 @@ namespace rtps
         num = 0;
         nb_var = 10;
 
-		max_cloud_num = nb_in_cloud; // remove max_outer_num
+		max_cloud_num = max_nb_in_cloud; // remove max_outer_num
 		cloud_num = 0;
 		// max_outer_particles defined in RTPSettings (used?)
 
-		this->nb_in_cloud = nb_in_cloud;
 		// I should be able to not specify this, but GPU restrictions ...
-		//max_outer_num = nb_in_cloud; // max number of cloud particles
 
         resource_path = settings->GetSettingAs<string>("rtps_path");
         printf("resource path: %s\n", resource_path.c_str());
@@ -60,6 +58,7 @@ namespace rtps
         
         calculate();
         updateSPHP();
+        updateCLOUDP();
 
         //settings->printSettings();
 
@@ -72,6 +71,13 @@ namespace rtps
 
         integrator = LEAPFROG;
         //integrator = EULER;
+
+		// Create cloud object for testing
+		float4 center(0.,0.,0.,0.0);
+		float radius_in = 1.;
+		float radius_out = 1.2;
+		vector<float4> cloud_normals;
+		bool scaled = true;
 
         //*** end Initialization
 
@@ -105,8 +111,8 @@ namespace rtps
         collision_tri = CollisionTriangle(sph_source_dir, ps->cli, timers["ct_gpu"], 2048); //TODO expose max_triangles as a parameter
 		
 		//  ADD A SWITCH TO HANDLE CLOUD IF PRESENT
-		if (nb_in_cloud > 0) {
-			collision_cloud = CollisionCloud(sph_source_dir, ps->cli, timers["ct_pgu"], 2048); // Last argument is? ??
+		if (cloud_num > 0) {
+			collision_cloud = CollisionCloud(sph_source_dir, ps->cli, timers["ct_pgu"], max_cloud_num); // Last argument is? ??
 		}
 
         //could generalize this to other integration methods later (leap frog, RK4)
@@ -136,6 +142,8 @@ namespace rtps
         //settings->printSettings();
         //printf("=================================================\n");
 
+		// must be called after prepareSorted
+		addHollowBall(500, center, radius_in, radius_out, scaled, cloud_normals);
     }
 
     SPH::~SPH()
@@ -454,7 +462,7 @@ namespace rtps
 
 		// NEED TIMER FOR POINT CLOUD COLLISIONS (GE)
 		#if 1
-		collision_cloud.execute(num, nb_in_cloud, 
+		collision_cloud.execute(num, cloud_num, 
 			cl_position_s, 
 			cl_cloud_position_s, 
 			cl_cloud_normal_s,
@@ -631,6 +639,7 @@ namespace rtps
 
 		//CLOUD BUFFERS
 		if (max_cloud_num > 0) {
+			printf("max_cloud_num= %d\n", max_cloud_num);
         	cl_cloud_position_u = Buffer<float4>(ps->cli, cloud_positions);
         	cl_cloud_position_s = Buffer<float4>(ps->cli, cloud_positions);
         	cl_cloud_normal_u = Buffer<float4>(ps->cli, cloud_normals);
@@ -794,6 +803,27 @@ namespace rtps
     }
 
 	//----------------------------------------------------------------------
+	void SPH::pushCloudParticles(vector<float4>& pos, vector<float4>& normals)
+	{
+		if ((cloud_num+pos.size()) > max_cloud_num) {
+			printf("exceeded max number of cloud particles\n");
+			return;
+		}
+
+		//cloud_positions.resize(max_cloud_num); // replace by max_cloud_num
+		//cloud_normals.resize(max_cloud_num);
+		for (int i=0; i < pos.size(); i++) {
+			pos[i].print("pos");
+			normals[i].print("norm");
+		}
+        cl_cloud_position_u.copyToDevice(pos, cloud_num);
+        cl_cloud_normal_u.copyToDevice(normals, cloud_num);
+
+		cloud_num += pos.size();
+		printf("cloud_num= %d\n", cloud_num);
+		return;
+	}
+	//----------------------------------------------------------------------
     void SPH::addHollowBall(int nn, float4 center, float radius_in, float radius_out, bool scaled, vector<float4>& normals)
     {
         float scale = 1.0f;
@@ -801,9 +831,11 @@ namespace rtps
         {
             scale = sphp.simulation_scale;
         }
-        vector<float4> sphere = addHollowSphere(nn, center, radius_in, radius_out, spacing, scale, normals);
+		printf("spacing= %f\n", spacing);
+        vector<float4> sphere = addHollowSphere(nn, center, radius_in, radius_out, spacing/2., scale, normals);
         float4 velo(0, 0, 0, 0);
-        pushParticles(sphere,velo);
+		printf("addHollowBall: nb particles: %d\n", sphere.size());
+        pushCloudParticles(sphere,normals);
     }
 
 	//----------------------------------------------------------------------

@@ -216,6 +216,7 @@ namespace rtps
         //copy the SPH parameter struct to the GPU
         void updateSPHP();
         void updateCLOUDP();
+		void pushCloudParticles(vector<float4>& pos, vector<float4>& normals);
 
         //Nearest Neighbors search related functions
         //Prep prep;

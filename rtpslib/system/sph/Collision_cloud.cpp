@@ -37,7 +37,8 @@ namespace rtps
 
         int iarg = 0;
 		//printf("num= %d\n", num);
-		printf("num_pts_cloud= %d\n", num_pts_cloud);
+		//printf("(exit) num_pts_cloud= %d\n", num_pts_cloud);
+		//exit(0);
         //k_collision_cloud.setArg(iarg++, num);
         k_collision_cloud.setArg(iarg++, num_pts_cloud);
         k_collision_cloud.setArg(iarg++, pos_s.getDevicePtr());
@@ -55,7 +56,7 @@ namespace rtps
         k_collision_cloud.setArg(iarg++, cli_debug.getDevicePtr());
 
         int local_size = 128;
-		printf("CollisionCloud\n"); exit(1);
+		//printf("CollisionCloud\n"); exit(1);
 		// loop over fluid particles
         float gputime = k_collision_cloud.execute(num, local_size);
         if(gputime > 0)

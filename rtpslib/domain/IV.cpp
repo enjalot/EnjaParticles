@@ -333,6 +333,10 @@ namespace rtps
 					// account. Can fix later when we are refining. 
                     if (d2 > r2out || d2 < r2in) continue;
 					float4 r(x,y,z,1.0f);
+					float sqi = sqrt(1. / (n.x*n.x + n.y*n.y + n.z*n.z));
+					n.x *= sqi;
+					n.y *= sqi;
+					n.z *= sqi;
 					rvec.push_back(r);
 					normals.push_back(n);
 					i++;
