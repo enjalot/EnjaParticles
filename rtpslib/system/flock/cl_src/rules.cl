@@ -2,7 +2,7 @@
 #define _RULES_CL_
 
 //These are passed along through cl_neighbors.h only used inside ForNeighbor defined in this file
-#define ARGS __global float4 target, __global float4* pos,  __global float4* vel, __global int4* flockmates,  __global float4* separation, __global float4* alignment, __global float4* cohesion, __global float4* goal, __global float4* avoid 
+#define ARGS float4 target, __global float4* pos,  __global float4* vel, __global int4* flockmates,  __global float4* separation, __global float4* alignment, __global float4* cohesion, __global float4* goal, __global float4* avoid 
 #define ARGV target, pos, vel, flockmates, separation, alignment, cohesion, goal, avoid
 
 #include "cl_macros.h"
