@@ -250,6 +250,11 @@ namespace rtps
 
             //if(num >0) printf("before hash and sort\n");
             hash_and_sort();
+
+			// only for clouds (if cloud_num > 0)
+			if (cloud_num > 0) {
+            	cloud_hash_and_sort();
+			}
             //if(num >0) printf("after hash and sort\n");
 
             //printf("data structures\n");
@@ -292,6 +297,23 @@ namespace rtps
                 clf_debug,
                 cli_debug);
             timers["cellindices"]->stop();
+
+			// I should be able to overlap with fluid sorting or fluid calculation
+			// SORT CLOUD
+            //printf("cellindices\n");
+            //timers["cellindices"]->start();
+            int cloud_nc = cellindices.execute(   num,
+                cl_cloud_sort_hashes,
+                cl_cloud_sort_indices,
+                cl_cloud_cell_indices_start,
+                cl_cloud_cell_indices_end,
+                //cl_sphp,
+                cl_GridParams,
+                grid_params.nb_cells,
+                clf_debug,
+                cli_debug);
+            //timers["cellindices"]->stop();
+			printf("(deleted cloud particles?) cloud_nc= %d\n", cloud_nc);
        
             //printf("permute\n");
             timers["permute"]->start();
@@ -311,11 +333,34 @@ namespace rtps
                 cli_debug);
             timers["permute"]->stop();
  
+            //printf("permute\n");
+            timers["permute"]->start();
+            permute.execute(   num,
+                cl_cloud_position_u,
+                cl_cloud_position_s,
+				// IAN: with my approach, the routines would remain the same. With your
+				// approach (a different array for each variable, there are more arguments, and 
+				// you need different routines for different cases
+                cl_velocity_u, //
+                cl_velocity_s, //
+                cl_veleval_u, //
+                cl_veleval_s, //
+                cl_color_u, //
+                cl_color_s, //
+                cl_cloud_sort_indices,
+                //cl_sphp,
+                cl_GridParams,
+                clf_debug,
+                cli_debug);
+            timers["permute"]->stop();
+
+			// NUMBER OF CLOUD PARTICLES IS CONSTANT THROUGHOUT THE SIMULATION
+ 
 
             //printf("num %d, nc %d\n", num, nc);
             if (nc <= num && nc >= 0)
             {
-                //check if the number of particles have changed
+                //check if the number of particles has changed
                 //(this happens when particles go out of bounds,
                 //  either because of forces or by explicitly placing
                 //  them in order to delete)
@@ -454,7 +499,6 @@ namespace rtps
         timers["bitonic"]->start();
         cloud_bitonic_sort(); // DEFINED WHERE?
         timers["bitonic"]->stop();
-
     }
 
 	//----------------------------------------------------------------------
