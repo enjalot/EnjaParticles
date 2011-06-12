@@ -177,6 +177,7 @@ namespace rtps
 
     }
 
+	//----------------------------------------------------------------------
     void SPH::update()
     {
         //call kernels
@@ -252,6 +253,7 @@ namespace rtps
             //if(num >0) printf("after hash and sort\n");
 
             //printf("data structures\n");
+			// WHY ISN't THIS USED? GE
             /*
             timers["datastructures"]->start();
             int nc = datastructures.execute(   num,
@@ -276,6 +278,7 @@ namespace rtps
                 cli_debug);
             timers["datastructures"]->stop();
             */
+
             //printf("cellindices\n");
             timers["cellindices"]->start();
             int nc = cellindices.execute(   num,
@@ -427,6 +430,29 @@ namespace rtps
         //defined in Sort.cpp
         timers["bitonic"]->start();
         bitonic_sort();
+        timers["bitonic"]->stop();
+
+    }
+
+    void SPH::cloud_hash_and_sort()
+    {
+        //printf("hash\n");
+        timers["hash"]->start();
+        hash.execute(   cloud_num,
+                //cl_vars_unsorted,
+                cl_cloud_position_u,
+                cl_cloud_sort_hashes,
+                cl_cloud_sort_indices,
+                //cl_sphp,
+                cl_GridParams,
+                clf_debug,
+                cli_debug);
+        timers["hash"]->stop();
+
+        //printf("bitonic_sort\n");
+        //defined in Sort.cpp
+        timers["bitonic"]->start();
+        cloud_bitonic_sort(); // DEFINED WHERE?
         timers["bitonic"]->stop();
 
     }
@@ -823,6 +849,10 @@ namespace rtps
 		}
         cl_cloud_position_u.copyToDevice(pos, cloud_num);
         cl_cloud_normal_u.copyToDevice(normals, cloud_num);
+
+		// Should be sorted, so this is temporary to check collision code
+        //cl_cloud_position_s.copyToDevice(pos, cloud_num);
+        //cl_cloud_normal_s.copyToDevice(normals, cloud_num);
 
 		cloud_num += pos.size();
 		printf("cloud_num= %d\n", cloud_num);

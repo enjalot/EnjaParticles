@@ -166,6 +166,7 @@ set (rtpslib_SOURCES
     #${rtpslib_SOURCE_DIR}/system/flock/Hash
     #${rtpslib_SOURCE_DIR}/system/flock/BitonicSort
     #${rtpslib_SOURCE_DIR}/system/flock/DataStructures
+    #${rtpslib_SOURCE_DIR}/system/flock/CloudDataStructures
     #${rtpslib_SOURCE_DIR}/system/flock/Neighbors
     #${rtpslib_SOURCE_DIR}/particle
     )

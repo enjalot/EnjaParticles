@@ -226,7 +226,9 @@ namespace rtps
         CellIndices cellindices;
         Permute permute;
         void hash_and_sort();
+        void cloud_hash_and_sort();  // GE
         void bitonic_sort();
+        void cloud_bitonic_sort();   // GE
         Density density;
         Force force;
         void collision();
