@@ -1,4 +1,4 @@
-#include "Permute.h"
+#include "CloudPermute.h"
 
 #include <string>
 
@@ -6,26 +6,26 @@ namespace rtps
 {
 
 	//----------------------------------------------------------------------
-    Permute::Permute(std::string path, CL* cli_, EB::Timer* timer_)
+    CloudPermute::CloudPermute(std::string path, CL* cli_, EB::Timer* timer_)
     {
         cli = cli_;
         timer = timer_;
         printf("create permute kernel\n");
-        path = path + "/permute.cl";
-        k_permute = Kernel(cli, path, "permute");
+        path = path + "/cloud_permute.cl";
+        k_permute = Kernel(cli, path, "cloud_permute");
         
     }
 
-    void Permute::execute(int num,
+    void CloudPermute::execute(int num,
                     //input
                     Buffer<float4>& pos_u,
                     Buffer<float4>& pos_s,
-                    Buffer<float4>& vel_u,
-                    Buffer<float4>& vel_s,
-                    Buffer<float4>& veleval_u,
-                    Buffer<float4>& veleval_s,
-                    Buffer<float4>& color_u,
-                    Buffer<float4>& color_s,
+                    Buffer<float4>& normal_u,
+                    Buffer<float4>& normal_s,
+                    //Buffer<float4>& veleval_u,
+                    //Buffer<float4>& veleval_s,
+                    //Buffer<float4>& color_u,
+                    //Buffer<float4>& color_s,
                     Buffer<unsigned int>& indices,
                     //params
                     //Buffer<SPHParams>& sphp,
@@ -34,18 +34,18 @@ namespace rtps
                     Buffer<float4>& clf_debug,
                     Buffer<int4>& cli_debug)
     {
-
+	printf("CloudPermute: num= %d\n", num);
         
         int iarg = 0;
         k_permute.setArg(iarg++, num);
         k_permute.setArg(iarg++, pos_u.getDevicePtr());
         k_permute.setArg(iarg++, pos_s.getDevicePtr());
-        k_permute.setArg(iarg++, vel_u.getDevicePtr());
-        k_permute.setArg(iarg++, vel_s.getDevicePtr());
-        k_permute.setArg(iarg++, veleval_u.getDevicePtr());
-        k_permute.setArg(iarg++, veleval_s.getDevicePtr());
-        k_permute.setArg(iarg++, color_u.getDevicePtr());
-        k_permute.setArg(iarg++, color_s.getDevicePtr());
+        k_permute.setArg(iarg++, normal_u.getDevicePtr());
+        k_permute.setArg(iarg++, normal_s.getDevicePtr());
+        //k_permute.setArg(iarg++, veleval_u.getDevicePtr());
+        //k_permute.setArg(iarg++, veleval_s.getDevicePtr());
+        //k_permute.setArg(iarg++, color_u.getDevicePtr());
+        //k_permute.setArg(iarg++, color_s.getDevicePtr());
         k_permute.setArg(iarg++, indices.getDevicePtr());
 
         int workSize = 64;
@@ -65,11 +65,11 @@ namespace rtps
 
         
 #if 0
-        //printPermuteDiagnostics();
+        //printCloudPermuteDiagnostics();
 
-        printf("**************** Permute Diagnostics ****************\n");
-        int nbc = nb_cells + 1;
-        printf("nb_cells: %d\n", nbc);
+        printf("**************** CloudPermute Diagnostics ****************\n");
+        int nbc = num;
+        printf("(cloud) num: %d\n", num);
         printf("num particles: %d\n", num);
 
         std::vector<unsigned int> is(nbc);
@@ -78,10 +78,6 @@ namespace rtps
         ci_end.copyToHost(ie);
         ci_start.copyToHost(is);
 
-        //std::vector<unsigned int> hpos_u(nbc);
-        //std::vector<unsigned int> hpos_s(nbc);
-		//pos_s.copyToHost(hpos_s);
-		//pos_u.copyToHost(hpos_u);
 
         for(int i = 0; i < nbc; i++)
         {
@@ -114,7 +110,7 @@ namespace rtps
 			pos_s.copyToHost(hpos_s);
 			indices.copyToHost(hindices);
 
-			printf("**** INSIDE PERMUTE ****\n");
+			printf("**** INSIDE CLOUDPERMUTE ****\n");
 
 			printf("**** UNSORTED POSITIONS *****\n");
             for (int i=0; i < num; i++)
@@ -135,7 +131,6 @@ namespace rtps
                 printf("indices: %d\n", hindices[i]);
             }
 #endif
-
 
 
         //return nc;

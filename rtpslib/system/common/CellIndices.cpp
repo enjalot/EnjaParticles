@@ -29,6 +29,8 @@ namespace rtps
                     Buffer<int4>& cli_debug)
     {
 
+		printf("*** enter CellIndices, num= %d\n", num);
+
         //-------------------
         // Set cl_cell indices to -1
         int minus = 0xffffffff;
@@ -72,34 +74,42 @@ namespace rtps
         //ci_end.copyToHost(num_changed, nb_cells);
        
         int nc = num_changed[0];
+		printf("cell indices: (num_changed) nc= %d\n", nc);
         //printf("Num Changed: %d\n", nc);
 
         //if(num > 0 && nc < 0) { exit(0); }
         
-#if 0
+#if 1
         //printCellIndicesDiagnostics();
 
         printf("**************** CellIndices Diagnostics ****************\n");
         int nbc = nb_cells + 1;
-        printf("nb_cells: %d\n", nbc);
-        printf("num particles: %d\n", num);
+        printf("nb_cells: %d\n", nbc); // nb grid cells?
+        printf("num: %d\n", num); // nb grid cells?
+        printf("cell indices, num particles: %d\n", num);
 
         std::vector<unsigned int> is(nbc);
         std::vector<unsigned int> ie(nbc);
+        std::vector<unsigned int> in(nbc);
+        std::vector<unsigned int> hhash(nbc);
         
         ci_end.copyToHost(ie);
         ci_start.copyToHost(is);
-
+        indices.copyToHost(in);
+        hashes.copyToHost(hhash);
 
         for(int i = 0; i < nbc; i++)
         {
-            if (is[i] != -1)// && ie[i] != 0)
+            if (is[i] != -1)// && ie[i] != 0) // GE inserted comment
             {
                 //nb = ie[i] - is[i];
                 //nb_particles += nb;
-                if(is[i] < 8000 || ie[i] > 0)
+                //if(is[i] < 8000 || ie[i] > 0) // GE put the comment
                 {
+					// in particle list
                     printf("cell: %d indices start: %d indices stop: %d\n", i, is[i], ie[i]);
+					// hash is for cells (different number)
+                    //printf("cell: %d hash: %d, index: %d\n", i, hhash[i], in[i]);
                 }
             }
         }
@@ -117,10 +127,10 @@ namespace rtps
             std::vector<float4> dens(nbc);
 
             //svars.copyToHost(dens, DENS*sphp.max_num);
-            svars.copyToHost(poss, POS*sphp.max_num);
+            //svars.copyToHost(poss, POS*sphp.max_num);
 
-            for (int i=0; i < nbc; i++)
-            //for (int i=0; i < 10; i++) 
+            //for (int i=0; i < nbc; i++)
+            for (int i=0; i < 10; i++) 
             {
                 poss[i] = poss[i] / sphp.simulation_scale;
                 //printf("-----\n");

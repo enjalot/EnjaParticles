@@ -105,6 +105,8 @@ namespace rtps
         bitonic = Bitonic<unsigned int>(common_source_dir, ps->cli );
         cellindices = CellIndices(common_source_dir, ps->cli, timers["ci_gpu"] );
         permute = Permute( common_source_dir, ps->cli, timers["perm_gpu"] );
+		printf("before cloud_permute\n");
+        cloud_permute = CloudPermute( common_source_dir, ps->cli, timers["perm_gpu"] );
 
         density = Density(sph_source_dir, ps->cli, timers["density_gpu"]);
         force = Force(sph_source_dir, ps->cli, timers["force_gpu"]);
@@ -126,7 +128,6 @@ namespace rtps
 
         string lt_file = settings->GetSettingAs<string>("lt_cl");
         //lifetime = Lifetime(sph_source_dir, ps->cli, timers["lifetime_gpu"], lt_file);
-
 
 
 #endif
@@ -224,6 +225,7 @@ namespace rtps
 	//----------------------------------------------------------------------
     void SPH::updateGPU()
     {
+		printf("enter updateGPU, num= %d\n", num);
 
         timers["update"]->start();
         glFinish();
@@ -243,6 +245,9 @@ namespace rtps
         }
 
         cl_position_u.acquire();
+
+
+
         cl_color_u.acquire();
         //sub-intervals
         for (int i=0; i < sub_intervals; i++)
@@ -270,8 +275,6 @@ namespace rtps
                 cl_veleval_s,
                 //cl_vars_unsorted,
                 cl_color_u,
-                //cl_vars_sorted,
-                cl_color_s,
                 cl_sort_hashes,
                 cl_sort_indices,
                 cl_cell_indices_start,
@@ -284,7 +287,7 @@ namespace rtps
             timers["datastructures"]->stop();
             */
 
-            //printf("cellindices\n");
+            printf("before cellindices, num= %d\n", num);
             timers["cellindices"]->start();
             int nc = cellindices.execute(   num,
                 cl_sort_hashes,
@@ -298,11 +301,15 @@ namespace rtps
                 cli_debug);
             timers["cellindices"]->stop();
 
+			printf("num= %d\n", num);
+			//if (num > 0) exit(1); //GE
+
 			// I should be able to overlap with fluid sorting or fluid calculation
+			if (num > 0) { // SHOULD NOT BE NEEDED
 			// SORT CLOUD
-            //printf("cellindices\n");
-            //timers["cellindices"]->start();
-            int cloud_nc = cellindices.execute(   num,
+            printf("before cloud cellindices, num= %d, cloud_num= %d\n", num, cloud_num);
+            timers["cellindices"]->start();
+            int cloud_nc = cellindices.execute(cloud_num,
                 cl_cloud_sort_hashes,
                 cl_cloud_sort_indices,
                 cl_cloud_cell_indices_start,
@@ -312,10 +319,12 @@ namespace rtps
                 grid_params.nb_cells,
                 clf_debug,
                 cli_debug);
-            //timers["cellindices"]->stop();
-			printf("(deleted cloud particles?) cloud_nc= %d\n", cloud_nc);
+            timers["cellindices"]->stop();
+			//printf("(deleted cloud particles?) cloud_nc= %d\n", cloud_nc);
+			//exit(1);
+			}
        
-            //printf("permute\n");
+            printf("*** enter fluid permute, num= %d\n", num);
             timers["permute"]->start();
             permute.execute(   num,
                 cl_position_u,
@@ -332,28 +341,9 @@ namespace rtps
                 clf_debug,
                 cli_debug);
             timers["permute"]->stop();
+			printf("exit after fluid permute\n");
+			//if (num > 0) exit(0);
  
-            //printf("permute\n");
-            timers["permute"]->start();
-            permute.execute(   num,
-                cl_cloud_position_u,
-                cl_cloud_position_s,
-				// IAN: with my approach, the routines would remain the same. With your
-				// approach (a different array for each variable, there are more arguments, and 
-				// you need different routines for different cases
-                cl_velocity_u, //
-                cl_velocity_s, //
-                cl_veleval_u, //
-                cl_veleval_s, //
-                cl_color_u, //
-                cl_color_s, //
-                cl_cloud_sort_indices,
-                //cl_sphp,
-                cl_GridParams,
-                clf_debug,
-                cli_debug);
-            timers["permute"]->stop();
-
 			// NUMBER OF CLOUD PARTICLES IS CONSTANT THROUGHOUT THE SIMULATION
  
 
@@ -391,6 +381,31 @@ namespace rtps
                 //this doesn't work because sorted force etc. are having an effect?
                 //continue; 
             }
+
+			if (num > 0) {
+            //printf("permute\n");
+            timers["cloud_permute"]->start();
+            cloud_permute.execute(   cloud_num,
+                cl_cloud_position_u,
+                cl_cloud_position_s,
+				// IAN: with my approach, the routines would remain the same. With your
+				// approach (a different array for each variable, there are more arguments, and 
+				// you need different routines for different cases
+                cl_cloud_normal_u, //
+                cl_cloud_normal_s, //
+                //cl_veleval_u, //
+                //cl_veleval_s, //
+                //cl_color_u, //
+                //cl_color_s, //
+                cl_cloud_sort_indices,
+                //cl_sphp,
+                cl_GridParams,
+                clf_debug,
+                cli_debug);
+            timers["cloud_permute"]->stop();
+			printf("exit cloud_permite\n"); exit(1);
+		    }
+
 
             //if(num >0) printf("density\n");
             timers["density"]->start();
@@ -481,7 +496,7 @@ namespace rtps
 
     void SPH::cloud_hash_and_sort()
     {
-        //printf("hash\n");
+        //printf("cloud hash and sort\n"); exit(0);
         timers["hash"]->start();
         hash.execute(   cloud_num,
                 //cl_vars_unsorted,
@@ -633,6 +648,7 @@ namespace rtps
         timers["cellindices"] = new EB::Timer("CellIndices function", time_offset);
         timers["ci_gpu"] = new EB::Timer("CellIndices GPU kernel execution", time_offset);
         timers["permute"] = new EB::Timer("Permute function", time_offset);
+        timers["cloud_permute"] = new EB::Timer("CloudPermute function", time_offset);
         timers["perm_gpu"] = new EB::Timer("Permute GPU kernel execution", time_offset);
         timers["ds_gpu"] = new EB::Timer("DataStructures GPU kernel execution", time_offset);
         timers["bitonic"] = new EB::Timer("Bitonic Sort function", time_offset);
@@ -644,6 +660,7 @@ namespace rtps
         timers["cw_gpu"] = new EB::Timer("Collision Wall GPU kernel execution", time_offset);
         timers["collision_tri"] = new EB::Timer("Collision triangles function", time_offset);
         timers["ct_gpu"] = new EB::Timer("Collision Triangle GPU kernel execution", time_offset);
+        timers["collision_cloud"] = new EB::Timer("Collision cloud function", time_offset);
         timers["integrate"] = new EB::Timer("Integration function", time_offset);
         timers["leapfrog_gpu"] = new EB::Timer("LeapFrog Integration GPU kernel execution", time_offset);
         timers["euler_gpu"] = new EB::Timer("Euler Integration GPU kernel execution", time_offset);
@@ -766,9 +783,11 @@ namespace rtps
         */
 
         std::vector<unsigned int> keys(max_num);
+        std::vector<unsigned int> cloud_keys(max_cloud_num);
         //to get around limits of bitonic sort only handling powers of 2
 #include "limits.h"
         std::fill(keys.begin(), keys.end(), INT_MAX);
+        std::fill(cloud_keys.begin(), cloud_keys.end(), INT_MAX);
         cl_sort_indices  = Buffer<unsigned int>(ps->cli, keys);
         cl_sort_hashes   = Buffer<unsigned int>(ps->cli, keys);
 
@@ -799,20 +818,24 @@ namespace rtps
 		// out of memory on CPU and GPU. 
 
 		if (max_cloud_num > 0) {
-			keys.resize(max_cloud_num);
+			//keys.resize(max_cloud_num);
         	cl_cloud_cell_indices_start = Buffer<unsigned int>(ps->cli, gcells);
         	cl_cloud_cell_indices_end   = Buffer<unsigned int>(ps->cli, gcells);
-        	cl_cloud_sort_indices       = Buffer<unsigned int>(ps->cli, keys);
-        	cl_cloud_sort_hashes        = Buffer<unsigned int>(ps->cli, keys);
-        	cl_cloud_sort_output_hashes  = Buffer<unsigned int>(ps->cli, keys);
-        	cl_cloud_sort_output_indices = Buffer<unsigned int>(ps->cli, keys);
+        	cl_cloud_sort_indices       = Buffer<unsigned int>(ps->cli, cloud_keys);
+        	cl_cloud_sort_hashes        = Buffer<unsigned int>(ps->cli, cloud_keys);
+        	cl_cloud_sort_output_hashes  = Buffer<unsigned int>(ps->cli, cloud_keys);
+        	cl_cloud_sort_output_indices = Buffer<unsigned int>(ps->cli, cloud_keys);
 		}
+
+		printf("keys.size= %d\n", keys.size()); // 
+		printf("cloud_keys.size= %d\n", cloud_keys.size()); // 4k
+		printf("gcells.size= %d\n", gcells.size()); // 1729
+		//exit(1);
      }
 
     void SPH::setupDomain()
     {
         grid->calculateCells(sphp.smoothing_distance / sphp.simulation_scale);
-
 
         grid_params.grid_min = grid->getMin();
         grid_params.grid_max = grid->getMax();

@@ -94,6 +94,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/common/Hash
     ${rtpslib_SOURCE_DIR}/system/common/CellIndices
     ${rtpslib_SOURCE_DIR}/system/common/Permute
+    ${rtpslib_SOURCE_DIR}/system/common/CloudPermute
 	
     
     # Simple

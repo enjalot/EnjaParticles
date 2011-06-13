@@ -24,7 +24,8 @@ class OUTER;
 #include <BitonicSort.h>
 //#include <DataStructures.h>
 #include <CellIndices.h>
-#include <Permute.h>
+#include <Permute.h> // contains CloudPermute
+#include <CloudPermute.h> // contains CloudPermute
 #include <sph/Density.h>
 #include <sph/Force.h>
 #include <sph/Collision_wall.h>
@@ -225,6 +226,7 @@ namespace rtps
         //DataStructures datastructures;
         CellIndices cellindices;
         Permute permute;
+        CloudPermute cloud_permute; // for generality, keep separate (GE)
         void hash_and_sort();
         void cloud_hash_and_sort();  // GE
         void bitonic_sort();
