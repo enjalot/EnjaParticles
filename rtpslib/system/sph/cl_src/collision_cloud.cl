@@ -234,6 +234,8 @@ __kernel void collision_cloud(
                        DEBUG_ARGS
                        )
 {
+	return;
+
     // particle index
     int nb_vars = sphp->nb_vars;
     int num = sphp->num;

@@ -18,6 +18,23 @@ namespace rtps
     } 
 
 
+/*
+		collision_cloud.execute(num, cloud_num, 
+			cl_position_s, 
+			cl_cloud_position_s, 
+			cl_cloud_normal_s,
+			cl_force_s, // output
+
+            cl_cloud_cell_indices_start,
+            cl_cloud_cell_indices_end,
+
+			cl_sphp,    // IS THIS CORRECT?
+			cl_GridParamsScaled,
+			// debug
+			clf_debug,
+			cli_debug);
+*/
+
     // TO OPTIMIZE, I SHOULD BE ABLE TO COMBINE BOUNDARY SEARCH with 
     // INTERIOR POINT SEARCH. 
     void CollisionCloud::execute(int num, int num_pts_cloud, 
@@ -63,7 +80,10 @@ namespace rtps
         int local_size = 128;
 		//printf("CollisionCloud\n"); exit(1);
 		// loop over fluid particles
+		printf("BEFORE COLLISION CLOUD EXECUTE\n");
         float gputime = k_collision_cloud.execute(num, local_size);
+		printf("AFTER COLLISION CLOUD EXECUTE\n");
+
         if(gputime > 0)
             timer->set(gputime);
 

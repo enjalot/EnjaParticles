@@ -403,7 +403,7 @@ namespace rtps
                 clf_debug,
                 cli_debug);
             timers["cloud_permute"]->stop();
-			printf("exit cloud_permite\n"); exit(1);
+			//printf("exit cloud_permite\n"); exit(1);
 		    }
 
 
@@ -561,7 +561,7 @@ namespace rtps
             cl_cloud_cell_indices_start,
             cl_cloud_cell_indices_end,
 
-			cl_sphp, 
+			cl_sphp,    // IS THIS CORRECT?
 			cl_GridParamsScaled,
 			// debug
 			clf_debug,
