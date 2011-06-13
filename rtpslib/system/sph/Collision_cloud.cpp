@@ -83,6 +83,7 @@ namespace rtps
 		printf("BEFORE COLLISION CLOUD EXECUTE\n");
         float gputime = k_collision_cloud.execute(num, local_size);
 		printf("AFTER COLLISION CLOUD EXECUTE\n");
+		exit(0);
 
         if(gputime > 0)
             timer->set(gputime);

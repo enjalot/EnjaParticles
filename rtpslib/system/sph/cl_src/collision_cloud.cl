@@ -81,12 +81,13 @@ inline void ForNeighborCloud(//__global float4*  vars_sorted,
                         float4 p_fluid,   // position_i,
                         __constant struct GridParams* gp,
                         __constant struct SPHParams* sphp,
-                        __constant struct CLOUDParams* cloudp
+                        int num_cloud
+                        //__constant struct CLOUDParams* cloudp
                         DEBUG_ARGS
                        )
 {
     int num = sphp->num;
-    int num_cloud = cloudp->num;
+    //int num_cloud = cloudp->num;
 
     // get the particle info (in the current grid) to test against
     //float4 p_fluid = position_i; // * sphp->simulation_scale; 
@@ -130,7 +131,8 @@ void IterateParticlesInCellCloud(
                            __global int*       cell_indexes_end,
                            __constant struct GridParams* gp,
                            __constant struct SPHParams* sphp,
-                           __constant struct CLOUDParams* cloudp
+						   int num_cloud
+                           //__constant struct CLOUDParams* cloudp
                            DEBUG_ARGS
                            )
 {
@@ -157,7 +159,7 @@ void IterateParticlesInCellCloud(
         for (uint index_j=startIndex; index_j < endIndex; index_j++)
         {
             //***** UPDATE pt (sum) (4)
-            ForNeighborCloud(cloud_pos, cloud_normals, pt, index_j, position_i, gp, sphp, cloudp DEBUG_ARGV);
+            ForNeighborCloud(cloud_pos, cloud_normals, pt, index_j, position_i, gp, sphp, num_cloud DEBUG_ARGV);
         }
     }
 }
@@ -220,17 +222,17 @@ void IterateParticlesInNearbyCellsCloud(
 
 // 1
 __kernel void collision_cloud(
-						int pts_in_cloud,  
+						int num_cloud,
 						__global float4* pos,  
-						__global float* cloud_pos,  
-						__global float* cloud_normals,  
+						__global float4* cloud_pos,  
+						__global float4* cloud_normals,  
 						__global float4* force,
 
                        __global int*    cell_cloud_indexes_start,
                        __global int*    cell_cloud_indexes_end,
                        __constant struct GridParams* gp,
-                       __constant struct SPHParams* sphp,
-                       __constant struct CLOUDParams* cloudp  // TO ADD
+                       __constant struct SPHParams* sphp
+                       //__constant struct CLOUDParams* cloudp  // TO ADD
                        DEBUG_ARGS
                        )
 {
@@ -239,7 +241,7 @@ __kernel void collision_cloud(
     // particle index
     int nb_vars = sphp->nb_vars;
     int num = sphp->num;
-    int num_cloud = cloudp->num;
+    //int num_cloud = cloudp->num;
 
     int index = get_global_id(0);
     if (index >= num) return;
@@ -247,7 +249,7 @@ __kernel void collision_cloud(
     float4 position_i = pos[index] * sphp->simulation_scale; // SCALE needed
 
     //debuging
-    clf[index] = (float4)(99,0,0,0);
+    //clf[index] = (float4)(99,0,0,0);
     //cli[index].w = 0;
 
     // Do calculations on particles in neighboring cells
@@ -256,7 +258,8 @@ __kernel void collision_cloud(
 
 	// 2
 	// returns force acting on particle due to neighbor cloud particles in pt.force
-    IterateParticlesInNearbyCellsCloud(pos, force, &pt, position_i, cloud_pos, cloud_normals, cell_cloud_indexes_start, cell_cloud_indexes_end, gp, sphp, cloudp DEBUG_ARGV);
+	// num_cloud argument is not required
+    IterateParticlesInNearbyCellsCloud(pos, force, &pt, position_i, cloud_pos, cloud_normals, cell_cloud_indexes_start, cell_cloud_indexes_end, gp, sphp, num_cloud DEBUG_ARGV);
     force[index] = pt.force; 
     //clf[index].xyz = pt.force.xyz;
 }

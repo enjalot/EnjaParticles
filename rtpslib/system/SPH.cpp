@@ -552,6 +552,7 @@ namespace rtps
 
 		// NEED TIMER FOR POINT CLOUD COLLISIONS (GE)
 		#if 1
+		if (num > 0) {
 		collision_cloud.execute(num, cloud_num, 
 			cl_position_s, 
 			cl_cloud_position_s, 
@@ -566,6 +567,7 @@ namespace rtps
 			// debug
 			clf_debug,
 			cli_debug);
+		}
 		#endif
 
     }
