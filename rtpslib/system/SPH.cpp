@@ -147,7 +147,8 @@ namespace rtps
         //printf("=================================================\n");
 
 		// must be called after prepareSorted
-		center = float4(2.5, 2.5, 0., 0.0);
+		//center = float4(2.5, 2.5, 0., 0.0);
+		center = float4(5.0, 2.5, 2.5, 0.0);
 		addHollowBall(2000, center, radius_in, radius_out, scaled, cloud_normals);
 		//center.x = 4.;
 		//addHollowBall(500, center, radius_in, radius_out, scaled, cloud_normals);
