@@ -73,10 +73,16 @@ namespace rtps
         integrator = LEAPFROG;
         //integrator = EULER;
 
+		// inside main
+    	//rtps::Domain* grid = new Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
 		// Create cloud object for testing
-		float4 center(0.,0.,0.,0.0);
-		float radius_in = 1.;
-		float radius_out = 1.2;
+		//min = float4(1.2, 1.2, 3.2, 1.0f);
+		//max = float4(2., 2., 4., 1.0f);
+		// with a large radius, I am simulating a plane that particles 
+		// should bounce off of
+		float radius_in = 2.5;
+		float radius_out = radius_in + .5;
+		float4 center(1.6,1.6,2.7-radius_out, 0.0);
 		vector<float4> cloud_normals;
 		bool scaled = true;
 
@@ -141,6 +147,11 @@ namespace rtps
         //printf("=================================================\n");
 
 		// must be called after prepareSorted
+		center = float4(1.6,1.6,2.7-radius_out, 0.0);
+		addHollowBall(500, center, radius_in, radius_out, scaled, cloud_normals);
+		center.x = 4.;
+		addHollowBall(500, center, radius_in, radius_out, scaled, cloud_normals);
+		center.y = 4.;
 		addHollowBall(500, center, radius_in, radius_out, scaled, cloud_normals);
 
 		//  ADD A SWITCH TO HANDLE CLOUD IF PRESENT
@@ -305,10 +316,12 @@ namespace rtps
 			//if (num > 0) exit(1); //GE
 
 			// I should be able to overlap with fluid sorting or fluid calculation
+			#if 1
 			if (num > 0) { // SHOULD NOT BE NEEDED
 			// SORT CLOUD
             printf("before cloud cellindices, num= %d, cloud_num= %d\n", num, cloud_num);
             timers["cellindices"]->start();
+
             int cloud_nc = cellindices.execute(cloud_num,
                 cl_cloud_sort_hashes,
                 cl_cloud_sort_indices,
@@ -323,6 +336,7 @@ namespace rtps
 			//printf("(deleted cloud particles?) cloud_nc= %d\n", cloud_nc);
 			//exit(1);
 			}
+			#endif
        
             printf("*** enter fluid permute, num= %d\n", num);
             timers["permute"]->start();
@@ -385,6 +399,7 @@ namespace rtps
 			if (num > 0) {
             //printf("permute\n");
             timers["cloud_permute"]->start();
+			#if 1
             cloud_permute.execute(   cloud_num,
                 cl_cloud_position_u,
                 cl_cloud_position_s,
@@ -402,6 +417,7 @@ namespace rtps
                 cl_GridParams,
                 clf_debug,
                 cli_debug);
+			#endif
             timers["cloud_permute"]->stop();
 			//printf("exit cloud_permite\n"); exit(1);
 		    }
@@ -551,10 +567,12 @@ namespace rtps
         timers["collision_tri"]->stop();
 
 		// NEED TIMER FOR POINT CLOUD COLLISIONS (GE)
+		// Messed collisions up
 		#if 1
 		if (num > 0) {
 		collision_cloud.execute(num, cloud_num, 
 			cl_position_s, 
+			cl_velocity_s, 
 			cl_cloud_position_s, 
 			cl_cloud_normal_s,
 			cl_force_s, // output
@@ -631,6 +649,7 @@ namespace rtps
 
     }
 
+	// GE: WHY IS THIS NEEDED?
     void SPH::call_prep(int stage)
     {
             cl_position_u.copyFromBuffer(cl_position_s, 0, 0, num);
@@ -880,10 +899,15 @@ namespace rtps
     int SPH::addBox(int nn, float4 min, float4 max, bool scaled, float4 color)
     {
         float scale = 1.0f;
+		#if 0
         if (scaled)
         {
             scale = sphp.simulation_scale;
         }
+		#endif
+		//printf("GEE inside addBox, before addRect, scale= %f\n", scale);
+		//printf("GEE inside addBox, sphp.simulation_scale= %f\n", sphp.simulation_scale);
+		//printf("GEE addBox spacing = %f\n", spacing);
         vector<float4> rect = addRect(nn, min, max, spacing, scale);
         float4 velo(0, 0, 0, 0);
         pushParticles(rect, velo, color);
@@ -912,6 +936,7 @@ namespace rtps
 
 		//cloud_positions.resize(max_cloud_num); // replace by max_cloud_num
 		//cloud_normals.resize(max_cloud_num);
+		printf("pos.size= %d\n", pos.size());
 		for (int i=0; i < pos.size(); i++) {
 			pos[i].print("pos");
 			normals[i].print("norm");
@@ -931,14 +956,25 @@ namespace rtps
     void SPH::addHollowBall(int nn, float4 center, float radius_in, float radius_out, bool scaled, vector<float4>& normals)
     {
         float scale = 1.0f;
+		#if 0
         if (scaled)
         {
             scale = sphp.simulation_scale;
         }
-		printf("spacing= %f\n", spacing);
+		#endif
+		//printf("GEE inside addHollowBall, before addHollowSphere, scale= %f\n", scale);
+		//printf("GEE inside addHollowBall, sphp.simulation_scale= %f\n", sphp.simulation_scale);
+		//printf("spacing= %f\n", spacing);
+		//printf("GEE addHollowSphere spacing = %f\n", spacing);
+
         vector<float4> sphere = addHollowSphere(nn, center, radius_in, radius_out, spacing/2., scale, normals);
         float4 velo(0, 0, 0, 0);
-		printf("addHollowBall: nb particles: %d\n", sphere.size());
+		printf("** addHollowBall: nb particles: %d\n", sphere.size());
+		for (int i=0; i < sphere.size(); i++) {
+			printf("%d, %f, %f, %f\n", i, sphere[i].x, sphere[i].y, sphere[i].z);
+		}
+		// pos of cloud in world coordinates
+		// simulation coord = (world coord) * simulation_scale
         pushCloudParticles(sphere,normals);
     }
 

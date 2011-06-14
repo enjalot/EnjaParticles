@@ -16,12 +16,16 @@ namespace rtps
          */
         spacing *= 1.1f;
 
+		//printf("GE inside addRect: scale= %f\n", scale);
+
         float xmin = min.x / scale;
         float xmax = max.x / scale;
         float ymin = min.y / scale;
         float ymax = max.y / scale;
         float zmin = min.z / scale;
         float zmax = max.z / scale;
+
+		printf("scale= %f\n", scale);
 
         std::vector<float4> rvec(num);
         int i=0;
@@ -33,6 +37,7 @@ namespace rtps
                 {
                     if (i >= num) break;
                     rvec[i] = float4(x,y,z,1.0f);
+					//rvec[i].print("addRect"); // scaled?
                     i++;
                 }
             }
@@ -54,6 +59,8 @@ namespace rtps
         float ymax = max.y / scale;
         float zmin = min.z / scale;
         float zmax = max.z / scale;
+
+		printf("GE inside addCube: scale= %f\n", scale);
 
         rvec.resize(num);
 
@@ -106,8 +113,6 @@ namespace rtps
         }
         rvec.resize(i);
         return rvec;
-
-
     }
 	//----------------------------------------------------------------------
 
@@ -304,6 +309,8 @@ namespace rtps
 //----------------------------------------------------------------------
 	std::vector<float4> addHollowSphere(int num, float4 center, float radius_in, float radius_out, float spacing, float scale, std::vector<float4>& normals)
 	{
+		printf("GE inside addHollowSphere: scale= %f\n", scale);
+
         spacing *= 1.9f;
         float xmin = (center.x - radius_out) / scale;
         float xmax = (center.x + radius_out) / scale;
@@ -311,9 +318,15 @@ namespace rtps
         float ymax = (center.y + radius_out) / scale;
         float zmin = (center.z - radius_out) / scale;
         float zmax = (center.z + radius_out) / scale;
-        float r2in  = radius_in  * radius_in;
-        float r2out = radius_out * radius_out;
+        float r2in  = (radius_in/scale)  * (radius_in/scale);
+        float r2out = (radius_out/scale) * (radius_out/scale);
         float d2 = 0.0f;
+
+		center = center /scale;
+		center.print("center");
+		printf("xmin,xmax= %f, %f\n", xmin, xmax);
+		printf("ymin,ymax= %f, %f\n", ymin, ymax);
+		printf("zmin,zmax= %f, %f\n", zmin, zmax);
 
         std::vector<float4> rvec; // num
         //std::vector<float4> nvec; //(num);
@@ -337,6 +350,7 @@ namespace rtps
 					n.x *= sqi;
 					n.y *= sqi;
 					n.z *= sqi;
+					n.w  = 0.;
 					rvec.push_back(r);
 					normals.push_back(n);
 					i++;
@@ -344,9 +358,6 @@ namespace rtps
             }
         }
         return rvec;
-
-
-		;
 	}
 //----------------------------------------------------------------------
 

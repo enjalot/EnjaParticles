@@ -46,7 +46,6 @@ float4 calculateFrictionForce(float4 vel, float4 force, float4 normal, float fri
 	return friction_force;
 
 }
-
 //----------------------------------------------------------------------
 #if 0
 //Gordon Erlebacher (based on Krog'10)

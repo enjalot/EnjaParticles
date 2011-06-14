@@ -98,7 +98,6 @@ namespace rtps
 		// CL Cloud parameters
         settings->SetSetting("Number of Cloud Particles", 0);
 
-
     }
    
     void SPH::updateCLOUDP()
@@ -118,6 +117,9 @@ namespace rtps
         sphp.rest_distance = settings->GetSettingAs<float>("Rest Distance");
         sphp.smoothing_distance = settings->GetSettingAs<float>("Smoothing Distance");
         sphp.simulation_scale = settings->GetSettingAs<float>("Simulation Scale");
+
+		printf("sphp.simulation_scale= %f\n", sphp.simulation_scale);
+		printf("sphp.smoothing_distance= %f\n", sphp.smoothing_distance);
         
         //dynamic params
         sphp.boundary_stiffness = settings->GetSettingAs<float>("Boundary Stiffness");

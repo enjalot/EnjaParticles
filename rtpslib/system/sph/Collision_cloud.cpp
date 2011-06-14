@@ -17,8 +17,7 @@ namespace rtps
 
     } 
 
-
-/*
+#if 0
 		collision_cloud.execute(num, cloud_num, 
 			cl_position_s, 
 			cl_cloud_position_s, 
@@ -33,7 +32,7 @@ namespace rtps
 			// debug
 			clf_debug,
 			cli_debug);
-*/
+#endif
 
     // TO OPTIMIZE, I SHOULD BE ABLE TO COMBINE BOUNDARY SEARCH with 
     // INTERIOR POINT SEARCH. 
@@ -41,6 +40,7 @@ namespace rtps
             //input
             //Buffer<float4>& svars, 
             Buffer<float4>& pos_s, 
+            Buffer<float4>& vel_s, 
             Buffer<float4>& cloud_pos_s, 
             Buffer<float4>& cloud_normals_s,
             Buffer<float4>& force_s, 
@@ -64,6 +64,7 @@ namespace rtps
 		printf("num_pts_cloud= %d\n", num_pts_cloud);
         k_collision_cloud.setArg(iarg++, num_pts_cloud);
         k_collision_cloud.setArg(iarg++, pos_s.getDevicePtr());
+        k_collision_cloud.setArg(iarg++, vel_s.getDevicePtr());
         k_collision_cloud.setArg(iarg++, cloud_pos_s.getDevicePtr());
         k_collision_cloud.setArg(iarg++, cloud_normals_s.getDevicePtr());
         k_collision_cloud.setArg(iarg++, force_s.getDevicePtr());
@@ -81,15 +82,18 @@ namespace rtps
 		//printf("CollisionCloud\n"); exit(1);
 		// loop over fluid particles
 		printf("BEFORE COLLISION CLOUD EXECUTE\n");
-        float gputime = k_collision_cloud.execute(num, local_size);
-		printf("AFTER COLLISION CLOUD EXECUTE\n");
-		exit(0);
 
-        if(gputime > 0)
-            timer->set(gputime);
+// This routine is screwing up the particles. Something is wrong. 
+        float gputime = k_collision_cloud.execute(num, local_size);
+return;
+		printf("AFTER COLLISION CLOUD EXECUTE\n");
+
+        //if(gputime > 0)
+            //timer->set(gputime);
 
 
 		printf("exit cloud COLLISION\n"); 
+		//exit(0);
     }
 
 // DISABLE CPU FUNCTIONS: Duplicate function definitions

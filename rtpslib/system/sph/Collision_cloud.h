@@ -15,6 +15,7 @@ namespace rtps
             CollisionCloud(std::string path, CL* cli, EB::Timer* timer, int max_points);
             void execute(int num, int num_pts_cloud, 
                         Buffer<float4>& pos_s, 
+                        Buffer<float4>& vel_s, 
                         Buffer<float4>& cloud_pos_s, 
                         Buffer<float4>& cloud_normals_s, 
                         Buffer<float4>& force_s, 

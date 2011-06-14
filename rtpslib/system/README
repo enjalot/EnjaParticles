@@ -2,4 +2,16 @@ OUTER.cpp : handles objects defined by point clouds moving inside the
   fluid. For now these objects are rigid, but that could changed if combined
   with rigging. 
 
+unsorted pos of fluid: not scaled. 
+unsorted pos of cloud: not scaled 
+
+permute fluid: do not scale/unscale pos_s 
+cloud_permute: scale cloud_pos to simulation space (*0.05)
+    cloud_pos_s = 0.05 * cloud_pos_u
+
+Euler: unsorted pos = unsorted pos / scale; // scale=0.05
+   p /= scale;
+
+where did we have pos_s *= scale?
+
 

@@ -24,8 +24,6 @@ __kernel void euler(
     int num = sphp->num;
     if (i >= num) return;
 
-
-
     float4 p = pos_s[i];
     float4 v = vel_s[i];
     float4 f = force_s[i];

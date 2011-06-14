@@ -91,7 +91,7 @@ namespace rtps
 
 #endif
 
-#if 1
+#if 0
         //print out elements from the sorted arrays
 #define DENS 0
 #define POS 1
