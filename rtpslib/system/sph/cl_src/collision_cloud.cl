@@ -24,8 +24,6 @@ void zeroPoint(PointData* pt)
     pt->color_normal = (float4)(0.,0.,0.,0.);
     pt->force = (float4)(0.,0.,0.,0.);
 }
-
-
 //----------------------------------------------------------------------
 //Collide a fluid particle against a point (and normal). Ideally, the size of the normal
 //should be proportional to the underlying surface area supported by the normal, But we not 
@@ -246,7 +244,11 @@ __kernel void collision_cloud(
     IterateParticlesInNearbyCellsCloud(pos, force, &pt, position_i, velocity_i, cloud_pos, cloud_normals, cell_cloud_indexes_start, cell_cloud_indexes_end, gp, sphp, num_cloud DEBUG_ARGV);
 
 	// must somehow scale according to nb points in neighborhood
-    force[index] += pt.force; 
+	float fact = 1.;
+	pt.force.x *= fact;
+	pt.force.y *= fact;
+	pt.force.z *= fact;
+    force[index] += pt.force;
 
     //clf[index].xyz = pt.force.xyz;
 }

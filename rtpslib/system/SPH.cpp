@@ -147,12 +147,12 @@ namespace rtps
         //printf("=================================================\n");
 
 		// must be called after prepareSorted
-		center = float4(1.6,1.6,2.7-radius_out, 0.0);
-		addHollowBall(500, center, radius_in, radius_out, scaled, cloud_normals);
-		center.x = 4.;
-		addHollowBall(500, center, radius_in, radius_out, scaled, cloud_normals);
-		center.y = 4.;
-		addHollowBall(500, center, radius_in, radius_out, scaled, cloud_normals);
+		center = float4(2.5, 2.5, 0., 0.0);
+		addHollowBall(2000, center, radius_in, radius_out, scaled, cloud_normals);
+		//center.x = 4.;
+		//addHollowBall(500, center, radius_in, radius_out, scaled, cloud_normals);
+		//center.y = 4.;
+		//addHollowBall(500, center, radius_in, radius_out, scaled, cloud_normals);
 
 		//  ADD A SWITCH TO HANDLE CLOUD IF PRESENT
 		// Must be called after a point cloud has been created. 

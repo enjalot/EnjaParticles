@@ -186,8 +186,8 @@ int main(int argc, char** argv)
     settings->setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
     //settings->setRenderType(RTPSettings::RENDER);
     //settings.setRenderType(RTPSettings::SPRITE_RENDER);
-    settings->setRadiusScale(0.2);
-    settings->setBlurScale(2.0);
+    settings->setRadiusScale(5);
+    settings->setBlurScale(5.0);
     settings->setUseGLSL(1);
 
     settings->SetSetting("sub_intervals", 1);
