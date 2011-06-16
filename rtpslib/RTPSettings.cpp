@@ -13,6 +13,7 @@ namespace rtps
 
     RTPSettings::RTPSettings()
     {
+		printf("rtpsettings: 1\n");
         changed = false;
         system = SPH;
         max_particles = 2048;
@@ -23,6 +24,7 @@ namespace rtps
 
     RTPSettings::RTPSettings(SysType system, int max_particles, float dt)
     {
+		printf("rtpsettings: 2\n");
         changed = false;
         this->system = system;
         this->max_particles = max_particles;
@@ -33,6 +35,7 @@ namespace rtps
 
     RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain* grid)
     {
+		printf("rtpsettings: 3\n");
         changed = false;
         this->system = system;
         this->max_particles = nlpo2(max_particles);
@@ -44,6 +47,7 @@ namespace rtps
     //with triangle collision
     RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain* grid, bool tri_collision)
     {
+		printf("rtpsettings: 4\n");
         changed = false;
         this->system = system;
         this->max_particles = max_particles;
@@ -55,6 +59,7 @@ namespace rtps
     
     RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain* grid, float maxspeed, float mindist, float searchradius, float color[], float w_sep, float w_align, float w_coh)
     {
+		printf("rtpsettings: 5\n");
         changed = false;
         this->system = system;
         this->system = system;

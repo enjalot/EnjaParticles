@@ -169,7 +169,7 @@ void IterateParticlesInNearbyCellsCloud(
                                   __global int*       cell_indices_end,
                                   __constant struct GridParams* gp,
                                   __constant struct SPHParams* sphp,
-                                  cloud_num
+                                  int cloud_num
                                   DEBUG_ARGS
                                   )
 {
@@ -244,7 +244,7 @@ __kernel void collision_cloud(
     IterateParticlesInNearbyCellsCloud(pos, force, &pt, position_i, velocity_i, cloud_pos, cloud_normals, cell_cloud_indexes_start, cell_cloud_indexes_end, gp, sphp, num_cloud DEBUG_ARGV);
 
 	// must somehow scale according to nb points in neighborhood
-	float fact = 1.;
+	float fact = .1;        // scale the boundary force (arbitrary factor. Not satisfactory. GE)
 	pt.force.x *= fact;
 	pt.force.y *= fact;
 	pt.force.z *= fact;

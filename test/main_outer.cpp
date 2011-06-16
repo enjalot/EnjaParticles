@@ -99,7 +99,7 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 131072
 //#define NUM_PARTICLES 65536
 //#define NUM_PARTICLES 32768
-//#define NUM_PARTICLES 16384
+#define NUM_PARTICLES 16384
 //#define NUM_PARTICLES 10000
 //#define NUM_PARTICLES 8192
 //#define NUM_PARTICLES 4096
@@ -108,7 +108,7 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 256
 //
 //
-#define NUM_PARTICLES 4000
+#define NUM_PARTICLES 12000
 
 #define DT .003f
 
@@ -172,7 +172,8 @@ int main(int argc, char** argv)
 
 	// SPH combined with outside particles. Ideally, SPH should be merged
 	// with OUTER. 
-	rtps::RTPSettings* settings = new rtps::RTPSettings(rtps::RTPSettings::OUTER, NUM_PARTICLES, DT, grid);
+	printf("main before outer\n"); exit(0);
+	rtps::RTPSettings* settings = new rtps::RTPSettings(rtps::RTPSettings::OUTER, max_num, DT, grid);
 
     //should be argv[0]
 #ifdef WIN32
@@ -183,8 +184,8 @@ int main(int argc, char** argv)
     //printf("arvg[0]: %s\n", argv[0]);
 #endif
 
-    settings->setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
-    //settings->setRenderType(RTPSettings::RENDER);
+    //settings->setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
+    settings->setRenderType(RTPSettings::RENDER);
     //settings.setRenderType(RTPSettings::SPRITE_RENDER);
     settings->setRadiusScale(5);
     settings->setBlurScale(5.0);

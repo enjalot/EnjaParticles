@@ -28,6 +28,7 @@ namespace rtps
         ps = psfr;
         settings = ps->settings;
         max_num = n;
+		//printf("max_num= %d\n", max_num); exit(0);
         num = 0;
         nb_var = 10;
 
@@ -83,7 +84,7 @@ namespace rtps
 		float radius_in = 2.5;
 		float radius_out = radius_in + .5;
 		float4 center(1.6,1.6,2.7-radius_out, 0.0);
-		vector<float4> cloud_normals;
+		//vector<float4> cloud_normals;
 		bool scaled = true;
 
         //*** end Initialization
@@ -147,20 +148,29 @@ namespace rtps
         //printf("=================================================\n");
 
 		// must be called after prepareSorted
-		//center = float4(2.5, 2.5, 0., 0.0);
-		center = float4(5.0, 2.5, 2.5, 0.0);
-		addHollowBall(2000, center, radius_in, radius_out, scaled, cloud_normals);
-		//center.x = 4.;
-		//addHollowBall(500, center, radius_in, radius_out, scaled, cloud_normals);
-		//center.y = 4.;
-		//addHollowBall(500, center, radius_in, radius_out, scaled, cloud_normals);
+		center = float4(2.5, 2.5, 0., 0.0);
+		//center = float4(5.0, 2.5, 2.5, 0.0);
+		//addHollowBall(2000, center, radius_in, radius_out, scaled, cloud_normals);
+		readPointCloud(cloud_positions, cloud_normals, cloud_faces);
+//printf("*cloud_positions size: %d\n", cloud_positions.size());
+//exit(0);
 
 		//  ADD A SWITCH TO HANDLE CLOUD IF PRESENT
 		// Must be called after a point cloud has been created. 
 		if (cloud_num > 0) {
 			collision_cloud = CollisionCloud(sph_source_dir, ps->cli, timers["ct_pgu"], max_cloud_num); // Last argument is? ??
-			//printf("collision_cloud exit\n"); exit(0);
 		}
+
+	//printf("max_cloud_num=%d\n", max_cloud_num);
+		printf("cloud_positions capacity: %d\n", cloud_positions.capacity());
+		printf("cloud_normals capacity: %d\n", cloud_normals.capacity());
+		cloud_positions.resize(cloud_positions.capacity());
+		cloud_normals.resize(cloud_normals.capacity());
+
+		// only needs to be done once if cloud not moving
+		// ideally, cloud should be stored in vbos. 
+        cl_cloud_position_u.copyToHost(cloud_positions);
+		renderer->setCloudData(cloud_positions, cloud_normals, cloud_faces, cloud_num);
     }
 
     SPH::~SPH()
@@ -754,6 +764,9 @@ namespace rtps
 		//CLOUD BUFFERS
 		if (max_cloud_num > 0) {
 			printf("max_cloud_num= %d\n", max_cloud_num);
+printf("cloud_positions size: %d\n", cloud_positions.size());
+printf("cloud_positions size: %d\n", cloud_normals.size());
+//exit(0);
         	cl_cloud_position_u = Buffer<float4>(ps->cli, cloud_positions);
         	cl_cloud_position_s = Buffer<float4>(ps->cli, cloud_positions);
         	cl_cloud_normal_u = Buffer<float4>(ps->cli, cloud_normals);
@@ -932,16 +945,14 @@ namespace rtps
 	{
 		if ((cloud_num+pos.size()) > max_cloud_num) {
 			printf("exceeded max number of cloud particles\n");
+			exit(2); //GE
 			return;
 		}
 
+		printf("cloud_num on entry: %d\n", cloud_num);
 		//cloud_positions.resize(max_cloud_num); // replace by max_cloud_num
 		//cloud_normals.resize(max_cloud_num);
 		printf("pos.size= %d\n", pos.size());
-		for (int i=0; i < pos.size(); i++) {
-			pos[i].print("pos");
-			normals[i].print("norm");
-		}
         cl_cloud_position_u.copyToDevice(pos, cloud_num);
         cl_cloud_normal_u.copyToDevice(normals, cloud_num);
 
@@ -951,8 +962,123 @@ namespace rtps
 
 		cloud_num += pos.size();
 		printf("cloud_num= %d\n", cloud_num);
+
+		#if 0
+		for (int i=0; i < pos.size(); i++) {
+			printf("i= %d\n", i);
+			pos[i].print("pos");
+			normals[i].print("norm");
+		}
+		#endif
+		//printf("*******************\n"); exit(1);
 		return;
 	}
+	//----------------------------------------------------------------------
+	void SPH::readPointCloud(std::vector<float4>& cloud_positions, 
+							 std::vector<float4>& cloud_normals,
+							 std::vector<int4>& cloud_faces)
+	{
+    	std::string file_vertex = "/Users/erlebach/arm1_vertex.txt";
+    	std::string file_normal = "/Users/erlebach/arm1_normal.txt";
+    	std::string file_face = "/Users/erlebach/arm1_faces.txt";
+
+		// I should really do: resize(cloud_num) which is initially zero
+		cloud_positions.resize(0);
+		cloud_normals.resize(0);
+		cloud_faces.resize(0);
+
+    	FILE* fd = fopen((const char*) file_vertex.c_str(), "r");
+    	int nb = 5737;
+    	float x, y, z;
+    	for (int i=0; i < nb; i++) {
+        	fscanf(fd, "%f %f %f\n", &x, &y, &z);
+        	//printf("x,y,z= %f, %f, %f\n", x, y, z);
+			cloud_positions.push_back(float4(x,y,z,1.));
+			//cloud_positions[i] = float4(x,y,z,1.);
+    	}
+
+    	fclose(fd);
+
+    	fd = fopen((const char*) file_normal.c_str(), "r");
+    	for (int i=0; i < nb; i++) {
+        	fscanf(fd, "%f %f %f\n", &x, &y, &z);
+        	//printf("x,y,z= %f, %f, %f\n", x, y, z);
+			cloud_normals.push_back(float4(x,y,z,0.));
+			//cloud_normals[i] = float4(x,y,z,0.);
+    	}
+
+
+		// rescale point clouds
+		float4 center(2.5, 2.5, 2.50, 1.); // center of domain
+		// compute bounding box
+		float xmin = 1.e10, ymin= 1.e10, zmin=1.e10;
+		float xmax = -1.e10, ymax= -1.e10, zmax= -1.e10;
+		for (int i=0; i < nb; i++) {
+			float4& f = cloud_positions[i];
+			xmin = (f.x < xmin) ? f.x : xmin;
+			ymin = (f.y < ymin) ? f.y : ymin;
+			zmin = (f.z < zmin) ? f.z : zmin;
+			xmax = (f.x > xmax) ? f.x : xmax;
+			ymax = (f.y > ymax) ? f.y : ymax;
+			zmax = (f.z > zmax) ? f.z : zmax;
+		}
+
+		// center of hand
+		float4 rcenter(0.5*(xmin+xmax), 0.5*(ymin+ymax), 0.5*(zmin+zmax), 1.);
+
+		float xr = (xmax-xmin);
+		float yr = (ymax-ymin);
+		float zr = (zmax-zmin);
+
+		float maxr = xr;
+		maxr = yr > maxr ? yr : maxr;
+		maxr = zr > maxr ? zr : maxr; // max size of box
+
+		float scale = 2.;
+		float4 trans = center - rcenter;
+		rcenter.print("rcenter");
+		center.print("center");
+		trans.print("trans");
+		float s;
+
+		// arms is now in [0,1]^3 with center (0.5)^3
+		for (int i=0; i < nb; i++) {
+			float4& f = cloud_positions[i];
+			f.x = (f.x + trans.x - center.x)*scale + center.x; 
+			f.y = (f.y + trans.y - center.y)*scale + center.y; 
+			f.z = (f.z + trans.z - center.z)*scale + center.z; 
+			//f.y = f.y + trans.y; 
+			//f.z = f.z + trans.z; 
+			f.z = center.z - (f.z-center.z);
+		}
+
+		// scale hand and move to center
+		#if 0
+		for (int i=0; i < nb; i++) {
+			float4& f = cloud_positions[i];
+			float s = f.y;
+		}
+		#endif
+
+		nb = 1338;
+
+    	int v1, v2, v3, v4;
+    	int n1, n2, n3, n4;
+    	fd = fopen((const char*) file_face.c_str(), "r");
+    	for (int i=0; i < nb; i++) {
+        	fscanf(fd, "%d//%d %d//%d %d//%d %d//%d\n", &v1, &n1, &v2, &n2, &v3, &n3, &v4, &n4);
+        	//printf("x,y,z= %d, %d, %d\n", x1, y1, z1);
+        	//printf("x,y,z= %d, %d, %d\n", x2, y2, z2);
+        	printf("--------------------\n");
+			cloud_faces.push_back(int4(v1,v2,v3,v4)); // forms a face
+    	}
+
+
+		pushCloudParticles(cloud_positions, cloud_normals);
+//printf("*** cloud_num= %d\n", cloud_num); 
+//exit(1);
+	}
+
 	//----------------------------------------------------------------------
     void SPH::addHollowBall(int nn, float4 center, float radius_in, float radius_out, bool scaled, vector<float4>& normals)
     {
@@ -1134,8 +1260,7 @@ namespace rtps
         }
         //renderer->setParticleRadius(spacing*0.5);
         renderer->setParticleRadius(spacing);
+		//renderer->setRTPS(
     }
-
-
 
 }; //end namespace

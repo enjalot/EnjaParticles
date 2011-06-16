@@ -72,6 +72,10 @@ namespace rtps
         //wrapper around IV.h addSphere
         void addBall(int nn, float4 center, float radius, bool scaled);
     	void addHollowBall(int nn, float4 center, float radius_in, float radius_out, bool scaled, std::vector<float4>& normals);
+		void readPointCloud(std::vector<float4>& cloud_positions, 
+							std::vector<float4>& cloud_normals,
+						 	std::vector<int4>& cloud_faces);
+
         //wrapper around Hose.h 
         int addHose(int total_n, float4 center, float4 velocity, float radius, float4 color=float4(1.0, 0.0, 0.0, 1.0f));
         void updateHose(int index, float4 center, float4 velocity, float radius, float4 color=float4(1.0, 0.0, 0.0, 1.0f));
@@ -153,6 +157,7 @@ namespace rtps
 		// POINT CLOUD ARRAYS
         std::vector<float4> cloud_positions;
         std::vector<float4> cloud_normals;
+        std::vector<int4> cloud_faces;
 		Buffer<float4>		cl_cloud_position_u;
 		Buffer<float4>		cl_cloud_position_s;
 		Buffer<float4>		cl_cloud_normal_u;
@@ -240,6 +245,11 @@ namespace rtps
         void integrate();
         LeapFrog leapfrog;
         Euler euler;
+
+
+		// GE
+		vector<float4>& getCloudPoints() { return cloud_positions; }
+		vector<float4>& getCloudNormals() { return cloud_normals; }
 
         Lifetime lifetime;
 

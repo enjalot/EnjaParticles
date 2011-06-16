@@ -42,7 +42,7 @@ namespace rtps
         GLubyte col1[] = {0,0,0,255};
         GLubyte col2[] = {255,255,255,255};
 
-        generateCheckerBoardTex(col1,col2,8, 640);
+        generateCheckerBoardTex(col1,col2,8,640);
         printf("GL VERSION %s\n", glGetString(GL_VERSION));
         //blending = settings.GetSettingAs<bool>("Render: Blending");
         //blending = settings->getUseAlphaBlending();
@@ -120,7 +120,6 @@ namespace rtps
             //glEnable(GL_DEPTH_TEST);
         }
 
-
         glDisable(GL_LIGHTING);
         //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
@@ -131,6 +130,9 @@ namespace rtps
 
         drawArrays();
         //printf("done rendering, clean up\n");
+
+		printf("*** before renderPointCloud\n");
+		renderPointCloud(); //GE
 
         glDepthMask(GL_TRUE);
 
@@ -144,12 +146,54 @@ namespace rtps
         //glEnable(GL_LIGHTING);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        //make sure rendering timing is accurate
-        glFinish();
 
         //printf("done rendering\n");
         timers["render"]->end();
+
+        //make sure rendering timing is accurate
+        glFinish();
     }
+	//----------------------------------------------------------------------
+	void Render::renderPointCloud()
+	{
+        glPointSize(0.1f);
+		int sz = cloud_positions->size();
+		printf("nb points in cloud: %d\n", cloud_num);
+#if 1
+		glBegin(GL_POINTS);
+			glColor3f(.5, .5, .5);
+			for (int i=0; i < cloud_num; i++) {
+				float4& f = (*cloud_positions)[i];
+				printf("f: %f, %f, %f\n", (float) f.x, (float) f.y, (float) f.z);
+				glVertex3f(f.x, f.y, f.z);
+			}
+		glEnd();
+		//exit(0);
+#endif
+
+#if 0
+		int nb_faces = cloud_faces->size();
+		glBegin(GL_QUADS);
+			for (int i=0; i < nb_faces; i++) {
+				int4& vertices = (*cloud_faces)[i];
+				//printf("ver: %d, %d, %d, %d\n", vertices.x, vertices.y, vertices.z, vertices.w);
+				float4& v1 = (*cloud_positions)[vertices.x];
+				//v1.print("v1");
+				glVertex3f(v1.x, v1.y, v1.z);
+				float4& v2 = (*cloud_positions)[vertices.y];
+				//v2.print("v2");
+				glVertex3f(v2.x, v2.y, v2.z);
+				float4& v3 = (*cloud_positions)[vertices.z];
+				//v3.print("v3");
+				glVertex3f(v3.x, v3.y, v3.z);
+				float4& v4 = (*cloud_positions)[vertices.w];
+				//v4.print("v4");
+				glVertex3f(v4.x, v4.y, v4.z);
+			}
+		glEnd();
+#endif
+	}
+	//----------------------------------------------------------------------
 
     void Render::writeBuffersToDisk()
     {
@@ -666,7 +710,5 @@ namespace rtps
     }
 
 }
-
-
 
 

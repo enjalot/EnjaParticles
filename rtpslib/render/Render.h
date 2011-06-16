@@ -108,6 +108,12 @@ namespace rtps
         virtual void render();
         virtual void setWindowDimensions(GLuint width,GLuint height);
 
+	protected:
+		std::vector<float4>* cloud_positions; 
+		std::vector<float4>* cloud_normals; 
+		std::vector<int4>* cloud_faces; 
+		int cloud_num;
+
     protected:
         int loadTexture(std::string texture_file, std::string texture_name);
         GLuint compileShaders(const char* vertex_file, const char* fragment_file, const char* geometry_file = NULL, GLenum* geom_param=NULL, GLint* geom_value=NULL, int geom_param_len=0);
@@ -155,6 +161,23 @@ namespace rtps
         {
             return particle_radius;
         }
+
+		// GE
+	public:
+		std::vector<float4>& setCloudData(std::vector<float4>& cloud_positions, 
+		                                  std::vector<float4>& cloud_normals, 
+		                                  std::vector<int4>& cloud_faces, 
+										  int nb_points)
+		{
+			 // cloud_positions.size() >= cloud_num;
+		     this->cloud_positions = &cloud_positions;
+		     this->cloud_normals = &cloud_normals;
+		     this->cloud_faces = &cloud_faces;
+			 this->cloud_num = nb_points; 
+		}
+	private:
+		void renderPointCloud();
+
     };  
 
 

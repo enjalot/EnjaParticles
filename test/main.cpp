@@ -108,7 +108,7 @@ rtps::RTPS* ps;
 //#define NUM_PARTICLES 256
 //
 //
-#define NUM_PARTICLES 4000
+#define NUM_PARTICLES 9000
 
 #define DT .003f
 
