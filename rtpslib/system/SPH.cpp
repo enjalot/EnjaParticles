@@ -1049,7 +1049,7 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
 			f.z = (f.z + trans.z - center.z)*scale + center.z; 
 			//f.y = f.y + trans.y; 
 			//f.z = f.z + trans.z; 
-			f.z = center.z - (f.z-center.z);
+			f.x = center.x - (f.x-center.x);
 		}
 
 		// scale hand and move to center
@@ -1060,7 +1060,7 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
 		}
 		#endif
 
-		nb = 1338;
+		nb = 5714;
 
     	int v1, v2, v3, v4;
     	int n1, n2, n3, n4;
