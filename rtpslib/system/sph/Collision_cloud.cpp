@@ -14,7 +14,6 @@ namespace rtps
 		//printf("path= %s\n", path.c_str());
 		//exit(0);
         k_collision_cloud = Kernel(cli, path, "collision_cloud");
-
     } 
 
 #if 0
@@ -91,7 +90,6 @@ return;
         //if(gputime > 0)
             //timer->set(gputime);
 
-
 		printf("exit cloud COLLISION\n"); 
 		//exit(0);
     }
@@ -160,7 +158,6 @@ return;
         //friction_force = friction_kinetic * -v_t;
 
         return friction_force;
-
     }
 
     void SPH::cpuCollision_cloud()

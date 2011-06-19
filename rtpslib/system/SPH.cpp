@@ -468,6 +468,7 @@ namespace rtps
 
 			printf("before collision\n");
             collision();
+			printf("after collision\n");
             timers["integrate"]->start();
             integrate();
             timers["integrate"]->stop();
@@ -581,21 +582,21 @@ namespace rtps
 		// Messed collisions up
 		#if 1
 		if (num > 0) {
-		collision_cloud.execute(num, cloud_num, 
-			cl_position_s, 
-			cl_velocity_s, 
-			cl_cloud_position_s, 
-			cl_cloud_normal_s,
-			cl_force_s, // output
+			collision_cloud.execute(num, cloud_num, 
+				cl_position_s, 
+				cl_velocity_s, 
+				cl_cloud_position_s, 
+				cl_cloud_normal_s,
+				cl_force_s, // output
 
-            cl_cloud_cell_indices_start,
-            cl_cloud_cell_indices_end,
+            	cl_cloud_cell_indices_start,
+            	cl_cloud_cell_indices_end,
 
-			cl_sphp,    // IS THIS CORRECT?
-			cl_GridParamsScaled,
-			// debug
-			clf_debug,
-			cli_debug);
+				cl_sphp,    // IS THIS CORRECT?
+				cl_GridParamsScaled,
+				// debug
+				clf_debug,
+				cli_debug);
 		}
 		#endif
 
@@ -949,11 +950,21 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
 			return;
 		}
 
+		printf("pos.size= %d\n", pos.size());
+		printf("normals.size= %d\n", normals.size());
+		//exit(0);
+
 		printf("cloud_num on entry: %d\n", cloud_num);
 		//cloud_positions.resize(max_cloud_num); // replace by max_cloud_num
 		//cloud_normals.resize(max_cloud_num);
 		printf("pos.size= %d\n", pos.size());
         cl_cloud_position_u.copyToDevice(pos, cloud_num);
+
+		//printf("cloud_num= %d\n", cloud_num);
+		for (int i=0; i < normals.size(); i++) {
+			printf("%d\n", i);
+			normals[i].print("normals");
+		}
         cl_cloud_normal_u.copyToDevice(normals, cloud_num);
 
 		// Should be sorted, so this is temporary to check collision code
@@ -963,10 +974,13 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
 		cloud_num += pos.size();
 		printf("cloud_num= %d\n", cloud_num);
 
-		#if 0
+		#if 1
 		for (int i=0; i < pos.size(); i++) {
-			printf("i= %d\n", i);
+			printf("i= %d, ", i);
 			pos[i].print("pos");
+		}
+		for (int i=0; i < normals.size(); i++) {
+			printf("i= %d, ", i);
 			normals[i].print("norm");
 		}
 		#endif
@@ -999,6 +1013,9 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
 
     	fclose(fd);
 
+		printf("before normal read: normal size: %d\n", cloud_normals.size());
+
+		printf("file_normal: %s\n", file_normal.c_str());
     	fd = fopen((const char*) file_normal.c_str(), "r");
     	for (int i=0; i < nb; i++) {
         	fscanf(fd, "%f %f %f\n", &x, &y, &z);
@@ -1009,7 +1026,8 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
 
 
 		// rescale point clouds
-		float4 center(2.5, 2.5, 2.50, 1.); // center of domain
+		// domain center is x=y=z=2.5
+		float4 center(2.5, 2.5, 1.50, 1.); // center of domain
 		// compute bounding box
 		float xmin = 1.e10, ymin= 1.e10, zmin=1.e10;
 		float xmax = -1.e10, ymax= -1.e10, zmax= -1.e10;
@@ -1034,7 +1052,7 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
 		maxr = yr > maxr ? yr : maxr;
 		maxr = zr > maxr ? zr : maxr; // max size of box
 
-		float scale = 2.;
+		float scale = 2.;  // set back to 2 or 3
 		float4 trans = center - rcenter;
 		rcenter.print("rcenter");
 		center.print("center");
@@ -1060,22 +1078,28 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
 		}
 		#endif
 
-		nb = 5714;
+		nb = 5713;
 
     	int v1, v2, v3, v4;
     	int n1, n2, n3, n4;
     	fd = fopen((const char*) file_face.c_str(), "r");
     	for (int i=0; i < nb; i++) {
         	fscanf(fd, "%d//%d %d//%d %d//%d %d//%d\n", &v1, &n1, &v2, &n2, &v3, &n3, &v4, &n4);
-        	//printf("x,y,z= %d, %d, %d\n", x1, y1, z1);
-        	//printf("x,y,z= %d, %d, %d\n", x2, y2, z2);
-        	printf("--------------------\n");
+        	//printf("x,y,z= %d, %d, %d\n", v1, v2, v3);
+        	//printf("x,y,z= %d, %d, %d\n", n2, n2, n3);
+			//exit(1);
+        	//printf("--------------------\n");
 			cloud_faces.push_back(int4(v1,v2,v3,v4)); // forms a face
     	}
 
+		//printf("cloud_faces.size= %d\n", cloud_faces.size());
+		//cloud_faces[0].print("cloud faces[0]");
+		//exit(0);
 
+
+		// push onto GPU
 		pushCloudParticles(cloud_positions, cloud_normals);
-//printf("*** cloud_num= %d\n", cloud_num); 
+printf("*** cloud_num= %d\n", cloud_num); 
 //exit(1);
 	}
 
@@ -1094,7 +1118,15 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
 		//printf("spacing= %f\n", spacing);
 		//printf("GEE addHollowSphere spacing = %f\n", spacing);
 
+printf("before HollowSphere\n");
+printf("cloud_positions size: %d\n", cloud_positions.size());
+printf("cloud_normals size: %d\n", cloud_normals.size());
         vector<float4> sphere = addHollowSphere(nn, center, radius_in, radius_out, spacing/2., scale, normals);
+printf("after HollowSphere\n");
+printf("cloud_positions size: %d\n", cloud_positions.size());
+printf("cloud_normals size: %d\n", cloud_normals.size());
+printf("normals size: %d\n", normals.size());
+printf("sphere size: %d\n", sphere.size());
         float4 velo(0, 0, 0, 0);
 		printf("** addHollowBall: nb particles: %d\n", sphere.size());
 		for (int i=0; i < sphere.size(); i++) {
@@ -1103,6 +1135,9 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
 		// pos of cloud in world coordinates
 		// simulation coord = (world coord) * simulation_scale
         pushCloudParticles(sphere,normals);
+printf("cloud_positions size: %d\n", cloud_positions.size());
+printf("cloud_normals size: %d\n", cloud_normals.size());
+//exit(0);
     }
 
 	//----------------------------------------------------------------------

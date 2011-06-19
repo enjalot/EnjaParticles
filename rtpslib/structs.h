@@ -76,6 +76,10 @@ namespace rtps
             this->z = z;
             this->w = w;
         }
+        void print(const char* msg=0)
+        {
+            printf("%s: %d, %d, %d, %d\n", msg, x, y, z, w);
+        }
     } int4;
 
 

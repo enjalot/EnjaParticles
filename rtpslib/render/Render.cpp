@@ -164,7 +164,9 @@ namespace rtps
 			glColor3f(.5, .5, .5);
 			for (int i=0; i < cloud_num; i++) {
 				float4& f = (*cloud_positions)[i];
-				printf("f: %f, %f, %f\n", (float) f.x, (float) f.y, (float) f.z);
+				printf("v: %f, %f, %f\n", (float) f.x, (float) f.y, (float) f.z);
+				if (f.x < 0 || f.y < 0 || f.z < 0) continue;
+				if (f.x > 5 || f.y > 5 || f.z > 5) continue;
 				glVertex3f(f.x, f.y, f.z);
 			}
 		glEnd();
@@ -172,7 +174,10 @@ namespace rtps
 #endif
 
 #if 0
+// SOMETHING WRONG WITH reading faces!!
+
 		int nb_faces = cloud_faces->size();
+		//printf("nb_faces= %d\n", nb_faces);
 		glBegin(GL_QUADS);
 			for (int i=0; i < nb_faces; i++) {
 				int4& vertices = (*cloud_faces)[i];
@@ -191,6 +196,7 @@ namespace rtps
 				glVertex3f(v4.x, v4.y, v4.z);
 			}
 		glEnd();
+		//exit(0);
 #endif
 
 	}

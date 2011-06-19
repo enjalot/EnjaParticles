@@ -329,6 +329,8 @@ namespace rtps
 		printf("zmin,zmax= %f, %f\n", zmin, zmax);
 
         std::vector<float4> rvec; // num
+		normals.resize(0);
+		//printf("normal capacity: %d\n", normals.capacity());
         //std::vector<float4> nvec; //(num);
 		int i=0;
 
@@ -339,6 +341,12 @@ namespace rtps
                 for (float x = xmin; x <= xmax; x+=spacing)
                 {
                     if (i >= num) break;
+
+					// if outside main domain [0,5]^3 HARDCODED DEBUGGING GE
+					if (x < 0 || x >5) continue;
+					if (y < 0 || y >5) continue;
+					if (z < 0 || z >5) continue;
+
 					float4 n(x-center.x, y-center.y, z-center.z, 0.);
                     d2 = (x - center.x)*(x - center.x) + (y - center.y)*(y - center.y) + (z - center.z)*(z - center.z);
 
