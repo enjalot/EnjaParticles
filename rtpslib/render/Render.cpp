@@ -108,6 +108,14 @@ namespace rtps
         glPushAttrib(GL_ALL_ATTRIB_BITS);
         glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
 
+		printf("*** before renderPointCloud\n");
+        glDepthMask(GL_TRUE);
+		glEnable(GL_LIGHTING);
+		renderPointCloud(); //GE
+        glDepthMask(GL_FALSE);
+		glDisable(GL_LIGHTING);
+
+
         if (blending)
         {
             //glDisable(GL_DEPTH_TEST);
@@ -120,7 +128,6 @@ namespace rtps
             //glEnable(GL_DEPTH_TEST);
         }
 
-        glDisable(GL_LIGHTING);
         //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
         // draws circles instead of squares
@@ -131,10 +138,9 @@ namespace rtps
         drawArrays();
         //printf("done rendering, clean up\n");
 
-		printf("*** before renderPointCloud\n");
-		renderPointCloud(); //GE
-
         glDepthMask(GL_TRUE);
+
+        glDisable(GL_LIGHTING);
 
         glPopClientAttrib();
         glPopAttrib();
@@ -173,7 +179,7 @@ namespace rtps
 		//exit(0);
 #endif
 
-#if 0
+#if 1
 // SOMETHING WRONG WITH reading faces!!
 
 		int nb_faces = cloud_faces->size();
