@@ -3,6 +3,7 @@ namespace rtps
 {
     unsigned int nlpo2(register unsigned int x)
     {
+        x--;
         x |= (x >> 1);
         x |= (x >> 2);
         x |= (x >> 4);
