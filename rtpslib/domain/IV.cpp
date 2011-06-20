@@ -8,6 +8,60 @@
 namespace rtps
 {
 
+//----------------------------------------------------------------------
+    std::vector<float4> addxyPlane(int num, float4 min, float4 max, float spacing, float scale, float zlevel, std::vector<float4>& normals)
+    {
+        /*!
+         * Create a rectangle with at most num particles in it.
+         *  The size of the return vector will be the actual number of particles used to fill the rectangle
+		 * normals are pointing upwards
+         */
+        spacing *= 1.1f;
+
+
+		//min.print("addplane min");
+		//max.print("addplane max");
+
+        float xmin = min.x / scale;
+        float xmax = max.x / scale;
+        float ymin = min.y / scale;
+        float ymax = max.y / scale;
+        float zmin = zlevel / scale;
+        float zmax = zlevel / scale;
+
+		printf("scale= %f\n", scale);
+
+        std::vector<float4> rvec(num);
+		normals.resize(0);
+        int i=0;
+
+        for (float z = zmin; z <= zmax; z+=spacing)
+        {
+            for (float y = ymin; y <= ymax; y+=spacing)
+            {
+                for (float x = xmin; x <= xmax; x+=spacing)
+                {
+                    if (i >= num) break;
+                    rvec[i] = float4(x,y,z,1.0f);
+					//rvec[i].print("addRect"); // scaled?
+
+					float4& n = normals[i];
+
+					// account. Can fix later when we are refining. 
+					n.x = 0.;
+					n.y = 0.;
+					n.z = 1.;
+					n.w = 0.;
+					//rvec.push_back(r);
+					normals.push_back(n);
+					i++;
+                }
+            }
+        }
+        rvec.resize(i);
+        return rvec;
+    }
+//----------------------------------------------------------------------
     std::vector<float4> addRect(int num, float4 min, float4 max, float spacing, float scale)
     {
         /*!

@@ -179,7 +179,7 @@ namespace rtps
 		//exit(0);
 #endif
 
-#if 1
+#if 0
 // SOMETHING WRONG WITH reading faces!!
 
 		int nb_faces = cloud_faces->size();

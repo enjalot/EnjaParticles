@@ -72,6 +72,8 @@ namespace rtps
         //wrapper around IV.h addSphere
         void addBall(int nn, float4 center, float radius, bool scaled);
     	void addHollowBall(int nn, float4 center, float radius_in, float radius_out, bool scaled, std::vector<float4>& normals);
+        void addNewxyPlane(int np, bool scaled, vector<float4>& normals);
+
 		void readPointCloud(std::vector<float4>& cloud_positions, 
 							std::vector<float4>& cloud_normals,
 						 	std::vector<int4>& cloud_faces);

@@ -22,6 +22,7 @@ namespace rtps
     RTPS_EXPORT vector<float4> addRandArrangement(int num, float scale, float4 dmin, float4 dmax);
     RTPS_EXPORT vector<float4> addRandSphere(int num, float4 center, float radius, float spacing, float scale, float4 dmin, float4 dmax);
 	RTPS_EXPORT std::vector<float4> addHollowSphere(int nn, float4 center, float radius_in, float radius_out, float spacing, float scale, std::vector<float4>& normals);
+    RTPS_EXPORT std::vector<float4> addxyPlane(int num, float4 min, float4 max, float spacing, float scale, float zlevel, std::vector<float4>& normals);
 }
 
 #endif

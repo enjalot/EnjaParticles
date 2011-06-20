@@ -151,9 +151,9 @@ namespace rtps
 		center = float4(2.5, 2.5, 0., 0.0);
 		//center = float4(5.0, 2.5, 2.5, 0.0);
 		//addHollowBall(2000, center, radius_in, radius_out, scaled, cloud_normals);
-		readPointCloud(cloud_positions, cloud_normals, cloud_faces);
-//printf("*cloud_positions size: %d\n", cloud_positions.size());
-//exit(0);
+		int nn = 2000;
+    	addNewxyPlane(nn, scaled, cloud_normals); 
+		//readPointCloud(cloud_positions, cloud_normals, cloud_faces);
 
 		//  ADD A SWITCH TO HANDLE CLOUD IF PRESENT
 		// Must be called after a point cloud has been created. 
@@ -1104,6 +1104,25 @@ printf("*** cloud_num= %d\n", cloud_num);
 	}
 
 	//----------------------------------------------------------------------
+    void SPH::addNewxyPlane(int np, bool scaled, vector<float4>& normals)
+	{
+		float scale = 1.0f;
+		float4 mmin = float4(0.,0.,2.5,1.);
+		float4 mmax = float4(5.,5.,2.5,1.);
+		float zlevel = 2.;
+		//printf("spacing= %f\n", spacing); exit(0);
+		vector<float4> plane = addxyPlane(4000, mmin, mmax, spacing/2., scale, zlevel, normals);
+        pushCloudParticles(plane,normals);
+
+    	for (int i=0; i < plane.size(); i++) {
+			float4& n = normals[i];
+			float4& v = plane[i];
+			//n.print("normal");
+			v.print("vertex");
+    	}
+		//exit(1);
+	}
+	//----------------------------------------------------------------------
     void SPH::addHollowBall(int nn, float4 center, float radius_in, float radius_out, bool scaled, vector<float4>& normals)
     {
         float scale = 1.0f;
@@ -1139,7 +1158,6 @@ printf("cloud_positions size: %d\n", cloud_positions.size());
 printf("cloud_normals size: %d\n", cloud_normals.size());
 //exit(0);
     }
-
 	//----------------------------------------------------------------------
     int SPH::addHose(int total_n, float4 center, float4 velocity, float radius, float4 color)
     {
