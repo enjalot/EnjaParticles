@@ -164,9 +164,10 @@ namespace rtps
 	//printf("max_cloud_num=%d\n", max_cloud_num);
 		printf("cloud_positions capacity: %d\n", cloud_positions.capacity());
 		printf("cloud_normals capacity: %d\n", cloud_normals.capacity());
+
 		cloud_positions.resize(cloud_positions.capacity());
 		cloud_normals.resize(cloud_normals.capacity());
-
+        //exit(0);
 		// only needs to be done once if cloud not moving
 		// ideally, cloud should be stored in vbos. 
         cl_cloud_position_u.copyToHost(cloud_positions);
@@ -411,6 +412,7 @@ namespace rtps
             //printf("permute\n");
             timers["cloud_permute"]->start();
 			#if 1
+            printf("cloud_permute, cloud_num: %d\n", cloud_num);
             cloud_permute.execute(   cloud_num,
                 cl_cloud_position_u,
                 cl_cloud_position_s,
@@ -967,8 +969,8 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
 
 		//printf("cloud_num= %d\n", cloud_num);
 		for (int i=0; i < normals.size(); i++) {
-			printf("%d\n", i);
-			normals[i].print("normals");
+			//printf("%d\n", i);
+			//normals[i].print("normals");
 		}
         cl_cloud_normal_u.copyToDevice(normals, cloud_num);
 
@@ -979,7 +981,7 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
 		cloud_num += pos.size();
 		printf("cloud_num= %d\n", cloud_num);
 
-		#if 1
+		#if 0
 		for (int i=0; i < pos.size(); i++) {
 			printf("i= %d, ", i);
 			pos[i].print("pos");
@@ -1115,17 +1117,19 @@ printf("*** cloud_num= %d\n", cloud_num);
 		float4 mmin = float4(0.,0.,2.5,1.);
 		float4 mmax = float4(5.,5.,2.5,1.);
 		float zlevel = 2.;
-		float sp = spacing / 2. ;
+		float sp = spacing / 4. ;
 		//printf("spacing= %f\n", spacing); exit(0);
 		vector<float4> plane = addxyPlane(6000, mmin, mmax, sp, scale, zlevel, normals);
 		//printf("plane size: %d\n", plane.size()); exit(0);
+        printf("plane.size(): %zd\n", plane.size());
+        printf("normals.size(): %zd\n", plane.size());
         pushCloudParticles(plane,normals);
 
     	for (int i=0; i < plane.size(); i++) {
 			float4& n = normals[i];
 			float4& v = plane[i];
 			//n.print("normal");
-			v.print("vertex");
+			//v.print("vertex");
     	}
 		//exit(1);
 	}
