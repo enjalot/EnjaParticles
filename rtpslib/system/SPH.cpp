@@ -153,8 +153,8 @@ namespace rtps
 		//center = float4(5.0, 2.5, 2.5, 0.0);
 		//addHollowBall(2000, center, radius_in, radius_out, scaled, cloud_normals);
 		int nn = 4000;
-    	addNewxyPlane(nn, scaled, cloud_normals); 
-		//readPointCloud(cloud_positions, cloud_normals, cloud_faces);
+    	//addNewxyPlane(nn, scaled, cloud_normals); 
+		readPointCloud(cloud_positions, cloud_normals, cloud_faces);
 
 		//  ADD A SWITCH TO HANDLE CLOUD IF PRESENT
 		// Must be called after a point cloud has been created. 
