@@ -785,6 +785,7 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
 
         //cl_error_check= Buffer<float4>(ps->cli, error_check);
 
+        
         //TODO make a helper constructor for buffer to make a cl_mem from a struct
         //Setup Grid Parameter structs
         std::vector<GridParams> gparams(0);
@@ -877,6 +878,10 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
         grid_params.grid_max = grid->getMax();
         grid_params.bnd_min  = grid->getBndMin();
         grid_params.bnd_max  = grid->getBndMax();
+
+        //grid_params.bnd_min = float4(1, 1, 1,0);
+        //grid_params.bnd_max =  float4(4, 4, 4, 0);
+
         grid_params.grid_res = grid->getRes();
         grid_params.grid_size = grid->getSize();
         grid_params.grid_delta = grid->getDelta();

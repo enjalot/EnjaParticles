@@ -67,6 +67,7 @@ public:
      * @return float4 
      */
     float4 getBndMin(){ return bnd_min; };
+    void setBndMin(float4 new_bnd_min){ bnd_min = new_bnd_min; };
     /**
      * 
      * 
@@ -75,6 +76,7 @@ public:
      * @return float4 
      */
     float4 getBndMax(){ return bnd_max; };
+    void setBndMax(float4 new_bnd_max){ bnd_max = new_bnd_max; };
     /**
      * 
      * 

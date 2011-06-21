@@ -169,8 +169,12 @@ int main(int argc, char** argv)
     //rtps::RTPSettings settings;
     //rtps::Domain grid = Domain(float4(-5,-.3,0,0), float4(2, 2, 12, 0));
     rtps::Domain* grid = new Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
+    //grid->setBndMin( float4(1, 1, 1,0));
+    //grid->setBndMax( float4(4, 4, 4, 0));
+
     //rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
 	rtps::RTPSettings* settings = new rtps::RTPSettings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
+    
 
     //should be argv[0]
 #ifdef WIN32
@@ -199,6 +203,7 @@ int main(int argc, char** argv)
 
     ps = new rtps::RTPS(settings);
     //ps = new rtps::RTPS();
+
 
     ps->settings->SetSetting("Gravity", -9.8f); // -9.8 m/sec^2
     ps->settings->SetSetting("Gas Constant", 1.0f);
