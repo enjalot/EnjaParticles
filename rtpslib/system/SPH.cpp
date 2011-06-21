@@ -1110,8 +1110,10 @@ printf("*** cloud_num= %d\n", cloud_num);
 		float4 mmin = float4(0.,0.,2.5,1.);
 		float4 mmax = float4(5.,5.,2.5,1.);
 		float zlevel = 2.;
+		float sp = spacing / 2. ;
 		//printf("spacing= %f\n", spacing); exit(0);
-		vector<float4> plane = addxyPlane(4000, mmin, mmax, spacing/2., scale, zlevel, normals);
+		vector<float4> plane = addxyPlane(6000, mmin, mmax, sp, scale, zlevel, normals);
+		//printf("plane size: %d\n", plane.size()); exit(0);
         pushCloudParticles(plane,normals);
 
     	for (int i=0; i < plane.size(); i++) {

@@ -65,7 +65,7 @@ printf("done with constructor\n");
         else if (settings->system == RTPSettings::SPH)
         {
             printf("*** sph system 1  ***\n");
-			settings->setMaxOuterParticles(4096);
+			settings->setMaxOuterParticles(4096*4);
             system = new SPH(this, settings->max_particles, settings->max_outer_particles);
 			printf("max: %d\n", settings->max_outer_particles);
         }
