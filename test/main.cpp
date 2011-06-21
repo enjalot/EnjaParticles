@@ -361,6 +361,10 @@ void appKeyboard(unsigned char key, int x, int y)
 
                 min = float4(1.2, 1.2, 3.2, 1.0f);
                 max = float4(2., 2., 4., 1.0f);
+
+				// release particles symmetrically wrt center 
+                min = float4(2.0, 2.0, 3.2, 1.0f);
+                max = float4(3.0, 3.0, 4.0, 1.0f);
                 
                 //float4 color = float4(rand()/(10.*RAND_MAX), rand()/(RAND_MAX+1.0), rand()/(RAND_MAX+1.0), 0.2);
                 ps->system->addBox(nn, min, max, false, color);

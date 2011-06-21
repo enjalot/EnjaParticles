@@ -15,26 +15,17 @@ __kernel void cloud_permute(
                             __global float4* pos_s,
                             __global float4* normal_u,
                             __global float4* normal_s,
-                            //__global float4* veleval_u,
-                            //__global float4* veleval_s,
-                            //__global float4*   color_u,
-                            //__global float4*   color_s,
                             __global uint* sort_indices
                             )
 {
     uint index = get_global_id(0);
-    //int num = sphp->num;
-   if (index >= num) return;
-    //cell_indices_end[index] = 42;
+
+    if (index >= num) return;
     uint sorted_index = sort_indices[index];
 
 	// Clouds are now in simulation coordinates
     pos_s[index]     = pos_u[sorted_index]; 
-
     normal_s[index]     = normal_u[sorted_index];
-    //veleval_s[index] = veleval_u[sorted_index]; // not sure if needed
-    //color_s[index]   = color_u[sorted_index];
-    //density(index) = unsorted_density(sorted_index); // only for debugging
 }
 //----------------------------------------------------------------------
 

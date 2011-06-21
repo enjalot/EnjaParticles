@@ -15,3 +15,5 @@ Euler: unsorted pos = unsorted pos / scale; // scale=0.05
 where did we have pos_s *= scale?
 
 
+What happens if force on boundary cloud particle is cancelled completely 
+  (see collision_cloud.cl)

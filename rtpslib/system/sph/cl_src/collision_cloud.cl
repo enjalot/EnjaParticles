@@ -244,12 +244,25 @@ __kernel void collision_cloud(
     IterateParticlesInNearbyCellsCloud(pos, force, &pt, position_i, velocity_i, cloud_pos, cloud_normals, cell_cloud_indexes_start, cell_cloud_indexes_end, gp, sphp, num_cloud DEBUG_ARGV);
 
 	// must somehow scale according to nb points in neighborhood
+	// pt.force: sum of all the boundary forces acting on the particle
+
 	float fact = 1.;        // scale the boundary force (arbitrary factor. Not satisfactory. GE)
+
 	pt.force.x *= fact;
 	pt.force.y *= fact;
 	pt.force.z *= fact;
-    force[index] += pt.force;
 
+	float ff = length(pt.force);
+
+	if (ff > 1.e-4) {
+    	//force[index] = pt.force;
+    	force[index] += pt.force;
+	}
+
+	// original
+    //force[index] += pt.force;
+
+	// what happens if force on boundary particle is cancelled? 
     //clf[index].xyz = pt.force.xyz;
 }
 

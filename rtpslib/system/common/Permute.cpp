@@ -53,6 +53,7 @@ namespace rtps
         //printf("about to data structures\n");
         try
         {
+			printf("k_permute (non-cloud): num= %d\n", num); 
             float gputime = k_permute.execute(num, workSize);
             if(gputime > 0)
                 timer->set(gputime);

@@ -22,19 +22,14 @@ namespace rtps
                     Buffer<float4>& pos_s,
                     Buffer<float4>& normal_u,
                     Buffer<float4>& normal_s,
-                    //Buffer<float4>& veleval_u,
-                    //Buffer<float4>& veleval_s,
-                    //Buffer<float4>& color_u,
-                    //Buffer<float4>& color_s,
                     Buffer<unsigned int>& indices,
                     //params
-                    //Buffer<SPHParams>& sphp,
                     Buffer<GridParams>& gp,
                     //debug params
                     Buffer<float4>& clf_debug,
                     Buffer<int4>& cli_debug)
     {
-	printf("CloudPermute: num= %d\n", num);
+		printf("CloudPermute: num= %d\n", num);
         
         int iarg = 0;
         k_permute.setArg(iarg++, num);
@@ -42,18 +37,15 @@ namespace rtps
         k_permute.setArg(iarg++, pos_s.getDevicePtr());
         k_permute.setArg(iarg++, normal_u.getDevicePtr());
         k_permute.setArg(iarg++, normal_s.getDevicePtr());
-        //k_permute.setArg(iarg++, veleval_u.getDevicePtr());
-        //k_permute.setArg(iarg++, veleval_s.getDevicePtr());
-        //k_permute.setArg(iarg++, color_u.getDevicePtr());
-        //k_permute.setArg(iarg++, color_s.getDevicePtr());
         k_permute.setArg(iarg++, indices.getDevicePtr());
 
         int workSize = 64;
         
-        //printf("about to data structures\n");
+        printf("cloudPermute, before kernel exec, num=  %d\n", num);
         try
         {
-            float gputime = k_permute.execute(num, workSize);
+			float gputime;
+            gputime = k_permute.execute(num, workSize);
             if(gputime > 0)
                 timer->set(gputime);
 

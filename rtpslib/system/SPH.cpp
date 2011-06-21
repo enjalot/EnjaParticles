@@ -1,3 +1,4 @@
+#define CLOUD_COLLISION 1
 
 #include <GL/glew.h>
 #include <math.h>
@@ -151,7 +152,7 @@ namespace rtps
 		center = float4(2.5, 2.5, 0., 0.0);
 		//center = float4(5.0, 2.5, 2.5, 0.0);
 		//addHollowBall(2000, center, radius_in, radius_out, scaled, cloud_normals);
-		int nn = 2000;
+		int nn = 4000;
     	addNewxyPlane(nn, scaled, cloud_normals); 
 		//readPointCloud(cloud_positions, cloud_normals, cloud_faces);
 
@@ -279,9 +280,11 @@ namespace rtps
             hash_and_sort();
 
 			// only for clouds (if cloud_num > 0)
+#if CLOUD_COLLISION
 			if (cloud_num > 0) {
             	cloud_hash_and_sort();
 			}
+#endif
             //if(num >0) printf("after hash and sort\n");
 
             //printf("data structures\n");
@@ -327,7 +330,7 @@ namespace rtps
 			//if (num > 0) exit(1); //GE
 
 			// I should be able to overlap with fluid sorting or fluid calculation
-			#if 1
+		#if CLOUD_COLLISION
 			if (num > 0) { // SHOULD NOT BE NEEDED
 			// SORT CLOUD
             printf("before cloud cellindices, num= %d, cloud_num= %d\n", num, cloud_num);
@@ -347,7 +350,7 @@ namespace rtps
 			//printf("(deleted cloud particles?) cloud_nc= %d\n", cloud_nc);
 			//exit(1);
 			}
-			#endif
+		#endif
        
             printf("*** enter fluid permute, num= %d\n", num);
             timers["permute"]->start();
@@ -407,31 +410,28 @@ namespace rtps
                 //continue; 
             }
 
+		#if CLOUD_COLLISION
 			if (num > 0) {
             //printf("permute\n");
             timers["cloud_permute"]->start();
+
 			#if 1
-            cloud_permute.execute(   cloud_num,
+            cloud_permute.execute(
+			    cloud_num,
                 cl_cloud_position_u,
                 cl_cloud_position_s,
-				// IAN: with my approach, the routines would remain the same. With your
-				// approach (a different array for each variable, there are more arguments, and 
-				// you need different routines for different cases
-                cl_cloud_normal_u, //
-                cl_cloud_normal_s, //
-                //cl_veleval_u, //
-                //cl_veleval_s, //
-                //cl_color_u, //
-                //cl_color_s, //
+                cl_cloud_normal_u, 
+                cl_cloud_normal_s,
                 cl_cloud_sort_indices,
-                //cl_sphp,
                 cl_GridParams,
                 clf_debug,
                 cli_debug);
 			#endif
+
             timers["cloud_permute"]->stop();
 			//printf("exit cloud_permite\n"); exit(1);
 		    }
+		#endif
 
 
             //if(num >0) printf("density\n");
@@ -580,7 +580,7 @@ namespace rtps
 
 		// NEED TIMER FOR POINT CLOUD COLLISIONS (GE)
 		// Messed collisions up
-		#if 1
+		#if CLOUD_COLLISION
 		if (num > 0) {
 			collision_cloud.execute(num, cloud_num, 
 				cl_position_s, 
@@ -1107,8 +1107,8 @@ printf("*** cloud_num= %d\n", cloud_num);
     void SPH::addNewxyPlane(int np, bool scaled, vector<float4>& normals)
 	{
 		float scale = 1.0f;
-		float4 mmin = float4(0.,0.,2.5,1.);
-		float4 mmax = float4(5.,5.,2.5,1.);
+		float4 mmin = float4(-.5,-.5,2.5,1.);
+		float4 mmax = float4(5.5,5.5,2.5,1.);
 		float zlevel = 2.;
 		float sp = spacing / 2. ;
 		//printf("spacing= %f\n", spacing); exit(0);

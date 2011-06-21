@@ -88,7 +88,7 @@ namespace rtps
             int dir = 1;        // dir: direction
             //int batch = num;
 
-            int arrayLength = nlpo2(num);
+            int arrayLength = nlpo2(cloud_num);
             //printf("num: %d\n", num);
             //printf("nlpo2(num): %d\n", arrayLength);
             //int arrayLength = max_num;
