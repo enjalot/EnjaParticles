@@ -166,7 +166,7 @@ int main(int argc, char** argv)
     //printf("arvg[0]: %s\n", argv[0]);
 #endif
 
-    settings->setRenderType(RTPSettings::RENDER);
+    settings->setRenderType(RTPSettings::MESH_RENDER);
     //settings->setRenderType(RTPSettings::SPRITE_RENDER);
     
     settings->setRadiusScale(1.0);

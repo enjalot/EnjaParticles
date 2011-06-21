@@ -406,7 +406,7 @@ namespace rtps
     }
 
     //----------------------------------------------------------------------
-    GLuint Render::compileShaders(const char* vertex_file, const char* fragment_file, const char* geometry_file, GLenum* geom_param, GLint* geom_value, int geom_param_len)
+    GLuint Render::compileShaders(const char* vertex_file, const char* fragment_file, const char* geometry_file, const GLenum* geom_param, const GLint* geom_value, int geom_param_len)
     {
 
         //this may not be the cleanest implementation
@@ -452,7 +452,7 @@ namespace rtps
 
         if (geometry_file)
         {
-            geometry_shader_source = file_contents(fragment_file,&frag_size);
+            geometry_shader_source = file_contents(geometry_file,&geom_size);
             if (!geometry_shader_source)
             {
                 printf("Geometry shader file not found or is empty! Cannot compile shader");

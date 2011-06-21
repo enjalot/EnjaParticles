@@ -955,6 +955,9 @@ void FLOCK::setRenderer()
         case RTPSettings::RENDER:
             renderer = new Render(pos_vbo,col_vbo,num,ps->cli, ps->settings);
             break;
+        case RTPSettings::MESH_RENDER:
+            renderer = new MeshRender(pos_vbo,col_vbo,num,ps->cli, ps->settings);
+            break;
         default:
             //should be an error
             renderer = new Render(pos_vbo,col_vbo,num,ps->cli, ps->settings);

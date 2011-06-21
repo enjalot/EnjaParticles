@@ -109,16 +109,18 @@ namespace rtps
         {
             glUseProgram(glsl_program[GAUSSIAN_X_SHADER]);
             glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "depthTex"),0);
-            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "del_x"),1.0f/window_width);
+            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "del_x"),1.0f/(float)window_width);
+            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "falloff"),settings->GetSettingAs<float>("blur_falloff"));
             glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_X_SHADER], "sig"),settings->GetSettingAs<float>("blur_scale")); 
             fullscreenQuad();
 
             glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D,gl_framebuffer_texs["d1"],0);
             glBindTexture(GL_TEXTURE_2D,gl_framebuffer_texs["d2"]);
 
-glUseProgram(glsl_program[GAUSSIAN_Y_SHADER]);
+            glUseProgram(glsl_program[GAUSSIAN_Y_SHADER]);
             glUniform1i( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "depthTex"),0);
-            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "del_y"),1.0f/window_height);
+            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "del_y"),1.0f/(float)window_height);
+            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "falloff"),settings->GetSettingAs<float>("blur_falloff"));
             glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_Y_SHADER], "sig"),settings->GetSettingAs<float>("blur_scale"));
             cur_depth = "d1";
             
@@ -129,6 +131,7 @@ glUseProgram(glsl_program[GAUSSIAN_Y_SHADER]);
             glUniform1i(glGetUniformLocation(glsl_program[GAUSSIAN_SHADER],"depthTex"),0);
             glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_SHADER], "del_x"),1.0/((float)window_width));
             glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_SHADER], "del_y"),1.0/((float)window_height));
+            glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_SHADER], "falloff"),settings->GetSettingAs<float>("blur_falloff"));
             glUniform1f( glGetUniformLocation(glsl_program[GAUSSIAN_SHADER], "sig"),settings->GetSettingAs<float>("blur_scale"));
             cur_depth = "d2";
         }
@@ -149,17 +152,17 @@ glUseProgram(glsl_program[GAUSSIAN_Y_SHADER]);
             glUseProgram(glsl_program[BILATERAL_GAUSSIAN_SHADER]);
             glUniform1i( glGetUniformLocation(glsl_program[BILATERAL_GAUSSIAN_SHADER], "depthTex"),0);
             glUniform2fv( glGetUniformLocation(glsl_program[BILATERAL_GAUSSIAN_SHADER], "blurDir"),1,ydir);
-            glUniform1f( glGetUniformLocation(glsl_program[BILATERAL_GAUSSIAN_SHADER], "blurDepthFallOff"),settings->GetSettingAs<float>("blur_depth_falloff"));
+            glUniform1f( glGetUniformLocation(glsl_program[BILATERAL_GAUSSIAN_SHADER], "sig_range"),settings->GetSettingAs<float>("blur_scale_range"));
             glUniform1f( glGetUniformLocation(glsl_program[BILATERAL_GAUSSIAN_SHADER], "sig"),settings->GetSettingAs<float>("blur_scale"));
             cur_depth = "d1";
         }
         else if (smoothing == CURVATURE_FLOW_SHADER)
         {
             int iter = settings->GetSettingAs<int>("curvature_flow_iterations");
-            float pmat[16];
-            glGetFloatv(GL_PROJECTION_MATRIX,pmat);
-            float focal_x = (pmat[0]*window_width)/2.0f;
-            float focal_y = (pmat[5]*window_height)/2.0f;
+            //float pmat[16];
+            //glGetFloatv(GL_PROJECTION_MATRIX,pmat);
+            //float focal_x = (pmat[0]*window_width)/2.0f;
+            //float focal_y = (pmat[5]*window_height)/2.0f;
             /*for(int i = 0;i<16;i++)
             {
                 printf("pmat[%d] = %f\n",i,pmat[i]);
@@ -167,13 +170,16 @@ glUseProgram(glsl_program[GAUSSIAN_Y_SHADER]);
             printf("focal_x = %f, focal_y = %f\n",focal_x,focal_y);*/
             glUseProgram(glsl_program[CURVATURE_FLOW_SHADER]);
             glUniform1i(glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER],"depthTex"),0);
-            glUniform1i(glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER],"width"),window_width);
-            glUniform1i(glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER],"height"),window_height); 
+            //glUniform1f(glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER],"width"),(float)window_width);
+            //glUniform1f(glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER],"height"),(float)window_height); 
             glUniform1f( glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER], "del_x"),1.0/((float)window_width));
             glUniform1f( glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER], "del_y"),1.0/((float)window_height));
-            glUniform1f( glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER], "focal_x"),focal_x);
-            glUniform1f( glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER], "focal_y"),focal_y);
+            glUniform1f( glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER], "h_x"),1.0/((float)window_width-1));
+            glUniform1f( glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER], "h_y"),1.0/((float)window_height-1));
+            //glUniform1f( glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER], "focal_x"),focal_x);
+            //glUniform1f( glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER], "focal_y"),focal_y);
             glUniform1f( glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER], "dt"),settings->GetSettingAs<float>("curvature_flow_dt"));
+            glUniform1f( glGetUniformLocation(glsl_program[CURVATURE_FLOW_SHADER], "distance_threshold"), settings->GetSettingAs<float>("curvature_flow_distance_threshold"));
             for(int i = 0; i < iter; i++)
             {
                 fullscreenQuad();

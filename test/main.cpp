@@ -192,10 +192,12 @@ int main(int argc, char** argv)
     settings->SetSetting("render_texture", "firejet_blast.png");
     settings->SetSetting("render_frag_shader", "sprite_tex_frag.glsl");
     settings->SetSetting("render_use_alpha", true);
-    settings->SetSetting("blur_depth_falloff",1.0f);
+    settings->SetSetting("blur_scale_range",0.01f);
     settings->SetSetting("blur_scale",8.0f);
-    settings->SetSetting("curvature_flow_iterations", 1);
-    settings->SetSetting("curvature_flow_dt", 0.1);
+    settings->SetSetting("blur_falloff",0.001f);
+    settings->SetSetting("curvature_flow_iterations", 100);
+    settings->SetSetting("curvature_flow_dt", 0.001);
+    settings->SetSetting("curvature_flow_distance_threshold", 0.0001);
     //settings->SetSetting("render_use_alpha", false);
     settings->SetSetting("render_alpha_function", "add");
     settings->SetSetting("lt_increment", -.00);
@@ -387,6 +389,7 @@ void appKeyboard(unsigned char key, int x, int y)
             return;
         case '/':
             ps->system->getRenderer()->setDepthSmoothing(Render::CURVATURE_FLOW_SHADER);
+            return;
         case 'w':
             translate_z -= 0.1;
             break;
@@ -405,6 +408,25 @@ void appKeyboard(unsigned char key, int x, int y)
         case 'x':
             translate_y -= 0.1;
             break;
+        case ',':
+           {
+               float falloff = ps->settings->GetSettingAs<float>("blur_falloff");
+               if(falloff<0.99f)
+               {
+                   ps->settings->SetSetting("blur_falloff",falloff+0.001f);
+               }
+           }
+           return;
+        case '.':
+           {
+               float falloff = ps->settings->GetSettingAs<float>("blur_falloff");
+               if(falloff>0.00001f)
+               {
+                   ps->settings->SetSetting("blur_falloff",falloff-0.001f);
+               }
+           }
+           return;
+/*
         case '>':
            {
                float falloff = ps->settings->GetSettingAs<float>("blur_depth_falloff");
@@ -423,6 +445,7 @@ void appKeyboard(unsigned char key, int x, int y)
                }
            }
            return;
+           */
         case '+':
            {
                float blur = ps->settings->GetSettingAs<float>("blur_scale");

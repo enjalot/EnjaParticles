@@ -66,7 +66,7 @@ namespace rtps
         };
         enum ShaderType
         {
-            NO_SHADER,SPHERE_SHADER, DEPTH_SHADER, GAUSSIAN_X_SHADER, GAUSSIAN_Y_SHADER, GAUSSIAN_SHADER, BILATERAL_GAUSSIAN_SHADER, NORMAL_SHADER, CURVATURE_FLOW_SHADER, MIKEP_SHADER, COPY_TO_FB
+            NO_SHADER,SPHERE_SHADER, DEPTH_SHADER, GAUSSIAN_X_SHADER, GAUSSIAN_Y_SHADER, GAUSSIAN_SHADER, BILATERAL_GAUSSIAN_SHADER, NORMAL_SHADER, CURVATURE_FLOW_SHADER, MESH_TRIANGLES, COPY_TO_FB
         };
 
         void setNum(int nn)
@@ -110,7 +110,7 @@ namespace rtps
 
     protected:
         int loadTexture(std::string texture_file, std::string texture_name);
-        GLuint compileShaders(const char* vertex_file, const char* fragment_file, const char* geometry_file = NULL, GLenum* geom_param=NULL, GLint* geom_value=NULL, int geom_param_len=0);
+        GLuint compileShaders(const char* vertex_file, const char* fragment_file, const char* geometry_file = NULL, const GLenum* geom_param=NULL, const GLint* geom_value=NULL, int geom_param_len=0);
         std::map<ShaderType,GLuint> glsl_program;    
         std::map<std::string,GLuint> gl_framebuffer_texs;
         std::map<std::string,GLuint> gl_textures;
