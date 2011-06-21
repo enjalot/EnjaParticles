@@ -170,7 +170,7 @@ namespace rtps
 			glColor3f(.5, .5, .5);
 			for (int i=0; i < cloud_num; i++) {
 				float4& f = (*cloud_positions)[i];
-				printf("v: %f, %f, %f\n", (float) f.x, (float) f.y, (float) f.z);
+				//printf("v: %f, %f, %f\n", (float) f.x, (float) f.y, (float) f.z);
 				if (f.x < 0 || f.y < 0 || f.z < 0) continue;
 				if (f.x > 5 || f.y > 5 || f.z > 5) continue;
 				glVertex3f(f.x, f.y, f.z);

@@ -157,7 +157,7 @@ set (rtpslib_SOURCES
     #### these are CPU only
     ${rtpslib_SOURCE_DIR}/system/outer/Pressure
     ${rtpslib_SOURCE_DIR}/system/outer/Viscosity
-    ${rtpslib_SOURCE_DIR}/system/outer/XOUTER
+    ${rtpslib_SOURCE_DIR}/system/OUTER
     ####
 
     
