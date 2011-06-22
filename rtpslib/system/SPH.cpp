@@ -273,10 +273,9 @@ namespace rtps
         }
 
         cl_position_u.acquire();
-
-
-
+        //cl_cloud_position_u.acquire();
         cl_color_u.acquire();
+
         //sub-intervals
         for (int i=0; i < sub_intervals; i++)
         {
@@ -290,32 +289,6 @@ namespace rtps
             	cloud_hash_and_sort();
 			}
 #endif
-            //if(num >0) printf("after hash and sort\n");
-
-            //printf("data structures\n");
-			// WHY ISN't THIS USED? GE
-            /*
-            timers["datastructures"]->start();
-            int nc = datastructures.execute(   num,
-                cl_position_u,
-                cl_position_s,
-                cl_velocity_u,
-                cl_velocity_s,
-                cl_veleval_u,
-                cl_veleval_s,
-                //cl_vars_unsorted,
-                cl_color_u,
-                cl_sort_hashes,
-                cl_sort_indices,
-                cl_cell_indices_start,
-                cl_cell_indices_end,
-                cl_sphp,
-                cl_GridParams,
-                grid_params.nb_cells,
-                clf_debug,
-                cli_debug);
-            timers["datastructures"]->stop();
-            */
 
             printf("before cellindices, num= %d\n", num);
             timers["cellindices"]->start();
@@ -475,7 +448,7 @@ namespace rtps
             collision();
 			printf("after collision\n");
             timers["integrate"]->start();
-            integrate();
+            integrate(); // includes boundary force
             timers["integrate"]->stop();
 
             /*
@@ -497,6 +470,7 @@ namespace rtps
         }
 
         cl_position_u.release();
+        //cl_cloud_position_u.release();
         cl_color_u.release();
 
         timers["update"]->stop();
@@ -651,10 +625,13 @@ namespace rtps
                 cli_debug);
         }
 
-		float4 cloudVel = float4(.25, 0., 0., 1.);
+		// Perhaps I am messed up by Courant condition if cloud point 
+		// velocities are too large? 
+
+		float4 cloudVel = float4(.001, 0., 0., 1.);
 
 		// CLOUD INTEGRATION
-		#if 0
+		#if 1
 			// How to prevent the cloud from advecting INTO THE FLUID? 
 			printf("cloud euler, cloud_num= %d\n", cloud_num);
             cloudEuler.execute(cloud_num,
