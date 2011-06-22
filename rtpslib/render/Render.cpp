@@ -195,29 +195,29 @@ namespace rtps
 					//printf("ver: %d, %d, %d, %d\n", vertices.x, vertices.y, vertices.z, vertices.w);
 					float4& v1 = (*cloud_positions)[vertices.x];
 					float4& n1 = (*cloud_normals)[normals.x];
-					v1.print("v1");
-					n1.print("n1");
+					//v1.print("v1");
+					//n1.print("n1");
 					glNormal3f(n1.x, n1.y, n1.z);
 					glVertex3f(v1.x, v1.y, v1.z);
 
 					float4& v2 = (*cloud_positions)[vertices.y];
 					float4& n2 = (*cloud_normals)[normals.y];
-					v2.print("v2");
-					n2.print("n2");
+					//v2.print("v2");
+					//n2.print("n2");
 					glNormal3f(n2.x, n2.y, n2.z);
 					glVertex3f(v2.x, v2.y, v2.z);
 
 					float4& v3 = (*cloud_positions)[vertices.z];
 					float4& n3 = (*cloud_normals)[normals.z];
-					v3.print("v3");
-					n3.print("n3");
+					//v3.print("v3");
+					//n3.print("n3");
 					glNormal3f(n3.x, n3.y, n3.z);
 					glVertex3f(v3.x, v3.y, v3.z);
 
 					float4& v4 = (*cloud_positions)[vertices.w];
 					float4& n4 = (*cloud_normals)[normals.w];
-					v4.print("v4");
-					n4.print("n4");
+					//v4.print("v4");
+					//n4.print("n4");
 					glNormal3f(n4.x, n4.y, n4.z);
 					glVertex3f(v4.x, v4.y, v4.z);
 				}

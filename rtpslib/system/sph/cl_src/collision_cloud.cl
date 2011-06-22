@@ -255,8 +255,8 @@ __kernel void collision_cloud(
 	float ff = length(pt.force);
 
 	if (ff > 1.e-4) {
-    	//force[index] = pt.force;
-    	force[index] += pt.force;
+    	force[index] = pt.force;
+    	//force[index] += pt.force;
 	}
 
 	// original

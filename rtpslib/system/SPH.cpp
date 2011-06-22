@@ -1013,6 +1013,7 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
 		cloud_positions.resize(0);
 		cloud_normals.resize(0);
 		cloud_faces.resize(0);
+		cloud_faces_normals.resize(0);
 
     	FILE* fd = fopen((const char*) file_vertex.c_str(), "r");
 		if (fd == 0) {
@@ -1023,7 +1024,7 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
     	float x, y, z;
     	for (int i=0; i < nb; i++) {
         	fscanf(fd, "%f %f %f\n", &x, &y, &z);
-        	//printf("x,y,z= %f, %f, %f\n", x, y, z);
+        	printf("vertex %d:, x,y,z= %f, %f, %f\n", i, x, y, z);
 			cloud_positions.push_back(float4(x,y,z,1.));
 			//cloud_positions[i] = float4(x,y,z,1.);
     	}
@@ -1036,7 +1037,7 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
     	fd = fopen((const char*) file_normal.c_str(), "r");
     	for (int i=0; i < nb; i++) {
         	fscanf(fd, "%f %f %f\n", &x, &y, &z);
-        	//printf("x,y,z= %f, %f, %f\n", x, y, z);
+        	printf("normal %d: x,y,z= %f, %f, %f\n", i, x, y, z);
 			cloud_normals.push_back(float4(x,y,z,0.));
 			//cloud_normals[i] = float4(x,y,z,0.);
     	}
@@ -1106,9 +1107,25 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
         	//printf("x,y,z= %d, %d, %d\n", n2, n2, n3);
 			//exit(1);
         	//printf("--------------------\n");
-			cloud_faces.push_back(int4(v1,v2,v3,v4)); // forms a face
-			cloud_faces_normals.push_back(int4(n1,n2,n3,n4)); // forms a face
+			cloud_faces.push_back(int4(v1-1,v2-1,v3-1,v4-1)); // forms a face
+			cloud_faces_normals.push_back(int4(n1-1,n2-1,n3-1,n4-1)); // forms a face
     	}
+
+		#if 1
+		for (int i=0; i < cloud_faces_normals.size(); i++) {
+			int4& n = cloud_faces_normals[i];
+			float4& n1 = cloud_normals[n.x];
+			float4& n2 = cloud_normals[n.y];
+			float4& n3 = cloud_normals[n.z];
+			float4& n4 = cloud_normals[n.w];
+			n.print("n");
+			n1.print("n1");
+			n2.print("n2");
+			n3.print("n3");
+			n4.print("n4");
+		}
+		//exit(1);
+		#endif
 
 
 		// push onto GPU
