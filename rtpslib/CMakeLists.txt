@@ -108,6 +108,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/SPH.cpp
     ${rtpslib_SOURCE_DIR}/system/SPHSettings.cpp
 
+    ${rtpslib_SOURCE_DIR}/system/sph/CloudEuler
     ${rtpslib_SOURCE_DIR}/system/sph/Euler
     ${rtpslib_SOURCE_DIR}/system/sph/LeapFrog
     ${rtpslib_SOURCE_DIR}/system/sph/Lifetime

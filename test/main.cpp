@@ -61,6 +61,14 @@ float translate_x = -2.00f;
 float translate_y = -2.70f;//300.f;
 float translate_z = 3.50f;
 
+float arm_translate_x = 0.;
+float arm_translate_y = 0.;
+float arm_translate_z = 0.;
+float arm_velocity_x = 0.;
+float arm_velocity_y = 0.;
+float arm_velocity_z = 0.;
+
+
 // mouse controls
 int mouse_old_x, mouse_old_y;
 int mouse_buttons = 0;
@@ -378,6 +386,7 @@ void appKeyboard(unsigned char key, int x, int y)
                 ps->system->addBox(nn, min, max, false, color);
                 return;
             }
+
         case 'o':
             ps->system->getRenderer()->writeBuffersToDisk();
             return;
@@ -387,6 +396,7 @@ void appKeyboard(unsigned char key, int x, int y)
         case 'C':
             ps->system->getRenderer()->setDepthSmoothing(Render::BILATERAL_GAUSSIAN_SHADER);
             return;
+
         case 'w':
             translate_z -= 0.1;
             break;
@@ -399,6 +409,33 @@ void appKeyboard(unsigned char key, int x, int y)
         case 'd':
             translate_x -= 0.1;
             break;
+
+        case 'W':
+            arm_translate_z -= 0.1;
+            arm_velocity_z  += 0.1;
+            break;
+        case 'A':
+			// move hand at constant velocity in x
+            arm_translate_x += 0.1;
+            arm_velocity_x  += 0.1;
+            break;
+        case 'S':
+            arm_translate_z += 0.1;
+            arm_velocity_z  += 0.1;
+            break;
+        case 'D':
+            arm_translate_x -= 0.1;
+            arm_velocity_x  -= 0.1;
+            break;
+        case 'Z':
+            arm_translate_y += 0.1;
+            arm_velocity_y  += 0.1;
+            break;
+        case 'X':
+            arm_translate_y -= 0.1;
+            arm_velocity_y  -= 0.1;
+            break;
+
         case 'z':
             translate_y += 0.1;
             break;

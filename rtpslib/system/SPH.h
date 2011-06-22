@@ -34,6 +34,7 @@ class OUTER;
 #include <sph/LeapFrog.h>
 #include <sph/Lifetime.h>
 #include <sph/Euler.h>
+#include <sph/CloudEuler.h>
 
 //#include "../util.h"
 #include <Hose.h>
@@ -254,6 +255,7 @@ namespace rtps
         void integrate();
         LeapFrog leapfrog;
         Euler euler;
+        CloudEuler cloudEuler;
 
 
 		// GE

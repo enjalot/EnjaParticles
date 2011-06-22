@@ -1003,8 +1003,11 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
     	//std::string file_normal = "/Users/erlebach/arm1_normal.txt";
     	//std::string file_face = "/Users/erlebach/arm1_faces.txt";
 
-		//std::string base = "/Users/erlebach/Documents/src/blender-particles/EnjaParticles/data/";
-		std::string base = "/panfs/panasas1/users/gerlebacher/vislab/src/blender-particles/EnjaParticles_nogit/EnjaParticles/data/";
+		// mac
+		std::string base = "/Users/erlebach/Documents/src/blender-particles/EnjaParticles/data/";
+
+		// Linux/Vislab
+		//std::string base = "/panfs/panasas1/users/gerlebacher/vislab/src/blender-particles/EnjaParticles_nogit/EnjaParticles/data/";
 
     	std::string file_vertex = base + "arm1_vertex.txt";
     	std::string file_normal = base + "arm1_normal.txt";
@@ -1025,7 +1028,7 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
     	float x, y, z;
     	for (int i=0; i < nb; i++) {
         	fscanf(fd, "%f %f %f\n", &x, &y, &z);
-        	printf("vertex %d:, x,y,z= %f, %f, %f\n", i, x, y, z);
+        	//printf("vertex %d:, x,y,z= %f, %f, %f\n", i, x, y, z);
 			cloud_positions.push_back(float4(x,y,z,1.));
 			//cloud_positions[i] = float4(x,y,z,1.);
     	}
@@ -1038,7 +1041,7 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
     	fd = fopen((const char*) file_normal.c_str(), "r");
     	for (int i=0; i < nb; i++) {
         	fscanf(fd, "%f %f %f\n", &x, &y, &z);
-        	printf("normal %d: x,y,z= %f, %f, %f\n", i, x, y, z);
+        	//printf("normal %d: x,y,z= %f, %f, %f\n", i, x, y, z);
 			cloud_normals.push_back(float4(x,y,z,0.));
 			//cloud_normals[i] = float4(x,y,z,0.);
     	}
@@ -1046,7 +1049,7 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
 
 		// rescale point clouds
 		// domain center is x=y=z=2.5
-		float4 center(2.5, 2.5, 1.50, 1.); // center of domain
+		float4 center(2.5, 2.5, 0.50, 1.); // center of domain (shifted in z)
 		// compute bounding box
 		float xmin = 1.e10, ymin= 1.e10, zmin=1.e10;
 		float xmax = -1.e10, ymax= -1.e10, zmax= -1.e10;
@@ -1073,9 +1076,6 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
 
 		float scale = 2.;  // set back to 2 or 3
 		float4 trans = center - rcenter;
-		rcenter.print("rcenter");
-		center.print("center");
-		trans.print("trans");
 		float s;
 
 		// arms is now in [0,1]^3 with center (0.5)^3
@@ -1084,8 +1084,6 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
 			f.x = (f.x + trans.x - center.x)*scale + center.x; 
 			f.y = (f.y + trans.y - center.y)*scale + center.y; 
 			f.z = (f.z + trans.z - center.z)*scale + center.z; 
-			//f.y = f.y + trans.y; 
-			//f.z = f.z + trans.z; 
 			f.x = center.x - (f.x-center.x);
 		}
 
@@ -1119,15 +1117,13 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
 			float4& n2 = cloud_normals[n.y];
 			float4& n3 = cloud_normals[n.z];
 			float4& n4 = cloud_normals[n.w];
-			n.print("n");
-			n1.print("n1");
-			n2.print("n2");
-			n3.print("n3");
-			n4.print("n4");
+			//n.print("n");
+			//n1.print("n1");
+			//n2.print("n2");
+			//n3.print("n3");
+			//n4.print("n4");
 		}
-		//exit(1);
 		#endif
-
 
 		// push onto GPU
 		pushCloudParticles(cloud_positions, cloud_normals);
