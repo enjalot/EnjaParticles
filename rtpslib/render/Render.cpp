@@ -179,30 +179,32 @@ namespace rtps
 		//exit(0);
 #endif
 
-#if 0
+#if 1
 // SOMETHING WRONG WITH reading faces!!
 
 		int nb_faces = cloud_faces->size();
-		//printf("nb_faces= %d\n", nb_faces);
-		glBegin(GL_QUADS);
-			for (int i=0; i < nb_faces; i++) {
-				int4& vertices = (*cloud_faces)[i];
-				//printf("ver: %d, %d, %d, %d\n", vertices.x, vertices.y, vertices.z, vertices.w);
-				float4& v1 = (*cloud_positions)[vertices.x];
-				//v1.print("v1");
-				glVertex3f(v1.x, v1.y, v1.z);
-				float4& v2 = (*cloud_positions)[vertices.y];
-				//v2.print("v2");
-				glVertex3f(v2.x, v2.y, v2.z);
-				float4& v3 = (*cloud_positions)[vertices.z];
-				//v3.print("v3");
-				glVertex3f(v3.x, v3.y, v3.z);
-				float4& v4 = (*cloud_positions)[vertices.w];
-				//v4.print("v4");
-				glVertex3f(v4.x, v4.y, v4.z);
-			}
-		glEnd();
-		//exit(0);
+
+		if (nb_faces > 0) {
+			//printf("nb_faces= %d\n", nb_faces);
+			glBegin(GL_QUADS);
+				for (int i=0; i < nb_faces; i++) {
+					int4& vertices = (*cloud_faces)[i];
+					//printf("ver: %d, %d, %d, %d\n", vertices.x, vertices.y, vertices.z, vertices.w);
+					float4& v1 = (*cloud_positions)[vertices.x];
+					//v1.print("v1");
+					glVertex3f(v1.x, v1.y, v1.z);
+					float4& v2 = (*cloud_positions)[vertices.y];
+					//v2.print("v2");
+					glVertex3f(v2.x, v2.y, v2.z);
+					float4& v3 = (*cloud_positions)[vertices.z];
+					//v3.print("v3");
+					glVertex3f(v3.x, v3.y, v3.z);
+					float4& v4 = (*cloud_positions)[vertices.w];
+					//v4.print("v4");
+					glVertex3f(v4.x, v4.y, v4.z);
+				}
+			glEnd();
+		}
 #endif
 
 	}

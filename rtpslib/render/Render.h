@@ -175,7 +175,7 @@ namespace rtps
 		     this->cloud_faces = &cloud_faces;
 			 this->cloud_num = nb_points; 
 		}
-	private:
+	protected:
 		void renderPointCloud();
 
     };  

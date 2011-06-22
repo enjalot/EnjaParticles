@@ -138,6 +138,15 @@ namespace rtps
         glPushAttrib(GL_ALL_ATTRIB_BITS);
         glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
 
+		printf("*** before renderPointCloud\n");
+        glDepthMask(GL_TRUE);
+		glEnable(GL_LIGHTING);
+		renderPointCloud(); //GE
+        glDepthMask(GL_FALSE);
+		glDisable(GL_LIGHTING);
+
+
+
         //perserve original buffer
         GLint buffer;
         glGetIntegerv(GL_DRAW_BUFFER,&buffer);
