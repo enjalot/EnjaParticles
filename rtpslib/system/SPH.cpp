@@ -778,7 +778,7 @@ namespace rtps
         cl_position_u.acquire();
         cl_position_u.copyToDevice(poss);
         cl_position_u.release();
-        ps->cli->queue.finish();
+        ps->cli->queue[0].finish();
 
 
     }

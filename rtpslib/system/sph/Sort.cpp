@@ -33,7 +33,7 @@ namespace rtps
             exit(0);
         }
 
-        ps->cli->queue.finish();
+        ps->cli->queue[0].finish();
 
         /*
         int nbc = 10;
@@ -58,7 +58,7 @@ namespace rtps
               cl_sort_indices.getDevicePtr());
         */
 
-        ps->cli->queue.finish();
+        ps->cli->queue[0].finish();
 #if 0
     
         printf("********* Bitonic Sort Diagnostics **************\n");

@@ -131,110 +131,122 @@ namespace rtps
         printf("cl::Platform::get(): %s\n", oclErrorString(err));
         printf("platforms.size(): %zd\n", platforms.size());
 
-        deviceUsed = 0;
-        err = platforms[0].getDevices(CL_DEVICE_TYPE_GPU, &devices);
-        printf("getDevices: %s\n", oclErrorString(err));
-        printf("devices.size(): %zd\n", devices.size());
-        //const char* s = devices[0].getInfo<CL_DEVICE_EXTENSIONS>().c_str();
-        //printf("extensions: \n %s \n", s);
-        int t = devices.front().getInfo<CL_DEVICE_TYPE>();
-        printf("type: \n %d %d \n", t, CL_DEVICE_TYPE_GPU);
+        for(int i = 0; i < platforms.size(); i++)
+        {
+            printf("platform name: %s\n",platforms[i].getInfo<CL_PLATFORM_NAME>().c_str());
+            deviceUsed = 0;
+            err = platforms[i].getDevices(CL_DEVICE_TYPE_GPU, &devices);
+            printf("getDevices: %s\n", oclErrorString(err));
+            printf("devices.size(): %zd\n", devices.size());
+            //const char* s = devices[0].getInfo<CL_DEVICE_EXTENSIONS>().c_str();
+            //printf("extensions: \n %s \n", s);
 
-        //assume sharing for now, at some point we should implement a check
-        //to make sure the devices can do context sharing
+                //assume sharing for now, at some point we should implement a check
+                //to make sure the devices can do context sharing
+        
+        
+                // Define OS-specific context properties and create the OpenCL context
+                //#if defined (__APPLE_CC__)
+        #if defined (__APPLE__) || defined(MACOSX)
+                CGLContextObj kCGLContext = CGLGetCurrentContext();
+                CGLShareGroupObj kCGLShareGroup = CGLGetShareGroup(kCGLContext);
+                cl_context_properties props[] =
+                {
+                    CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE, (cl_context_properties)kCGLShareGroup,
+                    0
+                };
+                //this works
+                //cl_context cxGPUContext = clCreateContext(props, 0, 0, NULL, NULL, &err);
+                //these dont
+                //cl_context cxGPUContext = clCreateContext(props, 1,(cl_device_id*)&devices.front(), NULL, NULL, &err);
+                //cl_context cxGPUContext = clCreateContextFromType(props, CL_DEVICE_TYPE_GPU, NULL, NULL, &err);
+                //printf("IS IT ERR???? %s\n", oclErrorString(err));
+                try
+                {
+                    context = cl::Context(props);   //had to edit line 1448 of cl.hpp to add this constructor
+                }
+                catch (cl::Error er)
+                {
+                    printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+                }
+        #else
+        #if defined WIN32 // Win32
+                cl_context_properties props[] = 
+                {
+                    CL_GL_CONTEXT_KHR, (cl_context_properties)wglGetCurrentContext(), 
+                    CL_WGL_HDC_KHR, (cl_context_properties)wglGetCurrentDC(), 
+                    CL_CONTEXT_PLATFORM, (cl_context_properties)(platforms[0])(),
+                    0
+                };
+                //cl_context cxGPUContext = clCreateContext(props, 1, &cdDevices[uiDeviceUsed], NULL, NULL, &err);
+                try
+                {
+                    context = cl::Context(CL_DEVICE_TYPE_GPU, props);
+                }
+                catch (cl::Error er)
+                {
+                    printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+                }
+        #else
+                cl_context_properties props[] = 
+                {
+                    CL_GL_CONTEXT_KHR, (cl_context_properties)glXGetCurrentContext(), 
+                    CL_GLX_DISPLAY_KHR, (cl_context_properties)glXGetCurrentDisplay(), 
+                    CL_CONTEXT_PLATFORM, (cl_context_properties)(platforms[i])(),
+                    0
+                };
+                //cl_context cxGPUContext = clCreateContext(props, 1, &cdDevices[uiDeviceUsed], NULL, NULL, &err);
+                try
+                {
+                    context = cl::Context(CL_DEVICE_TYPE_GPU, props);
+                }
+                catch (cl::Error er)
+                {
+                    printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+                }
+        #endif
+        #endif
+        
+                //for some reason this properties works but props doesn't with c++ bindings
+                //cl_context_properties properties[] =
+                //    { CL_CONTEXT_PLATFORM, (cl_context_properties)(platforms[0])(), 0};
+        
+                /*
+                try{
+                    context = cl::Context(CL_DEVICE_TYPE_GPU, props);
+                    //context = cl::Context(devices, props);
+                    //context = cl::Context(devices, props, NULL, NULL, &err);
+                    //printf("IS IT ERR222 ???? %s\n", oclErrorString(err));
+                    //context = cl::Context(CL_DEVICE_TYPE_GPU, props);
+                    //context = cl::Context(cxGPUContext);
+                }
+                catch (cl::Error er) {
+                    printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+                }
+                */
+            for(int j = 0; j < devices.size(); j++)
+            {
+                //int t = devices.front().getInfo<CL_DEVICE_TYPE>();
+                int t = devices[j].getInfo<CL_DEVICE_TYPE>();
+                printf("type: \n %d %d \n", t, CL_DEVICE_TYPE_GPU);
+                printf("device name: %s\n", devices[j].getInfo<CL_DEVICE_NAME>().c_str());
+                printf("device extensions: %s\n", devices[j].getInfo<CL_DEVICE_EXTENSIONS>().c_str());
+        
 
-
-        // Define OS-specific context properties and create the OpenCL context
-        //#if defined (__APPLE_CC__)
-#if defined (__APPLE__) || defined(MACOSX)
-        CGLContextObj kCGLContext = CGLGetCurrentContext();
-        CGLShareGroupObj kCGLShareGroup = CGLGetShareGroup(kCGLContext);
-        cl_context_properties props[] =
-        {
-            CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE, (cl_context_properties)kCGLShareGroup,
-            0
-        };
-        //this works
-        //cl_context cxGPUContext = clCreateContext(props, 0, 0, NULL, NULL, &err);
-        //these dont
-        //cl_context cxGPUContext = clCreateContext(props, 1,(cl_device_id*)&devices.front(), NULL, NULL, &err);
-        //cl_context cxGPUContext = clCreateContextFromType(props, CL_DEVICE_TYPE_GPU, NULL, NULL, &err);
-        //printf("IS IT ERR???? %s\n", oclErrorString(err));
-        try
-        {
-            context = cl::Context(props);   //had to edit line 1448 of cl.hpp to add this constructor
-        }
-        catch (cl::Error er)
-        {
-            printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
-        }
-#else
-#if defined WIN32 // Win32
-        cl_context_properties props[] = 
-        {
-            CL_GL_CONTEXT_KHR, (cl_context_properties)wglGetCurrentContext(), 
-            CL_WGL_HDC_KHR, (cl_context_properties)wglGetCurrentDC(), 
-            CL_CONTEXT_PLATFORM, (cl_context_properties)(platforms[0])(),
-            0
-        };
-        //cl_context cxGPUContext = clCreateContext(props, 1, &cdDevices[uiDeviceUsed], NULL, NULL, &err);
-        try
-        {
-            context = cl::Context(CL_DEVICE_TYPE_GPU, props);
-        }
-        catch (cl::Error er)
-        {
-            printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
-        }
-#else
-        cl_context_properties props[] = 
-        {
-            CL_GL_CONTEXT_KHR, (cl_context_properties)glXGetCurrentContext(), 
-            CL_GLX_DISPLAY_KHR, (cl_context_properties)glXGetCurrentDisplay(), 
-            CL_CONTEXT_PLATFORM, (cl_context_properties)(platforms[0])(),
-            0
-        };
-        //cl_context cxGPUContext = clCreateContext(props, 1, &cdDevices[uiDeviceUsed], NULL, NULL, &err);
-        try
-        {
-            context = cl::Context(CL_DEVICE_TYPE_GPU, props);
-        }
-        catch (cl::Error er)
-        {
-            printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
-        }
-#endif
-#endif
-
-        //for some reason this properties works but props doesn't with c++ bindings
-        //cl_context_properties properties[] =
-        //    { CL_CONTEXT_PLATFORM, (cl_context_properties)(platforms[0])(), 0};
-
-        /*
-        try{
-            context = cl::Context(CL_DEVICE_TYPE_GPU, props);
-            //context = cl::Context(devices, props);
-            //context = cl::Context(devices, props, NULL, NULL, &err);
-            //printf("IS IT ERR222 ???? %s\n", oclErrorString(err));
-            //context = cl::Context(CL_DEVICE_TYPE_GPU, props);
-            //context = cl::Context(cxGPUContext);
-        }
-        catch (cl::Error er) {
-            printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
-        }
-        */
-        //devices = context.getInfo<CL_CONTEXT_DEVICES>();
-
-        //create the command queue we will use to execute OpenCL commands
-        ///command_queue = clCreateCommandQueue(context, devices[deviceUsed], 0, &err);
-        cl_command_queue_properties cq_props = CL_QUEUE_PROFILING_ENABLE;
-        try
-        {
-            queue = cl::CommandQueue(context, devices[deviceUsed], cq_props, &err);
-        }
-        catch (cl::Error er)
-        {
-            printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+                //devices = context.getInfo<CL_CONTEXT_DEVICES>();
+        
+                //create the command queue we will use to execute OpenCL commands
+                ///command_queue = clCreateCommandQueue(context, devices[deviceUsed], 0, &err);
+                cl_command_queue_properties cq_props = CL_QUEUE_PROFILING_ENABLE;
+                try
+                {
+                    queue.push_back(cl::CommandQueue(context, devices[j], cq_props, &err));
+                }
+                catch (cl::Error er)
+                {
+                    printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+                }
+            }
         }
     }
 

@@ -37,15 +37,10 @@ namespace rtps
             int addKernel(Kernel kern);
         */
 
-        cl::Context context;
-        cl::CommandQueue queue;
-
-        std::vector<cl::Device> devices;
-        int deviceUsed;
-
-        //error checking stuff
         int err;
         cl::Event event;
+        cl::Context context;
+        std::vector<cl::CommandQueue> queue;
 
         //setup an OpenCL context that shares with OpenGL
         void setup_gl_cl();
@@ -63,6 +58,9 @@ namespace rtps
 
     private:
         std::string inc_dir;
+        std::vector<cl::Device> devices;
+        //error checking stuff
+        int deviceUsed;
     };
 
 

@@ -34,8 +34,8 @@ namespace rtps
         try
         {
             cl::Event event;
-            cli->err = cli->queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(ndrange), cl::NullRange, NULL, &event);
-            cli->queue.finish();
+            cli->err = cli->queue[0].enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(ndrange), cl::NullRange, NULL, &event);
+            cli->queue[0].finish();
             event.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
             event.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
             timing = (end - start) * 1.0e-6f;
@@ -50,7 +50,7 @@ namespace rtps
 
     }
 
-    float Kernel::execute(int ndrange, int worksize)
+    float Kernel::execute(int ndrange, int worksize, int queue_num)
     {
         int global;
         float factor = (1.0f * ndrange) / worksize;
@@ -76,8 +76,8 @@ namespace rtps
         try
         {
             cl::Event event;
-            cli->err = cli->queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(global), cl::NDRange(worksize), NULL, &event);
-            cli->queue.finish();
+            cli->err = cli->queue[queue_num].enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(global), cl::NDRange(worksize), NULL, &event);
+            cli->queue[queue_num].finish();
             event.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
             event.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
             timing = (end - start) * 1.0e-6f;
@@ -91,12 +91,12 @@ namespace rtps
 
     }
 
-    void Kernel::setArgShared(int arg, int nb_bytes)
+    void Kernel::setArgShared(int arg, int nb_bytes, int queue_num)
     {
         try
         {
             kernel.setArg(arg, nb_bytes, 0);
-            cli->queue.finish();
+            cli->queue[queue_num].finish();
         }
         catch (cl::Error er)
         {
