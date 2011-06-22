@@ -14,18 +14,21 @@ __kernel void cloudEuler(
                    __constant struct SPHParams* sphp, 
                    float dt)
 {
+
     unsigned int i = get_global_id(0);
     int num = sphp->num;
     if (i >= num) return;
 
+    //float4 p = pos_s[i] * sphp->simulation_scale;
     float4 p = pos_s[i];
 
     p += dt*vel;
     p.w = 1.0f; //just in case
-    p.xyz /= sphp->simulation_scale;
+    //p.xyz /= sphp->simulation_scale;
 
     uint originalIndex = sort_indices[i];
 
+	// NOT VALID LINE
     pos_u[originalIndex] = (float4)(p.xyz, 1.);  // for plotting
+	return;
 }
-

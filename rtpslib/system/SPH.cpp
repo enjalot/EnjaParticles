@@ -134,6 +134,10 @@ namespace rtps
             euler = Euler(sph_source_dir, ps->cli, timers["euler_gpu"]);
         }
 
+		// CLOUD Integrator
+		// ADD Cloud timers later. 
+		cloudEuler = CloudEuler(sph_source_dir, ps->cli, timers["euler_gpu"]);
+
         string lt_file = settings->GetSettingAs<string>("lt_cl");
         //lifetime = Lifetime(sph_source_dir, ps->cli, timers["lifetime_gpu"], lt_file);
 
@@ -645,8 +649,27 @@ namespace rtps
                 //debug
                 clf_debug,
                 cli_debug);
-
         }
+
+		float4 cloudVel = float4(.25, 0., 0., 1.);
+
+		// CLOUD INTEGRATION
+		#if 0
+			// How to prevent the cloud from advecting INTO THE FLUID? 
+			printf("cloud euler, cloud_num= %d\n", cloud_num);
+            cloudEuler.execute(cloud_num,
+                settings->dt,
+                cl_position_u,
+                cl_position_s,
+                cloudVel,
+                cl_cloud_sort_indices,
+                cl_sphp,
+                //debug
+                clf_debug,
+                cli_debug);
+		#endif
+
+
 
 #if 0
         if (num > 0)

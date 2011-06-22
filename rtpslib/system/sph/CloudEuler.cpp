@@ -9,7 +9,7 @@ namespace rtps
  
         printf("create euler kernel\n");
         path += "/cloud_euler.cl";
-        k_cloud_euler = Kernel(cli, path, "euler");
+        k_cloud_euler = Kernel(cli, path, "cloudEuler");
     } 
 
     void CloudEuler::execute(int num,
