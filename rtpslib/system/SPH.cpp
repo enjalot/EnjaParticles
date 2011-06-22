@@ -1003,7 +1003,8 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
     	//std::string file_normal = "/Users/erlebach/arm1_normal.txt";
     	//std::string file_face = "/Users/erlebach/arm1_faces.txt";
 
-		std::string base = "/Users/erlebach/Documents/src/blender-particles/EnjaParticles/data/";
+		//std::string base = "/Users/erlebach/Documents/src/blender-particles/EnjaParticles/data/";
+		std::string base = "/panfs/panasas1/users/gerlebacher/vislab/src/blender-particles/EnjaParticles_nogit/EnjaParticles/data/";
 
     	std::string file_vertex = base + "arm1_vertex.txt";
     	std::string file_normal = base + "arm1_normal.txt";
