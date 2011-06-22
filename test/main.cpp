@@ -23,8 +23,10 @@
 
 using namespace rtps;
 
-int window_width = 640;
-int window_height = 480;
+//int window_width = 640;
+//int window_height = 480;
+int window_width = 640*2;
+int window_height = 480*2;
 int glutWindowHandle = 0;
 
 
@@ -113,8 +115,9 @@ rtps::RTPS* ps;
 
 #define DT .003f
 
-//float4 color = float4(0.1, 0.1, 0.73, .05);
-float4 color = float4(1., 0.5, 0.0, 1.);
+// contorl 
+float4 color = float4(0.1, 0.1, 0.73, .05);
+//float4 color = float4(1., 0.5, 0.0, 1.);
 int hindex; 
 
 
@@ -123,7 +126,7 @@ int hindex;
 //GE::Time *ts[3];
 
 //================
-//#include "materials_lights.h"
+#include "materials_lights.h"
 
 //----------------------------------------------------------------------
 float rand_float(float mn, float mx)
@@ -157,7 +160,7 @@ int main(int argc, char** argv)
     glutMotionFunc(appMotion);
     glutReshapeFunc(resizeWindow);
 
-    //define_lights_and_materials();
+    define_lights_and_materials();
 
     // initialize necessary OpenGL extensions
     glewInit();
@@ -188,7 +191,7 @@ int main(int argc, char** argv)
     settings->setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
     //settings->setRenderType(RTPSettings::RENDER);
     //settings.setRenderType(RTPSettings::SPRITE_RENDER);
-    settings->setRadiusScale(0.5);
+    settings->setRadiusScale(0.2);
     settings->setBlurScale(1.0);
     settings->setUseGLSL(1);
 

@@ -76,7 +76,8 @@ namespace rtps
 
 		void readPointCloud(std::vector<float4>& cloud_positions, 
 							std::vector<float4>& cloud_normals,
-						 	std::vector<int4>& cloud_faces);
+						 	std::vector<int4>& cloud_faces,
+						 	std::vector<int4>& cloud_faces_normals);
 
         //wrapper around Hose.h 
         int addHose(int total_n, float4 center, float4 velocity, float radius, float4 color=float4(1.0, 0.0, 0.0, 1.0f));
@@ -160,6 +161,7 @@ namespace rtps
         std::vector<float4> cloud_positions;
         std::vector<float4> cloud_normals;
         std::vector<int4>   cloud_faces;
+        std::vector<int4>   cloud_faces_normals;
 		Buffer<float4>		cl_cloud_position_u;
 		Buffer<float4>		cl_cloud_position_s;
 		Buffer<float4>		cl_cloud_normal_u;

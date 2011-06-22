@@ -154,7 +154,7 @@ namespace rtps
 		//addHollowBall(2000, center, radius_in, radius_out, scaled, cloud_normals);
 		int nn = 4000;
     	//addNewxyPlane(nn, scaled, cloud_normals); 
-		readPointCloud(cloud_positions, cloud_normals, cloud_faces);
+		readPointCloud(cloud_positions, cloud_normals, cloud_faces, cloud_faces_normals);
 
 		//  ADD A SWITCH TO HANDLE CLOUD IF PRESENT
 		// Must be called after a point cloud has been created. 
@@ -172,7 +172,7 @@ namespace rtps
 		// only needs to be done once if cloud not moving
 		// ideally, cloud should be stored in vbos. 
         cl_cloud_position_u.copyToHost(cloud_positions);
-		renderer->setCloudData(cloud_positions, cloud_normals, cloud_faces, cloud_num);
+		renderer->setCloudData(cloud_positions, cloud_normals, cloud_faces, cloud_faces_normals, cloud_num);
     }
 
     SPH::~SPH()
@@ -996,11 +996,18 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
 	//----------------------------------------------------------------------
 	void SPH::readPointCloud(std::vector<float4>& cloud_positions, 
 							 std::vector<float4>& cloud_normals,
-							 std::vector<int4>& cloud_faces)
+							 std::vector<int4>& cloud_faces,
+							 std::vector<int4>& cloud_faces_normals)
 	{
-    	std::string file_vertex = "/Users/erlebach/arm1_vertex.txt";
-    	std::string file_normal = "/Users/erlebach/arm1_normal.txt";
-    	std::string file_face = "/Users/erlebach/arm1_faces.txt";
+    	//std::string file_vertex = "/Users/erlebach/arm1_vertex.txt";
+    	//std::string file_normal = "/Users/erlebach/arm1_normal.txt";
+    	//std::string file_face = "/Users/erlebach/arm1_faces.txt";
+
+		std::string base = "/Users/erlebach/Documents/src/blender-particles/EnjaParticles/data/";
+
+    	std::string file_vertex = base + "arm1_vertex.txt";
+    	std::string file_normal = base + "arm1_normal.txt";
+    	std::string file_face = base + "arm1_faces.txt";
 
 		// I should really do: resize(cloud_num) which is initially zero
 		cloud_positions.resize(0);
@@ -1008,6 +1015,10 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
 		cloud_faces.resize(0);
 
     	FILE* fd = fopen((const char*) file_vertex.c_str(), "r");
+		if (fd == 0) {
+			printf("cannot open: %s\n", file_vertex.c_str());
+			exit(1);
+		}
     	int nb = 5737;
     	float x, y, z;
     	for (int i=0; i < nb; i++) {
@@ -1096,17 +1107,12 @@ printf("cloud_positions size: %d\n", cloud_normals.size());
 			//exit(1);
         	//printf("--------------------\n");
 			cloud_faces.push_back(int4(v1,v2,v3,v4)); // forms a face
+			cloud_faces_normals.push_back(int4(n1,n2,n3,n4)); // forms a face
     	}
-
-		//printf("cloud_faces.size= %d\n", cloud_faces.size());
-		//cloud_faces[0].print("cloud faces[0]");
-		//exit(0);
 
 
 		// push onto GPU
 		pushCloudParticles(cloud_positions, cloud_normals);
-printf("*** cloud_num= %d\n", cloud_num); 
-//exit(1);
 	}
 
 	//----------------------------------------------------------------------

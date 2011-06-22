@@ -112,6 +112,7 @@ namespace rtps
 		std::vector<float4>* cloud_positions; 
 		std::vector<float4>* cloud_normals; 
 		std::vector<int4>* cloud_faces; 
+		std::vector<int4>* cloud_faces_normals; 
 		int cloud_num;
 
     protected:
@@ -167,12 +168,14 @@ namespace rtps
 		std::vector<float4>& setCloudData(std::vector<float4>& cloud_positions, 
 		                                  std::vector<float4>& cloud_normals, 
 		                                  std::vector<int4>& cloud_faces, 
+		                                  std::vector<int4>& cloud_faces_normals, 
 										  int nb_points)
 		{
 			 // cloud_positions.size() >= cloud_num;
 		     this->cloud_positions = &cloud_positions;
 		     this->cloud_normals = &cloud_normals;
 		     this->cloud_faces = &cloud_faces;
+		     this->cloud_faces_normals = &cloud_faces_normals;
 			 this->cloud_num = nb_points; 
 		}
 	protected:
