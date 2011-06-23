@@ -18,6 +18,7 @@ namespace rtps
                         Buffer<float4>& vel_s, 
                         Buffer<float4>& cloud_pos_s, 
                         Buffer<float4>& cloud_normals_s, 
+                        Buffer<float4>& cloud_velocity_s, 
                         Buffer<float4>& force_s, 
             			//output
             			Buffer<unsigned int>& ci_start,

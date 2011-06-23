@@ -214,6 +214,7 @@ __kernel void collision_cloud(
 						__global float4* vel,  
 						__global float4* cloud_pos,  
 						__global float4* cloud_normals,  
+						__global float4* cloud_velocity,  
 						__global float4* force,
 
                         __global int*    cell_cloud_indexes_start,

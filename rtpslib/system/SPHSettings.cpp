@@ -109,6 +109,7 @@ namespace rtps
 	}
 
 
+	//----------------------------------------------------------------------
     void SPH::updateSPHP()
     {
 
@@ -160,6 +161,8 @@ namespace rtps
         sphp.nb_vars = settings->GetSettingAs<int>("Number of Variables"); // for combined variables (vars_sorted, etc.)
         sphp.choice = settings->GetSettingAs<int>("Choice"); // which kind of calculation to invoke
         sphp.max_num = settings->GetSettingAs<int>("Maximum Number of Particles");
+        sphp.cloud_num = settings->GetSettingAs<int>("Number of Cloud Particles");
+        sphp.max_cloud_num = settings->GetSettingAs<int>("Maximum Number of Cloud Particles");
 
         //update the OpenCL buffer
         std::vector<SPHParams> vparams(0);

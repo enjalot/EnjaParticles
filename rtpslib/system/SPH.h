@@ -255,7 +255,7 @@ namespace rtps
         void integrate();
         LeapFrog leapfrog;
         Euler euler;
-        CloudEuler cloudEuler;
+        CloudEuler cloud_euler;
 
 
 		// GE
@@ -278,6 +278,8 @@ namespace rtps
 		OUTER* outer;
 
 		int nb_in_cloud; // nb of points in cloud
+
+		void printDevArray(Buffer<float4>& cl_cloud_position, char* msg, int nb_el, int nb_print);
 
     };
 

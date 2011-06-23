@@ -460,7 +460,9 @@ void appKeyboard(unsigned char key, int x, int y)
 void timerCB(int ms)
 {
     glutTimerFunc(ms, timerCB, ms);
+	printf("****** BEFORE ps->update ******\n");
     ps->update();
+	printf("****** AFTER ps->update ******\n");
     glutPostRedisplay();
 }
 

@@ -97,6 +97,7 @@ namespace rtps
 
         void printSettings();
 
+		//----------------------------------------------------------------------
         // Return the value associate with KEY as the specified template parameter type
         // e.g.,
         //  int i = SPHSettings.GetSettingAs<int>("key");
@@ -117,6 +118,7 @@ namespace rtps
             return ss_typecast<RT>(settings[key]);
         }
 
+		//----------------------------------------------------------------------
         template <typename RT>
         void SetSetting(std::string key, RT value) {
             // TODO: change to stringstream for any type of input that is cast as string
@@ -131,6 +133,7 @@ namespace rtps
             //}
         }
     
+		//----------------------------------------------------------------------
         bool Exists(std::string key) { if(settings.find(key) == settings.end()) { return false; } else { return true; } }
 
 

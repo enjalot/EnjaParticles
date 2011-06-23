@@ -16,6 +16,8 @@ namespace rtps
                         float dt,
                         Buffer<float4>& pos_u,
                         Buffer<float4>& pos_s,
+                        Buffer<float4>& normal_u,
+                        Buffer<float4>& normal_s,
 						float4 vel,
                         Buffer<unsigned int>& indices,
                         //params

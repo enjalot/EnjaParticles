@@ -74,7 +74,7 @@ namespace rtps
         cl_ulong start, end;
         float timing = -1.0f;
 
-		printf("kernel: global = %d\n", global);
+		//printf("kernel: global = %d\n", global);
         try
         {
             cl::Event event;

@@ -42,6 +42,7 @@ namespace rtps
             Buffer<float4>& vel_s, 
             Buffer<float4>& cloud_pos_s, 
             Buffer<float4>& cloud_normals_s,
+            Buffer<float4>& cloud_velocity_s,
             Buffer<float4>& force_s, 
             //output
 			Buffer<unsigned int>& ci_start,
@@ -56,16 +57,13 @@ namespace rtps
 		printf("enter cloud COLLISION\n"); 
 
         int iarg = 0;
-		//printf("num= %d\n", num);
-		//printf("(exit) num_pts_cloud= %d\n", num_pts_cloud);
-		//exit(0);
-        //k_collision_cloud.setArg(iarg++, num);
-		printf("num_pts_cloud= %d\n", num_pts_cloud);
+		//printf("num_pts_cloud= %d\n", num_pts_cloud);
         k_collision_cloud.setArg(iarg++, num_pts_cloud);
         k_collision_cloud.setArg(iarg++, pos_s.getDevicePtr());
         k_collision_cloud.setArg(iarg++, vel_s.getDevicePtr());
         k_collision_cloud.setArg(iarg++, cloud_pos_s.getDevicePtr());
         k_collision_cloud.setArg(iarg++, cloud_normals_s.getDevicePtr());
+        k_collision_cloud.setArg(iarg++, cloud_velocity_s.getDevicePtr());
         k_collision_cloud.setArg(iarg++, force_s.getDevicePtr());
 
         k_collision_cloud.setArg(iarg++, ci_start.getDevicePtr());

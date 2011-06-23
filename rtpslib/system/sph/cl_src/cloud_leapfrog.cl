@@ -57,3 +57,5 @@ __kernel void cloudLeapfrog(
 }
 
 
+// in prep
+// copy from cl_position_s to cl_position_u

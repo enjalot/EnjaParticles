@@ -52,6 +52,9 @@ typedef struct SPHParams
     int choice; // which kind of calculation to invoke
     int max_num;
 
+    int cloud_num; // nb cloud points
+    int max_cloud_num;
+
 } SPHParams;
 
 

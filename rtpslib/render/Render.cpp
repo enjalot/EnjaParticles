@@ -179,8 +179,8 @@ namespace rtps
 		//exit(0);
 #endif
 
-#if 1
-// SOMETHING WRONG WITH reading faces!!
+#if 0
+// Something wrong with the faces when the arm is moving
 
 		int nb_faces = cloud_faces->size();
 
