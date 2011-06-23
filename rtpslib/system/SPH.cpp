@@ -806,6 +806,7 @@ namespace rtps
 		// BEGIN CLOUD
 		cloud_positions.resize(max_cloud_num); // replace by max_cloud_num
 		cloud_normals.resize(max_cloud_num);
+		cloud_velocity.resize(max_cloud_num);
 		// END CLOUD
 
         //for reading back different values from the kernel
@@ -846,6 +847,8 @@ namespace rtps
         	cl_cloud_position_s = Buffer<float4>(ps->cli, cloud_positions);
         	cl_cloud_normal_u = Buffer<float4>(ps->cli, cloud_normals);
         	cl_cloud_normal_s = Buffer<float4>(ps->cli, cloud_normals);
+        	cl_cloud_velocity_u = Buffer<float4>(ps->cli, cloud_velocity);
+        	cl_cloud_velocity_s = Buffer<float4>(ps->cli, cloud_velocity);
 		}
 
         //pure opencl buffers: these are deprecated

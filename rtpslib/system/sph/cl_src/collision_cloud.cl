@@ -34,6 +34,7 @@ void collision_point(PointData* pt,
 		float4 v_fluid, //vel_s,  // boundary point
 		float4 p_cloud,
 		float4 n_cloud,  // normalized
+		float4 v_cloud,  
 		__constant struct GridParams* gp,
 		__constant struct SPHParams* sphp)
 {
@@ -54,7 +55,8 @@ void collision_point(PointData* pt,
     if (diff > sphp->EPSILON)
     {
 		// assume n_cloud has unit length
-        r_f = calculateRepulsionForce(n_cloud, v_fluid, sphp->boundary_stiffness, sphp->boundary_dampening, diff);
+		float4 v_cloud = .003; // TEMPORARY
+        r_f = calculateRepulsionForce(n_cloud, v_fluid-v_cloud, sphp->boundary_stiffness, sphp->boundary_dampening, diff);
         //f_f = calculateFrictionForce(v, f, nc, friction_kinetic, friction_static_limit);
 		;
     }
@@ -68,6 +70,7 @@ void collision_point(PointData* pt,
 inline void ForNeighborCloud(//__global float4*  vars_sorted,
 						__global float4* cloud_pos, 
 						__global float4* cloud_normals,
+						__global float4* cloud_velocity,
                         PointData* pt,
                         uint index_j,  // neighbor index
                         float4 p_fluid,   // position_i,
@@ -85,6 +88,7 @@ inline void ForNeighborCloud(//__global float4*  vars_sorted,
 	// cloud_pos always in world coord
     float4 p_cloud = cloud_pos[index_j] * sphp->simulation_scale; 
     float4 n_cloud = cloud_normals[index_j]; // * sphp->simulation_scale; 
+    float4 v_cloud = cloud_velocity[index_j]; // * sphp->simulation_scale; 
 
     //float4 v_cloud = cloud_vel[index_j]; // * sphp->simulation_scale; 
 
@@ -101,6 +105,7 @@ inline void ForNeighborCloud(//__global float4*  vars_sorted,
 			v_fluid,
 			p_cloud,
 			n_cloud, 
+			v_cloud, 
 			gp,
 			sphp);
 	}
@@ -117,6 +122,7 @@ void IterateParticlesInCellCloud(
                            float4  velocity_i, // of fluid
 						   __global float4* cloud_pos,
 						   __global float4* cloud_normals,
+						   __global float4* cloud_velocity,
                            __global int* cell_indexes_start, // based on cloud points
                            __global int*  cell_indexes_end,
                            __constant struct GridParams* gp,
@@ -148,7 +154,7 @@ void IterateParticlesInCellCloud(
         for (uint index_j=startIndex; index_j < endIndex; index_j++)
         {
             //***** UPDATE pt (sum) (4)
-            ForNeighborCloud(cloud_pos, cloud_normals, pt, index_j, position_i, velocity_i, gp, sphp, num_cloud DEBUG_ARGV);
+            ForNeighborCloud(cloud_pos, cloud_normals, cloud_velocity, pt, index_j, position_i, velocity_i, gp, sphp, num_cloud DEBUG_ARGV);
         }
     }
 }
@@ -165,6 +171,7 @@ void IterateParticlesInNearbyCellsCloud(
                                   float4   velocity_i, 
                                   __global float4*   cloud_pos, 
                                   __global float4*   cloud_normals,   
+                                  __global float4*   cloud_velocity,   
                                   __global int*       cell_indices_start,
                                   __global int*       cell_indices_end,
                                   __constant struct GridParams* gp,
@@ -193,7 +200,7 @@ void IterateParticlesInNearbyCellsCloud(
 
                 // **** SUMMATION/UPDATE
 				// 3
-                IterateParticlesInCellCloud(pos, force, pt, ipos, position_i, velocity_i, cloud_pos, cloud_normals, cell_indices_start, cell_indices_end, gp, sphp, cloud_num DEBUG_ARGV);
+                IterateParticlesInCellCloud(pos, force, pt, ipos, position_i, velocity_i, cloud_pos, cloud_normals, cloud_velocity, cell_indices_start, cell_indices_end, gp, sphp, cloud_num DEBUG_ARGV);
 
                 //barrier(CLK_LOCAL_MEM_FENCE); // DEBUG
                 // SERIOUS PROBLEM: Results different than results with cli = 5 (bottom of this file)
@@ -242,7 +249,7 @@ __kernel void collision_cloud(
 	// returns force acting on particle due to neighbor cloud particles 
 	// in pt.force
 	// num_cloud argument is not required
-    IterateParticlesInNearbyCellsCloud(pos, force, &pt, position_i, velocity_i, cloud_pos, cloud_normals, cell_cloud_indexes_start, cell_cloud_indexes_end, gp, sphp, num_cloud DEBUG_ARGV);
+    IterateParticlesInNearbyCellsCloud(pos, force, &pt, position_i, velocity_i, cloud_pos, cloud_normals, cloud_velocity, cell_cloud_indexes_start, cell_cloud_indexes_end, gp, sphp, num_cloud DEBUG_ARGV);
 
 	// must somehow scale according to nb points in neighborhood
 	// pt.force: sum of all the boundary forces acting on the particle

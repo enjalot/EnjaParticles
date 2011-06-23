@@ -161,7 +161,7 @@ namespace rtps
 		// POINT CLOUD ARRAYS
         std::vector<float4> cloud_positions;
         std::vector<float4> cloud_normals;
-        std::vector<int4>   cloud_velocity;
+        std::vector<float4> cloud_velocity;
         std::vector<int4>   cloud_faces;
         std::vector<int4>   cloud_faces_normals;
 		float4				avg_cloud_velocity;
