@@ -54,7 +54,7 @@ namespace rtps
             Buffer<float4>& clf_debug,
             Buffer<int4>& cli_debug)
     {
-		printf("enter cloud COLLISION\n"); 
+		//printf("enter cloud COLLISION\n"); 
 
         int iarg = 0;
 		//printf("num_pts_cloud= %d\n", num_pts_cloud);
@@ -78,12 +78,12 @@ namespace rtps
         int local_size = 128;
 		//printf("CollisionCloud\n"); exit(1);
 		// loop over fluid particles
-		printf("BEFORE COLLISION CLOUD EXECUTE\n");
+		//printf("BEFORE COLLISION CLOUD EXECUTE\n");
 
 // This routine is screwing up the particles. Something is wrong. 
         float gputime = k_collision_cloud.execute(num, local_size);
 return;
-		printf("AFTER COLLISION CLOUD EXECUTE\n");
+		//printf("AFTER COLLISION CLOUD EXECUTE\n");
 
         //if(gputime > 0)
             //timer->set(gputime);

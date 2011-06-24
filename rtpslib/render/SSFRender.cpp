@@ -138,7 +138,7 @@ namespace rtps
         glPushAttrib(GL_ALL_ATTRIB_BITS);
         glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
 
-		printf("*** before renderPointCloud\n");
+		//printf("*** before renderPointCloud\n");
         glDepthMask(GL_TRUE);
 		glEnable(GL_LIGHTING);
 		renderPointCloud(); //GE

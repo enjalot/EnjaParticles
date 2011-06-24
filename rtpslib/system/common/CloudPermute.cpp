@@ -29,7 +29,7 @@ namespace rtps
                     Buffer<float4>& clf_debug,
                     Buffer<int4>& cli_debug)
     {
-		printf("CloudPermute: num= %d\n", num);
+		//printf("CloudPermute: num= %d\n", num);
         
         int iarg = 0;
         k_permute.setArg(iarg++, num);
@@ -41,7 +41,7 @@ namespace rtps
 
         int workSize = 64;
         
-        printf("cloudPermute, before kernel exec, num=  %d\n", num);
+        //printf("cloudPermute, before kernel exec, num=  %d\n", num);
         try
         {
 			float gputime;

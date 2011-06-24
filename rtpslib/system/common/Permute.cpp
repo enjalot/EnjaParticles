@@ -10,7 +10,7 @@ namespace rtps
     {
         cli = cli_;
         timer = timer_;
-        printf("create permute kernel\n");
+        //printf("create permute kernel\n");
         path = path + "/permute.cl";
         k_permute = Kernel(cli, path, "permute");
         
@@ -53,7 +53,7 @@ namespace rtps
         //printf("about to data structures\n");
         try
         {
-			printf("k_permute (non-cloud): num= %d\n", num); 
+			//printf("k_permute (non-cloud): num= %d\n", num); 
             float gputime = k_permute.execute(num, workSize);
             if(gputime > 0)
                 timer->set(gputime);

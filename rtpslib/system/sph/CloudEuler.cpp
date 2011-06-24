@@ -18,7 +18,9 @@ namespace rtps
                     Buffer<float4>& pos_s,
                     Buffer<float4>& normal_u,
                     Buffer<float4>& normal_s,
-                    float4 vel,
+                    Buffer<float4>& velocity_u,
+                    Buffer<float4>& velocity_s,
+                    //float4 vel,
                     Buffer<unsigned int>& indices,
                     //params
                     Buffer<SPHParams>& sphp,
@@ -32,17 +34,17 @@ namespace rtps
         k_cloud_euler.setArg(iargs++, pos_s.getDevicePtr());
         k_cloud_euler.setArg(iargs++, normal_u.getDevicePtr());
         k_cloud_euler.setArg(iargs++, normal_s.getDevicePtr());
-        k_cloud_euler.setArg(iargs++, vel);
+        k_cloud_euler.setArg(iargs++, velocity_u.getDevicePtr());
+        k_cloud_euler.setArg(iargs++, velocity_s.getDevicePtr());
+        //k_cloud_euler.setArg(iargs++, vel);
         k_cloud_euler.setArg(iargs++, indices.getDevicePtr());
         k_cloud_euler.setArg(iargs++, sphp.getDevicePtr());
         k_cloud_euler.setArg(iargs++, dt); //time step
 
-		printf("BEOFRE k_cloud_euler.execute\n");
-
+		//printf("BEFORE k_cloud_euler.execute\n");
 
         int local_size = 128;
         k_cloud_euler.execute(num, local_size);
-
     }
 
 	// NO CPU IMPLEMENTATION

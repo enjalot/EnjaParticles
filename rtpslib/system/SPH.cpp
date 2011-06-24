@@ -99,6 +99,10 @@ namespace rtps
 		//vector<float4> cloud_normals;
 		bool scaled = true;
 
+		// Ideally, change every time step, and update all points in 
+		// the cloud on the GPU (in which routine?)
+		avg_cloud_velocity = float4(3., 0., 0., 1.);
+
         //*** end Initialization
 
         setupTimers();
@@ -228,7 +232,7 @@ namespace rtps
 	//----------------------------------------------------------------------
     void SPH::update()
     {
-		printf("+++++++++++++ enter UPDATE()\n");
+		//printf("+++++++++++++ enter UPDATE()\n");
         //call kernels
         //TODO: add timings
 #ifdef CPU
@@ -274,7 +278,7 @@ namespace rtps
 	//----------------------------------------------------------------------
     void SPH::updateGPU()
     {
-		printf("**** enter updateGPU, num= %d\n", num);
+		//printf("**** enter updateGPU, num= %d\n", num);
 
         timers["update"]->start();
         glFinish();
@@ -298,7 +302,8 @@ namespace rtps
         cl_color_u.acquire();
 
         //sub-intervals
-		printf("sub_intervals= %d\n", sub_intervals);
+		//printf("sub_intervals= %d\n", sub_intervals);
+
         for (int i=0; i < sub_intervals; i++)
         {
 
@@ -308,17 +313,17 @@ namespace rtps
 			// only for clouds (if cloud_num > 0)
 #if CLOUD_COLLISION
 			if (cloud_num > 0) {
-				printf("BEFORE CLOUD_HASH_AND_SORT\n");
-				printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
-				printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
+				//printf("BEFORE CLOUD_HASH_AND_SORT\n");
+				//printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
+				//printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
             	cloud_hash_and_sort();
-				printf("AFTER CLOUD_HASH_AND_SORT\n");
-				printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
-				printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
+				//printf("AFTER CLOUD_HASH_AND_SORT\n");
+				//printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
+				//printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
 			}
 #endif
 
-            printf("before cellindices, num= %d\n", num);
+            //printf("before cellindices, num= %d\n", num);
             timers["cellindices"]->start();
             int nc = cellindices.execute(   num,
                 cl_sort_hashes,
@@ -339,7 +344,7 @@ namespace rtps
 		#if CLOUD_COLLISION
 			if (num > 0) { // SHOULD NOT BE NEEDED
 			// SORT CLOUD
-            printf("before cloud cellindices, num= %d, cloud_num= %d\n", num, cloud_num);
+            //printf("before cloud cellindices, num= %d, cloud_num= %d\n", num, cloud_num);
             timers["cellindices"]->start();
 
             int cloud_nc = cellindices.execute(cloud_num,
@@ -358,7 +363,7 @@ namespace rtps
 			}
 		#endif
        
-            printf("*** enter fluid permute, num= %d\n", num);
+            //printf("*** enter fluid permute, num= %d\n", num);
             timers["permute"]->start();
             permute.execute(   num,
                 cl_position_u,
@@ -375,7 +380,7 @@ namespace rtps
                 clf_debug,
                 cli_debug);
             timers["permute"]->stop();
-			printf("exit after fluid permute\n");
+			//printf("exit after fluid permute\n");
 			//if (num > 0) exit(0);
  
 			// NUMBER OF CLOUD PARTICLES IS CONSTANT THROUGHOUT THE SIMULATION
@@ -423,9 +428,9 @@ namespace rtps
             //printf("permute\n");
             timers["cloud_permute"]->start();
 
-			printf("BEFORE CLOUD_PERMUTE\n");
-			printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
-			printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
+			//printf("BEFORE CLOUD_PERMUTE\n");
+			//printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
+			//printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
 
 			#if 1
             cloud_permute.execute(
@@ -440,9 +445,9 @@ namespace rtps
                 cli_debug);
 			#endif
 
-			printf("AFTER CLOUD_PERMUTE\n");
-			printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
-			printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
+			//printf("AFTER CLOUD_PERMUTE\n");
+			//printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
+			//printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
 			cl_cloud_position_s.copyToHost(cloud_positions);
 
             timers["cloud_permute"]->stop();
@@ -509,9 +514,9 @@ namespace rtps
         //cl_cloud_position_u.release();
         cl_color_u.release();
 
-		printf("*** END OF GPU UPDATE ***\n");
-		printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
-		printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
+		//printf("*** END OF GPU UPDATE ***\n");
+		//printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
+		//printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
 		cl_cloud_position_s.copyToHost(cloud_positions);
 
 		//exit(0);
@@ -673,20 +678,19 @@ namespace rtps
 
 		static int count=0;
 
-		float4 cloudVel = float4(3., 0., 0., 1.);
 		printf("settings->dt= %f\n", settings->dt);
 
 		// CLOUD INTEGRATION
 		#if 1
-		printf("*** BEFORE CLOUD_EULER ***\n");
-		printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
-		printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // WRONG
+		//printf("*** BEFORE CLOUD_EULER ***\n");
+		//printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
+		//printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // WRONG
 
 		// start the arm moving after x iterations
-		if (count > 600) {
+		if (count > 10) {
 
 			// How to prevent the cloud from advecting INTO THE FLUID? 
-			printf("cloud euler, cloud_num= %d\n", cloud_num);
+			//printf("cloud euler, cloud_num= %d\n", cloud_num);
 			// returns unsorted positions
             cloud_euler.execute(cloud_num,
                 settings->dt,
@@ -694,7 +698,8 @@ namespace rtps
                 cl_cloud_position_s,
                 cl_cloud_normal_u,
                 cl_cloud_normal_s,
-                cloudVel,
+                cl_cloud_velocity_u,
+                cl_cloud_velocity_s,
                 cl_cloud_sort_indices,
                 cl_sphp,
                 //debug
@@ -704,7 +709,7 @@ namespace rtps
 		}
 		count++;
 
-			printf("*** AFTER CLOUD_EULER ***\n");
+			//printf("*** AFTER CLOUD_EULER ***\n");
 			//printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
 			//printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // WRONG
 		#endif
@@ -807,6 +812,8 @@ namespace rtps
 		cloud_positions.resize(max_cloud_num); // replace by max_cloud_num
 		cloud_normals.resize(max_cloud_num);
 		cloud_velocity.resize(max_cloud_num);
+		// Should really be done every iteration unless constant
+		std::fill(cloud_velocity.begin(), cloud_velocity.end(), avg_cloud_velocity);
 		// END CLOUD
 
         //for reading back different values from the kernel
@@ -817,12 +824,12 @@ namespace rtps
 
         //float4 color = float4(0.0, 1.0, 0.0, 1.0f);
         //std::fill(colors.begin(), colors.end(),color);
-        std::fill(forces.begin(), forces.end(),float4(0.0f, 0.0f, 1.0f, 0.0f));
-        std::fill(velocities.begin(), velocities.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
-        std::fill(veleval.begin(), veleval.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
+        std::fill(forces.begin(), forces.end(), float4(0.0f, 0.0f, 1.0f, 0.0f));
+        std::fill(velocities.begin(), velocities.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
+        std::fill(veleval.begin(), veleval.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
 
         std::fill(densities.begin(), densities.end(), 0.0f);
-        std::fill(xsphs.begin(), xsphs.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
+        std::fill(xsphs.begin(), xsphs.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
         std::fill(error_check.begin(), error_check.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
 
         // VBO creation, TODO: should be abstracted to another class
@@ -1112,9 +1119,9 @@ namespace rtps
 
     	fclose(fd);
 
-		printf("before normal read: normal size: %d\n", cloud_normals.size());
+		//printf("before normal read: normal size: %d\n", cloud_normals.size());
 
-		printf("file_normal: %s\n", file_normal.c_str());
+		//printf("file_normal: %s\n", file_normal.c_str());
     	fd = fopen((const char*) file_normal.c_str(), "r");
     	for (int i=0; i < nb; i++) {
         	fscanf(fd, "%f %f %f\n", &x, &y, &z);
@@ -1126,7 +1133,7 @@ namespace rtps
 
 		// rescale point clouds
 		// domain center is x=y=z=2.5
-		float4 center(2.5, 2.5, 0.50, 1.); // center of domain (shifted in z)
+		float4 center(2.5, 2.5, 1.50, 1.); // center of domain (shifted in z)
 		// compute bounding box
 		float xmin = 1.e10, ymin= 1.e10, zmin=1.e10;
 		float xmax = -1.e10, ymax= -1.e10, zmax= -1.e10;
@@ -1244,15 +1251,7 @@ namespace rtps
 		//printf("spacing= %f\n", spacing);
 		//printf("GEE addHollowSphere spacing = %f\n", spacing);
 
-printf("before HollowSphere\n");
-printf("cloud_positions size: %d\n", cloud_positions.size());
-printf("cloud_normals size: %d\n", cloud_normals.size());
         vector<float4> sphere = addHollowSphere(nn, center, radius_in, radius_out, spacing/2., scale, normals);
-printf("after HollowSphere\n");
-printf("cloud_positions size: %d\n", cloud_positions.size());
-printf("cloud_normals size: %d\n", cloud_normals.size());
-printf("normals size: %d\n", normals.size());
-printf("sphere size: %d\n", sphere.size());
         float4 velo(0, 0, 0, 0);
 		printf("** addHollowBall: nb particles: %d\n", sphere.size());
 		for (int i=0; i < sphere.size(); i++) {
@@ -1261,8 +1260,6 @@ printf("sphere size: %d\n", sphere.size());
 		// pos of cloud in world coordinates
 		// simulation coord = (world coord) * simulation_scale
         pushCloudParticles(sphere,normals);
-printf("cloud_positions size: %d\n", cloud_positions.size());
-printf("cloud_normals size: %d\n", cloud_normals.size());
 //exit(0);
     }
 	//----------------------------------------------------------------------

@@ -164,8 +164,14 @@ namespace rtps
         std::vector<float4> cloud_velocity;
         std::vector<int4>   cloud_faces;
         std::vector<int4>   cloud_faces_normals;
+		// ideally, the total point cloud is a collection of rigid
+		// objects. For now, only a single rigid object
+		float4				cloud_cg; // center of gravity
 		float4				avg_cloud_velocity;
 		float4				avg_cloud_angular_momentum;
+		// quaternion (theta/2, rotation axis)
+		float4				cloud_omega;  // rotation quaterion
+		float 				cloud_rot_mat[3][3];
 		Buffer<float4>		cl_cloud_position_u;
 		Buffer<float4>		cl_cloud_position_s;
 		Buffer<float4>		cl_cloud_velocity_u;

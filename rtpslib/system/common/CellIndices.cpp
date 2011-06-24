@@ -9,7 +9,7 @@ namespace rtps
     {
         cli = cli_;
         timer = timer_;
-        printf("create cellindices kernel\n");
+        //printf("create cellindices kernel\n");
         path = path + "/cellindices.cl";
         k_cellindices = Kernel(cli, path, "cellindices");
         
@@ -29,7 +29,7 @@ namespace rtps
                     Buffer<int4>& cli_debug)
     {
 
-		printf("*** enter CellIndices, num= %d\n", num);
+		//printf("*** enter CellIndices, num= %d\n", num);
 
         //-------------------
         // Set cl_cell indices to -1
@@ -74,7 +74,7 @@ namespace rtps
         //ci_end.copyToHost(num_changed, nb_cells);
        
         int nc = num_changed[0];
-		printf("cell indices: (num_changed) nc= %d\n", nc);
+		//printf("cell indices: (num_changed) nc= %d\n", nc);
         //printf("Num Changed: %d\n", nc);
 
         //if(num > 0 && nc < 0) { exit(0); }
