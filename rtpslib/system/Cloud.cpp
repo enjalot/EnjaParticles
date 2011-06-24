@@ -1,4 +1,4 @@
-#define CLOUD_COLLISION 1
+#define CLOUD_COLLISION 0
 
 #include <GL/glew.h>
 #include <math.h>
@@ -215,7 +215,7 @@ namespace rtps
                 cl_cloud_cell_indices_start,
                 cl_cloud_cell_indices_end,
                 //cl_sphp,
-                cl_GridParams,
+                &cl_GridParams,
                 grid_params.nb_cells,
                 clf_debug,
                 cli_debug);
@@ -267,6 +267,34 @@ namespace rtps
     }
 
 	//----------------------------------------------------------------------
+	void CLOUD::permuteExecute()
+	{
+            cloud_permute.execute(
+			    cloud_num,
+                cl_cloud_position_u,
+                cl_cloud_position_s,
+                cl_cloud_normal_u, 
+                cl_cloud_normal_s,
+                cl_cloud_sort_indices,
+                *cl_GridParams,
+                clf_debug,
+                cli_debug);
+	}
+	//----------------------------------------------------------------------
+	void CLOUD::cellindicesExecute()
+	{
+		cellindices.execute(cloud_num,
+                cl_cloud_sort_hashes,
+                cl_cloud_sort_indices,
+                cl_cloud_cell_indices_start,
+                cl_cloud_cell_indices_end,
+                //cl_sphp,
+                *cl_GridParams,
+                grid_params.nb_cells,
+                clf_debug,
+                cli_debug);
+	}
+	//----------------------------------------------------------------------
     void CLOUD::cloud_hash_and_sort()
     {
         //printf("cloud hash and sort\n"); exit(0);
@@ -275,7 +303,7 @@ namespace rtps
                 cl_cloud_position_u,
                 cl_cloud_sort_hashes,
                 cl_cloud_sort_indices,
-                cl_GridParams,
+                *cl_GridParams,
                 clf_debug,
                 cli_debug);
         timers["hash"]->stop();
@@ -448,13 +476,13 @@ namespace rtps
 
         //TODO make a helper constructor for buffer to make a cl_mem from a struct
         //Setup Grid Parameter structs
-        std::vector<GridParams> gparams(0);
-        gparams.push_back(grid_params);
-        cl_GridParams = Buffer<GridParams>(ps->cli, gparams);
+        //std::vector<GridParams> gparams(0);
+        //gparams.push_back(grid_params);
+        //cl_GridParams = Buffer<GridParams>(ps->cli, gparams);
         //scaled Grid Parameters
-        std::vector<GridParams> sgparams(0);
-        sgparams.push_back(grid_params_scaled);
-        cl_GridParamsScaled = Buffer<GridParams>(ps->cli, sgparams);
+        //std::vector<GridParams> sgparams(0);
+        //sgparams.push_back(grid_params_scaled);
+        //cl_GridParamsScaled = Buffer<GridParams>(ps->cli, sgparams);
 
         //setup debug arrays
         std::vector<float4> clfv(cloud_max_num);

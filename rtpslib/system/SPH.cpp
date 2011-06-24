@@ -1,4 +1,4 @@
-#define CLOUD_COLLISION 1
+#define CLOUD_COLLISION 0
 
 #include <GL/glew.h>
 #include <math.h>
@@ -110,6 +110,10 @@ namespace rtps
 		cloud = new CLOUD(ps, sphp, max_nb_in_cloud);
 		int cloud_num = cloud->getCloudNum(); 
 		int cloud_max_num = cloud->getMaxCloudNum(); 
+
+		// I can define cl_sphp later since I am using pointers
+		cloud->setSPHP(&cl_sphp);
+		cloud->setGridParams(&cl_GridParams);
 
 		printf("cloud_num = %d\n", cloud_num);
 
@@ -253,7 +257,6 @@ namespace rtps
         //call kernels
         //TODO: add timings
 #ifdef CPU
-		printf("updateCPU\n"); exit(3);
         updateCPU();
 #endif
 #ifdef GPU
@@ -278,17 +281,6 @@ namespace rtps
         {
             cpuLeapFrog();
         }
-#if 0
-        //printf("positions[0].z %f\n", positions[0].z);
-        for (int i = 0; i < 100; i++)
-        {
-            //if(xsphs[i].z != 0.0)
-            //printf("force: %f %f %f  \n", veleval[i].x, veleval[i].y, veleval[i].z);
-            printf("force: %f %f %f  \n", xsphs[i].x, xsphs[i].y, xsphs[i].z);
-            //printf("force: %f %f %f  \n", velocities[i].x, velocities[i].y, velocities[i].z);
-        }
-        //printf("cpu execute!\n");
-#endif
         glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
         glBufferData(GL_ARRAY_BUFFER, num * sizeof(float4), &positions[0], GL_DYNAMIC_DRAW);
     }
@@ -318,7 +310,6 @@ namespace rtps
         }
 
         cl_position_u.acquire();
-        //cl_cloud_position_u.acquire();
         cl_color_u.acquire();
 
         //sub-intervals
@@ -404,7 +395,6 @@ namespace rtps
 			//if (num > 0) exit(0);
  
 			// NUMBER OF CLOUD PARTICLES IS CONSTANT THROUGHOUT THE SIMULATION
- 
 
             printf("** num %d, nc %d\n", num, nc);
             if (nc <= num && nc >= 0)
@@ -430,7 +420,7 @@ namespace rtps
                 settings->SetSetting("Number of Particles", num);
                 //sphp.num = num;
                 updateSPHP();
-                updateCLOUDP();
+                //updateCLOUDP();
                 renderer->setNum(sphp.num);
 
                 //need to copy sorted arrays into unsorted arrays
@@ -509,9 +499,20 @@ namespace rtps
             timers["force"]->stop();
 
             collision();
-            timers["integrate"]->start();
+
+			// CLOUD UPDATE
+
+			#if 0
+            cloud->cloud_hash_and_sort();
+            cloud->cellindicesExecute();
+            cloud->permuteExecute();
+			//collision
+			cloud->collision(cl_position_s, cl_velocity_s, cl_force_s, cl_sphp, num);
+			cloud->integrate();
+			#endif
+
+
             integrate(); // includes boundary force
-            timers["integrate"]->stop();
 
             /*
             lifetime.execute( num,
@@ -655,6 +656,7 @@ namespace rtps
 
     void SPH::integrate()
     {
+        timers["integrate"]->start();
 		int cloud_num = cloud->getCloudNum();
 
         if (integrator == EULER)
@@ -730,7 +732,6 @@ namespace rtps
                 //debug
                 clf_debug,
                 cli_debug);
-
 		}
 		count++;
 
@@ -752,7 +753,7 @@ namespace rtps
         }
 #endif
 
-
+    	timers["integrate"]->stop();
     }
 
 	// GE: WHY IS THIS NEEDED?

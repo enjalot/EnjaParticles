@@ -138,7 +138,7 @@ namespace rtps
 
         //Parameter structs
         Buffer<SPHParams>*   cl_sphp;
-        Buffer<GridParams>  cl_GridParams;
+        Buffer<GridParams>*  cl_GridParams;
         Buffer<GridParams>  cl_GridParamsScaled;
 
 		//Parameter structs for point cloud
@@ -162,14 +162,10 @@ namespace rtps
         Permute permute;
         CloudPermute cloud_permute; // for generality, keep separate (GE)
         void hash_and_sort();
-        void cloud_hash_and_sort();  // GE
         void bitonic_sort();
         void cloud_bitonic_sort();   // GE
         //void collision();
-    	void collision(Buffer<float4>& cl_pos_s, Buffer<float4>& cl_vel_s, 
-	          Buffer<float4>& cl_force_s, Buffer<SPHParams>& cl_sphp, int num_sph);
         CollisionCloud collision_cloud;
-        void integrate();
         CloudEuler cloud_euler;
 
         std::string resource_path;
@@ -187,6 +183,12 @@ namespace rtps
 		void printDevArray(Buffer<float4>& cl_array, char* msg, int nb_el, int nb_print);
 
 public:
+        void integrate();
+    	void collision(Buffer<float4>& cl_pos_s, Buffer<float4>& cl_vel_s, 
+	          Buffer<float4>& cl_force_s, Buffer<SPHParams>& cl_sphp, int num_sph);
+        void cloud_hash_and_sort();  // GE
+		void cellindicesExecute();
+		void permuteExecute();
 		int getCloudNum() { return cloud_num; }
 		void setCloudNum(int cloud_num) { this->cloud_num = cloud_num; }
 		int getMaxCloudNum() { return cloud_max_num; }
@@ -197,6 +199,9 @@ public:
 		}
 		void setSPHP(Buffer<SPHParams>* cl_sphp) {
 			this->cl_sphp = cl_sphp;
+		}
+		void setGridParams(Buffer<GridParams>* cl_GridParams) {
+			this->cl_GridParams = cl_GridParams;
 		}
 
 		#if 0
