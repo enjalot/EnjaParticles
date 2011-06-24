@@ -107,6 +107,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/OUTERSettings.cpp
     ${rtpslib_SOURCE_DIR}/system/SPH.cpp
     ${rtpslib_SOURCE_DIR}/system/SPHSettings.cpp
+    ${rtpslib_SOURCE_DIR}/system/Cloud.cpp
 
     ${rtpslib_SOURCE_DIR}/system/sph/CloudEuler
     ${rtpslib_SOURCE_DIR}/system/sph/Euler
