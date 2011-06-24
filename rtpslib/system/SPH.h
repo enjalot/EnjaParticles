@@ -16,6 +16,8 @@
 #include <Domain.h>
 #include <SPHSettings.h>
 
+#include "Cloud.h"
+
 class OUTER;
 
 
@@ -282,6 +284,7 @@ namespace rtps
         //void sset_int(int n, int val, cl_mem xdst);
 
 		OUTER* outer;
+		CLOUD* cloud;
 
 		int nb_in_cloud; // nb of points in cloud
 

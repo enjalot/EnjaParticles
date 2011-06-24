@@ -3,8 +3,6 @@
 
 namespace rtps
 {
-
-
     void SPH::calculate()
     {
         /*!

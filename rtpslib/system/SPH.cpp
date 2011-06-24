@@ -15,6 +15,7 @@
 #include "common/Hose.h"
 
 
+
 //for random
 #include<time.h>
 
@@ -44,7 +45,7 @@ namespace rtps
         num = 0;
         nb_var = 10;
 
-		max_cloud_num = max_nb_in_cloud; // remove max_outer_num
+		//max_cloud_num = max_nb_in_cloud; // remove max_outer_num
 		cloud_num = 0;
 		// max_outer_particles defined in RTPSettings (used?)
 
@@ -200,6 +201,9 @@ namespace rtps
 		}
 		#endif
 		renderer->setCloudData(cloud_positions, cloud_normals, cloud_faces, cloud_faces_normals, cloud_num);
+
+		max_nb_in_cloud = 8192;  // 1 << 13
+		cloud = new CLOUD(ps, sphp, max_cloud_num);
     }
 
 	//----------------------------------------------------------------------

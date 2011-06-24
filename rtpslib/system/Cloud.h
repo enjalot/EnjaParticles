@@ -18,31 +18,19 @@
 #include <SPHSettings.h>
 
 
-class OUTER;
+//class OUTER;
 
 
-//#include <Prep.h>
 #include <Hash.h>
-#include <BitonicSort.h>
-//#include <DataStructures.h>
+#include <CloudBitonicSort.h>
 #include <CellIndices.h>
 #include <CloudPermute.h> // contains CloudPermute
-//#include <sph/Density.h>
-//#include <sph/Force.h>
-//#include <sph/Collision_wall.h>
-//#include <sph/Collision_triangle.h>
-//#include <sph/Lifetime.h>
-//#include <sph/Euler.h>
 
 #include <Permute.h> // contains CloudPermute
 #include <sph/CloudEuler.h>
 
 // sphp required
 #include <sph/Collision_cloud.h>
-//#include <sph/LeapFrog.h>
-
-//#include "../util.h"
-#include <Hose.h>
 
 //#include <timege.h>
 #include <timer_eb.h>
@@ -64,14 +52,9 @@ namespace rtps
     class RTPS_EXPORT CLOUD : public System
     {
     public:
-        CLOUD(RTPS *ps, int num, SPHParams& sphp, int nb_in_cloud=0);
+        CLOUD(RTPS *ps, SPHParams& sphp, int nb_in_cloud=0);
 
         ~CLOUD();
-
-		// GE
-		//void setOUTER(OUTER* outer) {
-			//this->outer = outer;
-		//}
 
 		// advance particles one iteration
         void update();
@@ -92,13 +75,6 @@ namespace rtps
 						 	std::vector<int4>& cloud_faces,
 						 	std::vector<int4>& cloud_faces_normals);
 
-        //virtual void render();
-
-        //void loadTriangles(std::vector<Triangle> &triangles);
-
-        //void testDelete();
-        //int cut; //for debugging DEBUG
-
         EB::TimerList timers;
         int setupTimers();
         void printTimers();
@@ -115,53 +91,18 @@ namespace rtps
         RTPS* ps;
         RTPSettings* settings;
 
-        //CLOUDSettings* sphsettings;
 		CLOUDParams cloudp;
         GridParams grid_params;
         GridParams grid_params_scaled;
-        Integrator integrator;
         float spacing; //Particle rest distance in world coordinates
 
         std::string sph_source_dir;
         int nb_var;
 
-        std::vector<float4> deleted_pos;
-        std::vector<float4> deleted_vel;
-
-
-        //keep track of hoses
-        std::vector<Hose*> hoses;
-
         //needs to be called when particles are added
         void calculateCLOUDSettings();
-        void setupDomain();
+        //void setupDomain();
         void prepareSorted();
-        //void popParticles();
-
-        //This should be in OpenCL classes
-        //Kernel k_scopy;
-
-        std::vector<float4> positions;
-        std::vector<float4> colors;
-        std::vector<float4> velocities;
-        std::vector<float4> veleval;
-
-        std::vector<float>  densities;
-        std::vector<float4> forces;
-        std::vector<float4> xsphs;
-
-        //Buffer<float4>      cl_position_u;
-        //Buffer<float4>      cl_position_s;
-        //Buffer<float4>      cl_color_u;
-        //Buffer<float4>      cl_color_s;
-        //Buffer<float4>      cl_velocity_u;
-        //Buffer<float4>      cl_velocity_s;
-        //Buffer<float4>      cl_veleval_u;
-        //Buffer<float4>      cl_veleval_s;
-
-        //Buffer<float>       cl_density_s;
-        //Buffer<float4>      cl_force_s;
-        //Buffer<float4>      cl_xsph_s;
 
 		// POINT CLOUD ARRAYS
         std::vector<float4> cloud_positions;
@@ -169,6 +110,7 @@ namespace rtps
         std::vector<float4> cloud_velocity;
         std::vector<int4>   cloud_faces;
         std::vector<int4>   cloud_faces_normals;
+
 		// ideally, the total point cloud is a collection of rigid
 		// objects. For now, only a single rigid object
 		float4				cloud_cg; // center of gravity
@@ -192,26 +134,7 @@ namespace rtps
         Buffer<unsigned int>         cl_cloud_sort_output_hashes;
         Buffer<unsigned int>         cl_cloud_sort_output_indices;
 
-        //Neighbor Search related arrays
-        //Buffer<float4>      cl_vars_sorted;
-        //Buffer<float4>      cl_vars_unsorted;
-        //Buffer<float4>      cl_cells; // positions in Ian code
-        //Buffer<unsigned int>         cl_cell_indices_start;
-        //Buffer<unsigned int>         cl_cell_indices_end;
-        //Buffer<int>                  cl_vars_sort_indices;
-        //Buffer<unsigned int>         cl_sort_hashes;
-        //Buffer<unsigned int>         cl_sort_indices;
-        //Buffer<unsigned int>         cl_unsort;
-        //Buffer<unsigned int>         cl_sort;
-
-        //Buffer<Triangle>    cl_triangles;
-
-        //Two arrays for bitonic sort (sort not done in place)
-        //should be moved to within bitonic
-        //Buffer<unsigned int>         cl_sort_output_hashes;
-        //Buffer<unsigned int>         cl_sort_output_indices;
-
-        Bitonic<unsigned int> bitonic;
+        CloudBitonic<unsigned int> bitonic;
 
         //Parameter structs
         Buffer<SPHParams>   cl_sphp;
@@ -226,18 +149,6 @@ namespace rtps
 
 		SPHParams* sphp;
 
-
-        //CPU functions
-        //void cpuDensity();
-        //void cpuPressure();
-        //void cpuViscosity();
-        //void cpuXCLOUD();
-        //void cpuCollision_wall();
-        //void cpuCollision_cloud();
-        //void cpuEuler();
-        //void cpuLeapFrog();
-
-        //void updateCPU();
         void updateGPU();
 
         //calculate the various parameters that depend on max_num of particles
@@ -246,11 +157,7 @@ namespace rtps
         void updateCLOUDP();
 		void pushCloudParticles(vector<float4>& pos, vector<float4>& normals);
 
-        //Nearest Neighbors search related functions
-        //Prep prep;
-        //void call_prep(int stage);
         Hash hash;
-        //DataStructures datastructures;
         CellIndices cellindices;
         Permute permute;
         CloudPermute cloud_permute; // for generality, keep separate (GE)
@@ -258,45 +165,20 @@ namespace rtps
         void cloud_hash_and_sort();  // GE
         void bitonic_sort();
         void cloud_bitonic_sort();   // GE
-        //Density density;
-        //Force force;
         void collision();
-        //CollisionWall collision_wall;
-        //CollisionTriangle collision_tri;
         CollisionCloud collision_cloud;
         void integrate();
-        //LeapFrog leapfrog;
-        //Euler euler;
         CloudEuler cloud_euler;
-
 
 		// GE
 		vector<float4>& getCloudPoints() { return cloud_positions; }
 		vector<float4>& getCloudNormals() { return cloud_normals; }
-
-        //Lifetime lifetime;
-
-
-        //float Wpoly6(float4 r, float h);
-        //float Wspiky(float4 r, float h);
-        //float Wviscosity(float4 r, float h);
-
-        //OpenCL helper functions, should probably be part of the OpenCL classes
-        //void loadScopy();
-        //void scopy(int n, cl_mem xsrc, cl_mem ydst); 
-
-        //void sset_int(int n, int val, cl_mem xdst);
-
-		OUTER* outer;
 
 		int nb_in_cloud; // nb of points in cloud
 
 		void printDevArray(Buffer<float4>& cl_array, char* msg, int nb_el, int nb_print);
 
     };
-
-
-
 };
 
 #endif
