@@ -253,6 +253,7 @@ namespace rtps
         //call kernels
         //TODO: add timings
 #ifdef CPU
+		printf("updateCPU\n"); exit(3);
         updateCPU();
 #endif
 #ifdef GPU
@@ -268,8 +269,6 @@ namespace rtps
         cpuViscosity();
         cpuXSPH();
         cpuCollision_wall();
-
-		printf("exit 3\n");exit(3);
 
         if (integrator == EULER)
         {
