@@ -52,6 +52,9 @@ set (test_flock_SOURCES
     main_flock.cpp
     )
 
+set (test_multigpu_SOURCES
+    main_multigpu.cpp
+    )
 
 
 ADD_DEFINITIONS(-g )
@@ -61,6 +64,7 @@ ADD_EXECUTABLE(sph.x ${test_SOURCES})
 ADD_EXECUTABLE(multi.x ${test_multi_SOURCES})
 ADD_EXECUTABLE(simple.x ${test_simple_SOURCES})
 ADD_EXECUTABLE(flock.x ${test_flock_SOURCES})
+ADD_EXECUTABLE(multigpu.x ${test_multigpu_SOURCES})
 
 message("current build dir:\n")
 message("${BASE_DIR}/rtps/build")
@@ -94,11 +98,16 @@ TARGET_LINK_LIBRARIES (simple.x
 TARGET_LINK_LIBRARIES (flock.x
     ${LINK_LIBS}
 )
+
+TARGET_LINK_LIBRARIES (multigpu.x
+    ${LINK_LIBS}
+)
 #IF(WIN32)
 install (TARGETS sph.x DESTINATION ${rtpsuite_BINARY_DIR}/bin)
 install (TARGETS multi.x DESTINATION ${rtpsuite_BINARY_DIR}/bin)
 install (TARGETS simple.x DESTINATION ${rtpsuite_BINARY_DIR}/bin)
 install (TARGETS flock.x DESTINATION ${rtpsuite_BINARY_DIR}/bin)
+install (TARGETS multigpu.x DESTINATION ${rtpsuite_BINARY_DIR}/bin)
 #install (FILES MathFunctions.h DESTINATION include)
 
 #ENDIF(WIN32)

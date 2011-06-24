@@ -138,6 +138,9 @@ namespace rtps
             err = platforms[i].getDevices(CL_DEVICE_TYPE_GPU, &devices);
             printf("getDevices: %s\n", oclErrorString(err));
             printf("devices.size(): %zd\n", devices.size());
+            err = platforms[i].getDevices(CL_DEVICE_TYPE_CPU, &cpu_devices);
+            printf("getDevices: %s\n", oclErrorString(err));
+            printf("devices.size(): %zd\n", cpu_devices.size());
             //const char* s = devices[0].getInfo<CL_DEVICE_EXTENSIONS>().c_str();
             //printf("extensions: \n %s \n", s);
 
@@ -198,11 +201,13 @@ namespace rtps
                 //cl_context cxGPUContext = clCreateContext(props, 1, &cdDevices[uiDeviceUsed], NULL, NULL, &err);
                 try
                 {
-                    context = cl::Context(CL_DEVICE_TYPE_GPU, props);
+                    //context = cl::Context(CL_DEVICE_TYPE_GPU, props);
+                    //context = cl::Context(devices, props);
+                    context = cl::Context(devices);
                 }
                 catch (cl::Error er)
                 {
-                    printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+                    printf("ERROR: %s(%s)%d\n", er.what(), oclErrorString(er.err()),er.err());
                 }
         #endif
         #endif
@@ -241,6 +246,83 @@ namespace rtps
                 try
                 {
                     queue.push_back(cl::CommandQueue(context, devices[j], cq_props, &err));
+                }
+                catch (cl::Error er)
+                {
+                    printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+                }
+            }
+
+            
+        #if defined (__APPLE__) || defined(MACOSX)
+                CGLContextObj kCGLContext = CGLGetCurrentContext();
+                /*CGLShareGroupObj kCGLShareGroup = CGLGetShareGroup(kCGLContext);*/
+                cl_context_properties props_cpu[] =
+                {
+                    0
+                };
+                try
+                {
+                    cpu_context = cl::Context(props_cpu);   //had to edit line 1448 of cl.hpp to add this constructor
+                }
+                catch (cl::Error er)
+                {
+                    printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+                }
+        #else
+        #if defined WIN32 // Win32
+                cl_context_properties props_cpu[] = 
+                {
+                    /*CL_GL_CONTEXT_KHR, (cl_context_properties)wglGetCurrentContext(), 
+                    CL_WGL_HDC_KHR, (cl_context_properties)wglGetCurrentDC(), */
+                    CL_CONTEXT_PLATFORM, (cl_context_properties)(platforms[i])(),
+                    0
+                };
+                try
+                {
+                    cpu_context = cl::Context(CL_DEVICE_TYPE_CPU, props_cpu);
+                }
+                catch (cl::Error er)
+                {
+                    printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+                }
+        #else
+                cl_context_properties props_cpu[] = 
+                {
+                    /*CL_GL_CONTEXT_KHR, (cl_context_properties)glXGetCurrentContext(), 
+                    CL_GLX_DISPLAY_KHR, (cl_context_properties)glXGetCurrentDisplay(), */
+                    CL_CONTEXT_PLATFORM, (cl_context_properties)(platforms[i])(),
+                    0
+                };
+                //cl_context cxGPUContext = clCreateContext(props, 1, &cdDevices[uiDeviceUsed], NULL, NULL, &err);
+                try
+                {
+                    cpu_context = cl::Context(cpu_devices);
+                }
+                catch (cl::Error er)
+                {
+                    printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+                }
+        #endif
+        #endif
+        
+            for(int j = 0; j < cpu_devices.size(); j++)
+            {
+                //int t = devices.front().getInfo<CL_DEVICE_TYPE>();
+                int t = cpu_devices[j].getInfo<CL_DEVICE_TYPE>();
+                printf("type: \n %d %d \n", t, CL_DEVICE_TYPE_CPU);
+                printf("device name: %s\n", cpu_devices[j].getInfo<CL_DEVICE_NAME>().c_str());
+                printf("device extensions: %s\n", cpu_devices[j].getInfo<CL_DEVICE_EXTENSIONS>().c_str());
+        
+
+                //devices = context.getInfo<CL_CONTEXT_DEVICES>();
+        
+                //create the command queue we will use to execute OpenCL commands
+                ///command_queue = clCreateCommandQueue(context, devices[deviceUsed], 0, &err);
+                cl_command_queue_properties cq_props = CL_QUEUE_PROFILING_ENABLE;
+                try
+                {
+                    cpu_queue.push_back(cl::CommandQueue(cpu_context, cpu_devices[j], cq_props, &err));
                 }
                 catch (cl::Error er)
                 {

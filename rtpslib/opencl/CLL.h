@@ -40,7 +40,11 @@ namespace rtps
         int err;
         cl::Event event;
         cl::Context context;
+        cl::Context cpu_context;
         std::vector<cl::CommandQueue> queue;
+        std::vector<cl::CommandQueue> cpu_queue;
+        std::vector<cl::Device> devices;
+        std::vector<cl::Device> cpu_devices;
 
         //setup an OpenCL context that shares with OpenGL
         void setup_gl_cl();
@@ -58,7 +62,6 @@ namespace rtps
 
     private:
         std::string inc_dir;
-        std::vector<cl::Device> devices;
         //error checking stuff
         int deviceUsed;
     };
