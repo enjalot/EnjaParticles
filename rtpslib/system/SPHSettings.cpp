@@ -32,8 +32,10 @@ namespace rtps
         float simulation_scale = pow(.5f * VP * max_num / domain_vol, 1.f/3.f); 
         //float simulation_scale = pow(VP * 16000/ domain_vol, 1.f/3.f); 
 
-		// Cloud update
-        settings->SetSetting("Maximum Number of Cloud Particles", max_cloud_num);
+		//int max_cloud_num = cloud->getMaxCloudNum();
+
+		// Cloud update (SHOULD NOT BE REQUIRED
+        //settings->SetSetting("Maximum Number of Cloud Particles", max_cloud_num);
        
         settings->SetSetting("Maximum Number of Particles", max_num);
         settings->SetSetting("Mass", mass);

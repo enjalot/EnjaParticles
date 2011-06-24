@@ -45,8 +45,8 @@ namespace rtps
         num = 0;
         nb_var = 10;
 
-		//max_cloud_num = max_nb_in_cloud; // remove max_outer_num
-		cloud_num = 0;
+		//cloud_max_num = max_nb_in_cloud; // remove max_outer_num
+		//cloud_num = 0;
 		// max_outer_particles defined in RTPSettings (used?)
 
 		// I should be able to not specify this, but GPU restrictions ...
@@ -104,6 +104,15 @@ namespace rtps
 		// the cloud on the GPU (in which routine?)
 		avg_cloud_velocity = float4(3., 0., 0., 1.);
 
+
+		// CLOUD INITIALIZTION
+		max_nb_in_cloud = 8192;  // 1 << 13
+		cloud = new CLOUD(ps, sphp, max_nb_in_cloud);
+		int cloud_num = cloud->getCloudNum(); 
+		int cloud_max_num = cloud->getMaxCloudNum(); 
+
+		printf("cloud_num = %d\n", cloud_num);
+
         //*** end Initialization
 
         setupTimers();
@@ -117,6 +126,8 @@ namespace rtps
         
         //setup the sorted and unsorted arrays
         prepareSorted();
+        setRenderer();
+		cloud->setRenderer(renderer); // cloud arrays in cloud/ must be created
 
         //should be more cross platform
         sph_source_dir = resource_path + "/" + std::string(SPH_CL_SOURCE_DIR);
@@ -159,9 +170,7 @@ namespace rtps
 
 #endif
 
-        // settings defaults to 0
-        //renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
-        setRenderer();
+		//renderer->setCloudData(cloud_positions, cloud_normals, cloud_faces, cloud_faces_normals, cloud_num);
 
         //printf("MAIN settings: \n");
         //settings->printSettings();
@@ -173,12 +182,16 @@ namespace rtps
 		//addHollowBall(2000, center, radius_in, radius_out, scaled, cloud_normals);
 		int nn = 4000;
     	//addNewxyPlane(nn, scaled, cloud_normals); 
-		readPointCloud(cloud_positions, cloud_normals, cloud_faces, cloud_faces_normals);
+
+
+		//readPointCloud(cloud_positions, cloud_normals, cloud_faces, cloud_faces_normals);
+
+
 
 		//  ADD A SWITCH TO HANDLE CLOUD IF PRESENT
 		// Must be called after a point cloud has been created. 
 		if (cloud_num > 0) {
-			collision_cloud = CollisionCloud(sph_source_dir, ps->cli, timers["ct_pgu"], max_cloud_num); // Last argument is? ??
+			collision_cloud = CollisionCloud(sph_source_dir, ps->cli, timers["ct_pgu"], cloud_max_num); // Last argument is? ??
 		}
 
 		printf("cloud_positions capacity: %d\n", cloud_positions.capacity());
@@ -200,10 +213,10 @@ namespace rtps
 			cloud_positions[i].print("pos_u");
 		}
 		#endif
-		renderer->setCloudData(cloud_positions, cloud_normals, cloud_faces, cloud_faces_normals, cloud_num);
 
-		max_nb_in_cloud = 8192;  // 1 << 13
-		cloud = new CLOUD(ps, sphp, max_cloud_num);
+	// GETS TO THIS POINT
+	//printf("exit 3\n"); exit(3);
+
     }
 
 	//----------------------------------------------------------------------
@@ -256,6 +269,8 @@ namespace rtps
         cpuXSPH();
         cpuCollision_wall();
 
+		printf("exit 3\n");exit(3);
+
         if (integrator == EULER)
         {
             cpuEuler();
@@ -283,6 +298,8 @@ namespace rtps
     void SPH::updateGPU()
     {
 		//printf("**** enter updateGPU, num= %d\n", num);
+
+		int cloud_num = cloud->getCloudNum();
 
         timers["update"]->start();
         glFinish();
@@ -554,6 +571,7 @@ namespace rtps
 
     void SPH::cloud_hash_and_sort()
     {
+		int cloud_num = cloud->getCloudNum();
         //printf("cloud hash and sort\n"); exit(0);
         timers["hash"]->start();
         hash.execute(   cloud_num,
@@ -608,6 +626,8 @@ namespace rtps
                 cli_debug);
         timers["collision_tri"]->stop();
 
+		int cloud_num = cloud->getCloudNum();
+
 		// NEED TIMER FOR POINT CLOUD COLLISIONS (GE)
 		// Messed collisions up
 		#if CLOUD_COLLISION
@@ -636,6 +656,8 @@ namespace rtps
 
     void SPH::integrate()
     {
+		int cloud_num = cloud->getCloudNum();
+
         if (integrator == EULER)
         {
             //euler();
@@ -749,7 +771,7 @@ namespace rtps
             cl_veleval_u.copyFromBuffer(cl_veleval_s, 0, 0, num);
             cl_color_u.copyFromBuffer(cl_color_s, 0, 0, num);
 
-			printf("*** call_prep: cloud_num= %d\n", cloud_num);
+			printf("*** call_prep: cloud_num= %d\n", cloud->getCloudNum());
 			//cl_cloud_position_u.copyFromBuffer(cl_cloud_position_s, 0, 0, cloud_num);
 			//cl_cloud_normal_u.copyFromBuffer(cl_cloud_normal_s, 0, 0, cloud_num);
     }
@@ -812,10 +834,12 @@ namespace rtps
         densities.resize(max_num);
         xsphs.resize(max_num);
 
+		int cloud_max_num = cloud->getMaxCloudNum();
+
 		// BEGIN CLOUD
-		cloud_positions.resize(max_cloud_num); // replace by max_cloud_num
-		cloud_normals.resize(max_cloud_num);
-		cloud_velocity.resize(max_cloud_num);
+		cloud_positions.resize(cloud_max_num); // replace by cloud_max_num
+		cloud_normals.resize(cloud_max_num);
+		cloud_velocity.resize(cloud_max_num);
 		// Should really be done every iteration unless constant
 		std::fill(cloud_velocity.begin(), cloud_velocity.end(), avg_cloud_velocity);
 		// END CLOUD
@@ -852,8 +876,8 @@ namespace rtps
         cl_color_s = Buffer<float4>(ps->cli, colors);
 
 		//CLOUD BUFFERS
-		if (max_cloud_num > 0) {
-			printf("max_cloud_num= %d\n", max_cloud_num);
+		if (cloud_max_num > 0) {
+			printf("cloud_max_num= %d\n", cloud_max_num);
         	cl_cloud_position_u = Buffer<float4>(ps->cli, cloud_positions);
         	cl_cloud_position_s = Buffer<float4>(ps->cli, cloud_positions);
         	cl_cloud_normal_u = Buffer<float4>(ps->cli, cloud_normals);
@@ -908,7 +932,7 @@ namespace rtps
         */
 
         std::vector<unsigned int> keys(max_num);
-        std::vector<unsigned int> cloud_keys(max_cloud_num);
+        std::vector<unsigned int> cloud_keys(cloud_max_num);
         //to get around limits of bitonic sort only handling powers of 2
 #include "limits.h"
         std::fill(keys.begin(), keys.end(), INT_MAX);
@@ -942,8 +966,8 @@ namespace rtps
 		// Due to potentially, large grid, this is very expensive, and one could run 
 		// out of memory on CPU and GPU. 
 
-		if (max_cloud_num > 0) {
-			//keys.resize(max_cloud_num);
+		if (cloud_max_num > 0) {
+			//keys.resize(cloud_max_num);
         	cl_cloud_cell_indices_start = Buffer<unsigned int>(ps->cli, gcells);
         	cl_cloud_cell_indices_end   = Buffer<unsigned int>(ps->cli, gcells);
         	cl_cloud_sort_indices       = Buffer<unsigned int>(ps->cli, cloud_keys);
@@ -1037,8 +1061,12 @@ namespace rtps
 	//----------------------------------------------------------------------
 	void SPH::pushCloudParticles(vector<float4>& pos, vector<float4>& normals)
 	{
-		if ((cloud_num+pos.size()) > max_cloud_num) {
-			printf("exceeded max number of cloud particles\n");
+		int cloud_max_num = cloud->getMaxCloudNum();
+		int cloud_num = cloud->getCloudNum();
+
+		if ((cloud_num+pos.size()) > cloud_max_num) {
+			printf("cloud_num= %d + pos.size()= %d\n", cloud_num, pos.size());
+			printf("exceeded max number of cloud particles (%d)\n", cloud_max_num);
 			exit(2); //GE
 			return;
 		}
@@ -1048,8 +1076,8 @@ namespace rtps
 		//exit(0);
 
 		printf("cloud_num on entry: %d\n", cloud_num);
-		//cloud_positions.resize(max_cloud_num); // replace by max_cloud_num
-		//cloud_normals.resize(max_cloud_num);
+		//cloud_positions.resize(cloud_max_num); // replace by cloud_max_num
+		//cloud_normals.resize(cloud_max_num);
 		printf("pos.size= %d\n", pos.size());
         cl_cloud_position_u.copyToDevice(pos, cloud_num);
 
@@ -1066,6 +1094,7 @@ namespace rtps
         //cl_cloud_normal_s.copyToDevice(normals, cloud_num);
 
 		cloud_num += pos.size();
+		cloud->setCloudNum(cloud_num);
 		printf("cloud_num= %d\n", cloud_num);
 
 		#if 0
@@ -1399,6 +1428,7 @@ namespace rtps
         //renderer->render_table(grid->getBndMin(), grid->getBndMax());
         System::render();
     }
+	//----------------------------------------------------------------------
     void SPH::setRenderer()
     {
         switch(ps->settings->getRenderType())

@@ -36,28 +36,25 @@ namespace rtps
 	//----------------------------------------------------------------------
     CLOUD::CLOUD(RTPS *psfr, SPHParams& sphp, int max_nb_in_cloud) 
     {
-		this->sphp = &sphp;
+		//this->sphp = &sphp; // ADD LATER?
 
         //store the particle system framework
         ps = psfr;
         settings = ps->settings;
         //max_num = n;
-        num = 0;
-        nb_var = 10;
 
-		max_cloud_num = max_nb_in_cloud; // remove max_outer_num
+		cloud_max_num = max_nb_in_cloud; // remove max_outer_num
 		cloud_num = 0;
 		// max_outer_particles defined in RTPSettings (used?)
 
 		// I should be able to not specify this, but GPU restrictions ...
-
         resource_path = settings->GetSettingAs<string>("rtps_path");
         printf("resource path: %s\n", resource_path.c_str());
 
         //seed random
         srand ( time(NULL) );
 
-        grid = settings->grid;
+        //grid = settings->grid;
 
 		std::vector<CLOUDParams> vcparams(0);
 		vcparams.push_back(cloudp);
@@ -115,11 +112,6 @@ namespace rtps
         string lt_file = settings->GetSettingAs<string>("lt_cl");
 #endif
 
-        // settings defaults to 0
-        //renderer = new Render(pos_vbo,col_vbo,num,ps->cli, &ps->settings);
-        setRenderer();
-
-
 		// must be called after prepareSorted
 		center = float4(2.5, 2.5, 0., 0.0);
 		//center = float4(5.0, 2.5, 2.5, 0.0);
@@ -128,10 +120,12 @@ namespace rtps
     	//addNewxyPlane(nn, scaled, cloud_normals); 
 		readPointCloud(cloud_positions, cloud_normals, cloud_faces, cloud_faces_normals);
 
+		//printf("cloud_num = %d\n", cloud_num); exit(4);
+
 		//  ADD A SWITCH TO HANDLE CLOUD IF PRESENT
 		// Must be called after a point cloud has been created. 
 		if (cloud_num > 0) {
-			collision_cloud = CollisionCloud(sph_source_dir, ps->cli, timers["ct_pgu"], max_cloud_num); // Last argument is? ??
+			collision_cloud = CollisionCloud(sph_source_dir, ps->cli, timers["ct_pgu"], cloud_max_num); // Last argument is? ??
 		}
 
 		printf("cloud_positions capacity: %d\n", cloud_positions.capacity());
@@ -153,7 +147,8 @@ namespace rtps
 			cloud_positions[i].print("pos_u");
 		}
 		#endif
-		renderer->setCloudData(cloud_positions, cloud_normals, cloud_faces, cloud_faces_normals, cloud_num);
+		//printf("cloud_num = %d\n", cloud_num); exit(0);
+        settings->SetSetting("Maximum Number of Cloud Particles", cloud_max_num);
     }
 
 	//----------------------------------------------------------------------
@@ -178,7 +173,6 @@ namespace rtps
 	//----------------------------------------------------------------------
     void CLOUD::updateGPU()
     {
-		//printf("**** enter updateGPU, num= %d\n", num);
 
         timers["update"]->start();
         //glFinish();
@@ -192,10 +186,6 @@ namespace rtps
         //interval for all the other calls.
         //this does end up acquire/release everytime sprayHoses calls pushparticles
         //should just do try/except?
-        for (int i=0; i < sub_intervals; i++)
-        {
-            sprayHoses();
-        }
 
         for (int i=0; i < sub_intervals; i++)
         {
@@ -214,7 +204,7 @@ namespace rtps
 #endif
 
 		#if CLOUD_COLLISION
-			if (num > 0) { // SHOULD NOT BE NEEDED
+		//	if (num > 0) { // SHOULD NOT BE NEEDED
 			// SORT CLOUD
             //printf("before cloud cellindices, num= %d, cloud_num= %d\n", num, cloud_num);
             timers["cellindices"]->start();
@@ -230,7 +220,7 @@ namespace rtps
                 clf_debug,
                 cli_debug);
             timers["cellindices"]->stop();
-			}
+			//}
 		#endif
        
 		#if CLOUD_COLLISION
@@ -265,10 +255,10 @@ namespace rtps
 		    }
 		#endif
 
-            collision();
-            timers["integrate"]->start();
+            //collision();
+			// CALL THIS FROM SPH
+
             integrate(); // includes boundary force
-            timers["integrate"]->stop();
         }
 
 		cl_cloud_position_s.copyToHost(cloud_positions);
@@ -298,18 +288,19 @@ namespace rtps
     }
 
 	//----------------------------------------------------------------------
-    void CLOUD::collision()
+    void CLOUD::collision(Buffer<float4>& cl_pos_s, Buffer<float4>& cl_vel_s, 
+	          Buffer<float4>& cl_force_s, Buffer<SPHParams>& cl_sphp, int num_sph)
     {
 		;
 		// NEED TIMER FOR POINT CLOUD COLLISIONS (GE)
 		// Messed collisions up
 		#if CLOUD_COLLISION
 		// ****** Call from SPH? *****
-		#if 0
-		if (num > 0) {
-			collision_cloud.execute(num, cloud_num, 
-				cl_position_s, 
-				cl_velocity_s,  
+		#if 1
+		if (num_sph > 0) {
+			collision_cloud.execute(num_sph, cloud_num, 
+				cl_pos_s, 
+				cl_vel_s,  
 				cl_cloud_position_s, 
 				cl_cloud_normal_s,
 				cl_cloud_velocity_s,
@@ -332,6 +323,7 @@ namespace rtps
     void CLOUD::integrate()
     {
 
+        timers["integrate"]->start();
 		// Perhaps I am messed up by Courant condition if cloud point 
 		// velocities are too large? 
 
@@ -360,7 +352,7 @@ namespace rtps
                 cl_cloud_velocity_u,
                 cl_cloud_velocity_s,
                 cl_cloud_sort_indices,
-                cl_sphp,
+                *cl_sphp,
                 //debug
                 clf_debug,
                 cli_debug);
@@ -372,6 +364,8 @@ namespace rtps
 			//printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
 			//printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // WRONG
 		#endif
+
+        timers["integrate"]->stop();
     }
 
 	//----------------------------------------------------------------------
@@ -411,13 +405,14 @@ namespace rtps
 	//----------------------------------------------------------------------
     void CLOUD::printTimers()
     {
-        printf("Number of Particles: %d\n", num);
+		#if 0
         timers.printAll();
         std::ostringstream oss; 
         oss << "sph_timer_log_" << std::setw( 7 ) << std::setfill( '0' ) <<  num; 
         //printf("oss: %s\n", (oss.str()).c_str());
 
         timers.writeToFile(oss.str()); 
+		#endif
     }
 
 	//----------------------------------------------------------------------
@@ -426,23 +421,23 @@ namespace rtps
 //#include "sph/cl_src/cl_macros.h"
 
 		// BEGIN CLOUD
-		cloud_positions.resize(max_cloud_num); // replace by max_cloud_num
-		cloud_normals.resize(max_cloud_num);
-		cloud_velocity.resize(max_cloud_num);
+		cloud_positions.resize(cloud_max_num); // replace by cloud_max_num
+		cloud_normals.resize(cloud_max_num);
+		cloud_velocity.resize(cloud_max_num);
 		// Should really be done every iteration unless constant
 		std::fill(cloud_velocity.begin(), cloud_velocity.end(), avg_cloud_velocity);
 		// END CLOUD
 
         //for reading back different values from the kernel
-        std::vector<float4> error_check(max_num);
+        //std::vector<float4> error_check(max_num);
         
         float4 pmax = grid_params.grid_max + grid_params.grid_size;
 
-        std::fill(error_check.begin(), error_check.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
+        //std::fill(error_check.begin(), error_check.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
 
 		//CLOUD BUFFERS
-		if (max_cloud_num > 0) {
-			printf("max_cloud_num= %d\n", max_cloud_num);
+		if (cloud_max_num > 0) {
+			printf("cloud_max_num= %d\n", cloud_max_num);
         	cl_cloud_position_u = Buffer<float4>(ps->cli, cloud_positions);
         	cl_cloud_position_s = Buffer<float4>(ps->cli, cloud_positions);
         	cl_cloud_normal_u   = Buffer<float4>(ps->cli, cloud_normals);
@@ -462,19 +457,18 @@ namespace rtps
         cl_GridParamsScaled = Buffer<GridParams>(ps->cli, sgparams);
 
         //setup debug arrays
-        std::vector<float4> clfv(max_num);
+        std::vector<float4> clfv(cloud_max_num);
         std::fill(clfv.begin(), clfv.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
-        std::vector<int4> cliv(max_num);
+        std::vector<int4> cliv(cloud_max_num);
         std::fill(cliv.begin(), cliv.end(),int4(0.0f, 0.0f, 0.0f, 0.0f));
         clf_debug = Buffer<float4>(ps->cli, clfv);
         cli_debug = Buffer<int4>(ps->cli, cliv);
 
 
-        std::vector<unsigned int> keys(max_num);
-        std::vector<unsigned int> cloud_keys(max_cloud_num);
+        std::vector<unsigned int> cloud_keys(cloud_max_num);
         //to get around limits of bitonic sort only handling powers of 2
 #include "limits.h"
-        std::fill(keys.begin(), keys.end(), INT_MAX);
+        //std::fill(keys.begin(), keys.end(), INT_MAX);
         std::fill(cloud_keys.begin(), cloud_keys.end(), INT_MAX);
 
         // Size is the grid size + 1, the last index is used to signify how many particles are within bounds
@@ -485,8 +479,8 @@ namespace rtps
         int minus = 0xffffffff;
         std::fill(gcells.begin(), gcells.end(), 666);
 
-		if (max_cloud_num > 0) {
-			//keys.resize(max_cloud_num);
+		if (cloud_max_num > 0) {
+			//keys.resize(cloud_max_num);
         	cl_cloud_cell_indices_start = Buffer<unsigned int>(ps->cli, gcells);
         	cl_cloud_cell_indices_end   = Buffer<unsigned int>(ps->cli, gcells);
         	cl_cloud_sort_indices       = Buffer<unsigned int>(ps->cli, cloud_keys);
@@ -495,7 +489,7 @@ namespace rtps
         	cl_cloud_sort_output_indices = Buffer<unsigned int>(ps->cli, cloud_keys);
 		}
 
-		printf("keys.size= %d\n", keys.size()); // 
+		//printf("keys.size= %d\n", keys.size()); // 
 		printf("cloud_keys.size= %d\n", cloud_keys.size()); // 4k
 		printf("gcells.size= %d\n", gcells.size()); // 1729
      }
@@ -537,7 +531,7 @@ namespace rtps
 	//----------------------------------------------------------------------
 	void CLOUD::pushCloudParticles(vector<float4>& pos, vector<float4>& normals)
 	{
-		if ((cloud_num+pos.size()) > max_cloud_num) {
+		if ((cloud_num+pos.size()) > cloud_max_num) {
 			printf("exceeded max number of cloud particles\n");
 			exit(2); //GE
 			return;

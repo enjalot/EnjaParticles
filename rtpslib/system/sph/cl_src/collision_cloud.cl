@@ -232,7 +232,7 @@ __kernel void collision_cloud(
                        )
 {
     // particle index
-    int nb_vars = sphp->nb_vars;
+    //int nb_vars = sphp->nb_vars;
     int num = sphp->num;
 
     int index = get_global_id(0);

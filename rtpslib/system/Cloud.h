@@ -49,7 +49,8 @@ namespace rtps
 {
     //using namespace sph;
 
-    class RTPS_EXPORT CLOUD : public System
+    //class RTPS_EXPORT CLOUD : public System
+    class RTPS_EXPORT CLOUD 
     {
     public:
         CLOUD(RTPS *ps, SPHParams& sphp, int nb_in_cloud=0);
@@ -97,7 +98,6 @@ namespace rtps
         float spacing; //Particle rest distance in world coordinates
 
         std::string sph_source_dir;
-        int nb_var;
 
         //needs to be called when particles are added
         void calculateCLOUDSettings();
@@ -137,7 +137,7 @@ namespace rtps
         CloudBitonic<unsigned int> bitonic;
 
         //Parameter structs
-        Buffer<SPHParams>   cl_sphp;
+        Buffer<SPHParams>*   cl_sphp;
         Buffer<GridParams>  cl_GridParams;
         Buffer<GridParams>  cl_GridParamsScaled;
 
@@ -147,7 +147,7 @@ namespace rtps
         Buffer<float4>      clf_debug;  //just for debugging cl files
         Buffer<int4>        cli_debug;  //just for debugging cl files
 
-		SPHParams* sphp;
+		//SPHParams* sphp;
 
         void updateGPU();
 
@@ -165,10 +165,18 @@ namespace rtps
         void cloud_hash_and_sort();  // GE
         void bitonic_sort();
         void cloud_bitonic_sort();   // GE
-        void collision();
+        //void collision();
+    	void collision(Buffer<float4>& cl_pos_s, Buffer<float4>& cl_vel_s, 
+	          Buffer<float4>& cl_force_s, Buffer<SPHParams>& cl_sphp, int num_sph);
         CollisionCloud collision_cloud;
         void integrate();
         CloudEuler cloud_euler;
+
+        std::string resource_path;
+        std::string common_source_dir;
+
+        int cloud_max_num;
+        int cloud_num;  // USED FOR WHAT? 
 
 		// GE
 		vector<float4>& getCloudPoints() { return cloud_positions; }
@@ -178,7 +186,29 @@ namespace rtps
 
 		void printDevArray(Buffer<float4>& cl_array, char* msg, int nb_el, int nb_print);
 
-    };
-};
+public:
+		int getCloudNum() { return cloud_num; }
+		void setCloudNum(int cloud_num) { this->cloud_num = cloud_num; }
+		int getMaxCloudNum() { return cloud_max_num; }
+		int setRenderer(Render* renderer) {
+			this->renderer = renderer;
+			printf("renderer= %ld, cloud_num = %d\n", renderer, cloud_num);
+			this->renderer->setCloudData(cloud_positions, cloud_normals, cloud_faces, cloud_faces_normals, cloud_num);
+		}
+		void setSPHP(Buffer<SPHParams>* cl_sphp) {
+			this->cl_sphp = cl_sphp;
+		}
 
+		#if 0
+		void setSPHArrrays(
+				cl_position_s, 
+				cl_velocity_s,  
+				cl_force_s, // output
+		#endif
+
+private:
+		Render* renderer;
+    };
+}; // namespace
+ 
 #endif

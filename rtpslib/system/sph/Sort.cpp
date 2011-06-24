@@ -88,6 +88,8 @@ namespace rtps
             int dir = 1;        // dir: direction
             //int batch = num;
 
+			int cloud_num = cloud->getCloudNum();
+
             int arrayLength = nlpo2(cloud_num);
             //printf("num: %d\n", num);
             //printf("nlpo2(num): %d\n", arrayLength);
@@ -125,6 +127,8 @@ namespace rtps
         printf("\n");
         */
 
+
+		int cloud_num = cloud->getCloudNum();
 
 		// NOT SURE HOW THIS WORKS!! GE
         cl_cloud_sort_hashes.copyFromBuffer(cl_cloud_sort_output_hashes, 0, 0, cloud_num);
