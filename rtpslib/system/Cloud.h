@@ -49,6 +49,26 @@ namespace rtps
 {
     //using namespace sph;
 
+	typedef struct CLOUDParams
+    //Struct which gets passed to OpenCL routines
+	{
+		int num; // nb cloud points
+		int max_num; // max nb cloud points
+		void print() {
+			printf("---- CLOUDParams----\n");
+			printf("nb points: %d\n", num);
+			printf("max nb points: %d\n", max_num);
+		}
+	}
+#ifndef WIN32
+	__attribute__((aligned(16)));
+#else
+		;
+        #pragma pack(pop)
+#endif
+
+
+
     //class RTPS_EXPORT CLOUD : public System
     class RTPS_EXPORT CLOUD 
     {
@@ -94,11 +114,17 @@ namespace rtps
         RTPSettings* settings;
 
 		CLOUDParams cloudp;
+		SPHParams* sphp;
+
         GridParams* grid_params;
         GridParams grid_params_scaled;
         float spacing; //Particle rest distance in world coordinates
 
         std::string sph_source_dir;
+
+        CollisionCloud collision_cloud;
+        CloudEuler cloud_euler;
+        CloudPermute cloud_permute; // for generality, keep separate (GE)
 
         //needs to be called when particles are added
         void calculateCLOUDSettings();
@@ -138,15 +164,13 @@ namespace rtps
         CloudBitonic<unsigned int> bitonic;
 
         //Parameter structs
-        Buffer<SPHParams>*   cl_sphp;
-        Buffer<GridParams>*  cl_GridParams;
-        Buffer<GridParams>  cl_GridParamsScaled;
-
-		//Parameter structs for point cloud
+        Buffer<SPHParams>*    cl_sphp;
         Buffer<CLOUDParams>   cl_cloudp;
+        Buffer<GridParams>*   cl_GridParams;
+        Buffer<GridParams>    cl_GridParamsScaled;
 
-        Buffer<float4>      clf_debug;  //just for debugging cl files
-        Buffer<int4>        cli_debug;  //just for debugging cl files
+        Buffer<float4>        clf_debug;  //just for debugging cl files
+        Buffer<int4>          cli_debug;  //just for debugging cl files
 
 		//SPHParams* sphp;
 
@@ -155,19 +179,15 @@ namespace rtps
         //calculate the various parameters that depend on max_num of particles
         void calculate();
         //copy the CLOUD parameter struct to the GPU
-        void updateCLOUDP();
 		void pushCloudParticles(vector<float4>& pos, vector<float4>& normals);
 
         Hash hash;
         CellIndices cellindices;
         Permute permute;
-        CloudPermute cloud_permute; // for generality, keep separate (GE)
         void hash_and_sort();
         void bitonic_sort();
         void cloud_bitonic_sort();   // GE
         //void collision();
-        CollisionCloud collision_cloud;
-        CloudEuler cloud_euler;
 
         std::string resource_path;
         std::string common_source_dir;
@@ -187,6 +207,7 @@ namespace rtps
 		void printDevArray(Buffer<int>& cl_array, char* msg, int nb_el, int nb_print);
 
 public:
+    	void updateCLOUDP();
         void integrate();
     	void collision(Buffer<float4>& cl_pos_s, Buffer<float4>& cl_vel_s, 
 	          Buffer<float4>& cl_force_s, Buffer<SPHParams>& cl_sphp, int num_sph);

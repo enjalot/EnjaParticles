@@ -864,5 +864,11 @@ namespace rtps
         timers["bitonic"]->stop();
     }
 	//----------------------------------------------------------------------
+    void CLOUD::updateCLOUDP()
+	{
+		cloudp.num = settings->GetSettingAs<int>("Number of Cloud Particles");
+		cloudp.max_num = settings->GetSettingAs<int>("Maximum Number of Cloud Particles");
+	}
+	//----------------------------------------------------------------------
 
 }; //end namespace

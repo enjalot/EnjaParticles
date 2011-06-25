@@ -102,11 +102,6 @@ namespace rtps
 
     }
    
-    void SPH::updateCLOUDP()
-	{
-		cloudp.num = settings->GetSettingAs<int>("Number of Cloud Particles");
-		cloudp.max_num = settings->GetSettingAs<int>("Maximum Number of Cloud Particles");
-	}
 
 
 	//----------------------------------------------------------------------
