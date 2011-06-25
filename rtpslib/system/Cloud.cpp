@@ -72,11 +72,11 @@ namespace rtps
 	{
             cloud_permute.execute(
 			    cloud_num,
-                cl_cloud_position_u,
-                cl_cloud_position_s,
-                cl_cloud_normal_u, 
-                cl_cloud_normal_s,
-                cl_cloud_sort_indices,
+                cl_position_u,
+                cl_position_s,
+                cl_normal_u, 
+                cl_normal_s,
+                cl_sort_indices,
                 *cl_GridParams,
                 clf_debug,
                 cli_debug);
@@ -85,10 +85,10 @@ namespace rtps
 	void CLOUD::cellindicesExecute()
 	{
 		cellindices.execute(cloud_num,
-                cl_cloud_sort_hashes,
-                cl_cloud_sort_indices,
-                cl_cloud_cell_indices_start,
-                cl_cloud_cell_indices_end,
+                cl_sort_hashes,
+                cl_sort_indices,
+                cl_cell_indices_start,
+                cl_cell_indices_end,
                 //cl_sphp,
                 *cl_GridParams,
                 grid_params->nb_cells,
@@ -100,9 +100,9 @@ namespace rtps
     {
         timers["hash"]->start();
         hash.execute( cloud_num,
-                cl_cloud_position_u,
-                cl_cloud_sort_hashes,
-                cl_cloud_sort_indices,
+                cl_position_u,
+                cl_sort_hashes,
+                cl_sort_indices,
                 *cl_GridParams,
                 clf_debug,
                 cli_debug);
@@ -121,13 +121,13 @@ namespace rtps
 		collision_cloud.execute(num_sph, cloud_num, 
 			cl_sph_pos_s, 
 			cl_sph_vel_s,  
-			cl_cloud_position_s, 
-			cl_cloud_normal_s,
-			cl_cloud_velocity_s,
+			cl_position_s, 
+			cl_normal_s,
+			cl_velocity_s,
 			cl_sph_force_s, // output
 
-			cl_cloud_cell_indices_start,
-			cl_cloud_cell_indices_end,
+			cl_cell_indices_start,
+			cl_cell_indices_end,
 
 			cl_sphp,    // IS THIS CORRECT?
 			//*cl_GridParams,
@@ -140,7 +140,6 @@ namespace rtps
 
     void CLOUD::integrate()
     {
-
         timers["integrate"]->start();
 
 		static int count=0;
@@ -155,13 +154,13 @@ namespace rtps
 			// returns unsorted positions
             cloud_euler.execute(cloud_num,
                 settings->dt,
-                cl_cloud_position_u,
-                cl_cloud_position_s,
-                cl_cloud_normal_u,
-                cl_cloud_normal_s,
-                cl_cloud_velocity_u,
-                cl_cloud_velocity_s,
-                cl_cloud_sort_indices,
+                cl_position_u,
+                cl_position_s,
+                cl_normal_u,
+                cl_normal_s,
+                cl_velocity_u,
+                cl_velocity_s,
+                cl_sort_indices,
                 *cl_sphp,
                 //debug
                 clf_debug,
@@ -228,7 +227,7 @@ namespace rtps
 		cloud_normals.resize(cloud_max_num);
 		cloud_velocity.resize(cloud_max_num);
 		// Should really be done every iteration unless constant
-		std::fill(cloud_velocity.begin(), cloud_velocity.end(), avg_cloud_velocity);
+		std::fill(cloud_velocity.begin(), cloud_velocity.end(), avg_velocity);
 		// END CLOUD
 
         //for reading back different values from the kernel
@@ -243,15 +242,15 @@ namespace rtps
 
 		//CLOUD BUFFERS
 		if (cloud_max_num > 0) {
-        	cl_cloud_position_u = Buffer<float4>(ps->cli, cloud_positions);
-        	cl_cloud_position_s = Buffer<float4>(ps->cli, cloud_positions);
-        	cl_cloud_normal_u   = Buffer<float4>(ps->cli, cloud_normals);
-        	cl_cloud_normal_s   = Buffer<float4>(ps->cli, cloud_normals);
-        	cl_cloud_velocity_u = Buffer<float4>(ps->cli, cloud_velocity);
-        	cl_cloud_velocity_s = Buffer<float4>(ps->cli, cloud_velocity);
+        	cl_position_u = Buffer<float4>(ps->cli, cloud_positions);
+        	cl_position_s = Buffer<float4>(ps->cli, cloud_positions);
+        	cl_normal_u   = Buffer<float4>(ps->cli, cloud_normals);
+        	cl_normal_s   = Buffer<float4>(ps->cli, cloud_normals);
+        	cl_velocity_u = Buffer<float4>(ps->cli, cloud_velocity);
+        	cl_velocity_s = Buffer<float4>(ps->cli, cloud_velocity);
 		}
 
-		//cl_cloud_position_u.copyToHost(cloud_positions); printf("xx\n");exit(1);
+		//cl_position_u.copyToHost(cloud_positions); printf("xx\n");exit(1);
 
         //setup debug arrays
         std::vector<float4> clfv(cloud_max_num);
@@ -282,12 +281,12 @@ namespace rtps
 
 		if (cloud_max_num > 0) {
 			//keys.resize(cloud_max_num);
-        	cl_cloud_cell_indices_start  = Buffer<unsigned int>(ps->cli, gcells);
-        	cl_cloud_cell_indices_end    = Buffer<unsigned int>(ps->cli, gcells);
-        	cl_cloud_sort_indices        = Buffer<unsigned int>(ps->cli, cloud_keys);
-        	cl_cloud_sort_hashes         = Buffer<unsigned int>(ps->cli, cloud_keys);
-        	cl_cloud_sort_output_hashes  = Buffer<unsigned int>(ps->cli, cloud_keys);
-        	cl_cloud_sort_output_indices = Buffer<unsigned int>(ps->cli, cloud_keys);
+        	cl_cell_indices_start  = Buffer<unsigned int>(ps->cli, gcells);
+        	cl_cell_indices_end    = Buffer<unsigned int>(ps->cli, gcells);
+        	cl_sort_indices        = Buffer<unsigned int>(ps->cli, cloud_keys);
+        	cl_sort_hashes         = Buffer<unsigned int>(ps->cli, cloud_keys);
+        	cl_sort_output_hashes  = Buffer<unsigned int>(ps->cli, cloud_keys);
+        	cl_sort_output_indices = Buffer<unsigned int>(ps->cli, cloud_keys);
 		}
 
 		//printf("keys.size= %d\n", keys.size()); // 
@@ -296,42 +295,6 @@ namespace rtps
 		//exit(0);
      }
 	 //----------------------------------------------------------------------
-
-    int CLOUD::addBox(int nn, float4 min, float4 max, bool scaled, float4 color)
-    {
-	#if 0
-        float scale = 1.0f;
-		#if 0
-        if (scaled)
-        {
-            scale = sphp->simulation_scale;
-        }
-		#endif
-		//printf("GEE inside addBox, before addRect, scale= %f\n", scale);
-		//printf("GEE inside addBox, sphp->simulation_scale= %f\n", sphp->simulation_scale);
-		//printf("GEE addBox spacing = %f\n", spacing);
-        vector<float4> rect = addRect(nn, min, max, spacing, scale);
-        float4 velo(0, 0, 0, 0);
-        pushParticles(rect, velo, color);
-        return rect.size();
-	#endif
-    }
-
-    void CLOUD::addBall(int nn, float4 center, float radius, bool scaled)
-    {
-	#if 0
-        float scale = 1.0f;
-        if (scaled)
-        {
-            scale = sphp->simulation_scale;
-        }
-        vector<float4> sphere = addSphere(nn, center, radius, spacing, scale);
-        float4 velo(0, 0, 0, 0);
-        pushParticles(sphere,velo);
-	#endif
-    }
-
-	//----------------------------------------------------------------------
 	void CLOUD::pushCloudParticles(vector<float4>& pos, vector<float4>& normals)
 	{
 		if ((cloud_num+pos.size()) > cloud_max_num) {
@@ -340,8 +303,8 @@ namespace rtps
 			return;
 		}
 
-        cl_cloud_position_u.copyToDevice(pos, cloud_num);
-        cl_cloud_normal_u.copyToDevice(normals, cloud_num);
+        cl_position_u.copyToDevice(pos, cloud_num);
+        cl_normal_u.copyToDevice(normals, cloud_num);
 
 		cloud_num += pos.size();
 
@@ -518,10 +481,10 @@ namespace rtps
             bitonic.Sort(batch, 
                         arrayLength,  //GE?? ???
                         dir,
-                        &cl_cloud_sort_output_hashes,
-                        &cl_cloud_sort_output_indices,
-                        &cl_cloud_sort_hashes,
-                        &cl_cloud_sort_indices );
+                        &cl_sort_output_hashes,
+                        &cl_sort_output_indices,
+                        &cl_sort_hashes,
+                        &cl_sort_indices );
         }
         catch (cl::Error er)
         {
@@ -532,8 +495,8 @@ namespace rtps
         ps->cli->queue.finish();
 
 		// NOT SURE HOW THIS WORKS!! GE
-        cl_cloud_sort_hashes.copyFromBuffer(cl_cloud_sort_output_hashes, 0, 0, cloud_num);
-        cl_cloud_sort_indices.copyFromBuffer(cl_cloud_sort_output_indices, 0, 0, cloud_num);
+        cl_sort_hashes.copyFromBuffer(cl_sort_output_hashes, 0, 0, cloud_num);
+        cl_sort_indices.copyFromBuffer(cl_sort_output_indices, 0, 0, cloud_num);
 
         /*
         scopy(num, cl_sort_output_hashes.getDevicePtr(), 
@@ -549,8 +512,8 @@ namespace rtps
         int nbc = 20;
         //sh = cl_sort_hashes.copyToHost(nbc);
         //eci = cl_cell_indices_end.copyToHost(nbc);
-        std::vector<unsigned int> sh = cl_cloud_sort_hashes.copyToHost(nbc);
-        std::vector<unsigned int> si = cl_cloud_sort_indices.copyToHost(nbc);
+        std::vector<unsigned int> sh = cl_sort_hashes.copyToHost(nbc);
+        std::vector<unsigned int> si = cl_sort_indices.copyToHost(nbc);
         //std::vector<int> eci = cl_cell_indices_end.copyToHost(nbc);
 
     
@@ -587,35 +550,29 @@ namespace rtps
 		//int nn = 4000;
     	//addNewxyPlane(nn, scaled, cloud_normals); 
 		readPointCloud(cloud_positions, cloud_normals, cloud_faces, cloud_faces_normals);
-        //calculate();
 
         //calculate();
         updateCLOUDP(); cloudp.print(); // nb points corect
 
-		//printf("cloud_num = %d\n", cloud_num); exit(4);
-
 		//  ADD A SWITCH TO HANDLE CLOUD IF PRESENT
 		// Must be called after a point cloud has been created. 
 		if (cloud_num > 0) {
-			collision_cloud = CollisionCloud(sph_source_dir, ps->cli, timers["ct_pgu"], cloud_max_num); // Last argument is? ??
+			collision_cloud = CollisionCloud(sph_source_dir, ps->cli, timers["ct_pgu"], cloud_max_num); 
 		}
 
-
-		printf("cloud_positions capacity: %d\n", cloud_positions.capacity());
-		printf("cloud_normals capacity: %d\n", cloud_normals.capacity());
 
 		cloud_positions.resize(cloud_positions.capacity());
 		cloud_normals.resize(cloud_normals.capacity());
 		// only needs to be done once if cloud not moving
 		// ideally, cloud should be stored in vbos. 
-        cl_cloud_position_u.copyToHost(cloud_positions);
+        cl_position_u.copyToHost(cloud_positions);
 	}
 	//----------------------------------------------------------------------
 	void CLOUD::setupRigidBodyKinematics()
 	{
 		// Ideally, change every time step, and update all points in 
 		// the cloud on the GPU (in which routine?)
-		avg_cloud_velocity = float4(3., 0., 0., 1.);
+		avg_velocity = float4(3., 0., 0., 1.);
 	}
 	//----------------------------------------------------------------------
 	void CLOUD::setupStages()
