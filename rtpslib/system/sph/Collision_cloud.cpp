@@ -54,7 +54,7 @@ namespace rtps
             Buffer<float4>& clf_debug,
             Buffer<int4>& cli_debug)
     {
-		//printf("enter cloud COLLISION\n"); 
+		printf("enter cloud COLLISION\n"); 
 
         int iarg = 0;
 		//printf("num_pts_cloud= %d\n", num_pts_cloud);

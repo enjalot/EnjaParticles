@@ -113,6 +113,7 @@ namespace rtps
         //SPHSettings* sphsettings;
         SPHParams sphp;
         GridParams grid_params;
+        GridParams grid_params_scaled;
         Integrator integrator;
         float spacing; //Particle rest distance in world coordinates
 

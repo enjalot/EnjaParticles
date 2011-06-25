@@ -1,4 +1,4 @@
-#define CLOUD_COLLISION 0
+#define CLOUD_COLLISION 1
 
 #include <GL/glew.h>
 #include <math.h>
@@ -23,12 +23,14 @@ namespace rtps
     //using namespace sph;
 
 	//----------------------------------------------------------------------
-    CLOUD::CLOUD(RTPS *psfr, SPHParams& sphp, Buffer<GridParams>* cl_GridParams, GridParams* grid_params, int max_nb_in_cloud) 
+    CLOUD::CLOUD(RTPS *psfr, SPHParams& sphp, Buffer<GridParams>* cl_GridParams, Buffer<GridParams>* cl_GridParamsScaled, GridParams* grid_params, GridParams* grid_params_scaled, int max_nb_in_cloud) 
     {
 		//this->sphp = &sphp; // ADD LATER?
 
 		this->cl_GridParams = cl_GridParams;
+		this->cl_GridParamsScaled = cl_GridParamsScaled;
 		this->grid_params   = grid_params;
+		this->grid_params_scaled   = grid_params_scaled;
 
         //store the particle system framework
         ps = psfr;
@@ -160,6 +162,7 @@ namespace rtps
     }
 
 	//----------------------------------------------------------------------
+	#if 0
     void CLOUD::update()
     {
 		//printf("+++++++++++++ enter UPDATE()\n");
@@ -172,8 +175,9 @@ namespace rtps
         updateGPU();
 #endif
     }
-
+	#endif
 	//----------------------------------------------------------------------
+	#if 0
     void CLOUD::updateGPU()
     {
 
@@ -201,7 +205,6 @@ namespace rtps
 #endif
 
 		#if CLOUD_COLLISION
-		//	if (num > 0) { // SHOULD NOT BE NEEDED
 			// SORT CLOUD
             //printf("before cloud cellindices, num= %d, cloud_num= %d\n", num, cloud_num);
             timers["cellindices"]->start();
@@ -217,7 +220,6 @@ namespace rtps
                 clf_debug,
                 cli_debug);
             timers["cellindices"]->stop();
-			//}
 		#endif
        
 		#if CLOUD_COLLISION
@@ -262,6 +264,7 @@ namespace rtps
 
         timers["update"]->stop();
     }
+	#endif
 
 	//----------------------------------------------------------------------
 	void CLOUD::permuteExecute()
@@ -294,7 +297,7 @@ namespace rtps
 	//----------------------------------------------------------------------
     void CLOUD::cloud_hash_and_sort()
     {
-		printf("BEFORE CLOUD_HASH_AND_SORT\n");
+		//printf("BEFORE CLOUD_HASH_AND_SORT\n");
 		//u.printDevArray(cl_cloud_sort_hashes, "hashes_s", cloud_num, 10); // OK
 		//u.printDevArray(cl_cloud_sort_indices, "indices_s", cloud_num, 10); // WRONG
 		//u.printDevArray(cl_cloud_position_u, "indices_s", cloud_num, cloud_num); // WRONG
@@ -328,8 +331,9 @@ namespace rtps
 		// Messed collisions up
 		#if CLOUD_COLLISION
 		// ****** Call from SPH? *****
-		#if 1
-		if (num_sph > 0) {
+		printf("num_sph= %d, cloud_num= %d\n", num_sph, cloud_num);
+		//if (num_sph > 0) {
+			printf("*** cloud collide\n");
 			collision_cloud.execute(num_sph, cloud_num, 
 				cl_pos_s, 
 				cl_vel_s,  
@@ -342,13 +346,12 @@ namespace rtps
             	cl_cloud_cell_indices_end,
 
 				cl_sphp,    // IS THIS CORRECT?
-				cl_GridParams,
-				//cl_GridParamsScaled,
+				//*cl_GridParams,
+				*cl_GridParamsScaled,
 				// debug
 				clf_debug,
 				cli_debug);
-		}
-		#endif
+		//}
 		#endif
     }
 	//----------------------------------------------------------------------
@@ -362,7 +365,7 @@ namespace rtps
 
 		static int count=0;
 
-		printf("settings->dt= %f\n", settings->dt);
+		//printf("settings->dt= %f\n", settings->dt);
 
 		// CLOUD INTEGRATION
 		#if 1

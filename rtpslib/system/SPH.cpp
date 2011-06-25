@@ -305,8 +305,8 @@ namespace rtps
                 cl_cell_indices_start,
                 cl_cell_indices_end,
                 cl_sphp,
-                //cl_GridParamsScaled, // GE: Might have to fix this. Do not know. 
-                cl_GridParams,
+                cl_GridParamsScaled, // GE: Might have to fix this. Do not know. 
+                //cl_GridParams,
                 clf_debug,
                 cli_debug);
             timers["density"]->stop();
@@ -324,8 +324,8 @@ namespace rtps
                 cl_cell_indices_start,
                 cl_cell_indices_end,
                 cl_sphp,
-                cl_GridParams,
-                //cl_GridParamsScaled,
+                //cl_GridParams,
+                cl_GridParamsScaled,
                 clf_debug,
                 cli_debug);
 
@@ -333,11 +333,11 @@ namespace rtps
 
             collision();
 
-			//cloudUpdate();
+			cloudUpdate();
             integrate(); // includes boundary force
         }
 
-		//cloudCleanup();
+		cloudCleanup();
 
         cl_position_u.release();
         cl_color_u.release();
@@ -380,8 +380,8 @@ namespace rtps
                 cl_velocity_s,
                 cl_force_s,
                 cl_sphp,
-                cl_GridParams,
-                //cl_GridParamsScaled,
+                //cl_GridParams,
+                cl_GridParamsScaled,
                 //debug
                 clf_debug,
                 cli_debug);
@@ -582,8 +582,11 @@ namespace rtps
         std::vector<GridParams> gparams(0);
         gparams.push_back(grid_params);
         cl_GridParams = Buffer<GridParams>(ps->cli, gparams);
+
         //scaled Grid Parameters
         std::vector<GridParams> sgparams(0);
+        sgparams.push_back(grid_params_scaled);
+        cl_GridParamsScaled = Buffer<GridParams>(ps->cli, sgparams);
 
 
         //setup debug arrays
@@ -663,7 +666,20 @@ namespace rtps
 
         float ss = sphp.simulation_scale;
 
+        grid_params_scaled.grid_min = grid_params.grid_min * ss;
+        grid_params_scaled.grid_max = grid_params.grid_max * ss;
+        grid_params_scaled.bnd_min  = grid_params.bnd_min * ss;
+        grid_params_scaled.bnd_max  = grid_params.bnd_max * ss;
+        grid_params_scaled.grid_res = grid_params.grid_res;
+        grid_params_scaled.grid_size = grid_params.grid_size * ss;
+        grid_params_scaled.grid_delta = grid_params.grid_delta / ss;
+        //grid_params_scaled.nb_cells = (int) (grid_params_scaled.grid_res.x*grid_params_scaled.grid_res.y*grid_params_scaled.grid_res.z);
+        grid_params_scaled.nb_cells = grid_params.nb_cells;
+        //grid_params_scaled.grid_inv_delta = grid_params.grid_inv_delta / ss;
+        //grid_params_scaled.grid_inv_delta.w = 1.0f;
+
         grid_params.print();
+        grid_params_scaled.print();
     }
 
 	//----------------------------------------------------------------------
@@ -930,7 +946,8 @@ namespace rtps
 	void SPH::cloudInitialize()
 	{
 		int max_nb_in_cloud = 8192;  // 1 << 13
-		cloud = new CLOUD(ps, sphp, &cl_GridParams, &grid_params, max_nb_in_cloud);
+		cloud = new CLOUD(ps, sphp, &cl_GridParams, &cl_GridParamsScaled, 
+		   &grid_params, &grid_params_scaled, max_nb_in_cloud);
 
 		// I can define cl_sphp later since I am using pointers
 		cloud->setSPHP(&cl_sphp);
@@ -941,19 +958,15 @@ namespace rtps
 	//----------------------------------------------------------------------
 	void SPH::cloudUpdate()
 	{
-		#if 1
             cloud->cloud_hash_and_sort();
-			printf("after cloud hash and sort\n");
-			//collision
             cloud->cellindicesExecute();
-			printf("after cellindices\n");
             cloud->permuteExecute();
-			printf("after cloud permute\n");
-		#endif
-			cloud->collision(cl_position_s, cl_velocity_s, cl_force_s, cl_sphp, num);
-			printf("after cloud collision\n");
+			printf("cloud update: num= %d\n", num);
+			if (num > 0) {
+				cloud->collision(cl_position_s, cl_velocity_s, cl_force_s, cl_sphp, num);
+;
+			}
 			cloud->integrate();
-			printf("after cloud integrate\n");
 	}
 	//----------------------------------------------------------------------
 	void SPH::cloudCleanup()

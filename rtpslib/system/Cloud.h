@@ -77,12 +77,15 @@ namespace rtps
     {
     public:
         //CLOUD(RTPS *ps, SPHParams& sphp, int nb_in_cloud=0);
-    	CLOUD(RTPS *psfr, SPHParams& sphp, Buffer<GridParams>* cl_GridParams, GridParams* grid_params, int max_nb_in_cloud);
+    	CLOUD(RTPS *psfr, SPHParams& sphp, Buffer<GridParams>* cl_GridParams, 
+		    Buffer<GridParams>* cl_GridParamsScaled, 
+			GridParams* grid_params, GridParams* grid_params_scaled, 
+			int max_nb_in_cloud);
 
         ~CLOUD();
 
 		// advance particles one iteration
-        void update();
+        //void update();
 
         //wrapper around IV.h addRect
         int addBox(int nn, float4 min, float4 max, bool scaled, float4 color=float4(1.0f, 0.0f, 0.0f, 1.0f));
@@ -119,7 +122,8 @@ namespace rtps
 		CLOUDParams cloudp;
 		SPHParams* sphp;
 
-        GridParams* grid_params;
+        GridParams* 		grid_params;
+        GridParams* 		grid_params_scaled;
         float spacing; //Particle rest distance in world coordinates
 
         std::string sph_source_dir;
@@ -129,7 +133,7 @@ namespace rtps
         CloudPermute cloud_permute; // for generality, keep separate (GE)
 
         //needs to be called when particles are added
-        void calculateCLOUDSettings();
+        //void calculateCLOUDSettings();
         //void setupDomain();
         void prepareSorted();
 
@@ -170,17 +174,17 @@ namespace rtps
         Buffer<SPHParams>*    cl_sphp;
         Buffer<CLOUDParams>   cl_cloudp;
         Buffer<GridParams>*   cl_GridParams;
-        Buffer<GridParams>    cl_GridParamsScaled;
+        Buffer<GridParams>*   cl_GridParamsScaled;
 
         Buffer<float4>        clf_debug;  //just for debugging cl files
         Buffer<int4>          cli_debug;  //just for debugging cl files
 
 		//SPHParams* sphp;
 
-        void updateGPU();
+        //void updateGPU();
 
         //calculate the various parameters that depend on max_num of particles
-        void calculate();
+        //void calculate();
         //copy the CLOUD parameter struct to the GPU
 		void pushCloudParticles(vector<float4>& pos, vector<float4>& normals);
 
