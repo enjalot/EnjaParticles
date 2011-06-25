@@ -69,6 +69,8 @@ namespace rtps
         //these don't appear to be implemented. need to revisit
         void set(T val);
         void set(const std::vector<T> &data);
+		void getSize() { return nb_el; }
+		void getNbBytes() { return nb_bytes; }
 
     private:
          //we will want to access buffers by name when going across systems
@@ -76,6 +78,8 @@ namespace rtps
         //the actual buffer handled by the Khronos OpenCL c++ header
         //cl::Memory cl_buffer;
         std::vector<cl::Memory> cl_buffer;
+		int nb_el; // measured in units of <T>
+		int nb_bytes; 
 
         CL *cli;
 

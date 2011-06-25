@@ -16,6 +16,8 @@
 #include <Domain.h>
 #include <SPHSettings.h>
 
+#include <util.h>
+
 #include "Cloud.h"
 
 class OUTER;
@@ -78,8 +80,6 @@ namespace rtps
         int addBox(int nn, float4 min, float4 max, bool scaled, float4 color=float4(1.0f, 0.0f, 0.0f, 1.0f));
         //wrapper around IV.h addSphere
         void addBall(int nn, float4 center, float radius, bool scaled);
-    	void addHollowBall(int nn, float4 center, float radius_in, float radius_out, bool scaled, std::vector<float4>& normals);
-        void addNewxyPlane(int np, bool scaled, vector<float4>& normals);
 
         //wrapper around Hose.h 
         int addHose(int total_n, float4 center, float4 velocity, float radius, float4 color=float4(1.0, 0.0, 0.0, 1.0f));
@@ -113,7 +113,6 @@ namespace rtps
         //SPHSettings* sphsettings;
         SPHParams sphp;
         GridParams grid_params;
-        GridParams grid_params_scaled;
         Integrator integrator;
         float spacing; //Particle rest distance in world coordinates
 
@@ -246,6 +245,8 @@ namespace rtps
 
 		OUTER* outer;
 		CLOUD* cloud;
+
+		Utils u;
 
 		int nb_in_cloud; // nb of points in cloud
 

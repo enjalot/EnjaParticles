@@ -11,11 +11,13 @@
 #include <RTPS.h>
 #include <System.h>
 #include <Kernel.h>
-#include <Buffer.h>
+#include <opencl/Buffer.h>
 
 #include <Domain.h>
 //#include <CLOUDSettings.h>
 #include <SPHSettings.h>
+
+#include <util.h>
 
 
 //class OUTER;
@@ -117,7 +119,6 @@ namespace rtps
 		SPHParams* sphp;
 
         GridParams* grid_params;
-        GridParams grid_params_scaled;
         float spacing; //Particle rest distance in world coordinates
 
         std::string sph_source_dir;
@@ -198,6 +199,8 @@ namespace rtps
 		// GE
 		vector<float4>& getCloudPoints() { return cloud_positions; }
 		vector<float4>& getCloudNormals() { return cloud_normals; }
+
+		Utils u;  // for debugging etc.
 
 		int nb_in_cloud; // nb of points in cloud
 

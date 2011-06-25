@@ -11,6 +11,57 @@
 namespace rtps
 {
 
+//----------------------------------------------------------------------
+void Utils::printDevArray(Buffer<int4>& cl_array, char* msg, int nb_el, int nb_print)
+{
+	std::vector<int4> pos(nb_el);
+	cl_array.copyToHost(pos);
+	printf("*** %s ***\n", msg);
+	for (int i=0; i < nb_print; i++) {
+		printf("i= %d: ", i);
+		pos[i].print(msg);
+	}
+}
+//----------------------------------------------------------------------
+void Utils::printDevArray(Buffer<int>& cl_array, char* msg, int nb_el, int nb_print)
+{
+	std::vector<int> pos(nb_el);
+	cl_array.copyToHost(pos);
+	printf("*** %s ***\n", msg);
+	for (int i=0; i < nb_print; i++) {
+		printf("%s[%d]: %d ", msg, i, pos[i]);
+	}
+}
+//----------------------------------------------------------------------
+void Utils::printDevArray(Buffer<float>& cl_array, char* msg, int nb_el, int nb_print)
+{
+	std::vector<float> pos(nb_el);
+	cl_array.copyToHost(pos);
+	printf("*** %s ***\n", msg);
+	for (int i=0; i < nb_print; i++) {
+		printf("%s[%d]: %f ", msg, i, pos[i]);
+	}
+}
+//----------------------------------------------------------------------
+void Utils::printDevArray(Buffer<float4>& cl_array, char* msg, int nb_el, int nb_print)
+{
+	std::vector<float4> pos(nb_el);
+	cl_array.copyToHost(pos);
+	printf("*** %s ***\n", msg);
+	for (int i=0; i < nb_print; i++) {
+		printf("i= %d: ", i);
+		pos[i].print(msg);
+	}
+}
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+
+
+
+	//----------------------------------------------------------------------
     char *file_contents(const char *filename, int *length)
     {
         FILE *f = fopen(filename, "r");
@@ -34,6 +85,7 @@ namespace rtps
         return(char*)buffer;
     }
 
+	//----------------------------------------------------------------------
     int deleteVBO(GLuint id)
     {
         glBindBuffer(1, id);
@@ -41,6 +93,7 @@ namespace rtps
         return 1; //success
     }
 
+	//----------------------------------------------------------------------
     GLuint createVBO(const void* data, int dataSize, GLenum target, GLenum usage)
     {
         GLuint id = 0;  // 0 is reserved, glGenBuffersARB() will return non-zero id if success
@@ -65,8 +118,7 @@ namespace rtps
         return id;      // return VBO id
     }
 
-
-
+	//----------------------------------------------------------------------
     void make_cube(std::vector<Triangle> &triangles, float4 cen, float half_edge)
     {
         // Written by G. Erlebacher Aug. 5, 2010
@@ -183,5 +235,5 @@ namespace rtps
         tri.normal.set(-1.,0.,0.,0.);
         triangles.push_back(tri);
     }
-
+	//----------------------------------------------------------------------
 }

@@ -23,17 +23,6 @@ namespace rtps
 {
     using namespace sph;
 
-	void SPH::printDevArray(Buffer<float4>& cl_array, char* msg, int nb_el, int nb_print)
-	{
-		std::vector<float4> pos(nb_el);
-		cl_array.copyToHost(pos);
-		printf("*** %s ***\n", msg);
-		for (int i=0; i < nb_print; i++) {
-			printf("i= %d: ", i);
-			pos[i].print(msg);
-		}
-	}
-
 	//----------------------------------------------------------------------
     SPH::SPH(RTPS *psfr, int n, int max_nb_in_cloud)
     {
@@ -591,8 +580,6 @@ namespace rtps
         cl_GridParams = Buffer<GridParams>(ps->cli, gparams);
         //scaled Grid Parameters
         std::vector<GridParams> sgparams(0);
-        sgparams.push_back(grid_params_scaled);
-        cl_GridParamsScaled = Buffer<GridParams>(ps->cli, sgparams);
 
 
         //setup debug arrays
@@ -603,19 +590,6 @@ namespace rtps
         clf_debug = Buffer<float4>(ps->cli, clfv);
         cli_debug = Buffer<int4>(ps->cli, cliv);
 
-
-        /*
-        //sorted and unsorted arrays
-        std::vector<float4> unsorted(max_num*nb_var);
-        std::vector<float4> sorted(max_num*nb_var);
-
-        std::fill(unsorted.begin(), unsorted.end(),float4(0.0f, 0.0f, 0.0f, 1.0f));
-        std::fill(sorted.begin(), sorted.end(),float4(0.0f, 0.0f, 0.0f, 1.0f));
-        //std::fill(unsorted.begin(), unsorted.end(), pmax);
-        //std::fill(sorted.begin(), sorted.end(), pmax);
-        cl_vars_unsorted = Buffer<float4>(ps->cli, unsorted);
-        cl_vars_sorted = Buffer<float4>(ps->cli, sorted);
-        */
 
         std::vector<unsigned int> keys(max_num);
         //to get around limits of bitonic sort only handling powers of 2
@@ -655,6 +629,7 @@ namespace rtps
 		//exit(1);
      }
 
+	//----------------------------------------------------------------------
     void SPH::setupDomain()
     {
         grid->calculateCells(sphp.smoothing_distance / sphp.simulation_scale);
@@ -684,23 +659,10 @@ namespace rtps
 
         float ss = sphp.simulation_scale;
 
-        grid_params_scaled.grid_min = grid_params.grid_min * ss;
-        grid_params_scaled.grid_max = grid_params.grid_max * ss;
-        grid_params_scaled.bnd_min  = grid_params.bnd_min * ss;
-        grid_params_scaled.bnd_max  = grid_params.bnd_max * ss;
-        grid_params_scaled.grid_res = grid_params.grid_res;
-        grid_params_scaled.grid_size = grid_params.grid_size * ss;
-        grid_params_scaled.grid_delta = grid_params.grid_delta / ss;
-        //grid_params_scaled.nb_cells = (int) (grid_params_scaled.grid_res.x*grid_params_scaled.grid_res.y*grid_params_scaled.grid_res.z);
-        grid_params_scaled.nb_cells = grid_params.nb_cells;
-        //grid_params_scaled.grid_inv_delta = grid_params.grid_inv_delta / ss;
-        //grid_params_scaled.grid_inv_delta.w = 1.0f;
-
         grid_params.print();
-        grid_params_scaled.print();
-
     }
 
+	//----------------------------------------------------------------------
     int SPH::addBox(int nn, float4 min, float4 max, bool scaled, float4 color)
     {
         float scale = 1.0f;

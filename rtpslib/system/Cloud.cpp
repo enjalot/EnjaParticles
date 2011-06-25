@@ -23,48 +23,6 @@ namespace rtps
     //using namespace sph;
 
 	//----------------------------------------------------------------------
-	void CLOUD::printDevArray(Buffer<int4>& cl_array, char* msg, int nb_el, int nb_print)
-	{
-		std::vector<int4> pos(nb_el);
-		cl_array.copyToHost(pos);
-		printf("*** %s ***\n", msg);
-		for (int i=0; i < nb_print; i++) {
-			printf("i= %d: ", i);
-			pos[i].print(msg);
-		}
-	}
-	//----------------------------------------------------------------------
-	void CLOUD::printDevArray(Buffer<int>& cl_array, char* msg, int nb_el, int nb_print)
-	{
-		std::vector<int> pos(nb_el);
-		cl_array.copyToHost(pos);
-		printf("*** %s ***\n", msg);
-		for (int i=0; i < nb_print; i++) {
-			printf("%s[%d]: %d ", msg, i, pos[i]);
-		}
-	}
-	//----------------------------------------------------------------------
-	void CLOUD::printDevArray(Buffer<float>& cl_array, char* msg, int nb_el, int nb_print)
-	{
-		std::vector<float> pos(nb_el);
-		cl_array.copyToHost(pos);
-		printf("*** %s ***\n", msg);
-		for (int i=0; i < nb_print; i++) {
-			printf("%s[%d]: %f ", msg, i, pos[i]);
-		}
-	}
-	//----------------------------------------------------------------------
-	void CLOUD::printDevArray(Buffer<float4>& cl_array, char* msg, int nb_el, int nb_print)
-	{
-		std::vector<float4> pos(nb_el);
-		cl_array.copyToHost(pos);
-		printf("*** %s ***\n", msg);
-		for (int i=0; i < nb_print; i++) {
-			printf("i= %d: ", i);
-			pos[i].print(msg);
-		}
-	}
-	//----------------------------------------------------------------------
     CLOUD::CLOUD(RTPS *psfr, SPHParams& sphp, Buffer<GridParams>* cl_GridParams, GridParams* grid_params, int max_nb_in_cloud) 
     {
 		//this->sphp = &sphp; // ADD LATER?
@@ -227,12 +185,12 @@ namespace rtps
 #if CLOUD_COLLISION
 			if (cloud_num > 0) {
 				//printf("BEFORE CLOUD_HASH_AND_SORT\n");
-				//printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
-				//printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
+				//u.printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
+				//u.printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
             	cloud_hash_and_sort();
 				//printf("AFTER CLOUD_HASH_AND_SORT\n");
-				//printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
-				//printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
+				//u.printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
+				//u.printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
 			}
 #endif
 
@@ -262,8 +220,8 @@ namespace rtps
             timers["cloud_permute"]->start();
 
 			//printf("BEFORE CLOUD_PERMUTE\n");
-			//printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
-			//printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
+			//u.printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
+			//u.printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
 
 			#if 1
             cloud_permute.execute(
@@ -279,8 +237,8 @@ namespace rtps
 			#endif
 
 			//printf("AFTER CLOUD_PERMUTE\n");
-			//printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
-			//printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
+			//u.printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
+			//u.printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
 			cl_cloud_position_s.copyToHost(cloud_positions);
 
             timers["cloud_permute"]->stop();
@@ -390,8 +348,8 @@ namespace rtps
 		// CLOUD INTEGRATION
 		#if 1
 		//printf("*** BEFORE CLOUD_EULER ***\n");
-		//printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
-		//printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // WRONG
+		//u.printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
+		//u.printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // WRONG
 
 		// start the arm moving after x iterations
 		if (count > 10) {
@@ -417,8 +375,8 @@ namespace rtps
 		count++;
 
 			//printf("*** AFTER CLOUD_EULER ***\n");
-			//printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
-			//printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // WRONG
+			//u.printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
+			//u.printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // WRONG
 		#endif
 
         timers["integrate"]->stop();
@@ -506,16 +464,6 @@ namespace rtps
 
 		//cl_cloud_position_u.copyToHost(cloud_positions); printf("xx\n");exit(1);
 
-        //TODO make a helper constructor for buffer to make a cl_mem from a struct
-        //Setup Grid Parameter structs
-        //std::vector<GridParams> gparams(0);
-        //gparams.push_back(grid_params);
-        //cl_GridParams = Buffer<GridParams>(ps->cli, gparams);
-        //scaled Grid Parameters
-        //std::vector<GridParams> sgparams(0);
-        //sgparams.push_back(grid_params_scaled);
-        //cl_GridParamsScaled = Buffer<GridParams>(ps->cli, sgparams);
-
         //setup debug arrays
         std::vector<float4> clfv(cloud_max_num);
         std::fill(clfv.begin(), clfv.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -523,7 +471,6 @@ namespace rtps
         std::fill(cliv.begin(), cliv.end(),int4(0.0f, 0.0f, 0.0f, 0.0f));
         clf_debug = Buffer<float4>(ps->cli, clfv);
         cli_debug = Buffer<int4>(ps->cli, cliv);
-
 
         std::vector<unsigned int> cloud_keys(cloud_max_num);
         //to get around limits of bitonic sort only handling powers of 2

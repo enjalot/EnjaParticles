@@ -16,6 +16,8 @@
     #define RTPS_EXPORT
 #endif
 
+#include <opencl/Buffer.h>
+
 namespace rtps
 {
 
@@ -26,6 +28,15 @@ namespace rtps
 
 
     void RTPS_EXPORT make_cube(std::vector<Triangle> &triangles, float4 center, float half_edge);
+
+
+class Utils
+{
+	void printDevArray(Buffer<int>& cl_array, char* msg, int nb_el, int nb_print);
+	void printDevArray(Buffer<int4>& cl_array, char* msg, int nb_el, int nb_print);
+	void printDevArray(Buffer<float>& cl_array, char* msg, int nb_el, int nb_print);
+	void printDevArray(Buffer<float4>& cl_array, char* msg, int nb_el, int nb_print);
+};
 
 }
 
