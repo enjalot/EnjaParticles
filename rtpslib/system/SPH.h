@@ -29,7 +29,7 @@ class OUTER;
 //#include <DataStructures.h>
 #include <CellIndices.h>
 #include <Permute.h> // contains CloudPermute
-#include <CloudPermute.h> // contains CloudPermute
+//#include <CloudPermute.h> // contains CloudPermute
 #include <sph/Density.h>
 #include <sph/Force.h>
 #include <sph/Collision_wall.h>
@@ -38,7 +38,7 @@ class OUTER;
 #include <sph/LeapFrog.h>
 #include <sph/Lifetime.h>
 #include <sph/Euler.h>
-#include <sph/CloudEuler.h>
+//#include <sph/CloudEuler.h>
 
 //#include "../util.h"
 #include <Hose.h>
@@ -204,7 +204,7 @@ namespace rtps
         void calculate();
         //copy the SPH parameter struct to the GPU
         void updateSPHP();
-		void pushCloudParticles(vector<float4>& pos, vector<float4>& normals);
+		//void pushCloudParticles(vector<float4>& pos, vector<float4>& normals);
 
         //Nearest Neighbors search related functions
         //Prep prep;
@@ -213,7 +213,7 @@ namespace rtps
         //DataStructures datastructures;
         CellIndices cellindices;
         Permute permute;
-        CloudPermute cloud_permute; // for generality, keep separate (GE)
+        //CloudPermute cloud_permute; // for generality, keep separate (GE)
         void hash_and_sort();
         void cloud_hash_and_sort();  // GE
         void bitonic_sort();
@@ -223,11 +223,11 @@ namespace rtps
         void collision();
         CollisionWall collision_wall;
         CollisionTriangle collision_tri;
-        CollisionCloud collision_cloud;
+        //CollisionCloud collision_cloud;
         void integrate();
         LeapFrog leapfrog;
         Euler euler;
-        CloudEuler cloud_euler;
+        //CloudEuler cloud_euler;
 
 
         Lifetime lifetime;

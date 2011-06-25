@@ -69,8 +69,8 @@ namespace rtps
         //these don't appear to be implemented. need to revisit
         void set(T val);
         void set(const std::vector<T> &data);
-		void getSize() { return nb_el; }
-		void getNbBytes() { return nb_bytes; }
+		int getSize() { return nb_el; }
+		int getNbBytes() { return nb_bytes; }
 
     private:
          //we will want to access buffers by name when going across systems

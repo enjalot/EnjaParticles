@@ -87,6 +87,7 @@ namespace rtps
 		cloudInitialize();
 
 
+
         //should be more cross platform
         sph_source_dir = resource_path + "/" + std::string(SPH_CL_SOURCE_DIR);
         common_source_dir = resource_path + "/" + std::string(COMMON_CL_SOURCE_DIR);
@@ -304,7 +305,8 @@ namespace rtps
                 cl_cell_indices_start,
                 cl_cell_indices_end,
                 cl_sphp,
-                cl_GridParamsScaled,
+                //cl_GridParamsScaled, // GE: Might have to fix this. Do not know. 
+                cl_GridParams,
                 clf_debug,
                 cli_debug);
             timers["density"]->stop();
@@ -322,7 +324,8 @@ namespace rtps
                 cl_cell_indices_start,
                 cl_cell_indices_end,
                 cl_sphp,
-                cl_GridParamsScaled,
+                cl_GridParams,
+                //cl_GridParamsScaled,
                 clf_debug,
                 cli_debug);
 
@@ -330,11 +333,11 @@ namespace rtps
 
             collision();
 
-			cloudUpdate();
+			//cloudUpdate();
             integrate(); // includes boundary force
         }
 
-		cloudCleanup();
+		//cloudCleanup();
 
         cl_position_u.release();
         cl_color_u.release();
@@ -377,7 +380,8 @@ namespace rtps
                 cl_velocity_s,
                 cl_force_s,
                 cl_sphp,
-                cl_GridParamsScaled,
+                cl_GridParams,
+                //cl_GridParamsScaled,
                 //debug
                 clf_debug,
                 cli_debug);
@@ -941,12 +945,15 @@ namespace rtps
             cloud->cloud_hash_and_sort();
 			printf("after cloud hash and sort\n");
 			//collision
-			exit(0);
             cloud->cellindicesExecute();
+			printf("after cellindices\n");
             cloud->permuteExecute();
+			printf("after cloud permute\n");
 		#endif
 			cloud->collision(cl_position_s, cl_velocity_s, cl_force_s, cl_sphp, num);
+			printf("after cloud collision\n");
 			cloud->integrate();
+			printf("after cloud integrate\n");
 	}
 	//----------------------------------------------------------------------
 	void SPH::cloudCleanup()

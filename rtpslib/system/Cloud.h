@@ -25,6 +25,7 @@
 
 #include <Hash.h>
 #include <CloudBitonicSort.h>
+#include <BitonicSort.h>
 #include <CellIndices.h>
 #include <CloudPermute.h> // contains CloudPermute
 
@@ -162,7 +163,8 @@ namespace rtps
         Buffer<unsigned int>         cl_cloud_sort_output_hashes;
         Buffer<unsigned int>         cl_cloud_sort_output_indices;
 
-        CloudBitonic<unsigned int> bitonic;
+        //CloudBitonic<unsigned int> bitonic;
+        Bitonic<unsigned int> bitonic;
 
         //Parameter structs
         Buffer<SPHParams>*    cl_sphp;

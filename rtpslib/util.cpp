@@ -23,13 +23,23 @@ void Utils::printDevArray(Buffer<int4>& cl_array, char* msg, int nb_el, int nb_p
 	}
 }
 //----------------------------------------------------------------------
+void Utils::printDevArray(Buffer<unsigned int>& cl_array, char* msg, int nb_el, int nb_print)
+{
+	std::vector<unsigned int> pos(nb_el);
+	cl_array.copyToHost(pos);
+	printf("*** %s ***\n", msg);
+	for (int i=0; i < nb_print; i++) {
+		printf("%s[%d]: %u \n", msg, i, pos[i]);
+	}
+}
+//----------------------------------------------------------------------
 void Utils::printDevArray(Buffer<int>& cl_array, char* msg, int nb_el, int nb_print)
 {
 	std::vector<int> pos(nb_el);
 	cl_array.copyToHost(pos);
 	printf("*** %s ***\n", msg);
 	for (int i=0; i < nb_print; i++) {
-		printf("%s[%d]: %d ", msg, i, pos[i]);
+		printf("%s[%d]: %d \n", msg, i, pos[i]);
 	}
 }
 //----------------------------------------------------------------------
@@ -39,7 +49,7 @@ void Utils::printDevArray(Buffer<float>& cl_array, char* msg, int nb_el, int nb_
 	cl_array.copyToHost(pos);
 	printf("*** %s ***\n", msg);
 	for (int i=0; i < nb_print; i++) {
-		printf("%s[%d]: %f ", msg, i, pos[i]);
+		printf("%s[%d]: %f \n", msg, i, pos[i]);
 	}
 }
 //----------------------------------------------------------------------

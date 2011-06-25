@@ -52,8 +52,7 @@ namespace rtps
 		vcparams.push_back(cloudp);
 		cl_cloudp = Buffer<CLOUDParams>(ps->cli, vcparams);
         
-        //calculate();
-        //updateCLOUDP();
+
 
         //settings->printSettings();
 
@@ -71,6 +70,7 @@ namespace rtps
 		avg_cloud_velocity = float4(3., 0., 0., 1.);
 
         setupTimers();
+
 
 #ifdef CPU
         printf("RUNNING ON THE CPU\n");
@@ -91,7 +91,11 @@ namespace rtps
         ps->cli->addIncludeDir(common_source_dir);
 
         hash = Hash(common_source_dir, ps->cli, timers["hash_gpu"]);
-        bitonic = CloudBitonic<unsigned int>(common_source_dir, ps->cli );
+
+		// Kernel errors when using CloudBitonic. Do not know why!
+        bitonic = Bitonic<unsigned int>(common_source_dir, ps->cli );
+        //bitonic = CloudBitonic<unsigned int>(common_source_dir, ps->cli );
+
         cellindices = CellIndices(common_source_dir, ps->cli, timers["ci_gpu"] );
         permute = Permute( common_source_dir, ps->cli, timers["perm_gpu"] );
 
@@ -111,6 +115,10 @@ namespace rtps
 		//int nn = 4000;
     	//addNewxyPlane(nn, scaled, cloud_normals); 
 		readPointCloud(cloud_positions, cloud_normals, cloud_faces, cloud_faces_normals);
+        //calculate();
+
+        //calculate();
+        updateCLOUDP(); cloudp.print(); // nb points corect
 
 		//printf("cloud_num = %d\n", cloud_num); exit(4);
 
@@ -119,6 +127,10 @@ namespace rtps
 		if (cloud_num > 0) {
 			collision_cloud = CollisionCloud(sph_source_dir, ps->cli, timers["ct_pgu"], cloud_max_num); // Last argument is? ??
 		}
+
+
+
+
 
 		printf("cloud_positions capacity: %d\n", cloud_positions.capacity());
 		printf("cloud_normals capacity: %d\n", cloud_normals.capacity());
@@ -184,13 +196,7 @@ namespace rtps
 			// only for clouds (if cloud_num > 0)
 #if CLOUD_COLLISION
 			if (cloud_num > 0) {
-				//printf("BEFORE CLOUD_HASH_AND_SORT\n");
-				//u.printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
-				//u.printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
             	cloud_hash_and_sort();
-				//printf("AFTER CLOUD_HASH_AND_SORT\n");
-				//u.printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
-				//u.printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
 			}
 #endif
 
@@ -288,6 +294,14 @@ namespace rtps
 	//----------------------------------------------------------------------
     void CLOUD::cloud_hash_and_sort()
     {
+		printf("BEFORE CLOUD_HASH_AND_SORT\n");
+		//u.printDevArray(cl_cloud_sort_hashes, "hashes_s", cloud_num, 10); // OK
+		//u.printDevArray(cl_cloud_sort_indices, "indices_s", cloud_num, 10); // WRONG
+		//u.printDevArray(cl_cloud_position_u, "indices_s", cloud_num, cloud_num); // WRONG
+		//printf("cloudsorthashes size: %d\n", cl_cloud_sort_hashes.getSize());
+		//printf("cloudsortIndices size: %d\n", cl_cloud_sort_indices.getSize());
+		//printf("cloud_num= %d\n", cloud_num);
+
         timers["hash"]->start();
         hash.execute( cloud_num,
                 cl_cloud_position_u,
@@ -297,6 +311,10 @@ namespace rtps
                 clf_debug,
                 cli_debug);
         timers["hash"]->stop();
+
+		//printf("AFTER CLOUD_HASH_AND_SORT\n");
+		//u.printDevArray(cl_cloud_sort_hashes,  "hashes_s",  cloud_num, cloud_num); // OK
+		//u.printDevArray(cl_cloud_sort_indices, "indices_s", cloud_num, cloud_num); // WRONG
 
         cloud_bitonic_sort(); 
     }
@@ -324,7 +342,8 @@ namespace rtps
             	cl_cloud_cell_indices_end,
 
 				cl_sphp,    // IS THIS CORRECT?
-				cl_GridParamsScaled,
+				cl_GridParams,
+				//cl_GridParamsScaled,
 				// debug
 				clf_debug,
 				cli_debug);
@@ -741,8 +760,15 @@ namespace rtps
         {
             int dir = 1;        // dir: direction
 
-            int arrayLength = nlpo2(cloud_num);
+            //int arrayLength = nlpo2(cloud_num);
+            int arrayLength = cloud_max_num;
             int batch = 1;
+
+			//printf("BEFORE bitonic sort\n");
+			//u.printDevArray(cl_cloud_sort_hashes, "sort_hash", cloud_num, 10); 
+			//u.printDevArray(cl_cloud_sort_indices, "sort-index", cloud_num, 10);
+			//u.printDevArray(cl_cloud_sort_output_hashes, "sort_out_hash", cloud_num, 10); 
+			//u.printDevArray(cl_cloud_sort_output_indices, "sort_out_hash", cloud_num, 10);
 
 
             //printf("about to try sorting\n");
@@ -753,7 +779,6 @@ namespace rtps
                         &cl_cloud_sort_output_indices,
                         &cl_cloud_sort_hashes,
                         &cl_cloud_sort_indices );
-
         }
         catch (cl::Error er)
         {
@@ -761,7 +786,14 @@ namespace rtps
             exit(0);
         }
 
-		printf("after cloud bitonic sort\n");
+		#if 0
+		u.printDevArray(cl_cloud_sort_hashes, "sort_hash", cloud_num, 10); 
+		u.printDevArray(cl_cloud_sort_indices, "sort-index", cloud_num, 10);
+		u.printDevArray(cl_cloud_sort_output_hashes, "sort_out_hash", cloud_num, 10); 
+		u.printDevArray(cl_cloud_sort_output_indices, "sort_out_hash", cloud_num, 10);
+		#endif
+
+		//printf("after cloud bitonic sort\n");
 
         ps->cli->queue.finish();
 
@@ -813,8 +845,8 @@ namespace rtps
 	//----------------------------------------------------------------------
     void CLOUD::updateCLOUDP()
 	{
-		cloudp.num = settings->GetSettingAs<int>("Number of Cloud Particles");
-		cloudp.max_num = settings->GetSettingAs<int>("Maximum Number of Cloud Particles");
+		cloudp.num = cloud_num; //settings->GetSettingAs<int>("Number of Cloud Particles");
+		cloudp.max_num = cloud_max_num; // settings->GetSettingAs<int>("Maximum Number of Cloud Particles");
 	}
 	//----------------------------------------------------------------------
 

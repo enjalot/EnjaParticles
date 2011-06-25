@@ -32,6 +32,8 @@ namespace rtps
 
 class Utils
 {
+public:
+	void printDevArray(Buffer<unsigned int>& cl_array, char* msg, int nb_el, int nb_print);
 	void printDevArray(Buffer<int>& cl_array, char* msg, int nb_el, int nb_print);
 	void printDevArray(Buffer<int4>& cl_array, char* msg, int nb_el, int nb_print);
 	void printDevArray(Buffer<float>& cl_array, char* msg, int nb_el, int nb_print);
