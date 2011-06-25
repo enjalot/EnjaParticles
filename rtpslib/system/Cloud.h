@@ -84,9 +84,6 @@ namespace rtps
 
         ~CLOUD();
 
-		// advance particles one iteration
-        //void update();
-
         //wrapper around IV.h addRect
         int addBox(int nn, float4 min, float4 max, bool scaled, float4 color=float4(1.0f, 0.0f, 0.0f, 1.0f));
         //wrapper around IV.h addSphere
@@ -181,8 +178,6 @@ namespace rtps
 
 		//SPHParams* sphp;
 
-        //void updateGPU();
-
         //calculate the various parameters that depend on max_num of particles
         //void calculate();
         //copy the CLOUD parameter struct to the GPU
@@ -238,6 +233,10 @@ public:
 			this->cl_GridParams = cl_GridParams;
 			this->grid_params = grid_params;
 		}
+
+		void addCloud();
+		void setupStages();
+		void setupRigidBodyKinematics();
 
 		#if 0
 		void setSPHArrrays(

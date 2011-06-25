@@ -25,8 +25,6 @@ namespace rtps
 	//----------------------------------------------------------------------
     CLOUD::CLOUD(RTPS *psfr, SPHParams& sphp, Buffer<GridParams>* cl_GridParams, Buffer<GridParams>* cl_GridParamsScaled, GridParams* grid_params, GridParams* grid_params_scaled, int max_nb_in_cloud) 
     {
-		//this->sphp = &sphp; // ADD LATER?
-
 		this->cl_GridParams = cl_GridParams;
 		this->cl_GridParamsScaled = cl_GridParamsScaled;
 		this->grid_params   = grid_params;
@@ -35,7 +33,6 @@ namespace rtps
         //store the particle system framework
         ps = psfr;
         settings = ps->settings;
-        //max_num = n;
 
 		cloud_max_num = max_nb_in_cloud; // remove max_outer_num
 		cloud_num = 0;
@@ -48,110 +45,19 @@ namespace rtps
         //seed random
         srand ( time(NULL) );
 
-        //grid = settings->grid;
-
 		std::vector<CLOUDParams> vcparams(0);
 		vcparams.push_back(cloudp);
 		cl_cloudp = Buffer<CLOUDParams>(ps->cli, vcparams);
-        
-
-
-        //settings->printSettings();
 
         spacing = settings->GetSettingAs<float>("Spacing");
 
-		// should bounce off 
-		float radius_in = 2.5;
-		float radius_out = radius_in + .5;
-		float4 center(1.6,1.6,2.7-radius_out, 0.0);
-		//vector<float4> cloud_normals;
-		bool scaled = true;
-
-		// Ideally, change every time step, and update all points in 
-		// the cloud on the GPU (in which routine?)
-		avg_cloud_velocity = float4(3., 0., 0., 1.);
+		setupRigidBodyKinematics();
 
         setupTimers();
+		setupStages();
 
+		addCloud();
 
-#ifdef CPU
-        printf("RUNNING ON THE CPU\n");
-		printf("No CPU implementation for point clouds\n");
-		exit(1);
-#endif
-#ifdef GPU
-        printf("RUNNING ON THE GPU\n");
-
-        //setup the sorted and unsorted arrays
-        prepareSorted();
-
-        //should be more cross platform
-        sph_source_dir = resource_path + "/" + std::string(SPH_CL_SOURCE_DIR);
-        common_source_dir = resource_path + "/" + std::string(COMMON_CL_SOURCE_DIR);
-
-        ps->cli->addIncludeDir(sph_source_dir);
-        ps->cli->addIncludeDir(common_source_dir);
-
-        hash = Hash(common_source_dir, ps->cli, timers["hash_gpu"]);
-
-		// Kernel errors when using CloudBitonic. Do not know why!
-        bitonic = Bitonic<unsigned int>(common_source_dir, ps->cli );
-        //bitonic = CloudBitonic<unsigned int>(common_source_dir, ps->cli );
-
-        cellindices = CellIndices(common_source_dir, ps->cli, timers["ci_gpu"] );
-        permute = Permute( common_source_dir, ps->cli, timers["perm_gpu"] );
-
-        cloud_permute = CloudPermute( common_source_dir, ps->cli, timers["perm_gpu"] );
-
-		// CLOUD Integrator
-		// ADD Cloud timers later. 
-		cloud_euler = CloudEuler(sph_source_dir, ps->cli, timers["euler_gpu"]);
-
-        string lt_file = settings->GetSettingAs<string>("lt_cl");
-#endif
-
-		// must be called after prepareSorted
-		center = float4(2.5, 2.5, 0., 0.0);
-		//center = float4(5.0, 2.5, 2.5, 0.0);
-		//addHollowBall(2000, center, radius_in, radius_out, scaled, cloud_normals);
-		//int nn = 4000;
-    	//addNewxyPlane(nn, scaled, cloud_normals); 
-		readPointCloud(cloud_positions, cloud_normals, cloud_faces, cloud_faces_normals);
-        //calculate();
-
-        //calculate();
-        updateCLOUDP(); cloudp.print(); // nb points corect
-
-		//printf("cloud_num = %d\n", cloud_num); exit(4);
-
-		//  ADD A SWITCH TO HANDLE CLOUD IF PRESENT
-		// Must be called after a point cloud has been created. 
-		if (cloud_num > 0) {
-			collision_cloud = CollisionCloud(sph_source_dir, ps->cli, timers["ct_pgu"], cloud_max_num); // Last argument is? ??
-		}
-
-
-
-
-
-		printf("cloud_positions capacity: %d\n", cloud_positions.capacity());
-		printf("cloud_normals capacity: %d\n", cloud_normals.capacity());
-
-		cloud_positions.resize(cloud_positions.capacity());
-		cloud_normals.resize(cloud_normals.capacity());
-		// only needs to be done once if cloud not moving
-		// ideally, cloud should be stored in vbos. 
-        cl_cloud_position_u.copyToHost(cloud_positions);
-
-		//printf("*** end of CLOUD constructor ***\n");
-		//printf("*** Unsorted cloud particles are place on the GPU ***\n");
-		#if 1
-		//cl_cloud_position_u.copyToHost(cloud_positions);
-		for (int i=0; i < 3; i++) {
-			printf("i= %d, ", i);
-			cloud_positions[i].print("pos_u");
-		}
-		#endif
 		//printf("cloud_num = %d\n", cloud_num); exit(0);
         settings->SetSetting("Maximum Number of Cloud Particles", cloud_max_num);
     }
@@ -160,111 +66,6 @@ namespace rtps
     CLOUD::~CLOUD()
     {
     }
-
-	//----------------------------------------------------------------------
-	#if 0
-    void CLOUD::update()
-    {
-		//printf("+++++++++++++ enter UPDATE()\n");
-        //call kernels
-        //TODO: add timings
-#ifdef CPU
-        //updateCPU();
-#endif
-#ifdef GPU
-        updateGPU();
-#endif
-    }
-	#endif
-	//----------------------------------------------------------------------
-	#if 0
-    void CLOUD::updateGPU()
-    {
-
-        timers["update"]->start();
-        //glFinish();
-        //if (settings->has_changed()) updateSPHP();
-
-        //settings->printSettings();
-
-        //int sub_intervals = 3;  //should be a setting
-        int sub_intervals =  settings->GetSettingAs<float>("sub_intervals");
-        //this should go in the loop but avoiding acquiring and releasing each sub
-        //interval for all the other calls.
-        //this does end up acquire/release everytime sprayHoses calls pushparticles
-        //should just do try/except?
-
-        for (int i=0; i < sub_intervals; i++)
-        {
-
-			// only for clouds (if cloud_num > 0)
-#if CLOUD_COLLISION
-			if (cloud_num > 0) {
-            	cloud_hash_and_sort();
-			}
-#endif
-
-		#if CLOUD_COLLISION
-			// SORT CLOUD
-            //printf("before cloud cellindices, num= %d, cloud_num= %d\n", num, cloud_num);
-            timers["cellindices"]->start();
-
-            cellindices.execute(cloud_num,
-                cl_cloud_sort_hashes,
-                cl_cloud_sort_indices,
-                cl_cloud_cell_indices_start,
-                cl_cloud_cell_indices_end,
-                //cl_sphp,
-                &cl_GridParams,
-                grid_params->nb_cells,
-                clf_debug,
-                cli_debug);
-            timers["cellindices"]->stop();
-		#endif
-       
-		#if CLOUD_COLLISION
-			if (cloud_num > 0) {
-            //printf("permute\n");
-            timers["cloud_permute"]->start();
-
-			//printf("BEFORE CLOUD_PERMUTE\n");
-			//u.printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
-			//u.printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
-
-			#if 1
-            cloud_permute.execute(
-			    cloud_num,
-                cl_cloud_position_u,
-                cl_cloud_position_s,
-                cl_cloud_normal_u, 
-                cl_cloud_normal_s,
-                cl_cloud_sort_indices,
-                cl_GridParams,
-                clf_debug,
-                cli_debug);
-			#endif
-
-			//printf("AFTER CLOUD_PERMUTE\n");
-			//u.printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
-			//u.printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
-			cl_cloud_position_s.copyToHost(cloud_positions);
-
-            timers["cloud_permute"]->stop();
-			//printf("exit cloud_permute\n"); exit(1);
-		    }
-		#endif
-
-            //collision();
-			// CALL THIS FROM SPH
-
-            integrate(); // includes boundary force
-        }
-
-		cl_cloud_position_s.copyToHost(cloud_positions);
-
-        timers["update"]->stop();
-    }
-	#endif
 
 	//----------------------------------------------------------------------
 	void CLOUD::permuteExecute()
@@ -297,14 +98,6 @@ namespace rtps
 	//----------------------------------------------------------------------
     void CLOUD::cloud_hash_and_sort()
     {
-		//printf("BEFORE CLOUD_HASH_AND_SORT\n");
-		//u.printDevArray(cl_cloud_sort_hashes, "hashes_s", cloud_num, 10); // OK
-		//u.printDevArray(cl_cloud_sort_indices, "indices_s", cloud_num, 10); // WRONG
-		//u.printDevArray(cl_cloud_position_u, "indices_s", cloud_num, cloud_num); // WRONG
-		//printf("cloudsorthashes size: %d\n", cl_cloud_sort_hashes.getSize());
-		//printf("cloudsortIndices size: %d\n", cl_cloud_sort_indices.getSize());
-		//printf("cloud_num= %d\n", cloud_num);
-
         timers["hash"]->start();
         hash.execute( cloud_num,
                 cl_cloud_position_u,
@@ -315,44 +108,33 @@ namespace rtps
                 cli_debug);
         timers["hash"]->stop();
 
-		//printf("AFTER CLOUD_HASH_AND_SORT\n");
-		//u.printDevArray(cl_cloud_sort_hashes,  "hashes_s",  cloud_num, cloud_num); // OK
-		//u.printDevArray(cl_cloud_sort_indices, "indices_s", cloud_num, cloud_num); // WRONG
-
         cloud_bitonic_sort(); 
     }
 
 	//----------------------------------------------------------------------
-    void CLOUD::collision(Buffer<float4>& cl_pos_s, Buffer<float4>& cl_vel_s, 
-	          Buffer<float4>& cl_force_s, Buffer<SPHParams>& cl_sphp, int num_sph)
+    void CLOUD::collision(Buffer<float4>& cl_sph_pos_s, Buffer<float4>& cl_sph_vel_s, 
+	          Buffer<float4>& cl_sph_force_s, Buffer<SPHParams>& cl_sphp, int num_sph)
     {
-		;
 		// NEED TIMER FOR POINT CLOUD COLLISIONS (GE)
-		// Messed collisions up
-		#if CLOUD_COLLISION
-		// ****** Call from SPH? *****
-		printf("num_sph= %d, cloud_num= %d\n", num_sph, cloud_num);
-		//if (num_sph > 0) {
-			printf("*** cloud collide\n");
-			collision_cloud.execute(num_sph, cloud_num, 
-				cl_pos_s, 
-				cl_vel_s,  
-				cl_cloud_position_s, 
-				cl_cloud_normal_s,
-				cl_cloud_velocity_s,
-				cl_force_s, // output
 
-            	cl_cloud_cell_indices_start,
-            	cl_cloud_cell_indices_end,
+		printf("*** cloud collide\n");
+		collision_cloud.execute(num_sph, cloud_num, 
+			cl_sph_pos_s, 
+			cl_sph_vel_s,  
+			cl_cloud_position_s, 
+			cl_cloud_normal_s,
+			cl_cloud_velocity_s,
+			cl_sph_force_s, // output
 
-				cl_sphp,    // IS THIS CORRECT?
-				//*cl_GridParams,
-				*cl_GridParamsScaled,
-				// debug
-				clf_debug,
-				cli_debug);
-		//}
-		#endif
+			cl_cloud_cell_indices_start,
+			cl_cloud_cell_indices_end,
+
+			cl_sphp,    // IS THIS CORRECT?
+			//*cl_GridParams,
+			*cl_GridParamsScaled,
+			// debug
+			clf_debug,
+			cli_debug);
     }
 	//----------------------------------------------------------------------
 
@@ -360,18 +142,10 @@ namespace rtps
     {
 
         timers["integrate"]->start();
-		// Perhaps I am messed up by Courant condition if cloud point 
-		// velocities are too large? 
 
 		static int count=0;
 
-		//printf("settings->dt= %f\n", settings->dt);
-
 		// CLOUD INTEGRATION
-		#if 1
-		//printf("*** BEFORE CLOUD_EULER ***\n");
-		//u.printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
-		//u.printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // WRONG
 
 		// start the arm moving after x iterations
 		if (count > 10) {
@@ -395,11 +169,6 @@ namespace rtps
 
 		}
 		count++;
-
-			//printf("*** AFTER CLOUD_EULER ***\n");
-			//u.printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
-			//u.printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // WRONG
-		#endif
 
         timers["integrate"]->stop();
     }
@@ -474,8 +243,6 @@ namespace rtps
 
 		//CLOUD BUFFERS
 		if (cloud_max_num > 0) {
-			printf("cloud_max_num= %d\n", cloud_max_num);
-			printf("cloud_positions size: %d\n", cloud_positions.size());
         	cl_cloud_position_u = Buffer<float4>(ps->cli, cloud_positions);
         	cl_cloud_position_s = Buffer<float4>(ps->cli, cloud_positions);
         	cl_cloud_normal_u   = Buffer<float4>(ps->cli, cloud_normals);
@@ -496,7 +263,10 @@ namespace rtps
 
         std::vector<unsigned int> cloud_keys(cloud_max_num);
         //to get around limits of bitonic sort only handling powers of 2
+
+// DANGEROUS because could contain classes, etc.
 #include "limits.h"
+
         //std::fill(keys.begin(), keys.end(), INT_MAX);
         std::fill(cloud_keys.begin(), cloud_keys.end(), INT_MAX);
 
@@ -570,24 +340,10 @@ namespace rtps
 			return;
 		}
 
-		printf("pos.size= %d\n", pos.size());
-		printf("normals.size= %d\n", normals.size());
-		//exit(0);
-
-		printf("cloud_num on entry: %d\n", cloud_num);
-		printf("pos.size= %d\n", pos.size());
         cl_cloud_position_u.copyToDevice(pos, cloud_num);
-
-		//printf("cloud_num= %d\n", cloud_num);
-		printf("INSIDE pushCloudeParticles\n");
-		for (int i=0; i < 3; i++) {
-			printf("%d\n", i);
-			pos[i].print("cloud_pos");
-		}
         cl_cloud_normal_u.copyToDevice(normals, cloud_num);
 
 		cloud_num += pos.size();
-		printf("cloud_num= %d\n", cloud_num);
 
 		return;
 	}
@@ -597,6 +353,7 @@ namespace rtps
 							   std::vector<int4>&   cloud_faces,
 							   std::vector<int4>&   cloud_faces_normals)
 	{
+		// REMOVE HARDCODING!!!
 		// mac
 		std::string base = "/Users/erlebach/Documents/src/blender-particles/EnjaParticles/data/";
 
@@ -739,19 +496,9 @@ namespace rtps
             scale = sphp->simulation_scale;
         }
 		#endif
-		//printf("GEE inside addHollowBall, before addHollowSphere, scale= %f\n", scale);
-		//printf("GEE inside addHollowBall, sphp->simulation_scale= %f\n", sphp->simulation_scale);
-		//printf("spacing= %f\n", spacing);
-		//printf("GEE addHollowSphere spacing = %f\n", spacing);
 
         vector<float4> sphere = addHollowSphere(nn, center, radius_in, radius_out, spacing/2., scale, normals);
         float4 velo(0, 0, 0, 0);
-		printf("** addHollowBall: nb particles: %d\n", sphere.size());
-		for (int i=0; i < sphere.size(); i++) {
-			printf("%d, %f, %f, %f\n", i, sphere[i].x, sphere[i].y, sphere[i].z);
-		}
-		// pos of cloud in world coordinates
-		// simulation coord = (world coord) * simulation_scale
         pushCloudParticles(sphere,normals);
 //exit(0);
     }
@@ -766,13 +513,6 @@ namespace rtps
             //int arrayLength = nlpo2(cloud_num);
             int arrayLength = cloud_max_num;
             int batch = 1;
-
-			//printf("BEFORE bitonic sort\n");
-			//u.printDevArray(cl_cloud_sort_hashes, "sort_hash", cloud_num, 10); 
-			//u.printDevArray(cl_cloud_sort_indices, "sort-index", cloud_num, 10);
-			//u.printDevArray(cl_cloud_sort_output_hashes, "sort_out_hash", cloud_num, 10); 
-			//u.printDevArray(cl_cloud_sort_output_indices, "sort_out_hash", cloud_num, 10);
-
 
             //printf("about to try sorting\n");
             bitonic.Sort(batch, 
@@ -789,28 +529,7 @@ namespace rtps
             exit(0);
         }
 
-		#if 0
-		u.printDevArray(cl_cloud_sort_hashes, "sort_hash", cloud_num, 10); 
-		u.printDevArray(cl_cloud_sort_indices, "sort-index", cloud_num, 10);
-		u.printDevArray(cl_cloud_sort_output_hashes, "sort_out_hash", cloud_num, 10); 
-		u.printDevArray(cl_cloud_sort_output_indices, "sort_out_hash", cloud_num, 10);
-		#endif
-
-		//printf("after cloud bitonic sort\n");
-
         ps->cli->queue.finish();
-
-        /*
-        int nbc = 10;
-        std::vector<int> sh = cl_sort_hashes.copyToHost(nbc);
-        std::vector<int> eci = cl_cell_indices_end.copyToHost(nbc);
-    
-        for(int i = 0; i < nbc; i++)
-        {
-            printf("before[%d] %d eci: %d\n; ", i, sh[i], eci[i]);
-        }
-        printf("\n");
-        */
 
 		// NOT SURE HOW THIS WORKS!! GE
         cl_cloud_sort_hashes.copyFromBuffer(cl_cloud_sort_output_hashes, 0, 0, cloud_num);
@@ -852,5 +571,91 @@ namespace rtps
 		cloudp.max_num = cloud_max_num; // settings->GetSettingAs<int>("Maximum Number of Cloud Particles");
 	}
 	//----------------------------------------------------------------------
+	void CLOUD::addCloud()
+	{
+		// should bounce off 
+		float radius_in = 2.5;
+		float radius_out = radius_in + .5;
+		float4 center(1.6,1.6,2.7-radius_out, 0.0);
+		//vector<float4> cloud_normals;
+		bool scaled = true;
+
+		// must be called after prepareSorted
+		center = float4(2.5, 2.5, 0., 0.0);
+		//center = float4(5.0, 2.5, 2.5, 0.0);
+		//addHollowBall(2000, center, radius_in, radius_out, scaled, cloud_normals);
+		//int nn = 4000;
+    	//addNewxyPlane(nn, scaled, cloud_normals); 
+		readPointCloud(cloud_positions, cloud_normals, cloud_faces, cloud_faces_normals);
+        //calculate();
+
+        //calculate();
+        updateCLOUDP(); cloudp.print(); // nb points corect
+
+		//printf("cloud_num = %d\n", cloud_num); exit(4);
+
+		//  ADD A SWITCH TO HANDLE CLOUD IF PRESENT
+		// Must be called after a point cloud has been created. 
+		if (cloud_num > 0) {
+			collision_cloud = CollisionCloud(sph_source_dir, ps->cli, timers["ct_pgu"], cloud_max_num); // Last argument is? ??
+		}
+
+
+		printf("cloud_positions capacity: %d\n", cloud_positions.capacity());
+		printf("cloud_normals capacity: %d\n", cloud_normals.capacity());
+
+		cloud_positions.resize(cloud_positions.capacity());
+		cloud_normals.resize(cloud_normals.capacity());
+		// only needs to be done once if cloud not moving
+		// ideally, cloud should be stored in vbos. 
+        cl_cloud_position_u.copyToHost(cloud_positions);
+	}
+	//----------------------------------------------------------------------
+	void CLOUD::setupRigidBodyKinematics()
+	{
+		// Ideally, change every time step, and update all points in 
+		// the cloud on the GPU (in which routine?)
+		avg_cloud_velocity = float4(3., 0., 0., 1.);
+	}
+	//----------------------------------------------------------------------
+	void CLOUD::setupStages()
+	{
+#ifdef CPU
+        printf("RUNNING ON THE CPU\n");
+		printf("No CPU implementation for point clouds\n");
+		exit(1);
+#endif
+#ifdef GPU
+        printf("RUNNING ON THE GPU\n");
+
+        //setup the sorted and unsorted arrays
+        prepareSorted();
+
+        //should be more cross platform
+        sph_source_dir = resource_path + "/" + std::string(SPH_CL_SOURCE_DIR);
+        common_source_dir = resource_path + "/" + std::string(COMMON_CL_SOURCE_DIR);
+
+        ps->cli->addIncludeDir(sph_source_dir);
+        ps->cli->addIncludeDir(common_source_dir);
+
+        hash = Hash(common_source_dir, ps->cli, timers["hash_gpu"]);
+
+		// Kernel errors when using CloudBitonic. Do not know why!
+        bitonic = Bitonic<unsigned int>(common_source_dir, ps->cli );
+        //bitonic = CloudBitonic<unsigned int>(common_source_dir, ps->cli );
+
+        cellindices = CellIndices(common_source_dir, ps->cli, timers["ci_gpu"] );
+        permute = Permute( common_source_dir, ps->cli, timers["perm_gpu"] );
+
+        cloud_permute = CloudPermute( common_source_dir, ps->cli, timers["perm_gpu"] );
+
+		// CLOUD Integrator
+		// ADD Cloud timers later. 
+		cloud_euler = CloudEuler(sph_source_dir, ps->cli, timers["euler_gpu"]);
+#endif
+	}
+
+	//----------------------------------------------------------------------
+
 
 }; //end namespace
