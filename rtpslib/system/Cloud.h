@@ -17,6 +17,8 @@
 //#include <CLOUDSettings.h>
 #include <SPHSettings.h>
 
+#include <Matrix.h>
+
 #include <util.h>
 
 
@@ -28,6 +30,7 @@
 #include <BitonicSort.h>
 #include <CellIndices.h>
 #include <CloudPermute.h> // contains CloudPermute
+#include <CloudVelocity.h> 
 
 #include <Permute.h> // contains CloudPermute
 #include <sph/CloudEuler.h>
@@ -122,9 +125,12 @@ namespace rtps
 
         std::string sph_source_dir;
 
-        CollisionCloud collision_cloud;
+        Hash hash;
+        CellIndices cellindices;
         CloudEuler cloud_euler;
         CloudPermute cloud_permute; // for generality, keep separate (GE)
+		CloudVelocity velocity;
+        CollisionCloud collision_cloud;
 
         //needs to be called when particles are added
         void prepareSorted();
@@ -177,12 +183,11 @@ namespace rtps
         //copy the CLOUD parameter struct to the GPU
 		void pushCloudParticles(vector<float4>& pos, vector<float4>& normals);
 
-        Hash hash;
-        CellIndices cellindices;
-        Permute permute;
+        //Permute permute;
         void hash_and_sort();
         void bitonic_sort();
         void cloud_bitonic_sort();   // GE
+
 
         std::string resource_path;
         std::string common_source_dir;
@@ -202,6 +207,7 @@ public:
     	void collision(Buffer<float4>& cl_pos_s, Buffer<float4>& cl_vel_s, 
 	          Buffer<float4>& cl_force_s, Buffer<SPHParams>& cl_sphp, int num_sph);
         void cloud_hash_and_sort();  // GE
+    	void cloudVelocityExecute();
 		void cellindicesExecute();
 		void permuteExecute();
 		int setRenderer(Render* renderer) {

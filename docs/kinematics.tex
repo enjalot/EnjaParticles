@@ -1,0 +1,51 @@
+\documentclass[11pt]{article}
+\input{misc_mac}
+\input{macros}
+\begin{document}
+I have a rigid body in a fluid modeled by SPH. What are its equations 
+of motion. 
+
+First we start with kinematics. 
+
+I would like the model to rotate with angular speed $\omgvec$, where the 
+boldface character represents an axis of rotation. The axis passes
+through the point $x_P$.  We will generalize later. Assume this rigid
+object is formed from a collection of points $x_i$ that do not move 
+relative to each other. In other words: $(x_i-x_j)\cdot(x_k-x_l)$ is 
+constant for all time and for all $i,j,k,l$. 
+
+First assume that $\omgvec$ is independent of time (constant angular
+velocity and constant axis of rotation).
+$$
+\vvec_R = \vvec_{cg} + \omgvec \times \rvec_R
+$$
+where $\vvec_R$ is the velocity of point $R$ on the rigid body, the 
+subscript $cg$  denotes center of gravity of the rigid body, 
+and $\rvec_R$ is a vector from the center of gravity to the point $R$. 
+Now apply this equation to compute the velocity (in the lab frame of 
+reference) of particle $S$ on the rigid body: 
+$$
+\vvec_S = \vvec_{cg} + \omgvec \times \rvec_S
+$$
+Subtract the two equations: 
+$$
+\vvec_R-\vvec_S = \omgvec \times (\rvec_R-\rvec_S)
+$$
+If point $S$ is stationary in the laboratory frame of reference, 
+$\vvec_S=0$ and
+$$
+\vvec_R = \omgvec \times (\rvec_R-\rvec_S) .
+$$
+
+To implement this, store the stationary point in a Point3.
+and store the rotation vector in another Point3. 
+
+Every iteration, compute the velocity of all the points. Do this on the 
+with a GPU kernel: 
+
+computeVel(int num, float4* pos_s, float4 omega, float4 pos_cg)
+{
+    r = pos_s[index] 
+	v = omg x (r - pos_cg)
+}
+\end{document}

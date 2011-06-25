@@ -1,0 +1,413 @@
+% rename this file:  macros.tex
+%
+%  operators
+%
+\def\curl  {\nabla\times}
+\def\diverg{\nabla\cdot }
+\def\grad  {\nabla      }
+\def\lapl  {\nabla^2    }
+% 
+% constants
+%
+\def\onehv{\frac{1}{2}}
+\def\oneth{\frac{1}{3}}
+\def\twoth{\frac{2}{3}}
+\def\etwoD{\epsilon_{2D}}
+\def\ethreeD{\epsilon_{3D}}
+%
+%  math symbols
+%
+\def\notin{\in \kern -.80em / \,}
+%
+%
+% bold characters (nabla,v,x,z)
+%
+\def\nablab{\bf{\nabla}}
+%
+\def\bar{\overline}
+\def\barbar#1{\bar{\bar{#1}}}
+%
+%  vector quantities (single and double)
+%
+%\def\omgvec{\vec{\omega}}
+\def\omgvec{\bfg{\omega}}
+\def\psivec{\bfg{\psi}}
+
+\def\nearrowtw{\nearrow\nearrow}
+
+\def\ucprO{{\uvec^C_0}'}
+\def\ucpr{{\uvec^C}'}
+\def\ucO{{\uvec^C_0}}
+
+\def\pcprO{{p^C_0}'}
+\def\pcpr{{p^C}'}
+
+\def\uvecbar{\bar{\bf u}}
+
+\def\uvechat{\hat{\bf u}}
+
+\def\mvechat{\hat{\bf{m}}}
+
+\def\sptilde{{}^$~}
+\def\uvectilde{{\bf \tilde{u}}}
+\def\vvectilde{{\bf \tilde{v}}}
+\def\wvectilde{{\bf \tilde{w}}}
+
+\def\Ttildetilde{\tilde{\tilde{T}}}
+\def\Phibar{\bar{\Phi}}
+
+\def\sphat{{}^$^}
+\def\rhohat{\hat{\rho}}
+%
+% extra set of {} around makebox allows \ttilde  to be used as a sub/superscript
+%
+\def\chibar{\bar{\chi}}
+\def\Fbar{\bar{F}}
+\def\ubarc{\ubar^C}
+\def\pbarc{\pbar^C}
+\def\vtildetilde{\tilde{\tilde{v}}}
+\def\rhobar{\bar{\rho}}
+\def\sigmabar{\bar{\sigma}}
+
+\def\adot{{\dot{a}}}
+\def\bdot{{\dot{b}}}
+\def\cDot{{\dot{c}}}
+\def\ddot{{\dot{d}}}
+\def\edot{{\dot{e}}}
+\def\fdot{{\dot{f}}}
+\def\gdot{{\dot{g}}}
+\def\hdot{{\dot{h}}}
+\def\idot{{\dot{i}}}
+\def\jdot{{\dot{j}}}
+\def\kdot{{\dot{k}}}
+\def\ldot{{\dot{l}}}
+\def\mdot{{\dot{m}}}
+\def\ndot{{\dot{n}}}
+\def\odot{{\dot{o}}}
+\def\pdot{{\dot{p}}}
+\def\qdot{{\dot{q}}}
+\def\rdot{{\dot{r}}}
+\def\sdot{{\dot{s}}}
+\def\tdot{{\dot{t}}}
+\def\udot{{\dot{u}}}
+\def\vdot{{\dot{v}}}
+\def\wdot{{\dot{w}}}
+\def\xdot{{\dot{x}}}
+\def\ydot{{\dot{y}}}
+\def\zdot{{\dot{z}}}
+
+\def\Adot{{\dot{A}}}
+\def\Bdot{{\dot{B}}}
+\def\Cdot{{\dot{C}}}
+\def\Ddot{{\dot{D}}}
+\def\Edot{{\dot{E}}}
+\def\Fdot{{\dot{F}}}
+\def\Gdot{{\dot{G}}}
+\def\Hdot{{\dot{H}}}
+\def\Idot{{\dot{I}}}
+\def\Jdot{{\dot{J}}}
+\def\Kdot{{\dot{K}}}
+\def\Ldot{{\dot{L}}}
+\def\Mdot{{\dot{M}}}
+\def\Ndot{{\dot{N}}}
+\def\Odot{{\dot{O}}}
+\def\Pdot{{\dot{P}}}
+\def\Qdot{{\dot{Q}}}
+\def\Rdot{{\dot{R}}}
+\def\Sdot{{\dot{S}}}
+\def\Tdot{{\dot{T}}}
+\def\Udot{{\dot{U}}}
+\def\Vdot{{\dot{V}}}
+\def\Wdot{{\dot{W}}}
+\def\Xdot{{\dot{X}}}
+\def\Ydot{{\dot{Y}}}
+\def\Zdot{{\dot{Z}}}
+
+\def\abar{{\bar{a}}}
+\def\bbar{{\bar{b}}}
+\def\cbar{{\bar{c}}}
+\def\dbar{{\bar{d}}}
+\def\ebar{{\bar{e}}}
+\def\fbar{{\bar{f}}}
+\def\gbar{{\bar{g}}}
+\def\hbar{{\bar{h}}}
+\def\ibar{{\bar{i}}}
+\def\jbar{{\bar{j}}}
+\def\kbar{{\bar{k}}}
+\def\lbar{{\bar{l}}}
+\def\mbar{{\bar{m}}}
+\def\nbar{{\bar{n}}}
+\def\obar{{\bar{o}}}
+\def\pbar{{\bar{p}}}
+\def\qbar{{\bar{q}}}
+\def\rbar{{\bar{r}}}
+\def\sbar{{\bar{s}}}
+\def\tbar{{\bar{t}}}
+\def\ubar{{\bar{u}}}
+\def\vbar{{\bar{v}}}
+\def\wbar{{\bar{w}}}
+\def\xbar{{\bar{x}}}
+\def\ybar{{\bar{y}}}
+\def\zbar{{\bar{z}}}
+
+\def\Abar{{\bar{A}}}
+\def\Bbar{{\bar{B}}}
+\def\Cbar{{\bar{C}}}
+\def\Dbar{{\bar{D}}}
+\def\Ebar{{\bar{E}}}
+\def\Fbar{{\bar{F}}}
+\def\Gbar{{\bar{G}}}
+\def\Hbar{{\bar{H}}}
+\def\Ibar{{\bar{I}}}
+\def\Jbar{{\bar{J}}}
+\def\Kbar{{\bar{K}}}
+\def\Lbar{{\bar{L}}}
+\def\Mbar{{\bar{M}}}
+\def\Nbar{{\bar{N}}}
+\def\Obar{{\bar{O}}}
+\def\Pbar{{\bar{P}}}
+\def\Qbar{{\bar{Q}}}
+\def\Rbar{{\bar{R}}}
+\def\Sbar{{\bar{S}}}
+\def\Tbar{{\bar{T}}}
+\def\Ubar{{\bar{U}}}
+\def\Vbar{{\bar{V}}}
+\def\Wbar{{\bar{W}}}
+\def\Xbar{{\bar{X}}}
+\def\Ybar{{\bar{Y}}}
+\def\Zbar{{\bar{Z}}}
+
+\def\avec{{\bf a}}
+\def\bvec{{\bf b}}
+\def\cvec{{\bf c}}
+\def\dvec{{\bf d}}
+\def\evec{{\bf e}}
+\def\fvec{{\bf f}}
+\def\gvec{{\bf g}}
+\def\hvec{{\bf h}}
+\def\ivec{{\bf i}}
+\def\jvec{{\bf j}}
+\def\kvec{{\bf k}}
+\def\lvec{{\bf l}}
+\def\mvec{{\bf m}}
+\def\nvec{{\bf n}}
+\def\ovec{{\bf o}}
+\def\pvec{{\bf p}}
+\def\qvec{{\bf q}}
+\def\rvec{{\bf r}}
+\def\svec{{\bf s}}
+\def\tvec{{\bf t}}
+\def\uvec{{\bf u}}
+\def\vvec{{\bf v}}
+\def\wvec{{\bf w}}
+\def\xvec{{\bf x}}
+\def\yvec{{\bf y}}
+\def\zvec{{\bf z}}
+
+\def\Avec{{\bf A}}
+\def\Bvec{{\bf B}}
+\def\Cvec{{\bf C}}
+\def\Dvec{{\bf D}}
+\def\Evec{{\bf E}}
+\def\Fvec{{\bf F}}
+\def\Gvec{{\bf G}}
+\def\Hvec{{\bf H}}
+\def\Ivec{{\bf I}}
+\def\Jvec{{\bf J}}
+\def\Kvec{{\bf K}}
+\def\Lvec{{\bf L}}
+\def\Mvec{{\bf M}}
+\def\Nvec{{\bf N}}
+\def\Ovec{{\bf O}}
+\def\Pvec{{\bf P}}
+\def\Qvec{{\bf Q}}
+\def\Rvec{{\bf R}}
+\def\Svec{{\bf S}}
+\def\Tvec{{\bf T}}
+\def\Uvec{{\bf U}}
+\def\Vvec{{\bf V}}
+\def\Wvec{{\bf W}}
+\def\Xvec{{\bf X}}
+\def\Yvec{{\bf Y}}
+\def\Zvec{{\bf Z}}
+
+\def\ahat{{\hat{a}}}
+\def\bhat{{\hat{b}}}
+\def\chat{{\hat{c}}}
+\def\dhat{{\hat{d}}}
+\def\ehat{{\hat{e}}}
+\def\fhat{{\hat{f}}}
+\def\ghat{{\hat{g}}}
+\def\hhat{{\hat{h}}}
+\def\ihat{{\hat{i}}}
+\def\jhat{{\hat{j}}}
+\def\khat{{\hat{k}}}
+\def\lhat{{\hat{l}}}
+\def\mhat{{\hat{m}}}
+\def\nhat{{\hat{n}}}
+\def\ohat{{\hat{o}}}
+\def\phat{{\hat{p}}}
+\def\qhat{{\hat{q}}}
+\def\rhat{{\hat{r}}}
+\def\shat{{\hat{s}}}
+\def\that{{\hat{t}}}
+\def\uhat{\hat{u}}
+\def\vhat{{\hat{v}}}
+\def\what{{\hat{w}}}
+\def\xhat{{\hat{x}}}
+\def\yhat{{\hat{y}}}
+\def\zhat{{\hat{z}}}
+
+\def\Ahat{{\hat{A}}}
+\def\Bhat{{\hat{B}}}
+\def\Chat{{\hat{C}}}
+\def\Dhat{{\hat{D}}}
+\def\Ehat{{\hat{E}}}
+\def\Fhat{{\hat{F}}}
+\def\Ghat{{\hat{G}}}
+\def\Hhat{{\hat{H}}}
+\def\Ihat{{\hat{I}}}
+\def\Jhat{{\hat{J}}}
+\def\Khat{{\hat{K}}}
+\def\Lhat{{\hat{L}}}
+\def\Mhat{{\hat{M}}}
+\def\Nhat{{\hat{N}}}
+\def\Ohat{{\hat{O}}}
+\def\Phat{{\hat{P}}}
+\def\Qhat{{\hat{Q}}}
+\def\Rhat{{\hat{R}}}
+\def\Shat{{\hat{S}}}
+\def\That{{\hat{T}}}
+\def\Uhat{{\hat{U}}}
+\def\Vhat{{\hat{V}}}
+\def\What{{\hat{W}}}
+\def\Xhat{{\hat{X}}}
+\def\Yhat{{\hat{Y}}}
+\def\Zhat{{\hat{Z}}}
+
+
+\def\Acal{{\cal A}}
+\def\Bcal{{\cal B}}
+\def\Ccal{{\cal C}}
+\def\Dcal{{\cal D}}
+\def\Ecal{{\cal E}}
+\def\Fcal{{\cal F}}
+\def\Gcal{{\cal G}}
+\def\Hcal{{\cal H}}
+\def\Ical{{\cal I}}
+\def\Jcal{{\cal J}}
+\def\Kcal{{\cal K}}
+\def\Lcal{{\cal L}}
+\def\Mcal{{\cal M}}
+\def\Ncal{{\cal N}}
+\def\Ocal{{\cal O}}
+\def\Pcal{{\cal P}}
+\def\Qcal{{\cal Q}}
+\def\Rcal{{\cal R}}
+\def\Scal{{\cal S}}
+\def\Tcal{{\cal T}}
+\def\Ucal{{\cal U}}
+\def\Vcal{{\cal V}}
+\def\Wcal{{\cal W}}
+\def\Xcal{{\cal X}}
+\def\Ycal{{\cal Y}}
+\def\Zcal{{\cal Z}}
+\def\Acal{{\cal A}}
+
+\def\atilde{{\tilde{a}}}
+\def\btilde{{\tilde{b}}}
+\def\ctilde{{\tilde{c}}}
+\def\dtilde{{\tilde{d}}}
+\def\etilde{{\tilde{e}}}
+\def\ftilde{{\tilde{f}}}
+\def\gtilde{{\tilde{g}}}
+\def\htilde{{\tilde{h}}}
+\def\itilde{{\tilde{i}}}
+\def\jtilde{{\tilde{j}}}
+\def\ktilde{{\tilde{k}}}
+\def\ltilde{{\tilde{l}}}
+\def\mtilde{{\tilde{m}}}
+\def\ntilde{{\tilde{n}}}
+\def\otilde{{\tilde{o}}}
+\def\ptilde{{\tilde{p}}}
+\def\qtilde{{\tilde{q}}}
+\def\rtilde{{\tilde{r}}}
+\def\stilde{{\tilde{s}}}
+\def\ttilde{{\tilde{t}}}
+\def\utilde{{\tilde{u}}}
+\def\vtilde{{\tilde{v}}}
+\def\wtilde{{\tilde{w}}}
+\def\xtilde{{\tilde{x}}}
+\def\ytilde{{\tilde{y}}}
+\def\ztilde{{\tilde{z}}}
+
+\def\Atilde{{\tilde{A}}}
+\def\Btilde{{\tilde{B}}}
+\def\Ctilde{{\tilde{C}}}
+\def\Dtilde{{\tilde{D}}}
+\def\Etilde{{\tilde{E}}}
+\def\Ftilde{{\tilde{F}}}
+\def\Gtilde{{\tilde{G}}}
+\def\Htilde{{\tilde{H}}}
+\def\Itilde{{\tilde{I}}}
+\def\Jtilde{{\tilde{J}}}
+\def\Ktilde{{\tilde{K}}}
+\def\Ltilde{{\tilde{L}}}
+\def\Mtilde{{\tilde{M}}}
+\def\Ntilde{{\tilde{N}}}
+\def\Otilde{{\tilde{O}}}
+\def\Ptilde{{\tilde{P}}}
+\def\Qtilde{{\tilde{Q}}}
+\def\Rtilde{{\tilde{R}}}
+\def\Stilde{{{\tilde{S}}}}
+\def\Ttilde{{\tilde{T}}}
+\def\Utilde{{\tilde{U}}}
+\def\Vtilde{{\tilde{V}}}
+\def\Wtilde{{\tilde{W}}}
+\def\Xtilde{{\tilde{X}}}
+\def\Ytilde{{\tilde{Y}}}
+\def\Ztilde{{\tilde{Z}}}
+
+\def\Svectilde{\tilde{\bf S}}
+\def\Svecvec{\vec{\bf S}}
+
+\def\uvecO{{\bf u}_0}
+\def\uvecc{{{\bf u}^C}}
+\def\uveccO{{{\bf u}^C_0}}
+\def\uvecI{{{\bf u}^I}}
+\def\uvecIO{{{\bf u}^I_0}}
+
+\def\prc{{{p}^C}}
+\def\prcO{{{p}^C_0}}
+\def\pri{{p^I}}
+\def\priO{{p^I_0}}
+
+\def\scriptC{{\cal C}}
+\def\scriptF{{\cal F}}
+\def\scriptG{{\cal G}}
+\def\scriptP{{\cal P}}
+\def\scriptS{{\cal S}}
+\def\scriptU{{\cal U}}
+\def\scriptV{{\cal V}}
+
+%\def\scriptuvec{\vec{\scriptU}}
+\def\scriptuvec{{\bf \scriptU}}
+
+\def\gammasq{\sqrt{\gamma}}
+
+\def\vbd{{\bf v}}
+\def\xbd{{\bf x}}
+\def\zbd{{\bf z}}
+\def\kbd{{\bf k}}
+
+\def\scriptf{{\cal F}}
+\def\scriptg{{\cal G}}
+
+\def\sigvecvec{\vec{\bfg{\sigma}}}
+\def\sigvec{{\bfg{\sigma}}}
+\def\sigvecbar{\bar{\bfg{\sigma}}}
+\def\tauvec{{\bfg{\tau}}}
+\def\Ivecvec{{\vec{\bf I}}}
+\def\evecvec{\bf\vec{e}}
+\def\xivec{{\bf\vec{\xi}}}
+

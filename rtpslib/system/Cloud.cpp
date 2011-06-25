@@ -60,6 +60,13 @@ namespace rtps
 
 		//printf("cloud_num = %d\n", cloud_num); exit(0);
         settings->SetSetting("Maximum Number of Cloud Particles", cloud_max_num);
+
+		#if 0
+		float4 f = float4(2.,3.,4.,5);
+		float* ff = (float*) &f;
+		printf("f = %f, %f %f, %f\n", ff[0], ff[1], ff[2], ff[3]);
+		exit(0);
+		#endif
     }
 
 	//----------------------------------------------------------------------
@@ -96,6 +103,18 @@ namespace rtps
                 cli_debug);
 	}
 	//----------------------------------------------------------------------
+    void CLOUD::cloudVelocityExecute()
+	{
+		velocity.execute(
+					cloud_num,
+                    settings->dt,  // should be time, not dt
+					cl_position_s,
+					cl_velocity_s,
+                    cloud_cg,
+                    cloud_omega);
+	}
+
+	//----------------------------------------------------------------------
     void CLOUD::cloud_hash_and_sort()
     {
         timers["hash"]->start();
@@ -110,7 +129,6 @@ namespace rtps
 
         cloud_bitonic_sort(); 
     }
-
 	//----------------------------------------------------------------------
     void CLOUD::collision(Buffer<float4>& cl_sph_pos_s, Buffer<float4>& cl_sph_vel_s, 
 	          Buffer<float4>& cl_sph_force_s, Buffer<SPHParams>& cl_sphp, int num_sph)
@@ -602,9 +620,11 @@ namespace rtps
         //bitonic = CloudBitonic<unsigned int>(common_source_dir, ps->cli );
 
         cellindices = CellIndices(common_source_dir, ps->cli, timers["ci_gpu"] );
-        permute = Permute( common_source_dir, ps->cli, timers["perm_gpu"] );
-
+        //permute = Permute( common_source_dir, ps->cli, timers["perm_gpu"] );
         cloud_permute = CloudPermute( common_source_dir, ps->cli, timers["perm_gpu"] );
+
+		// ERROR in timer GE
+		velocity = CloudVelocity( sph_source_dir, ps->cli, timers["per_gpu"] );
 
 		// CLOUD Integrator
 		// ADD Cloud timers later. 

@@ -63,9 +63,9 @@ set (rtpslib_INCLUDES
     ${rtpslib_SOURCE_DIR}/render/util
     ${rtpslib_SOURCE_DIR}/domain
     ${rtpslib_SOURCE_DIR}/opencl
+    ${rtpslib_SOURCE_DIR}/matrix_library
     #${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src
 )    
-
 
 
 #library source files (don't explicitly give file extension, inferred from source type)
@@ -109,6 +109,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/SPHSettings.cpp
     ${rtpslib_SOURCE_DIR}/system/Cloud.cpp
 
+    ${rtpslib_SOURCE_DIR}/system/sph/CloudVelocity
     ${rtpslib_SOURCE_DIR}/system/sph/CloudEuler
     ${rtpslib_SOURCE_DIR}/system/sph/Euler
     ${rtpslib_SOURCE_DIR}/system/sph/LeapFrog

@@ -1,0 +1,301 @@
+% Rename  this file          misc_mac.tex
+%----------------------------------------------------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%	Math Symbols   Math Symbols   Math Symbols   Math Symbols   
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\pmb#1{\setbox0=\hbox{$#1$}%
+	\kern-.025em\copy0\kern-\wd0
+	\kern.05em\copy0\kern-\wd0
+	\kern-.025em\raise.0433em\box0}
+\def\pmbf#1{\pmb#1}
+\def\bfg#1{\pmb#1}
+
+% BETTER VALUES FOR AUTOMATIC FIGURE PLACEMENT THAN THOSE PROVIDED BY 
+% LATEX DEFAULTS.
+
+\renewcommand{\textfloatsep}{1ex}
+\renewcommand{\floatpagefraction}{0.9}
+\renewcommand{\intextsep}{1ex}
+\renewcommand{\topfraction}{.9}
+\renewcommand{\bottomfraction}{.9}
+\renewcommand{\textfraction}{.1}
+
+% #1  position of floating figure (h|t|b|p)
+% #1  EPS postscript file
+% #2  size
+% #3  caption
+
+%usage of newfig:
+%  \newfig{file.ps}{3in}{Fig1: this is a figure}
+
+\input{epsf}
+\def\newfig#1#2#3{
+  \begin{figure}[htbp]
+  \vspace{1ex}
+  \setlength{\epsfxsize}{#2}
+  \centerline{\epsfbox{#1}}
+  \vspace{-.1in}\caption{\small #3}\break\vspace{.2in}
+  \label{#1}
+  \end{figure}
+}
+
+%usage of newfigtwo: 2 figures, vertically stacked
+% \newfig
+%	{file1.ps}
+%	{file2.ps}
+%	{width}
+%	{vertical space}
+%	{Caption}
+
+\def\newfigtwo#1#2#3#4#5{
+  \begin{figure}[htbp]
+  \vspace{1ex}
+  \setlength{\epsfxsize}{#3}
+  \centerline{\epsfbox{#1}}
+  \vspace{#4}
+  \setlength{\epsfxsize}{#3}
+  \centerline{\epsfbox{#2}}
+  \vspace{-.1in}\caption{\small #5}\break\vspace{.2in}
+  \label{#1}
+  \end{figure}
+}
+
+\def\newfigh#1#2#3#4{  % add height specification
+  \begin{figure}[htbp]
+  \vspace{1ex}
+  \setlength{\epsfxsize}{#2}
+  \setlength{\epsfysize}{#4}
+  \centerline{\epsfbox{#1}}
+  \vspace{-.1in}\caption{\small #3}\break\vspace{.2in}
+  \label{#1}
+  \end{figure}
+}
+
+\def\herefig#1#2#3{
+  \begin{figure}[h]
+  \setlength{\epsfxsize}{#2}
+  \centerline{\epsfbox{#1}}
+  \caption{\small #3}
+  \label{#1}
+  \end{figure}
+}
+
+\def\etal{{{\em et~al.\,\,}}}
+\def\note#1{\\ =====#1===== \\}
+\def\FBOX#1{\ \\ \fbox{\begin{minipage}{5in}#1\end{minipage}}\\ }
+\newcount\sectionno     \sectionno=0
+\newcount\eqnum         \eqnum=0
+\def\addeqno{\global\advance \eqnum by  1 }
+\def\subeqno{\global\advance \eqnum by -1 }
+%\def\eqn{\addeqno \eqno \hbox{(\number\sectionno.\number\eqnum)} }
+
+\def\tildetilde#1{\tilde{\tilde{#1}}}
+\def\barbar#1{\overbar{\overbar{#1}}}
+
+\def\vsp#1{\vspace{#1 ex}}
+\def\fpar{\hspace{\parindent}}
+%
+%  \pf : 2 arguments: numerator and denominator of partial derivative
+%
+\def\pf#1#2{{\frac{\partial{#1}}{\partial{#2}}}}
+\def\pfs#1#2{{\partial_{#2}{#1}}}
+\def\pftwo#1#2{{\frac{\partial^2{#1}}{\partial{#2}^2}}}
+\def\pfxx#1#2{{\frac{\partial^2{#1}}{\partial{#2}^2}}}
+%\def\pfxy#1#2{{\frac{\partial^2{#1}}{\partial{#2}\partial{#3}}}}
+\def\pfn#1#2#3{{\frac{\partial^{#1}{#2}}{\partial{#3}^{#1}}}}
+\def\df#1#2{{\frac{d{#1}}{d{#2}}}}
+\def\dfn#1#2#3{{\frac{d^{#1}{#2}}{d{#3}^{#1}}}}
+\def\Dt#1#2{\frac{D#1}{D#2}}
+\def\dt#1#2{\frac{d#1}{d#2}}
+\def\bld#1{{\bf #1}}
+\def\pfp#1#2#3{\pf{}{#3}{\left(\frac{#1}{#2}\right)}}
+
+\def\norm#1{\|#1\|}
+
+%
+% Graphic characters  (\dot already defined by TeX/LateX)
+%
+\def\dash{\rule[1.5pt]{2mm}{.3mm}\HS{.9mm}}
+\def\dott{\rule[1.5pt]{.7mm}{.3mm}\HS{.7mm}}
+\def\dashline{\dash\dash\dash}
+\def\dotline{\dott\dott\dott\dott\dott\dott}
+\def\dashdotline{\dash$\cdot$\HS{.9mm}\dash}
+\def\solidline{\rule[2pt]{7mm}{.3mm}}
+% 
+% overcircle
+%
+\def\ovcircle#1{\buildrel{\circ}\over{#1}}
+%\def\below#1#2{\buildrel{#2}\under{#1}}
+%\def\above#1#2{\buildrel{#2}\over{#1}}
+%
+%  big parenthesis and brackets
+%
+\def\bigpar#1#2{{\left(\frac{#1}{#2}\right)}}
+\def\bigbra#1#2{{\left\[\frac{#1}{#2}\right\]}}
+
+\def\Lp{\left(}
+\def\Rp{\right)}
+\def\Lb{\left[}
+\def\Rb{\right]}
+\def\Ln{\left\langle}
+\def\Rn{\right\rangle}
+\def\Ld{\left.}
+\def\Rd{\right.}
+\def\Lv{\left|}
+\def\Rv{\right|}
+\def\Lbr{\left|}
+\def\Rbr{\right|}
+\def\lng{\langle}
+\def\rng{\rangle}
+\def\Lc{\left\{}
+\def\Rc{\right\}}
+%%% %
+
+% Cannot be handled by Lyx
+%\def\[{{[}}
+%\def\]{{]}}
+
+%
+\def\eol{\nonumber \\}
+\def\eolnonb{\nonumber\\}
+\def\eolnb{\\}
+\def\nonb{\nonumber}
+\def\be{\begin{equation}}
+\def\ee{\end{equation}}
+\def\BEQNA{\begin{eqnarray}}
+\def\EEQNA{\end{eqnarray}}
+\def\eqa{&=&}
+\def\beqna{\begin{eqnarray}}
+\def\eeqna{\end{eqnarray}}
+\def\bverb{\begin{verbatim}}
+\def\everb{\end{verbatim}}
+\def\VERB#1{\bverb #1 \everb}
+\def\btbl{\begin{tabular}}
+\def\etbl{\end{tabular}}
+\def\bmini{\begin{minipage}[t]{5.5in}}
+\def\emini{\end{minipage}}
+\def\parray#1#2{\left(\begin{array}{#1}#2\end{array}\right)}
+\def\barray#1#2{\left[\begin{array}{#1}#2\end{array}\right]}
+\def\carray#1#2{\left\{\begin{array}{#1}#2\end{array}\right.}
+\def\darray#1#2{\left|\begin{array}{#1}#2\end{array}\right|}
+
+\def\BEGTABLE#1{\begin{table}[hbt]\vspace{2ex}\begin{center}\bmini\centering\btbl{#1}}
+\def\ENDTABLE#1#2{\etbl\caption[#1]{#2}\EMINI\end{center}\vspace{2ex}\end{table}}
+
+\def\bfltbl#1{\begin{table}[hbt]\vspace{2ex}\begin{center}\bmini\centering\btbl{#1}}
+\def\efltbl#1#2{\etbl\caption[#1]{#2}\emini\end{center}\vspace{2ex}\end{table}}
+\def\mcol{\multicolumn}
+%
+%  label equations with (#)
+%
+\def\reff#1{(\ref{#1})}
+%
+%  macros borrowed from viewgraph package
+%
+
+\newenvironment{LETTRS}[3]{\begin{letter}{#1}
+\input{origin}\opening{Dear #2:}\input{#3}\closing{Sincerely yours,}\end{letter}}{\clearpage}
+
+\newenvironment{VIEW}[1]{{\BC\Huge\bf #1 \EC}\LARGE\VS{.05in}}{\clearpage}
+
+\def\RM#1{\rm{#1\ }}
+\def\BV{\begin{VIEW}}
+\def\EV{\end{VIEW}}
+
+\def\NI{\noindent}
+
+\def\VS{\vspace*}
+\def\HS{\hspace*}
+\def\IT{\item}
+
+\def\BARR{\begin{array}}
+\def\EARR{\end{array}}
+
+\def\BPARR{\left(\begin{array}}
+\def\EPARR{\end{array}\right)}
+
+\def\BDET{\left|\begin{array}}
+\def\EDET{\end{array}\right|}
+
+\def\BDF{\begin{definition}}
+\def\EDF{\end{definition}}
+
+\def\BSU{\begin{block}{Summary}}
+\def\ESU{\end{block}}
+
+\def\BEX{\begin{example}}
+\def\EEX{\end{example}}
+
+\def\BTH{\begin{theorem}}
+\def\ETH{\end{theorem}}
+
+\def\BCO{\begin{corollary}}
+\def\ECO{\end{corollary}}
+
+\def\BPROOF{\begin{proof}}
+\def\EPROOF{\end{proof}}
+
+\def\BLM{\begin{lemma}}
+\def\ELM{\end{lemma}}
+
+\def\BEQ{\begin{equation}}
+\def\EEQ{\end{equation}}
+
+\def\BEQNNB{$$}
+\def\EEQNNB{$$}
+
+\def\BE{\begin{enumerate}}
+\def\EE{\end{enumerate}}
+
+\def\BD{\begin{description}}
+\def\ED{\end{description}}
+
+\def\BI{\begin{itemize}}
+\def\EI{\end{itemize}}
+
+\def\BC{\begin{center}}
+\def\EC{\end{center}}
+
+\def\BFIG{\begin{figure}}
+\def\EFIG{\end{figure}}
+
+\def\BTABB{\begin{tabbing}}
+\def\ETABB{\end{tabbing}}
+
+\def\BMINI{\begin{minipage}}
+\def\EMINI{\end{minipage}}
+
+\def\BTABLE{\begin{table}}
+\def\ETABLE{\end{table}}
+
+\def\BTABUL{\begin{tabular}}
+\def\ETABUL{\end{tabular}}
+
+\def\MCOL{\multicolumn}
+\def\UL{\underline}
+\def\ULL#1{\UL{\UL{#1}}}
+
+\def\BDOC{\begin{document}}
+\def\EDOC{\end{document}}
+
+\def\EM#1{{\em #1\/}}
+\def\FN{\footnote}
+
+% Courtesy of Ugo Piomelli
+
+\def\latexfig #1 #2 #3 #4 #5 {\ \vfill
+\hfill\hbox to 0.05in{\vbox to #3truein{
+         \special{psfile="#1" angle=270 hscale=100 
+                  hoffset=#4 voffset=#5 vscale=100} }\hfill}
+\hfill\vspace{-0.1in}        }
+
+% #1 is the .ps filename
+% #2 is not used in the present version
+% #3 is the size of the white space left above the caption (in inches)
+% #4 is the horizontal offset from some unknown reference point.
+%    It is in 1/72 of an inch and is positive to the right.
+% #5 is the vertical offset from some unknown reference point.
+%    It is in 1/72 of an inch and is positive upwards.
+
