@@ -115,7 +115,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/sph/Lifetime
     #${rtpslib_SOURCE_DIR}/system/sph/Prep
     ${rtpslib_SOURCE_DIR}/system/sph/Sort
-    ${rtpslib_SOURCE_DIR}/system/sph/CloudSort
+    #${rtpslib_SOURCE_DIR}/system/sph/CloudSort
     ${rtpslib_SOURCE_DIR}/system/sph/Density
     ${rtpslib_SOURCE_DIR}/system/sph/Force
     ${rtpslib_SOURCE_DIR}/system/sph/Collision_wall

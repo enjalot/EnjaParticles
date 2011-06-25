@@ -53,7 +53,8 @@ namespace rtps
     class RTPS_EXPORT CLOUD 
     {
     public:
-        CLOUD(RTPS *ps, SPHParams& sphp, int nb_in_cloud=0);
+        //CLOUD(RTPS *ps, SPHParams& sphp, int nb_in_cloud=0);
+    	CLOUD(RTPS *psfr, SPHParams& sphp, Buffer<GridParams>* cl_GridParams, GridParams* grid_params, int max_nb_in_cloud);
 
         ~CLOUD();
 
@@ -93,7 +94,7 @@ namespace rtps
         RTPSettings* settings;
 
 		CLOUDParams cloudp;
-        GridParams grid_params;
+        GridParams* grid_params;
         GridParams grid_params_scaled;
         float spacing; //Particle rest distance in world coordinates
 
@@ -200,8 +201,9 @@ public:
 		void setSPHP(Buffer<SPHParams>* cl_sphp) {
 			this->cl_sphp = cl_sphp;
 		}
-		void setGridParams(Buffer<GridParams>* cl_GridParams) {
+		void setGridParams(Buffer<GridParams>* cl_GridParams, GridParams* grid_params) {
 			this->cl_GridParams = cl_GridParams;
+			this->grid_params = grid_params;
 		}
 
 		#if 0

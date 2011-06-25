@@ -32,11 +32,13 @@ namespace rtps
 			pos[i].print(msg);
 		}
 	}
-
 	//----------------------------------------------------------------------
-    CLOUD::CLOUD(RTPS *psfr, SPHParams& sphp, int max_nb_in_cloud) 
+    CLOUD::CLOUD(RTPS *psfr, SPHParams& sphp, Buffer<GridParams>* cl_GridParams, GridParams* grid_params, int max_nb_in_cloud) 
     {
 		//this->sphp = &sphp; // ADD LATER?
+
+		this->cl_GridParams = cl_GridParams;
+		this->grid_params   = grid_params;
 
         //store the particle system framework
         ps = psfr;
@@ -116,7 +118,7 @@ namespace rtps
 		center = float4(2.5, 2.5, 0., 0.0);
 		//center = float4(5.0, 2.5, 2.5, 0.0);
 		//addHollowBall(2000, center, radius_in, radius_out, scaled, cloud_normals);
-		int nn = 4000;
+		//int nn = 4000;
     	//addNewxyPlane(nn, scaled, cloud_normals); 
 		readPointCloud(cloud_positions, cloud_normals, cloud_faces, cloud_faces_normals);
 
@@ -133,7 +135,6 @@ namespace rtps
 
 		cloud_positions.resize(cloud_positions.capacity());
 		cloud_normals.resize(cloud_normals.capacity());
-        //exit(0);
 		// only needs to be done once if cloud not moving
 		// ideally, cloud should be stored in vbos. 
         cl_cloud_position_u.copyToHost(cloud_positions);
@@ -216,7 +217,7 @@ namespace rtps
                 cl_cloud_cell_indices_end,
                 //cl_sphp,
                 &cl_GridParams,
-                grid_params.nb_cells,
+                grid_params->nb_cells,
                 clf_debug,
                 cli_debug);
             timers["cellindices"]->stop();
@@ -290,16 +291,15 @@ namespace rtps
                 cl_cloud_cell_indices_end,
                 //cl_sphp,
                 *cl_GridParams,
-                grid_params.nb_cells,
+                grid_params->nb_cells,
                 clf_debug,
                 cli_debug);
 	}
 	//----------------------------------------------------------------------
     void CLOUD::cloud_hash_and_sort()
     {
-        //printf("cloud hash and sort\n"); exit(0);
         timers["hash"]->start();
-        hash.execute(   cloud_num,
+        hash.execute( cloud_num,
                 cl_cloud_position_u,
                 cl_cloud_sort_hashes,
                 cl_cloud_sort_indices,
@@ -308,11 +308,7 @@ namespace rtps
                 cli_debug);
         timers["hash"]->stop();
 
-        //printf("bitonic_sort\n");
-        //defined in Sort.cpp
-        timers["bitonic"]->start();
-        cloud_bitonic_sort(); // DEFINED WHERE?
-        timers["bitonic"]->stop();
+        cloud_bitonic_sort(); 
     }
 
 	//----------------------------------------------------------------------
@@ -446,8 +442,6 @@ namespace rtps
 	//----------------------------------------------------------------------
     void CLOUD::prepareSorted()
     {
-//#include "sph/cl_src/cl_macros.h"
-
 		// BEGIN CLOUD
 		cloud_positions.resize(cloud_max_num); // replace by cloud_max_num
 		cloud_normals.resize(cloud_max_num);
@@ -459,13 +453,17 @@ namespace rtps
         //for reading back different values from the kernel
         //std::vector<float4> error_check(max_num);
         
-        float4 pmax = grid_params.grid_max + grid_params.grid_size;
+		//grid_params->grid_max.print("xxx"); exit(0);
+        float4 pmax = grid_params->grid_max + grid_params->grid_size;
 
         //std::fill(error_check.begin(), error_check.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
+
+		printf("cloud prepare\n");
 
 		//CLOUD BUFFERS
 		if (cloud_max_num > 0) {
 			printf("cloud_max_num= %d\n", cloud_max_num);
+			printf("cloud_positions size: %d\n", cloud_positions.size());
         	cl_cloud_position_u = Buffer<float4>(ps->cli, cloud_positions);
         	cl_cloud_position_s = Buffer<float4>(ps->cli, cloud_positions);
         	cl_cloud_normal_u   = Buffer<float4>(ps->cli, cloud_normals);
@@ -473,6 +471,8 @@ namespace rtps
         	cl_cloud_velocity_u = Buffer<float4>(ps->cli, cloud_velocity);
         	cl_cloud_velocity_s = Buffer<float4>(ps->cli, cloud_velocity);
 		}
+
+		//cl_cloud_position_u.copyToHost(cloud_positions); printf("xx\n");exit(1);
 
         //TODO make a helper constructor for buffer to make a cl_mem from a struct
         //Setup Grid Parameter structs
@@ -502,25 +502,29 @@ namespace rtps
         // Size is the grid size + 1, the last index is used to signify how many particles are within bounds
         // That is a problem since the number of
         // occupied cells could be much less than the number of grid elements.
-        printf("%d\n", grid_params.nb_cells);
-        std::vector<unsigned int> gcells(grid_params.nb_cells+1);
+        printf("grid_params->nb_cells: %d\n", grid_params->nb_cells);
+        std::vector<unsigned int> gcells(grid_params->nb_cells+1);
         int minus = 0xffffffff;
         std::fill(gcells.begin(), gcells.end(), 666);
 
+		//printf("gcells size: %d\n", gcells.size()); exit(0);
+
 		if (cloud_max_num > 0) {
 			//keys.resize(cloud_max_num);
-        	cl_cloud_cell_indices_start = Buffer<unsigned int>(ps->cli, gcells);
-        	cl_cloud_cell_indices_end   = Buffer<unsigned int>(ps->cli, gcells);
-        	cl_cloud_sort_indices       = Buffer<unsigned int>(ps->cli, cloud_keys);
-        	cl_cloud_sort_hashes        = Buffer<unsigned int>(ps->cli, cloud_keys);
+        	cl_cloud_cell_indices_start  = Buffer<unsigned int>(ps->cli, gcells);
+        	cl_cloud_cell_indices_end    = Buffer<unsigned int>(ps->cli, gcells);
+        	cl_cloud_sort_indices        = Buffer<unsigned int>(ps->cli, cloud_keys);
+        	cl_cloud_sort_hashes         = Buffer<unsigned int>(ps->cli, cloud_keys);
         	cl_cloud_sort_output_hashes  = Buffer<unsigned int>(ps->cli, cloud_keys);
         	cl_cloud_sort_output_indices = Buffer<unsigned int>(ps->cli, cloud_keys);
 		}
 
 		//printf("keys.size= %d\n", keys.size()); // 
-		printf("cloud_keys.size= %d\n", cloud_keys.size()); // 4k
+		printf("cloud_keys.size= %d\n", cloud_keys.size()); // 8192
 		printf("gcells.size= %d\n", gcells.size()); // 1729
+		//exit(0);
      }
+	 //----------------------------------------------------------------------
 
     int CLOUD::addBox(int nn, float4 min, float4 max, bool scaled, float4 color)
     {
@@ -588,9 +592,9 @@ namespace rtps
 	}
 	//----------------------------------------------------------------------
 	void CLOUD::readPointCloud(std::vector<float4>& cloud_positions, 
-							 std::vector<float4>& cloud_normals,
-							 std::vector<int4>& cloud_faces,
-							 std::vector<int4>& cloud_faces_normals)
+							   std::vector<float4>& cloud_normals,
+							   std::vector<int4>&   cloud_faces,
+							   std::vector<int4>&   cloud_faces_normals)
 	{
 		// mac
 		std::string base = "/Users/erlebach/Documents/src/blender-particles/EnjaParticles/data/";
@@ -749,6 +753,90 @@ namespace rtps
 		// simulation coord = (world coord) * simulation_scale
         pushCloudParticles(sphere,normals);
 //exit(0);
+    }
+	//----------------------------------------------------------------------
+    void CLOUD::cloud_bitonic_sort()    // GE
+    {
+        timers["bitonic"]->start();
+        try
+        {
+            int dir = 1;        // dir: direction
+            //int batch = num;
+
+			printf("before cloud_bitonic_sort, cloud_max_num= %d\n", cloud_max_num);
+            int arrayLength = nlpo2(cloud_num);
+            //printf("num: %d\n", num);
+            printf("nlpo2(num): %d\n", arrayLength);
+            //int arrayLength = max_num;
+            //int batch = max_num / arrayLength;
+            int batch = 1;
+
+
+            //printf("about to try sorting\n");
+            bitonic.Sort(batch, 
+                        arrayLength,  //GE?? ???
+                        dir,
+                        &cl_cloud_sort_output_hashes,
+                        &cl_cloud_sort_output_indices,
+                        &cl_cloud_sort_hashes,
+                        &cl_cloud_sort_indices );
+
+        }
+        catch (cl::Error er)
+        {
+            printf("ERROR(bitonic sort): %s(%s)\n", er.what(), oclErrorString(er.err()));
+            exit(0);
+        }
+
+		printf("after cloud bitonic sort\n");
+
+        ps->cli->queue.finish();
+
+        /*
+        int nbc = 10;
+        std::vector<int> sh = cl_sort_hashes.copyToHost(nbc);
+        std::vector<int> eci = cl_cell_indices_end.copyToHost(nbc);
+    
+        for(int i = 0; i < nbc; i++)
+        {
+            printf("before[%d] %d eci: %d\n; ", i, sh[i], eci[i]);
+        }
+        printf("\n");
+        */
+
+
+		// NOT SURE HOW THIS WORKS!! GE
+        cl_cloud_sort_hashes.copyFromBuffer(cl_cloud_sort_output_hashes, 0, 0, cloud_num);
+        cl_cloud_sort_indices.copyFromBuffer(cl_cloud_sort_output_indices, 0, 0, cloud_num);
+
+        /*
+        scopy(num, cl_sort_output_hashes.getDevicePtr(), 
+              cl_sort_hashes.getDevicePtr());
+        scopy(num, cl_sort_output_indices.getDevicePtr(), 
+              cl_sort_indices.getDevicePtr());
+        */
+
+        ps->cli->queue.finish();
+#if 0
+    
+        printf("********* Bitonic Sort Diagnostics **************\n");
+        int nbc = 20;
+        //sh = cl_sort_hashes.copyToHost(nbc);
+        //eci = cl_cell_indices_end.copyToHost(nbc);
+        std::vector<unsigned int> sh = cl_cloud_sort_hashes.copyToHost(nbc);
+        std::vector<unsigned int> si = cl_cloud_sort_indices.copyToHost(nbc);
+        //std::vector<int> eci = cl_cell_indices_end.copyToHost(nbc);
+
+    
+        for(int i = 0; i < nbc; i++)
+        {
+            //printf("after[%d] %d eci: %d\n; ", i, sh[i], eci[i]);
+            printf("sh[%d] %d si: %d\n ", i, sh[i], si[i]);
+        }
+
+#endif
+
+        timers["bitonic"]->stop();
     }
 	//----------------------------------------------------------------------
 

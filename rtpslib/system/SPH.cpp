@@ -105,15 +105,16 @@ namespace rtps
 		avg_cloud_velocity = float4(3., 0., 0., 1.);
 
 
-		// CLOUD INITIALIZTION
+		// CLOUD INITIALIZATION
 		max_nb_in_cloud = 8192;  // 1 << 13
-		cloud = new CLOUD(ps, sphp, max_nb_in_cloud);
+		cloud = new CLOUD(ps, sphp, &cl_GridParams, &grid_params, max_nb_in_cloud);
 		int cloud_num = cloud->getCloudNum(); 
 		int cloud_max_num = cloud->getMaxCloudNum(); 
 
 		// I can define cl_sphp later since I am using pointers
 		cloud->setSPHP(&cl_sphp);
-		cloud->setGridParams(&cl_GridParams);
+		//printf("grid_params nb_cells= %d\n", grid_params.nb_cells); exit(1);
+		//cloud->setGridParams(&cl_GridParams, &grid_params);
 
 		printf("cloud_num = %d\n", cloud_num);
 
@@ -203,6 +204,7 @@ namespace rtps
 
 		cloud_positions.resize(cloud_positions.capacity());
 		cloud_normals.resize(cloud_normals.capacity());
+
         //exit(0);
 		// only needs to be done once if cloud not moving
 		// ideally, cloud should be stored in vbos. 
@@ -322,18 +324,8 @@ namespace rtps
             hash_and_sort();
 
 			// only for clouds (if cloud_num > 0)
-#if CLOUD_COLLISION
-			if (cloud_num > 0) {
-				//printf("BEFORE CLOUD_HASH_AND_SORT\n");
-				//printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
-				//printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
-            	cloud_hash_and_sort();
-				//printf("AFTER CLOUD_HASH_AND_SORT\n");
-				//printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
-				//printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
-			}
-#endif
 
+			//------------------
             //printf("before cellindices, num= %d\n", num);
             timers["cellindices"]->start();
             int nc = cellindices.execute(   num,
@@ -351,29 +343,8 @@ namespace rtps
 			printf("num= %d\n", num);
 			//if (num > 0) exit(1); //GE
 
-			// I should be able to overlap with fluid sorting or fluid calculation
-		#if CLOUD_COLLISION
-			if (num > 0) { // SHOULD NOT BE NEEDED
-			// SORT CLOUD
-            //printf("before cloud cellindices, num= %d, cloud_num= %d\n", num, cloud_num);
-            timers["cellindices"]->start();
-
-            int cloud_nc = cellindices.execute(cloud_num,
-                cl_cloud_sort_hashes,
-                cl_cloud_sort_indices,
-                cl_cloud_cell_indices_start,
-                cl_cloud_cell_indices_end,
-                //cl_sphp,
-                cl_GridParams,
-                grid_params.nb_cells,
-                clf_debug,
-                cli_debug);
-            timers["cellindices"]->stop();
-			//printf("(deleted cloud particles?) cloud_nc= %d\n", cloud_nc);
-			//exit(1);
-			}
-		#endif
        
+			//-----------------
             //printf("*** enter fluid permute, num= %d\n", num);
             timers["permute"]->start();
             permute.execute(   num,
@@ -396,6 +367,7 @@ namespace rtps
  
 			// NUMBER OF CLOUD PARTICLES IS CONSTANT THROUGHOUT THE SIMULATION
 
+			//---------------------
             printf("** num %d, nc %d\n", num, nc);
             if (nc <= num && nc >= 0)
             {
@@ -433,39 +405,8 @@ namespace rtps
                 //continue; 
             }
 
-		#if CLOUD_COLLISION
-			if (cloud_num > 0) {
-            //printf("permute\n");
-            timers["cloud_permute"]->start();
 
-			//printf("BEFORE CLOUD_PERMUTE\n");
-			//printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
-			//printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
-
-			#if 1
-            cloud_permute.execute(
-			    cloud_num,
-                cl_cloud_position_u,
-                cl_cloud_position_s,
-                cl_cloud_normal_u, 
-                cl_cloud_normal_s,
-                cl_cloud_sort_indices,
-                cl_GridParams,
-                clf_debug,
-                cli_debug);
-			#endif
-
-			//printf("AFTER CLOUD_PERMUTE\n");
-			//printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
-			//printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
-			cl_cloud_position_s.copyToHost(cloud_positions);
-
-            timers["cloud_permute"]->stop();
-			//printf("exit cloud_permite\n"); exit(1);
-		    }
-		#endif
-
-
+			//-------------------------------------
             //if(num >0) printf("density\n");
             timers["density"]->start();
             density.execute(   num,
@@ -480,6 +421,7 @@ namespace rtps
                 cli_debug);
             timers["density"]->stop();
             
+			//-------------------------------------
             //if(num >0) printf("force\n");
             timers["force"]->start();
             force.execute(   num,
@@ -502,45 +444,27 @@ namespace rtps
 
 			// CLOUD UPDATE
 
-			#if 0
+			#if 1
             cloud->cloud_hash_and_sort();
+			printf("after cloud hash and sort\n");
+			//collision
+			exit(0);
             cloud->cellindicesExecute();
             cloud->permuteExecute();
-			//collision
+			#endif
 			cloud->collision(cl_position_s, cl_velocity_s, cl_force_s, cl_sphp, num);
 			cloud->integrate();
+			#if 0
 			#endif
 
 
             integrate(); // includes boundary force
-
-            /*
-            lifetime.execute( num,
-                              settings->GetSettingAs<float>("lt_increment"),
-                              cl_position_u,
-                              cl_color_u,
-                              cl_color_s,
-                              cl_sort_indices,
-                              clf_debug,
-                              cli_debug
-                              );
-            */
-
-            //
-            //Andrew's rendering emporium
-            //neighborSearch(4);
         }
 
         cl_position_u.release();
-        //cl_cloud_position_u.release();
         cl_color_u.release();
 
-		//printf("*** END OF GPU UPDATE ***\n");
-		//printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // OK
-		//printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
 		cl_cloud_position_s.copyToHost(cloud_positions);
-
-		//exit(0);
 
         timers["update"]->stop();
     }
@@ -567,29 +491,6 @@ namespace rtps
         bitonic_sort();
         timers["bitonic"]->stop();
 
-    }
-
-    void SPH::cloud_hash_and_sort()
-    {
-		int cloud_num = cloud->getCloudNum();
-        //printf("cloud hash and sort\n"); exit(0);
-        timers["hash"]->start();
-        hash.execute(   cloud_num,
-                //cl_vars_unsorted,
-                cl_cloud_position_u,
-                cl_cloud_sort_hashes,
-                cl_cloud_sort_indices,
-                //cl_sphp,
-                cl_GridParams,
-                clf_debug,
-                cli_debug);
-        timers["hash"]->stop();
-
-        //printf("bitonic_sort\n");
-        //defined in Sort.cpp
-        timers["bitonic"]->start();
-        cloud_bitonic_sort(); // DEFINED WHERE?
-        timers["bitonic"]->stop();
     }
 
 	//----------------------------------------------------------------------
@@ -708,39 +609,6 @@ namespace rtps
 		printf("settings->dt= %f\n", settings->dt);
 
 		// CLOUD INTEGRATION
-		#if 1
-		//printf("*** BEFORE CLOUD_EULER ***\n");
-		//printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
-		//printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // WRONG
-
-		// start the arm moving after x iterations
-		if (count > 10) {
-
-			// How to prevent the cloud from advecting INTO THE FLUID? 
-			//printf("cloud euler, cloud_num= %d\n", cloud_num);
-			// returns unsorted positions
-            cloud_euler.execute(cloud_num,
-                settings->dt,
-                cl_cloud_position_u,
-                cl_cloud_position_s,
-                cl_cloud_normal_u,
-                cl_cloud_normal_s,
-                cl_cloud_velocity_u,
-                cl_cloud_velocity_s,
-                cl_cloud_sort_indices,
-                cl_sphp,
-                //debug
-                clf_debug,
-                cli_debug);
-		}
-		count++;
-
-			//printf("*** AFTER CLOUD_EULER ***\n");
-			//printDevArray(cl_cloud_position_s, "pos_s", cloud_num, 3); // WRONG
-			//printDevArray(cl_cloud_position_u, "pos_u", cloud_num, 3); // WRONG
-		#endif
-
-		//exit(0);
 
 #if 0
         if (num > 0)
