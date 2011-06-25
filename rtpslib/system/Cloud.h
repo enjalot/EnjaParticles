@@ -182,6 +182,9 @@ namespace rtps
 		int nb_in_cloud; // nb of points in cloud
 
 		void printDevArray(Buffer<float4>& cl_array, char* msg, int nb_el, int nb_print);
+		void printDevArray(Buffer<float>& cl_array, char* msg, int nb_el, int nb_print);
+		void printDevArray(Buffer<int4>& cl_array, char* msg, int nb_el, int nb_print);
+		void printDevArray(Buffer<int>& cl_array, char* msg, int nb_el, int nb_print);
 
 public:
         void integrate();

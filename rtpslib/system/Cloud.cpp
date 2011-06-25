@@ -22,6 +22,38 @@ namespace rtps
 {
     //using namespace sph;
 
+	//----------------------------------------------------------------------
+	void CLOUD::printDevArray(Buffer<int4>& cl_array, char* msg, int nb_el, int nb_print)
+	{
+		std::vector<int4> pos(nb_el);
+		cl_array.copyToHost(pos);
+		printf("*** %s ***\n", msg);
+		for (int i=0; i < nb_print; i++) {
+			printf("i= %d: ", i);
+			pos[i].print(msg);
+		}
+	}
+	//----------------------------------------------------------------------
+	void CLOUD::printDevArray(Buffer<int>& cl_array, char* msg, int nb_el, int nb_print)
+	{
+		std::vector<int> pos(nb_el);
+		cl_array.copyToHost(pos);
+		printf("*** %s ***\n", msg);
+		for (int i=0; i < nb_print; i++) {
+			printf("%s[%d]: %d ", msg, i, pos[i]);
+		}
+	}
+	//----------------------------------------------------------------------
+	void CLOUD::printDevArray(Buffer<float>& cl_array, char* msg, int nb_el, int nb_print)
+	{
+		std::vector<float> pos(nb_el);
+		cl_array.copyToHost(pos);
+		printf("*** %s ***\n", msg);
+		for (int i=0; i < nb_print; i++) {
+			printf("%s[%d]: %f ", msg, i, pos[i]);
+		}
+	}
+	//----------------------------------------------------------------------
 	void CLOUD::printDevArray(Buffer<float4>& cl_array, char* msg, int nb_el, int nb_print)
 	{
 		std::vector<float4> pos(nb_el);
@@ -761,14 +793,8 @@ namespace rtps
         try
         {
             int dir = 1;        // dir: direction
-            //int batch = num;
 
-			printf("before cloud_bitonic_sort, cloud_max_num= %d\n", cloud_max_num);
             int arrayLength = nlpo2(cloud_num);
-            //printf("num: %d\n", num);
-            printf("nlpo2(num): %d\n", arrayLength);
-            //int arrayLength = max_num;
-            //int batch = max_num / arrayLength;
             int batch = 1;
 
 
@@ -803,7 +829,6 @@ namespace rtps
         }
         printf("\n");
         */
-
 
 		// NOT SURE HOW THIS WORKS!! GE
         cl_cloud_sort_hashes.copyFromBuffer(cl_cloud_sort_output_hashes, 0, 0, cloud_num);
