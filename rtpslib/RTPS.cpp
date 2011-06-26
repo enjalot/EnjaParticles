@@ -118,5 +118,15 @@ printf("created system in RTPS\n");
     {
             system->printTimers();
     }
+
+	void RTPS::setCloudMovement(bool mvt)
+	{
+		cloud_movement = mvt;
+		printf("rtps::setCloudMovement: %d\n", mvt);
+	}
+	bool RTPS::getCloudMovement()
+	{
+		return cloud_movement;
+	}
 };
 

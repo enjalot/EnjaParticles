@@ -71,9 +71,12 @@ namespace rtps
         void render();
 
         void printTimers();
+		void setCloudMovement(bool mvt);
+		bool getCloudMovement();
 
     private:
         bool cl_managed;
+		bool cloud_movement;  // move or stop cloud 'S'
         
     };
 }

@@ -248,6 +248,7 @@ namespace rtps
 		CLOUD* cloud;
 
 		Utils u;
+		bool cloud_movement;
 
 		int nb_in_cloud; // nb of points in cloud
 

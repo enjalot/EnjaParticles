@@ -60,7 +60,8 @@ namespace rtps
 
 		addCloud();
 
-		cloud_omega = float4(10.,10.,100.,0.);
+		float scale = 30.;
+		cloud_omega = float4(1.,1.,10.,0.);
 		cloud_cg    = float4(1.5, 2.5, 2.5, 0.);
 		//cloud_cg = cloud_cg * sphp->simulation_scale;
 
@@ -272,8 +273,6 @@ namespace rtps
 
         //std::fill(error_check.begin(), error_check.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
 
-		printf("cloud prepare\n");
-
 		//CLOUD BUFFERS
 		if (cloud_max_num > 0) {
         	cl_position_u = Buffer<float4>(ps->cli, cloud_positions);
@@ -395,7 +394,7 @@ namespace rtps
 
 		// rescale point clouds
 		// domain center is x=y=z=2.5
-		float4 center(2.5, 2.5, 1.50, 1.); // center of domain (shifted in z)
+		float4 center(2.5, 2.5, 0.50, 1.); // center of domain (shifted in z)
 		// compute bounding box
 		float xmin = 1.e10, ymin= 1.e10, zmin=1.e10;
 		float xmax = -1.e10, ymax= -1.e10, zmax= -1.e10;
@@ -606,7 +605,9 @@ namespace rtps
 	{
 		// Ideally, change every time step, and update all points in 
 		// the cloud on the GPU (in which routine?)
-		avg_velocity = float4(3., 0., 0., 1.);
+		//avg_velocity = float4(3., 0., 0., 1.);
+		// not currently used (conflict with rotational motion)
+		avg_velocity = float4(0., 0., 0., 1.);
 	}
 	//----------------------------------------------------------------------
 	void CLOUD::setupStages()

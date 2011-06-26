@@ -92,6 +92,8 @@ namespace rtps
         float w_align;
         float w_coh;
 
+		// 
+
         bool has_changed() { return changed; };
         void updated() { changed = false; }; //for now we are assuming only one consumer (one system using the settings)
 

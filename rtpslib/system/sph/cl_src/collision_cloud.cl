@@ -44,10 +44,14 @@ void collision_point(PointData* pt,
     float friction_kinetic = 0.0f;
     float friction_static_limit = 0.0f;
 
-	// dd: distance between p and pc
-    float4 dist = p_fluid - p_cloud;  // computed before
-	dist.w = 0;
-	float dist1 = sqrt(dot(dist, dist));
+	// dist: distance between p and the boundary (pc) (take normal into account)
+	n_cloud.w = 0.;
+    float dist2 = dot(p_fluid - p_cloud, n_cloud);  // computed before
+	float dist1 = sqrt(dist2*dist2);
+
+	//float4 dist = p_fluid - p_cloud;
+	//float dist1 = sqrt(dot(dist, dist));
+
     float diff = sphp->boundary_distance - dist1;
 
 	 // the boundary surface normal nc is pointing into the fluid 
@@ -262,10 +266,12 @@ __kernel void collision_cloud(
 
 	float ff = length(pt.force);
 
+	#if 1
 	if (ff > 1.e-4) {
-    	force[index] = pt.force;
-    	//force[index] += pt.force;
+    	//force[index] = pt.force;
+    	force[index] += pt.force;
 	}
+	#endif
 
 	// original
     //force[index] += pt.force;

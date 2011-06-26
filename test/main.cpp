@@ -61,16 +61,17 @@ float translate_x = -2.00f;
 float translate_y = -2.70f;//300.f;
 float translate_z = 3.50f;
 
-float arm_translate_x = 0.;
-float arm_translate_y = 0.;
-float arm_translate_z = 0.;
-float arm_velocity_x = 0.;
-float arm_velocity_y = 0.;
-float arm_velocity_z = 0.;
+float cloud_translate_x = 0.;
+float cloud_translate_y = 0.;
+float cloud_translate_z = 0.;
+float cloud_velocity_x = 0.;
+float cloud_velocity_y = 0.;
+float cloud_velocity_z = 0.;
 
 // track whether shift-key is down
 bool shift_down = false;
 // if shift is down, left mouse tracks arm
+bool cloud_movement = false;
 
 
 // mouse controls
@@ -416,29 +417,33 @@ void appKeyboard(unsigned char key, int x, int y)
             break;
 
         case 'W':
-            arm_translate_z -= 0.1;
-            arm_velocity_z  += 0.1;
+            cloud_translate_z -= 0.1;
+            cloud_velocity_z  += 0.1;
             break;
         case 'A':
 			// move hand at constant velocity in x
-            arm_translate_x += 0.1;
-            arm_velocity_x  += 0.1;
+            cloud_translate_x += 0.1;
+            cloud_velocity_x  += 0.1;
             break;
         case 'S':
-            arm_translate_z += 0.1;
-            arm_velocity_z  += 0.1;
+			// turn arm rotation on and off
+			cloud_movement = cloud_movement ? false : true;
+			printf("cloud_movement = %d\n", cloud_movement);
+			ps->setCloudMovement(cloud_movement);
+            //cloud_translate_z += 0.1;
+            //cloud_velocity_z  += 0.1;
             break;
         case 'D':
-            arm_translate_x -= 0.1;
-            arm_velocity_x  -= 0.1;
+            cloud_translate_x -= 0.1;
+            cloud_velocity_x  -= 0.1;
             break;
         case 'Z':
-            arm_translate_y += 0.1;
-            arm_velocity_y  += 0.1;
+            cloud_translate_y += 0.1;
+            cloud_velocity_y  += 0.1;
             break;
         case 'X':
-            arm_translate_y -= 0.1;
-            arm_velocity_y  -= 0.1;
+            cloud_translate_y -= 0.1;
+            cloud_velocity_y  -= 0.1;
             break;
 
         case 'z':

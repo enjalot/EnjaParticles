@@ -34,6 +34,8 @@ namespace rtps
         num = 0;
         nb_var = 10;
 
+		cloud_movement = false;
+
 		// I should be able to not specify this, but GPU restrictions ...
 
         resource_path = settings->GetSettingAs<string>("rtps_path");
@@ -955,15 +957,23 @@ namespace rtps
 	//----------------------------------------------------------------------
 	void SPH::cloudUpdate()
 	{
-            cloud->cloud_hash_and_sort();
-            cloud->cellindicesExecute();
-            cloud->permuteExecute();
-			if (num > 0) {
-				cloud->collision(cl_position_s, cl_velocity_s, cl_force_s, cl_sphp, num);
+
+		printf("num= %d\n", num);
+		if (num == 0) return;
+
+		cloud->cloud_hash_and_sort();
+		cloud->cellindicesExecute();
+		cloud->permuteExecute();
+
+
+		printf("**** movement: %d\n", ps->getCloudMovement());
+		if (ps->getCloudMovement()) {
+			cloud->cloudVelocityExecute(); // before collision?
+		}
+
+		cloud->collision(cl_position_s, cl_velocity_s, cl_force_s, cl_sphp, num);
 ;
-			}
-    		cloud->cloudVelocityExecute(); // before collision?
-			cloud->integrate();
+		cloud->integrate();
 	}
 	//----------------------------------------------------------------------
 	void SPH::cloudCleanup()

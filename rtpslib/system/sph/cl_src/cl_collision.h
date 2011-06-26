@@ -8,7 +8,8 @@ float4 calculateRepulsionForce(float4 normal, float4 vel, float boundary_stiffne
 {
     vel.w = 0.0f;
 	//vel = (float4)(0.,0.,0.,0.);
-    float4 repulsion_force = (boundary_stiffness * distance - boundary_dampening * dot(normal, vel))*normal;
+//ORIG    float4 repulsion_force = (boundary_stiffness * distance - boundary_dampening * dot(normal, vel))*normal;
+	float4 repulsion_force = (boundary_stiffness * distance - boundary_dampening * dot(normal, vel))*normal;
     repulsion_force.w = 0.0f;
     return repulsion_force;
 }
