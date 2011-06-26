@@ -164,7 +164,6 @@ namespace rtps
 	{
         glPointSize(0.1f);
 		int sz = cloud_positions->size();
-		printf("nb points in cloud: %d\n", cloud_num);
 #if 1
 		glBegin(GL_POINTS);
 			glColor3f(.5, .5, .5);
@@ -179,7 +178,7 @@ namespace rtps
 		//exit(0);
 #endif
 
-#if 0
+#if 1
 // Something wrong with the faces when the arm is moving
 
 		int nb_faces = cloud_faces->size();

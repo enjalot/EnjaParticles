@@ -60,8 +60,8 @@ namespace rtps
 
 		addCloud();
 
-		cloud_omega = float4(0.,0.,100.,0.);
-		cloud_cg    = float4(2.5, 2.5, 2.5, 0.);
+		cloud_omega = float4(10.,10.,100.,0.);
+		cloud_cg    = float4(1.5, 2.5, 2.5, 0.);
 		//cloud_cg = cloud_cg * sphp->simulation_scale;
 
 		//printf("cloud_num = %d\n", cloud_num); exit(0);
@@ -111,11 +111,9 @@ namespace rtps
 	//----------------------------------------------------------------------
     void CLOUD::cloudVelocityExecute()
 	{
-		printf("**** BEFORE velocity execute *****\n");
-		u.printDevArray(cl_position_s, "pos_s", 10, 10);
-		u.printDevArray(cl_velocity_s, "vel_s", 10, 10);
-
-		cloud_cg.print("**cloud_cg**");
+		//printf("**** BEFORE velocity execute *****\n");
+		//u.printDevArray(cl_position_s, "pos_s", 10, 10);
+		//u.printDevArray(cl_velocity_s, "vel_s", 10, 10);
 
 		velocity.execute(
 					cloud_num,
@@ -125,9 +123,9 @@ namespace rtps
                     cloud_cg,
                     cloud_omega);
 
-		printf("**** AFTER velocity execute *****\n");
+		//printf("**** AFTER velocity execute *****\n");
 		//u.printDevArray(cl_position_s, "pos_s", 10, 10);
-		u.printDevArray(cl_velocity_s, "vel_s", 10, 10);
+		//u.printDevArray(cl_velocity_s, "vel_s", 10, 10);
 	}
 
 	//----------------------------------------------------------------------
@@ -151,7 +149,6 @@ namespace rtps
     {
 		// NEED TIMER FOR POINT CLOUD COLLISIONS (GE)
 
-		printf("*** cloud collide\n");
 		collision_cloud.execute(num_sph, cloud_num, 
 			cl_sph_pos_s, 
 			cl_sph_vel_s,  

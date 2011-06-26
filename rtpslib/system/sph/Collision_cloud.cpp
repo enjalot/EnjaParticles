@@ -54,8 +54,6 @@ namespace rtps
             Buffer<float4>& clf_debug,
             Buffer<int4>& cli_debug)
     {
-		printf("enter cloud COLLISION\n"); 
-
         int iarg = 0;
 		//printf("num_pts_cloud= %d\n", num_pts_cloud);
         k_collision_cloud.setArg(iarg++, num_pts_cloud);
@@ -88,7 +86,6 @@ return;
         //if(gputime > 0)
             //timer->set(gputime);
 
-		printf("exit cloud COLLISION\n"); 
 		//exit(0);
     }
 

@@ -230,7 +230,6 @@ namespace rtps
                 cli_debug);
             timers["cellindices"]->stop();
 
-			printf("num= %d\n", num);
 			//if (num > 0) exit(1); //GE
 
        
@@ -258,7 +257,6 @@ namespace rtps
 			// NUMBER OF CLOUD PARTICLES IS CONSTANT THROUGHOUT THE SIMULATION
 
 			//---------------------
-            printf("** num %d, nc %d\n", num, nc);
             if (nc <= num && nc >= 0)
             {
                 //check if the number of particles has changed
@@ -454,8 +452,6 @@ namespace rtps
 		// velocities are too large? 
 
 		static int count=0;
-
-		printf("settings->dt= %f\n", settings->dt);
 
     	timers["integrate"]->stop();
     }
@@ -962,7 +958,6 @@ namespace rtps
             cloud->cloud_hash_and_sort();
             cloud->cellindicesExecute();
             cloud->permuteExecute();
-			printf("cloud update: num= %d\n", num);
 			if (num > 0) {
 				cloud->collision(cl_position_s, cl_velocity_s, cl_force_s, cl_sphp, num);
 ;
