@@ -203,6 +203,9 @@ namespace rtps
 		}
 		count++;
 
+		cl_position_u.copyToHost(cloud_positions);
+		cl_normal_u.copyToHost(cloud_normals);
+
         timers["integrate"]->stop();
     }
 
