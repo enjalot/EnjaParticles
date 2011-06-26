@@ -68,6 +68,10 @@ float arm_velocity_x = 0.;
 float arm_velocity_y = 0.;
 float arm_velocity_z = 0.;
 
+// track whether shift-key is down
+bool shift_down = false;
+// if shift is down, left mouse tracks arm
+
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -89,6 +93,7 @@ void appDestroy();
 void appMouse(int button, int state, int x, int y);
 void appMotion(int x, int y);
 void resizeWindow(int w, int h);
+void setShiftDown();
 
 void timerCB(int ms);
 
@@ -526,12 +531,18 @@ void appDestroy()
 
 void appMouse(int button, int state, int x, int y)
 {
+	// The shift must be down when I click the mouse. Then 
+	// the shift is detected. 
     if (state == GLUT_DOWN)
     {
+		// Only called when the mouse is pressed for the first time. 
         mouse_buttons |= 1<<button;
+		//printf("mouse down\n");
+		setShiftDown();
     }
     else if (state == GLUT_UP)
     {
+		setShiftDown();
         mouse_buttons = 0;
     }
 
@@ -543,6 +554,15 @@ void appMouse(int button, int state, int x, int y)
 
 void appMotion(int x, int y)
 {
+// If SHIFT was detected, then move arm. 
+// HOW TO DETECTED WHEN SHIFT IS RELEASED? 
+
+	if (shift_down) {
+		printf("appMotion, shift down\n");
+	} else {
+		printf("appMotion, shift up\n");
+	}
+
     float dx, dy;
     dx = x - mouse_old_x;
     dy = y - mouse_old_y;
@@ -775,3 +795,14 @@ void draw_collision_boxes()
     //glEnable(GL_DEPTH_TEST);
     //glDepthMask(GL_TRUE);
 }
+//----------------------------------------------------------------------
+void setShiftDown()
+{
+		int mod = glutGetModifiers();
+		if (mod == GLUT_ACTIVE_SHIFT)
+			shift_down = true;
+		else 
+			shift_down = false;
+}
+//----------------------------------------------------------------------
+
