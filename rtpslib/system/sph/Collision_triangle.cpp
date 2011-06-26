@@ -11,7 +11,7 @@ namespace rtps {
 
 
         triangles_loaded = false;
-        printf("create collision wall kernel\n");
+        printf("create collision triangle kernel\n");
         path += "/collision_tri.cl";
         k_collision_tri = Kernel(cli, path, "collision_triangle");
     } 

@@ -23,12 +23,14 @@ namespace rtps
     //using namespace sph;
 
 	//----------------------------------------------------------------------
-    CLOUD::CLOUD(RTPS *psfr, SPHParams& sphp, Buffer<GridParams>* cl_GridParams, Buffer<GridParams>* cl_GridParamsScaled, GridParams* grid_params, GridParams* grid_params_scaled, int max_nb_in_cloud) 
+    CLOUD::CLOUD(RTPS *psfr, SPHParams& sphp_, Buffer<GridParams>* cl_GridParams, Buffer<GridParams>* cl_GridParamsScaled, GridParams* grid_params, GridParams* grid_params_scaled, int max_nb_in_cloud) 
     {
 		this->cl_GridParams = cl_GridParams;
 		this->cl_GridParamsScaled = cl_GridParamsScaled;
 		this->grid_params   = grid_params;
 		this->grid_params_scaled   = grid_params_scaled;
+
+		this->sphp = &sphp_;
 
         //store the particle system framework
         ps = psfr;
@@ -57,6 +59,10 @@ namespace rtps
 		setupStages();
 
 		addCloud();
+
+		cloud_omega = float4(0.,0.,100.,0.);
+		cloud_cg    = float4(2.5, 2.5, 2.5, 0.);
+		//cloud_cg = cloud_cg * sphp->simulation_scale;
 
 		//printf("cloud_num = %d\n", cloud_num); exit(0);
         settings->SetSetting("Maximum Number of Cloud Particles", cloud_max_num);
@@ -105,6 +111,12 @@ namespace rtps
 	//----------------------------------------------------------------------
     void CLOUD::cloudVelocityExecute()
 	{
+		printf("**** BEFORE velocity execute *****\n");
+		u.printDevArray(cl_position_s, "pos_s", 10, 10);
+		u.printDevArray(cl_velocity_s, "vel_s", 10, 10);
+
+		cloud_cg.print("**cloud_cg**");
+
 		velocity.execute(
 					cloud_num,
                     settings->dt,  // should be time, not dt
@@ -112,6 +124,10 @@ namespace rtps
 					cl_velocity_s,
                     cloud_cg,
                     cloud_omega);
+
+		printf("**** AFTER velocity execute *****\n");
+		//u.printDevArray(cl_position_s, "pos_s", 10, 10);
+		u.printDevArray(cl_velocity_s, "vel_s", 10, 10);
 	}
 
 	//----------------------------------------------------------------------

@@ -946,6 +946,7 @@ namespace rtps
 	void SPH::cloudInitialize()
 	{
 		int max_nb_in_cloud = 8192;  // 1 << 13
+		//printf("sphp scale= %f\n", sphp.simulation_scale); exit(1);
 		cloud = new CLOUD(ps, sphp, &cl_GridParams, &cl_GridParamsScaled, 
 		   &grid_params, &grid_params_scaled, max_nb_in_cloud);
 
@@ -966,6 +967,7 @@ namespace rtps
 				cloud->collision(cl_position_s, cl_velocity_s, cl_force_s, cl_sphp, num);
 ;
 			}
+    		cloud->cloudVelocityExecute(); // before collision?
 			cloud->integrate();
 	}
 	//----------------------------------------------------------------------

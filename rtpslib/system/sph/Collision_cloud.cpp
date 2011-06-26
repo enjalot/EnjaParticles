@@ -9,7 +9,7 @@ namespace rtps
     {
         cli = cli_;
         timer = timer_;
-        printf("create collision wall kernel\n");
+        printf("create collision cloud kernel\n");
         path += "/collision_cloud.cl";
 		//printf("path= %s\n", path.c_str());
 		//exit(0);
