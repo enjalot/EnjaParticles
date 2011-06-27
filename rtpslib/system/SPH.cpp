@@ -837,7 +837,9 @@ namespace rtps
     {
         renderer->render_box(grid->getBndMin(), grid->getBndMax());
         //renderer->render_table(grid->getBndMin(), grid->getBndMax());
+		renderer->setCloudTranslate(ps->getCloudTranslate());
         System::render();
+		//renderer->getCloudTranslate().print("cloud Translate");
     }
 	//----------------------------------------------------------------------
     void SPH::setRenderer()
@@ -970,6 +972,8 @@ namespace rtps
 		if (ps->getCloudMovement()) {
 			cloud->cloudVelocityExecute(); // before collision?
 		}
+
+		cloud->cloudVelocityExecute(); // before collision?
 
 		cloud->collision(cl_position_s, cl_velocity_s, cl_force_s, cl_sphp, num);
 ;

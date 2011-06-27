@@ -61,8 +61,16 @@ namespace rtps
 		addCloud();
 
 		float scale = 30.;
-		cloud_omega = float4(1.,1.,10.,0.);
-		cloud_cg    = float4(1.5, 2.5, 2.5, 0.);
+		float cloud_omega_mag = 0.; // velocity
+		cloud_omega = float4(1.,1.,10.,cloud_omega_mag);
+		float nn = cloud_omega.x*cloud_omega.x + 
+		           cloud_omega.y*cloud_omega.y + 
+		           cloud_omega.z*cloud_omega.z;
+		nn = 1. / sqrt(nn);
+		cloud_omega = float4(cloud_omega.x*nn, cloud_omega.y*nn, cloud_omega.z*nn, cloud_omega_mag);
+		cloud_cg0   	= float4(1.5, 2.5, 2.5, 0.);
+		cloud_cg    	= cloud_cg0;
+		cloud_cg_prev   = cloud_cg0;
 		//cloud_cg = cloud_cg * sphp->simulation_scale;
 
 		//printf("cloud_num = %d\n", cloud_num); exit(0);
@@ -112,16 +120,22 @@ namespace rtps
 	//----------------------------------------------------------------------
     void CLOUD::cloudVelocityExecute()
 	{
-		//printf("**** BEFORE velocity execute *****\n");
+		printf("**** BEFORE velocity execute *****\n");
 		//u.printDevArray(cl_position_s, "pos_s", 10, 10);
 		//u.printDevArray(cl_velocity_s, "vel_s", 10, 10);
+
+		cloud_cg_prev = cloud_cg;
+		cloud_cg = cloud_cg0 + ps->getCloudTranslate();
+		ps->getCloudTranslate().print("translate");
+		cloud_cg.print("cloud_cg");
 
 		velocity.execute(
 					cloud_num,
                     settings->dt,  // should be time, not dt
 					cl_position_s,
 					cl_velocity_s,
-                    cloud_cg,
+					// I might be off by dt. Must check
+                    cloud_cg, // in world coordinates (not simulation coord.)
                     cloud_omega);
 
 		//printf("**** AFTER velocity execute *****\n");
@@ -178,6 +192,8 @@ namespace rtps
 
 		// CLOUD INTEGRATION
 
+		float4 cg_diff = cloud_cg - cloud_cg_prev;
+
 		// start the arm moving after x iterations
 		if (count > 10) {
 
@@ -192,6 +208,7 @@ namespace rtps
                 cl_normal_s,
                 cl_velocity_u,
                 cl_velocity_s,
+				cg_diff, // must make more efficient
                 cl_sort_indices,
                 *cl_sphp,
                 //debug

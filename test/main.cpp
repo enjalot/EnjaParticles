@@ -291,6 +291,8 @@ void appKeyboard(unsigned char key, int x, int y)
                 nn = 16384;
                 min = float4(.1, .1, .1, 1.0f);
                 max = float4(3.9, 3.9, 3.9, 1.0f);
+                min = float4(.1, .1, .1, 1.0f);
+                max = float4(4.9, 4.9, 4.9, 1.0f);
                 //float4 color = float4(0.1, 0.1, 0.3, .01);
                 ps->system->addBox(nn, min, max, false,color);
                 return;
@@ -434,16 +436,16 @@ void appKeyboard(unsigned char key, int x, int y)
             //cloud_velocity_z  += 0.1;
             break;
         case 'D':
-            cloud_translate_x -= 0.1;
-            cloud_velocity_x  -= 0.1;
+            //cloud_translate_x -= 0.1;
+            //cloud_velocity_x  -= 0.1;
             break;
         case 'Z':
-            cloud_translate_y += 0.1;
-            cloud_velocity_y  += 0.1;
+            //cloud_translate_y += 0.1;
+            //cloud_velocity_y  += 0.1;
             break;
         case 'X':
-            cloud_translate_y -= 0.1;
-            cloud_velocity_y  -= 0.1;
+            //cloud_translate_y -= 0.1;
+            //cloud_velocity_y  -= 0.1;
             break;
 
         case 'z':
@@ -476,6 +478,7 @@ void timerCB(int ms)
     glutPostRedisplay();
 }
 
+//----------------------------------------------------------------------
 void appRender()
 {
 
@@ -500,6 +503,7 @@ void appRender()
         glRotatef(rotate_x, 1.0, 0.0, 0.0);
         glRotatef(rotate_y, 0.0, 0.0, 1.0); //we switched around the axis so make this rotate_z
         glTranslatef(translate_x, translate_z, translate_y);
+		printf("main: before ps->render()\n");
         ps->render();
         draw_collision_boxes();
         if(render_movie)
@@ -532,8 +536,6 @@ void appDestroy()
 }
 
 
-
-
 void appMouse(int button, int state, int x, int y)
 {
 	// The shift must be down when I click the mouse. Then 
@@ -562,25 +564,35 @@ void appMotion(int x, int y)
 // If SHIFT was detected, then move arm. 
 // HOW TO DETECTED WHEN SHIFT IS RELEASED? 
 
-	if (shift_down) {
-		printf("appMotion, shift down\n");
-	} else {
+	if (!shift_down) {
 		printf("appMotion, shift up\n");
+    	float dx, dy;
+    	dx = x - mouse_old_x;
+    	dy = y - mouse_old_y;
+
+    	if (mouse_buttons & 1)
+    	{
+        	rotate_x += dy * 0.2;
+        	rotate_y += dx * 0.2;
+    	}
+    	else if (mouse_buttons & 4)
+    	{
+        	translate_z -= dy * 0.1;
+    	}
+	} else {
+		//cloud_movement();
+		if (mouse_buttons & 1)
+		{
+			// Change sensitivity of mouse
+			cloud_translate_x += 0.004 * (x - mouse_old_x);
+			// so that mouse negative y moves downward on screen
+			cloud_translate_z -= 0.004 * (y - mouse_old_y);
+			ps->setCloudTranslate(cloud_translate_x, 
+			   cloud_translate_y, cloud_translate_z);
+		}
+		printf("appMotion, shift down\n");
 	}
 
-    float dx, dy;
-    dx = x - mouse_old_x;
-    dy = y - mouse_old_y;
-
-    if (mouse_buttons & 1)
-    {
-        rotate_x += dy * 0.2;
-        rotate_y += dx * 0.2;
-    }
-    else if (mouse_buttons & 4)
-    {
-        translate_z -= dy * 0.1;
-    }
 
     mouse_old_x = x;
     mouse_old_y = y;

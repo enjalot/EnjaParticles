@@ -258,7 +258,7 @@ __kernel void collision_cloud(
 	// must somehow scale according to nb points in neighborhood
 	// pt.force: sum of all the boundary forces acting on the particle
 
-	float fact = 1.;        // scale the boundary force (arbitrary factor. Not satisfactory. GE)
+	float fact = 10.;        // scale the boundary force (arbitrary factor. Not satisfactory. GE)
 
 	pt.force.x *= fact;
 	pt.force.y *= fact;

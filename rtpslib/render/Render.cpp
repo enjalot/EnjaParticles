@@ -10,6 +10,9 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h" 
 
+#include <RTPS.h>
+
+
 using namespace std;
 
 namespace rtps
@@ -740,6 +743,12 @@ namespace rtps
     {
         particle_radius = pradius;
     }
+
+	void Render::setCloudTranslate(float4& cloud_translate_)
+	{
+		this->cloud_translate = cloud_translate_;
+	}
+    //----------------------------------------------------------------------
 
 }
 

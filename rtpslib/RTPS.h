@@ -37,7 +37,6 @@ namespace rtps
 {
 
     class RTPS_EXPORT RTPS
-    
     {
     public:
         //default constructor
@@ -73,10 +72,13 @@ namespace rtps
         void printTimers();
 		void setCloudMovement(bool mvt);
 		bool getCloudMovement();
+		void setCloudTranslate(float cx, float cy, float cz);
+		float4& getCloudTranslate();
 
     private:
         bool cl_managed;
 		bool cloud_movement;  // move or stop cloud 'S'
+		float4 cloud_translate;
         
     };
 }

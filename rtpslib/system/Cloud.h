@@ -144,8 +144,13 @@ namespace rtps
 
 		// ideally, the total point cloud is a collection of rigid
 		// objects. For now, only a single rigid object
-		float4				cloud_cg; // center of gravity
+		float4	cloud_cg0; // center of gravity at time zero
+		float4	cloud_cg; // center of gravity at time t
+		float4	cloud_cg_prev; // center of gravity at time t-dt
 		float4				avg_velocity;
+		// position of center of gravity or other fixed point with respect
+		// to position at time zero. 
+		float4				cloud_Translate();
 		float4				avg_angular_momentum;
 		// quaternion (theta/2, rotation axis)
 		float4				cloud_omega;  // rotation quaterion

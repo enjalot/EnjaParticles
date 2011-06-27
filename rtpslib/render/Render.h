@@ -25,6 +25,10 @@
     #include <GL/gl.h>
 #endif
 
+//class RTPS;
+
+//rtps::RTPS xxx; // NOT WORKING??
+//RTPS yxx; // NOT WORKING??  DOES NOT NAME  A TYPE!!!
 
 
 #include "RTPSettings.h"
@@ -114,6 +118,7 @@ namespace rtps
 		std::vector<int4>* cloud_faces; 
 		std::vector<int4>* cloud_faces_normals; 
 		int cloud_num;
+		float4 cloud_translate;
 
     protected:
         int loadTexture(std::string texture_file, std::string texture_name);
@@ -142,7 +147,6 @@ namespace rtps
         Buffer<float>   cl_depth;
         Kernel  k_curvature_flow;
 
-
         // Added by GE, March 6, 2011
         // reference guarantees the location pointed to cannot be changed
         // But that is creating problems because one cannot have a default 
@@ -150,7 +154,6 @@ namespace rtps
         RTPSettings* settings; 
 
         std::string shader_source_dir;
-
 
         int generateCheckerBoardTex(GLubyte* color1,GLubyte* color2,int num_squares, int length);
         int generateCircleTexture(GLubyte r, GLubyte g, GLubyte b, GLubyte alpha, int diameter);
@@ -178,12 +181,12 @@ namespace rtps
 		     this->cloud_faces_normals = &cloud_faces_normals;
 			 this->cloud_num = nb_points; 
 		}
+		void setCloudTranslate(float4& cloud_translate_);
+		float4& getCloudTranslate() { return cloud_translate; }
 	protected:
 		void renderPointCloud();
 
     };  
-
-
 }
 
 #endif

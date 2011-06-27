@@ -101,6 +101,7 @@ printf("created system in RTPS\n");
 
     void RTPS::render()
     {
+		printf("RTPS: before system->render()\n");
         system->render();
         /*renderer->render();
         //this functionality should be inside the system's render() function
@@ -127,6 +128,14 @@ printf("created system in RTPS\n");
 	bool RTPS::getCloudMovement()
 	{
 		return cloud_movement;
+	}
+	void RTPS::setCloudTranslate(float cx, float cy, float cz)
+	{
+		cloud_translate = float4(cx, cy, cz, 1.);
+	}
+	float4& RTPS::getCloudTranslate()
+	{
+		return cloud_translate;
 	}
 };
 

@@ -20,6 +20,7 @@ namespace rtps
                         Buffer<float4>& normal_s,
                         Buffer<float4>& velocity_u,
                         Buffer<float4>& velocity_s,
+                        float4& pos_cg,
 						//float4 vel,
                         Buffer<unsigned int>& indices,
                         //params

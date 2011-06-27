@@ -12,10 +12,13 @@ __kernel void kern_cloud_velocity(
     unsigned int i = get_global_id(0);
     if (i >= num) return;
 
+	// SHOULD NOT BE HARDCODED!! :-)
 	float4 simulation_scale = 0.05;  // pass sphp as argument
 
 	float4 p = simulation_scale*(pos_s[i] - pos_cg);
 	vel_s[i] = (float4)(p.y*omega.z-p.z*omega.y, p.z*omega.x-p.x*omega.z, 
 	                 p.x*omega.y-p.y*omega.x, 1.);
+	vel_s[i] *= omega.w;
+	vel_s[i].w = 1.;
 	//vel_s[i] = (1.,0.,0.,1.);
 }

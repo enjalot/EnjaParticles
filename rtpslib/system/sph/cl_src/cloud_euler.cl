@@ -14,25 +14,27 @@ __kernel void cloudEuler(
                    __global float4* normal_s, 
                    __global float4* velocity_u, 
                    __global float4* velocity_s, 
-                   //float4 vel, 
+				   // pos_cg: difference from previous time step
+                   float4 pos_cg,  // just the tnraslation from pos_cg0
                    __global int* sort_indices,  
                    __constant struct SPHParams* sphp, 
                    float dt)
 {
-
     unsigned int i = get_global_id(0);
+	float ss = sphp->simulation_scale;
     //int num = sphp->cloud_num;
     if (i >= num) return;
 
-    //float4 p = pos_s[i] * sphp->simulation_scale;
-    float4 p = pos_s[i];
+    //float4 p = pos_s[i] * ss;
+    float4 p = pos_s[i] * ss;
     float4 vel = velocity_s[i];
 
-    p += dt*vel;
+    p += dt*vel + pos_cg*ss;
+	//p = pos_cg*sphp->simulation_scale + dt*vel;
     //p = dt*vel;
 	
     p.w = 1.0f; //just in case
-    //p.xyz /= sphp->simulation_scale;
+    p.xyz /= sphp->simulation_scale;
 
     uint originalIndex = sort_indices[i];
 
