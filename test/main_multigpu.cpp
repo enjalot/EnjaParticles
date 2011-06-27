@@ -7,9 +7,11 @@
 //#include <string.h>
 //#include <string>
 #include <sstream>
+#include <iostream>
 #include <iomanip>
 
 #include <RTPS.h>
+#include <omp.h>
 
 using namespace rtps;
 
@@ -25,6 +27,14 @@ CL* cli;
 const string cl_vect_add = "__kernel void vect_add(__global float* a, __global float* b, global float* c)"
                            "{"
                            "    int index = get_global_id(0);"
+//                           "    float tmp = a[index]*b[index];"
+//                           "    float tmp2 = a[index]*a[index];"
+//                           "    float tmp3 = b[index]*b[index];"
+//                           "    float tmp4 = tmp+tmp2+tmp3;"
+//                           "    for(int i = 0; i<1000; i++)"
+//                           "    {"
+//                           "        tmp4+=tmp4;"
+//                           "    }"
                            "    c[index] = a[index] + b[index];"
                            "}";
 
@@ -53,11 +63,17 @@ float rand_float(float mn, float mx)
 //----------------------------------------------------------------------
 int main(int argc, char** argv)
 {
+    //int work_group_size = 256;
+    //omp_set_num_threads(2);
 
     if(argc>1)
     {
         VECTOR_SIZE = atoi(argv[1]);
     }
+    /*if(argc>2)
+    {
+        work_group_size = atoi(argv[2]);
+    }*/
 
     printf("Vector size is %d\n",VECTOR_SIZE);
     EB::TimerList timers;
@@ -76,7 +92,7 @@ int main(int argc, char** argv)
 
     for(int i = 0; i<VECTOR_SIZE; i++)
     {
-        a_h[i]=b_h[i]=i;
+        a_h[i]=b_h[i]=i;c_h[i]=0.0f;
     }
 
     for(int NUM_GPUS = 1; NUM_GPUS<=cli->devices.size(); NUM_GPUS++)
@@ -94,7 +110,9 @@ int main(int argc, char** argv)
             cl::Buffer a_d[NUM_GPUS];
             cl::Buffer b_d[NUM_GPUS];
             cl::Buffer c_d[NUM_GPUS];
-            for(int i = 0; i<NUM_GPUS; i++)
+            int i;
+            #pragma omp parallel for private(i) schedule(static,1)
+            for(i = 0; i<NUM_GPUS; i++)
             {
                 a_d[i] = cl::Buffer(cli->context,CL_MEM_READ_ONLY,(a_h.size()/NUM_GPUS)*sizeof(float));
                 b_d[i] = cl::Buffer(cli->context,CL_MEM_READ_ONLY,(b_h.size()/NUM_GPUS)*sizeof(float));
@@ -105,13 +123,11 @@ int main(int argc, char** argv)
             //printFloatVector(b_h);
             cl::Event event;
             timers[timer_name[0]]->start();
-            for(int i = 0; i<NUM_GPUS; i++)
+            #pragma omp parallel for private(i) schedule(static,1)
+            for(i = 0; i<NUM_GPUS; i++)
             {
                 cli->err = cli->queue[i].enqueueWriteBuffer(a_d[i], CL_FALSE, 0, (a_h.size()/NUM_GPUS)*sizeof(float), &a_h[i*(a_h.size()/NUM_GPUS)], NULL, &event);
-                cli->err = cli->queue[i].enqueueWriteBuffer(b_d[i], CL_FALSE, 0/*i*(b_h.size()/NUM_GPUS)*sizeof(float)*/, (b_h.size()/NUM_GPUS)*sizeof(float), &b_h[i*(b_h.size()/NUM_GPUS)], NULL, &event);
-            }
-            for(int i = 0; i<NUM_GPUS; i++)
-            {
+                cli->err = cli->queue[i].enqueueWriteBuffer(b_d[i], CL_FALSE, 0, (b_h.size()/NUM_GPUS)*sizeof(float), &b_h[i*(b_h.size()/NUM_GPUS)], NULL, &event);
                 cli->queue[i].finish();
             }
             timers[timer_name[0]]->stop();
@@ -120,11 +136,17 @@ int main(int argc, char** argv)
             src.push_back(pair<const char*, ::size_t>(cl_vect_add.c_str(), cl_vect_add.length()));
             cl::Program prog(cli->context,src);
             prog.build(cli->devices);
+            /*std::cout << "Build Status: " << prog.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(cli->devices.front()) << std::endl;
+            std::cout << "Build Options:\t" << prog.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(cli->devices.front()) << std::endl;
+            std::cout << "Build Log:\t " << prog.getBuildInfo<CL_PROGRAM_BUILD_LOG>(cli->devices.front()) << std::endl;*/
             cl::Kernel kernel(prog,"vect_add");
             
             timers[timer_name[1]]->start();
-            for(int i = 0; i<NUM_GPUS; i++)
+            #pragma omp parallel for private(i) schedule(static,1)
+            for(i = 0; i<NUM_GPUS; i++)
             {
+                //printf("Thread number %d\n",omp_get_thread_num());
+                //printf("i = %d\n",i);
                 cl_ulong start, end;
                 float timing = -1.0f;
         
@@ -133,29 +155,27 @@ int main(int argc, char** argv)
                 kernel.setArg(2,c_d[i]);
                 try
                 {
-                    cli->err = cli->queue[i].enqueueNDRangeKernel(kernel,cl::NullRange,  cl::NDRange(NDRANGE), cl::NullRange, NULL, &event);
+                    cli->err = cli->queue[i].enqueueNDRangeKernel(kernel,cl::NullRange,  cl::NDRange(VECTOR_SIZE/NUM_GPUS),cl::NullRange , NULL, &event);
+                    cli->queue[i].finish();
                 }
                 catch (cl::Error er)
                 {
-                    printf("err: work group size: %d\n", NDRANGE);
+                    //printf("err: work group size: %d\n", work_group_size);
                     printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
                 }
-            }
-            for(int i = 0; i<NUM_GPUS; i++)
-            {
-                cli->queue[i].finish();
             }
             timers[timer_name[1]]->stop();
         
             timers[timer_name[2]]->start();
-            for(int i = 0; i<NUM_GPUS; i++)
+            #pragma omp parallel for private(i) schedule(static,1)
+            for(i = 0; i<NUM_GPUS; i++)
             {
-                cli->err = cli->queue[i].enqueueReadBuffer(c_d[i], CL_FALSE, 0/*i*(c_h.size()/NUM_GPUS)*sizeof(float)*/, (c_h.size()/NUM_GPUS)*sizeof(float), &c_h[i*(c_h.size()/NUM_GPUS)], NULL, &event);
+                cli->err = cli->queue[i].enqueueReadBuffer(c_d[i], CL_TRUE, 0, (c_h.size()/NUM_GPUS)*sizeof(float), &c_h[i*(c_h.size()/NUM_GPUS)], NULL, &event);
             }
-            for(int i = 0; i<NUM_GPUS; i++)
+            /*for(int i = 0; i<NUM_GPUS; i++)
             {
                 cli->queue[i].finish();
-            }
+            }*/
             timers[timer_name[2]]->stop();
     
             //printFloatVector(c_h);
@@ -208,6 +228,9 @@ int main(int argc, char** argv)
             src.push_back(pair<const char*, ::size_t>(cl_vect_add.c_str(), cl_vect_add.length()));
             cl::Program prog(cli->cpu_context,src);
             prog.build(cli->cpu_devices);
+            /*std::cout << "Build Status: " << prog.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(cli->cpu_devices.front()) << std::endl;
+            std::cout << "Build Options:\t" << prog.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(cli->cpu_devices.front()) << std::endl;
+            std::cout << "Build Log:\t " << prog.getBuildInfo<CL_PROGRAM_BUILD_LOG>(cli->cpu_devices.front()) << std::endl;*/
             cl::Kernel kernel(prog,"vect_add");
             
             timers[timer_name[1]]->start();
@@ -221,11 +244,11 @@ int main(int argc, char** argv)
                 kernel.setArg(2,c_d[i]);
                 try
                 {
-                    cli->err = cli->cpu_queue[i].enqueueNDRangeKernel(kernel,cl::NullRange,  cl::NDRange(NDRANGE), cl::NullRange, NULL, &event);
+                    cli->err = cli->cpu_queue[i].enqueueNDRangeKernel(kernel,cl::NullRange,  cl::NDRange(VECTOR_SIZE/NUM_CPUS), cl::NullRange, NULL, &event);
                 }
                 catch (cl::Error er)
                 {
-                    printf("err: work group size: %d\n", NDRANGE);
+                    //printf("err: work group size: %d\n", work_group_size);
                     printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
                 }
             }
@@ -238,7 +261,7 @@ int main(int argc, char** argv)
             timers[timer_name[2]]->start();
             for(int i = 0; i<NUM_CPUS; i++)
             {
-                cli->err = cli->cpu_queue[i].enqueueReadBuffer(c_d[i], CL_FALSE, 0/*i*(c_h.size()/NUM_CPUS)*sizeof(float)*/, (c_h.size()/NUM_CPUS)*sizeof(float), &c_h[i*(c_h.size()/NUM_CPUS)], NULL, &event);
+                cli->err = cli->cpu_queue[i].enqueueReadBuffer(c_d[i], CL_FALSE, 0, (c_h.size()/NUM_CPUS)*sizeof(float), &c_h[i*(c_h.size()/NUM_CPUS)], NULL, &event);
             }
             for(int i = 0; i<NUM_CPUS; i++)
             {
@@ -256,7 +279,9 @@ int main(int argc, char** argv)
     }
 
     timers["vect_add_cpu"]->start();
-    for(int i = 0; i<a_h.size(); i++)
+    int i;
+    #pragma omp parallel for 
+    for(i = 0; i<a_h.size(); i++)
     {
         c_h[i]=a_h[i]+b_h[i];
     }

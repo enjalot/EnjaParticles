@@ -5,6 +5,8 @@ ENDIF (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 project(rtpsuite)
 
+SET( CMAKE_BUILD_TYPE Release)
+
 #need to include FindOPENCL.cmake to
 SET( RTPS_CMAKE_MODULE_PATH
      ${rtpsuite_SOURCE_DIR}/cmake

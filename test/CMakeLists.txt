@@ -24,6 +24,10 @@ FIND_PACKAGE (GLUT)
 FIND_PACKAGE (OpenGL)
 FIND_PACKAGE (OPENCL)
 FIND_PACKAGE (GLEW)
+FIND_PACKAGE (OpenMP)
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 
 set (test_INCLUDES
     ${RTPS_DIR}
@@ -31,6 +35,7 @@ set (test_INCLUDES
     ${OPENGL_INCLUDE_DIR}
     ${GLEW_INCLUDE_PATH}
     ${BASE_DIR}/opencl10
+#    ${OPENMP_INCLUDE_DIR}
 )
 
 
@@ -57,7 +62,7 @@ set (test_multigpu_SOURCES
     )
 
 
-ADD_DEFINITIONS(-g )
+#ADD_DEFINITIONS(-g )
 
 INCLUDE_DIRECTORIES(${test_INCLUDES})
 ADD_EXECUTABLE(sph.x ${test_SOURCES})
@@ -79,10 +84,16 @@ SET(LINK_LIBS
     ${OPENGL_LIBRARIES}
     ${OPENCL_LIBRARIES}
     ${GLEW_LIBRARY}
+#    ${OPENMP_LIBRARIES}
     # /opt/local/lib/libGLEW.a #for staticl linking when distributing. should do this more cmake way
     # /usr/lib/libGLEW.a #for static linking when distributing on linux. should do this more cmake way
 )
 message(RTPS_EXPORTS "${rtps_EXPORTS}")
+
+#message("omp inc dir = ${OPENMP_INCLUDE_DIR}")
+#message("omp libs = ${OPENMP_LIBRARIES}")
+
+ADD_DEFINITIONS(-fopenmp)
 
 TARGET_LINK_LIBRARIES (sph.x
     ${LINK_LIBS}
@@ -101,6 +112,7 @@ TARGET_LINK_LIBRARIES (flock.x
 
 TARGET_LINK_LIBRARIES (multigpu.x
     ${LINK_LIBS}
+#    ${OPENMP_LIBRARIES}
 )
 #IF(WIN32)
 install (TARGETS sph.x DESTINATION ${rtpsuite_BINARY_DIR}/bin)

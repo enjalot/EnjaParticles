@@ -136,11 +136,11 @@ namespace rtps
             printf("platform name: %s\n",platforms[i].getInfo<CL_PLATFORM_NAME>().c_str());
             deviceUsed = 0;
             err = platforms[i].getDevices(CL_DEVICE_TYPE_GPU, &devices);
-            printf("getDevices: %s\n", oclErrorString(err));
+            printf("getDevices GPU: %s\n", oclErrorString(err));
             printf("devices.size(): %zd\n", devices.size());
             err = platforms[i].getDevices(CL_DEVICE_TYPE_CPU, &cpu_devices);
-            printf("getDevices: %s\n", oclErrorString(err));
-            printf("devices.size(): %zd\n", cpu_devices.size());
+            printf("getDevices CPU: %s\n", oclErrorString(err));
+            printf("cpu_devices.size(): %zd\n", cpu_devices.size());
             //const char* s = devices[0].getInfo<CL_DEVICE_EXTENSIONS>().c_str();
             //printf("extensions: \n %s \n", s);
 
@@ -253,7 +253,6 @@ namespace rtps
                 }
             }
 
-            
         #if defined (__APPLE__) || defined(MACOSX)
                 CGLContextObj kCGLContext = CGLGetCurrentContext();
                 /*CGLShareGroupObj kCGLShareGroup = CGLGetShareGroup(kCGLContext);*/
