@@ -60,6 +60,7 @@ set (rtpslib_INCLUDES
     ${rtpslib_SOURCE_DIR}/system/outer
     ${rtpslib_SOURCE_DIR}/system/common
     ${rtpslib_SOURCE_DIR}/render
+    ${rtpslib_SOURCE_DIR}/rotations
     ${rtpslib_SOURCE_DIR}/render/util
     ${rtpslib_SOURCE_DIR}/domain
     ${rtpslib_SOURCE_DIR}/opencl
