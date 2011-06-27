@@ -16,6 +16,7 @@ __kernel void cloudEuler(
                    __global float4* velocity_s, 
 				   // pos_cg: difference from previous time step
                    float4 pos_cg,  // just the tnraslation from pos_cg0
+                   float4 diff_pos_cg,  // just the tnraslation from pos_cg0
                    __global int* sort_indices,  
                    __constant struct SPHParams* sphp, 
                    float dt)
@@ -29,7 +30,7 @@ __kernel void cloudEuler(
     float4 p = pos_s[i] * ss;
     float4 vel = velocity_s[i];
 
-    p += dt*vel + pos_cg*ss;
+    p += dt*vel + diff_pos_cg*ss;
 	//p = pos_cg*sphp->simulation_scale + dt*vel;
     //p = dt*vel;
 	

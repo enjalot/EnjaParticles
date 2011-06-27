@@ -973,11 +973,14 @@ namespace rtps
 			cloud->cloudVelocityExecute(); // before collision?
 		}
 
-		cloud->cloudVelocityExecute(); // before collision?
+		//cloud->cloudVelocityExecute(); // before collision?
 
+		printf("REMOVE COLLISIONS GE\n");
 		cloud->collision(cl_position_s, cl_velocity_s, cl_force_s, cl_sphp, num);
 ;
-		cloud->integrate();
+		if (ps->getCloudMovement()) {
+			cloud->integrate();
+		}
 	}
 	//----------------------------------------------------------------------
 	void SPH::cloudCleanup()

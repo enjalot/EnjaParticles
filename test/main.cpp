@@ -29,6 +29,9 @@ int window_width = 640*2;
 int window_height = 480*2;
 int glutWindowHandle = 0;
 
+float4 mouse_old;
+float4 mouse_new;
+
 
 #define DTR 0.0174532925
 
@@ -68,9 +71,14 @@ float cloud_velocity_x = 0.;
 float cloud_velocity_y = 0.;
 float cloud_velocity_z = 0.;
 
+float4 rotation_axis;
+void computeRotationAxis(float4& v1, float4& v2);
+
 // track whether shift-key is down
 bool shift_down = false;
-// if shift is down, left mouse tracks arm
+bool ctrl_down = false;
+// if shift is down, left mouse tracks arm (translation)
+// if ctrl is down, left mouse tracks arm (rotation)
 bool cloud_movement = false;
 
 
@@ -95,6 +103,8 @@ void appMouse(int button, int state, int x, int y);
 void appMotion(int x, int y);
 void resizeWindow(int w, int h);
 void setShiftDown();
+
+long Vectorize(float4& hit, float4& origin, float radius, float4& vec);
 
 void timerCB(int ms);
 
@@ -133,6 +143,9 @@ rtps::RTPS* ps;
 float4 color = float4(0.5, 0.3, 0.73, .05);
 //float4 color = float4(1., 0.5, 0.0, 1.);
 int hindex; 
+
+// for rotation control via quaternion emulation
+float4 screen_center = float4(500.,500.,0.,1.);
 
 
 
@@ -536,6 +549,7 @@ void appDestroy()
 }
 
 
+//----------------------------------------------------------------------
 void appMouse(int button, int state, int x, int y)
 {
 	// The shift must be down when I click the mouse. Then 
@@ -559,12 +573,40 @@ void appMouse(int button, int state, int x, int y)
     //glutPostRedisplay();
 }
 
+//----------------------------------------------------------------------
 void appMotion(int x, int y)
 {
 // If SHIFT was detected, then move arm. 
 // HOW TO DETECTED WHEN SHIFT IS RELEASED? 
 
-	if (!shift_down) {
+	if (shift_down) {
+		printf("***** SHIFT DOWN ****\n");
+		//cloud_movement();
+		if (mouse_buttons & 1)
+		{
+			// Change sensitivity of mouse
+			cloud_translate_x += 0.004 * (x - mouse_old_x);
+			// so that mouse negative y moves downward on screen
+			cloud_translate_z -= 0.004 * (y - mouse_old_y);
+			ps->setCloudTranslate(cloud_translate_x, 
+			   cloud_translate_y, cloud_translate_z);
+		}
+		printf("appMotion, shift down\n");
+	} else if (ctrl_down) {
+		printf("***** CTRL DOWN ****\n");
+		mouse_old = float4(x,y, 0.,1.);
+		mouse_new = float4(mouse_old_x,mouse_old_y, 0.,1.);
+		float4 vec_old, vec_new;
+		// 300: radius for mouse
+		Vectorize(mouse_old, screen_center, 300, vec_old);
+		Vectorize(mouse_new, screen_center, 300, vec_new);
+		computeRotationAxis(vec_old, vec_new);
+		rotation_axis.print("**** axis");
+		ps->setRotationAxis(rotation_axis);
+        //ZeroHysteresisRotation(vec_old, vec_new);
+		// cloud rotation();
+	} else {
+		// domain manipulation
 		printf("appMotion, shift up\n");
     	float dx, dy;
     	dx = x - mouse_old_x;
@@ -579,20 +621,7 @@ void appMotion(int x, int y)
     	{
         	translate_z -= dy * 0.1;
     	}
-	} else {
-		//cloud_movement();
-		if (mouse_buttons & 1)
-		{
-			// Change sensitivity of mouse
-			cloud_translate_x += 0.004 * (x - mouse_old_x);
-			// so that mouse negative y moves downward on screen
-			cloud_translate_z -= 0.004 * (y - mouse_old_y);
-			ps->setCloudTranslate(cloud_translate_x, 
-			   cloud_translate_y, cloud_translate_z);
-		}
-		printf("appMotion, shift down\n");
 	}
-
 
     mouse_old_x = x;
     mouse_old_y = y;
@@ -816,10 +845,150 @@ void draw_collision_boxes()
 void setShiftDown()
 {
 		int mod = glutGetModifiers();
-		if (mod == GLUT_ACTIVE_SHIFT)
-			shift_down = true;
-		else 
-			shift_down = false;
+		shift_down = mod == GLUT_ACTIVE_SHIFT ? true : false;
+		ctrl_down = mod == GLUT_ACTIVE_CTRL ? true : false;
+
+		//printf("ctrl: %d, shift: %d\n", ctrl_down, shift_down);
+
+		//if (shift_down) exit(0);
+		//if (ctrl_down) exit(0);
 }
 //----------------------------------------------------------------------
+//Vectorize()
+// Create a 3D position vector on a unit sphere based on
+// mouse hitPt, sphere's screen origin, and sphere radius in
+// pixels. Return zero on success or non-zero if hit point 
+// was outside the sphere. This routine uses Quickdraw[TM] 3D
+// and assumes that the relevant QD3D headers and library
+// files have been included. Also need to #include <math.h>.
 
+#define BOUNDS_ERR 1L
+
+long Vectorize( 
+   float4& hit, 
+   float4& origin, 
+   float radius, 
+   float4& vec ) 
+   //TQ3Vector3D *vec ) 
+{
+   float x,y,z, modulus;
+   
+   x = (float)(hit.x - origin.x)/radius;
+   y = (float)(hit.y - origin.y)/radius;
+
+   //hit.print("hit");
+   //origin.print("origin");
+   //printf("before x,y= %f, %f\n", x, y);
+
+   y *= -1.0;         // compensate for "inverted" screen y-axis!
+   
+   modulus = sqrt(x*x + y*y);
+   //printf("modulus= %f\n", modulus);
+   //printf("radius(%f)/modulus= %f\n", radius, radius/modulus);
+   
+   if (modulus > .95) {    // outside radius!
+      x /= (modulus+.06);  // avoid singularities
+      y /= (modulus+.06);
+      //return BOUNDS_ERR;
+   }
+
+   //printf("after x,y= %f, %f\n", x, y);
+   //printf("x^2+y^2= %f\n", x*x+y*y);
+   
+   z = sqrt(1. - (x*x + y*y) );    // compute fictitious 'z' value
+   vec = float4(x,y,z,1.);
+   //vec.print("vec");
+   
+   return 0L;
+}
+//----------------------------------------------------------------------
+//Rotate::ZeroHysteresisRotation()
+// From two 3D vectors representing the positions of 
+// points on a unit sphere, calculate an axis of rotation
+// and an amount of rotation such that float4 A can be
+// moved along a geodesic to float4 B.
+// CAUTION: Error-checking omitted for clarity.
+
+void computeRotationAxis(float4& v1, float4& v2) 
+{
+   float4           cross;
+   //TQ3Matrix4x4     theMatrix;
+   //TQ3float43D      orig = { 0.,0.,0. };
+   float            dot,angle;
+   
+   dot = v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;
+
+   if (dot == 1.0) 
+      return;                                        // nothing to do
+
+   cross = float4(v1.y*v2.z-v1.z*v2.y, 
+                  v1.z*v2.x-v1.x*v2.z,
+                  v1.x*v2.y-v1.y*v2.x, 1.);
+
+   //Q3Vector3D_Cross( &v1, &v2, &cross ); // axis of rotation
+
+   // EVER ZERO?
+   float normi = sqrt(1./(cross.x*cross.x+cross.y*cross.y+cross.z*cross.z));
+   cross.x *= normi;
+   cross.y *= normi;
+   cross.z *= normi;
+   cross.w  = 0.0;
+   //Q3Vector3D_Normalize( &cross,&cross );   
+
+   angle = 2.*acos( dot );                           // angle of rotation
+   printf("angle= %f\n", angle);
+   cross.w = angle;
+   cross.print("cross");
+   rotation_axis = cross;
+   
+   #if 0
+   // set up a rotation around our chosen axis...
+   Q3Matrix4x4_SetRotateAboutAxis(&theMatrix,
+                     &orig, &cross, angle);
+   
+   Q3Matrix4x4_Multiply(   &gDocument.fRotation,
+                     &theMatrix,
+                     &gDocument.fRotation);     // multiply
+
+   DocumentDraw( &gDocument ) ;                 // draw
+   #endif
+}
+//----------------------------------------------------------------------
+#if 0
+//Rotate::FreeRotateWithMouse()
+// Call this function from the main event loop to
+// do free-rotations of 3D objects
+
+// the mouse action radius in pixels:
+#define RADIUS_VALUE 300.0
+
+void FreeRotateWithMouse(void) 
+{
+   float4             now, oldPt, center;
+   WindowPtr       win = FrontWindow();
+   float            radius = RADIUS_VALUE;
+   TQ3Vector3D   v1,v2;
+   long               err;
+
+   GetMouse( &oldPt );
+
+   center.h = (win->portRect.right - win->portRect.left)/2;
+   center.v = (win->portRect.bottom - win->portRect.top)/2;
+
+   while (StillDown()) 
+   {
+      GetMouse( &now );
+
+      err = Vectorize(&oldPt, &center, RADIUS_VALUE, &v1 );
+      err += Vectorize(&now, &center, RADIUS_VALUE, &v2 );
+
+      if (!err)
+         getRotationAxis( v1,v2 );
+
+      oldPt = now;
+   }
+}
+#endif
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------

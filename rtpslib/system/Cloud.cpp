@@ -61,8 +61,8 @@ namespace rtps
 		addCloud();
 
 		float scale = 30.;
-		float cloud_omega_mag = 0.; // velocity
-		cloud_omega = float4(1.,1.,10.,cloud_omega_mag);
+		float cloud_omega_mag = 0.2; // velocity
+		cloud_omega = float4(0.,1.,10.,cloud_omega_mag);
 		float nn = cloud_omega.x*cloud_omega.x + 
 		           cloud_omega.y*cloud_omega.y + 
 		           cloud_omega.z*cloud_omega.z;
@@ -120,14 +120,19 @@ namespace rtps
 	//----------------------------------------------------------------------
     void CLOUD::cloudVelocityExecute()
 	{
-		printf("**** BEFORE velocity execute *****\n");
 		//u.printDevArray(cl_position_s, "pos_s", 10, 10);
 		//u.printDevArray(cl_velocity_s, "vel_s", 10, 10);
 
 		cloud_cg_prev = cloud_cg;
 		cloud_cg = cloud_cg0 + ps->getCloudTranslate();
+
+		float4 cloud_omega = ps->getRotationAxis();
 		ps->getCloudTranslate().print("translate");
+		cloud_omega.w = 10.; // Angular rotation
+
+		printf("**** BEFORE vel exec, ");
 		cloud_cg.print("cloud_cg");
+		cloud_omega.print("*** BEFORE vel exec, rotation axis ***");
 
 		velocity.execute(
 					cloud_num,
@@ -208,6 +213,7 @@ namespace rtps
                 cl_normal_s,
                 cl_velocity_u,
                 cl_velocity_s,
+				cloud_cg, 
 				cg_diff, // must make more efficient
                 cl_sort_indices,
                 *cl_sphp,

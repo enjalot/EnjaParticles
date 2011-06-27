@@ -13,23 +13,22 @@ namespace rtps
             CloudEuler() { cli = NULL; timer = NULL; };
             CloudEuler(std::string path, CL* cli, EB::Timer* timer);
             void execute(int num,
-                        float dt,
-                        Buffer<float4>& pos_u,
-                        Buffer<float4>& pos_s,
-                        Buffer<float4>& normal_u,
-                        Buffer<float4>& normal_s,
-                        Buffer<float4>& velocity_u,
-                        Buffer<float4>& velocity_s,
-                        float4& pos_cg,
-						//float4 vel,
-                        Buffer<unsigned int>& indices,
-                        //params
-                        Buffer<SPHParams>& sphp,
-                        //debug
-                        Buffer<float4>& clf_debug,
-                        Buffer<int4>& cli_debug);
-            
-           
+                         float dt,
+                         Buffer<float4>& pos_u,
+                         Buffer<float4>& pos_s,
+                         Buffer<float4>& normal_u,
+                         Buffer<float4>& normal_s,
+                         Buffer<float4>& velocity_u,
+                         Buffer<float4>& velocity_s,
+                         float4& pos_cg,
+                         float4& diff_pos_cg,
+						 //float4 vel,
+                         Buffer<unsigned int>& indices,
+                         //params
+                         Buffer<SPHParams>& sphp,
+                         //debug
+                         Buffer<float4>& clf_debug,
+                         Buffer<int4>& cli_debug);
 
         private:
             CL* cli;

@@ -21,6 +21,7 @@ namespace rtps
                     Buffer<float4>& velocity_u,
                     Buffer<float4>& velocity_s,
 					float4& pos_cg,
+					float4& diff_pos_cg,
                     //float4 vel,
                     Buffer<unsigned int>& indices,
                     //params
@@ -38,10 +39,13 @@ namespace rtps
         k_cloud_euler.setArg(iargs++, velocity_u.getDevicePtr());
         k_cloud_euler.setArg(iargs++, velocity_s.getDevicePtr());
         k_cloud_euler.setArg(iargs++, pos_cg);
+        k_cloud_euler.setArg(iargs++, diff_pos_cg);
         //k_cloud_euler.setArg(iargs++, vel);
         k_cloud_euler.setArg(iargs++, indices.getDevicePtr());
         k_cloud_euler.setArg(iargs++, sphp.getDevicePtr());
         k_cloud_euler.setArg(iargs++, dt); //time step
+
+		pos_cg.print("*** pos_cg ***");
 
 
 		//printf("BEFORE k_cloud_euler.execute\n");

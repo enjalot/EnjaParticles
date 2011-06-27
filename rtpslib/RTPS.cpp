@@ -137,5 +137,13 @@ printf("created system in RTPS\n");
 	{
 		return cloud_translate;
 	}
+	void RTPS::setRotationAxis(float4& rotation_axis)
+	{
+		this->rotation_axis = rotation_axis;
+	}
+	float4& RTPS::getRotationAxis()
+	{
+		return rotation_axis;
+	}
 };
 

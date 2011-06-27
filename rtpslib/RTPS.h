@@ -73,12 +73,15 @@ namespace rtps
 		void setCloudMovement(bool mvt);
 		bool getCloudMovement();
 		void setCloudTranslate(float cx, float cy, float cz);
+		void setRotationAxis(float4& rotation_axis);
+		float4& getRotationAxis();
 		float4& getCloudTranslate();
 
     private:
         bool cl_managed;
 		bool cloud_movement;  // move or stop cloud 'S'
 		float4 cloud_translate;
+		float4 rotation_axis;
         
     };
 }

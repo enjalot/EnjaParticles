@@ -60,7 +60,7 @@ set (rtpslib_INCLUDES
     ${rtpslib_SOURCE_DIR}/system/outer
     ${rtpslib_SOURCE_DIR}/system/common
     ${rtpslib_SOURCE_DIR}/render
-    ${rtpslib_SOURCE_DIR}/rotations
+    #${rtpslib_SOURCE_DIR}/rotations
     ${rtpslib_SOURCE_DIR}/render/util
     ${rtpslib_SOURCE_DIR}/domain
     ${rtpslib_SOURCE_DIR}/opencl
@@ -80,7 +80,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/rtps_common
 
     ${rtpslib_SOURCE_DIR}/render/Render
-    ${rtpslib_SOURCE_DIR}/render/rotations
+    #${rtpslib_SOURCE_DIR}/render/rotations
     ${rtpslib_SOURCE_DIR}/render/SpriteRender
     ${rtpslib_SOURCE_DIR}/render/SSFRender
     ${rtpslib_SOURCE_DIR}/render/util/stb_image.c
