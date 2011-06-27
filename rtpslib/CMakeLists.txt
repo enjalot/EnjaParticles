@@ -80,6 +80,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/rtps_common
 
     ${rtpslib_SOURCE_DIR}/render/Render
+    ${rtpslib_SOURCE_DIR}/render/rotations
     ${rtpslib_SOURCE_DIR}/render/SpriteRender
     ${rtpslib_SOURCE_DIR}/render/SSFRender
     ${rtpslib_SOURCE_DIR}/render/util/stb_image.c
