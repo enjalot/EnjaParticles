@@ -39,7 +39,9 @@ namespace rtps
 
         int err;
         cl::Event event;
+
         cl::Context context;
+        std::vector<cl::Context> context_vec;
         cl::Context cpu_context;
         std::vector<cl::CommandQueue> queue;
         std::vector<cl::CommandQueue> cpu_queue;
@@ -65,14 +67,5 @@ namespace rtps
         //error checking stuff
         int deviceUsed;
     };
-
-
-
-
-
-
-
-}
-
+};
 #endif
-

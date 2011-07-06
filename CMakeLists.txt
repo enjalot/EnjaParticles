@@ -6,6 +6,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 project(rtpsuite)
 
 SET( CMAKE_BUILD_TYPE Release)
+#SET(CMAKE_BUILD_TYPE Debug)
 
 #need to include FindOPENCL.cmake to
 SET( RTPS_CMAKE_MODULE_PATH

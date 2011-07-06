@@ -31,8 +31,8 @@ namespace rtps
         cl_ulong start, end;
         float timing = -1.0f;
 
-        try
-        {
+        //try
+        //{
             cl::Event event;
             cli->err = cli->queue[0].enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(ndrange), cl::NullRange, NULL, &event);
             cli->queue[0].finish();
@@ -40,12 +40,12 @@ namespace rtps
             event.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
             timing = (end - start) * 1.0e-6f;
 
-        }
-        catch (cl::Error er)
-        {
-            printf("err: work group size: %d\n", ndrange);
-            printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
-        }
+        //}
+        //catch (cl::Error er)
+        //{
+        //    printf("err: work group size: %d\n", ndrange);
+        //    printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+        //}
         return timing;
 
     }
@@ -73,35 +73,35 @@ namespace rtps
 
         cl_ulong start, end;
         float timing = -1.0f;
-        try
-        {
+        //try
+        //{
             cl::Event event;
             cli->err = cli->queue[queue_num].enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(global), cl::NDRange(worksize), NULL, &event);
             cli->queue[queue_num].finish();
             event.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
             event.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
             timing = (end - start) * 1.0e-6f;
-        }
-        catch (cl::Error er)
-        {
-            printf("err: global %d, local %d\n", global, worksize);
-            printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
-        }
+        //}
+        //catch (cl::Error er)
+        //{
+        //    printf("err: global %d, local %d\n", global, worksize);
+        //    printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+        //}
         return timing;
 
     }
 
     void Kernel::setArgShared(int arg, int nb_bytes, int queue_num)
     {
-        try
-        {
+        //try
+        //{
             kernel.setArg(arg, nb_bytes, 0);
             cli->queue[queue_num].finish();
-        }
-        catch (cl::Error er)
-        {
-            printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
-        }
+        //}
+        //catch (cl::Error er)
+        //{
+        //    printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+        //}
     }
 
 }

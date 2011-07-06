@@ -191,24 +191,64 @@ namespace rtps
                     printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
                 }
         #else
+                /*Display* dis = glXGetCurrentDisplay();
+                GLXContext con = glXGetCurrentContext();
+                printf("gl context 0x%08x\n",&con);
+                printf("gl Current Display 0x%08x\n",dis);*/
                 cl_context_properties props[] = 
                 {
                     CL_GL_CONTEXT_KHR, (cl_context_properties)glXGetCurrentContext(), 
                     CL_GLX_DISPLAY_KHR, (cl_context_properties)glXGetCurrentDisplay(), 
-                    CL_CONTEXT_PLATFORM, (cl_context_properties)(platforms[i])(),
+                    CL_CONTEXT_PLATFORM, NULL,//(cl_context_properties)(platforms[i])(),
                     0
                 };
                 //cl_context cxGPUContext = clCreateContext(props, 1, &cdDevices[uiDeviceUsed], NULL, NULL, &err);
+                //std::vector<cl::Device> devtmp(1);
+                //devtmp[0] = devices.back();
+                //devices.pop_back();
+                #if 0
                 try
                 {
                     //context = cl::Context(CL_DEVICE_TYPE_GPU, props);
-                    //context = cl::Context(devices, props);
-                    context = cl::Context(devices);
+                    context = cl::Context(devices, props);
+                    //context = cl::Context(devices);
                 }
                 catch (cl::Error er)
                 {
-                    printf("ERROR: %s(%s)%d\n", er.what(), oclErrorString(er.err()),er.err());
+                    printf("ERROR: %s(%s)%d Line number %d\n", er.what(), oclErrorString(er.err()),er.err(),__LINE__);
                 }
+                #else
+                for(int i = 0; i<devices.size(); i++)
+                {
+                    std::vector<cl::Device> dev;
+                    dev.push_back(devices[i]);
+                    try
+                    {
+                        //context = cl::Context(CL_DEVICE_TYPE_GPU, props);
+                        //context = cl::Context(devices, props);
+                        context_vec.push_back(cl::Context(dev));
+                    }
+                    catch (cl::Error er)
+                    {
+                        printf("ERROR: %s(%s)%d Line number %d\n", er.what(), oclErrorString(er.err()),er.err(),__LINE__);
+                    }
+                    
+                }
+                //Just to make things work for now. Definitely need to rework the structure of this class.
+                context = context_vec[0];
+                #endif
+                //For TESTING if I can create 1 context per device
+                /*try
+                {
+                    //context = cl::Context(CL_DEVICE_TYPE_GPU, props);
+                    //context2 = cl::Context(devtmp, props);
+                    context2 = cl::Context(devices);
+                }
+                catch (cl::Error er)
+                {
+                    printf("ERROR: %s(%s)%d Line number %d\n", er.what(), oclErrorString(er.err()),er.err(),__LINE__);
+                }
+                devices.push_back(devtmp.back());*/
         #endif
         #endif
         
@@ -229,6 +269,7 @@ namespace rtps
                     printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
                 }
                 */
+                printf("devices.size %d\n",devices.size());
             for(int j = 0; j < devices.size(); j++)
             {
                 //int t = devices.front().getInfo<CL_DEVICE_TYPE>();
@@ -245,7 +286,7 @@ namespace rtps
                 cl_command_queue_properties cq_props = CL_QUEUE_PROFILING_ENABLE;
                 try
                 {
-                    queue.push_back(cl::CommandQueue(context, devices[j], cq_props, &err));
+                    queue.push_back(cl::CommandQueue(context_vec[j], devices[j], cq_props, &err));
                 }
                 catch (cl::Error er)
                 {
@@ -489,8 +530,4 @@ namespace rtps
 
         return CL_SUCCESS;
     }
-
-
-
-
 }
