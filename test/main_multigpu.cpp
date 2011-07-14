@@ -20,7 +20,7 @@
 //OpenCL stuff
 #endif
 #include <RTPS.h>
-#include <omp.h>
+//#include <omp.h>
 
 using namespace rtps;
 
@@ -38,14 +38,6 @@ CL* cli;
 const string cl_vect_add = "__kernel void vect_add(__global float* a, __global float* b, global float* c)"
                            "{"
                            "    int index = get_global_id(0);"
-//                           "    float tmp = a[index]*b[index];"
-//                           "    float tmp2 = a[index]*a[index];"
-//                           "    float tmp3 = b[index]*b[index];"
-//                           "    float tmp4 = tmp+tmp2+tmp3;"
-//                           "    for(int i = 0; i<1000; i++)"
-//                           "    {"
-//                           "        tmp4+=tmp4;"
-//                           "    }"
                            "    c[index] = a[index] + b[index];"
                            "}";
 

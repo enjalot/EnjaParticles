@@ -61,6 +61,9 @@ set (test_multigpu_SOURCES
     main_multigpu.cpp
     )
 
+set (test_multigpu_SOURCES
+    main_multigpu_imageproc.cpp
+    )
 
 #ADD_DEFINITIONS(-g )
 
@@ -70,6 +73,7 @@ ADD_EXECUTABLE(multi.x ${test_multi_SOURCES})
 ADD_EXECUTABLE(simple.x ${test_simple_SOURCES})
 ADD_EXECUTABLE(flock.x ${test_flock_SOURCES})
 ADD_EXECUTABLE(multigpu.x ${test_multigpu_SOURCES})
+ADD_EXECUTABLE(multigpu_imageproc.x ${test_multigpu_SOURCES})
 
 message("current build dir:\n")
 message("${BASE_DIR}/rtps/build")
@@ -93,7 +97,7 @@ message(RTPS_EXPORTS "${rtps_EXPORTS}")
 #message("omp inc dir = ${OPENMP_INCLUDE_DIR}")
 #message("omp libs = ${OPENMP_LIBRARIES}")
 
-ADD_DEFINITIONS(-fopenmp)
+#ADD_DEFINITIONS(-fopenmp)
 
 TARGET_LINK_LIBRARIES (sph.x
     ${LINK_LIBS}
@@ -114,12 +118,18 @@ TARGET_LINK_LIBRARIES (multigpu.x
     ${LINK_LIBS}
 #    ${OPENMP_LIBRARIES}
 )
+
+TARGET_LINK_LIBRARIES (multigpu_imageproc.x
+    ${LINK_LIBS}
+#    ${OPENMP_LIBRARIES}
+)
 #IF(WIN32)
 install (TARGETS sph.x DESTINATION ${rtpsuite_BINARY_DIR}/bin)
 install (TARGETS multi.x DESTINATION ${rtpsuite_BINARY_DIR}/bin)
 install (TARGETS simple.x DESTINATION ${rtpsuite_BINARY_DIR}/bin)
 install (TARGETS flock.x DESTINATION ${rtpsuite_BINARY_DIR}/bin)
 install (TARGETS multigpu.x DESTINATION ${rtpsuite_BINARY_DIR}/bin)
+install (TARGETS multigpu_imageproc.x DESTINATION ${rtpsuite_BINARY_DIR}/bin)
 #install (FILES MathFunctions.h DESTINATION include)
 
 #ENDIF(WIN32)
