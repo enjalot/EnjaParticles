@@ -1,0 +1,366 @@
+
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <time.h>
+//#include <utils.h>
+//#include <string.h>
+//#include <string>
+#include <sstream>
+#include <iostream>
+#include <iomanip>
+#include <algorithm>
+
+
+#include <GL/glew.h>
+#if defined __APPLE__ || defined(MACOSX)
+    #include <GLUT/glut.h>
+#else
+    #include <GL/glut.h>
+//OpenCL stuff
+#endif
+#include <RTPS.h>
+#include "../rtpslib/render/util/stb_image.h"
+#include "../rtpslib/render/util/stb_image_write.h"
+//#include <omp.h>
+
+using namespace rtps;
+
+//int num_gpus = 1;
+const int NDRANGE = 1;
+
+int window_width = 640;
+int window_height = 480;
+int glutWindowHandle = 0;
+
+int hindex; 
+
+CL* cli;
+
+const string cl_image_manip = "__kernel void image_manip(read_only image2d_t in_img, write_only image2d_t out_img)\n"
+                           "{\n"
+                           "    int xInd = get_global_id(0);\n"
+                           "    int yInd = get_global_id(1);\n"
+                           "    sampler_t smp = CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_NEAREST;\n"
+                           "    uint4 col = read_imageui(in_img,smp, (int2)(xInd,yInd));\n"
+                           "    uint4 newCol;\n"
+                           "    newCol.xyz = (uint3)(255,255,255)-col.xyz;\n"
+                           "    newCol.w = 255;\n"
+                           "    write_imageui(out_img,(int2)(xInd,yInd), newCol);\n"
+                           "}\n";
+
+//timers
+//GE::Time *ts[3];
+
+void printFloatVector(vector<float> vec)
+{
+    printf("[");
+    for(int i = 0; i<vec.size(); i++)
+    {
+        printf("%f,",vec[i]);
+    }
+    printf("\b]\n");
+}
+
+class CLProfiler
+{
+public:
+    void addEvent(const char* name, int device_num, int num_dev, cl::Event& event)
+    {
+        cl_ulong start, end;
+        float timing = -1.0f;
+        event.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
+        event.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
+        timing = (end - start) * 1.0e-6f;
+        stringstream s;
+        s<<name<< " # "<<device_num+1<<" of "<<num_dev;
+        timings[s.str()].push_back(timing);
+    }
+    void printAll()
+    {
+        for (map<string, vector<float> >::iterator i = timings.begin();
+              i!=timings.end(); i++)
+        {
+            cout<<i->first<<":"<<endl;
+            cout<<"\tMinimum Time:\t\t"<<*min_element(i->second.begin(),i->second.end())<<endl;
+            cout<<"\tMaximum Time:\t\t"<<*max_element(i->second.begin(),i->second.end())<<endl;
+            float total = 0.0;
+            for(vector<float>::iterator j = i->second.begin(); j!=i->second.end(); j++)
+                total+=*j;
+            cout<<"\tAverage Time:\t\t"<<total/i->second.size()<<endl;
+            cout<<"\tTotal Time:\t\t"<<total<<endl;
+            cout<<"\tCount:\t\t"<<i->second.size()<<"\n"<<endl;
+        }
+    }
+private:
+    map<string, vector<float> > timings;
+};
+void printEventInfo(const char* name, int device_num, cl::Event& event,map<string,vector<float> >& )
+{
+    
+}
+//================
+//#include "materials_lights.h"
+
+//----------------------------------------------------------------------
+float rand_float(float mn, float mx)
+{
+    float r = rand() / (float) RAND_MAX;
+    return mn + (mx-mn)*r;
+}
+//----------------------------------------------------------------------
+
+//----------------------------------------------------------------------
+int main(int argc, char** argv)
+{
+
+    //initialize glut
+/*    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_RGB | GLUT_ALPHA | GLUT_DOUBLE | GLUT_DEPTH
+		//|GLUT_STEREO //if you want stereo you must uncomment this.
+		);
+    glutInitWindowSize(window_width, window_height);
+    glutInitWindowPosition (glutGet(GLUT_SCREEN_WIDTH)/2 - window_width/2, 
+                            glutGet(GLUT_SCREEN_HEIGHT)/2 - window_height/2);
+
+
+    glutWindowHandle = glutCreateWindow("vector addition");*/
+    //omp_set_num_threads(2);
+
+    int num_runs = 10;
+    int vector_size = 10000000;
+
+    CLProfiler prof;
+
+    //Argument 1 sets the number of times to run
+    if(argc>1)
+    {
+        num_runs = atoi(argv[1]);
+    }
+
+    printf("Vector size is %d\n",vector_size);
+    printf("Number of times to run %d\n",num_runs);
+
+    int x,y,real_comp;
+
+    string imgFile ="../sprites/atlantisapproach_nasa_4288.jpg";
+    if(argc>2)
+    {
+        imgFile=argv[2];
+    }
+    int comp = 4;
+    stbi_uc* img = stbi_load(imgFile.c_str(),&x,&y,&real_comp,comp);
+    printf("img x = %d, y = %d, real_comp = %d\n",x,y,real_comp);
+    
+    for(int i =3;i<x*y*4;i+=4)
+    {
+        //set alpha channel to full. (This is arbitrary but necessary because of my lack of
+        //understanding of image formats)
+        img[i]=255;
+    }
+
+    size_t imgSize = sizeof(stbi_uc)*x*y*comp;
+
+    stbi_uc* img_out = new stbi_uc[imgSize];
+
+    cl::ImageFormat fmt;
+
+    /*
+    RGB is strange with the requirements. I currently force 4 channels arbitrarily
+    if(comp == 3)
+    {
+        fmt.image_channel_order = CL_RGB; 
+        fmt.image_channel_data_type = CL_UNORM_INT_101010;
+    }
+    else*/ if(comp==4)
+    {
+        fmt.image_channel_order = CL_RGBA;
+        fmt.image_channel_data_type = CL_UNSIGNED_INT8;
+    }
+    else
+    {
+        printf("Image format is incorrect! Must be RGB or RGBA.\n");
+    }
+
+    cli = new CL();
+
+    cl::Program::Sources src;
+    src.push_back(pair<const char*, ::size_t>(cl_image_manip.c_str(), cl_image_manip.length()));
+
+    vector<cl::Kernel> kernels;
+    for(int i = 0; i<cli->devices.size();i++)
+    {
+        cl::Program prog(cli->context_vec[i],src);
+        vector<cl::Device> dev;
+        dev.push_back(cli->devices[i]);
+        try
+        {
+            prog.build(dev);
+        } 
+        catch (cl::Error er)
+        {
+            printf("loadProgram::program.build\n");
+            printf("source= %s\n", cl_image_manip.c_str());
+            printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+        }
+        std::cout << "Build Status: " << prog.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(cli->devices[i]) << std::endl;
+        std::cout << "Build Options:\t" << prog.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(cli->devices[i]) << std::endl;
+        std::cout << "Build Log:\t " << prog.getBuildInfo<CL_PROGRAM_BUILD_LOG>(cli->devices[i]) << std::endl;
+    
+        kernels.push_back(cl::Kernel(prog,"image_manip"));
+    }
+
+    //Create timers to keep up with execution/memory transfer times.
+    int num_timers = 3;
+
+    EB::TimerList timers;
+    timers["vect_add_cpu"] = new EB::Timer("Adding vectors on single CPU", 0);
+    const char* timer_name_temp[] = {"buffer_write_%d_%ss","vect_add_%d_%ss","buffer_read_%d_%ss"};
+    const char* timer_desc_temp[] = {"Writing buffers to %d %ss","manipulating img on %d %ss","Reading buffers from %d %ss"};
+
+    char timer_name[num_timers*cli->devices.size()][256];
+    for(int num_gpus = 1; num_gpus<=cli->devices.size(); num_gpus++)
+    {
+        for(int i = 0;i<num_timers; i++)
+        {
+            char timer_desc[256];
+            sprintf(timer_name[i+(num_gpus-1)*num_timers],timer_name_temp[i],num_gpus,"GPU");
+            sprintf(timer_desc,timer_desc_temp[i],num_gpus,"GPU");
+            timers[timer_name[i+(num_gpus-1)*num_timers]] = new EB::Timer(timer_desc,0);
+        }
+    }
+
+    //run simulation num_runs times to make sure we get a good statistical sampleing of run times.
+    for(int j = 0; j<num_runs; j++)
+    {
+        int i;
+        cout<<"run: "<<j+1<<" of "<< num_runs<<endl;
+        
+        //Run on 1 gpu, 2 gpus, ..., n gpus where n is the number of devices belonging to the cl context.
+        for(int num_gpus = 1; num_gpus<=cli->devices.size(); num_gpus++)
+        {
+            int timer_num = 3*(num_gpus-1);
+            cl::Event event_img_write[num_gpus],event_img_read[num_gpus],event_execute[num_gpus];
+
+            //Create Buffers for each gpu.
+            cl::Image2D cl_img_in[num_gpus];
+            cl::Image2D cl_img_out[num_gpus];
+
+            //Set size and buffer properties for each of the buffer. Divide by num_gpus to evenly distribute
+            //data accross them
+            timers[timer_name[timer_num]]->start();
+            #pragma omp parallel for private(i) schedule(static,1)
+            for(i = 0; i<num_gpus; i++)
+            {
+                try
+                {
+                    //can't assign an event even though underneath it will enqueue a command to write to GPU.
+                    cl_img_in[i] = cl::Image2D(cli->context_vec[i],CL_MEM_READ_ONLY,fmt,x,y/num_gpus,0,NULL,NULL);
+                    cl_img_out[i] = cl::Image2D(cli->context_vec[i],CL_MEM_WRITE_ONLY,fmt,x,y/num_gpus,0,NULL,NULL);
+                    
+                    cl::size_t<3> origin;
+                    origin[0]=0;                   
+                    origin[1]=0;
+                    //origin[1]=i*(y/num_gpus);//+(i?1:0);                   
+                    origin[2]=0;                   
+//printf("origin (%d,%d,%d)\n",origin[0],origin[1],origin[2]);
+                                                   
+                    cl::size_t<3> region;              
+                    region[0] = x;                 
+                    //region[1] = (i+1)*(y/num_gpus);
+                    region[1] = (y/num_gpus);
+                    region[2] = 1;                 
+//printf("region (%d,%d,%d)\n",region[0],region[1],region[2]);
+
+                    cli->err = cli->queue[i].enqueueWriteImage(cl_img_in[i],CL_FALSE,origin,region,0,0,(void*)&img[(x*i*comp*(y/num_gpus))],NULL,&event_img_write[i]);
+                    cli->queue[i].finish();
+                }
+                catch (cl::Error er)
+                {
+                    printf("j = %d, num_gpus = %d, i = %d\n",j,num_gpus,i);
+                    printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+                }
+            }
+            timers[timer_name[timer_num]]->stop();
+
+            //Transfer our host buffers to each GPU then wait for it to finish before executing the kernel.
+            //set the kernel arguments
+            for(i=0;i<num_gpus; i++)
+            {
+                kernels[i].setArg(0,cl_img_in[i]);
+                kernels[i].setArg(1,cl_img_out[i]);
+            }
+
+            //Set the kernel arguments vec a,b,c and enqueue kernel.
+            timers[timer_name[timer_num+1]]->start();
+            #pragma omp parallel for private(i), schedule(static,1)
+            for(i = 0; i<num_gpus; i++)
+            {
+                try
+                {
+                    cli->err = cli->queue[i].enqueueNDRangeKernel(kernels[i],cl::NullRange,  cl::NDRange(x,y/num_gpus),cl::NullRange , NULL, &event_execute[i]);
+                }
+                catch (cl::Error er)
+                {
+                    printf("j = %d, num_gpus = %d, i = %d\n",j,num_gpus,i);
+                    printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+                }
+            }
+            for(i = 0; i<num_gpus; i++)
+            {
+                cli->queue[i].finish();
+            }
+            timers[timer_name[timer_num+1]]->stop();
+        
+            timers[timer_name[timer_num+2]]->start();
+            #pragma omp parallel for private(i) schedule(static,1)
+            for(i = 0; i<num_gpus; i++)
+            {
+                cl::Event event;
+                try
+                {
+                    cl::size_t<3> origin;
+                    origin[0]=0;                   
+                    origin[1]=0;
+                    //origin[1]=i*(y/num_gpus)+(i?1:0);                   
+                    origin[2]=0;                   
+//printf("origin (%d,%d,%d)\n",origin[0],origin[1],origin[2]);
+                                                   
+                    cl::size_t<3> region;              
+                    region[0] = x;                 
+                    region[1] = (y/num_gpus);
+                    //region[1] = (i+1)*(y/num_gpus);
+                    region[2] = 1;                 
+//printf("region (%d,%d,%d)\n",region[0],region[1],region[2]);
+
+                    cli->err = cli->queue[i].enqueueReadImage(cl_img_out[i],CL_TRUE,origin,region,0,0,(void*)&img_out[(x*i*comp*(y/num_gpus))+(i?1:0)],NULL,&event_img_read[i]);
+                    cli->queue[i].finish();
+                }
+                catch (cl::Error er)
+                {
+                    printf("i = %d, num_gpus = %d\n",i,num_gpus);
+                    printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+                }
+            }
+            timers[timer_name[timer_num+2]]->stop();
+
+
+            for(i=0;i<num_gpus;i++)
+            {
+                prof.addEvent("Negative calculation on GPU",i,num_gpus,event_execute[i]);
+                prof.addEvent("Image read on GPU",i,num_gpus,event_img_read[i]);
+            }
+        }
+    }
+
+    stbi_write_png("outputfile.png",x,y,comp,img_out,0);
+
+    timers.printAll();
+    prof.printAll();
+
+    delete cli;
+    delete[] img;
+    delete[] img_out;
+    return 0;
+}
