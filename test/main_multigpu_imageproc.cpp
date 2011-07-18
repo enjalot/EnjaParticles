@@ -39,7 +39,7 @@ int hindex;
 
 CL* cli;
 
-const string cl_image_manip = "__kernel void image_manip(read_only image2d_t in_img, write_only image2d_t out_img)\n"
+const string cl_image_manip = "__kernel void negative(read_only image2d_t in_img, write_only image2d_t out_img)\n"
                            "{\n"
                            "    int xInd = get_global_id(0);\n"
                            "    int yInd = get_global_id(1);\n"
@@ -49,8 +49,30 @@ const string cl_image_manip = "__kernel void image_manip(read_only image2d_t in_
                            "    newCol.xyz = (uint3)(255,255,255)-col.xyz;\n"
                            "    newCol.w = 255;\n"
                            "    write_imageui(out_img,(int2)(xInd,yInd), newCol);\n"
+                           "}\n"
+                           "__kernel void average(read_only image2d_t in_img, write_only image2d_t out_img, __constant int* filterwidth)\n"
+                           "{\n"
+                           "    int xInd = get_global_id(0);\n"
+                           "    int yInd = get_global_id(1);\n"
+                           "    sampler_t smp = CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_NEAREST;\n"
+                           "    uint4 sum = (uint4)(0,0,0,0);\n"
+                           "    for(int i = -*filterwidth; i<=*filterwidth; i++)\n"
+                           "    {\n"
+                           "        for(int j = -*filterwidth; j<*filterwidth; j++)\n"
+                           "        {\n" 
+                           "            sum += read_imageui(in_img,smp, (int2)(xInd+i,yInd+j));\n"
+                           "        }\n" 
+                           "    }\n"
+                           "    sum/=(*filterwidth)*(*filterwidth);\n"
+                           "    write_imageui(out_img,(int2)(xInd,yInd), sum);\n"
                            "}\n";
 
+enum kern_name
+{
+KERNEL_NEGATIVE,
+KERNEL_AVERAGE,
+KERNEL_GAUSSIAN
+};
 //timers
 //GE::Time *ts[3];
 
@@ -169,8 +191,9 @@ int main(int argc, char** argv)
     //omp_set_num_threads(2);
 
     int num_runs = 10;
-    int vector_size = 10000000;
-
+    int filterwidth = 3;
+    kern_name kern = KERNEL_AVERAGE;
+    
     CLProfiler prof;
 
     //Argument 1 sets the number of times to run
@@ -179,7 +202,6 @@ int main(int argc, char** argv)
         num_runs = atoi(argv[1]);
     }
 
-    printf("Vector size is %d\n",vector_size);
     printf("Number of times to run %d\n",num_runs);
 
     int x,y,real_comp;
@@ -248,7 +270,12 @@ int main(int argc, char** argv)
         std::cout << "Build Options:\t" << prog.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(cli->devices[i]) << std::endl;
         std::cout << "Build Log:\t " << prog.getBuildInfo<CL_PROGRAM_BUILD_LOG>(cli->devices[i]) << std::endl;
     
-        kernels.push_back(cl::Kernel(prog,"image_manip"));
+        if(kern==KERNEL_NEGATIVE)
+            kernels.push_back(cl::Kernel(prog,"negative"));
+        else if(kern==KERNEL_AVERAGE)
+            kernels.push_back(cl::Kernel(prog,"average"));
+        else if(kern==KERNEL_GAUSSIAN)
+            kernels.push_back(cl::Kernel(prog,"gaussian"));
     }
 
     //Create timers to keep up with execution/memory transfer times.
@@ -329,8 +356,17 @@ int main(int argc, char** argv)
             //set the kernel arguments
             for(i=0;i<num_gpus; i++)
             {
-                kernels[i].setArg(0,cl_img_in[i]);
-                kernels[i].setArg(1,cl_img_out[i]);
+                if(kern==KERNEL_NEGATIVE)
+                {
+                    kernels[i].setArg(0,cl_img_in[i]);
+                    kernels[i].setArg(1,cl_img_out[i]);
+                }
+                else if(kern==KERNEL_AVERAGE)
+                {
+                    kernels[i].setArg(0,cl_img_in[i]);
+                    kernels[i].setArg(1,cl_img_out[i]);
+                    kernels[i].setArg(2,filterwidth);
+                }
             }
 
             //Set the kernel arguments vec a,b,c and enqueue kernel.
