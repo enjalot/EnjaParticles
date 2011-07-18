@@ -10,6 +10,7 @@
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
+#include <limits>
 
 
 #include <GL/glew.h>
@@ -59,33 +60,72 @@ class CLProfiler
 public:
     void addEvent(const char* name, int device_num, int num_dev, cl::Event& event)
     {
-        cl_ulong start, end;
-        float timing = -1.0f;
+        cl_ulong start, end, queued, submit;
         event.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
         event.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
-        timing = (end - start) * 1.0e-6f;
+        event.getProfilingInfo(CL_PROFILING_COMMAND_QUEUED, &queued);
+        event.getProfilingInfo(CL_PROFILING_COMMAND_SUBMIT, &submit);
+        double timing = (end - start) * 1.0e-6; 
         stringstream s;
         s<<name<< " # "<<device_num+1<<" of "<<num_dev;
-        timings[s.str()].push_back(timing);
+        cl_timing& tmp = timings[s.str()]; 
+        tmp.end_time = end * 1.0e-6;
+        tmp.start_time = start * 1.0e-6;
+        tmp.queue_time = queued * 1.0e-6;
+        tmp.submit_time = submit * 1.0e-6;
+        if(timing>tmp.max_time)
+            tmp.max_time = timing;
+        if(timing<tmp.min_time)
+            tmp.min_time = timing;
+        tmp.total_time += timing;
+        tmp.num_times += 1;
     }
     void printAll()
     {
-        for (map<string, vector<float> >::iterator i = timings.begin();
+        for (map<string, cl_timing>::iterator i = timings.begin();
               i!=timings.end(); i++)
         {
             cout<<i->first<<":"<<endl;
-            cout<<"\tMinimum Time:\t\t"<<*min_element(i->second.begin(),i->second.end())<<endl;
+            /*cout<<"\tMinimum Time:\t\t"<<*min_element(i->second.begin(),i->second.end())<<endl;
             cout<<"\tMaximum Time:\t\t"<<*max_element(i->second.begin(),i->second.end())<<endl;
             float total = 0.0;
             for(vector<float>::iterator j = i->second.begin(); j!=i->second.end(); j++)
                 total+=*j;
             cout<<"\tAverage Time:\t\t"<<total/i->second.size()<<endl;
             cout<<"\tTotal Time:\t\t"<<total<<endl;
-            cout<<"\tCount:\t\t"<<i->second.size()<<"\n"<<endl;
+            cout<<"\tCount:\t\t"<<i->second.size()<<"\n"<<endl;**/
+            cout<<setprecision(15)<<fixed;
+            cout<<"\tSubmit Time:\t\t"<<i->second.submit_time<<endl;
+            cout<<"\tQueue Time:\t\t"<<i->second.queue_time<<endl;
+            cout<<"\tStart Time:\t\t"<<i->second.start_time<<endl;
+            cout<<"\tEnd Time:\t\t"<<i->second.end_time<<endl;
+            cout<<"\tMinimum Time:\t\t"<<i->second.min_time<<endl;
+            cout<<"\tMaximum Time:\t\t"<<i->second.max_time<<endl;
+            cout<<"\tAverage Time:\t\t"<<i->second.total_time/i->second.num_times<<endl;
+            cout<<"\tTotal Time:\t\t"<<i->second.total_time<<endl;
+            cout<<"\tCount:\t\t"<<i->second.num_times<<"\n"<<endl;
         }
     }
 private:
-    map<string, vector<float> > timings;
+    struct cl_timing
+    {
+        cl_timing()
+        {
+            min_time = numeric_limits<double>::max();
+            max_time = numeric_limits<double>::min();
+            total_time = start_time = end_time = queue_time = submit_time = 0.0;
+            num_times = 0;
+        }
+        double min_time;
+        double max_time;
+        double total_time;
+        double queue_time;
+        double submit_time;
+        double start_time;
+        double end_time;
+        int num_times;
+    };
+    map<string, cl_timing > timings;
 };
 void printEventInfo(const char* name, int device_num, cl::Event& event,map<string,vector<float> >& )
 {
@@ -220,9 +260,7 @@ int main(int argc, char** argv)
             {
                 cli->err = cli->queue[i].enqueueWriteBuffer(a_d[i], CL_FALSE, 0, (a_h.size()/num_gpus)*sizeof(float), &a_h[i*(a_h.size()/num_gpus)], NULL, &event_a[i]);
                 cli->err = cli->queue[i].enqueueWriteBuffer(b_d[i], CL_FALSE, 0, (b_h.size()/num_gpus)*sizeof(float), &b_h[i*(b_h.size()/num_gpus)], NULL, &event_b[i]);
-            }
-            for(i = 0; i<num_gpus; i++)
-            {
+		cli->queue[i].flush();
                 cli->queue[i].finish();
             }
             timers[timer_name[timer_num]]->stop();
@@ -243,16 +281,14 @@ int main(int argc, char** argv)
                 try
                 {
                     cli->err = cli->queue[i].enqueueNDRangeKernel(kernels[i],cl::NullRange,  cl::NDRange(vector_size/num_gpus),cl::NullRange , NULL, &event_execute[i]);
+		    cli->queue[i].flush();
+                    cli->queue[i].finish();
                 }
                 catch (cl::Error er)
                 {
                     printf("j = %d, num_gpus = %d, i = %d\n",j,num_gpus,i);
                     printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
                 }
-            }
-            for(i = 0; i<num_gpus; i++)
-            {
-                cli->queue[i].finish();
             }
             timers[timer_name[timer_num+1]]->stop();
         
@@ -261,7 +297,9 @@ int main(int argc, char** argv)
             for(i = 0; i<num_gpus; i++)
             {
                 cl::Event event;
-                cli->err = cli->queue[i].enqueueReadBuffer(c_d[i], CL_TRUE, 0, (c_h.size()/num_gpus)*sizeof(float), &c_h[i*(c_h.size()/num_gpus)], NULL, &event_read[i]);
+                cli->err = cli->queue[i].enqueueReadBuffer(c_d[i], CL_FALSE, 0, (c_h.size()/num_gpus)*sizeof(float), &c_h[i*(c_h.size()/num_gpus)], NULL, &event_read[i]);
+		cli->queue[i].flush();
+		cli->queue[i].finish();
             }
             timers[timer_name[timer_num+2]]->stop();
     
@@ -378,4 +416,4 @@ int main(int argc, char** argv)
 
     delete cli;
     return 0;
-} 
+}                                                                                                                                                                                                                                                                                                                                                              

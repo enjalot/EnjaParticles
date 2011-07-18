@@ -61,7 +61,7 @@ set (test_multigpu_SOURCES
     main_multigpu.cpp
     )
 
-set (test_multigpu_SOURCES
+set (test_multigpu_imageproc_SOURCES
     main_multigpu_imageproc.cpp
     )
 
@@ -73,7 +73,7 @@ ADD_EXECUTABLE(multi.x ${test_multi_SOURCES})
 ADD_EXECUTABLE(simple.x ${test_simple_SOURCES})
 ADD_EXECUTABLE(flock.x ${test_flock_SOURCES})
 ADD_EXECUTABLE(multigpu.x ${test_multigpu_SOURCES})
-ADD_EXECUTABLE(multigpu_imageproc.x ${test_multigpu_SOURCES})
+ADD_EXECUTABLE(multigpu_imageproc.x ${test_multigpu_imageproc_SOURCES})
 
 message("current build dir:\n")
 message("${BASE_DIR}/rtps/build")

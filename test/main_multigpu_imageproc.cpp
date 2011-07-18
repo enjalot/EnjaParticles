@@ -11,6 +11,7 @@
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
+#include <limits>
 
 
 #include <GL/glew.h>
@@ -68,33 +69,72 @@ class CLProfiler
 public:
     void addEvent(const char* name, int device_num, int num_dev, cl::Event& event)
     {
-        cl_ulong start, end;
-        float timing = -1.0f;
+        cl_ulong start, end, queued, submit;
         event.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
         event.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
-        timing = (end - start) * 1.0e-6f;
+        event.getProfilingInfo(CL_PROFILING_COMMAND_QUEUED, &queued);
+        event.getProfilingInfo(CL_PROFILING_COMMAND_SUBMIT, &submit);
+        double timing = (end - start) * 1.0e-6; 
         stringstream s;
         s<<name<< " # "<<device_num+1<<" of "<<num_dev;
-        timings[s.str()].push_back(timing);
+        cl_timing& tmp = timings[s.str()]; 
+        tmp.end_time = end * 1.0e-6;
+        tmp.start_time = start * 1.0e-6;
+        tmp.queue_time = queued * 1.0e-6;
+        tmp.submit_time = submit * 1.0e-6;
+        if(timing>tmp.max_time)
+            tmp.max_time = timing;
+        if(timing<tmp.min_time)
+            tmp.min_time = timing;
+        tmp.total_time += timing;
+        tmp.num_times += 1;
     }
     void printAll()
     {
-        for (map<string, vector<float> >::iterator i = timings.begin();
+        for (map<string, cl_timing>::iterator i = timings.begin();
               i!=timings.end(); i++)
         {
             cout<<i->first<<":"<<endl;
-            cout<<"\tMinimum Time:\t\t"<<*min_element(i->second.begin(),i->second.end())<<endl;
+            /*cout<<"\tMinimum Time:\t\t"<<*min_element(i->second.begin(),i->second.end())<<endl;
             cout<<"\tMaximum Time:\t\t"<<*max_element(i->second.begin(),i->second.end())<<endl;
             float total = 0.0;
             for(vector<float>::iterator j = i->second.begin(); j!=i->second.end(); j++)
                 total+=*j;
             cout<<"\tAverage Time:\t\t"<<total/i->second.size()<<endl;
             cout<<"\tTotal Time:\t\t"<<total<<endl;
-            cout<<"\tCount:\t\t"<<i->second.size()<<"\n"<<endl;
+            cout<<"\tCount:\t\t"<<i->second.size()<<"\n"<<endl;**/
+            cout<<setprecision(15)<<fixed;
+            cout<<"\tSubmit Time:\t\t"<<i->second.submit_time<<endl;
+            cout<<"\tQueue Time:\t\t"<<i->second.queue_time<<endl;
+            cout<<"\tStart Time:\t\t"<<i->second.start_time<<endl;
+            cout<<"\tEnd Time:\t\t"<<i->second.end_time<<endl;
+            cout<<"\tMinimum Time:\t\t"<<i->second.min_time<<endl;
+            cout<<"\tMaximum Time:\t\t"<<i->second.max_time<<endl;
+            cout<<"\tAverage Time:\t\t"<<i->second.total_time/i->second.num_times<<endl;
+            cout<<"\tTotal Time:\t\t"<<i->second.total_time<<endl;
+            cout<<"\tCount:\t\t"<<i->second.num_times<<"\n"<<endl;
         }
     }
 private:
-    map<string, vector<float> > timings;
+    struct cl_timing
+    {
+        cl_timing()
+        {
+            min_time = numeric_limits<double>::max();
+            max_time = numeric_limits<double>::min();
+            total_time = start_time = end_time = queue_time = submit_time = 0.0;
+            num_times = 0;
+        }
+        double min_time;
+        double max_time;
+        double total_time;
+        double queue_time;
+        double submit_time;
+        double start_time;
+        double end_time;
+        int num_times;
+    };
+    map<string, cl_timing > timings;
 };
 void printEventInfo(const char* name, int device_num, cl::Event& event,map<string,vector<float> >& )
 {
@@ -153,7 +193,7 @@ int main(int argc, char** argv)
     stbi_uc* img = stbi_load(imgFile.c_str(),&x,&y,&real_comp,comp);
     printf("img x = %d, y = %d, real_comp = %d\n",x,y,real_comp);
     
-    for(int i =3;i<x*y*4;i+=4)
+    for(int i =3;i<x*y*comp;i+=comp)
     {
         //set alpha channel to full. (This is arbitrary but necessary because of my lack of
         //understanding of image formats)
@@ -250,7 +290,7 @@ int main(int argc, char** argv)
             //Set size and buffer properties for each of the buffer. Divide by num_gpus to evenly distribute
             //data accross them
             timers[timer_name[timer_num]]->start();
-            #pragma omp parallel for private(i) schedule(static,1)
+            #pragma omp parallel for private(i)// schedule(static,1)
             for(i = 0; i<num_gpus; i++)
             {
                 try
@@ -274,6 +314,7 @@ int main(int argc, char** argv)
 //printf("region (%d,%d,%d)\n",region[0],region[1],region[2]);
 
                     cli->err = cli->queue[i].enqueueWriteImage(cl_img_in[i],CL_FALSE,origin,region,0,0,(void*)&img[(x*i*comp*(y/num_gpus))],NULL,&event_img_write[i]);
+                    cli->queue[i].flush();
                     cli->queue[i].finish();
                 }
                 catch (cl::Error er)
@@ -294,7 +335,7 @@ int main(int argc, char** argv)
 
             //Set the kernel arguments vec a,b,c and enqueue kernel.
             timers[timer_name[timer_num+1]]->start();
-            #pragma omp parallel for private(i), schedule(static,1)
+            #pragma omp parallel for private(i)//, schedule(static,1)
             for(i = 0; i<num_gpus; i++)
             {
                 try
@@ -307,14 +348,16 @@ int main(int argc, char** argv)
                     printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
                 }
             }
+            #pragma omp parallel for private(i)
             for(i = 0; i<num_gpus; i++)
             {
+		cli->queue[i].flush();
                 cli->queue[i].finish();
             }
             timers[timer_name[timer_num+1]]->stop();
         
             timers[timer_name[timer_num+2]]->start();
-            #pragma omp parallel for private(i) schedule(static,1)
+            #pragma omp parallel for private(i)// schedule(static,1)
             for(i = 0; i<num_gpus; i++)
             {
                 cl::Event event;
@@ -334,7 +377,8 @@ int main(int argc, char** argv)
                     region[2] = 1;                 
 //printf("region (%d,%d,%d)\n",region[0],region[1],region[2]);
 
-                    cli->err = cli->queue[i].enqueueReadImage(cl_img_out[i],CL_TRUE,origin,region,0,0,(void*)&img_out[(x*i*comp*(y/num_gpus))+(i?1:0)],NULL,&event_img_read[i]);
+                    cli->err = cli->queue[i].enqueueReadImage(cl_img_out[i],CL_FALSE,origin,region,0,0,(void*)&img_out[(x*i*comp*(y/num_gpus))/*+(i?2:0)*/],NULL,&event_img_read[i]);
+                    cli->queue[i].flush();
                     cli->queue[i].finish();
                 }
                 catch (cl::Error er)
@@ -348,6 +392,7 @@ int main(int argc, char** argv)
 
             for(i=0;i<num_gpus;i++)
             {
+                prof.addEvent("Image write on GPU",i,num_gpus,event_img_write[i]);
                 prof.addEvent("Negative calculation on GPU",i,num_gpus,event_execute[i]);
                 prof.addEvent("Image read on GPU",i,num_gpus,event_img_read[i]);
             }

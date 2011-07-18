@@ -197,9 +197,9 @@ namespace rtps
                 printf("gl Current Display 0x%08x\n",dis);*/
                 cl_context_properties props[] = 
                 {
-                    CL_GL_CONTEXT_KHR, (cl_context_properties)glXGetCurrentContext(), 
-                    CL_GLX_DISPLAY_KHR, (cl_context_properties)glXGetCurrentDisplay(), 
-                    CL_CONTEXT_PLATFORM, NULL,//(cl_context_properties)(platforms[i])(),
+                    /*CL_GL_CONTEXT_KHR, (cl_context_properties)glXGetCurrentContext(), 
+                    CL_GLX_DISPLAY_KHR, (cl_context_properties)glXGetCurrentDisplay(), */
+                    CL_CONTEXT_PLATFORM, (cl_context_properties)(platforms[i])(),
                     0
                 };
                 //cl_context cxGPUContext = clCreateContext(props, 1, &cdDevices[uiDeviceUsed], NULL, NULL, &err);
@@ -218,15 +218,16 @@ namespace rtps
                     printf("ERROR: %s(%s)%d Line number %d\n", er.what(), oclErrorString(er.err()),er.err(),__LINE__);
                 }
                 #else
-                for(int i = 0; i<devices.size(); i++)
+                for(int j = 0; j<devices.size(); j++)
                 {
                     std::vector<cl::Device> dev;
-                    dev.push_back(devices[i]);
+		    printf("Here %d\n",__LINE__);
+                    dev.push_back(devices[j]);
                     try
                     {
                         //context = cl::Context(CL_DEVICE_TYPE_GPU, props);
-                        //context = cl::Context(devices, props);
-                        context_vec.push_back(cl::Context(dev));
+                        context_vec.push_back(cl::Context(dev, props));
+                        //context_vec.push_back(cl::Context(dev));
                     }
                     catch (cl::Error er)
                     {
@@ -276,7 +277,11 @@ namespace rtps
                 int t = devices[j].getInfo<CL_DEVICE_TYPE>();
                 printf("type: \n %d %d \n", t, CL_DEVICE_TYPE_GPU);
                 printf("device name: %s\n", devices[j].getInfo<CL_DEVICE_NAME>().c_str());
+                printf("device id: %ld\n", devices[j].getInfo<CL_DEVICE_VENDOR_ID>());
                 printf("device extensions: %s\n", devices[j].getInfo<CL_DEVICE_EXTENSIONS>().c_str());
+                printf("device version: %s\n", devices[j].getInfo<CL_DEVICE_VERSION>().c_str());
+		printf("device profile: %s\n", devices[j].getInfo<CL_DEVICE_PROFILE>().c_str());
+                printf("driver version: %s\n", devices[j].getInfo<CL_DRIVER_VERSION>().c_str());
         
 
                 //devices = context.getInfo<CL_CONTEXT_DEVICES>();
@@ -531,3 +536,4 @@ namespace rtps
         return CL_SUCCESS;
     }
 }
+    
