@@ -115,9 +115,12 @@ namespace rtps
 		//u.printDevArray(cl_position_s, "pos_s", 10, 10);
 		//u.printDevArray(cl_velocity_s, "vel_s", 10, 10);
 
+		float angle = 0.; // not used at this time
+
 		velocity.execute(
 					cloud_num,
                     settings->dt,  // should be time, not dt
+                    angle,  // should be time, not dt
 					cl_position_s,
 					cl_velocity_s,
                     cloud_cg,
