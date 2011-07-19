@@ -959,9 +959,7 @@ namespace rtps
 	//----------------------------------------------------------------------
 	void SPH::cloudUpdate()
 	{
-
-		printf("num= %d\n", num);
-		if (num == 0) return;
+		//if (num == 0) return;
 
 		cloud->cloud_hash_and_sort();
 		cloud->cellindicesExecute();
@@ -969,18 +967,25 @@ namespace rtps
 
 
 		printf("**** movement: %d\n", ps->getCloudMovement());
-		if (ps->getCloudMovement()) {
-			cloud->cloudVelocityExecute(); // before collision?
-		}
+		//if (ps->getCloudMovement()) {
+			//cloud->cloudVelocityExecute(); // before collision?
+		//}
 
-		//cloud->cloudVelocityExecute(); // before collision?
+		// Press 'R': turn angular velocity on and off
+		// Press 'T': press translation on and off
+
+		// ctrl-mouse: move 
+		// computes velocity, but does not update anything
+		cloud->cloudVelocityExecute(); // before collision?
 
 		printf("REMOVE COLLISIONS GE\n");
-		cloud->collision(cl_position_s, cl_velocity_s, cl_force_s, cl_sphp, num);
-;
-		if (ps->getCloudMovement()) {
-			cloud->integrate();
+		if (num > 0) {
+			cloud->collision(cl_position_s, cl_velocity_s, cl_force_s, cl_sphp, num);
 		}
+;
+		//if (ps->getCloudMovement()) {
+			cloud->integrate();
+		//}
 	}
 	//----------------------------------------------------------------------
 	void SPH::cloudCleanup()

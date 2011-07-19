@@ -72,6 +72,7 @@ float cloud_velocity_y = 0.;
 float cloud_velocity_z = 0.;
 
 float4 rotation_axis;
+float4 rotation_axis_old;
 void computeRotationAxis(float4& v1, float4& v2);
 
 // track whether shift-key is down
@@ -165,6 +166,9 @@ float rand_float(float mn, float mx)
 //----------------------------------------------------------------------
 int main(int argc, char** argv)
 {
+	rotation_axis     = float4(1.,0.,0.,0.);
+	rotation_axis_old = float4(1.,0.,0.,0.);
+
     //initialize glut
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGB | GLUT_ALPHA | GLUT_DOUBLE | GLUT_DEPTH
@@ -205,7 +209,6 @@ int main(int argc, char** argv)
     //rtps::Domain grid = Domain(float4(0,0,0,0), float4(2, 2, 2, 0));
 	rtps::RTPSettings* settings = new rtps::RTPSettings(rtps::RTPSettings::SPH, NUM_PARTICLES, DT, grid);
     
-
     //should be argv[0]
 #ifdef WIN32
     settings->SetSetting("rtps_path", ".");
@@ -234,7 +237,6 @@ int main(int argc, char** argv)
     ps = new rtps::RTPS(settings);
     //ps = new rtps::RTPS();
 
-
     ps->settings->SetSetting("Gravity", -9.8f); // -9.8 m/sec^2
     ps->settings->SetSetting("Gas Constant", 1.0f);
     ps->settings->SetSetting("Viscosity", .001f);
@@ -253,8 +255,6 @@ printf("about to start main loop\n");
     glutMainLoop();
     return 0;
 }
-
-
 
 void init_gl()
 {
@@ -440,6 +440,7 @@ void appKeyboard(unsigned char key, int x, int y)
             cloud_translate_x += 0.1;
             cloud_velocity_x  += 0.1;
             break;
+		case 'R':
         case 'S':
 			// turn arm rotation on and off
 			cloud_movement = cloud_movement ? false : true;
@@ -572,7 +573,6 @@ void appMouse(int button, int state, int x, int y)
 
     //glutPostRedisplay();
 }
-
 //----------------------------------------------------------------------
 void appMotion(int x, int y)
 {
@@ -591,20 +591,19 @@ void appMotion(int x, int y)
 			ps->setCloudTranslate(cloud_translate_x, 
 			   cloud_translate_y, cloud_translate_z);
 		}
-		printf("appMotion, shift down\n");
 	} else if (ctrl_down) {
-		printf("***** CTRL DOWN ****\n");
-		mouse_old = float4(x,y, 0.,1.);
-		mouse_new = float4(mouse_old_x,mouse_old_y, 0.,1.);
+		mouse_old = float4(mouse_old_x, mouse_old_y, 0.,1.);
+		mouse_new = float4(x, y, 0.,1.);
+		//mouse_old.print("mouse_old");
+		//mouse_new.print("mouse_new");
 		float4 vec_old, vec_new;
 		// 300: radius for mouse
 		Vectorize(mouse_old, screen_center, 300, vec_old);
 		Vectorize(mouse_new, screen_center, 300, vec_new);
 		computeRotationAxis(vec_old, vec_new);
-		rotation_axis.print("**** axis");
+		rotation_axis_old = rotation_axis;
+		rotation_axis = vec_new; // not sure
 		ps->setRotationAxis(rotation_axis);
-        //ZeroHysteresisRotation(vec_old, vec_new);
-		// cloud rotation();
 	} else {
 		// domain manipulation
 		printf("appMotion, shift up\n");
@@ -712,10 +711,9 @@ void resizeWindow(int w, int h)
     setFrustum();
     glutPostRedisplay();
 }
-
+//----------------------------------------------------------------------
 void render_stereo()
 {
-
     glDrawBuffer(GL_BACK_LEFT);                              //draw into back left buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_PROJECTION);
@@ -769,8 +767,7 @@ void render_stereo()
         write_movie_frame("stereo/image_right_");
     }
 }
-
-
+//----------------------------------------------------------------------
 void setFrustum(void)
 {
     double top = nearZ*tan(DTR*fovy/2);                    //sets top of frustum based on fovy and near clipping plane
@@ -801,6 +798,7 @@ int write_movie_frame(const char* name)
         }
         return 0;
 }
+//----------------------------------------------------------------------
 void rotate_img(GLubyte* img, int size)
 {
     GLubyte tmp=0;
@@ -814,7 +812,7 @@ void rotate_img(GLubyte* img, int size)
         }
     }
 }
-
+//----------------------------------------------------------------------
 void draw_collision_boxes()
 {
     glColor4f(0,0,1,.5);
@@ -876,9 +874,10 @@ long Vectorize(
    x = (float)(hit.x - origin.x)/radius;
    y = (float)(hit.y - origin.y)/radius;
 
-   //hit.print("hit");
-   //origin.print("origin");
-   //printf("before x,y= %f, %f\n", x, y);
+   printf("radius= %f\n", radius);
+   hit.print("hit");
+   origin.print("origin");
+   printf("before x,y= %f, %f\n", x*radius, y*radius);
 
    y *= -1.0;         // compensate for "inverted" screen y-axis!
    
@@ -893,6 +892,7 @@ long Vectorize(
    }
 
    //printf("after x,y= %f, %f\n", x, y);
+   printf("after x,y= %f, %f\n", x*radius, y*radius);
    //printf("x^2+y^2= %f\n", x*x+y*y);
    
    z = sqrt(1. - (x*x + y*y) );    // compute fictitious 'z' value
@@ -923,22 +923,17 @@ void computeRotationAxis(float4& v1, float4& v2)
 
    cross = float4(v1.y*v2.z-v1.z*v2.y, 
                   v1.z*v2.x-v1.x*v2.z,
-                  v1.x*v2.y-v1.y*v2.x, 1.);
-
-   //Q3Vector3D_Cross( &v1, &v2, &cross ); // axis of rotation
+                  v1.x*v2.y-v1.y*v2.x, 0.);
 
    // EVER ZERO?
    float normi = sqrt(1./(cross.x*cross.x+cross.y*cross.y+cross.z*cross.z));
    cross.x *= normi;
    cross.y *= normi;
    cross.z *= normi;
-   cross.w  = 0.0;
-   //Q3Vector3D_Normalize( &cross,&cross );   
 
-   angle = 2.*acos( dot );                           // angle of rotation
-   printf("angle= %f\n", angle);
+   angle = 2.*acos(dot);    // angle of rotation
+   printf("main::angle= %f deg.\n", angle*180./3.14159);
    cross.w = angle;
-   cross.print("cross");
    rotation_axis = cross;
    
    #if 0
@@ -989,6 +984,5 @@ void FreeRotateWithMouse(void)
    }
 }
 #endif
-//----------------------------------------------------------------------
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------

@@ -43,16 +43,26 @@ and store the rotation vector in another Point3.
 Every iteration, compute the velocity of all the points. Do this on the 
 with a GPU kernel: 
 
+\begin{verbatim}
 computeVel(int num, float4* pos_s, float4 omega, float4 pos_cg)
 {
     r = pos_s[index] 
-	v = omg x (r - pos_cg)
+    v = omg x (r - pos_cg)
 }
+\end{verbatim}
 
 I have implemented the above. The boundaries are not treated very well. When the arm rotates against the fluid, I expect more waves, but the arm appears to be simply moving "through" the fluid with no force acting on the fluid. The BC modifies the force of the fluid
 particle. Perhaps there should be more force away from the boundary. 
 Also, there is an issue of moving the boundary at a different time from when the fluid particles are moving. So if the boundary is moving too fast relative to the fluid, the fluid
 particle could go from one side of the boundary to the other in one time step. That is not good. Either the motion of the boundary would have to be reduced, or the time step reduced (not sure this time step decrease is valid).
-----------------------------------------------------------------------
+%----------------------------------------------------------------------
+
+Given $\omega(t)$ (rotation axis as a function of time), 
+determine position of object. 
+Assume that the object is NOT rotating around the axis of 
+rotation, but only the axis of rotation changes. 
+Thus, once the axis stays fixed, the object should stop rotating. 
+I will add the object rotation on top of that. 
+%----------------------------------------------------------------------
 
 \end{document}

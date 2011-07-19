@@ -153,6 +153,7 @@ namespace rtps
 		float4				cloud_Translate();
 		float4				avg_angular_momentum;
 		// quaternion (theta/2, rotation axis)
+		float4				cloud_omega_old;  // rotation quaterion
 		float4				cloud_omega;  // rotation quaterion
 		float 				cloud_rot_mat[3][3];
 

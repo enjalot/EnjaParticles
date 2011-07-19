@@ -125,18 +125,28 @@ namespace rtps
 
 		cloud_cg_prev = cloud_cg;
 		cloud_cg = cloud_cg0 + ps->getCloudTranslate();
+		float delta_angle = cloud_cg.w - cloud_cg_prev.w;
 
 		float4 cloud_omega = ps->getRotationAxis();
+		cloud_omega.w = .2;
+
 		ps->getCloudTranslate().print("translate");
-		cloud_omega.w = 10.; // Angular rotation
+		//cloud_omega.w = 10.; // Angular rotation
 
 		printf("**** BEFORE vel exec, ");
 		cloud_cg.print("cloud_cg");
 		cloud_omega.print("*** BEFORE vel exec, rotation axis ***");
 
+		printf("cloud_velocity, ");
+		cloud_omega.print("OMEGA");
+
+		printf("delta_angle= %f\n", delta_angle);
+
+
 		velocity.execute(
 					cloud_num,
                     settings->dt,  // should be time, not dt
+					delta_angle,
 					cl_position_s,
 					cl_velocity_s,
 					// I might be off by dt. Must check
@@ -606,6 +616,23 @@ namespace rtps
 		//int nn = 4000;
     	//addNewxyPlane(nn, scaled, cloud_normals); 
 		readPointCloud(cloud_positions, cloud_normals, cloud_faces, cloud_faces_normals);
+
+		// center of gravity of cloud
+		float4 cg(0.,0.,0.,1.);
+		cloud_cg0   	= float4(1.5, 2.5, 2.5, 0.);
+		cloud_cg    	= cloud_cg0;
+		for (int i=0; i < cloud_positions.size(); i++) {
+			cg = cg + cloud_positions[i];
+		}
+		cg.x /= cloud_positions.size();
+		cg.y /= cloud_positions.size();
+		cg.z /= cloud_positions.size();
+		cg.w = 1.0;
+
+		cloud_cg0   	= cg;
+		cloud_cg    	= cloud_cg0;
+
+		cloud_cg.print("new center of gravity");
 
         //calculate();
         updateCLOUDP(); cloudp.print(); // nb points corect
