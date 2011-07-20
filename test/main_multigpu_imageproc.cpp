@@ -63,7 +63,8 @@ const string cl_image_manip = "__kernel void negative(read_only image2d_t in_img
                            "            sum += read_imageui(in_img,smp, (int2)(xInd+i,yInd+j));\n"
                            "        }\n" 
                            "    }\n"
-                           "    sum/=(*filterwidth)*(*filterwidth);\n"
+                           "    sum.xyz=sum.xyz/(4*(*filterwidth)*(*filterwidth));\n"
+                           "    sum.w=255;\n"
                            "    write_imageui(out_img,(int2)(xInd,yInd), sum);\n"
                            "}\n";
 
@@ -191,7 +192,7 @@ int main(int argc, char** argv)
     //omp_set_num_threads(2);
 
     int num_runs = 10;
-    int filterwidth = 3;
+    int filterwidth = 9;
     kern_name kern = KERNEL_AVERAGE;
     
     CLProfiler prof;
@@ -313,6 +314,7 @@ int main(int argc, char** argv)
             //Create Buffers for each gpu.
             cl::Image2D cl_img_in[num_gpus];
             cl::Image2D cl_img_out[num_gpus];
+            cl::Buffer cl_filterwidth[num_gpus];
 
             //Set size and buffer properties for each of the buffer. Divide by num_gpus to evenly distribute
             //data accross them
@@ -325,6 +327,7 @@ int main(int argc, char** argv)
                     //can't assign an event even though underneath it will enqueue a command to write to GPU.
                     cl_img_in[i] = cl::Image2D(cli->context_vec[i],CL_MEM_READ_ONLY,fmt,x,y/num_gpus,0,NULL,NULL);
                     cl_img_out[i] = cl::Image2D(cli->context_vec[i],CL_MEM_WRITE_ONLY,fmt,x,y/num_gpus,0,NULL,NULL);
+                    cl_filterwidth[i] = cl::Buffer(cli->context_vec[i],CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR,sizeof(int),&filterwidth,NULL);
                     
                     cl::size_t<3> origin;
                     origin[0]=0;                   
@@ -365,7 +368,7 @@ int main(int argc, char** argv)
                 {
                     kernels[i].setArg(0,cl_img_in[i]);
                     kernels[i].setArg(1,cl_img_out[i]);
-                    kernels[i].setArg(2,filterwidth);
+                    kernels[i].setArg(2,cl_filterwidth[i]);
                 }
             }
 
@@ -387,7 +390,7 @@ int main(int argc, char** argv)
             #pragma omp parallel for private(i)
             for(i = 0; i<num_gpus; i++)
             {
-		cli->queue[i].flush();
+		        cli->queue[i].flush();
                 cli->queue[i].finish();
             }
             timers[timer_name[timer_num+1]]->stop();
@@ -435,6 +438,7 @@ int main(int argc, char** argv)
         }
     }
 
+    //stbi_write_jpg("outputfile.jpg",x,y,comp,img_out);
     stbi_write_png("outputfile.png",x,y,comp,img_out,0);
 
     timers.printAll();
