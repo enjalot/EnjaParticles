@@ -66,13 +66,31 @@ const string cl_image_manip = "__kernel void negative(read_only image2d_t in_img
                            "    sum.xyz=sum.xyz/(4*(*filterwidth)*(*filterwidth));\n"
                            "    sum.w=255;\n"
                            "    write_imageui(out_img,(int2)(xInd,yInd), sum);\n"
+                           "}\n"
+                           "__kernel void filter(read_only image2d_t in_img, write_only image2d_t out_img, __constant int* filterwidth, __constant float* filter)\n"
+                           "{\n"
+                           "    int xInd = get_global_id(0);\n"
+                           "    int yInd = get_global_id(1);\n"
+                           "    sampler_t smp = CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_NEAREST;\n"
+                           "    uint4 sum = (uint4)(0,0,0,0);\n"
+                           "    for(int i = 0; i<=*filterwidth; i++)\n"
+                           "    {\n"
+                           "        for(int j = 0; j<*filterwidth; j++)\n"
+                           "        {\n" 
+                           "            sum.xyz += filter[j+(i*(*filterwidth))] * read_imageui(in_img,smp, (int2)(xInd+i,yInd+j)).xyz;\n"
+                           "        }\n" 
+                           "    }\n"
+                           "    //sum.xyz=sum.xyz/(4*(*filterwidth)*(*filterwidth));\n"
+                           "    sum.w=255;\n"
+                           "    write_imageui(out_img,(int2)(xInd,yInd), (uint4)sum);\n"
                            "}\n";
+
 
 enum kern_name
 {
 KERNEL_NEGATIVE,
 KERNEL_AVERAGE,
-KERNEL_GAUSSIAN
+KERNEL_FILTER
 };
 //timers
 //GE::Time *ts[3];
@@ -192,8 +210,13 @@ int main(int argc, char** argv)
     //omp_set_num_threads(2);
 
     int num_runs = 10;
-    int filterwidth = 9;
-    kern_name kern = KERNEL_AVERAGE;
+    int filterwidth = 3;
+    //Sobel Y filter.
+    //float filter[]= {-1,0,1,-2, 0, 2, -1,0,1};
+    //Sobel X filter.
+    float filter[]= {1,2,1,0,0, 0, -1,-2,-1};
+    
+    kern_name kern = KERNEL_FILTER;
     
     CLProfiler prof;
 
@@ -275,8 +298,8 @@ int main(int argc, char** argv)
             kernels.push_back(cl::Kernel(prog,"negative"));
         else if(kern==KERNEL_AVERAGE)
             kernels.push_back(cl::Kernel(prog,"average"));
-        else if(kern==KERNEL_GAUSSIAN)
-            kernels.push_back(cl::Kernel(prog,"gaussian"));
+        else if(kern==KERNEL_FILTER)
+            kernels.push_back(cl::Kernel(prog,"filter"));
     }
 
     //Create timers to keep up with execution/memory transfer times.
@@ -314,7 +337,10 @@ int main(int argc, char** argv)
             //Create Buffers for each gpu.
             cl::Image2D cl_img_in[num_gpus];
             cl::Image2D cl_img_out[num_gpus];
-            cl::Buffer cl_filterwidth[num_gpus];
+            //if(kern == KERNEL_AVERAGE || kern == KERNEL_FILTER)
+                cl::Buffer cl_filterwidth[num_gpus];
+            //if(kern == KERNEL_FILTER)
+                cl::Buffer cl_filter[num_gpus];
 
             //Set size and buffer properties for each of the buffer. Divide by num_gpus to evenly distribute
             //data accross them
@@ -327,7 +353,10 @@ int main(int argc, char** argv)
                     //can't assign an event even though underneath it will enqueue a command to write to GPU.
                     cl_img_in[i] = cl::Image2D(cli->context_vec[i],CL_MEM_READ_ONLY,fmt,x,y/num_gpus,0,NULL,NULL);
                     cl_img_out[i] = cl::Image2D(cli->context_vec[i],CL_MEM_WRITE_ONLY,fmt,x,y/num_gpus,0,NULL,NULL);
-                    cl_filterwidth[i] = cl::Buffer(cli->context_vec[i],CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR,sizeof(int),&filterwidth,NULL);
+                    if(kern==KERNEL_AVERAGE || kern== KERNEL_FILTER)
+                        cl_filterwidth[i] = cl::Buffer(cli->context_vec[i],CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR,sizeof(int),&filterwidth,NULL);
+                    if(kern == KERNEL_FILTER)
+                        cl_filter[i] = cl::Buffer(cli->context_vec[i],CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR,sizeof(float)*filterwidth*filterwidth,&filter,NULL);
                     
                     cl::size_t<3> origin;
                     origin[0]=0;                   
@@ -359,17 +388,14 @@ int main(int argc, char** argv)
             //set the kernel arguments
             for(i=0;i<num_gpus; i++)
             {
-                if(kern==KERNEL_NEGATIVE)
+                kernels[i].setArg(0,cl_img_in[i]);
+                kernels[i].setArg(1,cl_img_out[i]);
+                if(kern==KERNEL_AVERAGE || kern==KERNEL_FILTER)
                 {
-                    kernels[i].setArg(0,cl_img_in[i]);
-                    kernels[i].setArg(1,cl_img_out[i]);
-                }
-                else if(kern==KERNEL_AVERAGE)
-                {
-                    kernels[i].setArg(0,cl_img_in[i]);
-                    kernels[i].setArg(1,cl_img_out[i]);
                     kernels[i].setArg(2,cl_filterwidth[i]);
                 }
+                if(kern==KERNEL_FILTER)
+                    kernels[i].setArg(3,cl_filter[i]);
             }
 
             //Set the kernel arguments vec a,b,c and enqueue kernel.
