@@ -22,6 +22,9 @@ namespace rtps
                         Buffer<float4>& separation_s,
                         Buffer<float4>& alignment_s,
                         Buffer<float4>& cohesion_s,
+                        Buffer<float4>& goal_s,
+                        Buffer<float4>& avoid_s,
+                        Buffer<float4>& leaderfollowing_s,
                         Buffer<unsigned int>& indices,
                         //params
                         Buffer<FLOCKParameters>& flockp,

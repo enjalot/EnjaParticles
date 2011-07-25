@@ -17,3 +17,9 @@ where did we have pos_s *= scale?
 
 What happens if force on boundary cloud particle is cancelled completely 
   (see collision_cloud.cl)
+
+
+In this folder you can find the implementation of the systems availables in RTPS:
+- Simple: used for testing and debugging (created and used by I. Johnson)
+- SPH: main system of RTPS, simulates fluids using the SPH formulation (created and maintained by I. Johson, G. Erlebacher, A. Young)
+- FLOCK: system that simulates flocking, particles acts like boids (created and maintained by M. Merced)

@@ -10,23 +10,15 @@ namespace rtps{
         //messing with smoothing distance, making it really small to remove interaction still results in weird force values
         float smoothing_distance = 2.0f * rest_distance;
 
-        // float simulation_scale = pow(particle_vol * max_num / domain_vol, 1./3.); 
-        float simulation_scale = 1.0f;
-
+        float4 dmin = grid->getBndMin();
+        float4 dmax = grid->getBndMax();
+        float domain_vol = (dmax.x - dmin.x) * (dmax.y - dmin.y) * (dmax.z - dmin.z);
+        float VP = 2 * .0262144 / max_num;              //Particle Volume [ m^3 ]
+        
+        float simulation_scale = pow(.5f * VP * max_num / domain_vol, 1.f/3.f) * 5.f; 
         // must be less than smoothing_distance
         float spacing = rest_distance/ simulation_scale;
     
-        // PARAMETERS 
-        //float grid_min = grid->getBndMin();
-        //float grid_max = grid->getBndMax();
-
-        // SET THE SETTINGS
-        //settings->SetSetting("Maximum Number of Particles", max_num);
-        
-        // CL SETTINGS
-        //settings->SetSetting("Number of Variables", 10);
-        //settings->SetSetting("Choice", 0);
-
         // SIMULATION SETTINGS
         settings->SetSetting("Rest Distance", rest_distance);
         settings->SetSetting("Smoothing Distance", smoothing_distance);
@@ -35,39 +27,33 @@ namespace rtps{
         // SPACING
         settings->SetSetting("Spacing", spacing);
 
-        // GRID SIZE
-        //settings->SetSetting("Grid Min", grid_min);
-        //settings->SetSetting("Grid Max", grid_max);
-
         // BOID SETTINGS
-//        if(!settings->Exists("Min Separation Distance"))
-            settings->SetSetting("Min Separation Distance", 1.f);
-//        if(!settings->Exists("Searching Radius"))
-            settings->SetSetting("Searching Radius", 1.f);
-//        if(!settings->Exists("Max Speed"))
-            settings->SetSetting("Max Speed", 5.f);
+        settings->SetSetting("Min Separation Distance", 1.f);
+        settings->SetSetting("Searching Radius", 1.f);
+        settings->SetSetting("Max Speed", 5.f);
+        settings->SetSetting("Angular Velocity", 0.f);
 
         // BOID WEIGHTS
-//        if(!settings->Exists("Separation Weight"))
-            settings->SetSetting("Separation Weight", 1.50f);
-//        if(!settings->Exists("Alignment Weight"))
-            settings->SetSetting("Alignment Weight", 0.75f);
-//        if(!settings->Exists("Cohesion Weight"))
-            settings->SetSetting("Cohesion Weight", 0.5f);
-        
-            
+        settings->SetSetting("Separation Weight", 1.50f);
+        settings->SetSetting("Alignment Weight", 0.75f);
+        settings->SetSetting("Cohesion Weight", 0.5f);
+        settings->SetSetting("Goal Weight", 0.f);
+        settings->SetSetting("Avoid Weight", 0.f);
+        settings->SetSetting("LeaderFollowing Weight", 0.f);
+       
+        // BOID RULE'S SETTINGS 
+        settings->SetSetting("Slowing Distance", 0.025f);
+        settings->SetSetting("Leader Index", 0);
+
+        settings->SetSetting("Maximum Number of Particles", max_num);
         settings->SetSetting("Number of Particles", 0);
     }
 
     void FLOCK::updateFLOCKP(){
         
-        // SET THE SETTINGS
-        //flock_params.max_num = settings->GetSettingAs<int>("Maximum Number of Particles");
-        
         // CL SETTINGS
+        flock_params.max_num = settings->GetSettingAs<int>("Maximum Number of Particles");
         flock_params.num = settings->GetSettingAs<int>("Number of Particles");
-        //flock_params.nb_vars = settings->GetSettingAs<int>("Number of Variables");
-        //flock_params.choice = settings->GetSettingAs<int>("Choice");
 
         // SIMULATION SETTINGS
         flock_params.rest_distance = settings->GetSettingAs<float>("Rest Distance");
@@ -77,27 +63,24 @@ namespace rtps{
         // SPACING
         spacing = settings->GetSettingAs<float>("Spacing");
 
-        // GRID SIZE
-        //flock_params.grid_min = settings->GetSettingAs<float4>("Grid Min");
-        //flock_params.grid_max = settings->GetSettingAs<float4>("Grid Max");
-
         // BOID SETTINGS
         flock_params.min_dist = 0.5f * flock_params.smoothing_distance * settings->GetSettingAs<float>("Min Separation Distance");
         flock_params.search_radius = 0.8f * flock_params.smoothing_distance * settings->GetSettingAs<float>("Searching Radius");
         flock_params.max_speed = settings->GetSettingAs<float>("Max Speed");
+        flock_params.ang_vel = settings->GetSettingAs<float>("Angular Velocity");
 
         // BOID WEIGHTS
         flock_params.w_sep = settings->GetSettingAs<float>("Separation Weight");
         flock_params.w_align = settings->GetSettingAs<float>("Alignment Weight");
         flock_params.w_coh = settings->GetSettingAs<float>("Cohesion Weight");
-
-    //mymese debbug
-#if 0    
-    printf("***\ninside FLOCKSettings\n***\n"); 
-    printf("smoth_dist: %f\n", flock_params.smoothing_distance);
-    printf("radius: %f\n", flock_params.search_radius);
-    printf("min dist: %f \n", flock_params.min_dist);
-#endif
+        flock_params.w_goal = settings->GetSettingAs<float>("Goal Weight");
+        flock_params.w_avoid = settings->GetSettingAs<float>("Avoid Weight");
+        flock_params.w_leadfoll = settings->GetSettingAs<float>("LeaderFollowing Weight");
+        
+        // BOID RULE'S SETTINGS 
+        flock_params.slowing_distance= settings->GetSettingAs<float>("Slowing Distance");
+        flock_params.leader_index = settings->GetSettingAs<int>("Leader Index");
+        
         // update the OpenCL buffer
         std::vector<FLOCKParameters> vparams(0);
         vparams.push_back(flock_params);
@@ -107,4 +90,3 @@ namespace rtps{
     }
 
 }
-//#endif

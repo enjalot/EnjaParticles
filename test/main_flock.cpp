@@ -24,7 +24,7 @@
 using namespace rtps;
 
 int window_width = 640;
-int window_height = 480;
+int window_height = 640;
 int glutWindowHandle = 0;
 
 #define DTR 0.0174532925
@@ -54,9 +54,9 @@ double farZ = 100.0;                                        //far clipping plane
 double screenZ = 10.0;                                     //screen projection plane
 double IOD = 0.5;                                          //intraocular distance
 
-float translate_x = -2.00f;
-float translate_y = -2.70f;//300.f;
-float translate_z = 3.50f;
+float translate_x = -2.5f;  //-2.00f;
+float translate_y = -2.5f;  //-2.70f;//300.f;
+float translate_z =  4.0f;  //3.50f;
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -104,12 +104,13 @@ rtps::RTPS* ps;
 
 #define DT              0.001f
 
-#define maxspeed        10.0f
-#define mindist         1.f
-#define searchradius    1.f
+#define maxspeed        5.0f
+#define mindist         .50f
+#define searchradius    2.0f
 
-float color[4] =   {255.f, 0.f, 0.f, 0.f};
-
+float4 color  = float4(255.f, 0.f, 0.f, 0.f);
+float4 target = float4(3.,2.,4.,1.);
+int hindex;
 //----------------------------------------------------------------------
 float rand_float(float mn, float mx)
 {
@@ -149,10 +150,18 @@ int main(int argc, char** argv)
     printf("before we call enjas functions\n");
 
 
-    float w_sep = 15.f;     // 0.0001f
-    float w_align = 7.5f;   // 0.0001f
-    float w_coh = 2.5f;    // 0.00003f
-    
+    float w_sep = .40f;     //15
+    float w_align = .80f;   //7.5
+    float w_coh = 1.0f;     //2.5
+
+    float w_goal = 1.0f;
+    float w_avoid = .0f;
+
+    float w_leadfoll = 0.f;
+   
+    float ang_vel = 0.f; 
+    float slow_dist = .0f;
+
     //default constructor
     rtps::Domain* grid = new Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
     //rtps::RTPSettings* settings(rtps::RTPSettings::FLOCK, NUM_PARTICLES, DT, grid, maxspeed, mindist, searchradius, color, w_sep, w_align, w_coh);
@@ -166,12 +175,15 @@ int main(int argc, char** argv)
     //printf("arvg[0]: %s\n", argv[0]);
 #endif
 
-    settings->setRenderType(RTPSettings::RENDER);
+    //settings->setRenderType(RTPSettings::RENDER);
     //settings->setRenderType(RTPSettings::SPRITE_RENDER);
+    settings->setRenderType(RTPSettings::SPHERE3D_RENDER);
     
     settings->setRadiusScale(1.0);
     settings->setBlurScale(1.0);
     settings->setUseGLSL(1);
+
+    settings->setTarget(target);
 
     settings->SetSetting("render_texture", "nemo.png");
     settings->SetSetting("render_frag_shader", "boid_tex_frag.glsl");
@@ -186,13 +198,20 @@ int main(int argc, char** argv)
     ps->settings->SetSetting("Max Speed", maxspeed);
     ps->settings->SetSetting("Min Separation Distance", mindist);
     ps->settings->SetSetting("Searching Radius", searchradius);
+    ps->settings->SetSetting("Angular Velocity", ang_vel);
+    ps->settings->SetSetting("Slowing Distance", slow_dist);
+
     ps->settings->SetSetting("Separation Weight", w_sep);
     ps->settings->SetSetting("Alignment Weight", w_align);
     ps->settings->SetSetting("Cohesion Weight", w_coh);
+    ps->settings->SetSetting("Goal Weight", w_goal);
+    ps->settings->SetSetting("Avoid Weight", w_avoid);
+    ps->settings->SetSetting("LeaderFollowing Weight", w_leadfoll);
 
     //initialize the OpenGL scene for rendering
     init_gl();
-
+    
+    printf("about to start mainloop\n");
     glutMainLoop();
     return 0;
 }
@@ -214,7 +233,7 @@ void init_gl()
 
     // set view matrix
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glClearColor(.6, .6, .6, 1.0);
+    glClearColor(1.0, 1.0, 1.0, 1.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     //glRotatef(-90, 1.0, 0.0, 0.0);
@@ -248,10 +267,10 @@ void appKeyboard(unsigned char key, int x, int y)
     switch (key)
     {
         case 'e': //dam break
-            nn = 2000;
+            nn = 16384;
             min = float4(.1, .1, .1, 1.0f);
             max = float4(3.9, 3.9, 3.9, 1.0f);
-            ps->system->addBox(nn, min, max, false);
+            ps->system->addBox(nn, min, max, false, color);
             return;
         case 'p': //print timers
             ps->system->printTimers();
@@ -263,55 +282,12 @@ void appKeyboard(unsigned char key, int x, int y)
             // Cleanup up and quit
             appDestroy();
             return;
-        case 'm':
-            //spray hose
-            printf("about to spray\n");
-            ps->system->sprayHoses();
-            return;
-
+        
         case 'b':
             printf("deleting willy nilly\n");
             ps->system->testDelete();
             return;
 
-        case 't': //place a cube for collision
-            {
-                nn = 512;
-                float cw = .25;
-                float4 cen = float4(cw, cw, cw-.1, 1.0f);
-                make_cube(triangles, cen, cw);
-                cen = float4(1+cw, 1+cw, cw-.1, 1.0f);
-                make_cube(triangles, cen, cw);
-                cen = float4(1+3*cw, 1+3*cw, cw-.1, 1.0f);
-                make_cube(triangles, cen, cw);
-                cen = float4(3.5, 3.5, cw-.1, 1.0f);
-                make_cube(triangles, cen, cw);
-                ps->system->loadTriangles(triangles);
-                return;
-            }
-        case 'r': //drop a rectangle
-        {
-            //nn = 65536;
-	        nn = 1024;
-            //nn = 8192;
-            //nn = 4;
-            //max = float4(2.5, 2.5, 2.5, 1.0f);
-            //min = float4(2., 2., 2., 1.0f);
-            max = float4(4.5, 3., 4.5, 1.0f);
-            min = float4(1.5, 2., 1.5, 1.0f);
-            //max = float4(1.1,1.1, 1.1, 1.0f);
-            //min = float4(1., 1., 1., 1.0f);
-            ps->system->addBox(nn, min, max, false);
-            return;
-        }
-        case 'R': //add a sphere
-        {
-            nn = 64;
-            center = float4(2.5f, 2.5f, 2.5f, 1.0f);
-            radius = .3f;
-            ps->system->addBall(nn, center, radius, false);
-            return;
-        }
         case 'h':
         {
             //spray hose
@@ -321,43 +297,116 @@ void appKeyboard(unsigned char key, int x, int y)
             //float4 velocity(2., 5., -.8, 0);
             float4 velocity(2., .5, 2., 0);
             //sph sets spacing and multiplies by radius value
-            float4 color = float4(.0, 0.0, 1.0, 1.0);
-            ps->system->addHose(5000, center, velocity, 4, color);
+            //float4 color = float4(.0, 0.0, 1.0, 1.0);
+            hindex = ps->system->addHose(5000, center, velocity, 4, color);
             return;
         }
+        
+        case 'H':
+        {
+            //spray hose
+            printf("about to move hose\n");
+            float4 center(.1, 2., 1., 1.);
+            //float4 velocity(.6, -.6, -.6, 0);
+            //float4 velocity(2., 5., -.8, 0);
+            float4 velocity(2., -.5, -1., 0);
+            //sph sets spacing and multiplies by radius value
+            //float4 color = float4(.0, 0.0, 1.0, 1.0);
+            //float4 color = float4(0.1, 0.1, 0.3, .01);
+            ps->system->updateHose(hindex, center, velocity, 4, color);
+            return;
+		}
+        
         case 'n':
             render_movie=!render_movie;
             break;
+        
         case '`':
             stereo_enabled = !stereo_enabled;
             break;
+        
+        case 't': //place a cube for collision
+            {
+                nn = 512;
+                float cw = .1;
+                //float4 cen = float4(3., 1., 4., 1.0f);
+                make_cube(triangles, target, cw);
+                //cen = float4(1+cw, 1+cw, cw-.1, 1.0f);
+                //make_cube(triangles, cen, cw);
+                //cen = float4(1+3*cw, 1+3*cw, cw-.1, 1.0f);
+                //make_cube(triangles, cen, cw);
+                //cen = float4(3.5, 3.5, cw-.1, 1.0f);
+                //make_cube(triangles, cen, cw);
+                
+                //cen = float4(1.5, 1.5, cw-.1, 1.f);
+                //make_cube(triangles, cen, 1.);
+                
+                ps->system->loadTriangles(triangles);
+                return;
+            }
+
+        case 'r': //drop a rectangle
+        {
+            //nn = 65536;
+	        //nn = 1024;
+            //nn = 8192;
+            nn = 256;
+            //max = float4(4.5, 4.5 , 4.5, 1.0f);
+            //min = float4(0.5, 0.5 , 0.5, 1.0f);
+            max = float4(3.5, 1.5, 3.5, 1.0f);
+            min = float4(1.5, 1., 1.5, 1.0f);
+            //max = float4(4.5, 1., 4.5, 1.0f);
+            //min = float4(0.5, 1., 0.5, 1.0f);
+            ps->system->addBox(nn, min, max, false, color);
+            return;
+        }
+
+        case 'k': //add a sphere
+        {
+            nn = 1000;
+            center = float4(2.5f, 2.5f, 2.5f, 1.0f);
+            radius = 1.f;
+            printf("added a spehere at: %f %f %f with radius %f\n", center.x, center.y, center.z, radius);
+            ps->system->addBall(nn, center, radius, false);
+            return;
+        }
+
         case 'o':
             ps->system->getRenderer()->writeBuffersToDisk();
             return;
+        
         case 'c':
             ps->system->getRenderer()->setDepthSmoothing(Render::NO_SHADER);
             return;
+        
         case 'C':
             ps->system->getRenderer()->setDepthSmoothing(Render::BILATERAL_GAUSSIAN_SHADER);
             return;
+        
         case 'w':
             translate_z -= 0.1;
             break;
+        
         case 'a':
             translate_x += 0.1;
             break;
+        
         case 's':
             translate_z += 0.1;
             break;
+        
         case 'd':
             translate_x -= 0.1;
             break;
+        
         case 'z':
             translate_y += 0.1;
             break;
+        
         case 'x':
             translate_y -= 0.1;
             break;
+        
         default:
             return;
     }
@@ -386,6 +435,24 @@ void appRender()
 {
 
     //ps->system->sprayHoses();
+    GLfloat *ambient, *diffuse, *specular, *position;
+
+    ambient = new GLfloat[4];   //(.9,.9,.9,1.);
+    position = new GLfloat[4];  //(5,1,3,1);
+    diffuse = new GLfloat[4];
+    specular = new GLfloat[4];
+
+    ambient[0] = 1.0f;   diffuse[0] = 1.f;  specular[0] = .0f;  position[0] = 3.50f;
+    ambient[1] = 1.0f;   diffuse[1] = .0f;  specular[1] = .0f;  position[1] = 0.0f;
+    ambient[2] = 1.0f;   diffuse[2] = .0f;  specular[2] = 1.f;  position[2] = 1.50f;
+    ambient[3] = 1.0f;   diffuse[3] = 1.f;  specular[3] = 1.f;  position[3] = 1.f;
+
+    glEnable(GL_LIGHT0);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, ambient); 
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse); 
+    glLightfv(GL_LIGHT0, GL_SPECULAR, specular); 
+    glLightfv(GL_LIGHT0, GL_POSITION, position); 
+
 
     glEnable(GL_DEPTH_TEST);
     if (stereo_enabled)

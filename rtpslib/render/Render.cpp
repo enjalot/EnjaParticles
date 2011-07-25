@@ -333,6 +333,7 @@ namespace rtps
         perspectiveProjection();
     }
 
+	//----------------------------------------------------------------------
     void Render::renderPointsAsSpheres()
     {
 
@@ -360,6 +361,7 @@ namespace rtps
         glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
         glDisable(GL_POINT_SPRITE);
     }
+	//----------------------------------------------------------------------
 
     void Render::render_box(float4 min, float4 max)
     {
@@ -443,6 +445,7 @@ namespace rtps
         //glDisable(GL_DEPTH_TEST);
     }
 
+	//----------------------------------------------------------------------
     int Render::generateCheckerBoardTex(GLubyte* color1,GLubyte* color2,int num_squares, int length)
     {
         unsigned int imageSize = length*length;
@@ -689,6 +692,7 @@ namespace rtps
 
         unsigned char *im = stbi_load( texture_file.c_str(), &w, &h, &channels, force_channels );
         printf("after load w: %d h: %d channels: %d\n", w, h, channels);
+        printf("im looking for the image at %s\n", texture_file.c_str());
         if (im == NULL)
         {
             printf("fail!: %s\n", stbi_failure_reason());

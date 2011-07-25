@@ -12,7 +12,7 @@ namespace rtps
         string filename = settings->GetSettingAs<string>("render_texture");
         //path += "../../../sprites/fsu_seal.jpg";
         //path += "../../../sprites/firejet_blast.png";   //borrowed from http://homepage.mac.com/nephilim/sw3ddev/additive_blending.html
-        path += "../../sprites/" + filename;
+        path = "../../sprites/" + filename;
         //path += "../../../sprites/firejet_smoke.png";
         //path += "../../../sprites/tomek.jpg";
         //path += "../../../sprites/enjalot.jpg";

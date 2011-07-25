@@ -6,6 +6,7 @@
 #include "../render/Render.h"
 #include "../render/SpriteRender.h"
 #include "../render/SSFRender.h"
+#include "../render/Sphere3DRender.h"
 
 #ifdef WIN32
     #if defined(rtps_EXPORTS)
@@ -73,7 +74,7 @@ namespace rtps
             return 0;
         };
 
-        virtual void addBall(int nn, float4 center, float radius, bool scaled)
+        virtual void addBall(int nn, float4 center, float radius, bool scaled, float4 color=float4(1., 0., 0., 1.))
         {
         };
         virtual int addHose(int total_n, float4 center, float4 velocity, float radius, float4 color=float4(1., 0., 0., 1.))

@@ -23,7 +23,7 @@ SET(WITH_OPENCL TRUE)
 ADD_DEFINITIONS(-g )
 #ADD_DEFINITIONS(-DDEBUG)
 IF(WITH_OPENCL)
-        ADD_DEFINITIONS(-DGPU)
+    ADD_DEFINITIONS(-DGPU)
 ENDIF(WITH_OPENCL)
 #might want to have CPU even if we have OpenCL available
 #ADD_DEFINITIONS(-DCPU)
@@ -74,6 +74,7 @@ IF(CLOUD_COLLISION)
     ${rtpslib_SOURCE_DIR}/system/sph/CloudVelocity
     ${rtpslib_SOURCE_DIR}/system/sph/CloudEuler
     ${rtpslib_SOURCE_DIR}/system/sph/Collision_cloud
+    ${rtpslib_SOURCE_DIR}/system/common/CloudPermute
     )
 ENDIF(CLOUD_COLLISION)
 
@@ -91,6 +92,7 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/render/Render
     ${rtpslib_SOURCE_DIR}/render/SpriteRender
     ${rtpslib_SOURCE_DIR}/render/SSFRender
+    ${rtpslib_SOURCE_DIR}/render/Sphere3DRender
     ${rtpslib_SOURCE_DIR}/render/util/stb_image.c
     ${rtpslib_SOURCE_DIR}/render/util/stb_image_write.h
 
@@ -104,7 +106,6 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/common/Hash
     ${rtpslib_SOURCE_DIR}/system/common/CellIndices
     ${rtpslib_SOURCE_DIR}/system/common/Permute
-    ${rtpslib_SOURCE_DIR}/system/common/CloudPermute
 	
     
     # Simple

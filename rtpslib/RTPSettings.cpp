@@ -58,6 +58,7 @@ namespace rtps
         this->tri_collision = tri_collision;
     }
     
+#if 0
     RTPSettings::RTPSettings(SysType system, int max_particles, float dt, Domain* grid, float maxspeed, float mindist, float searchradius, float color[], float w_sep, float w_align, float w_coh)
     {
 		printf("rtpsettings: 5\n");
@@ -76,6 +77,7 @@ namespace rtps
         this->w_align = w_align;
         this->w_coh = w_coh;
     }
+#endif
 
     RTPSettings::~RTPSettings()
     {

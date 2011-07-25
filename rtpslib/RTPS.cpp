@@ -24,7 +24,7 @@ printf("done with constructor\n");
         cl_managed = true;
         settings = s;
         Init();
-printf("done with constructor\n");
+        printf("done with constructor\n");
     }
 
     RTPS::RTPS(RTPSettings *s, CL* _cli)
@@ -54,11 +54,10 @@ printf("done with constructor\n");
         glewInit();
 
         system = NULL;
-        //renderer = NULL;
 
         printf("init: settings->system: %d\n", settings->system);
+        
         //TODO choose based on settings
-        //system = new Simple(this, settings->max_particles);
         if (settings->system == RTPSettings::Simple)
         {
             printf("simple system\n");
@@ -86,11 +85,7 @@ printf("done with constructor\n");
 			settings->setMaxOuterParticles(10048);
         }
 
-printf("created system in RTPS\n");
-
-        //pass in the position and color vbo ids to the renderer
-        //get the number from the system
-        //renderer = new Render(system->getPosVBO(), system->getColVBO(), system->getNum());
+        printf("created system in RTPS\n");
     }
 
     void RTPS::update()
@@ -104,16 +99,6 @@ printf("created system in RTPS\n");
     void RTPS::render()
     {
         system->render();
-        /*renderer->render();
-        //this functionality should be inside the system's render() function
-        //so System should own the renderer object
-        if(settings->system == RTPSettings::SPH)
-        {
-            Domain grid = system->getGrid();
-            //should check if grid exists
-            renderer->render_box(grid.getBndMin(), grid.getBndMax());
-            renderer->render_table(grid.getBndMin(), grid.getBndMax());
-        }*/
     }
 
     void RTPS::printTimers()

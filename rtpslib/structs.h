@@ -131,6 +131,12 @@ namespace rtps
             return c;
         }
 
+        friend float4 operator-(float4&a)
+        {
+            float4 c = float4(-a.x, -a.y, -a.z, -a.w);
+            return c;
+        }
+
         friend float4 operator+(float4& a, float4& b)
         {
             float4 c = float4(b.x+a.x, b.y+a.y, b.z+a.z, b.w+a.w);
@@ -149,6 +155,44 @@ namespace rtps
             (*this).y += a.y;
             (*this).z += a.z;
             (*this).w += a.w;
+        }
+
+        void operator-=(float4 a)
+        {
+            (*this).x -= a.x;
+            (*this).y -= a.y;
+            (*this).z -= a.z;
+            (*this).w -= a.w;
+        }
+
+        void operator*=(float4 a)
+        {
+            (*this).x *= a.x;
+            (*this).y *= a.y;
+            (*this).z *= a.z;
+            (*this).w *= a.w;
+        }
+        void operator*=(float a)
+        {
+            (*this).x *= a;
+            (*this).y *= a;
+            (*this).z *= a;
+            (*this).w *= a;
+        }
+
+        void operator/=(float a)
+        {
+            (*this).x /= a;
+            (*this).y /= a;
+            (*this).z /= a;
+            (*this).w /= a;
+        }
+        void operator/=(float4 a)
+        {
+            (*this).x /= a.x;
+            (*this).y /= a.y;
+            (*this).z /= a.z;
+            (*this).w /= a.w;
         }
 
         friend float4 operator*(float r, float4& b)

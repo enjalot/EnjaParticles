@@ -18,10 +18,12 @@
 #if defined __APPLE__ || defined(MACOSX)
 //OpenGL stuff
     //#include <GLUT/glut.h>
+    #include <OpenGL/glu.h>
     #include <OpenGL/gl.h>
 #else
 //OpenGL stuff
     //#include <GL/glut.h>
+    #include <GL/glu.h>
     #include <GL/gl.h>
 #endif
 
