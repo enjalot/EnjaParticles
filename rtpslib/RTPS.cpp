@@ -15,6 +15,7 @@ namespace rtps
         cl_managed = true;
         //settings will be the default constructor
         Init();
+printf("done with constructor\n");
     }
 
     RTPS::RTPS(RTPSettings *s)
@@ -32,6 +33,7 @@ printf("done with constructor\n");
         cl_managed = false;
         settings = s;
         Init();
+printf("done with constructor\n");
     }
 
     RTPS::~RTPS()

@@ -124,8 +124,8 @@ rtps::RTPS* ps;
 #define DT .003f
 
 // contorl 
-float4 color = float4(0.5, 0.3, 0.73, .05);
-//float4 color = float4(1., 0.5, 0.0, 1.);
+//float4 color = float4(0.5, 0.3, 0.73, .05);
+float4 color = float4(.0, 0.7, 0.0, 1.);
 int hindex; 
 
 
@@ -196,8 +196,8 @@ int main(int argc, char** argv)
     //printf("arvg[0]: %s\n", argv[0]);
 #endif
 
-    settings->setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
-    //settings->setRenderType(RTPSettings::RENDER);
+    //settings->setRenderType(RTPSettings::SCREEN_SPACE_RENDER);
+    settings->setRenderType(RTPSettings::RENDER);
     //settings.setRenderType(RTPSettings::SPRITE_RENDER);
     settings->setRadiusScale(0.4);
     settings->setBlurScale(1.0);
@@ -302,7 +302,7 @@ void appKeyboard(unsigned char key, int x, int y)
         case 'b':
             printf("deleting willy nilly\n");
             ps->system->testDelete();
-            return;
+           return;
         case 'h':
         {
             //spray hose

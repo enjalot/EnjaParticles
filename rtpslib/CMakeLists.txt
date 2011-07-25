@@ -67,6 +67,16 @@ set (rtpslib_INCLUDES
     #${rtpslib_SOURCE_DIR}/opencl/bitonic_sort/src
 )    
 
+IF(CLOUD_COLLISION)
+    SET(cloud_sources 
+    ${rtpslib_SOURCE_DIR}/system/Cloud.cpp
+
+    ${rtpslib_SOURCE_DIR}/system/sph/CloudVelocity
+    ${rtpslib_SOURCE_DIR}/system/sph/CloudEuler
+    ${rtpslib_SOURCE_DIR}/system/sph/Collision_cloud
+    )
+ENDIF(CLOUD_COLLISION)
+
 
 #library source files (don't explicitly give file extension, inferred from source type)
 set (rtpslib_SOURCES
@@ -103,14 +113,13 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/simple/Euler
     	
 	# SPH
-    ${rtpslib_SOURCE_DIR}/system/OUTER.cpp
-    ${rtpslib_SOURCE_DIR}/system/OUTERSettings.cpp
     ${rtpslib_SOURCE_DIR}/system/SPH.cpp
     ${rtpslib_SOURCE_DIR}/system/SPHSettings.cpp
-    ${rtpslib_SOURCE_DIR}/system/Cloud.cpp
 
-    ${rtpslib_SOURCE_DIR}/system/sph/CloudVelocity
-    ${rtpslib_SOURCE_DIR}/system/sph/CloudEuler
+    #cloud
+    ${cloud_sources}
+
+
     ${rtpslib_SOURCE_DIR}/system/sph/Euler
     ${rtpslib_SOURCE_DIR}/system/sph/LeapFrog
     ${rtpslib_SOURCE_DIR}/system/sph/Lifetime
@@ -121,8 +130,8 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/sph/Force
     ${rtpslib_SOURCE_DIR}/system/sph/Collision_wall
     ${rtpslib_SOURCE_DIR}/system/sph/Collision_triangle
-    ${rtpslib_SOURCE_DIR}/system/sph/Collision_cloud
 
+    
     #### these are CPU only
     ${rtpslib_SOURCE_DIR}/system/sph/Pressure
     ${rtpslib_SOURCE_DIR}/system/sph/Viscosity
@@ -148,6 +157,8 @@ set (rtpslib_SOURCES
     # Added by GE
     ${rtpslib_SOURCE_DIR}/system/boids
 	# OUTER
+    ${rtpslib_SOURCE_DIR}/system/OUTER.cpp
+    ${rtpslib_SOURCE_DIR}/system/OUTERSettings.cpp
     ${rtpslib_SOURCE_DIR}/system/outer/Euler
     ${rtpslib_SOURCE_DIR}/system/outer/LeapFrog
     ${rtpslib_SOURCE_DIR}/system/outer/Lifetime
@@ -157,7 +168,6 @@ set (rtpslib_SOURCES
     ${rtpslib_SOURCE_DIR}/system/outer/Force
     ${rtpslib_SOURCE_DIR}/system/outer/Collision_wall
     ${rtpslib_SOURCE_DIR}/system/outer/Collision_triangle
-
     #### these are CPU only
     ${rtpslib_SOURCE_DIR}/system/outer/Pressure
     ${rtpslib_SOURCE_DIR}/system/outer/Viscosity

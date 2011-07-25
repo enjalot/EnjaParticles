@@ -141,7 +141,9 @@ namespace rtps
 		//printf("*** before renderPointCloud\n");
         glDepthMask(GL_TRUE);
 		glEnable(GL_LIGHTING);
+#ifdef CLOUD_COLLISION
 		renderPointCloud(); //GE
+#endif
         glDepthMask(GL_FALSE);
 		glDisable(GL_LIGHTING);
 

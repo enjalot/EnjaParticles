@@ -1,4 +1,3 @@
-#define CLOUD_COLLISION 0
 
 #include <GL/glew.h>
 #include <math.h>
@@ -82,9 +81,10 @@ namespace rtps
         ps->cli->addIncludeDir(sph_source_dir);
         ps->cli->addIncludeDir(common_source_dir);
 
-
+#ifdef CLOUD_COLLISION
 		// CLOUD INITIALIZATION
 		cloudInitialize();
+#endif
 
 
 
@@ -331,11 +331,15 @@ namespace rtps
 
             collision();
 
+#ifdef CLOUD_COLLISION
 			cloudUpdate();
+#endif
             integrate(); // includes boundary force
         }
 
+#ifdef CLOUD_COLLISION
 		cloudCleanup();
+#endif
 
         cl_position_u.release();
         cl_color_u.release();
@@ -938,6 +942,8 @@ namespace rtps
 
 #endif
     }
+    
+#ifdef CLOUD_COLLISION
 	//----------------------------------------------------------------------
 	void SPH::cloudInitialize()
 	{
@@ -972,5 +978,6 @@ namespace rtps
 		;
 	}
 	//----------------------------------------------------------------------
+#endif
 
 }; //end namespace

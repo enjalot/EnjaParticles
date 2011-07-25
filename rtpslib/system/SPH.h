@@ -18,10 +18,11 @@
 
 #include <util.h>
 
+#ifdef CLOUD_COLLISION
 #include "Cloud.h"
+#endif
 
 class OUTER;
-
 
 //#include <Prep.h>
 #include <Hash.h>
@@ -34,7 +35,9 @@ class OUTER;
 #include <sph/Force.h>
 #include <sph/Collision_wall.h>
 #include <sph/Collision_triangle.h>
-#include <sph/Collision_cloud.h>
+#ifdef CLOUD_COLLISION
+    #include <sph/Collision_cloud.h>
+#endif
 #include <sph/LeapFrog.h>
 #include <sph/Lifetime.h>
 #include <sph/Euler.h>
@@ -66,9 +69,11 @@ namespace rtps
         SPH(RTPS *ps, int num, int nb_in_cloud=0);
         ~SPH();
 
+#ifdef CLOUD_COLLISION
 		void cloudCleanup();
 		void cloudInitialize();
 		void cloudUpdate();
+#endif
 
 		// GE
 		void setOUTER(OUTER* outer) {
@@ -245,13 +250,15 @@ namespace rtps
         //void sset_int(int n, int val, cl_mem xdst);
 
 		OUTER* outer;
-		CLOUD* cloud;
 
 		Utils u;
 
+#ifdef CLOUD_COLLISION
+		CLOUD* cloud;
 		int nb_in_cloud; // nb of points in cloud
 
 		void printDevArray(Buffer<float4>& cl_cloud_position, char* msg, int nb_el, int nb_print);
+#endif
 
     };
 
