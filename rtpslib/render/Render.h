@@ -110,12 +110,31 @@ namespace rtps
         virtual void render();
         virtual void setWindowDimensions(GLuint width,GLuint height);
 
+// GE
+	public:
+#ifdef CLOUD_COLLISION
+		std::vector<float4>& setCloudData(std::vector<float4>& cloud_positions, 
+		                                  std::vector<float4>& cloud_normals, 
+		                                  std::vector<int4>& cloud_faces, 
+		                                  std::vector<int4>& cloud_faces_normals, 
+										  int nb_points)
+		{
+			 // cloud_positions.size() >= cloud_num;
+		     this->cloud_positions = &cloud_positions;
+		     this->cloud_normals = &cloud_normals;
+		     this->cloud_faces = &cloud_faces;
+		     this->cloud_faces_normals = &cloud_faces_normals;
+			 this->cloud_num = nb_points; 
+		}
 	protected:
+		void renderPointCloud();
 		std::vector<float4>* cloud_positions; 
 		std::vector<float4>* cloud_normals; 
 		std::vector<int4>* cloud_faces; 
 		std::vector<int4>* cloud_faces_normals; 
 		int cloud_num;
+#endif
+
 
     protected:
         int loadTexture(std::string texture_file, std::string texture_name);
@@ -165,24 +184,7 @@ namespace rtps
             return particle_radius;
         }
 
-		// GE
-	public:
-		std::vector<float4>& setCloudData(std::vector<float4>& cloud_positions, 
-		                                  std::vector<float4>& cloud_normals, 
-		                                  std::vector<int4>& cloud_faces, 
-		                                  std::vector<int4>& cloud_faces_normals, 
-										  int nb_points)
-		{
-			 // cloud_positions.size() >= cloud_num;
-		     this->cloud_positions = &cloud_positions;
-		     this->cloud_normals = &cloud_normals;
-		     this->cloud_faces = &cloud_faces;
-		     this->cloud_faces_normals = &cloud_faces_normals;
-			 this->cloud_num = nb_points; 
-		}
-	protected:
-		void renderPointCloud();
-
+		
     };  
 
 

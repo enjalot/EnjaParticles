@@ -161,6 +161,8 @@ namespace rtps
         //make sure rendering timing is accurate
         glFinish();
     }
+
+#ifdef CLOUD_COLLISION
 	//----------------------------------------------------------------------
 	void Render::renderPointCloud()
 	{
@@ -168,14 +170,15 @@ namespace rtps
 		int sz = cloud_positions->size();
 #if 1
 		glBegin(GL_POINTS);
-			glColor3f(.5, .5, .5);
-			for (int i=0; i < cloud_num; i++) {
-				float4& f = (*cloud_positions)[i];
-				//printf("v: %f, %f, %f\n", (float) f.x, (float) f.y, (float) f.z);
-				if (f.x < 0 || f.y < 0 || f.z < 0) continue;
-				if (f.x > 5 || f.y > 5 || f.z > 5) continue;
-				glVertex3f(f.x, f.y, f.z);
-			}
+        glColor3f(.5, .5, .5);
+        for (int i=0; i < cloud_num; i++) 
+        {
+            float4& f = (*cloud_positions)[i];
+            //printf("v: %f, %f, %f\n", (float) f.x, (float) f.y, (float) f.z);
+            if (f.x < 0 || f.y < 0 || f.z < 0) continue;
+            if (f.x > 5 || f.y > 5 || f.z > 5) continue;
+            glVertex3f(f.x, f.y, f.z);
+        }
 		glEnd();
 		//exit(0);
 #endif
@@ -183,50 +186,51 @@ namespace rtps
 #if 1
 // Something wrong with the faces when the arm is moving
 
-		int nb_faces = cloud_faces->size();
+    int nb_faces = cloud_faces->size();
 
-		if (nb_faces > 0) {
-			//printf("nb_faces= %d\n", nb_faces);
-			glBegin(GL_QUADS);
-				for (int i=0; i < nb_faces; i++) {
-					int4& vertices = (*cloud_faces)[i];
-					int4& normals = (*cloud_faces_normals)[i];
-					//vertices.print("v");
-					//normals.print("n");
-					//printf("ver: %d, %d, %d, %d\n", vertices.x, vertices.y, vertices.z, vertices.w);
-					float4& v1 = (*cloud_positions)[vertices.x];
-					float4& n1 = (*cloud_normals)[normals.x];
-					//v1.print("v1");
-					//n1.print("n1");
-					glNormal3f(n1.x, n1.y, n1.z);
-					glVertex3f(v1.x, v1.y, v1.z);
+    if (nb_faces > 0) 
+    {
+        //printf("nb_faces= %d\n", nb_faces);
+        glBegin(GL_QUADS);
+            for (int i=0; i < nb_faces; i++) {
+                int4& vertices = (*cloud_faces)[i];
+                int4& normals = (*cloud_faces_normals)[i];
+                //vertices.print("v");
+                //normals.print("n");
+                //printf("ver: %d, %d, %d, %d\n", vertices.x, vertices.y, vertices.z, vertices.w);
+                float4& v1 = (*cloud_positions)[vertices.x];
+                float4& n1 = (*cloud_normals)[normals.x];
+                //v1.print("v1");
+                //n1.print("n1");
+                glNormal3f(n1.x, n1.y, n1.z);
+                glVertex3f(v1.x, v1.y, v1.z);
 
-					float4& v2 = (*cloud_positions)[vertices.y];
-					float4& n2 = (*cloud_normals)[normals.y];
-					//v2.print("v2");
-					//n2.print("n2");
-					glNormal3f(n2.x, n2.y, n2.z);
-					glVertex3f(v2.x, v2.y, v2.z);
+                float4& v2 = (*cloud_positions)[vertices.y];
+                float4& n2 = (*cloud_normals)[normals.y];
+                //v2.print("v2");
+                //n2.print("n2");
+                glNormal3f(n2.x, n2.y, n2.z);
+                glVertex3f(v2.x, v2.y, v2.z);
 
-					float4& v3 = (*cloud_positions)[vertices.z];
-					float4& n3 = (*cloud_normals)[normals.z];
-					//v3.print("v3");
-					//n3.print("n3");
-					glNormal3f(n3.x, n3.y, n3.z);
-					glVertex3f(v3.x, v3.y, v3.z);
+                float4& v3 = (*cloud_positions)[vertices.z];
+                float4& n3 = (*cloud_normals)[normals.z];
+                //v3.print("v3");
+                //n3.print("n3");
+                glNormal3f(n3.x, n3.y, n3.z);
+                glVertex3f(v3.x, v3.y, v3.z);
 
-					float4& v4 = (*cloud_positions)[vertices.w];
-					float4& n4 = (*cloud_normals)[normals.w];
-					//v4.print("v4");
-					//n4.print("n4");
-					glNormal3f(n4.x, n4.y, n4.z);
-					glVertex3f(v4.x, v4.y, v4.z);
-				}
-			glEnd();
-		}
-#endif
-
+                float4& v4 = (*cloud_positions)[vertices.w];
+                float4& n4 = (*cloud_normals)[normals.w];
+                //v4.print("v4");
+                //n4.print("n4");
+                glNormal3f(n4.x, n4.y, n4.z);
+                glVertex3f(v4.x, v4.y, v4.z);
+            }
+        glEnd();
 	}
+#endif
+}
+#endif  //CLOUD_COLLISION
 	//----------------------------------------------------------------------
 
     void Render::writeBuffersToDisk()
