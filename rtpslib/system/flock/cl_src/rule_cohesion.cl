@@ -5,6 +5,6 @@
 float4 pj = position_j;
 	
 // rule 3. cohesion
-pt->cohesion+= pj;
+pt->cohesion += pj;
 
 #endif

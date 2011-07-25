@@ -39,6 +39,7 @@ namespace rtps{
         settings->SetSetting("Cohesion Weight", 0.5f);
         settings->SetSetting("Goal Weight", 0.f);
         settings->SetSetting("Avoid Weight", 0.f);
+        settings->SetSetting("Wander Weight", 0.f);
         settings->SetSetting("LeaderFollowing Weight", 0.f);
        
         // BOID RULE'S SETTINGS 
@@ -75,6 +76,7 @@ namespace rtps{
         flock_params.w_coh = settings->GetSettingAs<float>("Cohesion Weight");
         flock_params.w_goal = settings->GetSettingAs<float>("Goal Weight");
         flock_params.w_avoid = settings->GetSettingAs<float>("Avoid Weight");
+        flock_params.w_wander = settings->GetSettingAs<float>("Wander Weight");
         flock_params.w_leadfoll = settings->GetSettingAs<float>("LeaderFollowing Weight");
         
         // BOID RULE'S SETTINGS 

@@ -1,6 +1,8 @@
 #include <FLOCK.h>
 #include<math.h>
 
+#include<time.h>
+
 namespace rtps 
 {
     //----------------------------------------------------------------------
@@ -99,6 +101,9 @@ namespace rtps
         
         int numFlockmates;
 
+        //seed random
+        srand ( time(NULL) );
+        
         // Step 1. Loop over all boids
         for(int i = 0; i < num; i++)
         {
@@ -200,6 +205,17 @@ namespace rtps
                 float4 dist = normalize3(pt - pi);
                 float4 desiredVel = dist * flock_params.max_speed;
                 avoid[i] = -desiredVel - vi;
+            }
+
+            if(flock_params.w_wander > 0.f){
+                float r1 = rand();
+                float r2 = rand();
+                float r3 = rand();
+
+                float4 rand;
+                rand =  float4(r1, r2, r3, 0.f);
+                float4 desiredVel = normalize3(rand);
+                wander[i] = desiredVel * flock_params.max_speed;
             }
 
         }

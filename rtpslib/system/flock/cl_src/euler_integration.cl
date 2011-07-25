@@ -7,6 +7,7 @@
         
 __kernel void euler_integration(
                     float dt,
+                    int two_dimensional,
                    __global float4* pos_u, 
                    __global float4* pos_s, 
                    __global float4* vel_u, 
@@ -96,7 +97,7 @@ __kernel void euler_integration(
     }
 
     // add circular velocity field
-    float4 v = (float4)(-3*pi.z, 0.f , pi.x, 0.f);
+    float4 v = (float4)(-3*pi.y, pi.x, 0.f, 0.f);
     v *= flockp->ang_vel;    
 
     // add veleleration to velocity
@@ -128,6 +129,9 @@ __kernel void euler_integration(
 		pi.z += bndMax.z;
 	}
 #endif
+
+    if(two_dimensional)
+        pi.z = 0.f;
 
 	// STORE THE NEW POSITION AND NEW VELOCITY 
     uint originalIndex = sort_indices[i];

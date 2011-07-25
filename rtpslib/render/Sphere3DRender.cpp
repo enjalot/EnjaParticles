@@ -28,8 +28,8 @@ namespace rtps
 	//printf("enter Sphere3DRender::render\n");
 
     #if 1
-	glBindBuffer(GL_ARRAY_BUFFER, col_vbo);
-	glColorPointer(4, GL_FLOAT, 0, 0);
+    //glBindBuffer(GL_ARRAY_BUFFER, col_vbo);
+    //glColorPointer(4, GL_FLOAT, 0, 0);
 
     glBindBuffer(GL_ARRAY_BUFFER, pos_vbo);
     glVertexPointer(4, GL_FLOAT, 0, 0);
@@ -46,6 +46,7 @@ namespace rtps
 
 	// Need to take blender scale into account
 
+    //glEnableClientState(GL_COLOR_ARRAY);
 	for (int i=0; i < num; i++, count+=4) {
     	//printf("Pos PTR: %f, %f, %f\n", ((float*)ptr)[i], ((float*)ptr)[i+1], ((float*)ptr)[i+2]);
 		glPushMatrix();
@@ -56,7 +57,7 @@ namespace rtps
 		scale *= 1.5;
 		//printf("dens= %f, scale= %f\n", dens, scale);
 		glScalef(scale, scale, scale);
-		//glColor3f(.0, 1.0, .0);
+		glColor3f(.0, 1.0, .0);
 
         float radius_scale = settings->getRadiusScale(); //GE
 		//printf("radius_scale= %f\n", radius_scale);
@@ -64,7 +65,7 @@ namespace rtps
 		gluSphere(qu, radius_scale, 10, 10); // radius, slices, stacks
 		glPopMatrix();
 	}
-    glUnmapBufferARB(GL_ARRAY_BUFFER); 
+    //glDisableClientState(GL_COLOR_ARRAY);
     glUnmapBufferARB(GL_ARRAY_BUFFER); 
     #endif
 

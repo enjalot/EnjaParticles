@@ -104,9 +104,9 @@ rtps::RTPS* ps;
 
 #define DT              0.001f
 
-#define maxspeed        5.0f
-#define mindist         .50f
-#define searchradius    2.0f
+#define maxspeed        2.0f
+#define mindist         1.0f
+#define searchradius    1.50f
 
 float4 color  = float4(255.f, 0.f, 0.f, 0.f);
 float4 target = float4(3.,2.,4.,1.);
@@ -150,17 +150,20 @@ int main(int argc, char** argv)
     printf("before we call enjas functions\n");
 
 
-    float w_sep = .40f;     //15
-    float w_align = .80f;   //7.5
-    float w_coh = 1.0f;     //2.5
+    float w_sep = .50f;     //15
+    float w_align = .0f;   //7.5
+    float w_coh = 0.0f;     //2.5
 
     float w_goal = 1.0f;
-    float w_avoid = .0f;
+    float w_avoid = 0.0f;
+    float w_wander = 0.0f;
 
     float w_leadfoll = 0.f;
    
     float ang_vel = 0.f; 
     float slow_dist = .0f;
+
+    bool two_dimension = false;
 
     //default constructor
     rtps::Domain* grid = new Domain(float4(0,0,0,0), float4(5, 5, 5, 0));
@@ -175,7 +178,7 @@ int main(int argc, char** argv)
     //printf("arvg[0]: %s\n", argv[0]);
 #endif
 
-    //settings->setRenderType(RTPSettings::RENDER);
+   // settings->setRenderType(RTPSettings::RENDER);
     //settings->setRenderType(RTPSettings::SPRITE_RENDER);
     settings->setRenderType(RTPSettings::SPHERE3D_RENDER);
     
@@ -184,7 +187,7 @@ int main(int argc, char** argv)
     settings->setUseGLSL(1);
 
     settings->setTarget(target);
-
+    settings->setDimension(two_dimension);
     settings->SetSetting("render_texture", "nemo.png");
     settings->SetSetting("render_frag_shader", "boid_tex_frag.glsl");
     //settings->SetSetting("render_use_alpha", true);
@@ -349,14 +352,21 @@ void appKeyboard(unsigned char key, int x, int y)
         {
             //nn = 65536;
 	        //nn = 1024;
-            //nn = 8192;
-            nn = 256;
+            nn = 8192;
+            //nn = 256;
+            
+            // timings input cube
             //max = float4(4.5, 4.5 , 4.5, 1.0f);
             //min = float4(0.5, 0.5 , 0.5, 1.0f);
-            max = float4(3.5, 1.5, 3.5, 1.0f);
-            min = float4(1.5, 1., 1.5, 1.0f);
-            //max = float4(4.5, 1., 4.5, 1.0f);
-            //min = float4(0.5, 1., 0.5, 1.0f);
+            
+            // symmetry demo input square
+            //max = float4(3.5, 1., 3.5, 1.0f);
+            //min = float4(1.5, 1., 1.5, 1.0f);
+            
+            // bees demo input cube
+            max = float4(4., 2, 2, 1.0f);
+            min = float4(1., 1, 1, 1.0f);
+            
             ps->system->addBox(nn, min, max, false, color);
             return;
         }

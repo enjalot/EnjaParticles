@@ -15,6 +15,7 @@ namespace rtps
     
     void EulerIntegration::execute(int num,
                     float dt,
+                    bool two_dimensional,
                     Buffer<float4>& pos_u,
                     Buffer<float4>& pos_s,
                     Buffer<float4>& vel_u,
@@ -36,6 +37,7 @@ namespace rtps
 
         int iargs = 0;
         k_euler_integration.setArg(iargs++, dt); //time step
+        k_euler_integration.setArg(iargs++, two_dimensional); //2D or 3D?
         k_euler_integration.setArg(iargs++, pos_u.getDevicePtr());
         k_euler_integration.setArg(iargs++, pos_s.getDevicePtr());
         k_euler_integration.setArg(iargs++, vel_u.getDevicePtr());
@@ -67,6 +69,7 @@ namespace rtps
         float w_coh = flock_params.w_coh;  
         float w_goal = flock_params.w_goal;
         float w_avoid = flock_params.w_avoid;
+        float w_wander = flock_params.w_wander;
 
         float4 bndMax = grid_params.bnd_max;
         float4 bndMin = grid_params.bnd_min;
@@ -81,11 +84,12 @@ namespace rtps
 	        cohesion[i]   *=  w_coh;
             goal[i]       *=  w_goal;
             avoid[i]      *=  w_avoid;
+            wander[i]     *=  w_wander;
 
-            // Step 5. Set the final acceleration
-	        velocities[i] += (separation[i] + alignment[i] + cohesion[i] + goal[i] + avoid[i]);
+            // Step 5. Set the final velocity
+	        velocities[i] += (separation[i] + alignment[i] + cohesion[i] + goal[i] + avoid[i] + wander[i]);
         
-            // Step 6. Constrain acceleration
+            // Step 6. Constrain velocity
             float  vel_mag  = velocities[i].length();
 	        float4 vel_norm = normalize3(velocities[i]);
             if(vel_mag > flock_params.max_speed){
@@ -94,7 +98,7 @@ namespace rtps
             }
 
             // (Optional Step) Add circular velocity
-            float4 v = float4(-pi.z, 0., pi.x, 0.);
+            float4 v = float4(-pi.y, pi.x, 0.f,  0.f);
             v *= flock_params.ang_vel;
             velocities[i] += v;
 
@@ -122,6 +126,11 @@ namespace rtps
                 pi.z += bndMax.z;
             }
 
+            // Step 9. 2D or 3D?
+            if(ps->settings->two_dimensional)
+                pi.z =0.f;
+
+            // Copy positions to official vector
             positions[i] = pi; // flock_params.simulation_scale;
             positions[i].w = 1.0f;	
         }
