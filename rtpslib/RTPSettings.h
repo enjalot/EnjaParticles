@@ -79,6 +79,9 @@ namespace rtps
         // FLOCK: target of goal rule
         float4 target;
 
+        // FLOCK: 2D simulation
+        bool two_dimensional;
+
         bool has_changed() { return changed; };
         void updated() { changed = false; }; //for now we are assuming only one consumer (one system using the settings)
 
@@ -203,6 +206,15 @@ namespace rtps
         {
             target = t;
             target.print("target");
+        }
+
+        int getDimension()
+        {
+            return two_dimensional;
+        }
+        void setDimension(bool dim)
+        {
+            two_dimensional = dim;
         }
     };
 

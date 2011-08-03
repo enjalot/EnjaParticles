@@ -117,6 +117,7 @@ private:
     std::vector<float4> cohesion;
     std::vector<float4> goal;
     std::vector<float4> avoid;
+    std::vector<float4> wander;
     std::vector<float4> leaderfollowing;
 
     Buffer<float4>      cl_position_u;

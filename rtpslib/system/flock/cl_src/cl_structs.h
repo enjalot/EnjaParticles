@@ -23,6 +23,7 @@ typedef struct FLOCKParameters
     float w_coh;
     float w_goal;
     float w_avoid;
+    float w_wander;
     float w_leadfoll;
 
     // Boid rule's settings

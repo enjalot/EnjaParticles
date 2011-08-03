@@ -371,7 +371,7 @@ namespace rtps
     {
 
         glEnable(GL_DEPTH_TEST);
-        glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
+        glColor4f(.0f, 1.0f, .0f, 1.0f);
         //draw grid
         glBegin(GL_LINES);
         //1st face

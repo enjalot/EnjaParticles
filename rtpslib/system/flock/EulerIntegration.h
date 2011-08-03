@@ -15,6 +15,7 @@ namespace rtps
             EulerIntegration(std::string path, CL* cli, EB::Timer* timer);
             void execute(int num,
                         float dt,
+                        bool two_dimensional,
                         Buffer<float4>& pos_u,
                         Buffer<float4>& pos_s,
                         Buffer<float4>& vel_u,

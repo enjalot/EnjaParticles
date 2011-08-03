@@ -113,13 +113,11 @@ __kernel void rules(ARGS,
         #include "rule_avoid.cl"
     }
 
-    clf[index] = pt.goal;//(float4)(3.,3.,3.,3.); //pt.separation; 
-    cli[index] = (int4)((int)flockp->w_sep,(int)flockp->w_align,(int)flockp->w_coh,(int)flockp->w_goal);
+    //clf[index] = pt.goal;//(float4)(3.,3.,3.,3.); //pt.separation; 
+    //cli[index] = (int4)((int)flockp->w_sep,(int)flockp->w_align,(int)flockp->w_coh,(int)flockp->w_goal);
     
     flockmates[index].x = pt.num_flockmates;
     flockmates[index].y = pt.num_nearestFlockmates;
-
-
     
     separation[index]   = pt.separation;
     alignment[index]    = pt.alignment;

@@ -276,6 +276,7 @@ void FLOCK::integrate()
 {
     euler_integration.execute(num,
         settings->dt,
+        settings->two_dimensional,
         cl_position_u,
         cl_position_s,
         cl_velocity_u,
@@ -372,6 +373,7 @@ void FLOCK::prepareSorted()
     cohesion.resize(max_num);
     goal.resize(max_num);
     avoid.resize(max_num);
+    wander.resize(max_num);
     leaderfollowing.resize(max_num);
 
     //for reading back different values from the kernel
@@ -386,6 +388,7 @@ void FLOCK::prepareSorted()
     std::fill(cohesion.begin(), cohesion.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     std::fill(goal.begin(), goal.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     std::fill(avoid.begin(), avoid.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
+    std::fill(wander.begin(), wander.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     std::fill(leaderfollowing.begin(), leaderfollowing.end(),float4(0.0f, 0.0f, 0.0f, 0.0f));
     
     std::fill(error_check.begin(), error_check.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -585,11 +588,11 @@ void FLOCK::pushParticles(vector<float4> pos, float4 velo, float4 color)
     std::vector<float4> vels(nn);
     float ms = flock_params.max_speed;
     
-#if 0 
+#if 1 
     std::fill(vels.begin(), vels.end(), velo);
 #endif    
 
-#if 1 
+#if 0 
     for(int i=0; i < nn; i++){
         vels[i] = float4(rand(), rand(), rand(), velo.w);
         vels[i] = normalize3(vels[i]);
