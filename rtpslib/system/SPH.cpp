@@ -94,6 +94,7 @@ namespace rtps
 
         hash = Hash(common_source_dir, ps->cli, timers["hash_gpu"]);
         bitonic = Bitonic<unsigned int>(common_source_dir, ps->cli );
+        radix = Radix<unsigned int>(common_source_dir, ps->cli, max_num, 128);
         cellindices = CellIndices(common_source_dir, ps->cli, timers["ci_gpu"] );
         permute = Permute( common_source_dir, ps->cli, timers["perm_gpu"] );
 
@@ -367,6 +368,7 @@ namespace rtps
         //defined in Sort.cpp
         timers["bitonic"]->start();
         bitonic_sort();
+        //radix_sort();
         timers["bitonic"]->stop();
     }
 
@@ -865,6 +867,25 @@ namespace rtps
         //renderer->setParticleRadius(spacing*0.5);
         renderer->setParticleRadius(spacing);
 		//renderer->setRTPS(
+    }
+	//----------------------------------------------------------------------
+    void SPH::radix_sort()
+    {
+    try 
+        {   
+            int snum = nlpo2(num);
+            if(snum < 1024)
+            {   
+                snum = 1024;
+            }   
+            //printf("sorting snum: %d", snum); 
+            radix.sort(snum, &cl_sort_hashes, &cl_sort_indices);
+        }   
+        catch (cl::Error er) 
+        {   
+            printf("ERROR(radix sort): %s(%s)\n", er.what(), oclErrorString(er.err()));
+        }   
+
     }
 	//----------------------------------------------------------------------
     void SPH::bitonic_sort()

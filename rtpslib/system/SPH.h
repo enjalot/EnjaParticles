@@ -27,6 +27,7 @@ class OUTER;
 //#include <Prep.h>
 #include <Hash.h>
 #include <BitonicSort.h>
+#include <Radix.h>
 //#include <DataStructures.h>
 #include <CellIndices.h>
 #include <Permute.h> // contains CloudPermute
@@ -183,6 +184,7 @@ namespace rtps
         Buffer<unsigned int>         cl_sort_output_indices;
 
         Bitonic<unsigned int> bitonic;
+        Radix<unsigned int> radix;
 
         //Parameter structs
         Buffer<SPHParams>   cl_sphp;
@@ -223,6 +225,7 @@ namespace rtps
         void hash_and_sort();
         void cloud_hash_and_sort();  // GE
         void bitonic_sort();
+        void radix_sort();
         void cloud_bitonic_sort();   // GE
         Density density;
         Force force;
