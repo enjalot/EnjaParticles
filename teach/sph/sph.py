@@ -112,7 +112,7 @@ class Particle:
         self.pos = pos
         self.h = sphp.smoothing_radius
         self.scale = sphp.sim_scale
-        self.mass = sphp.m
+        self.mass = sphp.mass
 
         self.vel = Vec([0.,0.])
         self.veleval = Vec([0.,0.])
@@ -123,17 +123,21 @@ class Particle:
         self.screen_scale = self.surface.get_width() / sphp.domain.width
 
     def move(self, pos):
-        self.pos = pos * self.scale
+        self.pos = pos * self.scale / self.screen_scale
 
         #print "dens", self.dens
 
-    def draw(self):
+    def draw(self, show_dense = False):
         #draw circle representing particle smoothing radius
 
         dp = toscreen(self.pos / self.scale, self.surface, self.screen_scale)
         pygame.draw.circle(self.surface, self.col, dp, self.screen_scale * self.h / self.scale, 1)
         #draw filled circle representing density
-        pygame.draw.circle(self.surface, self.col, dp, self.dens / 40., 0)
+        #pygame.draw.circle(self.surface, self.col, dp, self.dens / 40., 0)
+        if show_dense:
+            pygame.draw.circle(self.surface, self.col, dp, self.dens / 10., 0)
+        else:
+            pygame.draw.circle(self.surface, self.col, dp, 30., 0)
 
         #TODO draw force vector (make optional)
         #vec = [self.x - f[0]*fdraw/fscale, self.y - f[1]*fdraw/fscale]
@@ -200,18 +204,47 @@ def addRect3D(num, pmin, pmax, sphp):
     return rvecnp;
 
 
+def addRect_old(num, pmin, pmax, sphp):
+    #Create a rectangle with at most num particles in it.  The size of the return
+    #vector will be the actual number of particles used to fill the rectangle
+    print "**** addRect ****"
+    print "rest dist:", sphp.rest_distance
+    print "sim_scale:", sphp.sim_scale
+    spacing = 1.0 * sphp.rest_distance / sphp.sim_scale;
+    print "spacing", spacing
+
+    xmin = pmin.x# * scale
+    xmax = pmax.x# * scale
+    ymin = pmin.y# * scale
+    ymax = pmax.y# * scale
+
+    print "min, max", xmin, xmax, ymin, ymax
+    rvec = [];
+    i=0;
+    for y in np.arange(ymin, ymax, spacing):
+        for x in np.arange(xmin, xmax, spacing):
+            if i >= num: break
+            print "x, y", x, y
+            rvec += [ Vec([x,y]) * sphp.sim_scale];
+            #rvec += [[x, y, 0., 1.]]
+            i+=1;
+    print "%d particles added" % i
+    #rvecnp = np.array(rvec, dtype=np.float32)
+    #return rvecnp;
+    return rvec
+
 
 
 def init_particles(num, sphp, domain, surface):
     particles = []
     p1 = Vec([.5, 2.]) * sphp.sim_scale
-    particles += [ Particle(p1, sphp, [255,0,0], surface) ] 
+    particles += [ Particle(p1, sphp, [0,0,255], surface) ] 
 
     pmin = Vec([.5, .5])
     pmax = Vec([2., 3.])
-    ps = addRect(num, pmin, pmax, sphp)
+    ps = addRect_old(num, pmin, pmax, sphp)
     for p in ps:
-        particles += [ Particle(p, sphp, [0,0,255], surface) ] 
+        particles += [ Particle(p, sphp, [255,0,0], surface) ] 
 
     """
     p2 = Vec([400., 400.]) * sphp.sim_scale

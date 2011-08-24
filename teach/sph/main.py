@@ -11,8 +11,8 @@ import glutil
 from vector import Vec
 
 #from forces import *
-import forces
-import sph
+#import forces
+from sph import SPH, addRect
 import clsph
 from hash import Domain
 
@@ -73,11 +73,11 @@ class window(object):
         dmin = Vec([0,0,0])
         dmax = Vec([1,1,1])
         self.domain = Domain(dmin, dmax)
-        self.system = sph.SPH(max_num, self.domain)
+        self.system = SPH(max_num, self.domain)
         self.ghost_domain = Domain(dmin, dmax)
-        self.ghost = sph.SPH(max_num * 36, self.ghost_domain)
-        ipos = sph.addRect(512, Vec([0.1, 0.1, 0.,0.]), Vec([1.,1.,0.,0.]), self.system)
-        gpos = sph.addRect(8192, Vec([0.1, 0.1, 0.,0.]), Vec([1.,1.,0.,0.]), self.ghost)
+        self.ghost = SPH(max_num * 36, self.ghost_domain)
+        ipos = addRect(512, Vec([0.1, 0.1, 0.,0.]), Vec([1.,1.,0.,0.]), self.system)
+        gpos = addRect(8192, Vec([0.1, 0.1, 0.,0.]), Vec([1.,1.,0.,0.]), self.ghost)
         #print ipos, "LEN", len(ipos)
         #print gpos, "LEN", len(gpos)
         self.clghost_system = clsph.CLSPH(dt, self.ghost, is_ghost=True)
@@ -94,6 +94,7 @@ class window(object):
         self.clghost_system.set_color(color)
 
         #########################################################################
+        print "about to start main loop"
         glutMainLoop()
  
 

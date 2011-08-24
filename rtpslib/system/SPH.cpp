@@ -368,8 +368,12 @@ namespace rtps
         //defined in Sort.cpp
         timers["bitonic"]->start();
         bitonic_sort();
-        //radix_sort();
         timers["bitonic"]->stop();
+        //timers["radix"]->start();
+        //timers["bitonic"]->start();
+        //radix_sort();
+        //timers["bitonic"]->stop();
+        //timers["radix"]->stop();
     }
 
 	//----------------------------------------------------------------------

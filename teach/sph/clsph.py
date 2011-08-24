@@ -21,8 +21,10 @@ class CLSPH:
         self.clinit()
         self.prgs = {}  #store our programs
         #of course hardcoding paths here is terrible
-        self.clsph_dir = "/Users/enjalot/code/sph/teach/sph/cl_src"
-        self.clcommon_dir = "/Users/enjalot/code/sph/teach/sph/cl_common"
+        self.clsph_dir = "/panfs/panasas1/users/idj03/code/master/teach/sph/cl_src"
+        #self.clsph_dir = "/Users/enjalot/code/sph/teach/sph/cl_src"
+        #self.clcommon_dir = "/Users/enjalot/code/sph/teach/sph/cl_common"
+        self.clcommon_dir = "/panfs/panasas1/users/idj03/code/master/teach/sph/cl_common"
 
         self.global_color = [0., 1., 0., 1.]
         

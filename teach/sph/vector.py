@@ -1,8 +1,8 @@
 
 
 #Vector class
+#Author - Ian Johnson | enjalot@gmail.com
 #http://docs.scipy.org/doc/numpy/user/basics.subclassing.html#slightly-more-realistic-example-attribute-added-to-existing-array
-#TODO: generalize to 3 and 4 dimensions
 
 import numpy as np
 import math
@@ -31,9 +31,13 @@ class Vec(np.ndarray):
     def __array_wrap__(self, out_arr, context=None):
         #this gets called after numpy functions are called on the array
         #out_arr is the output (resulting) array
+        #oa = Vec(out_arr)
         for i in range(len(out_arr)):
+            #setattr(oa, Vec.props[i], oa[i])
             setattr(out_arr, Vec.props[i], out_arr[i])
+        #out_arr = oa
         return np.ndarray.__array_wrap__(self, out_arr, context)
+        #return np.ndarray.__array_wrap__(self, oa, context)
 
     def __repr__(self):
         desc="""Vec2(data=%(data)s,"""  # x=%(x)s, y=%(y)s)"""
@@ -54,6 +58,12 @@ class Vec(np.ndarray):
         self[Vec.props.index(item)] = val
 
 
+    ###
+    #math utilities
+    ###
+
+def normalize(u):
+    return u / (math.sqrt(np.dot(u, u)))
 
 
 if __name__ == "__main__":
@@ -81,19 +91,12 @@ if __name__ == "__main__":
     va.y = 9
     va.z = 5
     print "va: ", repr(va)
-    vb = Vec([1.,1.,1.])
+    vb = Vec([1,1,1])
     vc = va + vb
-    print "vc: ", repr(vc)
+    print "v3: ", repr(vc)
     print "dot(va, vb):", np.dot(va, vb)
 
-    vb += va
-    print "vb:", repr(vb)
-    vb *= .1
-    print "vb:", repr(vb)
-    vb += vc*.1
-    print "vb:", repr(vb)
 
-    
 
 
 

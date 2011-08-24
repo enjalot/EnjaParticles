@@ -31,9 +31,12 @@ class Vec(np.ndarray):
     def __array_wrap__(self, out_arr, context=None):
         #this gets called after numpy functions are called on the array
         #out_arr is the output (resulting) array
+        oa = Vec(out_arr)
         for i in range(len(out_arr)):
-            setattr(out_arr, Vec.props[i], out_arr[i])
-        return np.ndarray.__array_wrap__(self, out_arr, context)
+            setattr(oa, Vec.props[i], oa[i])
+            #setattr(out_arr, Vec.props[i], out_arr[i])
+        #return np.ndarray.__array_wrap__(self, out_arr, context)
+        return np.ndarray.__array_wrap__(self, oa, context)
 
     def __repr__(self):
         desc="""Vec2(data=%(data)s,"""  # x=%(x)s, y=%(y)s)"""

@@ -17,6 +17,7 @@ def density_update(sphp, particles):
     for pi in particles:
         pi.dens = 0.
         for pj in particles:
+            #print pi.pos, pj.pos
             r = pi.pos - pj.pos
             #print r
             if mag(r) > pi.h: continue
