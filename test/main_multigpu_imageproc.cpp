@@ -72,17 +72,45 @@ const string cl_image_manip = "__kernel void negative(read_only image2d_t in_img
                            "    int xInd = get_global_id(0);\n"
                            "    int yInd = get_global_id(1);\n"
                            "    sampler_t smp = CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_NEAREST;\n"
-                           "    uint4 sum = (uint4)(0,0,0,0);\n"
+                           "    int4 sum = (int4)(0,0,0,0);\n"
+                           "    int offset = floor(*filterwidth/2.);\n"
                            "    for(int i = 0; i<=*filterwidth; i++)\n"
                            "    {\n"
                            "        for(int j = 0; j<*filterwidth; j++)\n"
                            "        {\n" 
-                           "            sum.xyz += filter[j+(i*(*filterwidth))] * read_imageui(in_img,smp, (int2)(xInd+i,yInd+j)).xyz;\n"
+                           "            sum.xyz += filter[i+(j*(*filterwidth))] * read_imagei(in_img,smp, (int2)(xInd+i-offset,yInd+j-offset)).xyz;\n"
                            "        }\n" 
                            "    }\n"
                            "    //sum.xyz=sum.xyz/(4*(*filterwidth)*(*filterwidth));\n"
+                           "    //sum/= (*filterwidth) * (*filterwidth);\n"
                            "    sum.w=255;\n"
-                           "    write_imageui(out_img,(int2)(xInd,yInd), (uint4)sum);\n"
+                           "    sum = clamp(sum,(int4)(0,0,0,0),(int4)(255,255,255,255));\n"
+                           "    write_imageui(out_img,(int2)(xInd,yInd), abs(sum));\n"
+                           "}\n"
+                           "__kernel void sobel(read_only image2d_t in_img, write_only image2d_t out_img)\n"
+                           "{\n"
+                           "    int xInd = get_global_id(0);\n"
+                           "    int yInd = get_global_id(1);\n"
+                           "    sampler_t smp = CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_NEAREST;\n"
+                           "    int4 sumx = (int4)(0,0,0,0);\n"
+                           "    int4 sumy = (int4)(0,0,0,0);\n"
+                           "    sumx.xyz += read_imagei(in_img,smp, (int2)(xInd+1,yInd-1)).xyz;\n"
+                           "    sumy.xyz += read_imagei(in_img,smp, (int2)(xInd+1,yInd-1)).xyz;\n"
+                           "    sumx.xyz +=2 * read_imagei(in_img,smp, (int2)(xInd+1,yInd)).xyz;\n"
+                           "    sumy.xyz +=2 * read_imagei(in_img,smp, (int2)(xInd,yInd-1)).xyz;\n"
+                           "    sumx.xyz += read_imagei(in_img,smp, (int2)(xInd+1,yInd+1)).xyz;\n"
+                           "    sumy.xyz += read_imagei(in_img,smp, (int2)(xInd-1,yInd-1)).xyz;\n"
+                           "    sumx.xyz -= read_imagei(in_img,smp, (int2)(xInd+1,yInd-1)).xyz;\n"
+                           "    sumy.xyz -= read_imagei(in_img,smp, (int2)(xInd-1,yInd+1)).xyz;\n"
+                           "    sumx.xyz -=2 * read_imagei(in_img,smp, (int2)(xInd+1,yInd)).xyz;\n"
+                           "    sumy.xyz -=2 * read_imagei(in_img,smp, (int2)(xInd,yInd+1)).xyz;\n"
+                           "    sumx.xyz -= read_imagei(in_img,smp, (int2)(xInd+1,yInd+1)).xyz;\n"
+                           "    sumy.xyz -= read_imagei(in_img,smp, (int2)(xInd+1,yInd+1)).xyz;\n"
+                           "    uint4 sum = convert_uint4(sqrt(convert_float4((sumx*sumx)+(sumy*sumy))));\n"
+//                           "    int4 sum = ceil(g);\n"
+                           "    sum.w=255;\n"
+//                           "    sum = clamp(sum,(int4)(0,0,0,0),(int4)(255,255,255,255));\n"
+                           "    write_imageui(out_img,(int2)(xInd,yInd), abs(sum));\n"
                            "}\n";
 
 
@@ -90,6 +118,7 @@ enum kern_name
 {
 KERNEL_NEGATIVE,
 KERNEL_AVERAGE,
+KERNEL_SOBEL,
 KERNEL_FILTER
 };
 //timers
@@ -211,12 +240,12 @@ int main(int argc, char** argv)
 
     int num_runs = 10;
     int filterwidth = 3;
-    //Sobel Y filter.
-    //float filter[]= {-1,0,1,-2, 0, 2, -1,0,1};
     //Sobel X filter.
-    float filter[]= {1,2,1,0,0, 0, -1,-2,-1};
+    //float filter[]= {-1,0,1,-2, 0, 2, -1,0,1};
+    //Sobel Y filter.
+    float filter[]= {-1,-2,-1,0,0, 0, 1, 2, 1};
     
-    kern_name kern = KERNEL_FILTER;
+    kern_name kern = KERNEL_SOBEL;
     
     CLProfiler prof;
 
@@ -235,7 +264,7 @@ int main(int argc, char** argv)
     {
         imgFile=argv[2];
     }
-    int comp = 4;
+    int comp = 3;
     stbi_uc* img = stbi_load(imgFile.c_str(),&x,&y,&real_comp,comp);
     printf("img x = %d, y = %d, real_comp = %d\n",x,y,real_comp);
     
@@ -252,14 +281,14 @@ int main(int argc, char** argv)
 
     cl::ImageFormat fmt;
 
-    /*
-    RGB is strange with the requirements. I currently force 4 channels arbitrarily
+    
+    //RGB is strange with the requirements. I currently force 4 channels arbitrarily
     if(comp == 3)
     {
         fmt.image_channel_order = CL_RGB; 
         fmt.image_channel_data_type = CL_UNORM_INT_101010;
     }
-    else*/ if(comp==4)
+    else if(comp==4)
     {
         fmt.image_channel_order = CL_RGBA;
         fmt.image_channel_data_type = CL_UNSIGNED_INT8;
@@ -300,6 +329,8 @@ int main(int argc, char** argv)
             kernels.push_back(cl::Kernel(prog,"average"));
         else if(kern==KERNEL_FILTER)
             kernels.push_back(cl::Kernel(prog,"filter"));
+        else if(kern==KERNEL_SOBEL)
+            kernels.push_back(cl::Kernel(prog,"sobel"));
     }
 
     //Create timers to keep up with execution/memory transfer times.
