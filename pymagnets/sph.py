@@ -1,7 +1,7 @@
 import numpy as np
 
 from vector import Vec
-from hash import Domain
+from domain import Domain
 from kernels import Kernel
 
 #screen_scale = 160

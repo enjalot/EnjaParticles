@@ -1,16 +1,16 @@
 import pyopencl as cl
 
-class CLLeapFrogDiffuse:
+class CLMagnet:
     def __init__(self, clsph):
         self.clsph = clsph
         self.queue = self.clsph.queue
         self.dt = self.clsph.dt
-        self.clsph.loadProgram(self.clsph.clsph_dir + "/leapfrog_diffuse.cl")
+        self.clsph.loadProgram(self.clsph.clsph_dir + "/magnet.cl")
     
     #@timings
     def execute(self, num, *args, **argv):
         if num > 0:
-            worksize = 128
+            worksize = 64
             factor = 1.*num / worksize
             if int(factor) != factor:
                 factor = int(factor)
@@ -19,7 +19,7 @@ class CLLeapFrogDiffuse:
                 global_size = (num,)
             local_size = (worksize,)
 
-            self.clsph.prgs["leapfrog_diffuse"].leapfrog(self.queue, global_size, local_size, *(args))
+            self.clsph.prgs["magnet"].magnet(self.queue, global_size, local_size, *(args))
 
             self.queue.finish()
      

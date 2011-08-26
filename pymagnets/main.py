@@ -12,11 +12,10 @@ import Image
 import glutil
 from vector import Vec
 
-import hash
+import domain 
 import sph
 import initialize
-from cldiffuse_system import CLDiffuseSystem, timings
-#import clghost
+from magnet_system import CLMagnetSystem, timings
 
 dt = .001
 subintervals = 1
@@ -40,14 +39,13 @@ class window(object):
         dmax = Vec([1.,1.,1.,0.])
         print "SPH System"
         print "-------------------------------------------------------------"
-        self.domain = hash.Domain(dmin, dmax)
+        self.domain = domain.Domain(dmin, dmax)
         self.system = sph.SPH(max_num, self.domain)
         self.system.gravity = -90.8
-        self.system.diffuse_coef = .001
+        #self.system.diffuse_coef = .001
         
         print "making particle system"
-        self.clsystem = CLDiffuseSystem(self.system, dt, ghost_system=None)
-        #self.clsystem = clsph.CLSPH(dt, self.system, ghost_system=self.clghost_system)
+        self.clsystem = CLMagnetSystem(self.system, dt, ghost_system=None)
 
         """
         color = [1., 0., 0., .75]
@@ -175,12 +173,14 @@ class window(object):
                 self.translate = self.init_persp_trans.copy()
                 self.rotate = self.init_persp_rotate.copy()
             self.glprojection()
+        """
         elif args[0] == 'd':
             self.clsystem.with_ghost_density = not self.clsystem.with_ghost_density
             print "density:", self.clsystem.with_ghost_density
         elif args[0] == 'f':
             self.clsystem.with_ghost_force = not self.clsystem.with_ghost_force
             print "force:", self.clsystem.with_ghost_force
+        """
              
 
     def on_click(self, button, state, x, y):

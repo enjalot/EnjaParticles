@@ -14,7 +14,6 @@ __kernel void leapfrog(
                       __global float4* col_s,
                       __global float4* veleval_u,
                       __global float4* force_s,
-                      __global float4* ghost_force_s,
                       __global float4* xsph_s,
                       __global int* sort_indices,  
                       //		__global float4* color,
@@ -40,10 +39,10 @@ __kernel void leapfrog(
 
 #if 1
 
-    f += ghost_force_s[i];
     //external force is gravity
     //f.z += sphp->gravity;
     f.y += sphp->gravity;
+    //f.y += -9.8f;
     f.w = 0.f;
 
     float speed = length(f);
@@ -52,10 +51,9 @@ __kernel void leapfrog(
         f *= sphp->velocity_limit/speed;
     }
 
+
     float4 vnext = v + dt*f;
     //float4 vnext = v;// + dt*f;
-    // WHY IS MY CORRECTION NEGATIVE and IAN's POSITIVE? 
-    //vnext += sphp->xsph_factor * xsph(i);
     vnext += sphp->xsph_factor * xsph_s[i];
 
     float4 veval = 0.5f*(v+vnext);
@@ -98,6 +96,8 @@ __kernel void leapfrog(
     veleval_u[i] = veval; 
     pos_u[i] = (float4)(p.xyz, 1.0f);  // for plotting
     col_u[i] = col_s[i];
+    //col_u[i] = col_s[i] + col_s[i] * dt;
+    //col_u[i].y = .5f;
 
     vel_u[i].z = 0.f;
     veleval_u[i].z = 0.f; 

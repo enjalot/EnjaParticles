@@ -7,11 +7,11 @@ import glutil
 import util
 timings = util.timings
 
-import clhash
-import clradix
-import clbitonic
-import clcellindices
-import clpermute
+import hash
+import radix
+import bitonic
+import cellindices
+import permute
 
 class CLSystem:
     def __init__(self, system, dt=.001, is_ghost=False, ghost_system=None):
@@ -47,11 +47,11 @@ class CLSystem:
         
         self.loadData()
 
-        self.hash = clhash.CLHash(self)
-        self.radix = clradix.Radix(self, self.system.max_num, 128, numpy.uint32(0))
-        self.bitonic = clbitonic.Bitonic(self, self.system.max_num, 128, numpy.uint32(0))
-        self.cellindices = clcellindices.CLCellIndices(self)
-        self.permute = clpermute.CLPermute(self)
+        self.hash = hash.CLHash(self)
+        self.radix = radix.Radix(self, self.system.max_num, 128, numpy.uint32(0))
+        self.bitonic = bitonic.Bitonic(self, self.system.max_num, 128, numpy.uint32(0))
+        self.cellindices = cellindices.CLCellIndices(self)
+        self.permute = permute.CLPermute(self)
           
     
     def acquire_gl(self):
