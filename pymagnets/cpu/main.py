@@ -62,13 +62,13 @@ def main():
     #particles = sph.init_particles(5, system, domain, screen)
     particles = []
     p1 = Vec([25, 25]) * system.sim_scale
-    np = Vec([.5, .5])
+    np = Vec([.8, .8])
     particles += [ Particle(p1, np, system, [0,128,128], screen) ] 
     particles[0].lock = True
 
     p = Vec([25 + 8, 25]) * system.sim_scale
     particles += [ Particle(p, np, system, [128,128,0], screen) ] 
-    """
+    #"""
     p = Vec([25, 25 + 8]) * system.sim_scale
     particles += [ Particle(p, np, system, [128,128,0], screen) ] 
     p = Vec([25 - 8, 25]) * system.sim_scale
@@ -77,7 +77,7 @@ def main():
     particles += [ Particle(p, np, system, [128,128,0], screen) ] 
     #p = Vec([25 + 8, 25 + 8]) * system.sim_scale
     #particles += [ Particle(p, np, system, [128,128,0], screen) ] 
-    """
+    #"""
 
 
 
@@ -87,7 +87,11 @@ def main():
     mouse_down = False
     pause = True 
     pi = 1
+    tpi = pi
     while 1:
+        tpi = pi
+        tcol = particles[pi].col[:]
+        particles[pi].col = [0, 200, 0]
         clock.tick(60)
         key = pygame.key.get_pressed()
         for event in pygame.event.get():
@@ -114,13 +118,20 @@ def main():
                 pause = not pause
 
             elif event.type == MOUSEBUTTONDOWN:
+                tcol = particles[pi].col[:]
                 mouse_down = True
             elif event.type == MOUSEMOTION:
                 if(mouse_down):
                     v = Vec([event.pos[0], event.pos[1]])
                     v = fromscreen(v, screen)
                     particles[pi].move(v)
+                    particles[pi].vel = Vec([0.,0.])
+                    particles[pi].force = Vec([0.,0.])
+                    particles[pi].angular = Vec([0.,0.])
             elif event.type == MOUSEBUTTONUP:
+                particles[pi].vel = Vec([0.,0.])
+                particles[pi].force = Vec([0.,0.])
+                particles[pi].angular = Vec([0.,0.])
                 mouse_down = False
 
         
@@ -141,6 +152,7 @@ def main():
         #print "ASDF"
         pygame.display.flip()
 
+        particles[tpi].col = tcol[:]
 
 
 
