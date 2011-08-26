@@ -14,31 +14,93 @@ def contact_update(sphp, particles):
     for pi in particles:
         pi.force = Vec([0.,0.])
 
+
 @timings
-def magnet_update(sphp, particles):
+def magnet_update(system, particles):
     for pi in particles:
         pi.force = Vec([0.,0.])
+        pi.angular = Vec([0., 0.])
+
+        for pj in particles:
+            if pj == pi:
+                continue
+            
+            #get distance between particles
+            r = pi.pos - pj.pos
+            magr = mag(r)
+            if magr > pi.h: continue
+
+            #calculate north 
+            pinp = pi.pos + pi.np
+            pjnp = pj.pos + pj.np
+            rnn = pinp - pjnp
+            fnn = system.strength * rnn / mag(rnn)**3 
+
+            pinp = pi.pos + pi.np
+            pjsp = pj.pos + pj.sp
+            rns = pinp - pjsp
+            fns = system.strength * rns / mag(rns)**3 
+
+            Fn = fns + fnn
+
+            #calculate south
+            pisp = pi.pos + pi.sp
+            pjnp = pj.pos + pj.np
+            rsn = pisp - pjnp
+            fsn = system.strength * rsn / mag(rsn)**3 
+
+            pisp = pi.pos + pi.sp
+            pjsp = pj.pos + pj.sp
+            rss = pisp - pjsp
+            fss = system.strength * rss / mag(rss)**3 
+
+            Fs = fss + fsn
+
+            #translation force
+            Ft = np.dot(Fn, pi.np) / mag(pi.np) + np.dot(Fs, pi.sp) / mag(pi.sp)
+            pi.force += Ft
+            #print Ft
+
+            #angular accel (torque) / (moment of inertia)
+            Fr = (Fn + Fs - Ft) / (2 * pi.mass * pi.r**2 / 5.)
+            #print Fr
+            pi.angular = Fr
+
+
+
+
+
+
 
 @timings
-def euler_update(sphp, particles):
-    dt = .001
-
+def euler_update(system, particles, dt):
     for pi in particles:
         if pi.lock:
             continue
+
         f = pi.force
 
         f.y += -9.8
 
         speed = mag(f);
         #print "speed", speed
-        if speed > sphp.velocity_limit:
-            f *= sphp.velocity_limit/speed;
+        if speed > system.velocity_limit:
+            f *= system.velocity_limit/speed;
 
-        
         #print "force", f
         pi.vel += f * dt
         pi.pos += pi.vel * dt
+
+        theta = mag(pi.angular) * dt
+        #rotate north pole
+        pi.np[0] = pi.np[0]*cos(theta) - pi.np[1]*sin(theta)
+        pi.np[1] = pi.np[0]*sin(theta) + pi.np[1]*cos(theta)
+        #rotate south pole
+        pi.sp[0] = pi.sp[0]*cos(theta) - pi.sp[1]*sin(theta)
+        pi.sp[1] = pi.sp[0]*sin(theta) + pi.sp[1]*cos(theta)
+
+
+
 
 
 

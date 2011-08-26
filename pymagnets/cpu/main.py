@@ -4,9 +4,11 @@ from pygame.locals import *
 from forces import *
 from vector import Vec
 import sph
+import magnet
 from particle import Particle
 from hash import Domain
 
+dt = .001
 
 
 def fromscreen(p, surface):
@@ -52,26 +54,30 @@ def main():
     #max_num = 2**7 #128
     
     dmin = Vec([0,0,0])
-    dmax = Vec([5,5,5])
+    dmax = Vec([50,50,50])
     domain = Domain(dmin, dmax)#, screen)
-    system = sph.SPH(max_num, domain)
+    #system = sph.SPH(max_num, domain)
+    system = magnet.Magnet(max_num, domain)
 
     #particles = sph.init_particles(5, system, domain, screen)
     particles = []
-    p1 = Vec([2.5, 2.5]) * system.sim_scale
-    particles += [ Particle(p1, system, [0,0,255], screen) ] 
+    p1 = Vec([25, 25]) * system.sim_scale
+    np = Vec([.5, .5])
+    particles += [ Particle(p1, np, system, [0,128,128], screen) ] 
     particles[0].lock = True
 
-    p = Vec([2.5 + .8, 2.5]) * system.sim_scale
-    particles += [ Particle(p, system, [255,0,0], screen) ] 
-    p = Vec([2.5, 2.5 + .8]) * system.sim_scale
-    particles += [ Particle(p, system, [255,0,0], screen) ] 
-    p = Vec([2.5 - .8, 2.5]) * system.sim_scale
-    particles += [ Particle(p, system, [255,0,0], screen) ] 
-    p = Vec([2.5, 2.5 - .8]) * system.sim_scale
-    particles += [ Particle(p, system, [255,0,0], screen) ] 
-    p = Vec([2.5 + .8, 2.5 + .8]) * system.sim_scale
-    particles += [ Particle(p, system, [255,0,0], screen) ] 
+    p = Vec([25 + 8, 25]) * system.sim_scale
+    particles += [ Particle(p, np, system, [128,128,0], screen) ] 
+    """
+    p = Vec([25, 25 + 8]) * system.sim_scale
+    particles += [ Particle(p, np, system, [128,128,0], screen) ] 
+    p = Vec([25 - 8, 25]) * system.sim_scale
+    particles += [ Particle(p, np, system, [128,128,0], screen) ] 
+    p = Vec([25, 25 - 8]) * system.sim_scale
+    particles += [ Particle(p, np, system, [128,128,0], screen) ] 
+    #p = Vec([25 + 8, 25 + 8]) * system.sim_scale
+    #particles += [ Particle(p, np, system, [128,128,0], screen) ] 
+    """
 
 
 
@@ -80,7 +86,7 @@ def main():
 
     mouse_down = False
     pause = True 
-    pi = 5
+    pi = 1
     while 1:
         clock.tick(60)
         key = pygame.key.get_pressed()
@@ -101,8 +107,8 @@ def main():
                 pi = 3
             elif key[K_4]:
                 pi = 4
-            elif key[K_5]:
-                pi = 5
+            #elif key[K_5]:
+            #    pi = 5
 
             elif key[K_p]:
                 pause = not pause
@@ -122,16 +128,20 @@ def main():
 
         #density_update(system, particles)
         if not pause:
-            contact_update(system, particles)
-            magnet_update(system, particles)
-            #force_update(system, particles)
-            collision_wall(system, domain, particles)
-            euler_update(system, particles)
+            for i in range(10):
+                contact_update(system, particles)
+                magnet_update(system, particles)
+                #force_update(system, particles)
+                collision_wall(system, domain, particles)
+                euler_update(system, particles, dt)
             #leapfrog_update(system, particles)
 
         draw_particles(particles)
         #print "ASDF"
         pygame.display.flip()
+
+
+
 
 if __name__ == "__main__":
     main()

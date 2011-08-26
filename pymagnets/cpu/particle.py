@@ -14,26 +14,32 @@ def toscreen(p, surface, screen_scale):
     return p
 
 class Particle:
-    def __init__(self, pos, sphp, color, surface):
+    def __init__(self, pos, np, system, color, surface):
         #physics stuff
+        #position
         self.pos = pos
-        self.h = sphp.smoothing_radius
-        self.scale = sphp.sim_scale
-        self.mass = sphp.mass
-        #defaults
-        self.dens = 500
+        #north pole (vector with origin at position)
+        self.np = np
+        #south pole (vector with origin at position)
+        self.sp = -1 * np
+
+        self.r = system.radius
+        self.h = system.interaction_radius
+        self.scale = system.sim_scale
+        self.mass = system.mass
+        self.dens = system.rho0
+
         self.force = Vec([0., 0.])
-        self.xsph = Vec([0.,0.])
-
-        self.lock = False
-
         self.vel = Vec([0.,0.])
         self.veleval = Vec([0.,0.])
+
+        #lock a particle in place (force updates don't affect it)
+        self.lock = False
 
         #pygame stuff
         self.col = color
         self.surface = surface
-        self.screen_scale = self.surface.get_width() / sphp.domain.width
+        self.screen_scale = self.surface.get_width() / system.domain.width
 
     def move(self, pos):
         self.pos = pos * self.scale / self.screen_scale
@@ -45,12 +51,15 @@ class Particle:
 
         dp = toscreen(self.pos / self.scale, self.surface, self.screen_scale)
         pygame.draw.circle(self.surface, self.col, dp, self.screen_scale * self.h / self.scale, 1)
-        #draw filled circle representing density
-        #pygame.draw.circle(self.surface, self.col, dp, self.dens / 40., 0)
-        if show_dense:
-            pygame.draw.circle(self.surface, self.col, dp, self.dens / 10., 0)
-        else:
-            pygame.draw.circle(self.surface, self.col, dp, 30., 0)
+        #draw filled circle representing particle size 
+        pygame.draw.circle(self.surface, self.col, dp, self.screen_scale * self.r / self.scale, 0)
+        
+        dnp = toscreen(self.pos + self.np / self.scale, self.surface, self.screen_scale)
+        dsp = toscreen(self.pos + self.sp / self.scale, self.surface, self.screen_scale)
+
+        pygame.draw.circle(self.surface, [200,0,0], dnp, 5)
+        pygame.draw.circle(self.surface, [0,0,200], dsp, 5)
+
 
         #TODO draw force vector (make optional)
         #vec = [self.x - f[0]*fdraw/fscale, self.y - f[1]*fdraw/fscale]
