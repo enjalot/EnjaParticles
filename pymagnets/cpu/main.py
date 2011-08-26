@@ -129,9 +129,10 @@ def main():
         #density_update(system, particles)
         if not pause:
             for i in range(10):
-                contact_update(system, particles)
                 magnet_update(system, particles)
                 #force_update(system, particles)
+
+                contact_update(system, particles)
                 collision_wall(system, domain, particles)
                 euler_update(system, particles, dt)
             #leapfrog_update(system, particles)
