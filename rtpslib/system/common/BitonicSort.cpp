@@ -1,4 +1,3 @@
-
 /**
  * C++ port of NVIDIA's Bitonic Sort implementation
  */

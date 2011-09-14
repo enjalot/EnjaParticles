@@ -1,4 +1,3 @@
-
 /**
  * C++ port of NVIDIA's CloudBitonic Sort implementation
  */
